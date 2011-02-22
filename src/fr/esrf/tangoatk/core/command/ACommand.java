@@ -1,24 +1,8 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
+// File:          AbstractCommand.java
+// Created:       2001-09-28 15:03:21, assum
+// By:            <erik@assum.net>
+// Time-stamp:    <2002-07-10 15:6:15, assum>
+// 
 // $Id$
 // 
 // Description:       
@@ -26,12 +10,15 @@
 
 package fr.esrf.tangoatk.core.command;
 import fr.esrf.tangoatk.core.*;
+import fr.esrf.TangoDs.*;
 import fr.esrf.Tango.*;
 import fr.esrf.TangoApi.*;
+import java.beans.*;
 import java.util.*;
+import org.apache.log4j.Logger;
 
 /**
- * <code>ACommand</code> is like {@link fr.esrf.tangoatk.core.attribute.AAttribute} is for Attributes,
+ * <code>ACommand</code> is like {@link AAttribute} is for Attributes,
  * the mother of all commands. It holds all common behaviour of Commands,
  * and delegates the handeling of input and output to its 
  * {@link ACommandHelper} instances, the inputHelper and the outputHelper.
@@ -41,7 +28,10 @@ import java.util.*;
  */
 public abstract class ACommand implements ICommand {
     protected ACommandHelper inputHelper, outputHelper;
-    protected Map<String,Property> propertyMap;
+    transient static Logger log =
+	ATKLogger.getInstance(ACommand.class.getName());
+    protected Map propertyMap;
+    transient protected Logger commandLog;
     protected String name;
     protected String nameSansDevice;
     transient private CommandInfo info;
@@ -50,8 +40,6 @@ public abstract class ACommand implements ICommand {
     protected List oldResult;
     protected EventSupport propChanges;
     protected Throwable oldt;
-    protected String alias;
-    protected int executionCount = 0;
 
     private static String VERSION = "$Id$";
 
@@ -64,18 +52,18 @@ public abstract class ACommand implements ICommand {
      * <code>init</code> initializes the Command, 
      *
      * @param d the <code>Device</code> this command is connected to
-     * @param cmdName a <code>String</code> value holding the name of this
+     * @param name a <code>String</code> value holding the name of this
      * command.
      * @param info a <code>DevCmdInfo</code> value holding the
      * {@link fr.esrf.Tango.DevCmdInfo} for this command
      */
     protected void init(fr.esrf.tangoatk.core.Device d,
-			String cmdName, CommandInfo info) {
-	propertyMap = new HashMap<String,Property> ();
-	this.device = d;
-        this.nameSansDevice = cmdName;
-	this.name = d.getName() + "/" + cmdName;
+			String name, CommandInfo info) {
+	device = d;
+	propertyMap = new HashMap();
 	setInfo(info);
+	this.name = name;
+	commandLog = ATKLogger.getLogger(getName().replace('/', '.'));
 
 	propChanges = new EventSupport();
     }
@@ -90,16 +78,17 @@ public abstract class ACommand implements ICommand {
     }
 
     /**
-     * <code>cmdError</code> sends off an error event to all the 
+     * <code>setError</code> sends off an error event to all the 
      * errorlisteners of this command.
      *
      * @param message a <code>String</code> value
      * @param t a <code>Throwable</code> value
      */
-    protected void cmdError(String message, Throwable t)
-    {
-	propChanges.fireReadErrorEvent(this, t);
+    protected void setError(String message, Throwable t) {
+	propChanges.fireErrorEvent(this, t);
+	log.error(message, t);
 	oldt = t;
+
     }
 
     public void storeConfig() {
@@ -112,7 +101,7 @@ public abstract class ACommand implements ICommand {
      * @return a <code>Property</code> value
      */
     public Property getProperty(String name) {
-	return propertyMap.get(name);
+	return (Property)propertyMap.get(name);
     }
 
 
@@ -127,55 +116,6 @@ public abstract class ACommand implements ICommand {
     }
     
 
-    protected String getTypeName(int type) {
-
-	switch (type) {
-	   case	Tango_DEV_BOOLEAN:
-	       return "boolean";
-	   case	Tango_DEV_SHORT:
-	       return "short";
- 	   case	Tango_DEV_FLOAT:
-	       return "float";
- 	   case	Tango_DEV_DOUBLE:
-	       return "double";
-	   case	Tango_DEV_USHORT:
-	       return "ushort";
-	   case	Tango_DEV_ULONG:
-	       return "ulong";
-	   case	Tango_DEV_LONG:
-	       return "long";
-	   case	Tango_DEV_STRING:
-	       return "string";
-           case Tango_DEV_STATE:
-	        return "scalar";
-	   case	Tango_DEVVAR_LONGSTRINGARRAY:
-	       return "long string array";
- 	   case	Tango_DEVVAR_DOUBLESTRINGARRAY:		
-	        return "double string array";
-	   case	Tango_DEVVAR_SHORTARRAY:
-	        return "short array"; 		
- 	   case	Tango_DEVVAR_FLOATARRAY:		
-	        return "float array"; 		
- 	   case	Tango_DEVVAR_DOUBLEARRAY:		
-	        return "double double"; 		
-	   case	Tango_DEVVAR_USHORTARRAY:		
-	        return "unsigned short array"; 		
-	   case	Tango_DEVVAR_ULONGARRAY:
-	        return "unsigned long array"; 		
-	   case	Tango_DEVVAR_LONGARRAY:
-	        return "long array"; 		
-	   case	Tango_DEVVAR_CHARARRAY:		
-	        return "char array"; 		
-	   case	Tango_DEVVAR_STRINGARRAY:
-	        return "string array"; 		
-	   default:
-	       return " ";
-	}
-    }
-    
-
-
-
 
     /**
      * <code>getInTypeElemName</code> returns the type name of an element of the array 
@@ -186,20 +126,44 @@ public abstract class ACommand implements ICommand {
      */
     public String getInTypeElemName()
     {
-	return getTypeName(getInType());
-    }
-
-
-    public String getOutTypeElemName() {
-	return getTypeName(getOutType());
-    }
-
-    public String getTag() {
-	return getStringProperty("tag");
-    }
-
-    public String getLevel() {
-	return getStringProperty("level");
+        int    in_type;
+	
+	in_type = getInType();
+	
+	switch (in_type)
+	{
+	   case	Tango_DEV_BOOLEAN:		
+	   case	Tango_DEV_SHORT: 		
+ 	   case	Tango_DEV_FLOAT:		
+ 	   case	Tango_DEV_DOUBLE:		
+	   case	Tango_DEV_USHORT:		
+	   case	Tango_DEV_ULONG:
+	   case	Tango_DEV_LONG:			    
+	   case	Tango_DEV_STRING:
+           case Tango_DEV_STATE:
+	        return "scalar";
+	   case	Tango_DEVVAR_LONGSTRINGARRAY:
+ 	   case	Tango_DEVVAR_DOUBLESTRINGARRAY:		
+	        return " ";
+	   case	Tango_DEVVAR_SHORTARRAY:
+	        return "short"; 		
+ 	   case	Tango_DEVVAR_FLOATARRAY:		
+	        return "float"; 		
+ 	   case	Tango_DEVVAR_DOUBLEARRAY:		
+	        return "double"; 		
+	   case	Tango_DEVVAR_USHORTARRAY:		
+	        return "unsigned short"; 		
+	   case	Tango_DEVVAR_ULONGARRAY:
+	        return "unsigned long"; 		
+	   case	Tango_DEVVAR_LONGARRAY:
+	        return "long"; 		
+	   case	Tango_DEVVAR_CHARARRAY:		
+	        return "char"; 		
+	   case	Tango_DEVVAR_STRINGARRAY:
+	        return "string"; 		
+	   default:
+	       return " ";
+	}
     }
 
     /**
@@ -268,7 +232,7 @@ public abstract class ACommand implements ICommand {
 	setProperty("in_type_name", s);
     }
 
-    public Map<String,Property> getPropertyMap() {
+    public Map getPropertyMap() {
 	return propertyMap;
     }
     
@@ -277,7 +241,7 @@ public abstract class ACommand implements ICommand {
     }
 
     void setProperty(String name, String value) {
-	Property p = propertyMap.get(name);
+	Property p = (Property)propertyMap.get(name);
 	if (p == null) 
 	    propertyMap.put(name, new StringProperty(this,
 						     name,
@@ -288,7 +252,7 @@ public abstract class ACommand implements ICommand {
     }
     
     void setProperty(String name, int value) {
-	Property p = propertyMap.get(name);
+	Property p = (Property)propertyMap.get(name);
 	if (p == null) 
 	    propertyMap.put(name,
 			    new TypeProperty(this,
@@ -300,7 +264,7 @@ public abstract class ACommand implements ICommand {
     }
 
     protected void setProperty(String name, fr.esrf.Tango.DispLevel value) {
-	Property p = propertyMap.get(name);
+	Property p = (Property)propertyMap.get(name);
 	if (p == null) {
 	    propertyMap.put(name, new DisplayLevelProperty(this,
 							   name,
@@ -313,10 +277,8 @@ public abstract class ACommand implements ICommand {
 
     void setInfo(CommandInfo info) {
 	this.info = info;
-	/* Already set in init(...) method
 	nameSansDevice = info.cmd_name;
 	name        = device.getName() + "/" + info.cmd_name;
-	***/
 	setProperty("name", name);
 	setProperty("tag", info.cmd_tag);
 	setProperty("in_type", info.in_type);
@@ -330,19 +292,6 @@ public abstract class ACommand implements ICommand {
 
     public void refresh() {
 
-    }
-    
-
-    public String getAlias() {
-	return alias;
-    }
-
-    public void setAlias(String alias) {
-	this.alias = alias;
-    }
-
-    public int getExecutionCount() {
-      return executionCount;
     }
 
     public String getName() {
@@ -391,18 +340,6 @@ public abstract class ACommand implements ICommand {
 
     public static boolean isVoid(int type) {
 	return type == Tango_DEV_VOID;
-    }
-
-    
-    public static boolean isBoolean(int type)
-    {
-        return type == Tango_DEV_BOOLEAN;
-    }
-
-    
-    public static boolean isString(int type)
-    {
-        return type == Tango_DEV_STRING;
     }
 
     
@@ -474,137 +411,26 @@ public abstract class ACommand implements ICommand {
     protected void publishResult(List result) {
 	propChanges.fireResultEvent(this, result);
     }
-    
-    protected boolean checkArgin(List l)
-    {
-         String    message;
-	 
-	 if ( !takesInput() )
-            return true;
-	    
-	 if ( l == null )
-	 {
-	    message = "execute (" + getName() + ") failed: " +
-		"Invalid argin syntax. Empty argument, you must specify a value.";
-	    cmdError(message, new CommandExecuteException(message));
-	    return false;
-	 }
-
-
-	 if (l.size() < 1)
-	 {
-	    message = "execute (" + getName() + ") failed: " +
-		 "Invalid argin syntax. Empty argument, you must specify a value.";
-	    cmdError(message, new CommandExecuteException(message));
-	    return false;
-	 }
-	 
-         if (takesTableInput())
-	    if (l.size() < 2)
-	    {
-	       message = "execute (" + getName() + ") failed: " +
-		    "Invalid argin syntax. You must specify a list of couples.";
-	       cmdError(message, new CommandExecuteException(message));
-	       return false;
-	    }     
-	 
-         if (takesTableInput())
-	    if ((l.get(0) == null) && (l.get(1) == null))
-	    {
-	       message = "execute (" + getName() + ") failed: " +
-		    "Invalid argin syntax. You must specify a list of couples.";
-	       cmdError(message, new CommandExecuteException(message));
-	       return false;
-	    }
-	 
-         if (takesTableInput())
-	    if ((l.get(0) != null) && (l.get(1) != null))
-	       if ( (((List) l.get(0)).size() == 0) && (((List) l.get(1)).size() == 0) )
-	       {
-		  message = "execute (" + getName() + ") failed: " +
-		       "Invalid argin syntax. You must specify a list of couples.";
-		  cmdError(message, new CommandExecuteException(message));
-		  return false;
-	       }
-	    
-	 return true;  
-    }
 
     public void execute(List l) {
-      executionCount++;
-      
-      boolean arginOK = checkArgin(l);
-      
-      if (!arginOK)
-         return;
-	 
-      try {
+	try {
 	    publishResult
 		(outputHelper.extractOutput
 		 (getDevice().executeCommand(getName(),
 					     inputHelper.setInput(l))));
 	} catch (DevFailed devfailed) {
-	    cmdError("execute(" + getName() + " failed", new
+	    setError("execute(" + getName() + " failed", new
 		     CommandExecuteException(devfailed));
 	} catch (Exception e) {
-	    //e.printStackTrace();
+	    e.printStackTrace();
 	    String message = "execute(" + getName() + " failed: " +
 		e + ")";
-	    cmdError(message, new CommandExecuteException(message));
+	    setError(message, new CommandExecuteException(message));
 	    
 	} // end of catch
 	
 	
     }
-
-
-
-  
-  public boolean isOperator()
-  {
-     Property               prop;
-     DisplayLevelProperty   dlp;
-          
-     
-     prop = getProperty("level");
-     
-     if (prop != null)
-     {
-	if (prop instanceof DisplayLevelProperty)
-	{
-	    dlp = (DisplayLevelProperty) prop;
-	    return (dlp.isOperator());
-	}
-     }
-     return false;
-  }
-
-  
-  public boolean isExpert()
-  {
-     Property               prop;
-     DisplayLevelProperty   dlp;
-          
-     
-     prop = getProperty("level");
-     
-     if (prop != null)
-     {
-	if (prop instanceof DisplayLevelProperty)
-	{
-	    dlp = (DisplayLevelProperty) prop;
-	    return (dlp.isExpert());
-	}
-     }
-     return false;
-  }
-
-
-  public AtkEventListenerList getListenerList() {
-    if (propChanges == null) return null;
-    else return propChanges.getListenerList();
-  }
-
 }
 
 
