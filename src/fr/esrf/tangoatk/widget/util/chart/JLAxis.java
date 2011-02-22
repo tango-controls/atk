@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 //
 // JLAxis.java
 // Description: A Class to handle 2D graphics plot
@@ -28,49 +6,40 @@
 
 package fr.esrf.tangoatk.widget.util.chart;
 
+
+import java.awt.event.*;
 import java.awt.*;
 import java.awt.font.*;
 import java.awt.geom.*;
 import javax.swing.*;
-import java.text.SimpleDateFormat;
+import javax.swing.event.*;
 import java.util.*;
 
 import com.braju.format.Format;
 
 // Inner class to handle label info
 
-class LabelInfo implements java.io.Serializable {
+class LabelInfo {
 
   String value;
+  boolean isVisible;
   Dimension size;
-  double pos;
-  Point offset;
+  int pos;
+  int subtick_step;  // -1 for logarithmic step, 0 None
 
-  LabelInfo(String lab, int w, int h, double pos) {
+  LabelInfo(String lab, boolean v, int w, int h, int d, int sub) {
     value = lab;
     size = new Dimension(w, h);
-    this.pos = pos;
-    offset = new Point(0,0);
-  }
-
-  public void setOffset(int x,int y) {
-    offset.x = x;
-    offset.y = y;
-  }
-
-  public int getWidth() {
-    return size.width + Math.abs(offset.x);
-  }
-
-  public int getHeight() {
-    return size.height + Math.abs(offset.y);
+    pos = d;
+    subtick_step = sub;
+    isVisible = v;
   }
 
 }
 
 // Inner class to handle XY correlation
 
-class XYData implements java.io.Serializable {
+class XYData {
 
   public DataList d1;
   public DataList d2;  // View plotted on the xAxis
@@ -110,7 +79,7 @@ class XYData implements java.io.Serializable {
  * @author JL Pons
  */
 
-public class JLAxis implements java.io.Serializable {
+public class JLAxis {
 
   // constant
   /** Horizontal axis at bottom of the chart */
@@ -150,15 +119,6 @@ public class JLAxis implements java.io.Serializable {
   public static final int HEXINT_FORMAT = 4;
   /** Display integer using binary format */
   public static final int BININT_FORMAT = 5;
-  /** Display value using exponential representation (xEyy) */
-  public static final int SCIENTIFICINT_FORMAT = 6;
-  /** Display value as date */
-  public static final int DATE_FORMAT = 7;
-
-  /** US date format to format labels as dates */
-  public static final String US_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
-  /** French date format to format labels as dates */
-  public static final String FR_DATE_FORMAT = "dd-MM-yyyy HH:mm:ss.SSS";
 
   static final double YEAR = 31536000000.0;
   static final double MONTH = 2592000000.0;
@@ -168,7 +128,6 @@ public class JLAxis implements java.io.Serializable {
   static final double SECO = 1000.0;
 
   //Local declaration
-  private boolean visible;
   private double min = 0.0;
   private double max = 100.0;
   private double minimum = 0.0;
@@ -178,14 +137,16 @@ public class JLAxis implements java.io.Serializable {
   private Color labelColor;
   private Font labelFont;
   private int labelFormat;
-  private Vector<LabelInfo> labels;
-  private int orientation;  // Axis orientation/position
-  private int dOrientation; // Default orientation (cannot be _ORG)
+  private Vector labels;
+  private int orientation;
+  private int dOrientation;
+  private int tick = 10;  // label precision
   private boolean subtickVisible;
   private Dimension csize = null;
   private String name;
   private int annotation = VALUE_ANNO;
-  private Vector<JLDataView> dataViews;
+  private Vector dataViews;
+  private JComponent parent;
   private double ln10;
   private boolean gridVisible;
   private boolean subGridVisible;
@@ -198,23 +159,7 @@ public class JLAxis implements java.io.Serializable {
   private String axeName;
   private java.text.SimpleDateFormat useFormat;
   private double desiredPrec;
-  private boolean drawOpposite;
-  private int tickLength;
-  private int subtickLength;
-  private int fontOverWidth;
-  private boolean inverted = false;
-  private double tickStep;    // In pixel
-  private double minTickStep;
-  private int subTickStep; // 0 => NONE , -1 => Log step , 1.. => Linear step
-  private int subTickTimeAnno=0; // Number of sub tick interval in TIME_ANNO
-  private boolean fitXAxisToDisplayDuration;
-  
-  private boolean zeroAlwaysVisible = false;
-  private boolean  autoLabeling = true;
-  private String[] userLabel = null;
-  private double[] userLabelPos = null;
 
-  private String dateFormat = US_DATE_FORMAT;
   //Global
   static final java.util.GregorianCalendar calendar = new java.util.GregorianCalendar();
   static final java.text.SimpleDateFormat genFormat = new java.text.SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS");
@@ -251,28 +196,12 @@ public class JLAxis implements java.io.Serializable {
   static final int diamondY[] = {4, 0, -4, 0};
   static final Polygon diamondShape = new Polygon(diamondX, diamondY, 4);
 
+  static double linStep[] = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
   static double logStep[] = {0.301, 0.477, 0.602, 0.699, 0.778, 0.845, 0.903, 0.954};
-
-  static public String getHelpString() {
-    return
-    "-- Axis settings --\n  Parameter name is preceded by the axis name.\n\n" +
-    "visible:true or false   Displays the axis\n" +
-    "grid:true or false   Displays the grid\n" +
-    "subgrid:true or false   Displays the sub grid\n" +
-    "grid_style:style   (0 Solid,1 Dot, 2 Dash, 3 Long Dash)\n" +
-    "min:value Axis minimum\n" +
-    "max:value Axis maximum\n" +
-    "autoscale:true or false Axis autoscale\n" +
-    "scale:s   Axis scale (0 Linear ,1 Log)\n" +
-    "format:format   Axis format (0 Auto,1 Sci,2 Time,3 Dec,4 Hex,5 Bin))\n" +
-    "title:'title'   Axis title ('null' to disable)\n" +
-    "color:r,g,b   Axis color\n" +
-    "label_font:name,style(0 Plain,1 Bold,2 italic),size\n";
-  }
 
   /** Axis constructor (Expert usage).
    * @param orientation Default Axis placement (cannot be ..._ORG).
-   * @param parent (deprecated, not used).
+   * @param parent parent chart
    * @see JLAxis#HORIZONTAL_DOWN
    * @see JLAxis#HORIZONTAL_UP
    * @see JLAxis#VERTICAL_LEFT
@@ -280,14 +209,14 @@ public class JLAxis implements java.io.Serializable {
    * @see JLAxis#setPosition
    */
   public JLAxis(JComponent parent, int orientation) {
-    labels = new Vector<LabelInfo>();
-    labelFont = new Font("Dialog", Font.PLAIN, 11);
+    labels = new Vector();
+    labelFont = new Font("Dialog", Font.BOLD, 11);
     labelColor = Color.black;
     name = null;
     this.orientation = orientation;
     dOrientation = orientation;
-    inverted = !isHorizontal();
-    dataViews = new Vector<JLDataView>();
+    dataViews = new Vector();
+    this.parent = parent;
     ln10 = Math.log(10);
     gridVisible = false;
     subGridVisible = false;
@@ -298,14 +227,8 @@ public class JLAxis implements java.io.Serializable {
     isZoomed = false;
     percentScrollback = 0.0;
     axeName = "";
-    visible = true;
-    drawOpposite = true;
-    tickLength = 4;
-    subtickLength = tickLength/2;
-    fontOverWidth = 0;
-    minTickStep = 50.0;
-    fitXAxisToDisplayDuration = true;
   }
+
 
   /**
    * Sets the percent scrollback. When using {@link JLChart#addData(JLDataView , double , double ) JLChart.addData}
@@ -322,7 +245,7 @@ public class JLAxis implements java.io.Serializable {
    * @return scrollback percent
    */
   public double getPercentScrollback() {
-    return percentScrollback * 100;
+    return percentScrollback;
   }
 
   /**
@@ -352,8 +275,6 @@ public class JLAxis implements java.io.Serializable {
    * @see  JLAxis#DECINT_FORMAT
    * @see  JLAxis#HEXINT_FORMAT
    * @see  JLAxis#BININT_FORMAT
-   * @see  JLAxis#SCIENTIFICINT_FORMAT
-   * @see  JLAxis#DATE_FORMAT
    * @see  JLAxis#getLabelFormat
    */
   public void setLabelFormat(int l) {
@@ -379,44 +300,12 @@ public class JLAxis implements java.io.Serializable {
   }
 
   /**
-   * Fit the x axis to display duration (Horizontal axis only).
-   * @param b true to fit x axis false otherwise
-   */
-  public void setFitXAxisToDisplayDuration(boolean b) {
-    fitXAxisToDisplayDuration = b;
-  }
-
-  /**
-   * Return true if the x axis fit to display duration.
-   */
-  public boolean isFitXAxisToDisplayDuration() {
-    return fitXAxisToDisplayDuration;
-  }
-
-  /**
    * Determines whether the axis is showing the grid
    * @return true if the grid is visible, false otherwise
    * @see  JLAxis#setGridVisible
    */
   public boolean isGridVisible() {
     return gridVisible;
-  }
-
-  /**
-   * Draw a second axis at the opposite side.
-   * @param b true to enable the opposite axis.
-   */
-  public void setDrawOpposite(boolean b) {
-    drawOpposite = b;
-  }
-
-  /**
-   * Determines whether the axis at the opposite side is visible
-   * @return true if opposite axis is visible.
-   * @see JLAxis#setDrawOpposite
-   */
-  public boolean isDrawOpposite() {
-    return drawOpposite;
   }
 
   /**
@@ -486,27 +375,8 @@ public class JLAxis implements java.io.Serializable {
     annotation = a;
   }
 
-  /**
-   * Returns the annotation method
-   * @see JLAxis#setAnnotation
-   */
   public int getAnnotation() {
     return annotation;
-  }
-
-  /**
-   * Display or hide the axis.
-   * @param b True to make the axis visible.
-   */
-  public void setVisible(boolean b) {
-    visible = b;
-  }
-
-  /**
-   * Returns true if the axis is visble, false otherwise
-   */
-  public boolean isVisible() {
-    return visible;
   }
 
   /** Determines whether the axis is zoomed.
@@ -650,44 +520,6 @@ public class JLAxis implements java.io.Serializable {
 
   }
 
-  /**
-   * Sets the axis orientation and reset position.
-   * @param orientation Orientation value
-   * @see JLAxis#HORIZONTAL_DOWN
-   * @see JLAxis#HORIZONTAL_UP
-   * @see JLAxis#VERTICAL_LEFT
-   * @see JLAxis#VERTICAL_RIGHT
-   * @see #setPosition
-   */
-  public void setOrientation(int orientation) {
-    this.orientation = orientation;
-    dOrientation = orientation;
-  }
-
-  /**
-   * Returns the orientation of this axis.
-   * @see #setOrientation
-   */
-  public int getOrientation() {
-    return orientation;
-  }
-
-  /**
-   * Sets the number of sub tick interval in TIME_ANNO
-   * @param nb Number of interval (0 to disable)
-   */
-  public void setTimeAnnoSubTickInterval(int nb) {
-    subTickTimeAnno = nb;
-  }
-
-  /**
-   * Returns the number of sub tick interval in TIME_ANNO
-   * @see #setTimeAnnoSubTickInterval
-   */
-  public int getTimeAnnoSubTickInterval() {
-    return subTickTimeAnno;
-  }
-
   /** Zoom axis.
    * @param x1 New minimum value for this axis
    * @param x2 New maximum value for this axis
@@ -712,11 +544,6 @@ public class JLAxis implements java.io.Serializable {
       double xr2 = (double) (x2 - boundRect.x) / (double) (boundRect.width);
       double nmin = min + (max - min) * xr1;
       double nmax = min + (max - min) * xr2;
-
-      // Too small zoom
-      double difference = nmax - nmin;
-      if (difference < 1E-13) return;
-
       min = nmin;
       max = nmax;
 
@@ -734,11 +561,6 @@ public class JLAxis implements java.io.Serializable {
       double yr2 = (double) (boundRect.y + boundRect.height - x1) / (double) (boundRect.height);
       double nmin = min + (max - min) * yr1;
       double nmax = min + (max - min) * yr2;
-
-      // Too small zoom
-      double difference = nmax - nmin;
-      if (difference < 1E-13) return;
-
       min = nmin;
       max = nmax;
 
@@ -762,52 +584,21 @@ public class JLAxis implements java.io.Serializable {
     isZoomed = false;
   }
 
-  /**
-   * @deprecated Use getTickSpacing
-   * @see JLAxis#getTickSpacing
+  /** Get the labels interval ( tick is the desired number of label on the axis ).
+   *  if font overlap happens, you may get less labels.
+   * @return Tick number.
+   * @see JLAxis#setTick
    */
   public int getTick() {
-    return (int)minTickStep;
+    return tick;
   }
 
-  /**
-   * Returns the current minimum tick spacing (in pixel).
-   */
-  public double getTickSpacing() {
-    return minTickStep;
-  }
-
-  /**
-   * Sets the minimum tick spacing (in pixel).
-   * Allows to control the number of generated labels.
-   * @param spacing Minimum tick spacing
-   */
-  public void setTickSpacing(double spacing) {
-    minTickStep = spacing;
-  }
-
-  /**
-   * @deprecated Use setTickSpacing
-   * @see JLAxis#setTickSpacing
+  /** Sets the label interval.
+   * @param s Desired number of label for this axis.
+   * @see JLAxis#getTick
    */
   public void setTick(int s) {
-    minTickStep = s;
-  }
-
-  /**
-   * Sets the tick length (in pixel).
-   * @param lgth Length
-   */
-  public void setTickLength(int lgth) {
-    tickLength = lgth;
-    subtickLength = tickLength/2;
-  }
-
-  /**
-   * Returns the tick length (in pixel).
-   */
-  public int getTickLength() {
-    return tickLength;
+    tick = s;
   }
 
   /** Gets the axis label.
@@ -911,41 +702,6 @@ public class JLAxis implements java.io.Serializable {
     }
   }
 
-  /**
-   * Add the given dataView at the specifed index.
-   * @param index Insertion position
-   * @param v DataView to add
-   * @see JLAxis#addDataView
-   */
-  public void addDataViewAt(int index,JLDataView v) {
-
-    if (dataViews.contains(v))
-      return;
-
-    if (!isHorizontal()) {
-      dataViews.add(index,v);
-      v.setAxis(this);
-    } else {
-      addDataView(v);
-    }
-
-  }
-
-  /**
-   * Get the dataView of this axis at the specified index.
-   * @param index DataView index
-   * @return Null if index out of bounds.
-   */
-  public JLDataView getDataView(int index) {
-
-    if(index<0 || index>=dataViews.size()) {
-//      System.out.println("JLChart.getDataView(): index out of bounds.");
-      return null;
-    }
-    return dataViews.get(index);
-
-  }
-
   /** Removes dataview from this axis
    * @param v dataView to remove from this axis.
    * @see JLAxis#addDataView
@@ -962,29 +718,6 @@ public class JLAxis implements java.io.Serializable {
     }
   }
 
-  /** Removes dataview from this axis and returns true if the dataview has been found for this Axis
-   * @param v dataView to remove from this axis.
-   * @return true if Axis contained the dataview and false if this dataview did not belong to the axis
-   * @see JLAxis#addDataView
-   * @see JLAxis#clearDataView
-   * @see JLAxis#getViews
-   */
-  public boolean checkRemoveDataView(JLDataView v)
-  {
-      boolean contained = dataViews.remove(v);
-      if (contained == true)
-      {
-	 v.setAxis(null);
-	 if (isHorizontal())
-	 {
-	   // Restore TIME_ANNO and Liner scale
-	   setAnnotation(TIME_ANNO);
-	   if (scale != LINEAR_SCALE) setScale(LINEAR_SCALE);
-	 }
-      }
-      return contained;
-  }
-
   /** Clear all dataview from this axis
    * @see JLAxis#removeDataView
    * @see JLAxis#addDataView
@@ -994,7 +727,7 @@ public class JLAxis implements java.io.Serializable {
     int sz = dataViews.size();
     JLDataView v;
     for (int i = 0; i < sz; i++) {
-      v = dataViews.get(i);
+      v = (JLDataView) dataViews.get(i);
       v.setAxis(null);
     }
     dataViews.clear();
@@ -1007,32 +740,8 @@ public class JLAxis implements java.io.Serializable {
    * @see JLAxis#removeDataView
    * @see JLAxis#clearDataView
    */
-  public Vector<JLDataView> getViews() {
+  public Vector getViews() {
     return dataViews;
-  }
-
-  /**
-   * Returns the number if dataview in this axis.
-   * @return DataView number.
-   */
-  public int getViewNumber() {
-    return dataViews.size();
-  }
-
-
-  /**
-   * Invert this axis.
-   * @param i true to invert the axis
-   */
-  public void setInverted(boolean i) {
-    inverted = i;
-  }
-
-  /**
-   * Returns true if this axis is inverted.
-   */
-  public boolean isInverted() {
-    return inverted;
   }
 
   /**
@@ -1044,14 +753,14 @@ public class JLAxis implements java.io.Serializable {
   }
 
   /** Return a scientific (exponential) representation of the double.
-   * @param d double to convert
+   * @param a souble to convert
    * @return A string continaing a scientific representation of the given double.
    */
   public String toScientific(double d) {
 
     double a = Math.abs(d);
     int e = 0;
-    String f = "%.2fe%d";
+    String f = "%.2fE%d";
 
     if (a != 0) {
       if (a < 1) {
@@ -1077,38 +786,6 @@ public class JLAxis implements java.io.Serializable {
     Object o[] = {new Double(a), new Integer(e)};
 
     return Format.sprintf(f, o);
-  }
-
-  public String toScientificInt(double d) {
-
-    double a = Math.abs(d);
-    int e = 0;
-    String f = "%de%d";
-
-    if (a != 0) {
-      if (a < 1) {
-        while (a < 1) {
-          a = a * 10;
-          e--;
-        }
-      } else {
-        while (a >= 10) {
-          a = a / 10;
-          e++;
-        }
-      }
-    }
-
-    if (a >= 9.999999999) {
-      a = a / 10;
-      e++;
-    }
-
-    if (d < 0) a = -a;
-
-    Object o[] = {new Integer((int)Math.rint(a)), new Integer(e)};
-
-    return Format.sprintf(f, o);
 
   }
 
@@ -1127,15 +804,16 @@ public class JLAxis implements java.io.Serializable {
 
   /**
    * Sets the appropriate time format for the range to display
+   * @return Time format
    */
-  private void computeDateformat(int maxLab) {
+  private void computeDateformat() {
 
     //find optimal precision
     boolean found = false;
     int i = 0;
     while (i < timePrecs.length && !found) {
       int n = (int) ((max - min) / timePrecs[i]);
-      found = (n <= maxLab);
+      found = (n <= tick);
       if (!found) i++;
     }
 
@@ -1151,67 +829,6 @@ public class JLAxis implements java.io.Serializable {
 
   }
 
-  /**
-   * Customize axis labels.
-   * @param labels Label values
-   * @param labelPos Label positions (in axis coordinates)
-   */
-  public void setLabels(String[] labels,double[] labelPos) {
-
-    if(labels == null || labelPos == null) {
-      userLabel = null;
-      userLabelPos = null;
-      autoLabeling = true;
-      return;
-    }
-
-    if(labels.length != labelPos.length) {
-      System.out.println("JLAxis.setLabels() : labels and labelPos must have the same size");
-      return;
-    }
-
-    userLabel = labels;
-    // avoiding NullPointerExceptions
-    if (userLabel != null) {
-        for (int i = 0; i < userLabel.length; i++) {
-            if (userLabel[i] == null) {
-                userLabel[i] = "" + null;
-            }
-        }
-    }
-    userLabelPos = labelPos;
-    autoLabeling = false;
-
-  }
-
-  /**
-   * Suppress last non significative zeros
-   * @param n String representing a floating number
-   */
-  private String suppressZero(String n) {
-
-    boolean hasDecimal = n.indexOf('.') != -1;
-
-    if(hasDecimal) {
-
-      StringBuffer str = new StringBuffer(n);
-      int i = str.length() - 1;
-      while( str.charAt(i)=='0' ) {
-        str.deleteCharAt(i);
-        i--;
-      }
-      if(str.charAt(i)=='.') {
-        // Remove unwanted decimal
-        str.deleteCharAt(i);
-      }
-
-      return str.toString();
-
-    } else {
-      return n;
-    }
-
-  }
 
   /**
    * Returns a representation of the double acording to the format
@@ -1221,35 +838,29 @@ public class JLAxis implements java.io.Serializable {
    */
   public String formatValue(double vt, double prec) {
 
-    if(Double.isNaN(vt))
-      return "NaN";
-
-    // Round value to nearest multiple of prec
+    // Round value according to desired prec
     // TODO: rounding in LOG_SCALE
     if (prec != 0 && scale == LINEAR_SCALE) {
-
-      boolean isNegative = (vt < 0.0);
-      if(isNegative) vt = -vt;
-
-      // Find multiple
-      double i = Math.floor(vt/prec + 0.5d);
-      vt = i * prec;
-
-      if(isNegative) vt = -vt;
-
+      long r;
+      if (vt >= 0) {
+        vt = vt / prec * 1e5;
+        r = (long) (vt + 0.5);
+        vt = (r * prec) / 1e5;
+      } else {
+        vt = -vt / prec * 1e5;
+        r = (long) (vt + 0.5);
+        vt = -(r * prec) / 1e5;
+      }
     }
 
     switch (labelFormat) {
       case SCIENTIFIC_FORMAT:
         return toScientific(vt);
 
-      case SCIENTIFICINT_FORMAT:
-        return toScientificInt(vt);
-
       case DECINT_FORMAT:
       case HEXINT_FORMAT:
       case BININT_FORMAT:
-        Object[] o2 = {new Integer((int) (Math.abs(vt)+0.5))};
+        Object[] o2 = {new Integer((int) (Math.abs(vt)))};
         if (vt < 0.0)
           return "-" + Format.sprintf(labelFomats[labelFormat], o2);
         else
@@ -1268,31 +879,9 @@ public class JLAxis implements java.io.Serializable {
         else
           return Format.sprintf(labelFomats[labelFormat], o3);
 
-      case DATE_FORMAT:
-        SimpleDateFormat format = new SimpleDateFormat(dateFormat);
-        long millisec = (long) (Math.abs(vt)*1000);
-        return format.format(new Date(millisec));
-
       default:
 
-        // Auto format
-        if(vt==0.0) return "0";
-
-        if(Math.abs(vt)<=1.0E-4) {
-
-          return toScientific(vt);
-
-        } else {
-
-          int nbDigit = -(int)Math.floor(Math.log10(prec));
-          if( nbDigit<=0 ) {
-            return suppressZero(Double.toString(vt));
-          } else {
-            String dFormat = "%." + nbDigit + "f";
-            return suppressZero(Format.sprintf(dFormat,new Object[]{new Double(vt)}));
-          }
-
-        }
+        return Double.toString(vt);
 
     }
 
@@ -1307,13 +896,14 @@ public class JLAxis implements java.io.Serializable {
   // AutoScaling stuff
   // Expert usage
 
+  // log10(x) = ln(x)/ln(10);
   private double computeHighTen(double d) {
-    int p = (int)Math.log10(d);
+    int p = (int) (Math.log(d) / ln10);
     return Math.pow(10.0, p + 1);
   }
 
   private double computeLowTen(double d) {
-    int p = (int)Math.log10(d);
+    int p = (int) (Math.log(d) / ln10);
     return Math.pow(10.0, p);
   }
 
@@ -1331,7 +921,7 @@ public class JLAxis implements java.io.Serializable {
 
       for (i = 0; i < sz; i++) {
 
-        v = dataViews.get(i);
+        v = (JLDataView) dataViews.get(i);
 
         if (v.hasTransform()) {
           double[] mm = v.computeTransformedMinMax();
@@ -1371,17 +961,6 @@ public class JLAxis implements java.io.Serializable {
         }
 
       }
-      else if (zeroAlwaysVisible)
-      {
-        if (min < 0 && max < 0)
-        {
-          max = 0;
-        }
-        else if (min > 0 && max > 0)
-        {
-          min = 0;
-        }
-      }
 
       if ((max - min) < 1e-100) {
         max += 0.999;
@@ -1389,10 +968,6 @@ public class JLAxis implements java.io.Serializable {
       }
 
       double prec = computeLowTen(max - min);
-
-      // Avoid unlabeled axis when log scale
-      if( scale==LOG_SCALE && prec<1.0 )
-        prec=1.0;
 
       //System.out.println("ComputeAutoScale: Prec= " + prec );
 
@@ -1428,6 +1003,7 @@ public class JLAxis implements java.io.Serializable {
 
     int i = 0;
     int sz = views.size();
+    double t;
     double mi,ma;
 
     if (isHorizontal() && autoScale && sz > 0) {
@@ -1441,24 +1017,17 @@ public class JLAxis implements java.io.Serializable {
         min = Double.MAX_VALUE;
         max = -Double.MAX_VALUE;
 
-        // Horizontal autoScale
+// Horizontal autoScale
 
         for (i = 0; i < sz; i++) {
 
           v = (JLDataView) views.get(i);
-	  
-          ma = v.getMaxXValue();
-          mi = v.getMinXValue();
+
+          ma = v.getMaxTime();
+          mi = v.getMinTime();
 
           if (scale == LOG_SCALE) {
-            if (mi <= 0) {
-              if (annotation == VALUE_ANNO) {
-                mi = v.getPositiveMinXValue();
-              }
-              else {
-                mi = v.getPositiveMinTime();
-              }
-            }
+            if (mi <= 0) mi = v.getPositiveMinTime();
             if (mi != Double.MAX_VALUE) mi = Math.log(mi) / ln10;
 
             if (ma <= 0)
@@ -1498,7 +1067,7 @@ public class JLAxis implements java.io.Serializable {
 
         if (annotation == TIME_ANNO) {
 
-          if( axisDuration != Double.POSITIVE_INFINITY && fitXAxisToDisplayDuration)
+          if( axisDuration != Double.POSITIVE_INFINITY )
             min = max - axisDuration;
 
           max += (max - min) * percentScrollback;
@@ -1527,45 +1096,22 @@ public class JLAxis implements java.io.Serializable {
   // Measurements stuff
 
   /**
-   * @deprecated Use getLabelFontDimension() instead
+   * Expert usage.
+   * @param g Graphics object
+   * @return Axis font height.
    */
   public int getFontHeight(Graphics g) {
-    return getLabelFontDimension(null);
-  }
-
-  /**
-   * Expert usage.
-   * @return Axis font dimension.
-   */
-  public int getLabelFontDimension(FontRenderContext frc) {
-
-    if(!visible || frc==null)
-      return 5; // 5 pixel margin when axis not visible
-
-    int hFont = (int)(labelFont.getLineMetrics("dummyStr0",frc).getHeight() + 0.5);
-
     if (isHorizontal()) {
-
-      if (name != null) {
-        if( orientation==HORIZONTAL_DOWN || orientation==HORIZONTAL_UP )
-          return 2*hFont+5;
-        else
-          return hFont+5;
-      } else {
-          return hFont+5;
-      }
-
+      if (name != null)
+        return 2 * g.getFontMetrics(labelFont).getHeight();
+      else
+        return g.getFontMetrics(labelFont).getHeight();
     } else {
       if (name != null)
-        return hFont+5;
+        return g.getFontMetrics(labelFont).getHeight();
       else
         return 5;
     }
-
-  }
-
-  public int getFontOverWidth() {
-    return fontOverWidth;
   }
 
   /**
@@ -1575,7 +1121,7 @@ public class JLAxis implements java.io.Serializable {
    * @see JLAxis#getLength
    */
   public int getThickness() {
-    if ((csize != null) && visible) {
+    if (csize != null) {
       if (!isHorizontal())
         return csize.width;
       else
@@ -1603,42 +1149,37 @@ public class JLAxis implements java.io.Serializable {
   /**
    * Expert usage.
    * Computes labels and measures axis dimension.
+   * @param g Grpahics object
    * @param frc Font render context
    * @param desiredWidth Desired width
    * @param desiredHeight Desired height
    */
-  public void measureAxis(FontRenderContext frc, int desiredWidth, int desiredHeight) {
+  public void measureAxis(Graphics g, FontRenderContext frc, int desiredWidth, int desiredHeight) {
 
     int i;
     int max_width = 10; // Minimun width
     int max_height = 0;
 
+
+    g.setFont(labelFont);
+
     computeAutoScale();
 
-    if(autoLabeling) {
-      if(!isHorizontal())
-        computeLabels(frc, desiredHeight);
-      else
-        computeLabels(frc, desiredWidth);
-    } else {
-      if(!isHorizontal())
-        computeUserLabels(frc, desiredHeight);
-      else
-        computeUserLabels(frc, desiredWidth);
-    }
+    if (!isHorizontal())
+      computeLabels(frc, desiredHeight, true);
+    else
+      computeLabels(frc, desiredWidth, false);
 
     for (i = 0; i < labels.size(); i++) {
-      LabelInfo li = labels.get(i);
-      if (li.getWidth() > max_width)
-        max_width = li.getWidth();
-      if (li.getHeight() > max_height)
-        max_height = li.getHeight();
+      LabelInfo li = (LabelInfo) labels.get(i);
+      if (li.size.width > max_width)
+        max_width = li.size.width;
+      if (li.size.height > max_height)
+        max_height = li.size.height;
     }
 
-    fontOverWidth = max_width/2+1;
-
     if (!isHorizontal())
-      csize = new Dimension(max_width + getLabelFontDimension(frc), desiredHeight);
+      csize = new Dimension(max_width + 5, desiredHeight);
     else
       csize = new Dimension(desiredWidth, max_height);
 
@@ -1730,47 +1271,46 @@ public class JLAxis implements java.io.Serializable {
 
     for (int i = 0; i < sz; i++) {
 
-      JLDataView v = dataViews.get(i);
-      if (v.isClickable()) {
-        DataList e = v.getData();
+      JLDataView v = (JLDataView) dataViews.get(i);
+      DataList e = v.getData();
 
-        idx = 0;
-        while (e != null) {
+      idx = 0;
+      while (e != null) {
 
-          Point p = transform(e.x, v.getTransformedValue(e.y), xAxis);
+        Point p = transform(e.x, v.getTransformedValue(e.y), xAxis);
 
-          if (boundRect2.contains(p)) {
-            norme2 = distance2(x, y, p.x, p.y);
-            if (norme2 < minNorme) {
+        if (boundRect2.contains(p)) {
+          norme2 = distance2(x, y, p.x, p.y);
+          if (norme2 < minNorme) {
 
-              minNorme = norme2;
-              minP = e;
-              minDataView = v;
-              minPt = p;
-              minIdx = idx;
+            minNorme = norme2;
+            minP = e;
+            minDataView = v;
+            minPt = p;
+	    minIdx = idx;
 
-              // Compute placement for the value info window
-              if (p.x < (boundRect.x + boundRect.width / 2)) {
-                if (p.y < (boundRect.y + boundRect.height / 2)) {
-                  minPl = SearchInfo.BOTTOMRIGHT;
-                } else {
-                  minPl = SearchInfo.TOPRIGHT;
-                }
+            // Compute placement for the value info window
+            if (p.x < (boundRect.x + boundRect.width / 2)) {
+              if (p.y < (boundRect.y + boundRect.height / 2)) {
+                minPl = SearchInfo.BOTTOMRIGHT;
               } else {
-                if (p.y < (boundRect.y + boundRect.height / 2)) {
-                  minPl = SearchInfo.BOTTOMLEFT;
-                } else {
-                  minPl = SearchInfo.TOPLEFT;
-                }
+                minPl = SearchInfo.TOPRIGHT;
+              }
+            } else {
+              if (p.y < (boundRect.y + boundRect.height / 2)) {
+                minPl = SearchInfo.BOTTOMLEFT;
+              } else {
+                minPl = SearchInfo.TOPLEFT;
               }
             }
           }
-
-          e = e.next;
-          idx++;
-
         }
+
+        e = e.next;
+	idx++;
+
       }
+
     }
 
     if (minNorme == Integer.MAX_VALUE)
@@ -1799,53 +1339,51 @@ public class JLAxis implements java.io.Serializable {
     JLDataView minDataView = null;
     int minPl = 0;
 
-    JLDataView w = xAxis.getViews().get(0);
+    JLDataView w = (JLDataView) xAxis.getViews().get(0);
 
     Rectangle boundRect2 = new Rectangle();
     boundRect2.setBounds(boundRect.x - 2, boundRect.y - 2, boundRect.width + 4, boundRect.height + 4);
 
     for (int i = 0; i < sz; i++) {
 
-      JLDataView v = dataViews.get(i);
-      if (v.isClickable()) {
-        XYData e = new XYData(v.getData(), w.getData());
+      JLDataView v = (JLDataView) dataViews.get(i);
+      XYData e = new XYData(v.getData(), w.getData());
 
-        if (e.isValid()) e.initFirstPoint();
+      if (e.isValid()) e.initFirstPoint();
 
-        while (e.isValid()) {
+      while (e.isValid()) {
 
-          Point p = transform(w.getTransformedValue(e.d2.y), v.getTransformedValue(e.d1.y), xAxis);
+        Point p = transform(w.getTransformedValue(e.d2.y), v.getTransformedValue(e.d1.y), xAxis);
 
-          if (boundRect2.contains(p)) {
-            norme2 = distance2(x, y, p.x, p.y);
-            if (norme2 < minNorme) {
+        if (boundRect2.contains(p)) {
+          norme2 = distance2(x, y, p.x, p.y);
+          if (norme2 < minNorme) {
 
-              minNorme = norme2;
-              minP = e.d1;
-              minXP = e.d2;
-              minDataView = v;
-              minPt = p;
+            minNorme = norme2;
+            minP = e.d1;
+            minXP = e.d2;
+            minDataView = v;
+            minPt = p;
 
-              // Compute placement for the value info window
-              if (p.x < (boundRect.x + boundRect.width / 2)) {
-                if (p.y < (boundRect.y + boundRect.height / 2)) {
-                  minPl = SearchInfo.BOTTOMRIGHT;
-                } else {
-                  minPl = SearchInfo.TOPRIGHT;
-                }
+            // Compute placement for the value info window
+            if (p.x < (boundRect.x + boundRect.width / 2)) {
+              if (p.y < (boundRect.y + boundRect.height / 2)) {
+                minPl = SearchInfo.BOTTOMRIGHT;
               } else {
-                if (p.y < (boundRect.y + boundRect.height / 2)) {
-                  minPl = SearchInfo.BOTTOMLEFT;
-                } else {
-                  minPl = SearchInfo.TOPLEFT;
-                }
+                minPl = SearchInfo.TOPRIGHT;
+              }
+            } else {
+              if (p.y < (boundRect.y + boundRect.height / 2)) {
+                minPl = SearchInfo.BOTTOMLEFT;
+              } else {
+                minPl = SearchInfo.TOPLEFT;
               }
             }
           }
-
-          e.toNextXYPoint();
-
         }
+
+        e.toNextXYPoint();
+
       }
 
     }
@@ -1869,6 +1407,14 @@ public class JLAxis implements java.io.Serializable {
    */
   public SearchInfo searchNearest(int x, int y, JLAxis xAxis) {
 
+    int sz = dataViews.size();
+    int norme2;
+    DataList minP = null;
+    Point minPt = null;
+    int minNorme = Integer.MAX_VALUE;
+    JLDataView minDataView = null;
+    int minPl = 0;
+
     //Search only in graph area
     if( x<=boundRect.x-10 ||
         x>=boundRect.x+boundRect.width+10 ||
@@ -1887,88 +1433,19 @@ public class JLAxis implements java.io.Serializable {
 
   }
 
-  private void computeUserLabels(FontRenderContext frc,double length) {
-
-    double sz = max - min;
-    double precDelta = sz / length;
-
-    labels.clear();
-
-    //Adjust labels offset according to tick
-
-    int offX = 0;
-    int offY = 0;
-    switch(dOrientation) {
-      case VERTICAL_LEFT:
-        offX = (tickLength<0)?tickLength:0;
-        break;
-      case VERTICAL_RIGHT:
-        offX = (tickLength<0)?-tickLength:0;
-        break;
-      default: // HORIZONTAL_DOWN
-        offY = (tickLength<0)?-tickLength:0;
-        break;
-    }
-
-    // Create labels
-
-    for(int i=0;i<userLabel.length;i++) {
-
-      double upos;
-      if(scale==LOG_SCALE)
-        upos = Math.log10(userLabelPos[i]);
-      else
-        upos = userLabelPos[i];
-
-      if(upos>=(min - precDelta) && upos<=(max + precDelta)) {
-
-          int pos;
-
-          if (inverted)
-            pos = (int)Math.rint(length * (1.0 - (upos - min) / sz));
-          else
-            pos = (int)Math.rint(length * ((upos - min) / sz));
-
-          Rectangle2D bounds = labelFont.getStringBounds(userLabel[i], frc);
-          LabelInfo li = new LabelInfo(userLabel[i], (int) bounds.getWidth(),
-                                       (int) bounds.getHeight(), pos);
-          li.setOffset(offX,offY);
-          labels.add(li);
-
-      }
-
-    }
-
-  }
-
   // ****************************************************************
   // Compute labels
   // Expert usage
-  private void computeLabels(FontRenderContext frc, double length) {
-
-    // XXX Vincent Hardion max < min ???
-    if (max < min) {
-//      StringBuffer errorBuffer = new StringBuffer("Error found in JLAxis");
-//      errorBuffer.append("\nMethod computeLabels(FontRenderContext,double)");
-//      errorBuffer.append("\nmax < min : ");
-//      errorBuffer.append("max = ").append(max);
-//      errorBuffer.append(", min = ").append(min);
-//      errorBuffer.append("\nInverting min and max values to avoid problems");
-//      System.err.println( errorBuffer.toString() );
-   	  double a = min;
-   	  min=max;
-   	  max=a;
-    }
+  private void computeLabels(FontRenderContext frc, double length, boolean invert) {
 
     double sz = max - min;
-    double pos;
-    int w,h;
+    int pos,w,h,i;
     int lgth = (int) length;
     java.util.Date date;
     String s;
     double startx;
     double prec;
-    double precDelta = sz / length;
+    LabelInfo lastLabel = null;
 
     labels.clear();
     Rectangle2D bounds;
@@ -1979,18 +1456,18 @@ public class JLAxis implements java.io.Serializable {
 
         // Only for HORINZONTAL axis !
         // This has nothing to do with TIME_FORMAT
-        // 10 labels maximum should be enough...
-        computeDateformat(10);
+
+        computeDateformat();
 
         // round to multiple of prec
-        long round;
-        round = (long) (min / desiredPrec);
+        int round;
+        round = (int) (min / desiredPrec);
         startx = (round + 1) * desiredPrec;
 
-        if (inverted)
-          pos = length * (1.0 - (startx - min) / sz);
+        if (invert)
+          pos = (int) (length * (1.0 - (startx - min) / sz));
         else
-          pos = length * ((startx - min) / sz);
+          pos = (int) (length * ((startx - min) / sz));
 
         calendar.setTimeInMillis((long) startx);
         date = calendar.getTime();
@@ -1998,28 +1475,24 @@ public class JLAxis implements java.io.Serializable {
         bounds = labelFont.getStringBounds(s, frc);
         w = (int) bounds.getWidth();
         h = (int) bounds.getHeight();
-        labels.add(new LabelInfo(s, w, h, pos));
+        lastLabel = new LabelInfo(s, true, w, h, pos, 0);
+        labels.add(lastLabel);
 
-        double minStep = (double) w * 1.3;
-        if(minStep<minTickStep) minStep = minTickStep;
-        double minPrec = (minStep / length) * sz;
+        double minPrec = (((double) w * 1.3) / length) * sz;
 
         // Correct to avoid label overlap
         prec = desiredPrec;
         while (prec < minPrec) prec += desiredPrec;
 
-        tickStep = length * prec/sz;
         startx += prec;
-        if(inverted) tickStep = -tickStep;
-        subTickStep = subTickTimeAnno;
 
         // Build labels
-        while (startx <= (max + precDelta)) {
+        while (startx <= max) {
 
-          if (inverted)
-            pos = (int)Math.rint(length * (1.0 - (startx - min) / sz));
+          if (invert)
+            pos = (int) (length * (1.0 - (startx - min) / sz));
           else
-            pos = (int)Math.rint(length * ((startx - min) / sz));
+            pos = (int) (length * ((startx - min) / sz));
 
           calendar.setTimeInMillis((long) startx);
           date = calendar.getTime();
@@ -2030,7 +1503,8 @@ public class JLAxis implements java.io.Serializable {
           if (pos > 0 && pos < lgth) {
             w = (int) bounds.getWidth();
             h = (int) bounds.getHeight();
-            labels.add(new LabelInfo(s, w, h, pos));
+            lastLabel = new LabelInfo(s, true, w, h, pos, 0);
+            labels.add(lastLabel);
           }
 
           startx += prec;
@@ -2040,55 +1514,16 @@ public class JLAxis implements java.io.Serializable {
 
       case VALUE_ANNO:
 
-        double fontAscent = (double) (labelFont.getLineMetrics("0",frc).getAscent());
-        prec = computeLowTen(max - min);
-        boolean extractLabel = false;
+        //Do not compute labels on vertical axis if no data displayed
+        if ((dataViews.size() == 0) && !isHorizontal()) return;
 
-        // Anticipate label overlap
-
-        int nbMaxLab;
-
-        if(!isHorizontal()) {
-
-          // VERTICAL
-          nbMaxLab = (int) (length / (2.0*fontAscent));
-
-        } else {
-
-          // HORIZONTAL
-          // The strategy is not obvious here as we can't estimate the max label width
-          // Do it with the min and the max
-          double minT;
-          double maxT;
-          if (scale == LOG_SCALE) {
-            minT = Math.pow(10.0, min);
-            maxT = Math.pow(10.0, max);
-          } else {
-            minT = min;
-            maxT = max;
-          }
-
-          double mW;
-          s = formatValue(minT, prec);
-          bounds = labelFont.getStringBounds(s, frc);
-          mW = bounds.getWidth();
-          s = formatValue(maxT, prec);
-          bounds = labelFont.getStringBounds(s, frc);
-          if(bounds.getWidth()>mW) mW = bounds.getWidth();
-          mW = 1.5*mW;
-          nbMaxLab = (int) (length / mW);
-
-        }
-
+        double fontAscent = (double) parent.getFontMetrics(labelFont).getAscent();
+        int nbMaxLab = (int) (length / fontAscent);
         int n;
         int step = 0;
-        int subStep = 0;
 
-        // Overrides maxLab
-        int userMaxLab = (int)Math.rint(length / minTickStep);
-        if (userMaxLab<nbMaxLab) nbMaxLab = userMaxLab;
 
-        if (nbMaxLab<1) nbMaxLab=1; // At least 1 labels !
+        if (nbMaxLab > tick) nbMaxLab = tick;
 
         // Find the best precision
 
@@ -2099,146 +1534,51 @@ public class JLAxis implements java.io.Serializable {
 
           startx = Math.rint(min);
 
-          n = (int)Math.rint((max - min) / prec);
+          n = (int) ((max - min) / prec);
 
           while (n > nbMaxLab) {
             prec = prec * 2;
             step = 2;
-            n = (int)Math.rint((max - min) / prec);
+            n = (int) ((max - min) / prec);
             if (n > nbMaxLab) {
               prec = prec * 5;
               step = 10;
-              n = (int)Math.rint((max - min) / prec);
+              n = (int) ((max - min) / prec);
             }
           }
-
-          subStep = step;
 
         } else {
 
-          // Linear scale
-
+          prec = computeLowTen(max - min);
           step = 10;
-          n = (int)Math.rint((max - min) / prec);
 
-          if (n <= nbMaxLab) {
+          n = (int) ((max - min) / (prec / 2.0));
 
-            // Look forward
-            n = (int)Math.rint((max - min) / (prec / 2.0));
-
-            while (n <= nbMaxLab) {
-              prec = prec / 2.0;
-              step = 5;
-              n = (int)Math.rint((max - min) / (prec / 5.0));
-              if (n <= nbMaxLab) {
-                prec = prec / 5.0;
-                step = 10;
-                n = (int)Math.rint((max - min) / (prec / 2.0));
-              }
-            }
-
-          } else {
-
-            // Look backward
-            while(n>nbMaxLab) {
-              prec = prec * 5.0;
-              step = 5;
-              n = (int)Math.rint((max - min) / prec);
-              if(n>nbMaxLab) {
-                prec = prec * 2.0;
-                step = 10;
-                n = (int)Math.rint((max - min) / prec);
-              }
-            }
-
-          }
-
-          // round to multiple of prec (last not visible label)
-
-          round = (long)Math.floor(min / prec);
-          startx = round * prec;
-
-          // Compute real number of label
-
-          double sx = startx;
-          int nbL = 0;
-          while(sx<=(max + precDelta)) {
-            if( sx >= (min - precDelta)) {
-              nbL++;
-            }
-            sx += prec;
-          }
-
-          if(nbL<=2) {
-            // Only one label
-            // Go backward and extract the 2 extremity
-            if(step==10) {
-              step=5;
-              prec=prec/2.0;
-            } else {
-              step=10;
-              prec=prec/5.0;
-            }
-            extractLabel = true;
-          }
-
-          // Compute tick sapcing
-
-          double tickSpacing = Math.abs(((prec / sz)*length) / (double)step);
-          subStep = step;
-          while(tickSpacing<10.0 && subStep>1) {
-            switch (subStep) {
-              case 10:
-               subStep = 5;
-               tickSpacing = tickSpacing * 2;
-               break;
-              case 5:
-               subStep = 2;
-               tickSpacing = tickSpacing * 2.5;
-               break;
-              case 2:
-               // No sub tick
-               subStep = 1;
-               break;
+          while (n <= nbMaxLab) {
+            prec = prec / 2.0;
+            step = 5;
+            n = (int) ((max - min) / (prec / 5.0));
+            if (n <= nbMaxLab) {
+              prec = prec / 5.0;
+              step = 10;
+              n = (int) ((max - min) / (prec / 2.0));
             }
           }
 
+          // round to multiple of prec
+          round = (int) (min / prec);
+          startx = (round - 1) * prec;
 
-        }
-
-        // Compute tickStep
-
-        tickStep = length * prec/sz;
-        if(inverted) tickStep = -tickStep;
-        subTickStep = subStep;
-
-        //Adjust labels offset according to tick
-
-        int offX = 0;
-        int offY = 0;
-        switch(dOrientation) {
-          case VERTICAL_LEFT:
-            offX = (tickLength<0)?tickLength:0;
-            break;
-          case VERTICAL_RIGHT:
-            offX = (tickLength<0)?-tickLength:0;
-            break;
-          default: // HORIZONTAL_DOWN
-            offY = (tickLength<0)?-tickLength:0;
-            break;
         }
 
         //Build labels
 
-        String lastLabelText = "";
-        double lastDiff = Double.MAX_VALUE;
-        LabelInfo lastLabel = null;
-        while (startx <= (max + precDelta)) {
+        while (startx <= max) {
 
-          if (inverted)
-            pos = (int)Math.rint(length * (1.0 - (startx - min) / sz));
+          if (invert)
+            pos = (int) (length * (1.0 - (startx - min) / sz));
           else
-            pos = (int)Math.rint(length * ((startx - min) / sz));
+            pos = (int) (length * ((startx - min) / sz));
 
           double vt;
           if (scale == LOG_SCALE)
@@ -2246,61 +1586,26 @@ public class JLAxis implements java.io.Serializable {
           else
             vt = startx;
 
-          String tempValue = formatValue(vt, prec);
-          double diff = 0;
-          if (labelFormat != TIME_FORMAT && labelFormat != DATE_FORMAT)
-          {
-              diff = Math.abs(Double.parseDouble(tempValue) - vt);
-          }
-          if (lastLabelText.equals(tempValue))
-          {
-            //avoiding label duplication
-            if (diff < lastDiff)
-            {
-              s = new String(tempValue);
-              if (lastLabel != null)
-              {
-                lastLabel.value = "";
-              }
-            }
-            else
-            {
-              s = "";
-            }
-          }
-          else
-          {
-            s = new String(tempValue);
-          }
-          lastDiff = diff;
-          lastLabelText = new String(tempValue);
+          s = formatValue(vt, prec);
           bounds = labelFont.getStringBounds(s, frc);
 
-          if (startx >= (min - precDelta)) {
-            LabelInfo li = new LabelInfo(s, (int) bounds.getWidth(), (int) fontAscent, pos);
-            li.setOffset(offX,offY);
+          // Check overlap
+          boolean visible = true;
+          if (lastLabel != null && isHorizontal()) {
+            // Check bounds on horizontal axis
+            visible = (lastLabel.pos + lastLabel.size.width / 2) <
+              (pos - ((int) bounds.getWidth()) / 2);
+          }
+
+          if (startx >= (min - 1e-12)) {
+            LabelInfo li = new LabelInfo(s, visible, (int) bounds.getWidth(), (int) fontAscent, pos, step);
+            if (visible) lastLabel = li;
             labels.add(li);
-            lastLabel = li;
           }
 
           startx += prec;
 
         }
-
-        // Extract 2 bounds when we didn't found a correct match.
-        if(extractLabel) {
-          if(labels.size()>2) {
-            Vector<LabelInfo> nLabels = new Vector<LabelInfo>();
-            LabelInfo lis = labels.get(0);
-            LabelInfo lie = labels.get(labels.size()-1);
-            nLabels.add(lis);
-            nLabels.add(lie);
-            tickStep = lie.pos - lis.pos;
-            subTickStep = labels.size()-1;
-            labels = nLabels;
-          }
-        }
-
         break;
 
     }
@@ -2319,9 +1624,8 @@ public class JLAxis implements java.io.Serializable {
    */
   public void drawFast(Graphics g, Point lp, Point p, JLDataView v) {
 
-    g.setClip(boundRect.x,boundRect.y,boundRect.width,boundRect.height);
-
     if (lp != null) {
+      if (boundRect.contains(lp)) {
 
         Graphics2D g2 = (Graphics2D) g;
         Stroke old = g2.getStroke();
@@ -2334,7 +1638,7 @@ public class JLAxis implements java.io.Serializable {
 
         //restore default stroke
         g2.setStroke(old);
-
+      }
     }
 
     //Paint marker
@@ -2408,15 +1712,14 @@ public class JLAxis implements java.io.Serializable {
     g.drawLine(x - barWidth / 2, y0, x - barWidth / 2, y);
   }
 
-  private void paintBar(Graphics g, Paint pattern, int barWidth, Color background, int fillStyle, int y0, int x, int y) {
+  private void paintBar(Graphics g, Paint pattern, int barWidth, Color background, Color foreground, int fillStyle, int y0, int x, int y) {
 
     Graphics2D g2 = (Graphics2D) g;
 
     if (fillStyle != JLDataView.FILL_STYLE_NONE) {
       if (pattern != null) g2.setPaint(pattern);
-      else                 g2.setColor(background);
       if (y > y0) {
-        g.fillRect(x - barWidth / 2, y0, barWidth, y-y0);
+        g.fillRect(x - barWidth / 2, y0, barWidth, (y - y0));
       } else {
         g.fillRect(x - barWidth / 2, y, barWidth, (y0 - y));
       }
@@ -2433,41 +1736,21 @@ public class JLAxis implements java.io.Serializable {
    */
   public static void drawSampleLine(Graphics g, int x, int y, JLDataView v) {
 
-    Color oc = g.getColor();
     Graphics2D g2 = (Graphics2D) g;
     Stroke old = g2.getStroke();
     BasicStroke bs = GraphicsUtils.createStrokeForLine(v.getLineWidth(), v.getStyle());
     if (bs != null) g2.setStroke(bs);
 
     // Draw
-    if( v.getViewType()==JLDataView.TYPE_LINE ) {
+    g.drawLine(x, y, x + 40, y);
 
-      if( v.getLineWidth()>0 ) {
-        g.drawLine(x, y, x + 40, y);
-      }
-      g.setColor(v.getMarkerColor());
-      paintMarker(g, v.getMarker(), v.getMarkerSize(), x + 20, y);
-
-    } else if( v.getViewType()==JLDataView.TYPE_BAR ) {
-
-      if(v.getFillStyle()!=JLDataView.FILL_STYLE_NONE) {
-        g.setColor(v.getFillColor());
-        g.fillRect(x+16,y-4,8,8);
-      }
-
-      g.setColor(v.getColor());
-      if (bs != null) g2.setStroke(bs);
-      if( v.getLineWidth()>0 ) {
-        g.drawLine(x+16, y-4, x + 24, y-4);
-        g.drawLine(x+24, y-4, x + 24, y+4);
-        g.drawLine(x+24, y+4, x + 16, y+4);
-        g.drawLine(x+16, y+4, x + 16, y-4);
-      }
-
-    }
-
-    // Restore
+    //restore default stroke
     g2.setStroke(old);
+
+    //Paint marker
+    Color oc = g.getColor();
+    g.setColor(v.getMarkerColor());
+    paintMarker(g, v.getMarker(), v.getMarkerSize(), x + 20, y);
     g.setColor(oc);
 
   }
@@ -2486,20 +1769,19 @@ public class JLAxis implements java.io.Serializable {
 
     //-------- Clipping
 
-    int xClip = xOrg + 1;
-    int yClip = yOrg - getLength() + 1;
-    int wClip = xAxis.getLength() - 1;
-    int hClip = getLength() - 1;
-
+    int xClip = xOrg - 1;
+    int yClip = yOrg - getLength() - 1;
+    int wClip = xAxis.getLength() + 2;
+    int hClip = getLength() + 2;
     if (wClip <= 1 || hClip <= 1) return;
-    g.clipRect(xClip, yClip, wClip, hClip);
+    g.setClip(xClip, yClip, wClip, hClip);
 
     //-------- Draw dataView
-    if (isXY) vx = xAxis.getViews().get(0);
+    if (isXY) vx = (JLDataView) (xAxis.getViews().get(0));
 
     for (k = 0; k < nbView; k++) {
 
-      JLDataView v = dataViews.get(k);
+      JLDataView v = (JLDataView) dataViews.get(k);
 
       if (isXY)
         paintDataViewXY(g, v, vx, xAxis, xOrg, yOrg);
@@ -2507,6 +1789,10 @@ public class JLAxis implements java.io.Serializable {
         paintDataViewNormal(g, v, xAxis, xOrg, yOrg);
 
     } // End (for k<nbView)
+
+    //Restore clip
+    Dimension d = parent.getSize();
+    g.setClip(0, 0, d.width, d.height);
 
   }
 
@@ -2533,7 +1819,7 @@ public class JLAxis implements java.io.Serializable {
 
     if (xAxis.isXY()) {
 
-      JLDataView vx = xAxis.getViews().get(0);
+      JLDataView vx = (JLDataView) (xAxis.getViews().get(0));
 
       // Look for the minimun interval
       DataList d = vx.getData();
@@ -2585,57 +1871,26 @@ public class JLAxis implements java.io.Serializable {
                                 Paint fPattern,
                                 int y0,
                                 int x,
-                                int y,
-                                int idx) {
+                                int y) {
 
     if (v.getViewType() == JLDataView.TYPE_BAR) {
 
-      if(idx>=0) {
-
-        Color fillColor = v.getBarFillColorAt(idx);
-        if( fillColor==null ) {
-
-          paintBar(g2,
-            fPattern,
-            barWidth,
-            v.getFillColor(),
-            v.getFillStyle(),
-            y0,
-            x,
-            y);
-
-        } else {
-
-          paintBar(g2,
-            null,
-            barWidth,
-            fillColor,
-            v.getFillStyle(),
-            y0,
-            x,
-            y);
-
-        }
-
-      } else {
-
-        paintBar(g2,
-          fPattern,
-          barWidth,
-          v.getFillColor(),
-          v.getFillStyle(),
-          y0,
-          x,
-          y);
-
-      }
+      paintBar((Graphics) g2,
+        fPattern,
+        barWidth,
+        v.getFillColor(),
+        v.getColor(),
+        v.getFillStyle(),
+        y0,
+        x,
+        y);
 
       // Draw bar border
       if (v.getLineWidth() > 0) {
         Stroke old = g2.getStroke();
         if (bs != null) g2.setStroke(bs);
         g2.setColor(v.getColor());
-        paintBarBorder(g2, barWidth, y0, x, y);
+        paintBarBorder((Graphics) g2, barWidth, y0, x, y);
         g2.setStroke(old);
       }
 
@@ -2684,7 +1939,6 @@ public class JLAxis implements java.io.Serializable {
   private void paintDataViewNormal(Graphics g, JLDataView v, JLAxis xAxis, int xOrg, int yOrg) {
 
     DataList l = v.getData();
-    int idx = 0;
 
     if (l != null) {
 
@@ -2712,7 +1966,6 @@ public class JLAxis implements java.io.Serializable {
       miny = min;
       maxy = max;
       ly = getLength();
-
 
       int j = 0;
       boolean valid = true;
@@ -2781,13 +2034,12 @@ public class JLAxis implements java.io.Serializable {
               }
 
               // Draw bar
-              paintDataViewBar(g2, v, barWidth, bs, fPattern, y0, pointX[j], pointY[j], idx);
+              paintDataViewBar(g2, v, barWidth, bs, fPattern, y0, pointX[j], pointY[j]);
 
               j++;
             }
 
             l = l.next;
-            idx++;
           }
 
         }
@@ -2798,7 +2050,6 @@ public class JLAxis implements java.io.Serializable {
         j = 0;
         if (!valid) {
           l = l.next;
-          idx++;
           valid = true;
         }
 
@@ -2813,6 +2064,7 @@ public class JLAxis implements java.io.Serializable {
   private void paintDataViewXY(Graphics g, JLDataView v, JLDataView w, JLAxis xAxis, int xOrg, int yOrg) {
 
     XYData l = new XYData(v.getData(), w.getData());
+    int lw = v.getLineWidth();
 
     if (l.isValid()) {
 
@@ -2867,6 +2119,7 @@ public class JLAxis implements java.io.Serializable {
 
       // Set the stroke mode for dashed line
       Graphics2D g2 = (Graphics2D) g;
+      Stroke old = g2.getStroke();
       BasicStroke bs = GraphicsUtils.createStrokeForLine(v.getLineWidth(), v.getStyle());
 
       // Create the filling pattern
@@ -2917,7 +2170,7 @@ public class JLAxis implements java.io.Serializable {
               }
 
               // Draw bar
-              paintDataViewBar(g2, v, barWidth, bs, fPattern, y0, pointX[j], pointY[j], -1);
+              paintDataViewBar(g2, v, barWidth, bs, fPattern, y0, pointX[j], pointY[j]);
 
               j++;
             }
@@ -2945,7 +2198,7 @@ public class JLAxis implements java.io.Serializable {
 
   // Paint sub tick outside label limit
   // Expert usage
-  private void paintYOutTicks(Graphics g, int x0, double ys, int y0, int la, BasicStroke bs, int tr,int off,boolean grid) {
+  private int paintExtraYSubTicks(Graphics g, int x0, int ys, int length, int y0, int la, BasicStroke bs, int step, int tr) {
 
     int j,h;
     Graphics2D g2 = (Graphics2D) g;
@@ -2953,13 +2206,13 @@ public class JLAxis implements java.io.Serializable {
 
     if (subtickVisible) {
 
-      if (subTickStep == -1) {
+      if (step == -1) {
 
         for (j = 0; j < logStep.length; j++) {
-          h = (int)Math.rint(ys + tickStep * logStep[j]);
-          if (h >= y0 && h <= (y0 + csize.height)) {
-            g.drawLine(x0 + tr + off , h, x0 + tr + off + subtickLength, h);
-            if (gridVisible && subGridVisible && grid) {
+          h = ys + (int) (length * logStep[j]);
+          if (h > y0 && h < (y0 + csize.height)) {
+            g.drawLine(x0 + tr - 1, h, x0 + tr + 2, h);
+            if (gridVisible && subGridVisible) {
               if (bs != null) g2.setStroke(bs);
               g.drawLine(x0, h, x0 + la, h);
               g2.setStroke(old);
@@ -2967,14 +2220,13 @@ public class JLAxis implements java.io.Serializable {
           }
         }
 
-      } else if (subTickStep > 0) {
+      } else if (step > 0) {
 
-        double r = 1.0 / (double)subTickStep;
-        for (j = 0; j < subTickStep; j ++) {
-          h = (int)Math.rint(ys + tickStep * r * j);
-          if (h >= y0 && h <= (y0 + csize.height)) {
-            g.drawLine(x0 + tr + off, h, x0 + tr + off + subtickLength, h);
-            if ((j > 0) && gridVisible && subGridVisible && grid) {
+        for (j = 0; j < linStep.length; j += (10 / step)) {
+          h = ys + (int) (length * linStep[j]);
+          if (h > y0 && h < (y0 + csize.height)) {
+            g.drawLine(x0 + tr - 1, h, x0 + tr + 2, h);
+            if ((j > 0) && gridVisible && subGridVisible) {
               if (bs != null) g2.setStroke(bs);
               g.drawLine(x0, h, x0 + la, h);
               g2.setStroke(old);
@@ -2984,6 +2236,11 @@ public class JLAxis implements java.io.Serializable {
 
       }
 
+      return length;
+
+    } else {
+
+      return 0;
 
     }
 
@@ -2991,7 +2248,7 @@ public class JLAxis implements java.io.Serializable {
 
   // Paint sub tick outside label limit
   // Expert usage
-  private void paintXOutTicks(Graphics g, int y0, double xs, int x0, int la, BasicStroke bs, int tr,int off,boolean grid) {
+  private int paintExtraXSubTicks(Graphics g, int y0, int xs, int length, int x0, int la, BasicStroke bs, int step, int tr) {
 
     int j,w;
     Graphics2D g2 = (Graphics2D) g;
@@ -2999,13 +2256,13 @@ public class JLAxis implements java.io.Serializable {
 
     if (subtickVisible) {
 
-      if (subTickStep == -1) {
+      if (step == -1) {
 
         for (j = 0; j < logStep.length; j++) {
-          w = (int)Math.rint(xs + tickStep * logStep[j]);
-          if (w >= x0 && w <= (x0 + csize.width)) {
-            g.drawLine(w, y0 + tr + off, w, y0 + tr + off + subtickLength);
-            if (gridVisible && subGridVisible && grid) {
+          w = xs + (int) (length * logStep[j]);
+          if (w > x0 && w < (x0 + csize.width)) {
+            g.drawLine(w, y0 + tr - 1, w, y0 + tr + 2);
+            if (gridVisible && subGridVisible) {
               if (bs != null) g2.setStroke(bs);
               g.drawLine(w, y0, w, y0 + la);
               g2.setStroke(old);
@@ -3013,14 +2270,13 @@ public class JLAxis implements java.io.Serializable {
           }
         }
 
-      } else if (subTickStep > 0) {
+      } else if (step > 0) {
 
-        double r = 1.0 / (double)subTickStep;
-        for (j = 0; j < subTickStep; j ++) {
-          w = (int)Math.rint(xs + tickStep * r * j);
-          if (w >= x0 && w <= (x0 + csize.width)) {
-            g.drawLine(w, y0 + tr + off, w, y0 + tr + off + subtickLength);
-            if ((j > 0) && gridVisible && subGridVisible && grid) {
+        for (j = 0; j < linStep.length; j += (10 / step)) {
+          w = xs + (int) (length * linStep[j]);
+          if (w > x0 && w < (x0 + csize.width)) {
+            g.drawLine(w, y0 + tr - 1, w, y0 + tr + 2);
+            if ((j > 0) && gridVisible && subGridVisible) {
               if (bs != null) g2.setStroke(bs);
               g.drawLine(w, y0, w, y0 + la);
               g2.setStroke(old);
@@ -3030,71 +2286,19 @@ public class JLAxis implements java.io.Serializable {
 
       }
 
+      return length;
+
+    } else {
+
+      return 0;
+
     }
 
-  }
-
-  private int getTickShift(int width) {
-
-    // Calculate position
-    int off=0;
-    switch(dOrientation) {
-      case VERTICAL_LEFT:
-        if(orientation==VERTICAL_ORG)
-          off=-width/2;
-        break;
-      case VERTICAL_RIGHT:
-        if(orientation==VERTICAL_ORG)
-          off=-width/2;
-        else
-          off=-width;
-        break;
-      case HORIZONTAL_DOWN:
-      case HORIZONTAL_UP:
-        if(orientation==HORIZONTAL_ORG1 || orientation==HORIZONTAL_ORG2)
-          off=-width/2;
-        else if (orientation==HORIZONTAL_UP)
-          off=0;
-        else
-          off=-width;
-        break;
-    }
-
-    return off;
-  }
-
-  private int getTickShiftOpposite(int width) {
-
-    // Calculate position
-    int off=0;
-    switch(dOrientation) {
-      case VERTICAL_RIGHT:
-        if(orientation==VERTICAL_ORG)
-          off=-width/2;
-        break;
-      case VERTICAL_LEFT:
-        if(orientation==VERTICAL_ORG)
-          off=-width/2;
-        else
-          off=-width;
-        break;
-      case HORIZONTAL_DOWN:
-      case HORIZONTAL_UP:
-        if(orientation==HORIZONTAL_ORG1 || orientation==HORIZONTAL_ORG2)
-          off=-width/2;
-        else if (orientation==HORIZONTAL_UP)
-          off=-width;
-        else
-          off=0;
-        break;
-    }
-
-    return off;
   }
 
   // Paint Y sub tick and return tick spacing
   // Expert usage
-  private void paintYTicks(Graphics g, int i, int x0, double y, int la, BasicStroke bs, int tr,int off,boolean grid) {
+  private int paintYSubTicks(Graphics g, int i, int x0, int y, int length, int la, BasicStroke bs, int tr) {
 
     int j,h;
     Graphics2D g2 = (Graphics2D) g;
@@ -3102,27 +2306,28 @@ public class JLAxis implements java.io.Serializable {
 
     if (subtickVisible && i < (labels.size() - 1)) {
 
-      // Draw ticks
+      LabelInfo li = (LabelInfo) labels.get(i + 1);
+      length += li.pos;
+      int step = li.subtick_step;
 
-      if (subTickStep == -1) {  // Logarithmic step
+      if (step == -1) {  // Logarithmic step
 
         for (j = 0; j < logStep.length; j++) {
-          h = (int)Math.rint(y + tickStep * logStep[j]);
-          g.drawLine(x0 + tr + off, h, x0 + tr + off + subtickLength, h);
-          if (gridVisible && subGridVisible && grid) {
+          h = y + (int) (length * logStep[j]);
+          g.drawLine(x0 + tr - 1, h, x0 + tr + 2, h);
+          if (gridVisible && subGridVisible) {
             if (bs != null) g2.setStroke(bs);
             g.drawLine(x0, h, x0 + la, h);
             g2.setStroke(old);
           }
         }
 
-      } else if (subTickStep > 0) {  // Linear step
+      } else if (step > 0) {  // Linear step
 
-        double r = 1.0 / (double)subTickStep;
-        for (j = 0; j < subTickStep; j ++) {
-          h = (int)Math.rint(y + tickStep * r * j);
-          g.drawLine(x0 + tr + off , h, x0 + tr + off + subtickLength, h);
-          if ((j > 0) && gridVisible && subGridVisible && grid) {
+        for (j = 0; j < linStep.length; j += (10 / step)) {
+          h = y + (int) (length * linStep[j]);
+          g.drawLine(x0 + tr - 1, h, x0 + tr + 2, h);
+          if ((j > 0) && gridVisible && subGridVisible) {
             if (bs != null) g2.setStroke(bs);
             g.drawLine(x0, h, x0 + la, h);
             g2.setStroke(old);
@@ -3130,6 +2335,12 @@ public class JLAxis implements java.io.Serializable {
         }
 
       }
+
+      return length;
+
+    } else {
+
+      return 0;
 
     }
 
@@ -3137,7 +2348,7 @@ public class JLAxis implements java.io.Serializable {
 
   // Paint X sub tick and return tick spacing
   // Expert usage
-  private void paintXTicks(Graphics g, int i, int y0, double x, int la, BasicStroke bs, int tr,int off,boolean grid) {
+  private int paintXSubTicks(Graphics g, int i, int y0, int x, int length, int la, BasicStroke bs, int tr) {
 
     int j,w;
     Graphics2D g2 = (Graphics2D) g;
@@ -3145,12 +2356,16 @@ public class JLAxis implements java.io.Serializable {
 
     if (subtickVisible && i < (labels.size() - 1)) {
 
-      if (subTickStep == -1) {  // Logarithmic step
+      LabelInfo li = (LabelInfo) labels.get(i + 1);
+      length += li.pos;
+      int step = li.subtick_step;
+
+      if (step == -1) {  // Logarithmic step
 
         for (j = 0; j < logStep.length; j++) {
-          w = (int)Math.rint(x + tickStep * logStep[j]);
-          g.drawLine(w, y0 + tr + off, w, y0 + tr + off + subtickLength);
-          if (gridVisible && subGridVisible && grid) {
+          w = x + (int) (length * logStep[j]);
+          g.drawLine(w, y0 + tr - 1, w, y0 + tr + 2);
+          if (gridVisible && subGridVisible) {
             if (bs != null) g2.setStroke(bs);
             g.drawLine(w, y0, w, y0 + la);
             g2.setStroke(old);
@@ -3158,13 +2373,12 @@ public class JLAxis implements java.io.Serializable {
         }
 
 
-      } else if (subTickStep > 0) {  // Linear step
+      } else if (step > 0) {  // Linear step
 
-        double r = 1.0 / (double)subTickStep;
-        for (j = 0; j < subTickStep; j++ ) {
-          w = (int)Math.rint(x + tickStep * r * j);
-          g.drawLine(w, y0 + tr + off, w, y0 + tr + off + subtickLength);
-          if ((j > 0) && gridVisible && subGridVisible && grid) {
+        for (j = 0; j < linStep.length; j += (10 / step)) {
+          w = x + (int) (length * linStep[j]);
+          g.drawLine(w, y0 + tr - 1, w, y0 + tr + 2);
+          if ((j > 0) && gridVisible && subGridVisible) {
             if (bs != null) g2.setStroke(bs);
             g.drawLine(w, y0, w, y0 + la);
             g2.setStroke(old);
@@ -3172,6 +2386,12 @@ public class JLAxis implements java.io.Serializable {
         }
 
       }
+
+      return length;
+
+    } else {
+
+      return 0;
 
     }
 
@@ -3199,38 +2419,38 @@ public class JLAxis implements java.io.Serializable {
    * @param xOrg X origin for transformation (pixel space)
    * @param yOrg Y origin for transformation (pixel space)
    * @param back Background color
-   * @param oppositeVisible Oposite axis is visible.
-   *
+   * @param dOrientation Default orientation
    */
-  void paintAxis(Graphics g, FontRenderContext frc, int x0, int y0, JLAxis xAxis, int xOrg, int yOrg, Color back,boolean oppositeVisible) {
+  public void paintAxis(Graphics g, FontRenderContext frc, int x0, int y0, JLAxis xAxis, int xOrg, int yOrg, Color back) {
 
-    int la = 0;
+    //Do not draw vertical axis without data
+    if (!isHorizontal() && dataViews.size() == 0) return;
+
+    //Do not paint when too small
+    if (getLength() <= 1) return;
+
+    int i,j,x,y,la = 0;
+    BasicStroke bs = null;
+    Graphics2D g2 = (Graphics2D) g;
+    int tickStep = 0;
     int tr = 0;
     Point p0 = null;
 
-    // Do not paint vertical axis without data
-    if (!isHorizontal() && dataViews.size() == 0) return;
+    Color subgridColor = computeMediumColor(labelColor, back);
 
-    // Do not paint when too small
-    if (getLength() <= 1) {
-      boundRect.setRect(0,0,0,0);
-      return;
-    }
+    g.setFont(labelFont);
 
-    la = xAxis.getLength();
+    // stroke for the grid
 
-    // Do not paint when out of bounds
-    if(la<=0) {
-      boundRect.setRect(0,0,0,0);
-      return;
-    }
+    if (gridVisible) bs = GraphicsUtils.createStrokeForLine(1, gridStyle);
+    la = xAxis.getLength() - 2;
 
     // Update bounding rectangle
 
     switch (dOrientation) {
 
       case VERTICAL_LEFT:
-        boundRect.setRect(x0 + getThickness(), y0, la, csize.height);
+        boundRect.setRect(x0 + csize.width, y0, la, csize.height);
 
         if (orientation == VERTICAL_ORG) {
           p0 = transform(0.0, 1.0, xAxis);
@@ -3278,83 +2498,46 @@ public class JLAxis implements java.io.Serializable {
 
     }
 
-    if(!visible)
-      return;
-
-    paintAxisDirect(g,frc,x0,y0,back,tr,xAxis.getLength());
-    if(drawOpposite && oppositeVisible) {
-      if(orientation==VERTICAL_ORG || orientation == HORIZONTAL_ORG1 || orientation == HORIZONTAL_ORG2)
-        paintAxisOppositeDouble(g,frc,x0,y0,back,tr,xAxis.getLength());
-      else
-        paintAxisOpposite(g,frc,x0,y0,back,tr,xAxis.getLength());
-    }
-
-  }
-
-  /**
-   * Paint this axis.
-   * @param g Graphics context
-   * @param frc Font render context
-   * @param x0 Axis position
-   * @param y0 Axis position
-   * @param back background Color (used to compute subTick color)
-   * @param tr Translation from x0 to axis.
-   * @param la Translation to opposite axis (used by grid).
-   */
-  public void paintAxisDirect(Graphics g, FontRenderContext frc, int x0, int y0,Color back,int tr,int la) {
-
-    int i,x,y,tickOff,subTickOff,labelShift;
-    BasicStroke bs = null;
-    Graphics2D g2 = (Graphics2D) g;
-
-    Color subgridColor = computeMediumColor(labelColor, back);
-    if (gridVisible) bs = GraphicsUtils.createStrokeForLine(1, gridStyle);
-    g.setFont(labelFont);
-
-    tickOff = getTickShift(tickLength);
-    subTickOff = getTickShift(subtickLength);
 
     switch (dOrientation) {
 
       case VERTICAL_LEFT:
 
-        //Draw extra sub ticks (outside labels limit)
-        if (labels.size()>0 && autoLabeling) {
-          LabelInfo lis = labels.get(0);
-          LabelInfo lie = labels.get(labels.size()-1);
-          g.setColor(subgridColor);
-          paintYOutTicks(g, x0 + csize.width, (double)y0 + lis.pos - tickStep, y0, la, bs, tr,subTickOff,true);
-          paintYOutTicks(g, x0 + csize.width, (double)y0 + lie.pos, y0, la, bs, tr,subTickOff,true);
-        }
-
         for (i = 0; i < labels.size(); i++) {
 
           // Draw labels
           g.setColor(labelColor);
-          LabelInfo li = labels.get(i);
+          LabelInfo li = (LabelInfo) labels.get(i);
 
           x = x0 + (csize.width - 4) - li.size.width;
-          y = (int)Math.rint(li.pos) + y0;
-          g.drawString(li.value, x + tr + li.offset.x, y + li.offset.y + li.size.height / 3);
+          y = li.pos + y0;
+          g.drawString(li.value, x + tr, y + li.size.height / 3);
+
+          //Draw tick
+          g.drawLine(x0 + tr + (csize.width - 2), y, x0 + tr + (csize.width + 3), y);
 
           //Draw the grid
           if (gridVisible) {
             Stroke old = g2.getStroke();
             if (bs != null) g2.setStroke(bs);
-            g.drawLine(x0 + (csize.width + 1), y, x0 + (csize.width + 1) + la, y);
+            g.drawLine(x0 + (csize.width + 2), y, x0 + (csize.width + 2) + la, y);
             g2.setStroke(old);
           }
 
           //Draw sub tick
-          if(autoLabeling) {
-            g.setColor(subgridColor);
-            paintYTicks(g, i, x0 + csize.width,li.pos + (double)y0, la, bs, tr,subTickOff,true);
-          }
+          g.setColor(subgridColor);
+          int ts = paintYSubTicks(g, i, x0 + csize.width, y, -li.pos, la, bs, tr);
+          if (ts != 0 && tickStep == 0) tickStep = ts;
 
-          //Draw tick
-          g.setColor(labelColor);
-          g.drawLine(x0 + tr + csize.width + tickOff, y, x0 + tr + csize.width + tickOff + tickLength, y);
+        }
 
+        //Draw extra sub ticks (outside labels limit)
+        if (tickStep != 0) {
+          LabelInfo lis = (LabelInfo) labels.get(0);
+          LabelInfo lie = (LabelInfo) labels.get(labels.size() - 1);
+
+          paintExtraYSubTicks(g, x0 + csize.width, y0 + lis.pos - tickStep, tickStep, y0, la, bs, lis.subtick_step, tr);
+          paintExtraYSubTicks(g, x0 + csize.width, y0 + lie.pos, tickStep, y0, la, bs, lis.subtick_step, tr);
         }
 
         // Draw Axe
@@ -3362,52 +2545,47 @@ public class JLAxis implements java.io.Serializable {
         g.drawLine(x0 + tr + csize.width, y0, x0 + tr + csize.width, y0 + csize.height);
 
         if (name != null) {
-          // Draw vertical label
-          g2.rotate(-Math.PI/2.0);
           Rectangle2D bounds = labelFont.getStringBounds(name, frc);
-          int fontAscent = (int)(labelFont.getLineMetrics("0",frc).getAscent()+0.5f);
-          g.drawString(name,- y0 - (csize.height + (int)(bounds.getWidth()))/2,x0 + fontAscent - 2);
-          g2.rotate(Math.PI/2.0);
+          g.drawString(name, (x0 + tr + csize.width) - (int) bounds.getWidth() / 2, y0 - (int) (bounds.getHeight() / 2) - 2);
         }
         break;
 
       case VERTICAL_RIGHT:
 
-        //Draw extra sub ticks (outside labels limit)
-        if (labels.size()>0 && autoLabeling) {
-          LabelInfo lis = labels.get(0);
-          LabelInfo lie = labels.get(labels.size()-1);
-          g.setColor(subgridColor);
-          paintYOutTicks(g, x0, (double)y0 + lis.pos - tickStep, y0, -la, bs, tr,subTickOff,true);
-          paintYOutTicks(g, x0, (double)y0 + lie.pos, y0, -la, bs, tr,subTickOff,true);
-        }
-
         for (i = 0; i < labels.size(); i++) {
 
           // Draw labels
           g.setColor(labelColor);
-          LabelInfo li = labels.get(i);
+          LabelInfo li = (LabelInfo) labels.get(i);
 
-          y = (int)Math.rint(li.pos) + y0;
-          g.drawString(li.value, x0 + tr + li.offset.x + 6, y + li.offset.y + li.size.height / 3);
+          y = li.pos + y0;
+          g.drawString(li.value, x0 + tr + 6, y + li.size.height / 3);
+
+          //Draw tick
+          g.drawLine(x0 + tr - 2, y, x0 + tr + 2, y);
 
           //Draw the grid
           if (gridVisible) {
             Stroke old = g2.getStroke();
             if (bs != null) g2.setStroke(bs);
-            g.drawLine(x0, y, x0- la, y);
+            g.drawLine(x0 - 2, y, x0 - 2 - la, y);
             g2.setStroke(old);
           }
 
           //Draw sub tick
-          if(autoLabeling) {
-            g.setColor(subgridColor);
-            paintYTicks(g, i, x0, li.pos + (double)y0, -la, bs, tr,subTickOff,true);
-          }
+          g.setColor(subgridColor);
+          int ts = paintYSubTicks(g, i, x0, y, -li.pos, -la, bs, tr);
+          if (ts != 0 && tickStep == 0) tickStep = ts;
 
-          //Draw tick
-          g.setColor(labelColor);
-          g.drawLine(x0 + tr + tickOff , y, x0 + tr + tickOff + tickLength, y);
+        }
+
+        //Draw extra sub ticks (outside labels limit)
+        if (tickStep != 0) {
+          LabelInfo lis = (LabelInfo) labels.get(0);
+          LabelInfo lie = (LabelInfo) labels.get(labels.size() - 1);
+
+          paintExtraYSubTicks(g, x0, y0 + lis.pos - tickStep, tickStep, y0, -la, bs, lis.subtick_step, tr);
+          paintExtraYSubTicks(g, x0, y0 + lie.pos, tickStep, y0, -la, bs, lis.subtick_step, tr);
         }
 
         // Draw Axe
@@ -3415,71 +2593,53 @@ public class JLAxis implements java.io.Serializable {
         g.drawLine(x0 + tr, y0, x0 + tr, y0 + csize.height);
 
         if (name != null) {
-          // Draw vertical label
-          g2.rotate(-Math.PI/2.0);
           Rectangle2D bounds = labelFont.getStringBounds(name, frc);
-          g.drawString(name,- y0 - (csize.height + (int)(bounds.getWidth()))/2, x0 + tr + csize.width - 2);
-          g2.rotate(Math.PI/2.0);
+          g.drawString(name, x0 + tr - (int) bounds.getWidth() / 2, y0 - (int) (bounds.getHeight() / 2) - 2);
         }
 
         break;
 
       case HORIZONTAL_UP:
       case HORIZONTAL_DOWN:
-
-        if(orientation==HORIZONTAL_UP) {
-          tr = -la;
-          labelShift = 1;
-        } else {
-          if(orientation==HORIZONTAL_ORG1 || orientation==HORIZONTAL_ORG2)
-            labelShift = 1;
-          else
-            labelShift = 2;
-        }
-
-        //Draw extra sub ticks (outside labels limit)
-        if (labels.size()>0 && autoLabeling) {
-          LabelInfo lis = labels.get(0);
-          LabelInfo lie = labels.get(labels.size()-1);
-          g.setColor(subgridColor);
-          paintXOutTicks(g, y0, (double)x0 + lis.pos - tickStep,  x0, -la, bs, tr,subTickOff,true);
-          paintXOutTicks(g, y0, (double)x0 + lie.pos,  x0, -la, bs, tr,subTickOff,true);
-        }
+      case HORIZONTAL_ORG1:
+      case HORIZONTAL_ORG2:
 
         for (i = 0; i < labels.size(); i++) {
 
           // Draw labels
           g.setColor(labelColor);
-          LabelInfo li = labels.get(i);
+          LabelInfo li = (LabelInfo) labels.get(i);
 
-          x = (int)Math.rint(li.pos)+x0;
+          x = li.pos + x0;
           y = y0;
-          if (orientation==HORIZONTAL_UP) {
-            g.drawString(li.value, x + li.offset.x - li.size.width / 2, y + tr - 2);
-          }
-          else {
-            g.drawString(li.value, x + li.offset.x - li.size.width / 2, y + tr + li.offset.y + li.size.height + 2);
-          }
+          if (li.isVisible)
+            g.drawString(li.value, x - li.size.width / 2, y + tr + li.size.height + 2);
 
-          //Draw sub tick
-          if(autoLabeling) {
-            g.setColor(subgridColor);
-            paintXTicks(g, i, y, li.pos+(double)x0, -la, bs, tr,subTickOff,true);
-          }
+          //Draw tick
+          g.drawLine(x, y0 + tr - 2, x, y0 + tr + 3);
 
           //Draw the grid
-          g.setColor(labelColor);
           if (gridVisible) {
             Stroke old = g2.getStroke();
             if (bs != null) g2.setStroke(bs);
-            g.drawLine(x, y0, x, y0 - la);
+            g.drawLine(x, y0 - 2, x, y0 - 2 - la);
             g2.setStroke(old);
           }
 
-          //Draw tick
-          g.setColor(labelColor);
-          g.drawLine(x, y0 + tr + tickOff, x, y0 + tr + tickOff + tickLength);
+          //Draw sub tick
+          g.setColor(subgridColor);
+          int ts = paintXSubTicks(g, i, y, x, -li.pos, -la, bs, tr);
+          if (ts != 0 && tickStep == 0) tickStep = ts;
 
+        }
+
+        //Draw extra sub ticks (outside labels limit)
+        if (tickStep != 0) {
+          LabelInfo lis = (LabelInfo) labels.get(0);
+          LabelInfo lie = (LabelInfo) labels.get(labels.size() - 1);
+
+          paintExtraXSubTicks(g, y0, x0 + lis.pos - tickStep, tickStep, x0, -la, bs, lis.subtick_step, tr);
+          paintExtraXSubTicks(g, y0, x0 + lie.pos, tickStep, x0, -la, bs, lis.subtick_step, tr);
         }
 
         // Draw Axe
@@ -3488,9 +2648,8 @@ public class JLAxis implements java.io.Serializable {
 
         if (name != null) {
           Rectangle2D bounds = labelFont.getStringBounds(name, frc);
-
           g.drawString(name, x0 + ((csize.width) - (int) bounds.getWidth()) / 2,
-            y0 + labelShift * (int) bounds.getHeight());
+            y0 + 2 * (int) bounds.getHeight());
         }
 
         break;
@@ -3499,175 +2658,6 @@ public class JLAxis implements java.io.Serializable {
 
   }
 
-  public void paintAxisOpposite(Graphics g, FontRenderContext frc, int x0, int y0,Color back,int tr,int la) {
-
-    int i,x,y,tickOff,subTickOff;
-    BasicStroke bs = null;
-
-    Color subgridColor = computeMediumColor(labelColor, back);
-
-    tickOff = getTickShiftOpposite(tickLength);
-    subTickOff = getTickShiftOpposite(subtickLength);
-
-    switch (dOrientation) {
-
-      case VERTICAL_RIGHT:
-
-        int nX0 = x0 - la - csize.width;
-
-        //Draw extra sub ticks (outside labels limit)
-        if (labels.size()>0 && autoLabeling) {
-          LabelInfo lis = labels.get(0);
-          LabelInfo lie = labels.get(labels.size()-1);
-          g.setColor(subgridColor);
-          paintYOutTicks(g, nX0 + csize.width, (double)y0 + lis.pos - tickStep, y0, la, bs, tr,subTickOff,false);
-          paintYOutTicks(g, nX0 + csize.width, (double)y0 + lie.pos, y0, la, bs, tr,subTickOff,false);
-        }
-
-        for (i = 0; i < labels.size(); i++) {
-
-          LabelInfo li = labels.get(i);
-          x = nX0 + (csize.width - 4) - li.size.width;
-          y = (int)Math.rint(li.pos) + y0;
-
-          //Draw sub tick
-          if(autoLabeling) {
-            g.setColor(subgridColor);
-            paintYTicks(g, i, nX0 + csize.width, li.pos + (double)y0, la, bs, tr,subTickOff,false);
-          }
-
-          //Draw tick
-          g.setColor(labelColor);
-          g.drawLine(nX0 + tr + csize.width + tickOff, y, nX0 + tr + csize.width + tickOff + tickLength, y);
-
-        }
-
-        // Draw Axe
-        g.setColor(labelColor);
-        g.drawLine(nX0 + tr + csize.width, y0, nX0 + tr + csize.width, y0 + csize.height);
-        break;
-
-      case VERTICAL_LEFT:
-
-        x = x0 + la + csize.width;
-
-        //Draw extra sub ticks (outside labels limit)
-        if (labels.size()>0 && autoLabeling) {
-          LabelInfo lis = labels.get(0);
-          LabelInfo lie = labels.get(labels.size()-1);
-          g.setColor(subgridColor);
-          paintYOutTicks(g, x, (double)y0 + lis.pos - tickStep, y0, -la, bs, tr,subTickOff,false);
-          paintYOutTicks(g, x, (double)y0 + lie.pos, y0, -la, bs, tr,subTickOff,false);
-        }
-
-        for (i = 0; i < labels.size(); i++) {
-
-          LabelInfo li = labels.get(i);
-          y = (int)Math.rint(li.pos) + y0;
-
-          //Draw sub tick
-          if(autoLabeling) {
-            g.setColor(subgridColor);
-            paintYTicks(g, i, x, li.pos + (double)y0, -la, bs, tr,subTickOff,false);
-          }
-
-          //Draw tick
-          g.setColor(labelColor);
-          g.drawLine(x + tr + tickOff , y, x + tr + tickOff + tickLength, y);
-        }
-
-        // Draw Axe
-        g.setColor(labelColor);
-        g.drawLine(x + tr, y0, x + tr, y0 + csize.height);
-        break;
-
-      case HORIZONTAL_UP:
-      case HORIZONTAL_DOWN:
-
-        if(orientation==HORIZONTAL_DOWN)
-          tr = -la;
-
-        //Draw extra sub ticks (outside labels limit)
-        if (labels.size()>0 && autoLabeling) {
-          LabelInfo lis = labels.get(0);
-          LabelInfo lie = labels.get(labels.size()-1);
-          g.setColor(subgridColor);
-          paintXOutTicks(g, y0, (double)x0 + lis.pos - tickStep, x0, -la, bs, tr,subTickOff,false);
-          paintXOutTicks(g, y0, (double)x0 + lie.pos, x0, -la, bs, tr,subTickOff,false);
-        }
-
-        for (i = 0; i < labels.size(); i++) {
-
-          LabelInfo li = labels.get(i);
-          x = (int)Math.rint(li.pos) + x0;
-          y = y0;
-
-          //Draw sub tick
-          if(autoLabeling) {
-            g.setColor(subgridColor);
-            paintXTicks(g, i, y, li.pos + (double)x0, -la, bs, tr,subTickOff,false);
-          }
-
-          //Draw tick
-          g.setColor(labelColor);
-          g.drawLine(x, y0 + tr + tickOff, x, y0 + tr + tickOff + tickLength);
-
-        }
-
-        // Draw Axe
-        g.setColor(labelColor);
-        g.drawLine(x0, y0 + tr, x0 + csize.width, y0 + tr);
-        break;
-
-    }
-
-  }
-
-  public void paintAxisOppositeDouble(Graphics g, FontRenderContext frc, int x0, int y0,Color back,int tr,int la) {
-
-    int nX0;
-
-    switch (dOrientation) {
-
-      case VERTICAL_RIGHT:
-
-        nX0 = x0 - la;
-
-        // Draw Axe
-        g.setColor(labelColor);
-        g.drawLine(nX0, y0, nX0 , y0 + csize.height);
-
-        // Draw Axe
-        g.drawLine(nX0 + la , y0, nX0 + la, y0 + csize.height);
-        break;
-
-      case VERTICAL_LEFT:
-
-        nX0 = x0 + csize.width;
-
-        // Draw Axe
-        g.setColor(labelColor);
-        g.drawLine(nX0, y0, nX0 , y0 + csize.height);
-
-        // Draw Axe
-        g.drawLine(nX0 + la , y0, nX0 + la, y0 + csize.height);
-
-        break;
-
-      case HORIZONTAL_UP:
-      case HORIZONTAL_DOWN:
-
-        // Draw Axe
-        g.setColor(labelColor);
-        g.drawLine(x0, y0 - la, x0 + csize.width, y0 - la);
-
-        // Draw Axe
-        g.drawLine(x0, y0, x0 + csize.width, y0);
-        break;
-
-    }
-
-  }
 
   /**
    * Apply axis configuration.
@@ -3679,14 +2669,10 @@ public class JLAxis implements java.io.Serializable {
   public void applyConfiguration(String prefix, CfFileReader f) {
 
     Vector p;
-    p = f.getParam(prefix + "visible");
-    if (p != null) setVisible(OFormat.getBoolean(p.get(0).toString()));
     p = f.getParam(prefix + "grid");
     if (p != null) setGridVisible(OFormat.getBoolean(p.get(0).toString()));
     p = f.getParam(prefix + "subgrid");
     if (p != null) setSubGridVisible(OFormat.getBoolean(p.get(0).toString()));
-    p = f.getParam(prefix + "timeannosubtick");
-    if (p != null) setTimeAnnoSubTickInterval(OFormat.getInt(p.get(0).toString()));
     p = f.getParam(prefix + "grid_style");
     if (p != null) setGridStyle(OFormat.getInt(p.get(0).toString()));
     p = f.getParam(prefix + "min");
@@ -3711,10 +2697,6 @@ public class JLAxis implements java.io.Serializable {
     if (p != null) setAxisColor(OFormat.getColor(p));
     p = f.getParam(prefix + "label_font");
     if (p != null) setFont(OFormat.getFont(p));
-    p = f.getParam(prefix + "fit_display_duration");
-    if (p != null) this.setFitXAxisToDisplayDuration(OFormat.getBoolean(p.get(0).toString()));
-    p = f.getParam(prefix + "percentscrollback");
-    if (p != null) this.setPercentScrollback(OFormat.getDouble(p.get(0).toString()));
 
   }
 
@@ -3731,10 +2713,8 @@ public class JLAxis implements java.io.Serializable {
 
     String to_write = "";
 
-    to_write += prefix + "visible:" + isVisible() + "\n";
     to_write += prefix + "grid:" + isGridVisible() + "\n";
     to_write += prefix + "subgrid:" + isSubGridVisible() + "\n";
-    to_write += prefix + "timeannosubtick:" + getTimeAnnoSubTickInterval() + "\n";
     to_write += prefix + "grid_style:" + getGridStyle() + "\n";
     to_write += prefix + "min:" + getMinimum() + "\n";
     to_write += prefix + "max:" + getMaximum() + "\n";
@@ -3744,44 +2724,8 @@ public class JLAxis implements java.io.Serializable {
     to_write += prefix + "title:\'" + getName() + "\'\n";
     to_write += prefix + "color:" + OFormat.color(getAxisColor()) + "\n";
     to_write += prefix + "label_font:" + OFormat.font(getFont()) + "\n";
-    to_write += prefix + "fit_display_duration:" + isFitXAxisToDisplayDuration() + "\n";
-    to_write += prefix + "percentscrollback:" + getPercentScrollback() + "\n";
 
     return to_write;
-  }
-
-  /**
-   * Allaws user to know if the 0 value will always be visible in case of auto scale
-   * @return a boolean value
-   */
-  public boolean isZeroAlwaysVisible ()
-  {
-    return zeroAlwaysVisible;
-  }
-
-  /**
-   * Sets if 0 must always be visible in case of auto scale or not
-   * @param zeroAlwaysVisible a boolean value. True for always visible, false otherwise.
-   */
-  public void setZeroAlwaysVisible (boolean zeroAlwaysVisible)
-  {
-    this.zeroAlwaysVisible = zeroAlwaysVisible;
-  }
-
-  public String getDateFormat ()
-  {
-    return dateFormat;
-  }
-
-  /**
-   * Sets date format chen chosen label format is DATE_FORMAT
-   * @param dateFormat
-   * @see #US_DATE_FORMAT
-   * @see #FR_DATE_FORMAT
-   */
-  public void setDateFormat (String dateFormat)
-  {
-    this.dateFormat = dateFormat;
   }
 
 }

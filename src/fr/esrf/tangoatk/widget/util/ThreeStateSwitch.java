@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util;
 
 import javax.swing.*;
@@ -29,7 +7,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.awt.font.FontRenderContext;
+import java.awt.image.BufferedImage;
+import java.util.EventListener;
 
 /* ThreeStateSwitch: A switch that can show 3 differents states associated
  * with 3 icons. By default the switch has 3 icons, one
@@ -55,6 +36,9 @@ public class ThreeStateSwitch extends JComponent implements MouseListener {
   Font titleFont;
   EventListenerList listenerList;  // list of ActionListener
 
+
+  static BufferedImage img = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
+
   /**
    * Construct a ThreeStateSwitch with no title and default icons.
    */
@@ -77,7 +61,7 @@ public class ThreeStateSwitch extends JComponent implements MouseListener {
 
   /**
    * Sets the title off this components
-   * @param s Title to display or null
+   * @param title Title to display or null
    */
   public void setTitle(String s) {
     title = s;
@@ -149,14 +133,14 @@ public class ThreeStateSwitch extends JComponent implements MouseListener {
    *  @param l Listener to add
    */
   public void addActionListener(ActionListener l) {
-    listenerList.add(ActionListener.class, l);
+    listenerList.add(ActionListener.class, (EventListener) l);
   }
 
   /** Removes the specified action listener 
    *  @param l Listener to remove
    */
   public void removActionListener(ActionListener l) {
-    listenerList.remove(ActionListener.class, l);
+    listenerList.remove(ActionListener.class, (EventListener) l);
   }
 
 
@@ -266,10 +250,16 @@ public class ThreeStateSwitch extends JComponent implements MouseListener {
       return;
     }
 
-    Dimension d = ATKGraphicsUtils.measureString(title,titleFont);
-    d.width += 6;
-    d.height += 4;
-    titleSize = d;
+    Graphics g = img.getGraphics();
+    g.setFont(titleFont);
+    Graphics2D g2 = (Graphics2D) g;
+    g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+      RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
+      RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+    FontRenderContext frc = g2.getFontRenderContext();
+    Rectangle2D bounds = titleFont.getStringBounds(title, frc);
+    titleSize = new Dimension((int) Math.ceil(bounds.getWidth()) + 6, (int) Math.ceil(bounds.getHeight()) + 4);
 
   }
 

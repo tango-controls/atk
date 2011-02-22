@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * Splash2.java
  *
  * Created on February 28, 2002, 10:37 AM
@@ -30,153 +8,145 @@ package fr.esrf.tangoatk.widget.util;
 
 import javax.swing.*;
 import java.awt.*;
-
+import java.awt.event.*;
+import java.awt.image.*;
 
 public class Splash extends JWindow {
 
-  JFileChooser f;
-
-  private SplashPanel splashPanel;
-
-  /** Creates and displays an ATK splash panel using the default ATK splash image. */
+  /** Creates new form Splash */
   public Splash() {
-    initComponents(null,null,null);
-  }
 
-  /**
-   * Creates and displays an ATK splash panel using the given image.
-   * @param splashImage Splash image
-   */
-  public Splash(ImageIcon splashImage) {
-    initComponents(splashImage,null,null);
-  }
+    getContentPane().setLayout(new GridLayout(1, 1));
+    setBackground(Color.black);
 
-  /**
-   * Creates and displays an ATK splash panel using the given image and text color.
-   * The textColor param does not affect the ProgressBar.
-   * @param splashImage Splash image
-   * @param textColor Text color
-   */
-  public Splash(ImageIcon splashImage,Color textColor) {
-    initComponents(splashImage,textColor,null);
-  }
+    ImageIcon img = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/util/esrf.gif"));
+    imgSize = new Dimension(img.getIconWidth(), img.getIconHeight());
 
-  /**
-   * Creates and displays an ATK splash panel using the given image ,text color
-   * and JSmoothProgressBar.
-   * @param splashImage Splash image
-   * @param textColor Text color
-   * @param newBar ProgressBar which will be used by this splah window.
-   */
-  public Splash(ImageIcon splashImage,Color textColor,JSmoothProgressBar newBar) {
-    initComponents(splashImage,textColor,newBar);
-  }
+    // Center the splah window
 
-  private void initComponents(ImageIcon icon,Color textColor,JSmoothProgressBar newBar) {
+    Dimension screenSize =
+        Toolkit.getDefaultToolkit().getScreenSize();
+    setLocation(screenSize.width / 2 - (imgSize.width / 2),
+        screenSize.height / 2 - (imgSize.height / 2));
+    setSize(imgSize);
 
-    setBackground(new Color(100,110,140));
+    icon = new JLabel();
+    icon.setIcon(img);
+    setContentPane(icon);
 
-    splashPanel = new SplashPanel(icon,textColor,newBar);
-
-    setContentPane(splashPanel);
+    splashPanel = new SplashPanel(imgSize);
+    setGlassPane(splashPanel);
     pack();
+    getGlassPane().setVisible(true);
 
-    // Center the splash window
-    Dimension d = splashPanel.getPreferredSize();
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    setBounds((screenSize.width - d.width)/2 , (screenSize.height - d.height)/2,
-              d.width,d.height);
-    setVisible(true);
+    super.setVisible(true);
+
+    // Let it appear
+    try { Thread.sleep(200); }
+    catch (Exception e) {}
+
+    // Force the paint here
+    Graphics g = getGraphics();
+    if( g!=null ) paintAll(g);
+    else System.out.println("Splash::Splash() Warning cannot retrieve graphics object.");
 
   }
 
-  public void setCopyright(String copyright) {
-    splashPanel.setCopyright(copyright);
+
+  // Paint a component in double buffer mode to avoid flickering paint
+  public void panelComponentPaint(JComponent c) {
+    Graphics g = getGraphics();
+    if( g!=null ) {
+      Rectangle  r = c.getBounds();
+      BufferedImage bi=new BufferedImage(r.width, r.height, BufferedImage.TYPE_INT_BGR );
+      Graphics big = bi.getGraphics();
+      big.translate(-r.x, -r.y);
+      paintAll(big);
+      g.drawImage(bi,r.x,r.y,this);
+    }
   }
 
-  public String getCopyright() {
-    return splashPanel.getCopyright();
+  public void setPanelForeground(java.awt.Color color) {
+    setForeground(color);
   }
 
-  public void setMessage(String message) {
-    splashPanel.setMessage(message);
+  public void setAuthor(String s) {
   }
 
-  public String getMessage() {
-    return splashPanel.getMessage();
-  }
-
-  public void setTitle(String title) {
-    splashPanel.setTitle(title);
-  }
-
-  public String getTitle() {
-    return splashPanel.getTitle();
+  public String getAuthor() {
+    return "";
   }
 
   public JSmoothProgressBar getProgressBar() {
-    return splashPanel.getProgress();
+    return splashPanel.progress;
+  }
+
+  public void setVersion(String s) {
+  }
+
+  public String getVersion() {
+    return "";
+  }
+
+  public void setCopyright(String copyright) {
+    splashPanel.copyright.setText(copyright);
+    panelComponentPaint(splashPanel.copyright);
+  }
+
+  public String getCopyright() {
+    return splashPanel.copyright.getText();
+  }
+
+  public void setMessage(String message) {
+    splashPanel.message.setText(message);
+    panelComponentPaint(splashPanel.message);
+  }
+
+  public String getMessage() {
+    return splashPanel.message.getText();
+  }
+
+  public void setTitle(String title) {
+    splashPanel.title.setText(title);
+    // Force the progress bar to be paint
+    panelComponentPaint(splashPanel.title);
+  }
+
+  public String getTitle() {
+    return splashPanel.title.getText();
+  }
+
+  public void initProgress(int i) {
+    splashPanel.progress.setValue(0);
+    splashPanel.progress.setMaximum(i);
   }
 
   public void initProgress() {
-    splashPanel.setProgress(0);
+    splashPanel.progress.setValue(0);
   }
 
   public void setMaxProgress(int i) {
-    splashPanel.getProgress().setMaximum(i);
+    splashPanel.progress.setMaximum(i);
   }
 
   public void progress(int i) {
-    splashPanel.setProgress(i);
+    splashPanel.progress.setValue(i);
+    // Force the progress bar to be paint
+    panelComponentPaint(splashPanel.progress);
   }
 
-
-  // For backward compatibilty (No longer used)
-
-  /** @deprecated */
-  public void initProgress(int maxValue) {
-    splashPanel.getProgress().setMaximum(maxValue);
-    splashPanel.setProgress(maxValue);
+  public void setIndeterminateProgress(boolean b) {
+    splashPanel.progress.setIndeterminate(b);
   }
-  /** @deprecated */
-  public void setIndeterminateProgress(boolean b) {}
-  /** @deprecated */
-  public void setAuthor(String s) {}
-  /** @deprecated */
-  public void setPanelForeground(java.awt.Color color) {}
-  /** @deprecated */
-  public String getAuthor() { return ""; }
-  /** @deprecated */
-  public void setVersion(String s) {}
-  /** @deprecated */
-  public String getVersion() { return ""; }
-
 
   public static void main(String[] args) {
-
-    //JSmoothProgressBar myBar = new JSmoothProgressBar();
-    //myBar.setStringPainted(true);
-    //myBar.setProgressBarColors(Color.GRAY,Color.LIGHT_GRAY,Color.DARK_GRAY);
-    //Splash s = new Splash(new ImageIcon("Z:\\tmp\\esrf.gif"),new Color(255,100,100),myBar);
-    //Splash s = new Splash(new ImageIcon("Z:\\tmp\\shot1.gif"));
-    Splash s = new Splash();
-    s.setTitle("SplashScreen");
-    s.setMessage("This is the free message line");
-    try {
-      Thread.sleep(1000);
-    } catch (InterruptedException e) {}
-    for(int i=0;i<=100;i++) {
-      try {
-        Thread.sleep(100);
-      } catch (InterruptedException e) {}
-      s.progress(i);
-    }
-    try {
-      Thread.sleep(1000);
-    } catch (InterruptedException e) {}
-    System.exit(0);
-
+    new Splash();
   } // end of main ()
 
+  private Dimension imgSize;
+  private SplashPanel splashPanel;
+  private JLabel icon;
+
+  // End of variables declaration//GEN-END:variables
 
 }

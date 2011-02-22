@@ -1,33 +1,8 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util.chart;
 
 //import com.sun.image.codec.jpeg.JPEGCodec;
 //import com.sun.image.codec.jpeg.JPEGImageDecoder;
 
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
@@ -221,17 +196,12 @@ public class GraphicsUtils {
   private static BufferedImage hatchPattern9;
   private static Paint hatchPaint9;
 
-  final static float dashDotPattern[] = {3.0f, 3.0f, 1.0f, 3.0f};
-  final static float dotPattern[] = {1.0f, 3.0f};
-  final static float dashPattern[] = {3.0f};
-  final static float longDashPattern[] = {6.0f};
+  final static float dashDotPattern[] = {5.0f, 3.0f, 2.0f, 3.0f};
+  final static float dotPattern[] = {2.0f, 4.0f};
+  final static float dashPattern[] = {5.0f};
+  final static float longDashPattern[] = {10.0f};
 
   private static boolean inited = false;
-
-  final static Color  fColor = new Color(99, 97, 156);
-  final static Insets zInset = new Insets(0,0,0,0);
-  final static Font   labelFont = new Font("Dialog", Font.PLAIN, 12);
-  final static Font   labelbFont = new Font("Dialog", Font.BOLD, 12);
 
   private static void init() {
 
@@ -364,22 +334,6 @@ public class GraphicsUtils {
 
     }
     return null;
-  }
-
-  public static Border createTitleBorder(String name) {
-    return BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(),
-            name,TitledBorder.LEFT, TitledBorder.DEFAULT_POSITION,
-            GraphicsUtils.labelbFont, GraphicsUtils.fColor);
-  }
-  
-  public static Font getLabelFont()
-  {
-     return labelFont;
-  }
-  
-  public static Font getLabelbFont()
-  {
-     return labelbFont;
   }
 
 }

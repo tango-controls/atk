@@ -1,436 +1,271 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * ErrorPanel.java
+ *
+ * Created on April 25, 2002, 2:47 PM
  */
 
 package fr.esrf.tangoatk.widget.util;
-
-import fr.esrf.tangoatk.core.ISetErrorListener;
-import fr.esrf.tangoatk.core.IErrorListener;
-
-import javax.swing.*;
-import javax.swing.event.TableColumnModelListener;
-import javax.swing.event.TableColumnModelEvent;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.border.TitledBorder;
 import java.awt.event.*;
-import java.awt.*;
-import java.util.Vector;
+import javax.swing.JTable;
+import javax.swing.table.*;
+import java.awt.Component;
+/**
+ *
+ * @author  root
+ */
+public class ErrorPanel extends javax.swing.JPanel implements fr.esrf.tangoatk.core.IErrorListener,
+                                                              fr.esrf.tangoatk.core.ISetErrorListener
+{
+    ErrorAdapter errorAdapter = new ErrorAdapter();
+    /** Creates new form ErrorPanel */
+    int selectedRow;
 
-class ErrorPanel extends JPanel implements IErrorListener,ISetErrorListener {
+    public ErrorPanel() {
+	selectedRow = -1;
+        initComponents();
 
-  private ErrorAdapter errorAdapter = new ErrorAdapter();
+	// this is a really ugly hack!! Please fix this and do it
+	// properly - Erik.
 
-  private JPopupMenu popupMenu;
-  private JMenuItem showItem;
-  private JMenuItem stackItem;
-  private JMenuItem stopItem;
-  private JMenuItem startItem;
-
-  private JPanel filterPanel;
-  private JToggleButton stopButton;
-  private JButton clearButton;
-  private JCheckBox panicBox;
-  private JCheckBox errorBox;
-  private JCheckBox warningBox;
-  private JComboBox sourceCombo;
-  private JComboBox sortCombo;
-
-  private JSplitPane errorSplitPane;
-  private JScrollPane tableView;
-  private JTable errorTable;
-  private JScrollPane errorView;
-  private ErrorTree errorTree;
-
-  private JFrame stackFrame;
-  private JTextArea stackText;
-
-  private int selectedRow;
-  private String selectedSource=null;
-  private boolean sourceComboUpdate=false;
-  private boolean stopped;
-
-  public ErrorPanel() {
-
-    selectedRow = -1;
-    stopped = false;
-    initComponents();
-    errorAdapter.setTimeFormat(new java.text.SimpleDateFormat("dd/MMM HH:mm:ss"));
-    errorAdapter.setErrorPanel(this);
-
-  }
-
-  private void initComponents() {
-
-    setLayout(new BorderLayout());
-
-    // ------------ Contextual menu -----------------------------
-
-    popupMenu = new JPopupMenu();
-    showItem = new JMenuItem();
-    showItem.setText("Show Error");
-    showItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        showItemActionPerformed();
-      }
-    });
-    popupMenu.add(showItem);
-
-    stackItem = new JMenuItem();
-    stackItem.setText("Show Java stack");
-    stackItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        showJavaStackActionPerformed();
-      }
-    });
-    popupMenu.add(stackItem);
-
-    stopItem = new JMenuItem();
-    stopItem.setText("Stop");
-    stopItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        stopItemActionPerformed();
-      }
-    });
-    popupMenu.add(stopItem);
-
-    startItem = new JMenuItem();
-    startItem.setText("Start");
-    startItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        startItemActionPerformed();
-      }
-    });
-    popupMenu.add(startItem);
-
-    // ----------------- Filter panel -----------------------------
-
-    filterPanel = new JPanel();
-    FlowLayout fl = new FlowLayout(FlowLayout.LEFT);
-    filterPanel.setLayout(fl);
-    filterPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Filters",
-                                                    TitledBorder.LEFT, TitledBorder.DEFAULT_POSITION,
-                                                    ATKConstant.labelFont, Color.BLACK));
-
-    stopButton = new JToggleButton();
-    stopButton.setText("Stop");
-    stopButton.setToolTipText("Stops updating");
-    stopButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        stopButtonActionPerformed();
-      }
-    });
-    filterPanel.add(stopButton);
-
-    clearButton = new JButton();
-    clearButton.setText("Clear");
-    clearButton.setToolTipText("Clear errors");
-    clearButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        clearButtonActionPerformed();
-      }
-    });
-    filterPanel.add(clearButton);
-
-    panicBox = new JCheckBox();
-    panicBox.setFont(ATKConstant.labelFont);
-    panicBox.setSelected(true);
-    panicBox.setText("View panic");
-    panicBox.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        panicBoxActionPerformed();
-      }
-    });
-    filterPanel.add(panicBox);
-
-    errorBox = new JCheckBox();
-    errorBox.setFont(ATKConstant.labelFont);
-    errorBox.setSelected(true);
-    errorBox.setText("View error");
-    errorBox.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        errorBoxActionPerformed();
-      }
-    });
-    filterPanel.add(errorBox);
-
-    warningBox = new JCheckBox();
-    warningBox.setFont(ATKConstant.labelFont);
-    warningBox.setSelected(true);
-    warningBox.setText("View warning");
-    warningBox.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        warningBoxActionPerformed();
-      }
-    });
-    filterPanel.add(warningBox);
-
-    JLabel l = new JLabel("  View source");
-    l.setFont(ATKConstant.labelFont);
-    filterPanel.add(l);
-
-    sourceCombo = new JComboBox();
-    sourceCombo.setFont(ATKConstant.labelFont);
-    sourceCombo.addItem("All");
-    filterPanel.add(sourceCombo);
-    sourceCombo.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        sourceComboActionPerformed();
-      }
-    });
-
-    l = new JLabel("  Sort by");
-    l.setFont(ATKConstant.labelFont);
-    filterPanel.add(l);
-
-    sortCombo = new JComboBox();
-    sortCombo.setFont(ATKConstant.labelFont);
-    sortCombo.addItem("No sort");
-    sortCombo.addItem("Time");
-    sortCombo.addItem("Severity");
-    sortCombo.addItem("Source");
-    sortCombo.addItem("Description");
-    filterPanel.add(sortCombo);
-    sortCombo.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        sortComboActionPerformed();
-      }
-    });
-
-    add(filterPanel,BorderLayout.SOUTH);
-
-    // ----------------- Error panel -----------------------------
-
-    errorTable = new JTable(errorAdapter);
-    errorTable.setPreferredScrollableViewportSize(new java.awt.Dimension(700, 300));
-    errorTable.addMouseListener(new java.awt.event.MouseAdapter() {
-      public void mousePressed(java.awt.event.MouseEvent evt) {
-        errorTableMousePressed(evt);
-      }
-      public void mouseReleased(java.awt.event.MouseEvent evt) {
-        errorTableMouseReleased(evt);
-      }
-    });
-    errorTable.getColumnModel().addColumnModelListener(
-        new TableColumnModelListener() {
-          public void columnAdded(TableColumnModelEvent e) {}
-          public void columnRemoved(TableColumnModelEvent e) {}
-          public void columnMoved(TableColumnModelEvent e) {
-            // Hack to get the mouse click on column label
-            // TODO: Do it properly...
-            errorTableColumnClicked(e.getFromIndex());
-          }
-          public void columnMarginChanged(ChangeEvent e) {}
-          public void columnSelectionChanged(ListSelectionEvent e) {}
-        }
-    );
-    tableView = new JScrollPane(errorTable);
-    tableView.setVerticalScrollBarPolicy(javax.swing.JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-
-    errorTree = new ErrorTree();
-    errorView = new JScrollPane(errorTree);
-    errorView.setPreferredSize(new java.awt.Dimension(230, 300));
-
-    errorSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-    errorSplitPane.add(tableView);
-    errorSplitPane.add(errorView);
-    errorSplitPane.setDividerSize(4);
-
-    add(errorSplitPane,BorderLayout.CENTER);
-
-    // ---------------------------- Stack frame --------------------------------
-
-    stackText = new JTextArea();
-    JScrollPane jp = new JScrollPane(stackText);
-    stackFrame = new JFrame("Java Stack View");
-    stackFrame.setContentPane(jp);
-
-    sizeColumns();
-  }
-
-  private void sortComboActionPerformed() {
-
-    int s = sortCombo.getSelectedIndex();
-    errorAdapter.setSortedColumn(s-1);
-
-  }
-
-  private void sourceComboActionPerformed() {
-
-    if (!sourceComboUpdate) {
-
-      int s = sourceCombo.getSelectedIndex();
-      if (s >= 1) {
-        selectedSource = sourceCombo.getSelectedItem().toString();
-      } else {
-        selectedSource = null;
-      }
-
-      errorAdapter.setSourceFilter(selectedSource);
-
+ 	errorTable.getColumnModel().getColumn(ErrorAdapter.TIME).setMaxWidth(70);
+ 	errorTable.getColumnModel().getColumn(ErrorAdapter.SEVERITY).setMaxWidth(50);
+ 	errorTable.getColumnModel().getColumn(ErrorAdapter.SOURCE).setMaxWidth(250);
     }
 
+
+    /** This method is called from within the constructor to
+     * initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is
+     * always regenerated by the Form Editor.
+     */
+    private void initComponents() {//GEN-BEGIN:initComponents
+          jPopupMenu1 = new javax.swing.JPopupMenu();
+          showItem = new javax.swing.JMenuItem();
+          stopItem = new javax.swing.JMenuItem();
+          startItem = new javax.swing.JMenuItem();
+          jSplitPane1 = new javax.swing.JSplitPane();
+          jScrollPane2 = new javax.swing.JScrollPane();
+          errorTree = new fr.esrf.tangoatk.widget.util.ErrorTree();
+          jScrollPane3 = new javax.swing.JScrollPane();
+          errorTable = new javax.swing.JTable();
+          jToolBar5 = new javax.swing.JToolBar();
+          stopButton = new javax.swing.JToggleButton();
+          panicBox = new javax.swing.JCheckBox();
+          errorBox = new javax.swing.JCheckBox();
+          warningBox = new javax.swing.JCheckBox();
+          
+          showItem.setText("Show Error");
+          showItem.addActionListener(new java.awt.event.ActionListener() {
+              public void actionPerformed(java.awt.event.ActionEvent evt) {
+                  showItemActionPerformed(evt);
+              }
+          });
+          
+          jPopupMenu1.add(showItem);
+          stopItem.setText("Stop");
+          stopItem.addActionListener(new java.awt.event.ActionListener() {
+              public void actionPerformed(java.awt.event.ActionEvent evt) {
+                  stopItemActionPerformed(evt);
+              }
+          });
+          
+          jPopupMenu1.add(stopItem);
+          startItem.setText("Start");
+          startItem.addActionListener(new java.awt.event.ActionListener() {
+              public void actionPerformed(java.awt.event.ActionEvent evt) {
+                  startItemActionPerformed(evt);
+              }
+          });
+          
+          jPopupMenu1.add(startItem);
+          
+            setLayout(new java.awt.GridBagLayout());
+            java.awt.GridBagConstraints gridBagConstraints1;
+            
+            jSplitPane1.setDividerSize(4);
+            jSplitPane1.setResizeWeight(0.7);
+            errorTree.setPreferredSize(new java.awt.Dimension(200, 300));
+            jScrollPane2.setViewportView(errorTree);
+            
+            jSplitPane1.setRightComponent(jScrollPane2);
+          
+          jScrollPane3.setVerticalScrollBarPolicy(javax.swing.JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+            errorTable.setModel(errorAdapter);
+            errorTable.setPreferredScrollableViewportSize(new java.awt.Dimension(600, 300));
+            errorTable.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mousePressed(java.awt.event.MouseEvent evt) {
+                    errorTableMousePressed(evt);
+                }
+                public void mouseReleased(java.awt.event.MouseEvent evt) {
+                    errorTableMouseReleased(evt);
+                }
+            });
+            
+            jScrollPane3.setViewportView(errorTable);
+            
+            jSplitPane1.setLeftComponent(jScrollPane3);
+          
+          gridBagConstraints1 = new java.awt.GridBagConstraints();
+          gridBagConstraints1.gridx = 0;
+          gridBagConstraints1.gridy = 1;
+          gridBagConstraints1.fill = java.awt.GridBagConstraints.BOTH;
+          gridBagConstraints1.weightx = 0.1;
+          gridBagConstraints1.weighty = 0.1;
+          add(jSplitPane1, gridBagConstraints1);
+          
+          stopButton.setText("Stop");
+          stopButton.setToolTipText("Stops updating");
+          stopButton.addActionListener(new java.awt.event.ActionListener() {
+              public void actionPerformed(java.awt.event.ActionEvent evt) {
+                  stopButtonActionPerformed(evt);
+              }
+          });
+          
+          jToolBar5.add(stopButton);
+          
+          panicBox.setSelected(true);
+          panicBox.setText("Panic");
+          panicBox.addActionListener(new java.awt.event.ActionListener() {
+              public void actionPerformed(java.awt.event.ActionEvent evt) {
+                  panicBoxActionPerformed(evt);
+              }
+          });
+          
+          jToolBar5.add(panicBox);
+          
+          errorBox.setSelected(true);
+          errorBox.setText("Error");
+          errorBox.addActionListener(new java.awt.event.ActionListener() {
+              public void actionPerformed(java.awt.event.ActionEvent evt) {
+                  errorBoxActionPerformed(evt);
+              }
+          });
+          
+          jToolBar5.add(errorBox);
+          
+          warningBox.setSelected(true);
+          warningBox.setText("Warning");
+          warningBox.addActionListener(new java.awt.event.ActionListener() {
+              public void actionPerformed(java.awt.event.ActionEvent evt) {
+                  warningBoxActionPerformed(evt);
+              }
+          });
+          
+          jToolBar5.add(warningBox);
+          
+          gridBagConstraints1 = new java.awt.GridBagConstraints();
+        gridBagConstraints1.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints1.weightx = 0.1;
+        add(jToolBar5, gridBagConstraints1);
+        
+    }//GEN-END:initComponents
+
+    private void panicBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_panicBoxActionPerformed
+        // Add your handling code here:
+	errorAdapter.showPanic(panicBox.isSelected());
+    }//GEN-LAST:event_panicBoxActionPerformed
+
+    private void errorBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_errorBoxActionPerformed
+        // Add your handling code here:
+	errorAdapter.showError(errorBox.isSelected());
+    }//GEN-LAST:event_errorBoxActionPerformed
+
+    private void warningBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_warningBoxActionPerformed
+        // Add your handling code here:
+	errorAdapter.showWarning(warningBox.isSelected());
+    }//GEN-LAST:event_warningBoxActionPerformed
+
+
+    private void stopButtonActionPerformed(java.awt.event.ActionEvent evt)
+    {//GEN-FIRST:event_stopButtonActionPerformed
+        // Add your handling code here:
+	
+	stopped = stopButton.getText().equals("Stop");
+	if (stopped)
+	{
+	   stopButton.setText("Resume");
+           stopButton.setToolTipText("Restarts updating");
+	}
+	else
+	{
+	   stopButton.setText("Stop");
+           stopButton.setToolTipText("Stops updating");
+ 	}
+	
+    }//GEN-LAST:event_stopButtonActionPerformed
+
+    private void showItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showItemActionPerformed
+        // Add your handling code here:
+        errorTree.addErrors(errorAdapter.getErrorNumber(selectedRow));
+        selectedRow = -1;
+    }//GEN-LAST:event_showItemActionPerformed
+
+
+    private void stopItemActionPerformed(java.awt.event.ActionEvent evt)
+    {//GEN-FIRST:event_stopItemActionPerformed
+        // Add your handling code here:
+	
+        stopped = true;
+	stopButton.setText("Resume");
+        stopButton.setToolTipText("Restarts updating");
+
+    }//GEN-LAST:event_stopItemActionPerformed
+
+    private void startItemActionPerformed(java.awt.event.ActionEvent evt)
+    {//GEN-FIRST:event_startItemActionPerformed
+        // Add your handling code here:
+	
+        stopped = false;
+	stopButton.setText("Stop");
+        stopButton.setToolTipText("Stops updating");
+	
+    }//GEN-LAST:event_startItemActionPerformed
+
+    private void errorTableMouseClicked(MouseEvent mouseevent) {
+	selectedRow = errorTable.getSelectedRow();
+	if (selectedRow != -1 && mouseevent.isPopupTrigger())
+	    jPopupMenu1.show(mouseevent.getComponent(), mouseevent.getX(),
+			     mouseevent.getY());
   }
 
-  private void panicBoxActionPerformed() {
-    errorAdapter.showPanic(panicBox.isSelected());
-  }
+    private void errorTableMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_errorTableMouseReleased
+        // Add your handling code here:
+	errorTableMouseClicked(evt);
+    }//GEN-LAST:event_errorTableMouseReleased
 
-  private void errorBoxActionPerformed() {
-    errorAdapter.showError(errorBox.isSelected());
-  }
+    private void errorTableMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_errorTableMousePressed
+        // Add your handling code here:
+	errorTableMouseClicked(evt);
+    }//GEN-LAST:event_errorTableMousePressed
 
-  private void warningBoxActionPerformed() {
-    errorAdapter.showWarning(warningBox.isSelected());
-  }
-
-  private void clearButtonActionPerformed() {
-     errorAdapter.clearError();
-  }
-
-  private void stopButtonActionPerformed() {
-
-    stopped = stopButton.getText().equals("Stop");
-    if (stopped) {
-      stopButton.setText("Resume");
-      stopButton.setToolTipText("Restarts updating");
-    } else {
-      stopButton.setText("Stop");
-      stopButton.setToolTipText("Stops updating");
+    public void errorChange(fr.esrf.tangoatk.core.ErrorEvent errorEvent) {
+        if (stopped) return;
+	errorAdapter.addError(errorEvent);
+    }    
+    
+    public void setErrorOccured(fr.esrf.tangoatk.core.ErrorEvent errorEvent)
+    {
+        if (stopped) return;
+	errorAdapter.addError(errorEvent);
     }
 
-  }
+    protected boolean stopped = false;    
 
-  private void showItemActionPerformed() {
-    errorTree.addErrors(errorAdapter.getErrorNumber(selectedRow));
-    selectedRow = -1;
-  }
-
-  private void showJavaStackActionPerformed() {
-
-    Throwable theError = errorAdapter.getErrorAt(selectedRow);
-    StackTraceElement[] st = theError.getStackTrace();
-    StringBuffer str = new StringBuffer();
-    str.append(theError.getClass()+"\n at\n");
-    for(int i=0;i<st.length;i++) {
-      str.append(st[i]);
-      str.append('\n');
-    }
-    stackText.setText(str.toString());
-    ATKGraphicsUtils.centerFrameOnScreen(stackFrame);
-    stackFrame.setVisible(true);
-
-  }
-
-  private void stopItemActionPerformed() {
-
-    stopped = true;
-    stopButton.setText("Resume");
-    stopButton.setToolTipText("Restarts updating");
-
-  }
-
-  private void startItemActionPerformed() {
-
-    stopped = false;
-    stopButton.setText("Stop");
-    stopButton.setToolTipText("Stops updating");
-
-  }
-
-  private void errorTableColumnClicked(int column) {
-    sortCombo.setSelectedIndex(column+1);
-  }
-
-  private void errorTableMouseClicked(MouseEvent mouseevent) {
-    selectedRow = errorTable.getSelectedRow();
-    if (selectedRow != -1 && mouseevent.isPopupTrigger())
-      popupMenu.show(mouseevent.getComponent(), mouseevent.getX(),
-                       mouseevent.getY());
-  }
-
-  private void errorTableMouseReleased(java.awt.event.MouseEvent evt) {
-    errorTableMouseClicked(evt);
-  }
-
-  private void errorTableMousePressed(java.awt.event.MouseEvent evt) {
-    errorTableMouseClicked(evt);
-  }
-
-  public void errorChange(fr.esrf.tangoatk.core.ErrorEvent errorEvent) {
-    if (stopped) return;
-    errorAdapter.addError(errorEvent);
-  }
-
-  public void setErrorOccured(fr.esrf.tangoatk.core.ErrorEvent errorEvent) {
-    if (stopped) return;
-    errorAdapter.addError(errorEvent);
-  }
-  
-  public void setErrorBufferSize (int nbErrors)
-  {
-      errorAdapter.setErrorBufferSize(nbErrors);
-  }
-
-  // Tiggered by the ErrorAdapter when the source list change.
-  public void sourceChange() {
-
-    int idx=-1;
-
-    sourceComboUpdate = true;
-
-    Vector src = errorAdapter.getAllSource();
-    sourceCombo.removeAllItems();
-    sourceCombo.addItem("All");
-    for(int i=0;i<src.size();i++) {
-      if(selectedSource!=null) {
-        if(selectedSource.equalsIgnoreCase((String)src.get(i)))
-          idx=i;
-      }
-      sourceCombo.addItem(src.get(i));
-    }
-
-    // Source not found anymore
-    if(idx==-1) {
-      selectedSource=null;
-      errorAdapter.setSourceFilter(selectedSource);
-    }
-
-    // Reselect source
-    sourceCombo.setSelectedIndex(idx+1);
-
-    sourceComboUpdate = false;
-
-  }
-
-  private void sizeColumns() {
-    errorTable.getColumnModel().getColumn(ErrorAdapter.TIME).setMaxWidth(140);
-    errorTable.getColumnModel().getColumn(ErrorAdapter.TIME).setMinWidth(110);
-    errorTable.getColumnModel().getColumn(ErrorAdapter.SEVERITY).setMaxWidth(60);
-    errorTable.getColumnModel().getColumn(ErrorAdapter.SOURCE).setMinWidth(150);
-    errorTable.getColumnModel().getColumn(ErrorAdapter.DESCRIPTION).setMinWidth(200);
-  }
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPopupMenu jPopupMenu1;
+    private javax.swing.JMenuItem showItem;
+    private javax.swing.JMenuItem stopItem;
+    private javax.swing.JMenuItem startItem;
+    private javax.swing.JSplitPane jSplitPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private fr.esrf.tangoatk.widget.util.ErrorTree errorTree;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JTable errorTable;
+    private javax.swing.JToolBar jToolBar5;
+    private javax.swing.JToggleButton stopButton;
+    private javax.swing.JCheckBox panicBox;
+    private javax.swing.JCheckBox errorBox;
+    private javax.swing.JCheckBox warningBox;
+    // End of variables declaration//GEN-END:variables
 
 }

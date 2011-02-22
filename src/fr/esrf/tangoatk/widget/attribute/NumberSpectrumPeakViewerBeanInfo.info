@@ -1,0 +1,8 @@
+name = NumberSpectrumPeakViewer
+package fr.esrf.tangoatk.widget.attribute
+
+properties = spectrumColor, xAxisAutoScale, y1AxisAutoScale
+ICON_COLOR_16x16 = NumberSpectrumPeakViewer.gif
+ICON_MONO_16x16 = NumberSpectrumPeakViewer.gif
+ICON_MONO_32x32 = NumberSpectrumPeakViewer.gif
+ICON_COLOR_32x32 = NumberSpectrumPeakViewer.gif

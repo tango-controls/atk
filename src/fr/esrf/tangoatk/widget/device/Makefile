@@ -1,5 +1,5 @@
-#BEANINFO =	StatusViewerBeanInfo.java
-#		StateViewerBeanInfo.java
+BEANINFO =	StateViewerBeanInfo.java       \
+		StatusViewerBeanInfo.java
 #            DeviceViewerBeanInfo.java \
 
 
@@ -9,11 +9,9 @@ ALL =   $(TARGET)/IDevicePopUp.class \
 	  $(TARGET)/StatusViewer.class      \
 	  $(TARGET)/StateViewer.class       \
 	  $(TARGET)/SimpleStateViewer.class       \
-	  $(TARGET)/DeviceStateButtonViewer.class       \
-      $(TARGET)/DeviceViewer.class \
-      $(TARGET)/SingletonStatusViewer.class \
-      $(TARGET)/Tree.class \
-	$(TARGET)/DeviceStateLightViewer.class \
+        $(TARGET)/DeviceViewer.class \
+        $(TARGET)/SingletonStatusViewer.class \
+        $(TARGET)/Tree.class \
 
 all: tree-stuff devices beaninfo icons
 
@@ -25,6 +23,6 @@ tree-stuff:
 
 manifest: manifest-file
 
-dslv: $(ALL)
-	$(JAVA) fr.esrf.tangoatk.widget.device.DeviceStateLightViewer jlp/test/1
+run:
+	$(JAVA) fr.esrf.tangoatk.widget.device.DeviceViewer
 
