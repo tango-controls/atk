@@ -1,30 +1,6 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.image;
 
 import fr.esrf.tangoatk.widget.util.JGradientViewer;
-
-import java.io.IOException;
 
 /**
  * Monochrome 8bits image format
@@ -32,30 +8,6 @@ import java.io.IOException;
 public class Mono8ImageFormat extends IImageFormat {
 
   public Mono8ImageFormat() {}
-
-  public void setData(byte[] rawData) throws IOException {
-
-    // Get width and height
-    int wh = (rawData[0] & 0xFF);
-    int wl = (rawData[1] & 0xFF);
-    wh = wh << 8;
-    int width = wh | wl;
-
-    int hh = (rawData[2] & 0xFF);
-    int hl = (rawData[3] & 0xFF);
-    hh = hh << 8;
-    int height = hh | hl;
-
-    // Convert data
-    int idx = 4;
-    data = new byte[height][width];
-    for(int j=0;j<height;j++) {
-      for(int i=0;i<width;i++) {
-        data[j][i] = rawData[idx++];
-      }
-    }
-
-  }
 
   public int getWidth() {
     if(getHeight()==0) return 0;
@@ -82,18 +34,17 @@ public class Mono8ImageFormat extends IImageFormat {
 
   }
 
-  public String getValueStr(int x,int y) {
-    return Double.toString(getValue(x,y));
-  }
-
-  public void computeFitting() {
+  public void preComputeBestFit(boolean bestFit, JGradientViewer tool) {
 
     // Scale to 16bit for the colormap
 
     if (!bestFit) {
 
-      tool.getAxis().setMinimum(-bfA0);
-      tool.getAxis().setMaximum(-bfA0 + (1.0/bfA1)*65536.0);
+      bfA0 = 0.0;
+      bfA1 = 256.0;
+      // Scale the gradient
+      tool.getAxis().setMinimum(0.0);
+      tool.getAxis().setMaximum(256.0);
 
     } else {
 

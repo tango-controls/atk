@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          EnumScalar.java
 // Created:       05/02/2007 poncet
 // By:            <poncet@esrf.fr>
@@ -44,123 +22,22 @@ import fr.esrf.TangoApi.events.*;
  * By convention the first label in the list is associated to the value zero and the
  * following labels are associated to the values increasing by 1 each time.
  * 
- * If the attribute property "EnumSetExclusion" is defined, it will be used to
- * exclude from the values authorized for writeAttribute some of the enumerated
- * labels defined in EnumLabels property. EnumSetExclusion is used to restrict
- * the authorized values for set to a subset of values defined in EnumLabels.
  * @author  poncet
  */
 
 public class EnumScalar extends AAttribute implements IEnumScalar
 {
 
-  EnumScalarHelper              enumHelper=null;
-  String                        scalarValue = null;
-  String                        setPointValue = null;
+  EnumScalarHelper      enumHelper=null;
+  String                scalarValue = null;
+  String                setPointValue = null;
   private String[]              enumLabels = null;
-  private String[]              enmuSetExcludeLabels = null;
-  private String[]              enumSetLabels = null;
 
 
 
-  public EnumScalar(String[] enums, String[] setEnumExclusion)
+  public EnumScalar(String[] enums)
   {
       enumLabels=enums;
-      enmuSetExcludeLabels=setEnumExclusion;
-      
-      if (enmuSetExcludeLabels != null)
-         setEnumSetLabels();
-
-      if ( enumSetLabels == null)
-         enumSetLabels = enumLabels;
-/* Debug trace ... 
-      if ( enumSetLabels != null)
-      {
-          for (int i=0; i<enumSetLabels.length; i++)
-	      System.out.println("enumSetLabels["+i+"]="+enumSetLabels[i]);
-      }
-      */
-  }
-  
-  private void setEnumSetLabels()
-  {
-      int    nbSetLabs, indSetLabel;
-      
-      nbSetLabs = enumLabels.length;
-      
-      for (int i=0; i<enmuSetExcludeLabels.length; i++)
-          if (containsEnumLabel(enumLabels, enmuSetExcludeLabels[i]) )
-	      nbSetLabs = nbSetLabs - 1;
-
-      if (nbSetLabs <= 0)
-         return;
-
-      if (nbSetLabs ==  enumLabels.length)
-         return;
-	 
-      enumSetLabels = new String[nbSetLabs];
-      indSetLabel = 0;
-      for (int i=0; i<enumLabels.length; i++)
-          if (!containsEnumLabel(enmuSetExcludeLabels, enumLabels[i]) )
-	  {
-	      enumSetLabels[indSetLabel] = new String(enumLabels[i]);
-	      indSetLabel++;
-	  }
-  }
-  
-  public static boolean containsEnumLabel (String[] labelList, String label)
-  {
-      
-      if (label == null)
-         return false;
-      if (label.length() < 1)
-         return false;
-	 
-      if (labelList == null)
-         return false;
-      if (labelList.length < 1)
-         return false;
-	 
-      for (int i=0; i<labelList.length; i++)
-          if (label.equals(labelList[i]))
-	     return true;
-	     
-      return false;
-  }
-  
-  public static String[] getNonEmptyLabels(String[] labelList)
-  {
-      String[]  copiedList, nonEmptyList;
-      int       copyIndex;
-      
-      if (labelList == null)
-         return null;
-	 
-      if (labelList.length < 1)
-         return null;
-      
-      copiedList = new String[labelList.length];
-      copyIndex = 0;
-      for (int i=0; i<labelList.length; i++)
-      {
-         if (labelList[i] != null)
-	    if (labelList[i].length() > 0)
-	    {
-	       copiedList[copyIndex]=labelList[i];
-	       copyIndex++;
-	    }
-      }
-      
-      if (copyIndex == 0)
-         return null;
-      if (copyIndex == labelList.length)
-         return copiedList;
-	 
-      nonEmptyList = new String[copyIndex];
-      
-      for (int i=0; i<nonEmptyList.length; i++)
-          nonEmptyList[i]=copiedList[i];
-      return nonEmptyList;
   }
 
 
@@ -218,10 +95,7 @@ public class EnumScalar extends AAttribute implements IEnumScalar
       try
       {
 	  setPoint = enumHelper.getEnumScalarSetPoint(readDeviceValueFromNetwork());
-	  if (containsEnumLabel(enumSetLabels, setPoint))
-	     setPointValue = setPoint;
-	  else
-	     setPointValue = null;
+	  setPointValue = setPoint;
       }
       catch (DevFailed e)
       {
@@ -278,7 +152,6 @@ public class EnumScalar extends AAttribute implements IEnumScalar
 	  {
 	      // Read the attribute from device cache (readValueFromNetwork)
 	      att = readValueFromNetwork();
-	      attribute = att;
 	      if (att == null) return;
 	      
 	      // Retreive the read value for the attribute
@@ -286,8 +159,6 @@ public class EnumScalar extends AAttribute implements IEnumScalar
 	      
 	      // Retreive the set point for the attribute
 	      setPointValue = enumHelper.getEnumScalarSetPoint(att);
-	      if (!containsEnumLabel(enumSetLabels, setPointValue))
-		 setPointValue = null;
 
 	      // Fire valueChanged
 	      enumHelper.fireEnumScalarValueChanged(scalarValue, timeStamp);
@@ -340,8 +211,6 @@ public class EnumScalar extends AAttribute implements IEnumScalar
 
 	     // Retreive the set point for the attribute
 	     setPointValue = enumHelper.getEnumScalarSetPoint(attValue);
-	     if (!containsEnumLabel(enumSetLabels, setPointValue))
-		 setPointValue = null;
 
 	     // Fire valueChanged
 	     enumHelper.fireEnumScalarValueChanged(scalarValue, timeStamp);
@@ -389,13 +258,6 @@ public class EnumScalar extends AAttribute implements IEnumScalar
   public String[] getEnumValues()
   {
       return enumLabels;
-  }
-
-  
-  
-  public String[] getSetEnumValues()
-  {
-      return enumSetLabels;
   }
  
          
@@ -464,8 +326,6 @@ public class EnumScalar extends AAttribute implements IEnumScalar
 
 	    // Retreive the set point for the attribute
 	    setPointValue = enumHelper.getEnumScalarSetPoint(da);
-	    if (!containsEnumLabel(enumSetLabels, setPointValue))
-	       setPointValue = null;
 
 	    // Fire valueChanged
 	    enumHelper.fireEnumScalarValueChanged(scalarValue, timeStamp);
@@ -565,8 +425,6 @@ public class EnumScalar extends AAttribute implements IEnumScalar
 
 	    // Retreive the set point for the attribute
 	    setPointValue = enumHelper.getEnumScalarSetPoint(da);
-	    if (!containsEnumLabel(enumSetLabels, setPointValue))
-	       setPointValue = null;
 
 	    // Fire valueChanged
 	    enumHelper.fireEnumScalarValueChanged(scalarValue, timeStamp);

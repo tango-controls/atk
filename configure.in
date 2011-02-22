@@ -40,12 +40,10 @@ TANGOHOME=/segfs/tango/release
 TANGOLIB=$TANGOHOME/java/lib
 TANGO=$TANGOLIB/TangORB.jar
 PRINTF=$ATKLIB/printf.jar
-IMAGEJ=$ATKLIB/ij.jar
 JEP=$ATKLIB/jep.jar:$ATKLIB/jepext.jar
-JOGL=$ATKLIB/jogl.jar:$ATKLIB/gluegen-rt.jar
 JTARGETDIR=$ATKLIB	
 BEANBOX=$JAVA_HOME/beans/beanbox/classes:$JAVA_HOME/beans/infobus.jar:$JAVA_HOME/beans/lib/methodtracer.jar
-CLASSPATH=$TANGO:$PRINTF:$JEP:$IMAGEJ:$JOGL:$ATKLIB:$BEANBOX:.;export CLASSPATH
+CLASSPATH=$TANGO:$PRINTF:$JEP:$ATKLIB:$BEANBOX:.;export CLASSPATH
 
 AC_SUBST(ATKSRC)
 AC_SUBST(TANGOHOME)

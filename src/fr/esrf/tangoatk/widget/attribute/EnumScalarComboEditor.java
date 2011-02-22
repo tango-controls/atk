@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * EnumScalarComboEditor.java
  *
  * Author:Faranguiss Poncet 2007
@@ -42,7 +20,6 @@ import javax.swing.*;
 
 
 import fr.esrf.tangoatk.core.*;
-import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
 
 
 /**
@@ -52,7 +29,7 @@ import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
  * @author  poncet
  */
 public class EnumScalarComboEditor extends JComboBox 
-                                     implements ActionListener, IEnumScalarListener, JDrawable
+                                     implements ActionListener, IEnumScalarListener
 {
 
     private DefaultComboBoxModel     comboModel=null;
@@ -116,7 +93,7 @@ public class EnumScalarComboEditor extends JComboBox
        invalidOpt = "???";
        
        // Update the comboBox model
-       valList = enumModel.getSetEnumValues();
+       valList = enumModel.getEnumValues();
        newOptions = null;
        if (valList != null)
        {
@@ -279,31 +256,6 @@ public class EnumScalarComboEditor extends JComboBox
 	this.setActionCommand("dummy");
     }
 
-  // ------------------------------------------------------
-  // Implementation of JDrawable interface
-  // ------------------------------------------------------
-  public void initForEditing() {
-  }
-
-  public JComponent getComponent() {
-    return this;
-  }
-
-  public String getDescription(String name) {
-    return "";
-  }
-
-  public String[] getExtensionList() {
-    return new String[0];
-  }
-
-  public boolean setExtendedParam(String name,String value,boolean popupErr) {
-    return true;
-  }
-
-  public String getExtendedParam(String name) {
-    return "";
-  }
 
 
     public static void main(String[] args)
@@ -342,7 +294,7 @@ public class EnumScalarComboEditor extends JComboBox
 	 mainFrame.setContentPane(esce);
 	 mainFrame.pack();
 
-	 mainFrame.setVisible(true);
+	 mainFrame.show();
 
 
     } // end of main ()

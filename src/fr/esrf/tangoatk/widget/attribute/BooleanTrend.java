@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * Trend.java Created on May 13, 2002, 4:28 PM
  */
 
@@ -45,7 +23,6 @@ import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
-
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -64,7 +41,6 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-
 import fr.esrf.tangoatk.core.AttributePolledList;
 import fr.esrf.tangoatk.core.ConnectionException;
 import fr.esrf.tangoatk.core.IBooleanScalar;
@@ -75,7 +51,6 @@ import fr.esrf.tangoatk.widget.util.ATKConstant;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.DeviceFinder;
 import fr.esrf.tangoatk.widget.util.IControlee;
-import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
 import fr.esrf.tangoatk.widget.util.chart.CfFileReader;
 import fr.esrf.tangoatk.widget.util.chart.IJLChartActionListener;
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
@@ -131,8 +106,6 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
     protected JMenuItem                                timeMenuI;
     protected JButton                                  cfgButton;
     protected JMenuItem                                cfgMenuI;
-    protected JButton                                  resetButton;
-    protected JMenuItem                                resetMenuI;
     protected JMenuItem                                showtoolMenuI;
     protected JPanel                                   innerPanel;
     protected JLabel                                   dateLabel;
@@ -148,7 +121,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
     protected JMenuItem                                optionMenuItem;
     protected JMenuItem                                attOptionMenuItem;
     // Chart stuff
-    protected BooleanChart                             theGraph;
+    protected BooleanChart                                  theGraph;
     protected String                                   graphTitle          = "";
     protected BooleanConfigPanel                       cfgPanel            = null;
     static protected Point                             framePos            = new Point(
@@ -201,10 +174,6 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
      * Corresponds to the button "Add new attribute"
      */
     public static final String                         config              = "CONFIG";
-    /**
-     * Corresponds to the button "Reset trend"
-     */
-    public static final String                         reset               = "RESET";
     protected int                                      timePrecision       = 0;
     protected final static String[]                    labels              = {"true", "false"};
     protected final static double[]                    labelPositions      = {1, 0};
@@ -269,9 +238,6 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
                 "/fr/esrf/tangoatk/widget/attribute/trend_config.gif" ) ) );
         cfgButton.setToolTipText( "Add new attribute" );
         cfgMenuI = new JMenuItem( "Add new attribute" );
-        resetButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_reset.gif")));
-        resetButton.setToolTipText("Reset trend");
-        resetMenuI = new JMenuItem("Reset trend");
         showtoolMenuI = new JMenuItem( "Hide toolbar" );
         theToolBar.setFloatable( true );
         loadButton.addActionListener( this );
@@ -290,8 +256,6 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
         timeMenuI.addActionListener( this );
         cfgButton.addActionListener( this );
         cfgMenuI.addActionListener( this );
-        resetButton.addActionListener(this);
-        resetMenuI.addActionListener(this);
         showtoolMenuI.addActionListener( this );
         theToolBar.add( loadButton );
         theToolBar.add( saveButton );
@@ -301,7 +265,6 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
         theToolBar.add( stopButton );
         theToolBar.add( timeButton );
         theToolBar.add( cfgButton );
-        theToolBar.add( resetButton );
         buttonMap.put( load, loadButton );
         buttonMap.put( save, saveButton );
         buttonMap.put( option, optionButton );
@@ -310,7 +273,6 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
         buttonMap.put( stop, stopButton );
         buttonMap.put( time, timeButton );
         buttonMap.put( config, cfgButton );
-        buttonMap.put( reset, resetButton );
         toolMenu.add( loadMenuI );
         toolMenu.add( saveMenuI );
         toolMenu.add( optionMenuI );
@@ -319,7 +281,6 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
         toolMenu.add( stopMenuI );
         toolMenu.add( timeMenuI );
         toolMenu.add( cfgMenuI );
-        toolMenu.add( resetMenuI );
         toolMenu.add( showtoolMenuI );
         // Create the graph
         theGraph = new BooleanChart();
@@ -363,52 +324,45 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
         treeMenu.add( optionMenuItem );
         treeMenu.add( attOptionMenuItem );
         addY1MenuItem.addActionListener( new java.awt.event.ActionListener() {
-            public void actionPerformed (java.awt.event.ActionEvent evt) {
-                TreePath[] selPaths = mainTree.getSelectionPaths();
-                for (int i = 0; i < selPaths.length; i++) {
-                    BooleanTrendSelectionNode selNode = 
-                        (BooleanTrendSelectionNode) selPaths[i]
-                        .getLastPathComponent();
-                    if ( selNode.getModel() != null
-                            && selNode.getSelected() != SEL_Y1 ) {
-                        selNode.setSelected( SEL_Y1 );
-                    }
+            public void actionPerformed (java.awt.event.ActionEvent evt)
+            {
+                BooleanTrendSelectionNode selNode = (BooleanTrendSelectionNode) mainTree
+                        .getSelectionPath().getLastPathComponent();
+                IBooleanScalar m = selNode.getModel();
+                if ( m != null )
+                {
+                    selNode.setSelected( SEL_Y1 );
+                    mainTree.repaint();
+                    theGraph.repaint();
                 }
-                mainTree.repaint();
-                theGraph.repaint();
             }
         } );
         addY2MenuItem.addActionListener( new java.awt.event.ActionListener() {
             public void actionPerformed (java.awt.event.ActionEvent evt)
             {
-                TreePath[] selPaths = mainTree.getSelectionPaths();
-                for (int i = 0; i < selPaths.length; i++) {
-                    BooleanTrendSelectionNode selNode = 
-                        (BooleanTrendSelectionNode) selPaths[i]
-                        .getLastPathComponent();
-                    if ( selNode.getModel() != null
-                            && selNode.getSelected() != SEL_Y2 ) {
-                        selNode.setSelected( SEL_Y2 );
-                    }
+                BooleanTrendSelectionNode selNode = (BooleanTrendSelectionNode) mainTree
+                        .getSelectionPath().getLastPathComponent();
+                IBooleanScalar m = selNode.getModel();
+                if ( m != null )
+                {
+                    selNode.setSelected( SEL_Y2 );
+                    mainTree.repaint();
+                    theGraph.repaint();
                 }
-                mainTree.repaint();
-                theGraph.repaint();
             }
         } );
         removeMenuItem.addActionListener( new java.awt.event.ActionListener() {
             public void actionPerformed (java.awt.event.ActionEvent evt)
             {
-                TreePath[] selPaths = mainTree.getSelectionPaths();
-                for (int i = 0; i < selPaths.length; i++) {
-                    BooleanTrendSelectionNode selNode = 
-                        (BooleanTrendSelectionNode) selPaths[i]
-                        .getLastPathComponent();
-                    if ( selNode.getModel() != null ) {
-                        selNode.setSelected( SEL_NONE );
-                    }
+                BooleanTrendSelectionNode selNode = (BooleanTrendSelectionNode) mainTree
+                        .getSelectionPath().getLastPathComponent();
+                IBooleanScalar m = selNode.getModel();
+                if ( m != null )
+                {
+                    selNode.setSelected( SEL_NONE );
+                    mainTree.repaint();
+                    theGraph.repaint();
                 }
-                mainTree.repaint();
-                theGraph.repaint();
             }
         } );
         optionMenuItem.addActionListener( new java.awt.event.ActionListener() {
@@ -505,9 +459,6 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
             boolean b = isButtonBarVisible();
             b = !b;
             setButtonBarVisible( b );
-        }
-        else if (o == resetButton || o == resetMenuI) {
-            resetTrend();
         }
     }
 
@@ -681,15 +632,29 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
         // Create the selection tree
         // -------------------------------------------------------
         rootNode = new BooleanTrendSelectionNode( this );
-        int j;
-        if ( list != null ) {
-            for (i = 0; i < list.size(); i++) {
-                if ( list.get(i) instanceof IBooleanScalar ) {
-                    j = i;
-                    lastAdded = rootNode.addItem( this, (IBooleanScalar) list
-                            .get( j ), defaultColor[j % defaultColor.length] );
+        AttributePolledList aList = null;
+        if ( list != null )
+        {
+            aList = new AttributePolledList();
+            aList.setFilter(booleanFilter);
+            int index = 0;
+            for (i = 0; i < list.size(); i++)
+            {
+                if (list.get(i) instanceof IBooleanScalar)
+                {
+                    lastAdded = rootNode.addItem(
+                            this, 
+                            (IBooleanScalar) list.get( i ),
+                            defaultColor[index % defaultColor.length]
+                    );
+                    aList.add( (IBooleanScalar) list.get( i ) );
+                    index++;
                 }
             }
+            aList.setRefreshInterval(list.getRefreshInterval());
+            aList.setSynchronizedPeriod(true);
+            aList.setTraceUnexpected(true);
+            if (list.isRefresherStarted()) aList.startRefresher();
         }
         BooleanTrendRenderer renderer = new BooleanTrendRenderer();
         mainTreeModel = new DefaultTreeModel( rootNode );
@@ -697,7 +662,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
         mainTree.setCellRenderer( renderer );
         mainTree.setEditable( false );
         mainTree.getSelectionModel().setSelectionMode(
-                TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION );
+                TreeSelectionModel.SINGLE_TREE_SELECTION );
         mainTree.setShowsRootHandles( true );
         mainTree.setRootVisible( true );
         mainTree.setBorder( BorderFactory.createLoweredBevelBorder() );
@@ -707,85 +672,34 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
             {
                 revalidate();
                 int selRow = mainTree.getRowForLocation( e.getX(), e.getY() );
-                TreePath[] selPaths = mainTree.getSelectionPaths();
+                TreePath selPath = mainTree.getPathForLocation( e.getX(), e
+                        .getY() );
                 if ( selRow != -1 )
                 {
                     if ( e.getClickCount() == 1
                             && e.getButton() == MouseEvent.BUTTON3 )
                     {
-                        if ( selPaths != null && selPaths.length > 0 )
+                        if ( selPath != null )
                         {
-                            if ( selPaths.length == 1 ) {
-                                BooleanTrendSelectionNode selNode = (BooleanTrendSelectionNode) selPaths[0]
-                                        .getLastPathComponent();
-                                if ( selNode.getModel() != null ) {
-                                    addY1MenuItem.setEnabled( selNode
-                                            .getSelected() != SEL_Y1 );
-                                    addY2MenuItem.setEnabled( selNode
-                                            .getSelected() != SEL_Y2 );
-                                    removeMenuItem.setEnabled( selNode
-                                            .getSelected() != SEL_NONE );
-                                    treeMenu
-                                            .show( mainTree, e.getX(), e.getY() );
-                                }
-                                else if ( selNode == rootNode ) {
-                                    if ( isButtonBarVisible() ) showtoolMenuI
-                                            .setText( "Hide toolbar" );
-                                    else showtoolMenuI.setText( "Show toolbar" );
-                                    toolMenu
-                                            .show( mainTree, e.getX(), e.getY() );
-                                }
+                            mainTree.setSelectionPath( selPath );
+                            BooleanTrendSelectionNode selNode = (BooleanTrendSelectionNode) selPath
+                                    .getLastPathComponent();
+                            if ( selNode.getModel() != null )
+                            {
+                                addY1MenuItem
+                                        .setEnabled( selNode.getSelected() != SEL_Y1 );
+                                addY2MenuItem
+                                        .setEnabled( selNode.getSelected() != SEL_Y2 );
+                                removeMenuItem.setEnabled( selNode
+                                        .getSelected() != SEL_NONE );
+                                treeMenu.show( mainTree, e.getX(), e.getY() );
                             }
-                            else {
-                                BooleanTrendSelectionNode lastAttributeNode = null;
-                                int attributeCount = 0;
-                                boolean containsRootNode = false;
-                                for (int i = 0; i < selPaths.length; i++) {
-                                    BooleanTrendSelectionNode selNode = 
-                                        (BooleanTrendSelectionNode) selPaths[i]
-                                            .getLastPathComponent();
-                                    if ( selNode.getModel() != null ) {
-                                        attributeCount++;
-                                        lastAttributeNode = selNode;
-                                    }
-                                    else if ( selNode == rootNode ) {
-                                        containsRootNode = true;
-                                    }
-                                }
-                                if ( attributeCount > 0 ) {
-                                    if ( attributeCount == 1 ) {
-                                        addY1MenuItem
-                                                .setEnabled(
-                                                        lastAttributeNode
-                                                        .getSelected() != SEL_Y1
-                                        );
-                                        addY2MenuItem
-                                                .setEnabled(
-                                                        lastAttributeNode
-                                                        .getSelected() != SEL_Y2
-                                        );
-                                        removeMenuItem
-                                                .setEnabled(
-                                                        lastAttributeNode
-                                                        .getSelected() != SEL_NONE
-                                        );
-                                    }
-                                    else {
-                                        addY1MenuItem.setEnabled( true );
-                                        addY2MenuItem.setEnabled( true );
-                                        removeMenuItem.setEnabled( true );
-                                    }
-                                    treeMenu
-                                            .show( mainTree, e.getX(), e.getY() );
-                                    lastAttributeNode = null;
-                                }
-                                else if ( containsRootNode ) {
-                                    if ( isButtonBarVisible() ) showtoolMenuI
-                                            .setText( "Hide toolbar" );
-                                    else showtoolMenuI.setText( "Show toolbar" );
-                                    toolMenu
-                                            .show( mainTree, e.getX(), e.getY() );
-                                }
+                            else if ( selNode == rootNode )
+                            {
+                                if ( isButtonBarVisible() ) showtoolMenuI
+                                        .setText( "Hide toolbar" );
+                                else showtoolMenuI.setText( "Show toolbar" );
+                                toolMenu.show( mainTree, e.getX(), e.getY() );
                             }
                         }
                     }
@@ -793,7 +707,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
             }
         } );
         innerPanel.add( treeView, BorderLayout.WEST );
-        attList = list;
+        attList = aList;
         if ( attList != null ) attList.addRefresherListener( this );
         updateModel();
     }
@@ -910,6 +824,26 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
         theGraph.showOptionDialog();
     }
 
+    /**
+     * <code>getExtension</code> returns the extension of a given file, that
+     * is the part after the last `.' in the filename.
+     * 
+     * @param f
+     *            a <code>File</code> value
+     * @return a <code>String</code> value
+     */
+    private String getExtension (File f)
+    {
+        String ext = null;
+        String s = f.getName();
+        int i = s.lastIndexOf( '.' );
+        if ( i > 0 && i < s.length() - 1 )
+        {
+            ext = s.substring( i + 1 ).toLowerCase();
+        }
+        return ext;
+    }
+
     private void saveButtonActionPerformed ()
     {
         int ok = JOptionPane.YES_OPTION;
@@ -921,7 +855,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
                 {
                     return true;
                 }
-                String extension = MultiExtFileFilter.getExtension( f );
+                String extension = getExtension( f );
                 if ( extension != null && extension.equals( "txt" ) ) return true;
                 return false;
             }
@@ -939,7 +873,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
             File f = chooser.getSelectedFile();
             if ( f != null )
             {
-                if ( MultiExtFileFilter.getExtension( f ) == null )
+                if ( getExtension( f ) == null )
                 {
                     f = new File( f.getAbsolutePath() + ".txt" );
                 }
@@ -958,7 +892,23 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
     {
         int ok = JOptionPane.YES_OPTION;
         JFileChooser chooser = new JFileChooser();
-        chooser.addChoosableFileFilter( new MultiExtFileFilter("Text files", "txt"));
+        chooser.addChoosableFileFilter( new FileFilter() {
+            public boolean accept (File f)
+            {
+                if ( f.isDirectory() )
+                {
+                    return true;
+                }
+                String extension = getExtension( f );
+                if ( extension != null && extension.equals( "txt" ) ) return true;
+                return false;
+            }
+
+            public String getDescription ()
+            {
+                return "text files ";
+            }
+        } );
         if ( lastConfig.length() > 0 ) chooser.setSelectedFile( new File(
                 lastConfig ) );
         int returnVal = chooser.showOpenDialog( parent );
@@ -1664,22 +1614,6 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
     public double getMaxDisplayDuration ()
     {
         return theGraph.getMaxDisplayDuration();
-    }
-
-    public void resetTrend() {
-
-      if( rootNode!=null ) {
-        Vector dv = rootNode.getSelectableItems();
-        BooleanTrendSelectionNode n;
-        for(int i = 0;i < dv.size(); i++) {
-          n = (BooleanTrendSelectionNode)dv.get(i);
-          if (n != null && n.getData() != null) {
-            n.getData().reset();
-          }
-        }
-        theGraph.repaint();
-      }
-
     }
 
     public static void main (String[] args) throws Exception {

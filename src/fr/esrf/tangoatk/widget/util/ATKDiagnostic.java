@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util;
 
 import fr.esrf.tangoatk.core.DeviceFactory;
@@ -27,7 +5,6 @@ import fr.esrf.tangoatk.core.Device;
 import fr.esrf.tangoatk.core.ConnectionException;
 import fr.esrf.tangoatk.core.attribute.AttributeFactory;
 import fr.esrf.tangoatk.core.attribute.AAttribute;
-import fr.esrf.tangoatk.core.attribute.PolledAttributeFactory;
 import fr.esrf.tangoatk.core.command.CommandFactory;
 import fr.esrf.tangoatk.core.command.ACommand;
 import fr.esrf.Tango.DevFailed;
@@ -226,66 +203,6 @@ class AttributeTableModel extends AbstractTableModel {
   }
 
 }
-// -----------------------------------------------------------------
-// Polled Attribute table
-// -----------------------------------------------------------------
-
-class PolledAttributeTableModel extends AbstractTableModel {
-
-  private AAttribute[] allAttributes = new AAttribute[0];
-  private static final String[] colNames = {"Attribute name","Listeners","","Polling count"};
-
-  public PolledAttributeTableModel() {
-    refresh();
-  }
-
-  public void refresh() {
-    allAttributes = PolledAttributeFactory.getPolledInstance().getAttributes();
-  }
-
-  public AAttribute getAttribute(int idx) {
-    return allAttributes[idx];
-  }
-
-  public int getRowCount() {
-    return allAttributes.length;
-  }
-
-  public int getColumnCount() {
-    return colNames.length;
-  }
-
-  public String getColumnName(int columnIndex) {
-    return colNames[columnIndex];
-  }
-
-  public Class getColumnClass(int columnIndex) {
-    if(columnIndex==2)
-      return JButton.class;
-    else
-      return String.class;
-  }
-
-  public boolean isCellEditable(int rowIndex, int columnIndex) {
-    return false;
-  }
-
-  public Object getValueAt(int rowIndex, int columnIndex) {
-    switch(columnIndex) {
-      case 0:
-        return allAttributes[rowIndex].getName();
-      case 1:
-        return Integer.toString(allAttributes[rowIndex].getPropChanges().getListenerCount());
-      case 2:
-        // Details button
-        return "";
-      case 3:
-        return Long.toString(allAttributes[rowIndex].getRefreshCount());
-    }
-    return "";
-  }
-
-}
 
 // -----------------------------------------------------------------
 // Command table
@@ -358,10 +275,6 @@ class DiagPanel extends JFrame implements ActionListener,MouseListener {
   private AttributeTableModel attributeModel;
   private JTextField attributeEvtText;
 
-  // Polled Attribute panel
-  private JTable polledAttributeTable;
-  private PolledAttributeTableModel polledAttributeModel;
-
   // Command panel
   private CommandTableModel commandModel;
 
@@ -411,7 +324,6 @@ class DiagPanel extends JFrame implements ActionListener,MouseListener {
 
     refreshPeriodText = new JTextField();
     refreshPeriodText.setFont(ATKConstant.labelFont);
-    refreshPeriodText.setMargin(new Insets(0,0,0,0));
     refreshPeriodText.setBounds(470,10,80,25);
     refreshPeriodText.addActionListener(this);
     dFacPanel.add(refreshPeriodText);
@@ -434,22 +346,6 @@ class DiagPanel extends JFrame implements ActionListener,MouseListener {
     attributeEvtText.setText(" ");
     attributePanel.add(attributeEvtText,BorderLayout.SOUTH);
     pane.add(attributePanel,"Attribute");
-
-    attributeEvtText = new JTextField();
-    attributeEvtText.setText(" ");
-    attributePanel.add(attributeEvtText,BorderLayout.SOUTH);
-    pane.add(attributePanel,"Attribute");
-
-    JPanel polledAttributePanel = new JPanel(new BorderLayout());
-    polledAttributeModel = new PolledAttributeTableModel();
-    polledAttributeTable = new JTable(polledAttributeModel);
-    polledAttributeTable.setDefaultRenderer(JButton.class,new MyCellRenderer());
-    polledAttributeTable.getColumnModel().getColumn(0).setPreferredWidth(150);
-    polledAttributeTable.getColumnModel().getColumn(2).setMaxWidth(25);
-    polledAttributeTable.addMouseListener(this);
-    JScrollPane polledAttributeView = new JScrollPane(polledAttributeTable);
-    polledAttributePanel.add(polledAttributeView,BorderLayout.CENTER);
-    pane.add(polledAttributePanel,"Polled Attribute");
 
     JPanel commandPanel = new JPanel(new BorderLayout());
     commandModel = new CommandTableModel();
@@ -512,8 +408,6 @@ class DiagPanel extends JFrame implements ActionListener,MouseListener {
       deviceModel.fireTableDataChanged();
       attributeModel.refresh();
       attributeModel.fireTableDataChanged();
-      polledAttributeModel.refresh();
-      polledAttributeModel.fireTableDataChanged();
     } else if(src==refreshPeriodText ) {
       String nPeriod = refreshPeriodText.getText();
       try {
@@ -535,7 +429,6 @@ class DiagPanel extends JFrame implements ActionListener,MouseListener {
   public void mouseClicked(MouseEvent e) {
     Object src = e.getSource();
     if(src == attributeTable) {
-
       int sRow = attributeTable.getSelectedRow();
       int sCol = attributeTable.getSelectedColumn();
       if (sRow != -1) {
@@ -546,18 +439,8 @@ class DiagPanel extends JFrame implements ActionListener,MouseListener {
         AAttribute a = attributeModel.getAttribute(sRow);
         String info = a.getPropChanges().getListenerInfo();
         JOptionPane.showMessageDialog(this,info,"Listeners registered for "+a.getName(),JOptionPane.INFORMATION_MESSAGE);
+
       }
-
-    } else if(src == polledAttributeTable) {
-
-      int sRow = polledAttributeTable.getSelectedRow();
-      int sCol = polledAttributeTable.getSelectedColumn();
-      if(sCol==2) {
-        AAttribute a = polledAttributeModel.getAttribute(sRow);
-        String info = a.getPropChanges().getListenerInfo();
-        JOptionPane.showMessageDialog(this,info,"Listeners registered for "+a.getName(),JOptionPane.INFORMATION_MESSAGE);
-      }
-
     } else if (src == deviceTable ) {
       int sRow = deviceTable.getSelectedRow();
       int sCol = deviceTable.getSelectedColumn();

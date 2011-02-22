@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          Tree.java
 // Created:       2002-09-17 11:53:27, erik
 // By:            <erik@assum.net>
@@ -277,13 +255,13 @@ public class Tree extends JTree {
 	if (family.isFilled()) return;
 	
 	JDialog waitingDialog = new JDialog((Frame)null,"Importing devices on " + family + "...");
-	waitingDialog.setVisible(true);
+	waitingDialog.show();
 	ATKGraphicsUtils.centerDialog(waitingDialog,400,0);
 	
 	propChanges.fireStatusEvent(this, "Importing devices on " + family + "...");
 	family.setFilled(true);
 	List  members = family.getChildren();
-	List<IDevice> devices = new Vector<IDevice> ();
+	List devices = new Vector();
 	DeviceFactory factory = DeviceFactory.getInstance();
 
 	for (int i = 0; i < members.size(); i++) {
@@ -379,7 +357,7 @@ public class Tree extends JTree {
 	tree.setShowEntities(true);
 	frame.setContentPane(tree);
 	frame.pack();
-	frame.setVisible(true);
+	frame.show();
 
     }
 	

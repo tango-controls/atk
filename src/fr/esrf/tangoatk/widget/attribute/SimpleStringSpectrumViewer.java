@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * SimpleStringSpectrumViewer.java
  *
  * Created on December 15, 2003, 2:40 PM
@@ -28,9 +6,11 @@
 
 package fr.esrf.tangoatk.widget.attribute;
 
+import fr.esrf.tangoatk.core.Device;
 import fr.esrf.tangoatk.core.*;
-import fr.esrf.tangoatk.widget.util.ATKConstant;
+import fr.esrf.tangoatk.widget.util.UIManagerHelper;
 
+import java.awt.*;
 import javax.swing.*;
 
 /**
@@ -43,7 +23,6 @@ public class SimpleStringSpectrumViewer extends javax.swing.JPanel
 {
      private javax.swing.JScrollPane    jScrollPane1;
      private javax.swing.JTextArea      strSpectText;
-     private boolean                    viewEnd = false;
      
      IStringSpectrum                    model;
 
@@ -127,24 +106,21 @@ public class SimpleStringSpectrumViewer extends javax.swing.JPanel
      {
        return strSpectText;
      }
-     
-     
 
-     /* javax.swing.JTextArea:setText(String) method has a memory
-     leak on SUN Solaris JVM (seems to be OK on windows)
-     The setStrTextArea method is called each time the String spectrum attribute
-     is read by the refresher even if it has not changed. This will be changed in the
-     future when the Tango Events will be used instead of ATK refreshers.
-     For the time being a test has been added to limit the memory leak of JVM.
-     */
+
      public void setStrTextArea(String s)
      {
+   /* javax.swing.JTextArea:setText(String) method has a memory
+   leak on SUN Solaris JVM (seems to be OK on windows)
+   The setStrTextArea method is called each time the String spectrum attribute
+   is read by the refresher even if it has not changed. This will be changed in the
+   future when the Tango Events will be used instead of ATK refreshers.
+   For the time being a test has been added to limit the memory leak of JVM.
+   */
 	if (s.equals(strSpectText.getText()))
 	  return;
-	  
-        strSpectText.setText(s);
-        if ( isViewEnd() )
-           placeTextToEnd (); 
+	else
+	  strSpectText.setText(s);
      }
 
      public void stringSpectrumChange(StringSpectrumEvent evt)
@@ -163,69 +139,36 @@ public class SimpleStringSpectrumViewer extends javax.swing.JPanel
 	    
 	    str_array = evt.getValue();
 	    attr_size= str_array.length;
-	    
-	    StringBuffer strbuff = new StringBuffer(attr_size);
+	    str = "";
 	    
 	    for (ind_str=0; ind_str < attr_size; ind_str++)
 	    {
-	       strbuff.append(str_array[ind_str]);
-	       strbuff.append("\n");
+	       str = str + "\n" + str_array[ind_str];
 	    }
-	    str = strbuff.toString();
 	}
-	setStrTextArea(str);      
+	setStrTextArea(str);
      }
 
      public void errorChange(ErrorEvent evt)
      {
-       setStrTextArea("Unknown");
+
      }
 
      public void stateChange(AttributeStateEvent evt)
      {
-	if ("VALID".equals(evt.getState()))
-	{
-	    strSpectText.setBackground(getBackground());
-	    return;
-	}
-	strSpectText.setBackground(ATKConstant.getColor4Quality(evt.getState()));
-     }
 
-     /**
-      * Returns whether user prefers to allways view the end of the text or not
-      * @return A boolean to know whether user prefers to allways view the end of the text or not
-      */
-     public boolean isViewEnd ()
-     {
-         return viewEnd;
      }
-
-     /**
-      * Sets whether user prefers to allways view the end of the text or not.
-      * @param viewEnd a boolean to set this preference
-      */
-     public void setViewEnd (boolean viewEnd)
-     {
-         this.viewEnd = viewEnd;
-         if ( isViewEnd () )
-             placeTextToEnd ();
-     }
-
-     private void placeTextToEnd ()
-     {
-         strSpectText.setCaretPosition(strSpectText.getDocument().getLength());
-     }
-
+     
      public static void main(String [] args)
      {
 	 fr.esrf.tangoatk.core.AttributeList atl = new fr.esrf.tangoatk.core.AttributeList();
 	 final SimpleStringSpectrumViewer sssv = new SimpleStringSpectrumViewer();
-         sssv.setViewEnd(true);
+
 	 try
 	 {
-	     //final IStringSpectrum attr = (IStringSpectrum)atl.add("JM/test/2/SequenceHistory");
-	     final IStringSpectrum attr = (IStringSpectrum)atl.add("sys/MSTATUS/RF-TRA/Devices");
-             sssv.setModel(attr);
+	     final IStringSpectrum attr = (IStringSpectrum)atl.add("JM/test/2/SequenceHistory");
+
+	     sssv.setModel(attr);
 	     atl.startRefresher();
 
 	 }
@@ -236,8 +179,7 @@ public class SimpleStringSpectrumViewer extends javax.swing.JPanel
 	 
 	 IEntity ie = null;
 	 
-	 //ie = atl.get("JM/test/2/SequenceHistory");
-         ie = atl.get("sys/MSTATUS/RF-TRA/Devices");
+	 ie = atl.get("JM/test/2/SequenceHistory");
 	 if (ie == null)
 	    System.out.println("Cannot retreive the attribute from the list.");
 	 else
@@ -257,7 +199,7 @@ public class SimpleStringSpectrumViewer extends javax.swing.JPanel
 	 gbc.insets = new java.awt.Insets(0, 0, 0, 5);
 	 f.getContentPane().add(sssv, gbc);
          f.pack();
-         f.setVisible( true );
+         f.show();
      }
 
 

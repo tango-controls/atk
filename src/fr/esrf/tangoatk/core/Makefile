@@ -17,13 +17,12 @@ ERRORHANDLER = 	$(TARGET)/ErrorHandlerAdapter.class \
 
 DEVICE = $(TARGET)/DeviceFactory.class \
 	$(TARGET)/DeviceProperty.class \
-        $(TARGET)/Device.class 
+         $(TARGET)/Device.class 
 
 
 INTERFACES = $(TARGET)/INumber.class   \
 	$(TARGET)/IDevice.class      \
 	$(TARGET)/IEntityFilter.class \
-	$(TARGET)/IEntityList.class \
 	$(TARGET)/IString.class \
         $(TARGET)/IDeviceApplication.class \
 	$(TARGET)/IErrorListener.class \
@@ -72,12 +71,6 @@ INTERFACES = $(TARGET)/INumber.class   \
         $(TARGET)/IRawImageListener.class \
         $(TARGET)/IEnumScalar.class \
         $(TARGET)/IEnumScalarListener.class \
-        $(TARGET)/IStringImage.class \
-        $(TARGET)/IStringImageListener.class \
-        $(TARGET)/IDevStateSpectrum.class \
-        $(TARGET)/IDevStateSpectrumListener.class \
-        $(TARGET)/IAttributeSpectrumHistory.class \
-        $(TARGET)/INumberSpectrumHistory.class
 
 
 PROPERTIES = $(TARGET)/Property.class \
@@ -87,7 +80,6 @@ PROPERTIES = $(TARGET)/Property.class \
 	     $(TARGET)/FormatProperty.class \
 	     $(TARGET)/DisplayLevelProperty.class \
 	     $(TARGET)/TypeProperty.class \
-	     $(TARGET)/PropertyStorage.class \
 
 
 EVENTS =  $(TARGET)/AtkEventListenerList.class \
@@ -110,8 +102,6 @@ EVENTS =  $(TARGET)/AtkEventListenerList.class \
           $(TARGET)/EndGroupExecutionEvent.class \
           $(TARGET)/RawImageEvent.class \
           $(TARGET)/EnumScalarEvent.class \
-          $(TARGET)/StringImageEvent.class \
-          $(TARGET)/DevStateSpectrumEvent.class \
 
 
 ABSTRACTS = $(TARGET)/AEntityList.class \
@@ -121,8 +111,7 @@ ABSTRACTS = $(TARGET)/AEntityList.class \
 
 
 
-LISTS = $(TARGET)/DeviceItem.class \
-	$(TARGET)/AttributeList.class \
+LISTS = $(TARGET)/AttributeList.class \
 	$(TARGET)/AttributePolledList.class \
 	$(TARGET)/CommandList.class \
         $(TARGET)/CommandGroup.class \

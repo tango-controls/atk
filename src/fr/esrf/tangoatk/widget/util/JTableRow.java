@@ -1,29 +1,5 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.event.TableModelListener;
 import javax.swing.event.TableModelEvent;
@@ -32,12 +8,9 @@ import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Clipboard;
 import java.awt.event.*;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Vector;
 
 /**
  * A class to handle a 2 dimension Table with fixed row name and column name, also
@@ -49,41 +22,41 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
   public final static int PRINT_MEDIUM = 1;
   public final static int PRINT_SMALL  = 2;
 
-  protected int         wT; // Table width
-  protected int         hT; // Table height
+  private int         wT; // Table width
+  private int         hT; // Table height
 
-  protected boolean editable=false;
-  protected Font    theFont;
-  protected File    currentFile = null;
+  private boolean editable=false;
+  private Font    theFont;
+  private File    currentFile = null;
 
   // Data
-  protected JScrollPane tableView;
-  protected JTable      theTable=null;
-  protected TableRowModel  dm;
-  protected Object[][]  theData;
-  protected String[]    colName=null;
+  private JScrollPane tableView;
+  private JTable      theTable=null;
+  private TableModel  dm;
+  private Object[][]  theData;
+  private String[]    colName=null;
 
   //rowName
-  protected JPanel     rowPanel;
-  protected JPanel     cornerPanel;
-  protected JTable     rowTable=null;
-  protected TableModel dmr;
-  protected Object[][] rowData=null;
+  private JPanel     rowPanel;
+  private JPanel     cornerPanel;
+  private JTable     rowTable=null;
+  private TableModel dmr;
+  private Object[][] rowData=null;
 
   //Contextual menu
-  protected Point      menuLocation;
-  protected JPopupMenu tableMenu;
-  protected JMenuItem  selectAllMenuItem;
-  protected JMenuItem  selectNoneMenuItem;
-  protected JMenuItem  selectColumnMenuItem;
-  protected JMenuItem  selectRowMenuItem;
-  protected JMenuItem  copyMenuItem;
-  protected JMenuItem  saveMenuItem;
-  protected JMenuItem  print1MenuItem;
-  protected JMenuItem  print2MenuItem;
-  protected JMenuItem  print3MenuItem;
+  private Point      menuLocation;
+  private JPopupMenu tableMenu;
+  private JMenuItem  selectAllMenuItem;
+  private JMenuItem  selectNoneMenuItem;
+  private JMenuItem  selectColumnMenuItem;
+  private JMenuItem  selectRowMenuItem;
+  private JMenuItem  copyMenuItem;
+  private JMenuItem  saveMenuItem;
+  private JMenuItem  print1MenuItem;
+  private JMenuItem  print2MenuItem;
+  private JMenuItem  print3MenuItem;
 
-  protected final static JLabel noDataLabel = new JLabel("No Data");
+  private final static JLabel noDataLabel = new JLabel("No Data");
 
   /**
    * Construction
@@ -104,7 +77,48 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
     // Main table
     // ------------------------------------------
 
-    dm = new TableRowModel();
+    dm = new TableModel() {
+
+      public void addTableModelListener(TableModelListener l) {
+      }
+
+      public void removeTableModelListener(TableModelListener l) {
+      }
+
+      public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        if(editable && theData!=null) theData[rowIndex][columnIndex] = aValue;
+      }
+
+      public Class getColumnClass(int columnIndex) {
+        return String.class;
+      }
+
+      public boolean isCellEditable(int row,int col) {
+        return editable;
+      }
+
+      public String getColumnName(int column) {
+        if(colName!=null) return colName[column];
+        else return "";
+      }
+
+      public int getRowCount() {
+        return hT;
+      }
+
+      public int getColumnCount() {
+        return wT;
+      }
+
+      public Object getValueAt(int row, int column) {
+        if(theData!=null) {
+          return theData[row][column];
+        } else {
+          return "";
+        }
+      }
+
+    };
 
     tableView=new JScrollPane();
     tableView.setPreferredSize(new Dimension(640,480));
@@ -136,7 +150,7 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
       public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
       }
 
-      public Class<?> getColumnClass(int columnIndex) {
+      public Class getColumnClass(int columnIndex) {
         return String.class;
       }
 
@@ -229,7 +243,6 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
    */
   public void setEditable(boolean b) {
    editable=b;
-   dm.setEditable( editable );
   }
 
   /**
@@ -299,28 +312,19 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
     int nhT;
     int nwT;
 
-    if (columnNames != null) {
-      colName = columnNames;
+    if( data==null ) {
+      clearData();
+      return;
     }
 
-    if( data==null ) {
-      nhT = 0;
-    }
-    else {
-      nhT = data.length;
-    }
+    nhT = data.length;
 
     if( nhT==0 ) {
-      if (columnNames == null) {
-        nwT = 0;
-      }
-      else {
-        nwT = columnNames.length;
-      }
+      clearData();
+      return;
     }
-    else {
-      nwT = data[0].length;
-    }
+
+    nwT = data[0].length;
 
     if( nwT==0 ) {
       clearData();
@@ -332,76 +336,33 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
 
     theData = data;
     rowData = null;
+    colName = columnNames;
 
     updateTables(nhT,nwT);
   }
 
-  protected void updateTables(int nhT,int nwT) {
+  private void updateTables(int nhT,int nwT) {
 
-    boolean structureChanged = false;
-    if (dm.getData() == null || theData == null) {
-      structureChanged = true;
-    }
-    else {
-      if (theData.length != dm.getData().length) {
-        structureChanged = true;
-      }
-      else if (theData.length > 0) {
-        if (theData[0] == null) {
-          if (dm.getData()[0] != null) {
-            structureChanged = true;
-          }
-        }
-        else {
-          if (theData[0].length != dm.getData()[0].length) {
-            structureChanged = true;
-          }
-        }
-      }
-    }
-    dm.setData(theData);
-    String[] dmColName = dm.getColName();
-    if (dmColName == null || colName == null || dmColName.length != colName.length) {
-      structureChanged = true;
-    }
-    else {
-      for (int i = 0; i < dmColName.length; i++) {
-        if ( colName[i] == null || !colName[i].equals(dmColName[i]) ) {
-          structureChanged = true;
-          break;
-        }
-      }
-    }
-    dm.setColName(colName);
-    wT = nwT;
-    hT = nhT;
-    //Create table if it is null
-    if(theTable==null || (rowTable==null && rowData!=null)) {
+    //Recreate table if dimension of the model change
+    if( theTable==null || nwT!=wT || nhT!=hT ) {
 
       //System.out.println("Rebuild table");
+      wT = nwT;
+      hT = nhT;
       createTable();
       placeComponent();
 
     } else {
 
-      if (structureChanged) {
-        dm.fireTableStructureChanged();
-      }
-      else {
-        if (dm.getRowCount() > 0) {
-          dm.fireTableRowsUpdated(0, dm.getRowCount() - 1);
-        }
-      }
+      //System.out.println("Update table");
+      TableModelEvent e1 = new TableModelEvent(dm,0,hT-1);
+      theTable.tableChanged(e1);
       if(rowTable!=null) {
         TableModelEvent e2 = new TableModelEvent(dmr,0,hT-1);
         rowTable.tableChanged(e2);
       }
 
     }
-    if (structureChanged) {
-      adjustColumnSize();
-    }
-    updateViewPortView();
 
   }
 
@@ -527,17 +488,9 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
       printTable(PRINT_SMALL);
 
     } else if ( src == saveMenuItem ) {
-        saveDataFile();
-    }
 
-  }
-  
-  //Add a method saveDataFile, in order to save data without opening the JtableRow
-  public void saveDataFile()
-  {
       JFileChooser fc = new JFileChooser(".");
-      if(currentFile!=null)
-          fc.setSelectedFile(currentFile);
+      if(currentFile!=null) fc.setSelectedFile(currentFile);
       int status = fc.showSaveDialog(this);
       if(status==JFileChooser.APPROVE_OPTION) {
         currentFile = fc.getSelectedFile();
@@ -549,30 +502,11 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
           JOptionPane.showMessageDialog(this,ex,"Error while saving data",JOptionPane.ERROR_MESSAGE);
         }
       }
-  }
-  
-  protected String makeDataString() {
-
-      int[] cols = theTable.getSelectedColumns();
-      int[] rows = theTable.getSelectedRows();
-
-      StringBuffer str = new StringBuffer();
-      for (int i = 0; i < cols.length; i++) {
-        str.append(theTable.getColumnName(cols[i]));
-        if (i < cols.length - 1) str.append('\t');
-      }
-      str.append('\n');
-      for (int j = 0; j < rows.length; j++) {
-        for (int i = 0; i < cols.length; i++) {
-          str.append(theData[rows[j]][cols[i]]);
-          if (i < cols.length - 1) str.append('\t');
-        }
-        str.append('\n');
-      }
-      return str.toString();
 
     }
-  
+
+  }
+
   public void mouseClicked(MouseEvent e) {}
 
   public void mousePressed(MouseEvent e) {
@@ -595,7 +529,7 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
   // Private stuff
   // ----------------------------------------------------
 
-  protected void createTable() {
+  private void createTable() {
 
     if( theTable!=null ) {
       theTable.removeMouseListener(this);
@@ -611,6 +545,15 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
     theTable.addMouseListener(this);
     noDataLabel.setFont( theFont );
 
+    if (wT == 0 || hT == 0)
+    {
+        tableView.setViewportView( noDataLabel );
+    }
+    else
+    {
+        tableView.setViewportView(theTable);
+    }
+
     if(rowData!=null) {
       rowTable = new JTable(dmr);
       rowTable.setFont(theFont);
@@ -622,21 +565,8 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
 
   }
 
-  protected void updateViewPortView() {
-    if (wT == 0 && hT == 0) {
-      if (tableView.getViewport().getView() != noDataLabel) {
-        tableView.setViewportView( noDataLabel );
-      }
-    }
-    else {
-      if (tableView.getViewport().getView() != theTable) {
-        tableView.setViewportView(theTable);
-      }
-    }
-  }
-
-  protected void placeComponent() {
-    if ((rowData!=null) && (rowTable != null)){
+  private void placeComponent() {
+    if(rowData!=null) {
       Dimension d = getSize();
       int hFont = 17;
       cornerPanel.setBounds(-5,-5 ,54,hFont+5);
@@ -646,28 +576,11 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
     }
   }
 
-  protected String makeTabbedString() {
+  private String makeTabbedString() {
 
     int[] cols = theTable.getSelectedColumns();
     int[] rows = theTable.getSelectedRows();
-        
-    //If nothing is selected, save all the table.
-    if((cols == null || cols.length == 0)&& (rows == null|| rows.length == 0))
-    {
-        
-        int nbCols = theTable.getColumnCount();
-        cols = new int[nbCols];
-        for (int i = 0; i < nbCols; i++) {
-            cols[i]=i;            
-        }
-        
-        int nbRows = theTable.getRowCount();
-        rows = new int[nbRows];
-        for (int i = 0; i < nbRows; i++) {
-            rows[i]=i;            
-        }
-    }
-        
+
     StringBuffer str = new StringBuffer();
     for (int i = 0; i < cols.length; i++) {
       str.append(theTable.getColumnName(cols[i]));
@@ -685,7 +598,7 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
 
   }
 
-  protected int[] measureColumns(Font f) {
+  private int[] measureColumns(Font f) {
 
     if(theData==null) return new int[0];
 
@@ -869,7 +782,7 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
     }
 
   }
-  
+
   /**
    * Test function.
    */
