@@ -1,3 +1,6 @@
+#            AttributeListBeanInfo.java \
+#            CommandListBeanInfo.java \
+# 	   NumberScalarBeanInfo.java \
 
 include ../../../../../.make-include
 
@@ -11,23 +14,23 @@ EXCEPTIONS = $(TARGET)/ATKException.class \
 	    $(TARGET)/CommandExecuteException.class \
 
 
-ERRORHANDLER = 	$(TARGET)/ErrorHandlerAdapter.class \
-
-
+ERRORHANDLER = 	$(TARGET)/BasicLogAppender.class \
+                $(TARGET)/BasicErrorHandler.class \
+                $(TARGET)/ErrorHandlerAdapter.class \
+		$(TARGET)/Log4jConfigurator.class \
 
 DEVICE = $(TARGET)/DeviceFactory.class \
-	$(TARGET)/DeviceProperty.class \
-        $(TARGET)/Device.class 
+         $(TARGET)/Device.class 
 
+UTIL = $(TARGET)/ATKUtil.class
+UTIL = $(TARGET)/ATKLogger.class
 
 INTERFACES = $(TARGET)/INumber.class   \
 	$(TARGET)/IDevice.class      \
 	$(TARGET)/IEntityFilter.class \
-	$(TARGET)/IEntityList.class \
 	$(TARGET)/IString.class \
         $(TARGET)/IDeviceApplication.class \
 	$(TARGET)/IErrorListener.class \
-	$(TARGET)/ISetErrorListener.class \
 	$(TARGET)/IErrorHandler.class \
 	$(TARGET)/ILogListener.class \
 	$(TARGET)/IStateListener.class \
@@ -38,6 +41,7 @@ INTERFACES = $(TARGET)/INumber.class   \
 	$(TARGET)/IImageListener.class \
         $(TARGET)/ISpectrumListener.class \
 	$(TARGET)/IResultListener.class \
+	$(TARGET)/IStringListListener.class \
 	$(TARGET)/Refresher.class \
 	$(TARGET)/IRefreshee.class \
 	$(TARGET)/IEntity.class \
@@ -52,32 +56,6 @@ INTERFACES = $(TARGET)/INumber.class   \
 	$(TARGET)/INumberScalar.class \
         $(TARGET)/INumberSpectrum.class \
         $(TARGET)/INumberImage.class \
-        $(TARGET)/IAttributeScalarHistory.class \
-        $(TARGET)/INumberScalarHistory.class \
-        $(TARGET)/IStringScalarHistory.class \
-        $(TARGET)/IStringSpectrum.class \
-        $(TARGET)/IStringSpectrumListener.class \
-	$(TARGET)/IRefresherListener.class \
-        $(TARGET)/IBooleanImage.class \
-        $(TARGET)/IBooleanSpectrum.class \
-        $(TARGET)/IBooleanScalar.class \
-        $(TARGET)/IBooleanImageListener.class \
-        $(TARGET)/IBooleanSpectrumListener.class \
-        $(TARGET)/IBooleanScalarListener.class \
-        $(TARGET)/IDevStateScalar.class \
-        $(TARGET)/IDevStateScalarListener.class \
-        $(TARGET)/ICommandGroup.class \
-        $(TARGET)/IEndGroupExecutionListener.class \
-        $(TARGET)/IRawImage.class \
-        $(TARGET)/IRawImageListener.class \
-        $(TARGET)/IEnumScalar.class \
-        $(TARGET)/IEnumScalarListener.class \
-        $(TARGET)/IStringImage.class \
-        $(TARGET)/IStringImageListener.class \
-        $(TARGET)/IDevStateSpectrum.class \
-        $(TARGET)/IDevStateSpectrumListener.class \
-        $(TARGET)/IAttributeSpectrumHistory.class \
-        $(TARGET)/INumberSpectrumHistory.class
 
 
 PROPERTIES = $(TARGET)/Property.class \
@@ -87,11 +65,9 @@ PROPERTIES = $(TARGET)/Property.class \
 	     $(TARGET)/FormatProperty.class \
 	     $(TARGET)/DisplayLevelProperty.class \
 	     $(TARGET)/TypeProperty.class \
-	     $(TARGET)/PropertyStorage.class \
 
 
-EVENTS =  $(TARGET)/AtkEventListenerList.class \
-          $(TARGET)/EventSupport.class \
+EVENTS =  $(TARGET)/EventSupport.class \
 	  $(TARGET)/ATKEvent.class \
           $(TARGET)/NumberScalarEvent.class \
           $(TARGET)/StringScalarEvent.class \
@@ -102,16 +78,6 @@ EVENTS =  $(TARGET)/AtkEventListenerList.class \
           $(TARGET)/ErrorEvent.class \
           $(TARGET)/ResultEvent.class \
           $(TARGET)/AttributeStateEvent.class \
-          $(TARGET)/StringSpectrumEvent.class \
-          $(TARGET)/BooleanImageEvent.class \
-          $(TARGET)/BooleanSpectrumEvent.class \
-          $(TARGET)/BooleanScalarEvent.class \
-          $(TARGET)/DevStateScalarEvent.class \
-          $(TARGET)/EndGroupExecutionEvent.class \
-          $(TARGET)/RawImageEvent.class \
-          $(TARGET)/EnumScalarEvent.class \
-          $(TARGET)/StringImageEvent.class \
-          $(TARGET)/DevStateSpectrumEvent.class \
 
 
 ABSTRACTS = $(TARGET)/AEntityList.class \
@@ -121,15 +87,13 @@ ABSTRACTS = $(TARGET)/AEntityList.class \
 
 
 
-LISTS = $(TARGET)/DeviceItem.class \
-	$(TARGET)/AttributeList.class \
-	$(TARGET)/AttributePolledList.class \
+LISTS = $(TARGET)/AttributeList.class \
 	$(TARGET)/CommandList.class \
-        $(TARGET)/CommandGroup.class \
 
-PRE = $(INTERFACES) $(ABSTRACTS) $(DEVICE) $(ERRORHANDLER) \
+
+
+PRE = $(UTIL) $(INTERFACES) $(ABSTRACTS) $(DEVICE) $(ERRORHANDLER) \
       $(EXCEPTIONS) $(EVENTS)  $(PROPERTIES) 
-
 
 POST = $(LISTS)
 
@@ -153,22 +117,36 @@ attributes:
 utils: 
 	(cd util && $(MAKE) all)
 
+test:
+	(cd t && $(MAKE) all)
+
 core: pre commands attributes post
 
 
-all:  core utils beaninfo
+all:  utils core test beaninfo
 
 
+# all:	exceptions errorhandler interfaces abstracts commands lists device \
+# 	lists scalarattributes  \
+# 	spectrumattributes  factories 
+
+ci:
+	@cvs ci Makefile `echo $(ALL) \
+                     | sed 's|$(TARGET)/||g' |  \
+                     sed 's|\.class|.java|g'`
 attribute-clean:
 	(cd attribute && $(MAKE) class-clean)
 
 command-clean:
 	(cd command && $(MAKE) class-clean)
 
+test-clean:
+	(cd t && $(MAKE) class-clean)
+
 util-clean:
 	(cd util && $(MAKE) class-clean)
 
-clean: class-clean util-clean command-clean attribute-clean
+clean: class-clean test-clean util-clean command-clean attribute-clean
 
 
 logTest: 	$(TARGET)/logTest.class \
@@ -202,7 +180,7 @@ devicedoc: errorhandlerdoc
 
 interfacedoc: devicedoc
 	$(AUTODIA) -o interfacedoc.xml $(PACKAGE).IErrorListener \
-	$(PACKAGE).ISetErrorListener \
+	$(PACKAGE).IStringListListener \
 	$(PACKAGE).IRefresher \
 	$(PACKAGE).IEntity \
 	$(PACKAGE).IFactory \
