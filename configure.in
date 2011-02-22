@@ -35,17 +35,21 @@ ATKHOME=$PWD
 ATKSRC=$ATKHOME/src	
 ATKLIB=$ATKHOME/lib
 ATKDOC=$ATKHOME/doc
-TANGOHOST=TANGO_HOST=$TANGO_HOST
-TANGOHOME=/segfs/tango/release
-TANGOLIB=$TANGOHOME/java/lib
+TANGOHOST=TANGO_HOST=splash:10000
+TANGOHOME=/segfs/tango
+TANGOLIB=$TANGOHOME/lib/java
 TANGO=$TANGOLIB/TangORB.jar
-PRINTF=$ATKLIB/printf.jar
-IMAGEJ=$ATKLIB/ij.jar
-JEP=$ATKLIB/jep.jar:$ATKLIB/jepext.jar
-JOGL=$ATKLIB/jogl.jar:$ATKLIB/gluegen-rt.jar
+TANGOTEST=$LIB/
+RT=$JAVA_HOME/jre/lib/rt.jar
 JTARGETDIR=$ATKLIB	
+JUNIT=$TANGOLIB/junit.jar
+PRINTF=$TANGOLIB/printf.jar
+JCCHART=$TANGOLIB/jcchart.jar
 BEANBOX=$JAVA_HOME/beans/beanbox/classes:$JAVA_HOME/beans/infobus.jar:$JAVA_HOME/beans/lib/methodtracer.jar
-CLASSPATH=$TANGO:$PRINTF:$JEP:$IMAGEJ:$JOGL:$ATKLIB:$BEANBOX:.;export CLASSPATH
+EXTENSIONS=$TANGOLIB/jscrollpane.jar
+JLOOX=/segfs/graphics/JLoox/esrfSynoptic/jlooxEsrfSynopt.jar
+ATKPANEL=/segfs/tango/bin/java/atkpanel.jar
+CLASSPATH=$RT:$TANGO:$ATKLIB:$JUNIT:$TANGOTEST:$JCCHART:$BEANBOX:$PRINTF:$JLOOX:$ATKPANEL:$EXTENSIONS:.;export CLASSPATH
 
 AC_SUBST(ATKSRC)
 AC_SUBST(TANGOHOME)
@@ -76,6 +80,8 @@ AC_PROG_JAVAC_WORKS()
 AC_CHECK_RQRD_CLASS(fr.esrf.TangoDs.Attribute)
 AC_CHECK_RQRD_CLASS(fr.esrf.Tango.Device)
 AC_CHECK_RQRD_CLASS(fr.esrf.TangoApi.Connection)
+AC_CHECK_RQRD_CLASS(com.braju.format.Format)
+AC_CHECK_RQRD_CLASS(com.klg.jclass.chart.JCChart)		
 dnl Checks for header files.
 
 dnl Checks for typedefs, structures, and compiler characteristics.

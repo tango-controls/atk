@@ -1,9 +1,0 @@
-name = TabbedPaneDevStateScalarViewer
-package = fr.esrf.tangoatk.widget.attribute
-
-properties = tooltipMode
-
-ICON_COLOR_16x16 = TabbedPaneDevStateScalarViewer.gif
-ICON_MONO_16x16 = TabbedPaneDevStateScalarViewer.gif
-ICON_MONO_32x32 = TabbedPaneDevStateScalarViewer32.gif
-ICON_COLOR_32x32 = TabbedPaneDevStateScalarViewer32.gif
