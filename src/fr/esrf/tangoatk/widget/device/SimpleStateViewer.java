@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.device;
 
 import fr.esrf.tangoatk.core.Device;
@@ -50,7 +28,7 @@ import fr.esrf.tangoatk.widget.util.*;
 public class SimpleStateViewer extends JSmoothLabel
         implements IStateListener,IErrorListener {
 
-  private Device device;
+  Device device;
   String state = "UNKNOWN";
   boolean externalSetText = false;
   boolean stateClickable = true;
@@ -97,33 +75,30 @@ public class SimpleStateViewer extends JSmoothLabel
    * shown on the textLabel.
    * @param device a <code>Device</code> to surveil
    */
-  public void setModel(Device devModel)
-  {
-     if (device != null)
-         clearModel();
-     
-     if (devModel == null)
-         return;
-
-     device = devModel;
-     if (!device.areDevPropertiesLoaded())
-         device.loadDevProperties();
-     device.addStateListener(this);
-     device.addErrorListener(this);
-     setState(device.getState());
-     setToolTipText(device.getName());
+  public void setModel(Device device) {
+    if (this.device != null)
+    {
+        this.device.removeStateListener(this);
+        this.device.removeErrorListener(this);
+    }
+    this.device = device;
+    if (device != null)
+    {
+        device.addStateListener(this);
+        device.addErrorListener(this);
+        setState(device.getState());
+        setToolTipText(device.getName());
+    }
+    else
+    {
+        setState(IDevice.UNKNOWN);
+        setToolTipText("no device");
+    }
   }
 
   public void clearModel()
   {
-     if (device != null)
-     {
-        device.removeStateListener(this);
-        device.removeErrorListener(this);
-        device = null;
-        setState(IDevice.UNKNOWN);
-        setToolTipText("no device");        
-     }
+      setModel(null);
   }
 
   /**
@@ -140,12 +115,9 @@ public class SimpleStateViewer extends JSmoothLabel
    *
    * @param state a <code>String</code> value
    */
-  private void setState(String state) {
+  public void setState(String state) {
     this.state = state;
-    if (device != null)
-        setBackground(ATKConstant.getColor4State(state, device.getInvertedOpenClose(), device.getInvertedInsertExtract()));
-    else
-        setBackground(ATKConstant.getColor4State(state));
+    setBackground(ATKConstant.getColor4State(state));
   }
 
   /**

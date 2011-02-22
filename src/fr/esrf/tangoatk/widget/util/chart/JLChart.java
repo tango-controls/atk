@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 //
 // JLChart.java
 // Description: A Class to handle 2D graphics plot.
@@ -62,7 +40,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Vector;
 import javax.imageio.ImageIO;
 import javax.swing.Box;
@@ -85,7 +62,6 @@ import javax.swing.event.EventListenerList;
 import javax.swing.filechooser.FileFilter;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.JTableRow;
-import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
 
 class LabelRect {
   Rectangle rect;
@@ -104,7 +80,7 @@ class TabbedLine {
   int anno;
   int sIndex;
   int precision = 0;
-  String noValueString = "";
+  String noValueString = "*";
 
   TabbedLine(int nb) {
     dv = new JLDataView[nb];
@@ -280,8 +256,6 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   public static final int LABEL_RIGHT = 2;
   /** Place label at the left of the chart */
   public static final int LABEL_LEFT = 3;
-  /** Place label at the bottom of the chart and try to arrange them in rows */
-  public static final int LABEL_ROW = 4;
 
   /* Chart properties menu item */
   public static final int MENU_CHARTPROP = 0;
@@ -293,8 +267,12 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   public static final int MENU_DATASAVE  = 3;
   /* print graph menu item */
   public static final int MENU_PRINT     = 4;
+  /* Load data file menu item */
+  public static final int MENU_DATALOAD  = 5;
+  /* Reset Chart menu item */
+  public static final int MENU_RESET     = 6;
   /* Statistics menu */
-  public static final int MENU_STAT      = 5;
+  public static final int MENU_STAT      = 7;
 
   /* Date Format recognized by loadDataFile() */
   public static final String US_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
@@ -309,9 +287,9 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   private Color headerColor;
 
   private boolean labelVisible = true;
-  private int labelMode = LABEL_ROW;
+  private int labelMode = LABEL_DOWN;
   private Font labelFont;
-  protected Vector<LabelRect> labelRect;
+  private Vector labelRect;
 
   private boolean ipanelVisible = false;
   private boolean paintAxisFirst = true;
@@ -320,9 +298,11 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   private double displayDuration;
   protected double maxDisplayDuration;
 
-  protected JPopupMenu chartMenu;
+  private JPopupMenu chartMenu;
   private JMenuItem optionMenuItem;
   private JMenuItem saveFileMenuItem;
+  private JMenuItem loadFileMenuItem;
+  private JMenuItem resetMenuItem;
   private JMenuItem zoomBackMenuItem;
   private JMenuItem printMenuItem;
   private JSeparator sepMenuItem;
@@ -359,22 +339,23 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   private Rectangle labelR;
   private Rectangle viewR;
   private Dimension margin;
-  private int labelHeight;
+  private int labelSHeight;
   private int labelWidth;
-  private int labelPerLine;
-  private int nbLabel;
+  private int labelHeight;
   private int headerWidth;
   private int axisHeight;
   private int axisWidth;
+  private int axisFontUp;
+  private int axisFontDown;
   private int y1AxisThickness;
   private int y2AxisThickness;
-  private int xAxisThickness;
-  private int xAxisUpMargin;
 
   // Axis
   private JLAxis xAxis;
   private JLAxis y1Axis;
   private JLAxis y2Axis;
+  
+  private boolean xAxisOnBottom=true;
 
   // Listeners
   private IJLChartListener listener;  // JLChart listener
@@ -387,25 +368,21 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
   // Menu item to allow user to set time precision
   private JMenuItem precisionMenuItem;
-
+  
   // Menu item to save a snapshot of this chart
   private JMenuItem saveSnapshotMenuItem;
 
   protected boolean preferDialog = false, modalDialog = false;
   protected JDialog tableDialog = null;
   protected Window dialogParent;
-  protected JFrame parentFrame = null;
 
   // Used to open the file chooser dialog on the last saved snapshot location
   protected String lastSnapshotLocation = ".";
 
-  // Used to open the file chooser dialog on the last saved data file location
-  protected String lastDataFileLocation = ".";
-
   // Used to open the file chooser dialog with the last used file filter
   protected FileFilter lastFileFilter = null;
 
-  protected String noValueString = "";
+  protected String noValueString = "*";
 
   /**
    * Graph constructor.
@@ -421,7 +398,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     headerColor = getForeground();
     labelFont = getFont();
 
-    margin = new Dimension(5,5);
+    margin = new Dimension(10,10);
     headerR = new Rectangle(0,0,0,0);
     viewR = new Rectangle(0,0,0,0);
     labelR = new Rectangle(0,0,0,0);
@@ -437,7 +414,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     displayDuration = Double.POSITIVE_INFINITY;
     maxDisplayDuration = Double.POSITIVE_INFINITY;
 
-    labelRect = new Vector<LabelRect>();
+    labelRect = new Vector();
     zoomDrag = false;
     zoomDragAllowed = false;
 
@@ -448,6 +425,12 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
     saveFileMenuItem = new JMenuItem("Save data File");
     saveFileMenuItem.addActionListener(this);
+
+    loadFileMenuItem = new JMenuItem("Load data File");
+    loadFileMenuItem.addActionListener(this);
+
+    resetMenuItem = new JMenuItem("Reset Chart");
+    resetMenuItem.addActionListener( this );
 
     tableMenu = new JMenu("Show table");
     tableAllMenuItem = new JMenuItem("All");
@@ -486,6 +469,8 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     chartMenu.add(statMenu);
     chartMenu.add(new JSeparator());
     chartMenu.add(saveFileMenuItem);
+    chartMenu.add(loadFileMenuItem);
+    chartMenu.add(resetMenuItem);
     chartMenu.add(printMenuItem);
     chartMenu.add(saveSnapshotMenuItem);
     chartMenu.add(precisionMenuItem);
@@ -510,6 +495,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     zoomButton.setVisible(false);
     zoomButton.addActionListener(this);
     add(zoomButton);
+
   }
 
   private void saveSnapshot()
@@ -523,7 +509,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
                 {
                     return true;
                 }
-                String extension = MultiExtFileFilter.getExtension( f );
+                String extension = getExtension( f );
                 if ( extension != null && extension.equals( "jpg" ) ) return true;
                 return false;
             }
@@ -553,7 +539,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
                 {
                     return true;
                 }
-                String extension = MultiExtFileFilter.getExtension( f );
+                String extension = getExtension( f );
                 if ( extension != null && extension.equals( "png" ) ) return true;
                 return false;
             }
@@ -602,8 +588,8 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
                 FileFilter filter = chooser.getFileFilter();
                 if ( filter == jpgFilter )
                 {
-                    if ( MultiExtFileFilter.getExtension( f ) == null
-                            || !MultiExtFileFilter.getExtension( f ).equalsIgnoreCase( "jpg" ) )
+                    if ( getExtension( f ) == null
+                            || !getExtension( f ).equalsIgnoreCase( "jpg" ) )
                     {
                         f = new File( f.getAbsolutePath() + ".jpg" );
                     }
@@ -611,8 +597,8 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
                 }
                 else if ( filter == pngFilter )
                 {
-                    if ( MultiExtFileFilter.getExtension( f ) == null
-                            || !MultiExtFileFilter.getExtension( f ).equalsIgnoreCase( "png" ) )
+                    if ( getExtension( f ) == null
+                            || !getExtension( f ).equalsIgnoreCase( "png" ) )
                     {
                         f = new File( f.getAbsolutePath() + ".png" );
                     }
@@ -624,17 +610,17 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
                 if ( ok == JOptionPane.YES_OPTION )
                 {
                     this.repaint();
-                    if ( MultiExtFileFilter.getExtension( f ) == null )
+                    if ( getExtension( f ) == null )
                     {
                         JOptionPane.showMessageDialog( this,
                                 "Unknown file type", "Error",
                                 JOptionPane.ERROR_MESSAGE );
                     }
-                    else if ( MultiExtFileFilter.getExtension( f ).equalsIgnoreCase( "jpg" ) )
+                    else if ( getExtension( f ).equalsIgnoreCase( "jpg" ) )
                     {
                         extension = "jpg";
                     }
-                    else if ( MultiExtFileFilter.getExtension( f ).equalsIgnoreCase( "png" ) )
+                    else if ( getExtension( f ).equalsIgnoreCase( "png" ) )
                     {
                         extension = "png";
                     }
@@ -714,12 +700,10 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
    * @param b boolean to know weather x Axis is on bottom of screen or not
    */
   public void setXAxisOnBottom(boolean b){
-      if (b) {
-          getXAxis().setPosition(JLAxis.HORIZONTAL_DOWN);
-      }
-      else {
-          getXAxis().setPosition(JLAxis.HORIZONTAL_ORG1);
-      }
+      xAxisOnBottom = b;
+      getXAxis().setXAxisOnBottom(b);
+      getY1Axis().setXAxisOnBottom(b);
+      getY2Axis().setXAxisOnBottom(b);
   }
 
   /**
@@ -727,9 +711,9 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
    * @return [code]true[/code] if x Axis is on bottom of screen, [code]false[/code] otherwise
    */
   public boolean isXAxisOnBottom(){
-      return getXAxis().getPosition() == JLAxis.HORIZONTAL_DOWN;
+      return xAxisOnBottom;
   }
-
+  
   /**
    * Sets header font
    * @param f Header font
@@ -825,9 +809,6 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
       if (s.length() == 0)
         header = null;
     setHeaderVisible(header != null);
-    if(parentFrame!=null && header!=null) {
-      parentFrame.setTitle(header);
-    }
   }
 
   /**
@@ -839,13 +820,6 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     return header;
   }
 
-  /**
-   * Sets the JFrame that will receive the header as title.
-   * @param parent JFrame parent
-   */
-  public void setFrameParent(JFrame parent) {
-    parentFrame = parent;
-  }
 
   /**
    * Sets the display duration.This will garbage old data in all displayed data views.
@@ -1013,7 +987,6 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
    * @param p Placement
    * @see JLChart#LABEL_UP
    * @see JLChart#LABEL_DOWN
-   * @see JLChart#LABEL_ROW
    * @see JLChart#LABEL_LEFT
    * @see JLChart#LABEL_RIGHT
    */
@@ -1037,7 +1010,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   public void setLabelFont(Font f) {
     labelFont = f;
   }
-
+  
   /**
    * Returns the label font
    * @see #setLabelFont
@@ -1158,7 +1131,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   }
 
   /**
-   * Removes a user action from chart menu.
+   * Removes a user action from chart menu. 
    * @param name Action name
    */
   public void removeUserAction(String name) {
@@ -1235,7 +1208,8 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
    * @see #MENU_TABLE
    * @see #MENU_DATASAVE
    * @see #MENU_PRINT
-   * @see #MENU_STAT
+   * @see #MENU_DATALOAD
+   * @see #MENU_RESET
    */
   public void removeMenuItem(int menu) {
 
@@ -1260,13 +1234,21 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
      case MENU_PRINT:
         chartMenu.remove(printMenuItem);
         break;
+        /* Save data file menu item */
+     case MENU_DATALOAD:
+       chartMenu.remove(loadFileMenuItem);
+       break;
+       /* Reset Chart menu item */
+     case MENU_RESET:
+       chartMenu.remove(resetMenuItem);
+       break;
        /* Statistics menu */
      case MENU_STAT:
        chartMenu.remove(statMenu);
        break;
     }
   }
-
+  
   /**
    * Method to add item to the contextual menu.
    * @param menu MenuItem to add
@@ -1281,7 +1263,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   public void addSeparator() {
     chartMenu.addSeparator();
   }
-
+  
   /**
    * Remove the specified JLChartAction Listener
    * @param l Listener to remove
@@ -1416,7 +1398,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
       TabbedLine tl;
       String s;
 
-      Vector<JLDataView>  views = new Vector<JLDataView> ();
+      Vector views = new Vector();
       if (xAxis.isXY()) views.addAll(xAxis.getViews());
       views.addAll(y1Axis.getViews());
       views.addAll(y2Axis.getViews());
@@ -1430,7 +1412,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
       tl.setNoValueString( noValueString );
       //-------no value String-------//
 
-      for (int v = 0; v < views.size(); v++) tl.add(v, views.get(v));
+      for (int v = 0; v < views.size(); v++) tl.add(v, (JLDataView) views.get(v));
 
       s = tl.getFirstLine(xAxis.getAnnotation());
       while (s != null) {
@@ -1445,7 +1427,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     }
 
   }
-
+ 
   /**
    * Loads a data file and add the corresponding data to Y1 axis
    * @param fileName the full path of the data file
@@ -1477,7 +1459,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
             throw new Exception("Failed to read X Axis annotation type");
         }
 
-        Vector<JLDataView>  existingViews = new Vector<JLDataView>();
+        Vector existingViews = new Vector();
         if (xAxis.isXY()) existingViews.addAll(xAxis.getViews());
         existingViews.addAll(y1Axis.getViews());
         existingViews.addAll(y2Axis.getViews());
@@ -1503,7 +1485,6 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
             }
         }
 
-        lastDataFileLocation = dataFile.getParentFile().getAbsolutePath();
         int viewCount = parsedLine.length - 1;
         if (viewCount < 0) throw new Exception();
         JLDataView[] views = new JLDataView[viewCount];
@@ -1637,50 +1618,61 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
      }
      updateTableDataSingle( v );
   }
+  
+  private void updateTableDataSingle(JLDataView v)
+  {
+      TabbedLine tl;
 
-  private void updateTableDataSingle (JLDataView v) {
-        TabbedLine tl;
-        tl = new TabbedLine( 1 );
-        tl.add( 0, v );
-        // Build data
-        Vector<Object[]> data = new Vector<Object[]>();
-        String[] cols = tl
-                .getFirstFields( xAxis.getAnnotation(), !xAxis.isXY() );
-        String[] s = tl.getNextFields();
-        while (s != null) {
-            data.add( s );
-            s = tl.getNextFields();
-        }
-        int y = data.size();
-        int x = cols.length;
-        Object[][] dv = new Object[y][x];
-        for (int j = 0; j < y; j++) {
-            Object[] ln = data.get( j );
-            for (int i = 0; i < x; i++) {
-                dv[j][i] = ln[i];
-            }
-        }
-        if ( preferDialog && tableDialog != null ) {
-            JTableRow row = null;
-            try {
-                row = (JTableRow) tableDialog.getContentPane();
-            }
-            catch (ClassCastException cce) {
-                if ( theTable != null ) {
-                    row = (JTableRow) theTable.getContentPane();
-                }
-                else {
-                    // nothing can be done
-                    return;
-                }
-            }
-            row.setData( dv, cols );
-            row = null;
-        }
-        else {
-            theTable.setData( dv, cols );
-        }
-    }
+      tl = new TabbedLine(1);
+      tl.add(0, v);
+      
+      // Build data
+      Vector data = new Vector();
+      String[] cols = tl.getFirstFields(xAxis.getAnnotation(),!xAxis.isXY());
+      Object s = tl.getNextFields();
+      while (s != null) {
+	data.add(s);
+	s = tl.getNextFields();
+      }
+
+      int y = data.size();
+      int x = cols.length;
+      Object[][] dv = new Object[y][x];
+      for (int j = 0; j < y; j++) {
+	Object[] ln = (Object[]) data.get(j);
+	for (int i = 0; i < x; i++) {
+          dv[j][i] = ln[i];
+	}
+      }
+
+      
+      if (preferDialog && tableDialog != null)
+      {
+          JTableRow row = null;
+          try
+          {
+              row = (JTableRow) tableDialog.getContentPane();
+          }
+          catch(ClassCastException cce)
+          {
+              if (theTable != null)
+              {
+                  row = (JTableRow) theTable.getContentPane();
+              }
+              else
+              {
+                  //nothing can be done
+                  return;
+              }
+          }
+          row.setData( dv, cols );
+          row = null;
+      }
+      else
+      {
+          theTable.setData(dv, cols);
+      }
+  }
 
   // Display a JTable containing data of a single dataView
   private void showTableSingle(JLDataView v) {
@@ -1712,16 +1704,16 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
       }
     }
 
-    updateTableDataSingle(v);
-
+    updateTableDataSingle(v); 
+    
     if (tableDialog != null && tableDialog.getContentPane() instanceof JTableRow)
     {
         theTable.setContentPane( tableDialog.getContentPane() );
     }
 
-    if (!theTable.isVisible())
+    if (!theTable.isVisible()) 
       theTable.centerWindow();
-
+      
     if (preferDialog)
     {
       tableDialog.setContentPane( theTable.getContentPane() );
@@ -1737,7 +1729,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
       tableDialog = null;
       theTable.setVisible(true);
     }
-
+    
     if (preferDialog)
     {
         tableDialog.repaint();
@@ -1809,305 +1801,227 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
           timePrecision = prec;
       }
   }
+  
+  // Display a JTable containing all data of the chart
+  private void showTableAll() {
 
-  //Extract the date to display in order to overwrite it in extends class
-  protected void showTableAll(Vector<JLDataView>  views){
-      TabbedLine tl;
-      
-      tl = new TabbedLine(views.size());
-      //-------precision-------//
-      tl.setPrecision(timePrecision);
-      //-------precision-------//
-      for (int v = 0; v < views.size(); v++) tl.add(v, views.get(v));
+    TabbedLine tl;
 
-      if (theTable == null)
-        theTable = new JLTable();
+    Vector views = new Vector();
+    if (xAxis.isXY()) views.addAll(xAxis.getViews());
+    views.addAll(y1Axis.getViews());
+    views.addAll(y2Axis.getViews());
 
-      if (tableDialog == null)
+    tl = new TabbedLine(views.size());
+    //-------precision-------//
+    tl.setPrecision(timePrecision);
+    //-------precision-------//
+    for (int v = 0; v < views.size(); v++) tl.add(v, (JLDataView) views.get(v));
+
+    if (theTable == null)
+      theTable = new JLTable();
+
+    if (tableDialog == null)
+    {
+      if (dialogParent != null)
       {
-        if (dialogParent != null)
+        if (dialogParent instanceof Frame)
         {
-          if (dialogParent instanceof Frame)
-          {
-            tableDialog = new JDialog((Frame)dialogParent, theTable.getTitle(), modalDialog);
-          }
-          else if (dialogParent instanceof Dialog)
-          {
-            tableDialog = new JDialog((Dialog)dialogParent, theTable.getTitle(), modalDialog);
-          }
-          else
-          {
-            tableDialog = new JDialog((Frame)null, theTable.getTitle(), modalDialog);
-          }
+          tableDialog = new JDialog((Frame)dialogParent, theTable.getTitle(), modalDialog);
+        }
+        else if (dialogParent instanceof Dialog)
+        {
+          tableDialog = new JDialog((Dialog)dialogParent, theTable.getTitle(), modalDialog);
         }
         else
         {
           tableDialog = new JDialog((Frame)null, theTable.getTitle(), modalDialog);
         }
       }
-
-      // Build data
-      Vector<Object[]> data = new Vector<Object[]>();
-      String[] cols = tl.getFirstFields(xAxis.getAnnotation(),!xAxis.isXY());
-      String[] s = tl.getNextFields();
-      while (s != null) {
-        data.add(s);
-        s = tl.getNextFields();
+      else
+      {
+        tableDialog = new JDialog((Frame)null, theTable.getTitle(), modalDialog);
       }
+    }
 
-      int y = data.size();
-      int x = cols.length;
-      Object[][] dv = new Object[y][x];
-      for (int j = 0; j < y; j++) {
-        Object[] ln = data.get(j);
-        for (int i = 0; i < x; i++) {
-          dv[j][i] = ln[i];
-        }
+    // Build data
+    Vector data = new Vector();
+    String[] cols = tl.getFirstFields(xAxis.getAnnotation(),!xAxis.isXY());
+    Object s = tl.getNextFields();
+    while (s != null) {
+      data.add(s);
+      s = tl.getNextFields();
+    }
+
+    int y = data.size();
+    int x = cols.length;
+    Object[][] dv = new Object[y][x];
+    for (int j = 0; j < y; j++) {
+      Object[] ln = (Object[]) data.get(j);
+      for (int i = 0; i < x; i++) {
+        dv[j][i] = ln[i];
       }
+    }
 
-      if (x == 1 && y == 0) {
-        // no data
-        dv = null;
-        cols = null;
-      }
-      theTable.setData(dv, cols);
+    theTable.setData(dv, cols);
+    
+    if (!theTable.isVisible())
+      theTable.centerWindow();
+      
+    if (preferDialog)
+    {
+      tableDialog.setContentPane(theTable.getContentPane());
+      tableDialog.setBounds(theTable.getBounds());
+      tableDialog.setResizable(theTable.isResizable());
+      theTable.setVisible(false);
+      theTable = null;
+      tableDialog.setVisible(true);
+    }
+    else
+    {
+      tableDialog.setVisible(false);
+      tableDialog = null;
+      theTable.setVisible(true);
+    }
 
-      if (!theTable.isVisible())
-        theTable.centerWindow();
-
-      if (preferDialog) {
-        tableDialog.setContentPane(theTable.getContentPane());
-        tableDialog.setBounds(theTable.getBounds());
-        tableDialog.setResizable(theTable.isResizable());
-        theTable.setVisible(false);
-        theTable = null;
-        tableDialog.setVisible(true);
-      }
-      else {
-        tableDialog.setVisible(false);
-        tableDialog = null;
-        theTable.setVisible(true);
-      }
-  }
-  
-  // Display a JTable containing all data of the chart
-  protected void showTableAll() {
-
-    Vector<JLDataView>  views = new Vector<JLDataView> ();
-    if (xAxis.isXY()) views.addAll(xAxis.getViews());
-    views.addAll(y1Axis.getViews());
-    views.addAll(y2Axis.getViews());    
-    showTableAll(views);
   }
 
-  protected void showStatAll(Vector<JLDataView>  views){
+  // Display a Dialog containing all statistics of the chart
+  private void showStatAll() {
+      Vector views = new Vector();
+      if (xAxis.isXY()) views.addAll(xAxis.getViews());
+      views.addAll(y1Axis.getViews());
+      views.addAll(y2Axis.getViews());
       int dataCount = 0;
-      double[][] values;
+      double[] values;
       synchronized (views) {
           for (int i = 0; i < views.size(); i++) {
-              dataCount += views.get(i).getDataLength();
+              dataCount += ( (JLDataView)views.get(i) ).getDataLength();
           }
-          values = new double[dataCount][2];
+          values = new double[dataCount];
           int index = 0;
           for (int i = 0; i < views.size(); i++) {
-              DataList data = views.get(i).getData();
+              DataList data = ( (JLDataView)views.get(i) ).getData();
               while (data != null) {
-                  double y = data.y;
-                  double x = data.x;
-                  if(Double.isNaN(y)) {
+                  double d = data.y;
+                  if(Double.isNaN(d)) {
                       long l = Double.doubleToRawLongBits( data.y );
                       if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_NEGATIVE_INFINITY) ) {
-                          y = Double.POSITIVE_INFINITY;
+                          d = Double.POSITIVE_INFINITY;
                       }
                       else if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_POSITIVE_INFINITY) ) {
-                          y = Double.NEGATIVE_INFINITY;
+                          d = Double.NEGATIVE_INFINITY;
                       }
                   }
-                  if(Double.isNaN(y)) {
-                      long l = Double.doubleToRawLongBits( data.y );
-                      if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_NEGATIVE_INFINITY) ) {
-                          y = Double.POSITIVE_INFINITY;
-                      }
-                      else if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_POSITIVE_INFINITY) ) {
-                          y = Double.NEGATIVE_INFINITY;
-                      }
-                  }
-                  if(Double.isNaN(x)) {
-                      long l = Double.doubleToRawLongBits( data.x );
-                      if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_NEGATIVE_INFINITY) ) {
-                          x = Double.POSITIVE_INFINITY;
-                      }
-                      else if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_POSITIVE_INFINITY) ) {
-                          x = Double.NEGATIVE_INFINITY;
-                      }
-                  }
-                  values[index][0] = y;
-                  values[index++][1] = x;
+                  values[index++] = d;
                   data = data.next;
               }
           }
       }
-      showStatistics(values, "all");
-  }
-  
-  // Display a Dialog containing all statistics of the chart
-  protected void showStatAll() {
-      Vector<JLDataView>  views = new Vector<JLDataView> ();
-      if (xAxis.isXY()) views.addAll(xAxis.getViews());
-      views.addAll(y1Axis.getViews());
-      views.addAll(y2Axis.getViews());
-      showStatAll(views);
+      showStatistics( values, "all" );
   }
 
   // Display a Dialog containing The dataView statistics
   private void showStatSingle(JLDataView v) {
-      double[][] values;
+      double[] values;
       synchronized(v) {
           int dataCount = v.getDataLength();
           DataList data = v.getData();
-          values = new double[dataCount][2];
+          values = new double[dataCount];
           for (int i =0; i < values.length; i++) {
-              double y = data.y;
-              double x = data.x;
-              if( Double.isNaN(y) ) {
-                  long l = Double.doubleToRawLongBits(data.y);
+              double d = data.y;
+              if(Double.isNaN(d)) {
+                  long l = Double.doubleToRawLongBits( data.y );
                   if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_NEGATIVE_INFINITY) ) {
-                      y = Double.POSITIVE_INFINITY;
+                      d = Double.POSITIVE_INFINITY;
                   }
                   else if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_POSITIVE_INFINITY) ) {
-                      y = Double.NEGATIVE_INFINITY;
+                      d = Double.NEGATIVE_INFINITY;
                   }
               }
-              if( Double.isNaN(x) ) {
-                  long l = Double.doubleToRawLongBits(data.x);
-                  if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_NEGATIVE_INFINITY) ) {
-                      x = Double.POSITIVE_INFINITY;
-                  }
-                  else if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_POSITIVE_INFINITY) ) {
-                      x = Double.NEGATIVE_INFINITY;
-                  }
-              }
-              values[i][0] = y;
-              values[i][1] = x;
+              values[i] = d;
               data = data.next;
           }
       }
       showStatistics( values, v.getName() );
   }
 
-  private void showStatistics(double[][] values, String name) {
+  private void showStatistics(double[] values, String name) {
       double min = Double.POSITIVE_INFINITY;
       double max = Double.NEGATIVE_INFINITY;
-      double minX = Double.NaN;
-      double maxX = Double.NaN;
       double average = 0;
       double standardDeviation = 0;
-      double sampleStandardDeviation = 0;
-      double squareSum = 0;
-      // standard deviation = sqrt( (1/N)*sum(xi^2) - ( (1/N)*sum(xi) )^2 )
-      // sample standard deviation = sqrt( (N/(N-1)) * ( (1/N)*sum(xi^2) - ( (1/N)*sum(xi) )^2 ) )
-      // (JLDataViews may be considered as samples of points)
-      try {
-          for (int i = 0; i < values.length; i++) {
-              if (values[i][0] < min) {
-                  min = values[i][0];
-                  minX = values[i][1];
+      double variance = 0;
+      try
+      {
+          for (int i = 0; i < values.length; i++)
+          {
+              if (values[i] < min) {
+                  min = values[i];
               }
-              if (values[i][0] > max) {
-                  max = values[i][0];
-                  maxX = values[i][1];
+              if (values[i] > max) {
+                  max = values[i];
               }
-              average += values[i][0];
-              double square;
-              if ( Double.isInfinite(values[i][0]) ) {
-                  square = Double.POSITIVE_INFINITY;
-              }
-              else if ( Double.isNaN(values[i][0]) ) {
-                  square = Double.NaN;
-              }
-              else {
-                  square = values[i][0] * values[i][0];
-              }
-              squareSum += square;
+              average = average +  values[i];
+              variance = variance + Math.pow ((values[i] - average), 2);
           }
-          if ( Double.isInfinite(min) && min > 0 ) {
+          if (Double.isInfinite( min ) && min > 0) {
               min = Double.NaN;
           }
-          if ( Double.isInfinite(max) && max < 0 ) {
+          if (Double.isInfinite( max ) && max < 0) {
               max = Double.NaN;
           }
-          if (values.length > 0) {
-              //-------------------calculate average---------------------------
-              average =  average / (double)values.length ;
-              //---------------calculate standard deviation--------------------
-              squareSum = squareSum / (double)values.length;
-              standardDeviation = Math.sqrt( squareSum - (average*average) );
-              if (values.length > 1) {
-                  sampleStandardDeviation = Math.sqrt( (((double)values.length)/(double)(values.length-1)) * (squareSum - (average*average)) );
-              }
-              else {
-                  sampleStandardDeviation = Double.NaN;
-              }
-          }
-          else {
-              average = Double.NaN;
-              standardDeviation = Double.NaN;
-              sampleStandardDeviation = Double.NaN;
-              min = Double.NaN;
-              max = Double.NaN;
-          }
+          //-------------------calculate average----------------------------
+          average =  average / values.length ;
+          //------------------------calculate variance----------------------
+          variance = variance / values.length;
+          //---------------calculate standard deviation---------------------
+          standardDeviation = Math.sqrt (variance);
 
-          StringBuffer titleBuffer = new StringBuffer("Statistics: ");
-          titleBuffer.append(name);
-          StringBuffer messageBuffer = new StringBuffer("Minimum: ");
-          messageBuffer.append(min);
-          if ( !Double.isNaN(minX) ) {
-              String xStringValue = "";
-              if (xAxis.getAnnotation() == JLAxis.TIME_ANNO) {
-                  xStringValue = JLAxis.formatTimeValue(minX);
-              }
-              else {
-                  xStringValue = xAxis.formatValue(minX, 0);
-              }
-              messageBuffer.append(", obtained at X = ");
-              messageBuffer.append(xStringValue);
-          }
-          messageBuffer.append("\nMaximum: ").append(max);
-          if ( !Double.isNaN(maxX) ) {
-              String xStringValue = "";
-              if (xAxis.getAnnotation() == JLAxis.TIME_ANNO) {
-                  xStringValue = JLAxis.formatTimeValue(maxX);
-              }
-              else {
-                  xStringValue = xAxis.formatValue(maxX, 0);
-              }
-              messageBuffer.append(", obtained at X = ");
-              messageBuffer.append(xStringValue);
-          }
-          messageBuffer.append("\nAverage: ").append(average);
-          messageBuffer.append("\nStandard Deviation: ");
-          messageBuffer.append(standardDeviation);
-          messageBuffer.append("\nSample Standard Deviation: ");
-          messageBuffer.append(sampleStandardDeviation);
+          String title = "Statistics: " + name;
+          String message = "Minimum: " + min
+                           + "\nMaximum: " + max
+                           + "\nAverage: " + average
+                           + "\nStandard Deviation: " + standardDeviation;
           JOptionPane.showMessageDialog(
                   this,
-                  messageBuffer.toString(),
-                  titleBuffer.toString(),
+                  message,
+                  title,
                   JOptionPane.PLAIN_MESSAGE,
                   null
           );
-          titleBuffer = null;
-          messageBuffer = null;
+          title = null;
+          message = null;
       }
-      catch(Exception e) {
+      catch(Exception e)
+      {
           JOptionPane.showMessageDialog(
                   this,
                   "Failed to obtain statistics on " + name,
                   "Error",
-                  JOptionPane.ERROR_MESSAGE
+                  JOptionPane.ERROR_MESSAGE,
+                  null
           );
           e.printStackTrace();
       }
+  }
+
+  /**
+   * <code>getExtension</code> returns the extension of a given file, that
+   * is the part after the last `.' in the filename.
+   * 
+   * @param f
+   *            a <code>File</code> value
+   * @return a <code>String</code> value
+   */
+  private String getExtension(File f) {
+      String ext = null;
+      String s = f.getName();
+      int i = s.lastIndexOf('.');
+      if (i > 0 && i < s.length() - 1) {
+          ext = s.substring(i + 1).toLowerCase();
+      }
+      return ext;
   }
 
   // -----------------------------------------------------
@@ -2130,36 +2044,77 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     } else if (src == tableAllMenuItem) {
       showTableAll();
     } else if (src == statAllMenuItem) {
-       showStatAll();
+        showStatAll();
     } else if (src == saveFileMenuItem) {
 
         int ok = JOptionPane.YES_OPTION;
-        JFileChooser chooser = new JFileChooser(lastDataFileLocation);
-        chooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
+        JFileChooser chooser = new JFileChooser(".");
+        chooser.addChoosableFileFilter(new FileFilter() {
+            public boolean accept(File f) {
+                if (f.isDirectory()) {
+                    return true;
+                }
+                String extension = getExtension(f);
+                if (extension != null && extension.equals("txt"))
+                    return true;
+                return false;
+            }
+
+            public String getDescription() {
+                return "text files ";
+            }
+        });
         chooser.setDialogTitle("Save Graph Data (Text file with TAB separated fields)");
         int returnVal = chooser.showSaveDialog(this);
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File f = chooser.getSelectedFile();
             if (f != null) {
-                if (MultiExtFileFilter.getExtension(f) == null) {
+                if (getExtension(f) == null) {
                     f = new File(f.getAbsolutePath() + ".txt");
                 }
                 if (f.exists()) {
                     ok = JOptionPane.showConfirmDialog(
                             this,
-                            "Do you want to overwrite " + f.getName() + " ?",
+                            "Do you want to overwrite " + f.getName() + " ?", 
                             "Confirm overwrite",
                             JOptionPane.YES_NO_OPTION
                     );
                 }
                 if (ok == JOptionPane.YES_OPTION) {
-                    lastDataFileLocation = f.getParentFile().getAbsolutePath();
                     saveDataFile(f.getAbsolutePath());
                 }
             }
         }
-    } else {
+    } else if (src == loadFileMenuItem) {
+        JFileChooser chooser = new JFileChooser(".");
+        chooser.addChoosableFileFilter(new FileFilter() {
+            public boolean accept(File f) {
+                if (f.isDirectory()) {
+                    return true;
+                }
+                String extension = getExtension(f);
+                if (extension != null && extension.equals("txt"))
+                    return true;
+                return false;
+            }
+
+            public String getDescription() {
+                return "text files ";
+            }
+        });
+        chooser.setDialogTitle("Load Graph Data (Text file with TAB separated fields)");
+        int returnVal = chooser.showOpenDialog(this);
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+          File f = chooser.getSelectedFile();
+          if (f != null) {
+            loadDataFile(f.getAbsolutePath());
+          }
+        }
+    }else if (src == resetMenuItem) {
+      reset();
+    }else {
 
       // Search in user action
       boolean found = false;
@@ -2252,30 +2207,19 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
   }
 
-  private void paintLabel(Graphics2D g,JLDataView v,JLAxis axis,int x,int y,int w,int a) {
-
-    int xm   = x + (w - labelWidth) / 2 + 7;
-    int ym   = y + labelHeight/2 + 2;
-    g.setColor(v.getColor());
-    JLAxis.drawSampleLine(g, xm, ym - 2, v);
-    g.setColor(v.getLabelColor());
-    g.drawString(v.getExtendedName() + " " + axis.getAxeName(), xm + 44, ym + labelHeight - a);
-    labelRect.add(new LabelRect(xm, ym - a, labelWidth, labelHeight, v));
-
-  }
-
   // paint Label and header
   private void paintLabelAndHeader(Graphics2D g) {
 
     int nbv1 = y1Axis.getViews().size();
     int nbv2 = y2Axis.getViews().size();
+    int ypos,xpos;
 
     // Draw header
     if (headerR.width>0) {
       g.setFont(headerFont);
-      int xpos = ((headerR.width - headerWidth) / 2);
+      xpos = ((headerR.width - headerWidth) / 2);
       g.setColor(headerColor);
-      g.drawString(header, xpos, headerR.y + g.getFontMetrics(headerFont).getAscent() - 1);
+      g.drawString(header, xpos, headerR.y + g.getFontMetrics(headerFont).getAscent() - 2);
     }
 
     // Draw labels
@@ -2286,53 +2230,37 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
       JLDataView v;
       int a = g.getFontMetrics(labelFont).getAscent();
       int i,k = 0;
+      int y;
 
-      if( labelMode==LABEL_ROW && labelPerLine>1 ) {
+      // Center
+      xpos = labelR.x + (labelR.width - labelWidth) / 2 + 2;
+      ypos = labelR.y + (labelR.height - labelHeight) / 2 + 2;
 
-        int rowWidth = labelR.width / labelPerLine;
-
-        // Draw labels (in row/column)
-        for (i = 0; i < nbv1; i++) {
-          v = y1Axis.getViews().get(i);
-          if (v.isLabelVisible()) {
-            int x = (k%labelPerLine) * rowWidth + labelR.x;
-            int y = (k/labelPerLine) * labelHeight + labelR.y;
-            paintLabel(g,v,y1Axis,x,y,rowWidth,a);
-            k++;
-          }
+      // Draw labels
+      for (i = 0; i < nbv1; i++) {
+        v = (JLDataView) y1Axis.getViews().get(i);
+        if (v.isLabelVisible()) {
+          g.setColor(v.getColor());
+          y = ypos + labelSHeight * k + labelSHeight / 2;
+          JLAxis.drawSampleLine(g, xpos, y - 2, v);
+          g.setColor(Color.BLACK);
+          g.drawString(v.getExtendedName() + " " + y1Axis.getAxeName(), xpos + 44, y + labelSHeight - a);
+          labelRect.add(new LabelRect(xpos, y - a, labelWidth + 44, labelSHeight, v));
+          k++;
         }
+      }
 
-        for (i = 0; i < nbv2; i++) {
-          v = y2Axis.getViews().get(i);
-          if (v.isLabelVisible()) {
-            int x = (k%labelPerLine) * rowWidth + labelR.x;
-            int y = (k/labelPerLine) * labelHeight + labelR.y;
-            paintLabel(g,v,y2Axis,x,y,rowWidth,a);
-            k++;
-          }
+      for (i = 0; i < nbv2; i++) {
+        v = (JLDataView) y2Axis.getViews().get(i);
+        if (v.isLabelVisible()) {
+          g.setColor(v.getColor());
+          y = ypos + labelSHeight * k + labelSHeight / 2;
+          JLAxis.drawSampleLine(g, xpos, y - 2, v);
+          g.setColor(Color.BLACK);
+          g.drawString(v.getExtendedName() + " " + y2Axis.getAxeName(), xpos + 44, y + labelSHeight - a);
+          labelRect.add(new LabelRect(xpos, y - a, labelWidth + 44, labelSHeight, v));
+          k++;
         }
-
-      } else {
-
-        // Draw labels (in column)
-        for (i = 0; i < nbv1; i++) {
-          v = y1Axis.getViews().get(i);
-          if (v.isLabelVisible()) {
-            int y = labelR.y + (labelR.height-nbLabel*labelHeight)/2 + labelHeight * k;
-            paintLabel(g,v,y1Axis,labelR.x,y,labelR.width,a);
-            k++;
-          }
-        }
-
-        for (i = 0; i < nbv2; i++) {
-          v = y2Axis.getViews().get(i);
-          if (v.isLabelVisible()) {
-            int y = labelR.y + (labelR.height-nbLabel*labelHeight)/2 + labelHeight * k;
-            paintLabel(g,v,y2Axis,labelR.x,y,labelR.width,a);
-            k++;
-          }
-        }
-
       }
 
     }
@@ -2346,16 +2274,18 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     int i;
     int MX = margin.width;
     int MY = margin.height;
-    int labelTHeight = 0; // Total label height
 
     // Reset sizes ------------------------------------------------------
-    headerR.setBounds(0,0,0,10);
+    headerR.setBounds(0,0,0,0);
     viewR.setBounds(0, 0, 0, 0);
     labelR.setBounds(0, 0, 0, 0);
     labelWidth = 0;
+    labelHeight = 0;
     headerWidth = 0;
     axisWidth = 0;
     axisHeight = 0;
+    axisFontUp = 0;
+    axisFontDown = 0;
     y1AxisThickness = 0;
     y2AxisThickness = 0;
 
@@ -2363,27 +2293,27 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     if (headerVisible && (header!=null) && (headerFont!=null)) {
       bounds = headerFont.getStringBounds(header, frc);
       headerWidth = (int) bounds.getWidth();
-      headerR.setBounds(MX , MY , w-2*MX , (int)bounds.getHeight() + 5);
+      headerR.setBounds(MX , MY , w-2*MX , (int)bounds.getHeight());
     }
 
     // Compute label number ------------------------------------------------------
-    nbLabel=0;
+    int nbLab=0;
     for (i = 0; i < y1Axis.getViews().size(); i++)
-      if( y1Axis.getViews().get(i).isLabelVisible() )
-        nbLabel++;
+      if( ((JLDataView) y1Axis.getViews().get(i)).isLabelVisible() )
+        nbLab++;
     for (i = 0; i < y2Axis.getViews().size(); i++)
-      if( y2Axis.getViews().get(i).isLabelVisible() )
-        nbLabel++;
+      if( ((JLDataView) y2Axis.getViews().get(i)).isLabelVisible() )
+        nbLab++;
 
     // Measure labels ------------------------------------------------------
-    if (labelVisible && (nbLabel>0) && (labelFont!=null)) {
+    if (labelVisible && (nbLab>0) && (labelFont!=null)) {
 
       JLDataView v;
       i = 0;
 
       double maxLength = 0;
       for (i = 0; i < y1Axis.getViews().size(); i++) {
-        v = y1Axis.getViews().get(i);
+        v = (JLDataView) y1Axis.getViews().get(i);
         if (v.isLabelVisible()) {
           bounds = labelFont.getStringBounds(v.getExtendedName() + " " + y1Axis.getAxeName(), frc);
           if (bounds.getWidth() > maxLength)
@@ -2391,7 +2321,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
         }
       }
       for (i = 0; i < y2Axis.getViews().size(); i++) {
-        v = y2Axis.getViews().get(i);
+        v = (JLDataView) y2Axis.getViews().get(i);
         if (v.isLabelVisible()) {
           bounds = labelFont.getStringBounds(v.getExtendedName() + " " + y2Axis.getAxeName(), frc);
           if (bounds.getWidth() > maxLength)
@@ -2399,34 +2329,22 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
         }
       }
 
-      labelHeight = (int) bounds.getHeight() + 2;
-      labelTHeight = (labelHeight * nbLabel) + 10;
-      labelWidth = (int) (maxLength + 55); // sample line width & margin
+      labelSHeight = (int) bounds.getHeight() + 2;
+      labelHeight = (labelSHeight * nbLab);
+      labelWidth = (int) (maxLength + 45); // sample line width
 
       switch( labelMode ) {
         case LABEL_UP:
-          labelR.setBounds(MX ,MY + headerR.height ,w-2*MX ,labelTHeight);
+          labelR.setBounds(MX ,MY + headerR.height ,w-2*MX ,labelHeight);
           break;
         case LABEL_DOWN:
-          labelR.setBounds(MX ,h-MY-labelTHeight, w-2*MX, labelTHeight);
+          labelR.setBounds(MX ,h-MY-labelHeight, w-2*MX, labelHeight);
           break;
         case LABEL_RIGHT:
           labelR.setBounds(w-MX-labelWidth, MY + headerR.height, labelWidth, h-2*MY-headerR.height);
           break;
         case LABEL_LEFT:
           labelR.setBounds(MX, MY + headerR.height, labelWidth, h - 2 * MY - headerR.height);
-          break;
-        case LABEL_ROW:
-          labelPerLine = w/labelWidth;
-          if(labelPerLine>nbLabel) labelPerLine = nbLabel;
-          if(labelPerLine<=1) {
-            // Revert to classic LABEL_DOWN
-            labelR.setBounds(MX ,h-MY-labelTHeight, w-2*MX, labelTHeight);
-          } else {
-            labelTHeight = labelHeight*(nbLabel/labelPerLine);
-            if(nbLabel%labelPerLine!=0) labelTHeight += labelHeight;
-            labelR.setBounds(MX ,h-MY-labelTHeight, w-2*MX, labelTHeight);
-          }
           break;
       }
 
@@ -2438,7 +2356,6 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
         viewR.setBounds(MX, MY + headerR.height + labelR.height , w - 2 * MX, h - 2*MY - headerR.height - labelR.height);
         break;
       case LABEL_DOWN:
-      case LABEL_ROW:
         viewR.setBounds(MX, MY + headerR.height , w - 2 * MX, h - 2 * MY - headerR.height - labelR.height);
         break;
       case LABEL_RIGHT:
@@ -2450,22 +2367,23 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     }
 
     // Measure Axis ------------------------------------------------------
-    xAxisThickness =  xAxis.getLabelFontDimension(frc);
-    if(xAxis.getOrientation()==JLAxis.HORIZONTAL_UP) {
-      xAxisUpMargin = xAxisThickness/2;
-    } else {
-      xAxisUpMargin = 0;
+    xAxis.computeXScale(views);
+
+    if ( y1Axis.isVisible() && (y1Axis.getViews().size() > 0) ) {
+      axisFontUp = y1Axis.getFontHeight(g);
+    } else if (y2Axis.isVisible() && (y2Axis.getViews().size() > 0)) {
+      axisFontUp = y2Axis.getFontHeight(g);
     }
 
-    axisHeight = viewR.height - xAxisThickness;
+    axisFontDown = xAxis.getFontHeight(g);
 
-    xAxis.computeXScale(views);
+    axisHeight = viewR.height - (axisFontUp + axisFontDown);
+
     y1Axis.measureAxis(frc, 0, axisHeight);
     y2Axis.measureAxis(frc, 0, axisHeight);
+
     y1AxisThickness = y1Axis.getThickness();
-    if(y1AxisThickness==0) y1AxisThickness = 5;
     y2AxisThickness = y2Axis.getThickness();
-    if(y2AxisThickness==0) y2AxisThickness = 5;
 
     axisWidth = viewR.width - (y1AxisThickness+y2AxisThickness);
 
@@ -2509,7 +2427,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     int h = getHeight();
 
     // Create a vector containing all views
-    Vector<JLDataView> views = new Vector<JLDataView> (y1Axis.getViews());
+    Vector views = new Vector(y1Axis.getViews());
     views.addAll(y2Axis.getViews());
 
     // Avoid a partial repaint that can make bad looking fx
@@ -2544,11 +2462,17 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
     // Paint chart background
     int xOrg = viewR.x + y1AxisThickness;
-    int yOrg = viewR.y + axisHeight + xAxisUpMargin;
+    int yOrg;
+    if (isXAxisOnBottom() || getY1Axis().getScale() == JLAxis.LOG_SCALE){
+        yOrg = viewR.y + axisFontUp + axisHeight;
+    }
+    else {
+        yOrg = (int)getY1Axis().transform(0, 0, getXAxis()).getY();//RG comment : I changed this line to aline X Axis whith 0 on Y1 Axis      
+    }
 
     int xOrgY1 = viewR.x;
     int xOrgY2 = viewR.x + y1AxisThickness + axisWidth;
-    int yOrgY  = viewR.y + xAxisUpMargin;
+    int yOrgY  = viewR.y + axisFontUp;
 
     if (!chartBackground.equals(getBackground()) && axisWidth > 0 && axisHeight > 0) {
       g.setColor(chartBackground);
@@ -2710,7 +2634,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
       int i = 0;
       boolean found = false;
       while (i < labelRect.size() && !found) {
-        LabelRect r = labelRect.get(i);
+        LabelRect r = (LabelRect) labelRect.get(i);
         found = r.rect.contains(e.getX(), e.getY());
         if (found) {
           //Display the Dataview options
@@ -2725,98 +2649,92 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     if (e.getButton() == MouseEvent.BUTTON3) {
       int i;
 
-        zoomBackMenuItem.setEnabled(isZoomed());
-        // Gets user action state
-        for (i = 0; i < userActionMenuItem.length; i++) {
-          if (userActionMenuItem[i] instanceof JCheckBoxMenuItem) {
-            JCheckBoxMenuItem b = (JCheckBoxMenuItem) userActionMenuItem[i];
-            b.setSelected(fireGetActionState(b.getText()));
-          }
+      zoomBackMenuItem.setEnabled(isZoomed());
+      // Gets user action state
+      for (i = 0; i < userActionMenuItem.length; i++) {
+        if (userActionMenuItem[i] instanceof JCheckBoxMenuItem) {
+          JCheckBoxMenuItem b = (JCheckBoxMenuItem) userActionMenuItem[i];
+          b.setSelected(fireGetActionState(b.getText()));
         }
-
-        // Add dataView table item
-        tableMenu.removeAll();
-        tableMenu.add(tableAllMenuItem);
-
-        // --------
-        if (y1Axis.getViewNumber() > 0) tableMenu.add(new JSeparator());
-        for (i = 0; i < tableSingleY1MenuItem.length; i++)
-          tableSingleY1MenuItem[i].removeActionListener(this);
-        tableSingleY1MenuItem = new JMenuItem[y1Axis.getViewNumber()];
-        for (i = 0; i < y1Axis.getViewNumber(); i++) {
-          tableSingleY1MenuItem[i] = new JMenuItem(y1Axis.getDataView(i).getName());
-          tableSingleY1MenuItem[i].addActionListener(this);
-          tableMenu.add(tableSingleY1MenuItem[i]);
-        }
-
-        // --------
-        if (y1Axis.getViewNumber() > 0 && y2Axis.getViewNumber() > 0) tableMenu.add(new JSeparator());
-        for (i = 0; i < tableSingleY2MenuItem.length; i++)
-          tableSingleY2MenuItem[i].removeActionListener(this);
-        tableSingleY2MenuItem = new JMenuItem[y2Axis.getViewNumber()];
-        for (i = 0; i < y2Axis.getViewNumber(); i++) {
-          tableSingleY2MenuItem[i] = new JMenuItem(y2Axis.getDataView(i).getName());
-          tableSingleY2MenuItem[i].addActionListener(this);
-          tableMenu.add(tableSingleY2MenuItem[i]);
-        }
-
-        // Add dataView option menu
-        dvMenu.removeAll();
-        for (i = 0; i < dvY1MenuItem.length; i++)
-          dvY1MenuItem[i].removeActionListener(this);
-        for (i = 0; i < dvY2MenuItem.length; i++)
-          dvY2MenuItem[i].removeActionListener(this);
-
-        dvY1MenuItem = new JMenuItem[y1Axis.getViewNumber()];
-        dvY2MenuItem = new JMenuItem[y2Axis.getViewNumber()];
-
-        int unamedDv = 1;
-
-        for(i = 0; i<y1Axis.getViewNumber(); i++ ) {
-          String dvName = y1Axis.getDataView(i).getName();
-          if(dvName.length()==0) { dvName = "Dataview #" + unamedDv;unamedDv++; }
-          dvY1MenuItem[i] = new JMenuItem(dvName);
-          dvY1MenuItem[i].addActionListener(this);
-          dvMenu.add(dvY1MenuItem[i]);
-        }
-        for(i = 0; i<y2Axis.getViewNumber(); i++ ) {
-          String dvName = y2Axis.getDataView(i).getName();
-          if(dvName.length()==0) { dvName = "Dataview #" + unamedDv;unamedDv++; }
-          dvY2MenuItem[i] = new JMenuItem(dvName);
-          dvY2MenuItem[i].addActionListener(this);
-          dvMenu.add(dvY2MenuItem[i]);
-        }
-
-        // DataView Statistics item
-        statMenu.removeAll();
-        statMenu.add(statAllMenuItem);
-
-        // --------
-        if (y1Axis.getViewNumber() > 0) statMenu.add(new JSeparator());
-        for (i = 0; i < statSingleY1MenuItem.length; i++)
-          statSingleY1MenuItem[i].removeActionListener(this);
-        statSingleY1MenuItem = new JMenuItem[y1Axis.getViewNumber()];
-        for (i = 0; i < y1Axis.getViewNumber(); i++) {
-          statSingleY1MenuItem[i] = new JMenuItem(y1Axis.getDataView(i).getName());
-          statSingleY1MenuItem[i].addActionListener(this);
-          statMenu.add(statSingleY1MenuItem[i]);
-        }
-
-        // --------
-        if (y1Axis.getViewNumber() > 0 && y2Axis.getViewNumber() > 0) statMenu.add(new JSeparator());
-        for (i = 0; i < statSingleY2MenuItem.length; i++)
-          statSingleY2MenuItem[i].removeActionListener(this);
-        statSingleY2MenuItem = new JMenuItem[y2Axis.getViewNumber()];
-        for (i = 0; i < y2Axis.getViewNumber(); i++) {
-          statSingleY2MenuItem[i] = new JMenuItem(y2Axis.getDataView(i).getName());
-          statSingleY2MenuItem[i].addActionListener(this);
-          statMenu.add(statSingleY2MenuItem[i]);
-        }
-
-        chartMenu.show(this, e.getX(), e.getY());
       }
 
+      // Add dataView table item
+      tableMenu.removeAll();
+      tableMenu.add(tableAllMenuItem);
+
+      // --------
+      if (y1Axis.getViewNumber() > 0) tableMenu.add(new JSeparator());
+      for (i = 0; i < tableSingleY1MenuItem.length; i++)
+        tableSingleY1MenuItem[i].removeActionListener(this);
+      tableSingleY1MenuItem = new JMenuItem[y1Axis.getViewNumber()];
+      for (i = 0; i < y1Axis.getViewNumber(); i++) {
+        tableSingleY1MenuItem[i] = new JMenuItem(y1Axis.getDataView(i).getName());
+        tableSingleY1MenuItem[i].addActionListener(this);
+        tableMenu.add(tableSingleY1MenuItem[i]);
+      }
+
+      // --------
+      if (y1Axis.getViewNumber() > 0 && y2Axis.getViewNumber() > 0) tableMenu.add(new JSeparator());
+      for (i = 0; i < tableSingleY2MenuItem.length; i++)
+        tableSingleY2MenuItem[i].removeActionListener(this);
+      tableSingleY2MenuItem = new JMenuItem[y2Axis.getViewNumber()];
+      for (i = 0; i < y2Axis.getViewNumber(); i++) {
+        tableSingleY2MenuItem[i] = new JMenuItem(y2Axis.getDataView(i).getName());
+        tableSingleY2MenuItem[i].addActionListener(this);
+        tableMenu.add(tableSingleY2MenuItem[i]);
+      }
+
+      // Add dataView option menu
+      dvMenu.removeAll();
+      for (i = 0; i < dvY1MenuItem.length; i++)
+        dvY1MenuItem[i].removeActionListener(this);
+      for (i = 0; i < dvY2MenuItem.length; i++)
+        dvY2MenuItem[i].removeActionListener(this);
+
+      dvY1MenuItem = new JMenuItem[y1Axis.getViewNumber()];
+      dvY2MenuItem = new JMenuItem[y2Axis.getViewNumber()];
+
+      for(i = 0; i<y1Axis.getViewNumber(); i++ ) {
+        dvY1MenuItem[i] = new JMenuItem(y1Axis.getDataView(i).getName());
+        dvY1MenuItem[i].addActionListener(this);
+        dvMenu.add(dvY1MenuItem[i]);
+      }
+      for(i = 0; i<y2Axis.getViewNumber(); i++ ) {
+        dvY2MenuItem[i] = new JMenuItem(y2Axis.getDataView(i).getName());
+        dvY2MenuItem[i].addActionListener(this);
+        dvMenu.add(dvY2MenuItem[i]);
+      }
+
+      // DataView Statistics item
+      statMenu.removeAll();
+      statMenu.add(statAllMenuItem);
+
+      // --------
+      if (y1Axis.getViewNumber() > 0) statMenu.add(new JSeparator());
+      for (i = 0; i < statSingleY1MenuItem.length; i++)
+        statSingleY1MenuItem[i].removeActionListener(this);
+      statSingleY1MenuItem = new JMenuItem[y1Axis.getViewNumber()];
+      for (i = 0; i < y1Axis.getViewNumber(); i++) {
+        statSingleY1MenuItem[i] = new JMenuItem(y1Axis.getDataView(i).getName());
+        statSingleY1MenuItem[i].addActionListener(this);
+        statMenu.add(statSingleY1MenuItem[i]);
+      }
+
+      // --------
+      if (y1Axis.getViewNumber() > 0 && y2Axis.getViewNumber() > 0) statMenu.add(new JSeparator());
+      for (i = 0; i < statSingleY2MenuItem.length; i++)
+        statSingleY2MenuItem[i].removeActionListener(this);
+      statSingleY2MenuItem = new JMenuItem[y2Axis.getViewNumber()];
+      for (i = 0; i < y2Axis.getViewNumber(); i++) {
+        statSingleY2MenuItem[i] = new JMenuItem(y2Axis.getDataView(i).getName());
+        statSingleY2MenuItem[i].addActionListener(this);
+        statMenu.add(statSingleY2MenuItem[i]);
+      }
+
+      chartMenu.show(this, e.getX(), e.getY());
     }
+
+  }
 
   //****************************************
   // redraw the panel
@@ -3011,11 +2929,15 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     //Add data
     v.add(x, y);
 
+    // Garbage
+    int nb = garbageData(v);
+    if (nb > 0 && v.getAxis() != null) need_repaint = true;
+
     // Does not repaint if zoom drag
     if (zoomDrag) return;
 
     if (xAxis.isXY()) {
-      // Perform full update in XY
+      // Perform fullupate in XY
       repaint();
       return;
     }
@@ -3031,12 +2953,9 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
       if (yaxis.getBoundRect().contains(p) && !need_repaint) {
         // We can perform fast update
-        Graphics g = getGraphics();
-        yaxis.drawFast(g, lp, p, v);
-        g.dispose();
+        yaxis.drawFast(getGraphics(), lp, p, v);
       } else {
         // Full update needed
-        garbageData(v);
         repaint();
       }
 
@@ -3051,7 +2970,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   public void setTimePrecision(int milliseconds) {
       timePrecision = milliseconds;
   }
-  
+
   /**
    * Returns the allowed margin to make a projection on a line on data show (default: 0).
    * @return The allowed margin to make a projection on a line on data show (default: 0).
@@ -3061,7 +2980,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   }
 
   /**
-   * Used with saveDataFile(). Returns the String used to represent "no data" (default : "").
+   * Used with saveDataFile(). Returns the String used to represent "no data" (default : "*").
    * @return The String used to represent "no data"
    */
   public String getNoValueString () {
@@ -3069,7 +2988,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   }
 
   /**
-   * Used with saveDataFile(). Sets the String used to represent "no data" (default : "").
+   * Used with saveDataFile(). Sets the String used to represent "no data" (default : "*").
    * @param noValueString The String used to represent "no data"
    */
   public void setNoValueString (String noValueString) {
@@ -3107,21 +3026,12 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
       this.dialogParent = parent;
   }
 
-  public void removeDataView(JLDataView view) {
-    if (view != null) {
-      JLAxis axis = view.getAxis();
-      if (axis != null) {
-        axis.removeDataView(view);
-      }
-    }
-  }
-
   public void reset () {
     reset(true);
   }
 
   protected void reset(boolean showConfirmDialog) {
-    Vector<JLDataView> existingViews = new Vector<JLDataView>();
+    Vector existingViews = new Vector();
     if (xAxis.isXY()) existingViews.addAll(xAxis.getViews());
     existingViews.addAll(y1Axis.getViews());
     existingViews.addAll(y2Axis.getViews());
@@ -3141,47 +3051,27 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
         return;
       }
     }
+    existingViews.clear();
+    existingViews = null;
+    
     maxDisplayDuration = Double.POSITIVE_INFINITY;
     displayDuration = Double.POSITIVE_INFINITY;
 
-    for (int i = 0; i < existingViews.size(); i++) {
-      removeDataView( existingViews.get(i) );
-    }
-
+    getY1Axis().clearDataView();
     getY1Axis().setLabels(null, null);
     getY1Axis().setScale(JLAxis.LINEAR_SCALE);
     getY1Axis().setAutoScale(true);
 
+    getY2Axis().clearDataView();
     getY2Axis().setLabels(null, null);
     getY2Axis().setScale(JLAxis.LINEAR_SCALE);
     getY2Axis().setAutoScale(true);
 
+    getXAxis().clearDataView();
     getXAxis().setLabels(null, null);
     getXAxis().setScale(JLAxis.LINEAR_SCALE);
     getXAxis().setAutoScale(true);
-
-    existingViews.clear();
-    existingViews = null;
   }
-  
-  protected JMenuItem getUserActionMenuItem(String actionName)
-  {
-      int i;
-      int correspondingIndex = -1;
-
-      for (i = 0; i < userAction.length; i++)
-      {
-          if ( userAction[i].equals(actionName) )
-          {
-              correspondingIndex = i;
-              break;
-          }
-      }
-        
-      if (correspondingIndex == -1) return null;
-      return userActionMenuItem[correspondingIndex];
-  }
-  
   //****************************************
   // Debug stuff
 
@@ -3189,50 +3079,128 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
     final JFrame f = new JFrame();
     final JLChart chart = new JLChart();
-    final JLDataView v = new JLDataView();
+    final JLDataView v1 = new JLDataView();
+    final JLDataView v2 = new JLDataView();
+    //double startTime = (double) ((System.currentTimeMillis() / 1000) * 1000);
 
     // Initialise chart properties
     chart.setHeaderFont(new Font("Times", Font.BOLD, 18));
     chart.setLabelFont(new Font("Times", Font.BOLD, 12));
     chart.setHeader("Test DataView");
-
+    
     // Initialise axis properties
-    chart.getY1Axis().setName("mAp");
+    chart.getY1Axis().setName("mA");
     chart.getY1Axis().setAutoScale(false);
-    chart.getY1Axis().setMinimum(-1);
-    chart.getY1Axis().setMaximum(1);
+    chart.getY1Axis().setMinimum(-120);
+    chart.getY1Axis().setMaximum(0);
+    chart.getY1Axis().setLabels(
+            new String[] {"-120","-100","-80","-60","-40","-20","0"} ,
+            new double[] {-120,-100,-80,-60,-40,-20,0}
+    );
+    chart.getY2Axis().setName("unit");
 
+    chart.getXAxis().setAutoScale(true);
     chart.getXAxis().setName("Value");
     chart.getXAxis().setGridVisible(true);
     chart.getXAxis().setSubGridVisible(true);
-    chart.getXAxis().setAnnotation(JLAxis.TIME_ANNO);
-    chart.getXAxis().setPercentScrollback(10.0);
+    chart.getXAxis().setAnnotation(JLAxis.VALUE_ANNO);
     chart.getY1Axis().setGridVisible(true);
     chart.getY1Axis().setSubGridVisible(true);
-    chart.getY2Axis().setVisible(true);
-    chart.getY2Axis().setName("mAp");
-    chart.setDisplayDuration(100000);
+    chart.getY2Axis().setVisible(false);
 
-    //v3.setName("Cos() function");
-    v.setMarker(JLDataView.MARKER_DOT);
-    chart.getY1Axis().addDataView(v);
+    if (args.length > 0)
+    {
+      chart.reset(false);
+      chart.loadDataFile(args[0]);
+    }
 
-    Thread refreshThread = new Thread() {
-      public void run() {
-        while(true) {
-          long   now = System.currentTimeMillis();
-          double t = (double)now;
-          double y = Math.cos(t/2000.0);
-          chart.addData(v,t,y);
-          try {
-            Thread.sleep(100);
-          } catch(InterruptedException e) {}
-        }
-      }
-    };
-    refreshThread.start();
-    
-    // -----------------------------------------------------------------
+    // Build dataview
+    /*
+    v1.add(startTime, -10.0);
+    v1.add(startTime + 30007, -15.0);
+    v1.add(startTime + 60008, 17.0);
+    v1.add(startTime + 90010, 21.0);
+    v1.add(startTime + 120147, 22.0);
+    v1.add(startTime + 150000, 24.0);
+    v1.add(startTime + 180000, 98.0);
+    v1.add(startTime + 210000, Double.NaN);
+    v1.add(startTime + 240000, 21.0);
+    v1.add(startTime + 270000, 99.0);
+    v1.add(startTime + 300000, 50.0);
+    v1.add(startTime + 330000, 40.0);
+    v1.add(startTime + 360000, 30.0);
+    v1.add(startTime + 390000, 20.0);
+    */
+
+    v1.add(-6, -10.0);
+    v1.add(-5, -15.0);
+    v1.add(-4, 17.0);
+    v1.add(-3, 21.0);
+    v1.add(-2, 22.0);
+    v1.add(-1, 24.0);
+    v1.add(0, 98.0);
+    v1.add(1, Double.NaN);
+    v1.add(2, 21.0);
+    v1.add(3, 99.0);
+    v1.add(4, 50.0);
+    v1.add(5, 40.0);
+    v1.add(6, 30.0);
+    v1.add(7, 20.0);
+
+    v1.setMarker(JLDataView.MARKER_CIRCLE);
+    v1.setStyle(JLDataView.STYLE_DASH);
+    v1.setName("Le signal 1");
+    v1.setUnit("std");
+    v1.setClickable(true);
+    v1.setUserFormat("%5.2f");
+
+    // Add the dataview to the chart
+    //chart.getY1Axis().addDataView(v1);
+   // chart.getY1Axis().addDataView(new JLDataView());
+
+
+    // Build a second dataview
+    /*
+    v2.add(startTime, -10.0);
+    v2.add(startTime + 30000, -5.0);
+    v2.add(startTime + 60000, 7.0);
+    v2.add(startTime + 90000, 11.0);
+    v2.add(startTime + 120000, 12.0);
+    v2.add(startTime + 150000, 14.0);
+    v2.add(startTime + 180000, 78.0);
+    v2.add(startTime + 210000, Double.NaN);
+    v2.add(startTime + 240000, 22.0);
+    v2.add(startTime + 270000, 55.0);
+    v2.add(startTime + 300000, 42.0);
+    v2.add(startTime + 330000, 11.0);
+    v2.add(startTime + 360000, 47.0);
+    v2.add(startTime + 390000, 12.0);
+*/
+    v2.add(-6, -10.0);
+    v2.add(-5, -5.0);
+    v2.add(-4, 7.0);
+    v2.add(-3, 11.0);
+    v2.add(-2, 12.0);
+    v2.add(-1, 14.0);
+    v2.add(0, 78.0);
+    v2.add(1, Double.NaN);
+    v2.add(2, 22.0);
+    v2.add(3, 55.0);
+    v2.add(4, 42.0);
+    v2.add(5, 11.0);
+    v2.add(6, 47.0);
+    v2.add(7, 12.0);
+
+    v2.setName("Le signal 2");
+    v2.setUnit("std");
+    v2.setColor(Color.blue);
+    v2.setLineWidth(3);
+    v2.setFillColor(Color.orange);
+    v2.setFillStyle(JLDataView.FILL_STYLE_SOLID);
+    v2.setViewType(JLDataView.TYPE_BAR);
+
+    // Add it to the chart
+    //chart.getY2Axis().addDataView(v2);
 
     JPanel bot = new JPanel();
     bot.setLayout(new FlowLayout());

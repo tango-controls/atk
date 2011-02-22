@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * ScalarCommandInput.java
  *
  * Created on January 16, 2002, 4:48 PM
@@ -35,7 +13,7 @@ import java.awt.*;
  */
 public class ScalarCommandInput extends javax.swing.JPanel implements IInput
 {
-    java.util.Vector<String>   inputList;
+    java.util.Vector   inputList;
     /** Creates new form ScalarCommandInput */
 
     public ScalarCommandInput(ICommand command)
@@ -45,7 +23,7 @@ public class ScalarCommandInput extends javax.swing.JPanel implements IInput
     }
     
     public ScalarCommandInput() {
-	inputList = new java.util.Vector<String> (1);
+	inputList = new java.util.Vector(1);
         initComponents();
     }
 
@@ -140,7 +118,7 @@ public class ScalarCommandInput extends javax.swing.JPanel implements IInput
 
 
 
-    public java.util.List<String> getInput()
+    public java.util.List getInput()
     {
 	inputList.clear();
 	if (jTextField1.getText().length() > 0)

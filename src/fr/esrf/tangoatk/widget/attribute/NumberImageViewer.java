@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.attribute;
 
 import java.awt.BorderLayout;
@@ -36,6 +14,8 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -48,21 +28,18 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Vector;
-
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -73,9 +50,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.event.EventListenerList;
 import javax.swing.filechooser.FileFilter;
-
 import com.braju.format.Format;
-
 import fr.esrf.TangoDs.AttrManip;
 import fr.esrf.tangoatk.core.IImageListener;
 import fr.esrf.tangoatk.core.INumberImage;
@@ -90,7 +65,6 @@ import fr.esrf.tangoatk.widget.util.JGradientViewer;
 import fr.esrf.tangoatk.widget.util.JImage;
 import fr.esrf.tangoatk.widget.util.JSmoothLabel;
 import fr.esrf.tangoatk.widget.util.JTableRow;
-import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
 import fr.esrf.tangoatk.widget.util.chart.AxisPanel;
 import fr.esrf.tangoatk.widget.util.chart.CfFileReader;
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
@@ -111,22 +85,19 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   // ------------------------------------------------------
   // Private data
   // ------------------------------------------------------
-  protected double[][] doubleValues = null;
+  private double[][] doubleValues = null;
   private Rectangle oldSelection = null;
-  protected int profileMode;
+  private int profileMode;
   private boolean showingMenu;
   private boolean snapToGrid;
   private boolean sigHistogram;
-  private boolean rectXYmode;
   private boolean isNegative;
-  private int integrationWidthH;
-  private int integrationWidthV;
-  protected int startHisto;
+  private int startHisto;
   private Gradient gColor;
   private int[] gColormap;
   private int iSz; // Image size
   private EventListenerList listenerList;  // list of Roi listeners
-  protected Insets noMargin = new Insets(0,0,0,0);
+  private Insets noMargin = new Insets(0,0,0,0);
   private boolean autoZoom = false;
   private boolean firstRefresh = false;
   private boolean userZoom = false;
@@ -150,25 +121,23 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   // ------------------------------------------------------
 
   protected JImage imagePanel;
-  protected JScrollPane imageView;
+  private JScrollPane imageView;
 
   // Button panel
-  protected JPanel buttonPanel;
-  protected JButton selectButton;
-  protected JButton selectMaxButton;
-  protected JButton selectColorButton;
-  protected JButton fileButton;
-  protected JButton zoomButton;
-  protected JButton tableButton;
-  protected JButton profileButton;
-  protected JButton profile2Button;
-  protected JButton histoButton;
-  protected JButton settingsButton;
-  protected JButton axisButton;
-  protected JButton loadButton;
-  protected JButton saveButton;
-  protected JButton printButton;
-  protected JScrollPane buttonView;
+  private JPanel buttonPanel;
+  private JButton selectButton;
+  private JButton selectMaxButton;
+  private JButton fileButton;
+  private JButton zoomButton;
+  private JButton tableButton;
+  private JButton profileButton;
+  private JButton histoButton;
+  private JButton settingsButton;
+  private JButton axisButton;
+  private JButton loadButton;
+  private JButton saveButton;
+  private JButton printButton;
+  private JScrollPane buttonView;
 
   // Info panel
   private Font panelFont;
@@ -177,39 +146,29 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   private JLabel rangeLabel;
   private JLabel avgLabel;
   private JLabel selLabel;
-  protected JTextField selText;
+  private JTextField selText;
 
   // Popup menu
-  protected JPopupMenu imgMenu;
-  protected JMenuItem infoMenuItem;
-  protected JCheckBoxMenuItem bestFitMenuItem;
-  protected JCheckBoxMenuItem snapToGridMenuItem;
-  protected JCheckBoxMenuItem negativeMenuItem;
-  protected JCheckBoxMenuItem toolbarMenuItem;
-  protected JCheckBoxMenuItem statusLineMenuItem;
-  protected JCheckBoxMenuItem showGradMenuItem;
-  protected JMenuItem selectionMenuItem;
-  protected JMenuItem selectionMaxMenuItem;
-  protected JMenuItem selectionColorMenuItem;
-  protected JMenuItem fileMenuItem;
-  protected JMenuItem zoomMenuItem;
-  protected JMenuItem tableMenuItem;
-  protected JMenuItem lineProfileMenuItem;
-  protected JMenuItem lineProfile2MenuItem;
-  protected JMenu dblProfileMenu;
-  protected JCheckBoxMenuItem vLeftCheckMenuItem;
-  protected JCheckBoxMenuItem vCenterCheckMenuItem;
-  protected JCheckBoxMenuItem vRigthCheckMenuItem;
-  protected JCheckBoxMenuItem hTopCheckMenuItem;
-  protected JCheckBoxMenuItem hCenterCheckMenuItem;
-  protected JCheckBoxMenuItem hBottomCheckMenuItem;
-  protected JMenuItem histogramMenuItem;
-  protected JMenuItem settingsMenuItem;
-  protected JMenuItem loadMenuItem;
-  protected JMenuItem saveMenuItem;
-  protected JMenuItem saveDataFileMenuItem;
-  protected JMenuItem printMenuItem;
-  protected JCheckBoxMenuItem displayLogMenuItem;
+
+  private JPopupMenu imgMenu;
+  private JMenuItem infoMenuItem;
+  private JCheckBoxMenuItem bestFitMenuItem;
+  private JCheckBoxMenuItem snapToGridMenuItem;
+  private JCheckBoxMenuItem negativeMenuItem;
+  private JCheckBoxMenuItem toolbarMenuItem;
+  private JCheckBoxMenuItem statusLineMenuItem;
+  private JCheckBoxMenuItem showGradMenuItem;
+  private JMenuItem selectionMenuItem;
+  private JMenuItem selectionMaxMenuItem;
+  private JMenuItem fileMenuItem;
+  private JMenuItem zoomMenuItem;
+  private JMenuItem tableMenuItem;
+  private JMenuItem lineProfileMenuItem;
+  private JMenuItem histogramMenuItem;
+  private JMenuItem settingsMenuItem;
+  private JMenuItem loadMenuItem;
+  private JMenuItem saveMenuItem;
+  private JMenuItem printMenuItem;
 
   // Gradientviewer
   private JGradientViewer gradientTool;
@@ -217,7 +176,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   // ------------------------------------------------------
   // LineProfiler panel components
   // ------------------------------------------------------
-  protected LineProfilerViewer lineProfiler = null;
+  private LineProfilerViewer lineProfiler = null;
 
   // ------------------------------------------------------
   // Zoom panel components
@@ -241,17 +200,12 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   private LabelViewer attNameLabel;
   private JButton propButton;
   private JCheckBox sigHistogramCheck;
-  private JCheckBox rectDisplayCheck;
   private JCheckBox bestFitCheck;
   private JCheckBox autoBestFitCheck;
   private JLabel minBestFitLabel;
   private JTextField minBestFitText;
   private JLabel maxBestFitLabel;
   private JTextField maxBestFitText;
-  private JLabel integrationWidthHLabel;
-  private JTextField integrationWidthHText;
-  private JLabel integrationWidthVLabel;
-  private JTextField integrationWidthVText;
   private JCheckBox snapToGridCheck;
   private JLabel snapToGridLabel;
   private JTextField snapToGridText;
@@ -298,49 +252,270 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   // Used to open the file chooser dialog with the last used file filter
   protected FileFilter lastFileFilter = null;
 
-  protected boolean logValues = false;
-
-  
-  private int		rgbNaN = 0; //Added by Pascal Verdier to manage a specified color for NaN values.
-  private Color	        colorNaN = null; //Added by Pascal Verdier to manage a specified color for NaN values.
-
   /**
    * Create a new NumberImageViewer
    */
   public NumberImageViewer() {
+
     setLayout(new BorderLayout());
     setBorder(BorderFactory.createEtchedBorder());
 
     // ------------------------------------------------------
     // Main panel
     // ------------------------------------------------------
-    initImagePanel();
+    imagePanel = new JImage();
+    imagePanel.setBorder(null);
+    imagePanel.setSnapGrid(8);
+    imageView = new JScrollPane(imagePanel);
+    add(imageView, BorderLayout.CENTER);
 
     // ------------------------------------------------------
     // Toolbar
     // ------------------------------------------------------
-    initButtonPanel();
+    buttonPanel = new JPanel();
+    buttonPanel.setLayout(null);
+    buttonPanel.setPreferredSize(new Dimension(60, 500));
+    buttonView = new JScrollPane(buttonPanel);
+    buttonView.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    add(buttonView, BorderLayout.WEST);
+    buttonView.addComponentListener(new ComponentListener(){
+      public void componentResized(ComponentEvent e) { adjustToolbarSize(); }
+      public void componentMoved(ComponentEvent e) {}
+      public void componentShown(ComponentEvent e) { adjustToolbarSize(); }
+      public void componentHidden(ComponentEvent e) { adjustToolbarSize(); }
+    });
+
+    selectButton = new JButton();
+    selectButton.setMargin(noMargin);
+    selectButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_select.gif")));
+    selectButton.setBounds(2, 5, 36, 36);
+    selectButton.setToolTipText("Free selection");
+    selectButton.addActionListener(this);
+    buttonPanel.add(selectButton);
+    
+    selectMaxButton = new JButton();
+    selectMaxButton.setMargin(noMargin);
+    selectMaxButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_selectmax.gif")));
+    selectMaxButton.setBounds(2, 45, 36, 36);
+    selectMaxButton.setToolTipText("Select whole image");
+    selectMaxButton.addActionListener(this);
+    buttonPanel.add(selectMaxButton);
+
+    fileButton = new JButton();
+    fileButton.setMargin(noMargin);
+    fileButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_snapshot.gif")));
+    fileButton.setBounds(2, 85, 36, 36);
+    fileButton.setToolTipText("Save snapshot");
+    fileButton.addActionListener(this);
+    buttonPanel.add(fileButton);
+
+    zoomButton = new JButton();
+    zoomButton.setMargin(noMargin);
+    zoomButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_zoom.gif")));
+    zoomButton.setBounds(2, 125, 36, 36);
+    zoomButton.setToolTipText("Zoom selection");
+    zoomButton.addActionListener(this);
+    buttonPanel.add(zoomButton);
+
+    tableButton = new JButton();
+    tableButton.setMargin(noMargin);
+    tableButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_table.gif")));
+    tableButton.setBounds(2, 165, 36, 36);
+    tableButton.setToolTipText("Selection to table");
+    tableButton.addActionListener(this);
+    buttonPanel.add(tableButton);
+
+    profileButton = new JButton();
+    profileButton.setMargin(noMargin);
+    profileButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_profile.gif")));
+    profileButton.setBounds(2, 210, 36, 36);
+    profileButton.setToolTipText("Line profile");
+    profileButton.addActionListener(this);
+    buttonPanel.add(profileButton);
+
+    histoButton = new JButton();
+    histoButton.setMargin(noMargin);
+    histoButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_histo.gif")));
+    histoButton.setBounds(2, 245, 36, 36);
+    histoButton.setToolTipText("Histogram");
+    histoButton.addActionListener(this);
+    buttonPanel.add(histoButton);
+
+    settingsButton = new JButton();
+    settingsButton.setMargin(noMargin);
+    settingsButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_option.gif")));
+    settingsButton.setBounds(2, 290, 36, 36);
+    settingsButton.setToolTipText("Image viewer settings");
+    settingsButton.addActionListener(this);
+    buttonPanel.add(settingsButton);
+
+    axisButton = new JButton();
+    axisButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_axis.gif")));
+    axisButton.setMargin(noMargin);
+    axisButton.setBounds(2, 335, 36, 36);
+    axisButton.setToolTipText("Axis settings");
+    axisButton.addActionListener(this);
+    buttonPanel.add(axisButton);
+
+    loadButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_load_settings.gif")));
+    loadButton.setToolTipText("Load settings");
+    loadButton.setMargin(noMargin);
+    loadButton.setBounds(2, 380, 36, 36);
+    loadButton.addActionListener(this);
+    buttonPanel.add(loadButton);
+
+    saveButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_save_settings.gif")));
+    saveButton.setToolTipText("Save settings");
+    saveButton.setMargin(noMargin);
+    saveButton.setBounds(2, 415, 36, 36);
+    saveButton.addActionListener(this);
+    buttonPanel.add(saveButton);
+
+    printButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_print.gif")));
+    printButton.setToolTipText("Print Image");
+    printButton.setMargin(noMargin);
+    printButton.setBounds(2, 460, 36, 36);
+    printButton.addActionListener(this);
+    buttonPanel.add(printButton);
 
     // ------------------------------------------------------
     // Gradient tool (Status Line)
     // ------------------------------------------------------
-    initGradient();
+
+    gradientTool = new JGradientViewer();
+    gradientTool.getAxis().setMinimum(0);
+    gradientTool.getAxis().setMaximum(65536);
+    add(gradientTool, BorderLayout.EAST);
 
     // ------------------------------------------------------
     // Main panel (Status Line)
     // ------------------------------------------------------
-    initStatusLine();
+
+    cfgPanel = new JPanel();
+    cfgPanel.setLayout(null);
+    cfgPanel.setPreferredSize(new Dimension(0, 50));
+    add(cfgPanel, BorderLayout.SOUTH);
+
+    panelFont = new Font("Dialog", Font.PLAIN, 11);
+
+    statusLabel = new JLabel("");
+    statusLabel.setFont(panelFont);
+    statusLabel.setBounds(5, 3, 220, 20);
+    cfgPanel.add(statusLabel);
+
+    rangeLabel = new JLabel("");
+    rangeLabel.setFont(panelFont);
+    rangeLabel.setBounds(235, 3, 300, 20);
+    cfgPanel.add(rangeLabel);
+
+    avgLabel = new JLabel("");
+    avgLabel.setFont(panelFont);
+    avgLabel.setBounds(235, 25, 300, 20);
+    cfgPanel.add(avgLabel);
+
+    selLabel = new JLabel("Selection");
+    selLabel.setFont(panelFont);
+    selLabel.setBounds(5, 25, 55, 20);
+    cfgPanel.add(selLabel);
+
+    selText = new JTextField("None");
+    selText.setMargin(noMargin);
+    selText.setFont(panelFont);
+    selText.setBounds(65, 25, 160, 20);
+    selText.addKeyListener(this);
+
+    cfgPanel.add(selText);
 
     // ------------------------------------------------------
     // (Main Panel) Popup menu
     // ------------------------------------------------------
-    initPopupMenu();
+
+    imgMenu = new JPopupMenu();
+
+    infoMenuItem = new JMenuItem("Image Viewer");
+    infoMenuItem.setEnabled(false);
+
+    bestFitMenuItem = new JCheckBoxMenuItem("Best fit");
+    bestFitMenuItem.addActionListener(this);
+
+    snapToGridMenuItem = new JCheckBoxMenuItem("Align to grid");
+    snapToGridMenuItem.addActionListener(this);
+
+    negativeMenuItem = new JCheckBoxMenuItem("Negative image");
+    negativeMenuItem.addActionListener(this);
+
+    toolbarMenuItem = new JCheckBoxMenuItem("Show toolbar");
+    toolbarMenuItem.addActionListener(this);
+
+    statusLineMenuItem = new JCheckBoxMenuItem("Show status line");
+    statusLineMenuItem.addActionListener(this);
+
+    showGradMenuItem = new JCheckBoxMenuItem("Show gradient");
+    showGradMenuItem.addActionListener(this);
+
+    selectionMenuItem = new JMenuItem("Free selection");
+    selectionMenuItem.addActionListener(this);
+
+    selectionMaxMenuItem = new JMenuItem("Select all");
+    selectionMaxMenuItem.addActionListener(this);
+
+    lineProfileMenuItem = new JMenuItem("Line profile");
+    lineProfileMenuItem.addActionListener(this);
+
+    histogramMenuItem = new JMenuItem("Histogram");
+    histogramMenuItem.addActionListener(this);
+
+    fileMenuItem = new JMenuItem("Save selection");
+    fileMenuItem.addActionListener(this);
+
+    zoomMenuItem = new JMenuItem("Zoom selection");
+    zoomMenuItem.addActionListener(this);
+
+    settingsMenuItem = new JMenuItem("Settings");
+    settingsMenuItem.addActionListener(this);
+
+    tableMenuItem = new JMenuItem("Selection to table");
+    tableMenuItem.addActionListener(this);
+
+    loadMenuItem = new JMenuItem("Load settings");
+    loadMenuItem.addActionListener(this);
+
+    saveMenuItem = new JMenuItem("Save settings");
+    saveMenuItem.addActionListener(this);
+
+    printMenuItem = new JMenuItem("Print image");
+    printMenuItem.addActionListener(this);
+
+    imgMenu.add(infoMenuItem);
+    imgMenu.add(new JSeparator());
+    imgMenu.add(bestFitMenuItem);
+    imgMenu.add(negativeMenuItem);
+    imgMenu.add(snapToGridMenuItem);
+    imgMenu.add(toolbarMenuItem);
+    imgMenu.add(statusLineMenuItem);
+    imgMenu.add(showGradMenuItem);
+    imgMenu.add(new JSeparator());
+    imgMenu.add(selectionMenuItem);
+    imgMenu.add(selectionMaxMenuItem);
+    imgMenu.add(fileMenuItem);
+    imgMenu.add(zoomMenuItem);
+    imgMenu.add(tableMenuItem);
+    imgMenu.add(new JSeparator());
+    imgMenu.add(lineProfileMenuItem);
+    imgMenu.add(histogramMenuItem);
+    imgMenu.add(new JSeparator());
+    imgMenu.add(settingsMenuItem);
+    imgMenu.add(new JSeparator());
+    imgMenu.add(loadMenuItem);
+    imgMenu.add(saveMenuItem);
+    imgMenu.add(new JSeparator());
+    imgMenu.add(printMenuItem);
 
     // Private stuff
+    imagePanel.addMouseMotionListener(this);
+    imagePanel.addMouseListener(this);
+
     isBestFit = true;
-    rectXYmode = false;
-    integrationWidthH = 1;
-    integrationWidthV = 1;
     setAlignToGrid(true);
     autoBestFit = true;
     sigHistogram = false;
@@ -350,311 +525,13 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     curSelMax = 0.0;
     startHisto = 0;
     zoomFactor = 0; // 100%
+    gColor = new Gradient();
+    gColor.buildRainbowGradient();
+    gColormap = gColor.buildColorMap(65536);
+    gradientTool.setGradient(gColor);
     iSz = 1;
     listenerList = new EventListenerList();
-  }
 
-  protected void initImagePanel() {
-      imagePanel = new JImage();
-      imagePanel.setBorder(null);
-      imagePanel.setSnapGrid(8);
-      imageView = new JScrollPane(imagePanel);
-      add(imageView, BorderLayout.CENTER);
-      imagePanel.addMouseMotionListener(this);
-      imagePanel.addMouseListener(this);
-      imagePanel.addKeyListener(this);
-  }
-
-  protected void initButtonPanel() {
-      buttonPanel = new JPanel();
-      buttonPanel.setLayout(null);
-      buttonPanel.setMinimumSize(new Dimension(60, 575));
-      buttonPanel.setPreferredSize(new Dimension(60, 575));
-      buttonView = new JScrollPane(buttonPanel);
-      buttonView.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-      add(buttonView, BorderLayout.WEST);
-
-      selectButton = new JButton();
-      selectButton.setMargin(noMargin);
-      selectButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_select.gif")));
-      selectButton.setBounds(2, 5, 36, 36);
-      selectButton.setToolTipText("Free selection");
-      selectButton.addActionListener(this);
-      buttonPanel.add(selectButton);
-      
-      selectMaxButton = new JButton();
-      selectMaxButton.setMargin(noMargin);
-      selectMaxButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_selectmax.gif")));
-      selectMaxButton.setBounds(2, 40, 36, 36);
-      selectMaxButton.setToolTipText("Select whole image");
-      selectMaxButton.addActionListener(this);
-      buttonPanel.add(selectMaxButton);
-
-      selectColorButton = new JButton();
-      selectColorButton.setMargin(noMargin);
-      selectColorButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_select_color.gif")));
-      selectColorButton.setBounds(2, 75, 36, 36);
-      selectColorButton.setToolTipText("Selection Color...");
-      selectColorButton.addActionListener(this);
-      buttonPanel.add(selectColorButton);
-
-      fileButton = new JButton();
-      fileButton.setMargin(noMargin);
-      fileButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_snapshot.gif")));
-      fileButton.setBounds(2, 115, 36, 36);
-      fileButton.setToolTipText("Save snapshot");
-      fileButton.addActionListener(this);
-      buttonPanel.add(fileButton);
-
-      zoomButton = new JButton();
-      zoomButton.setMargin(noMargin);
-      zoomButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_zoom.gif")));
-      zoomButton.setBounds(2, 155, 36, 36);
-      zoomButton.setToolTipText("Zoom selection");
-      zoomButton.addActionListener(this);
-      buttonPanel.add(zoomButton);
-
-      tableButton = new JButton();
-      tableButton.setMargin(noMargin);
-      tableButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_table.gif")));
-      tableButton.setBounds(2, 195, 36, 36);
-      tableButton.setToolTipText("Selection to table");
-      tableButton.addActionListener(this);
-      buttonPanel.add(tableButton);
-
-      profileButton = new JButton();
-      profileButton.setMargin(noMargin);
-      profileButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_profile.gif")));
-      profileButton.setBounds(2, 240, 36, 36);
-      profileButton.setToolTipText("Line profile");
-      profileButton.addActionListener(this);
-      buttonPanel.add(profileButton);
-
-      profile2Button = new JButton();
-      profile2Button.setMargin(noMargin);
-      profile2Button.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_profile2.gif")));
-      profile2Button.setBounds(2, 280, 36, 36);
-      profile2Button.setToolTipText("Line profiles");
-      profile2Button.addActionListener(this);
-      buttonPanel.add(profile2Button);
-
-      histoButton = new JButton();
-      histoButton.setMargin(noMargin);
-      histoButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_histo.gif")));
-      histoButton.setBounds(2, 320, 36, 36);
-      histoButton.setToolTipText("Histogram");
-      histoButton.addActionListener(this);
-      buttonPanel.add(histoButton);
-
-      settingsButton = new JButton();
-      settingsButton.setMargin(noMargin);
-      settingsButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_option.gif")));
-      settingsButton.setBounds(2, 365, 36, 36);
-      settingsButton.setToolTipText("Image viewer settings");
-      settingsButton.addActionListener(this);
-      buttonPanel.add(settingsButton);
-
-      axisButton = new JButton();
-      axisButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_axis.gif")));
-      axisButton.setMargin(noMargin);
-      axisButton.setBounds(2, 405, 36, 36);
-      axisButton.setToolTipText("Axis settings");
-      axisButton.addActionListener(this);
-      buttonPanel.add(axisButton);
-
-      loadButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_load_settings.gif")));
-      loadButton.setToolTipText("Load settings");
-      loadButton.setMargin(noMargin);
-      loadButton.setBounds(2, 450, 36, 36);
-      loadButton.addActionListener(this);
-      buttonPanel.add(loadButton);
-
-      saveButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_save_settings.gif")));
-      saveButton.setToolTipText("Save settings");
-      saveButton.setMargin(noMargin);
-      saveButton.setBounds(2, 490, 36, 36);
-      saveButton.addActionListener(this);
-      buttonPanel.add(saveButton);
-
-      printButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_print.gif")));
-      printButton.setToolTipText("Print Image");
-      printButton.setMargin(noMargin);
-      printButton.setBounds(2, 535, 36, 36);
-      printButton.addActionListener(this);
-      buttonPanel.add(printButton);
-
-  }
-
-  protected void initGradient() {
-      gradientTool = new JGradientViewer();
-      gradientTool.getAxis().setMinimum(0);
-      gradientTool.getAxis().setMaximum(65536);
-      add(gradientTool, BorderLayout.EAST);
-      gColor = new Gradient();
-      gColor.buildRainbowGradient();
-      gColormap = gColor.buildColorMap(65536);
-      gradientTool.setGradient(gColor);
-  }
-
-  protected void initStatusLine() {
-      cfgPanel = new JPanel();
-      cfgPanel.setLayout(null);
-      cfgPanel.setPreferredSize(new Dimension(0, 50));
-      add(cfgPanel, BorderLayout.SOUTH);
-
-      panelFont = new Font("Dialog", Font.PLAIN, 11);
-
-      statusLabel = new JLabel("");
-      statusLabel.setFont(panelFont);
-      statusLabel.setBounds(5, 3, 290, 20);
-      cfgPanel.add(statusLabel);
-
-      rangeLabel = new JLabel("");
-      rangeLabel.setFont(panelFont);
-      rangeLabel.setBounds(305, 3, 300, 20);
-      cfgPanel.add(rangeLabel);
-
-      avgLabel = new JLabel("");
-      avgLabel.setFont(panelFont);
-      avgLabel.setBounds(305, 25, 300, 20);
-      cfgPanel.add(avgLabel);
-
-      selLabel = new JLabel("Selection");
-      selLabel.setFont(panelFont);
-      selLabel.setBounds(5, 25, 55, 20);
-      cfgPanel.add(selLabel);
-
-      selText = new JTextField("None");
-      selText.setMargin(noMargin);
-      selText.setFont(panelFont);
-      selText.setBounds(65, 25, 230, 20);
-      selText.addKeyListener(this);
-
-      cfgPanel.add(selText);
-  }
-
-  protected void initPopupMenu() {
-      imgMenu = new JPopupMenu();
-
-      infoMenuItem = new JMenuItem("Image Viewer");
-      infoMenuItem.setEnabled(false);
-
-      bestFitMenuItem = new JCheckBoxMenuItem("Best fit");
-      bestFitMenuItem.addActionListener(this);
-
-      snapToGridMenuItem = new JCheckBoxMenuItem("Align to grid");
-      snapToGridMenuItem.addActionListener(this);
-
-      negativeMenuItem = new JCheckBoxMenuItem("Negative image");
-      negativeMenuItem.addActionListener(this);
-
-      toolbarMenuItem = new JCheckBoxMenuItem("Show toolbar");
-      toolbarMenuItem.addActionListener(this);
-
-      statusLineMenuItem = new JCheckBoxMenuItem("Show status line");
-      statusLineMenuItem.addActionListener(this);
-
-      showGradMenuItem = new JCheckBoxMenuItem("Show gradient");
-      showGradMenuItem.addActionListener(this);
-
-      selectionMenuItem = new JMenuItem("Free selection");
-      selectionMenuItem.addActionListener(this);
-
-      selectionMaxMenuItem = new JMenuItem("Select all");
-      selectionMaxMenuItem.addActionListener(this);
-
-      selectionColorMenuItem = new JMenuItem("Selection Color...");
-      selectionColorMenuItem.addActionListener(this);
-
-      lineProfileMenuItem = new JMenuItem("Line profile");
-      lineProfileMenuItem.addActionListener(this);
-
-      lineProfile2MenuItem = new JMenuItem("Line profiles");
-      lineProfile2MenuItem.addActionListener(this);
-
-      dblProfileMenu = new JMenu("Position");
-
-      hTopCheckMenuItem = new JCheckBoxMenuItem("Horizontal Line (Top)");
-      hTopCheckMenuItem.addActionListener(this);
-      dblProfileMenu.add(hTopCheckMenuItem);
-      hCenterCheckMenuItem = new JCheckBoxMenuItem("Horizontal Line (Center)");
-      hCenterCheckMenuItem.addActionListener(this);
-      dblProfileMenu.add(hCenterCheckMenuItem);
-      hBottomCheckMenuItem = new JCheckBoxMenuItem("Horizontal Line (Bottom)");
-      hBottomCheckMenuItem.addActionListener(this);
-      dblProfileMenu.add(hBottomCheckMenuItem);
-      dblProfileMenu.add(new JSeparator());
-      vLeftCheckMenuItem = new JCheckBoxMenuItem("Vertical Line (Left)");
-      vLeftCheckMenuItem.addActionListener(this);
-      dblProfileMenu.add(vLeftCheckMenuItem);
-      vCenterCheckMenuItem = new JCheckBoxMenuItem("Vertical Line (Center)");
-      vCenterCheckMenuItem.addActionListener(this);
-      dblProfileMenu.add(vCenterCheckMenuItem);
-      vRigthCheckMenuItem = new JCheckBoxMenuItem("Vertical Line (Right)");
-      vRigthCheckMenuItem.addActionListener(this);
-      dblProfileMenu.add(vRigthCheckMenuItem);
-      refreshDblProfileMenu();
-
-      histogramMenuItem = new JMenuItem("Histogram");
-      histogramMenuItem.addActionListener(this);
-
-      fileMenuItem = new JMenuItem("Save selection");
-      fileMenuItem.addActionListener(this);
-      
-      saveDataFileMenuItem = new JMenuItem("Save selection in data file");
-      saveDataFileMenuItem.addActionListener(this);            
-
-      zoomMenuItem = new JMenuItem("Zoom selection");
-      zoomMenuItem.addActionListener(this);
-
-      settingsMenuItem = new JMenuItem("Settings");
-      settingsMenuItem.addActionListener(this);
-
-      tableMenuItem = new JMenuItem("Selection to table");
-      tableMenuItem.addActionListener(this);
-
-      loadMenuItem = new JMenuItem("Load settings");
-      loadMenuItem.addActionListener(this);
-
-      saveMenuItem = new JMenuItem("Save settings");
-      saveMenuItem.addActionListener(this);
-      
-      printMenuItem = new JMenuItem("Print image");
-      printMenuItem.addActionListener(this);
-
-      displayLogMenuItem = new JCheckBoxMenuItem("Display log values");
-      displayLogMenuItem.addActionListener(this);
-
-      imgMenu.add(infoMenuItem);
-      imgMenu.add(new JSeparator());
-      imgMenu.add(bestFitMenuItem);
-      imgMenu.add(negativeMenuItem);
-      imgMenu.add(snapToGridMenuItem);
-      imgMenu.add(toolbarMenuItem);
-      imgMenu.add(statusLineMenuItem);
-      imgMenu.add(showGradMenuItem);
-      imgMenu.add(new JSeparator());
-      imgMenu.add(selectionMenuItem);
-      imgMenu.add(selectionMaxMenuItem);
-      imgMenu.add(selectionColorMenuItem);
-      imgMenu.add(fileMenuItem);
-      imgMenu.add(saveDataFileMenuItem);
-      imgMenu.add(zoomMenuItem);
-      imgMenu.add(tableMenuItem);
-      imgMenu.add(new JSeparator());
-      imgMenu.add(lineProfileMenuItem);
-      imgMenu.add(lineProfile2MenuItem);
-      imgMenu.add(dblProfileMenu);
-      imgMenu.add(histogramMenuItem);
-      imgMenu.add(new JSeparator());
-      imgMenu.add(settingsMenuItem);
-      imgMenu.add(new JSeparator());
-      imgMenu.add(loadMenuItem);
-      imgMenu.add(saveMenuItem);
-      imgMenu.add(new JSeparator());
-      imgMenu.add(printMenuItem);
-      imgMenu.add(new JSeparator());
-      imgMenu.add(displayLogMenuItem);
   }
 
   // ------------------------------------------------------
@@ -1028,13 +905,12 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
    * have to call setZoom() before setModel().
    * <pre>
    * Possible zoomIndex values are:
-   *   0 : 800%
-   *   1 : 400%
-   *   2 : 200%
-   *   3 : 100%
-   *   4 : 50%
-   *   5 : 25%
-   *   6 : 12.5%
+   *   0 : 400%
+   *   1 : 200%
+   *   2 : 100%
+   *   3 : 50%
+   *   4 : 25%
+   *   5 : 12.5%
    * </pre>
    * @param zoomIndex ZoomFactor index (see description).
    */
@@ -1042,31 +918,27 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
     switch (zoomIndex) {
 
-      case 0: // 800%
-        iSz = -8;
-        break;
-
-      case 1: // 400%
+      case 0: // 400%
         iSz = -4;
         break;
 
-      case 2: // 200%
+      case 1: // 200%
         iSz = -2;
         break;
 
-      case 3: // 100%
+      case 2: // 100%
         iSz = 1;
         break;
 
-      case 4: // 50%
+      case 3: // 50%
         iSz = 2;
         break;
 
-      case 5: //25%
+      case 4: // 25%
         iSz = 4;
         break;
 
-      case 6: //12.5%
+      case 5: //12.5%
         iSz = 8;
         break;
 
@@ -1095,26 +967,23 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
     int s = 0;
     switch (iSz) {
-      case -8:
+      case -4:
         s = 0;
         break;
-      case -4:
+      case -2:
         s = 1;
         break;
-      case -2:
+      case 1:
         s = 2;
         break;
-      case 1:
+      case 2:
         s = 3;
         break;
-      case 2:
+      case 4:
         s = 4;
         break;
-      case 4:
-        s = 5;
-        break;
       case 8:
-        s = 6;
+        s = 5;
         break;
     }
 
@@ -1443,50 +1312,16 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   // ----------------------------------------------------------
   // Private stuff
   // ----------------------------------------------------------
+  private void adjustToolbarSize() {
 
-  private void refreshDblProfileMenu() {
-
-    dblProfileMenu.setEnabled(profileMode==3);
-    if (profileMode == 3) {
-
-      hTopCheckMenuItem.setState(false);
-      hCenterCheckMenuItem.setState(false);
-      hBottomCheckMenuItem.setState(false);
-
-      switch (imagePanel.getHorizontalPosition()) {
-        case JImage.HORIZONTAL_TOP:
-          hTopCheckMenuItem.setState(true);
-          break;
-        case JImage.HORIZONTAL_CENTER:
-          hCenterCheckMenuItem.setState(true);
-          break;
-        case JImage.HORIZONTAL_BOTTOM:
-          hBottomCheckMenuItem.setState(true);
-          break;
-      }
-
-      vLeftCheckMenuItem.setState(false);
-      vCenterCheckMenuItem.setState(false);
-      vRigthCheckMenuItem.setState(false);
-
-      switch (imagePanel.getVerticalPosition()) {
-        case JImage.VERTICAL_LEFT:
-          vLeftCheckMenuItem.setState(true);
-          break;
-        case JImage.VERTICAL_CENTER:
-          vCenterCheckMenuItem.setState(true);
-          break;
-        case JImage.VERTICAL_RIGHT:
-          vRigthCheckMenuItem.setState(true);
-          break;
-      }
-
-    }
+    if(buttonView.isVisible())
+      buttonView.setPreferredSize(new Dimension(60,0));
+    revalidate();
 
   }
 
 
-  protected void mulRect(Rectangle r) {
+  private void mulRect(Rectangle r) {
     if(iSz<0) {
       r.x /= (-iSz);
       r.y /= (-iSz);
@@ -1514,7 +1349,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     }
   }
 
-  protected void mulPoint(Point p) {
+  private void mulPoint(Point p) {
 
     boolean xOk = false;
     boolean yOk = false;
@@ -1544,7 +1379,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
   }
 
-  protected void freePopup() {
+  private void freePopup() {
 
     if (lineProfiler != null) {
       lineProfiler.setData(null);
@@ -1560,94 +1395,33 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
   }
 
-  protected double[] buildProfileData(Point p1,Point p2) {
+  private double[] buildProfileData() {
 
     double[] profile;
 
     Dimension d = getCurrentImageSize();
 
-    mulPoint(p1);
-    mulPoint(p2);
+    Point[] p = imagePanel.getSelectionPoint();
 
-    int dx = p2.x - p1.x;
-    int dy = p2.y - p1.y;
-    int adx = Math.abs(dx);
-    int ady = Math.abs(dy);
-    double delta;
-    int i, j, xe, ye;
+    if (p != null) {
 
-    if( dx==0 && dy==0 ) {
-      return new double[0];
-    }
+      mulPoint(p[0]);
+      mulPoint(p[1]);
 
-    if (dx == 0 && dy != 0) {
+      int dx = p[1].x - p[0].x;
+      int dy = p[1].y - p[0].y;
+      int adx = Math.abs(dx);
+      int ady = Math.abs(dy);
+      double delta;
+      int i,xe,ye;
 
-      // Vertical profile
-      profile = new double[ady + 1];
-      ye = p1.y;
-      xe = p1.x;
-      int dxi = integrationWidthV/2;
-
-      for (i = 0; i <= ady; i++) {
-
-        double sum=0;
-        double n=0;
-
-        for(j=-dxi;j<=dxi;j++) {
-          if ( (xe+j) >= 0 && (xe+j) < d.width && ye >= 0 && ye < d.height)
-            sum += doubleValues[ye][xe+j];
-          else
-            sum = Double.NaN;
-          n = n + 1.0;
-        }
-        profile[i] = sum/n;
-
-        if (dy < 0)
-          ye--;
-        else
-          ye++;
-
-      }
-
-    } else if (dx != 0 && dy == 0) {
-
-      // Horizontal profile
-      profile = new double[adx + 1];
-      xe = p1.x;
-      ye = p1.y;
-      int dxi = integrationWidthH/2;
-
-      for (i = 0; i <= adx; i++) {
-
-        double sum=0;
-        double n=0;
-
-        for(j=-dxi;j<=dxi;j++) {
-          if (xe >= 0 && xe < d.width && (ye+j) >= 0 && (ye+j) < d.height)
-            sum += doubleValues[ye+j][xe];
-          else
-            sum = Double.NaN;
-          n = n + 1.0;
-        }
-        profile[i] = sum/n;
-
-        if (dx < 0)
-          xe--;
-        else
-          xe++;
-        
-      }
-
-    } else {
-
-      // Skew profile
       if (adx > ady) {
 
         delta = (double) dy / (double) adx;
         profile = new double[adx + 1];
-        xe = p1.x;
+        xe = p[0].x;
         for (i = 0; i <= adx; i++) {
-          ye = p1.y + (int) (delta * (double) i);
+          ye = p[0].y + (int) (delta * (double) i);
           if (xe >= 0 && xe < d.width && ye >= 0 && ye < d.height)
             profile[i] = doubleValues[ye][xe];
           else
@@ -1662,9 +1436,9 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
         delta = (double) dx / (double) ady;
         profile = new double[ady + 1];
-        ye = p1.y;
+        ye = p[0].y;
         for (i = 0; i <= ady; i++) {
-          xe = p1.x + (int) (delta * (double) i);
+          xe = p[0].x + (int) (delta * (double) i);
           if (xe >= 0 && xe < d.width && ye >= 0 && ye < d.height)
             profile[i] = doubleValues[ye][xe];
           else
@@ -1677,13 +1451,17 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
       }
 
-    }
+      return profile;
 
-    return profile;
+    } else {
+
+      return null;
+
+    }
 
   }
 
-  protected double[] buildHistogramData() {
+  private double[] buildHistogramData() {
 
     if (doubleValues == null)
       return null;
@@ -1752,19 +1530,13 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
   }
 
-  protected void refreshLineProfile() {
-
-    Point[] p;
+  private void refreshLineProfile() {
 
     if (lineProfiler != null && lineProfiler.isVisible() && profileMode > 0) {
 
-      refreshDblProfileMenu();
-
       switch (profileMode) {
         case 1:
-          p = imagePanel.getSelectionPoint();
-          if(p!=null) lineProfiler.setData(buildProfileData(p[0],p[1]));
-          else        lineProfiler.setData(null);
+          lineProfiler.setData(buildProfileData());
           break;
         case 2:
           double[] v = buildHistogramData();
@@ -1774,17 +1546,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
             lineProfiler.setData(null);
           }
           break;
-        case 3:
-          p = imagePanel.getSelectionCrossPoint();
-          if(p!=null) {
-            lineProfiler.setData(buildProfileData(p[0],p[1]));
-            lineProfiler.setData2(buildProfileData(p[2],p[3]));
-          } else {
-            lineProfiler.setData(null);
-            lineProfiler.setData2(null);
-          }
-          break;
-
       }
 
     }
@@ -1872,40 +1633,25 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     fireRoiChange();
   }
 
-  protected void refreshStatusLine() {
+  private void refreshStatusLine() {
 
     int m = imagePanel.getSelectionMode();
     String selStr = "None";
-    Point[] pts;
 
     switch (m) {
-      case JImage.MODE_LINE:
-        pts = imagePanel.getSelectionPoint();
+      case 0: // Line
+        Point[] pts = imagePanel.getSelectionPoint();
         if (pts != null) {
           mulPoint(pts[0]);
           mulPoint(pts[1]);
           selStr = "Line (" + pts[0].x + "," + pts[0].y + ") - (" + pts[1].x + "," + pts[1].y + ")";
         }
         break;
-      case JImage.MODE_CROSS:
-        pts = imagePanel.getSelectionCrossPoint();
-        if (pts != null) {
-          mulPoint(pts[0]);
-          mulPoint(pts[1]);
-          mulPoint(pts[2]);
-          mulPoint(pts[3]);
-          selStr = "(" + pts[0].x + "," + pts[0].y + ")-(" + pts[1].x + "," + pts[1].y + ")";
-          selStr += " (" + pts[2].x + "," + pts[2].y + ")-(" + pts[3].x + "," + pts[3].y + ")";
-        }
-        break;
-      case JImage.MODE_RECT:
+      case 1:
         Rectangle sel = imagePanel.getSelectionRect();
         if (sel != null) {
           mulRect(sel);
-          if(rectXYmode)
-            selStr = "Rect (" + sel.x + "," + sel.y + ") - (" + (sel.x + sel.width - 1) + "," + (sel.y + sel.height + -1) + ")";
-          else
-            selStr = "Rect (" + sel.x + "," + sel.y + ") - [" + sel.width + "," + sel.height + "]";
+          selStr = "Rect (" + sel.x + "," + sel.y + ") - [" + sel.width + "," + sel.height + "]";
         }
         break;
     }
@@ -1956,39 +1702,10 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     snapToGrid = snapToGridCheck.isSelected();
     isNegative = negativeCheck.isSelected();
     sigHistogram = sigHistogramCheck.isSelected();
-    rectXYmode = rectDisplayCheck.isSelected();
 
     setZoom(imageSizeCombo.getSelectedIndex());
 
     setAlignToGrid(snapToGrid);
-
-    try {
-
-      int iwh = Integer.parseInt(integrationWidthHText.getText());
-
-      if( iwh%2==0 ) {
-        JOptionPane.showMessageDialog(null, "Integration width (H) must be an odd number", "Error", JOptionPane.ERROR_MESSAGE);
-      } else {
-        integrationWidthH = iwh;
-      }
-
-    } catch (Exception e) {
-      JOptionPane.showMessageDialog(null, "Invalid syntax for integration width (H)", "Error", JOptionPane.ERROR_MESSAGE);
-    }
-
-    try {
-
-      int iwv = Integer.parseInt(integrationWidthVText.getText());
-
-      if( iwv%2==0 ) {
-        JOptionPane.showMessageDialog(null, "Integration width (V) must be an odd number", "Error", JOptionPane.ERROR_MESSAGE);
-      } else {
-        integrationWidthV = iwv;
-      }
-
-    } catch (Exception e) {
-      JOptionPane.showMessageDialog(null, "Invalid syntax for integration width (V)", "Error", JOptionPane.ERROR_MESSAGE);
-    }
 
     try {
 
@@ -2048,7 +1765,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     */
   public String getSettings() {
     constructSettingsPanel();
-    initSettings();
+
     String to_write = "";
 
     synchronized(this)
@@ -2123,7 +1840,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       
 
       // try to apply settings
-      Vector<?> param;
+      Vector param;
 
       param = f.getParam("minBestFitText");
       if (param == null) {
@@ -2535,9 +2252,17 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
         gradientPos[i] = pos;
       }
 
-      gColor = new Gradient(gradientPos,gradientColor);
+      gColor = new Gradient();
+      if (gradientCount == 5)
+      {
+        gColor.buildRainbowGradient();
+      }
+      for (int i = 0; i < gradientCount; i++)
+      {
+        gColor.setColorAt(i, gradientColor[i]);
+        gColor.setPosAt(i, gradientPos[i]);
+      }
       gColormap = gColor.buildColorMap(65536);
-      gradientTool.setGradient(gColor);
 
       applySettings();
       setToolbarVisible(toolbarMenuItem.isSelected());
@@ -2559,7 +2284,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
             if (f.isDirectory()) {
                 return true;
             }
-            String extension = MultiExtFileFilter.getExtension(f);
+            String extension = getExtension(f);
             if (extension != null && extension.equals("txt"))
                 return true;
             return false;
@@ -2576,7 +2301,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       File f = chooser.getSelectedFile();
       if (f != null) {
-        if (MultiExtFileFilter.getExtension(f) == null) {
+        if (getExtension(f) == null) {
           f = new File(f.getAbsolutePath() + ".txt");
         }
         if (f.exists())
@@ -2599,7 +2324,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
             if (f.isDirectory()) {
                 return true;
             }
-            String extension = MultiExtFileFilter.getExtension(f);
+            String extension = getExtension(f);
             if (extension != null && extension.equals("txt"))
                 return true;
             return false;
@@ -2668,7 +2393,23 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   private void showSettings() {
 
     constructSettingsPanel();
-    initSettings();  
+
+    minBestFitText.setText(Double.toString(bfMin));
+    maxBestFitText.setText(Double.toString(bfMax));
+
+    minBestFitLabel.setEnabled(!autoBestFit);
+    minBestFitText.setEnabled(!autoBestFit);
+    maxBestFitLabel.setEnabled(!autoBestFit);
+    maxBestFitText.setEnabled(!autoBestFit);
+
+    bestFitCheck.setSelected(isBestFit);
+    autoBestFitCheck.setSelected(autoBestFit);
+    sigHistogramCheck.setSelected(sigHistogram);
+    snapToGridCheck.setSelected(snapToGrid);
+    negativeCheck.setSelected(isNegative);
+    imageSizeCombo.setSelectedIndex(getZoom());
+
+    snapToGridText.setText(Integer.toString(imagePanel.getSnapGrid()));
 
     ATKGraphicsUtils.centerDialog(settingsDialog);
     settingsDialog.setVisible(true);
@@ -2679,34 +2420,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     }
 
   }
-  
-  private void initSettings(){
-
-      minBestFitText.setText(Double.toString(bfMin));
-      maxBestFitText.setText(Double.toString(bfMax));
-
-      integrationWidthVText.setText(Integer.toString(integrationWidthV));
-      integrationWidthHText.setText(Integer.toString(integrationWidthH));
-
-      minBestFitLabel.setEnabled(!autoBestFit);
-      minBestFitText.setEnabled(!autoBestFit);
-      maxBestFitLabel.setEnabled(!autoBestFit);
-      maxBestFitText.setEnabled(!autoBestFit);
-
-      bestFitCheck.setSelected(isBestFit);
-      autoBestFitCheck.setSelected(autoBestFit);
-      sigHistogramCheck.setSelected(sigHistogram);
-      snapToGridCheck.setSelected(snapToGrid);
-      negativeCheck.setSelected(isNegative);
-
-      imageSizeCombo.setSelectedIndex(getZoom());
-      snapToGridText.setText(Integer.toString(imagePanel.getSnapGrid()));
-      rectDisplayCheck.setSelected(rectXYmode);
-
-      gradViewer.setGradient(gColor);
-}
-
-
 
   private boolean buildTable() {
 
@@ -2798,22 +2511,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     tableDialog.setVisible(true);
 
   }
-  
-  //This method is used to construct table without displaying the table
-  private void constructTable() {
-
-      constructTablePanel();
-      synchronized (this) {
-        if (!buildTable()) return;
-      }
-  }
-  
-  //This method is used to save data file without displaying the table
-  private void saveDataFile() {
-      constructTable();
-      if (tablePanel != null)
-          tablePanel.saveDataFile();
-  }
 
   private void showPropertyFrame() {
 
@@ -2837,12 +2534,10 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       gradientTool.setGradient(gColor);
       gradientTool.repaint();
     }
-    
-    
 
   }
 
-  protected void constructLineProfiler() {
+  private void constructLineProfiler() {
     if (lineProfiler == null) {
 
       // -------------------------------------------------------------------
@@ -2943,8 +2638,8 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       // ------------------------------------------------------
       settingsPanel = new JPanel();
       settingsPanel.setLayout(null);
-      settingsPanel.setMinimumSize(new Dimension(290, 330));
-      settingsPanel.setPreferredSize(new Dimension(290, 330));
+      settingsPanel.setMinimumSize(new Dimension(290, 245));
+      settingsPanel.setPreferredSize(new Dimension(290, 245));
 
       attNameLabel = new LabelViewer();
       attNameLabel.setOpaque(false);
@@ -3043,7 +2738,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
       imageSizeCombo = new JComboBox();
       imageSizeCombo.setFont(panelFont);
-      imageSizeCombo.addItem("800  %");
       imageSizeCombo.addItem("400  %");
       imageSizeCombo.addItem("200  %");
       imageSizeCombo.addItem("100  %");
@@ -3058,74 +2752,42 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       js2.setBounds(0, 153, 500, 10);
       settingsPanel.add(js2);
 
-      integrationWidthHLabel = new JLabel("Integration width (Horizontal profile)");
-      integrationWidthHLabel.setFont(panelFont);
-      integrationWidthHLabel.setBounds(5,160,220,20);
-      settingsPanel.add(integrationWidthHLabel);
-
-      integrationWidthHText = new JTextField();
-      integrationWidthHText.setEditable(true);
-      integrationWidthHText.setBounds(230,160,50,20);
-      settingsPanel.add(integrationWidthHText);
-
-      integrationWidthVLabel = new JLabel("Integration width (Vertical profile)");
-      integrationWidthVLabel.setFont(panelFont);
-      integrationWidthVLabel.setBounds(5,185,220,20);
-      settingsPanel.add(integrationWidthVLabel);
-
-      integrationWidthVText = new JTextField();
-      integrationWidthVText.setEditable(true);
-      integrationWidthVText.setBounds(230,185,50,20);
-      settingsPanel.add(integrationWidthVText);
-
-      // ------------------------------------------------------------------------------------
-      JSeparator js3 = new JSeparator();
-      js3.setBounds(0, 218, 500, 10);
-      settingsPanel.add(js3);
-
       snapToGridCheck = new JCheckBox("Align to grid");
       snapToGridCheck.setSelected(false);
       snapToGridCheck.setFont(panelFont);
-      snapToGridCheck.setBounds(5, 225, 100, 20);
+      snapToGridCheck.setBounds(5, 160, 100, 20);
       snapToGridCheck.setToolTipText("Align the selection to the grid");
       settingsPanel.add(snapToGridCheck);
 
       snapToGridLabel = new JLabel("Grid spacing");
       snapToGridLabel.setFont(panelFont);
-      snapToGridLabel.setBounds(110, 225, 90, 20);
+      snapToGridLabel.setBounds(110, 160, 90, 20);
       settingsPanel.add(snapToGridLabel);
 
       snapToGridText = new JTextField("");
       snapToGridText.setMargin(noMargin);
       snapToGridText.setFont(panelFont);
-      snapToGridText.setBounds(205, 225, 50, 20);
+      snapToGridText.setBounds(205, 160, 50, 20);
       settingsPanel.add(snapToGridText);
 
-      sigHistogramCheck = new JCheckBox("Display significant data for histogram");
+      sigHistogramCheck = new JCheckBox("Display significative data for histogram");
       sigHistogramCheck.setSelected(false);
       sigHistogramCheck.setFont(panelFont);
-      sigHistogramCheck.setBounds(5, 250, 280, 20);
-      sigHistogramCheck.setToolTipText("Clip the histogram to significant data");
+      sigHistogramCheck.setBounds(5, 185, 280, 20);
+      sigHistogramCheck.setToolTipText("Clip the histogram to significative data");
       settingsPanel.add(sigHistogramCheck);
-
-      rectDisplayCheck = new JCheckBox("Display rectangle as (x1,y1) - (x2,y2)");
-      rectDisplayCheck.setSelected(false);
-      rectDisplayCheck.setFont(panelFont);
-      rectDisplayCheck.setBounds(5, 275, 280, 20);
-      rectDisplayCheck.setToolTipText("Display rectangle as (x1,y1) - (x2,y2) instead of (x1,y1) - [width,height]");
-      settingsPanel.add(rectDisplayCheck);
 
       okButton = new JButton();
       okButton.setText("Apply");
       okButton.setFont(panelFont);
-      okButton.setBounds(5, 300, 80, 25);
+      okButton.setBounds(5, 215, 80, 25);
       okButton.addActionListener(this);
       settingsPanel.add(okButton);
 
       cancelButton = new JButton();
       cancelButton.setText("Dismiss");
       cancelButton.setFont(panelFont);
-      cancelButton.setBounds(205, 300, 80, 25);
+      cancelButton.setBounds(205, 215, 80, 25);
       cancelButton.addActionListener(this);
       settingsPanel.add(cancelButton);
 
@@ -3145,12 +2807,22 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
   }
 
-
-  private void refreshStatusAndProlfile() {
-    synchronized (this) {
-      refreshStatusLine();
-      refreshLineProfile();
-    }
+  /**
+   * <code>getExtension</code> returns the extension of a given file,
+   * that is the part after the last `.' in the filename.
+   *
+   * @param f a <code>File</code> value
+   * @return a <code>String</code> value
+   */
+  private String getExtension(File f) {
+	String ext = null;
+	String s = f.getName();
+	int i = s.lastIndexOf('.');
+	
+	if (i > 0 &&  i < s.length() - 1) {
+	    ext = s.substring(i+1).toLowerCase();
+	}
+	return ext;
   }
 
   // ----------------------------------------------------------
@@ -3178,11 +2850,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       imagePanel.setSelection(0, 0, d.width, d.height);
       selectionChanged();
 
-    } else if (evt.getSource() == selectColorButton ||
-            evt.getSource() == selectionColorMenuItem) {
-
-      changeSelectionColor();
-
     } else if (evt.getSource() == fileButton ||
             evt.getSource() == fileMenuItem ) {
 
@@ -3191,35 +2858,30 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     } else if (evt.getSource() == profileButton ||
         evt.getSource() == lineProfileMenuItem) {
 
-      imagePanel.setSelectionMode(JImage.MODE_LINE);
+      imagePanel.setSelectionMode(0);
       constructLineProfiler();
       lineProfiler.setLineProfileMode();
       lineProfiler.setVisible(true);
       profileMode = 1;
-      refreshDblProfileMenu();
-      refreshStatusAndProlfile();
 
-    } else if (evt.getSource() == profile2Button ||
-        evt.getSource() == lineProfile2MenuItem) {
-
-      imagePanel.setSelectionMode(JImage.MODE_CROSS);
-      constructLineProfiler();
-      lineProfiler.setMode(LineProfilerViewer.LINE_MODE_DOUBLE);
-      lineProfiler.setVisible(true);
-      profileMode = 3;
-      refreshDblProfileMenu();
-      refreshStatusAndProlfile();
+      synchronized (this) {
+        refreshStatusLine();
+        refreshLineProfile();
+      }
 
     } else if (evt.getSource() == histoButton ||
         evt.getSource() == histogramMenuItem) {
 
-      imagePanel.setSelectionMode(JImage.MODE_RECT);
+      imagePanel.setSelectionMode(1);
       constructLineProfiler();
       lineProfiler.setHistogramMode();
       lineProfiler.setVisible(true);
       profileMode = 2;
-      refreshDblProfileMenu();
-      refreshStatusAndProlfile();
+
+      synchronized (this) {
+        refreshStatusLine();
+        refreshLineProfile();
+      }
 
     } else if (evt.getSource() == bestFitMenuItem) {
       setBestFit(!isBestFit());
@@ -3271,30 +2933,8 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       loadButtonActionPerformed();
     } else if (evt.getSource() == saveButton || evt.getSource() == saveMenuItem) {
       saveButtonActionPerformed();
-    } else if (evt.getSource() == saveDataFileMenuItem) {
-          saveDataFile();
     } else if (evt.getSource() == printButton || evt.getSource() == printMenuItem) {
       printImage();
-    } else if (evt.getSource() == displayLogMenuItem) {
-      setLogValues( displayLogMenuItem.isSelected() );
-    } else if (evt.getSource() == vLeftCheckMenuItem) {
-      imagePanel.setVerticalPosition(JImage.VERTICAL_LEFT);
-      refreshStatusAndProlfile();
-    } else if (evt.getSource() == vCenterCheckMenuItem) {
-      imagePanel.setVerticalPosition(JImage.VERTICAL_CENTER);
-      refreshStatusAndProlfile();
-    } else if (evt.getSource() == vRigthCheckMenuItem) {
-      imagePanel.setVerticalPosition(JImage.VERTICAL_RIGHT);
-      refreshStatusAndProlfile();
-    } else if (evt.getSource() == hTopCheckMenuItem) {
-      imagePanel.setHorizontalPosition(JImage.HORIZONTAL_TOP);
-      refreshStatusAndProlfile();
-    } else if (evt.getSource() == hCenterCheckMenuItem) {
-      imagePanel.setHorizontalPosition(JImage.HORIZONTAL_CENTER);
-      refreshStatusAndProlfile();
-    } else if (evt.getSource() == hBottomCheckMenuItem) {
-      imagePanel.setHorizontalPosition(JImage.HORIZONTAL_BOTTOM);
-      refreshStatusAndProlfile();
     }
 
   }
@@ -3400,7 +3040,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     }
 
   }
-  
+
   // ----------------------------------------------------------
   // Keyboard listener
   // ----------------------------------------------------------
@@ -3476,20 +3116,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
         refreshStatusLine();
       }
     }
-    else if (e.getSource() == imagePanel) {
-      switch ( e.getKeyCode() ) {
-        case KeyEvent.VK_UP:
-        case KeyEvent.VK_DOWN:
-        case KeyEvent.VK_LEFT:
-        case KeyEvent.VK_RIGHT:
-            synchronized(this) {
-                refreshStatusLine();
-                refreshSelectionMinMax();
-                refreshLineProfile();
-            }
-            break;
-      }
-    }
 
   }
 
@@ -3504,19 +3130,13 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   // ----------------------------------------------------------
 
   public void errorChange(fr.esrf.tangoatk.core.ErrorEvent errorEvent) {
-      setData(null);
   }
 
   public void stateChange(fr.esrf.tangoatk.core.AttributeStateEvent evt) {
   }
 
   public void imageChange(fr.esrf.tangoatk.core.NumberImageEvent evt) {
-    if (logValues) {
-      setData( computeLog( evt.getValue() ) );
-    }
-    else {
-      setData(evt.getValue());
-    }
+    setData(evt.getValue());
   }
 
   // ----------------------------------------------------------
@@ -3527,11 +3147,15 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
    * @param v  Value to assign to model. This image must have a height equals to 2.
    */
   public void setModel(INumberImage v) {
-    // Free old model
-    clearModel();
 
     if (settingsDialog != null)
       attNameLabel.setModel(v);
+
+    // Free old model
+    if (model != null) {
+      model.removeImageListener(this);
+      model = null;
+    }
 
     // Init new one
     if (v != null) {
@@ -3548,17 +3172,14 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       // make it visible
       model.refresh();
     }
+
   }
 
   /**
    * Removes all  listener belonging to the viewer.
    */
   public void clearModel() {
-    if (model == null) return;
-    
-    model.removeImageListener(this);
-    model = null;
-    if (imagePanel != null) imagePanel.setImage(null);
+    setModel(null);
   }
 
   // ----------------------------------------------------------
@@ -3771,18 +3392,39 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       for (j = 0; j < doubleValues.length; j++)
         for (i = 0; i < doubleValues[j].length; i++) {
           double v = doubleValues[j][i];
-          if ( (!Double.isNaN(v)) && (!Double.isInfinite(v)) )
+          if (Double.isNaN(v))
           {
-            // ignore NaN and Infinite values
+              if (autoBfMin == 65536.0 && autoBfMax == 0.0)
+              {
+                  autoBfMin = 0;
+                  autoBfMax = 0;
+              }
+          }
+          else if (Double.isInfinite(v))
+          {
+              if (v > 0)
+              {
+                  if (autoBfMin == 65536.0 && autoBfMax == 0.0)
+                  {
+                      autoBfMin = 0;
+                      autoBfMax = 65536;
+                  }
+              }
+              else
+              {
+                  if (autoBfMin == 65536.0 && autoBfMax == 0.0)
+                  {
+                      autoBfMin = -65535;
+                      autoBfMax = 0;
+                  }
+              }
+          }
+          else
+          {
             if (v > autoBfMax) autoBfMax = v;
             if (v < autoBfMin) autoBfMin = v;
           }
         }
-      if (autoBfMin == 65536.0 && autoBfMax == 0.0)
-      {
-          autoBfMin = 0;
-          autoBfMax = 0;
-      }
 
       bfa0 = -autoBfMin;
 
@@ -3892,7 +3534,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("edf"))
           return true;
         return false;
@@ -3922,7 +3564,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("jpg"))
           return true;
         return false;
@@ -3952,7 +3594,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("jpg"))
           return true;
         return false;
@@ -3982,7 +3624,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("png"))
           return true;
         return false;
@@ -4012,7 +3654,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("png"))
           return true;
         return false;
@@ -4038,11 +3680,11 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     };
 
     FileFilter[] filters = new FileFilter[5];
-    filters[0] = edfFilter;
+    filters[0] = pngFilter;
     filters[1] = png8Filter;
-    filters[2] = pngFilter;
+    filters[2] = jpgFilter;
     filters[3] = jpg8Filter;
-    filters[4] = jpgFilter;
+    filters[4] = edfFilter;
     JFileChooser chooser = new JFileChooser(lastSnapshotLocation);
     for (int i = 0; i < filters.length; i++) {
       if ( filters[i].equals(lastFileFilter) ) {
@@ -4063,17 +3705,17 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
         FileFilter filter = chooser.getFileFilter();
 
         if (edfFilter.equals(filter)) {
-          if (MultiExtFileFilter.getExtension(f) == null || !MultiExtFileFilter.getExtension(f).equalsIgnoreCase("edf")) {
+          if (getExtension(f) == null || !getExtension(f).equalsIgnoreCase("edf")) {
             f = new File(f.getAbsolutePath() + ".edf");
           }
           lastFileFilter = filter;
         } else if (jpgFilter.equals(filter) || jpg8Filter.equals(filter)) {
-          if (MultiExtFileFilter.getExtension(f) == null || !MultiExtFileFilter.getExtension(f).equalsIgnoreCase("jpg")) {
+          if (getExtension(f) == null || !getExtension(f).equalsIgnoreCase("jpg")) {
             f = new File(f.getAbsolutePath() + ".jpg");
           }
           lastFileFilter = filter;
         } else if (pngFilter.equals(filter) || png8Filter.equals(filter)) {
-          if (MultiExtFileFilter.getExtension(f) == null || !MultiExtFileFilter.getExtension(f).equalsIgnoreCase("png")) {
+          if (getExtension(f) == null || !getExtension(f).equalsIgnoreCase("png")) {
             f = new File(f.getAbsolutePath() + ".png");
           }
           lastFileFilter = filter;
@@ -4094,7 +3736,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
           } else if (jpgFilter.equals(filter)) {
 
             try {
-              ImageIO.write(getSelectionImage(), "jpg", f);
+              ImageIO.write(imagePanel.getImage(), "jpg", f);
             }
             catch (IOException ioe) {
               JOptionPane.showMessageDialog(this, "File could not be saved", "Error", JOptionPane.ERROR_MESSAGE);
@@ -4112,7 +3754,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
           } else if (pngFilter.equals(filter)) {
 
             try {
-              ImageIO.write(getSelectionImage(), "png", f);
+              ImageIO.write(imagePanel.getImage(), "png", f);
             }
             catch (IOException ioe) {
               JOptionPane.showMessageDialog(this, "File could not be saved", "Error", JOptionPane.ERROR_MESSAGE);
@@ -4145,73 +3787,17 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
   }
 
-  private BufferedImage getSelectionImage() {
-
-    Rectangle r = imagePanel.getSelectionRect();
-    if( r!=null ) {
-
-      BufferedImage newImage = new BufferedImage(r.width,r.height,BufferedImage.TYPE_INT_RGB);
-      Graphics2D g2 = newImage.createGraphics();
-      g2.drawImage(imagePanel.getImage(),0 ,0 ,r.width-1 ,r.height-1 ,
-                                         r.x, r.y, r.x+r.width-1, r.y+r.height-1,null);
-      g2.dispose();
-      return newImage;
-
-    } else {
-
-      int w = imagePanel.getImage().getWidth();
-      int h = imagePanel.getImage().getHeight();
-      BufferedImage newImage = new BufferedImage(w,h,BufferedImage.TYPE_INT_RGB);
-      Graphics2D g2 = newImage.createGraphics();
-      g2.drawImage(imagePanel.getImage(),0,0,null);
-      g2.dispose();
-      return newImage;
-
-    }
-
-  }
-
   private BufferedImage get8BitImage() {
 
     // Convert to 8 bits
-    Rectangle r = imagePanel.getSelectionRect();
-    if( r!=null ) {
+    int w = imagePanel.getImage().getWidth();
+    int h = imagePanel.getImage().getHeight();
+    BufferedImage newImage = new BufferedImage(w,h,BufferedImage.TYPE_BYTE_GRAY);
+    Graphics2D g2 = newImage.createGraphics();
+    g2.drawImage(imagePanel.getImage(),0,0,null);
+    g2.dispose();
+    return newImage;
 
-      BufferedImage newImage = new BufferedImage(r.width,r.height,BufferedImage.TYPE_BYTE_GRAY);
-      Graphics2D g2 = newImage.createGraphics();
-      g2.drawImage(imagePanel.getImage(),0 ,0 ,r.width-1 ,r.height-1 ,
-                                       r.x, r.y, r.x+r.width-1, r.y+r.height-1,null);
-      g2.dispose();
-      return newImage;
-
-    } else {
-
-      int w = imagePanel.getImage().getWidth();
-      int h = imagePanel.getImage().getHeight();
-      BufferedImage newImage = new BufferedImage(w,h,BufferedImage.TYPE_BYTE_GRAY);
-      Graphics2D g2 = newImage.createGraphics();
-      g2.drawImage(imagePanel.getImage(),0,0,null);
-      g2.dispose();
-      return newImage;
-
-    }
-
-  }
-
- //	Added by Pascal Verdier to manage a specified color for NaN values.
-  
- /**
-  *	Set a specified color for NaN values.
-  *
-  *	@param color the specified color for NaN values (if null NaN color is not managed) 
-  */
-  public void setNaNcolor(Color color)
-  {
-       if (color==null)
-           rgbNaN = 0;
-       else
-           rgbNaN = color.getRGB();
-       colorNaN = color;
   }
 
   // Convert the image from TANGO format to SCREEN format according
@@ -4270,166 +3856,77 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
           // Bigger image
           int sz = -iSz;
 
-          for (int j = 0; j<dimy; j++)
-          {
-               if (colorNaN==null) //	NaN color not managed
-               {
-		     
-        	 if (isBestFit)
-                 {
+          for (int j = 0; j<dimy; j++) {
 
-                    if (isNegative) {
-                      for (int i = 0; i < dimx; i++) {
-                            int c = gColormap[(~bestFit(doubleValues[j][i])) & 65535];
-                            for(int k=0;k<sz;k++)
-                          rgb[i*sz+k] = c;
-                      }
-                    } else {
-                      for (int i = 0; i < dimx; i++) {
-                            int c = gColormap[bestFit(doubleValues[j][i])];
-                            for(int k=0;k<sz;k++)
-                          rgb[i*sz+k] = c;
-                      }
-                    }
+            if (isBestFit) {
 
-                 } 
-                 else // not BestFit
-                 {
+              if (isNegative) {
+                for (int i = 0; i < dimx; i++) {
+                  int c = gColormap[(~bestFit(doubleValues[j][i])) & 65535];
+                  for(int k=0;k<sz;k++)
+                    rgb[i*sz+k] = c;
+                }
+              } else {
+                for (int i = 0; i < dimx; i++) {
+                  int c = gColormap[bestFit(doubleValues[j][i])];
+                  for(int k=0;k<sz;k++)
+                    rgb[i*sz+k] = c;
+                }
+              }
 
-                    if (isNegative) {
-                      for (int i = 0; i < dimx; i++) {
-                            int c = gColormap[(~(int)(doubleValues[j][i])) & 65535];
-                            for(int k=0;k<sz;k++)
-                          rgb[i*sz+k] = c;
-                      }
-                    } else {
-                      for (int i = 0; i < dimx; i++) {
-                            int c = gColormap[((int) doubleValues[j][i]) & 65535];
-                            for(int k=0;k<sz;k++)
-                          rgb[i*sz+k] = c;
-                      }
-                    }
+            } else {
 
-                 }
-               }
-               else //	Manage NaN NaN color
-               {
-		      
-         	 if (isBestFit)
-                 {
-                    if (isNegative) {
-                      for (int i = 0; i < dimx; i++) {
-                            int c = (Double.isNaN(doubleValues[j][i])) ? rgbNaN :
-                                                                    gColormap[(~bestFit(doubleValues[j][i])) & 65535];
-                            for(int k=0;k<sz;k++)
-                               rgb[i*sz+k] = c;
-                      }
-                    } else {
-                      for (int i = 0; i < dimx; i++) {
-                            int c = (Double.isNaN(doubleValues[j][i])) ? rgbNaN :
-                                                                    gColormap[bestFit(doubleValues[j][i])];
-                            for(int k=0;k<sz;k++)
-                               rgb[i*sz+k] = c;
-                      }
-                    }
+              if (isNegative) {
+                for (int i = 0; i < dimx; i++) {
+                  int c = gColormap[(~(int)(doubleValues[j][i])) & 65535];
+                  for(int k=0;k<sz;k++)
+                    rgb[i*sz+k] = c;
+                }
+              } else {
+                for (int i = 0; i < dimx; i++) {
+                  int c = gColormap[((int) doubleValues[j][i]) & 65535];
+                  for(int k=0;k<sz;k++)
+                    rgb[i*sz+k] = c;
+                }
+              }
 
-                 }
-                 else // not BestFit
-                 {
-            	    if (isNegative) {
-                      for (int i = 0; i < dimx; i++) {
-                            int c = (Double.isNaN(doubleValues[j][i])) ? rgbNaN :
-                                                                    gColormap[(~(int)(doubleValues[j][i])) & 65535];
-                            for(int k=0;k<sz;k++)
-                               rgb[i*sz+k] = c;
-                      }
-            	    } else {
-                      for (int i = 0; i < dimx; i++) {
-                            int c = (Double.isNaN(doubleValues[j][i])) ? rgbNaN :
-                                                                    gColormap[((int) doubleValues[j][i]) & 65535];
-                            for(int k=0;k<sz;k++)
-                                rgb[i*sz+k] = c;
-                      }
-            	    }
+            }
 
-                 }
-               }
             for(int k=0;k<sz;k++)
               lastImg.setRGB(0, j*sz+k, rdimx, 1, rgb, 0, rdimx);
 
           }
 
-        } 
-        else //Smaller
-        {
-           if (colorNaN==null)
-           { //	NaN color not managed
-             
-             for (int j = 0,l = 0; l < rdimy; j += iSz, l++) {
+        } else {
 
-               if (isBestFit) {
+          //Smaller
+          for (int j = 0,l = 0; l < rdimy; j += iSz, l++) {
 
-            	 if (isNegative) {
-                   for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
-                	 rgb[k] = gColormap[(~bestFit(doubleValues[j][i])) & 65535];
-            	 } else {
-                   for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
-                	 rgb[k] = gColormap[bestFit(doubleValues[j][i])];
-            	 }
+            if (isBestFit) {
 
-               } else {
+              if (isNegative) {
+                for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
+                  rgb[k] = gColormap[(~bestFit(doubleValues[j][i])) & 65535];
+              } else {
+                for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
+                  rgb[k] = gColormap[bestFit(doubleValues[j][i])];
+              }
 
-            	 if (isNegative) {
-                   for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
-                	 rgb[k] = gColormap[(~(int) doubleValues[j][i]) & 65535];
-            	 } else {
-                   for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
-                	 rgb[k] = gColormap[((int) doubleValues[j][i]) & 65535];
-            	 }
-               }
-               lastImg.setRGB(0, l, rdimx, 1, rgb, 0, rdimx);
-             }	//	end of for (int j = 0,l = 0; ..
-           }
-	   else // Manage NaN NaN color
-	   {
-		      
-             for (int j = 0,l = 0; l < rdimy; j += iSz, l++) {
+            } else {
 
-               if (isBestFit) {
+              if (isNegative) {
+                for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
+                  rgb[k] = gColormap[(~(int) doubleValues[j][i]) & 65535];
+              } else {
+                for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
+                  rgb[k] = gColormap[((int) doubleValues[j][i]) & 65535];
+              }
 
-            	 if (isNegative) {
-                   for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
-                     if (Double.isNaN(doubleValues[j][i]))
-		        rgb[k] = rgbNaN;
-		     else
-                    	rgb[k] = gColormap[(~bestFit(doubleValues[j][i])) & 65535];
-            	 } else {
-                   for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
-                     if (Double.isNaN(doubleValues[j][i]))
-			rgb[k] = rgbNaN;
-		     else
-                    	rgb[k] = gColormap[bestFit(doubleValues[j][i])];
-            	 }
+            }
 
-               } else {
+            lastImg.setRGB(0, l, rdimx, 1, rgb, 0, rdimx);
+          }
 
-            	 if (isNegative) {
-                   for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
-                     if (Double.isNaN(doubleValues[j][i]))
-			rgb[k] = rgbNaN;
-		     else
-                    	rgb[k] = gColormap[(~(int) doubleValues[j][i]) & 65535];
-            	 } else {
-                   for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
-                     if (Double.isNaN(doubleValues[j][i]))
-			rgb[k] = rgbNaN;
-		     else
-                    	rgb[k] = gColormap[((int) doubleValues[j][i]) & 65535];
-            	 }
-               }
-               lastImg.setRGB(0, l, rdimx, 1, rgb, 0, rdimx);
-             }	//	end of for (int j = 0,l = 0; ..
- 	   }
         }
 
         imagePanel.repaint();
@@ -4455,74 +3952,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     ATKGraphicsUtils.printComponent(imagePanel,"Print Image",true,0);
   }
 
-  /**
-   * @return the logValues
-   */
-  public boolean isLogValues () {
-    return logValues;
-  }
-
-  /**
-   * @param logValues the logValues to set
-   */
-    public void setLogValues(boolean logValues)
-    {
-        if (logValues != this.logValues)
-        {
-            synchronized (this)
-            {
-                if (model != null)
-                {
-                    double[][] values = model.getValue();
-                    if (logValues)
-                    {
-                        setData(computeLog(values));
-                    }
-                    else
-                    {
-                        setData(values);
-                    }
-                }
-            }
-        }
-        this.logValues = logValues;
-    }
-
-  protected double[][] computeLog(double[][] values) {
-    if (values == null) {
-      return null;
-    }
-    int length1 = 0, length2 = 0;
-    length1 = values.length;
-    if (length1 > 0) {
-      length2 = values[0].length;
-    }
-    double[][] logs = new double[length1][length2];
-//    StringBuffer testLog = new StringBuffer("\n-------------");
-    for (int i = 0; i < length1; i++) {
-      for (int j = 0; j < length2; j++) {
-        logs[i][j] = Math.log10( values[i][j] );
-//        testLog.append("\nvalues[").append(i).append("][").append(j).append("] = ").append( values[i][j] );
-//        testLog.append("\nlogs[").append(i).append("][").append(j).append("] = ").append( logs[i][j] );
-      }
-    }
-//    testLog.append("\n-------------\n");
-//    System.out.println( testLog.toString() );
-    return logs;
-  }
-
-  protected void changeSelectionColor() {
-    Color selectionColor = JColorChooser.showDialog(
-            this,
-            "Choose Selection Color",
-            imagePanel.getSelectionColor()
-    );
-    if (selectionColor != null) {
-        imagePanel.setSelectionColor(selectionColor);
-        imagePanel.repaint();
-    }
-  }
-
   // ----------------------------------------------------------
   // Instantiate the DualSpectrumViewer
   // ----------------------------------------------------------
@@ -4535,9 +3964,9 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     //d.setSelectionEnabled(false);
     //d.setBestFit(true);
     //d.setToolbarVisible(false);
-    //d.setStatusLineVisible(false);
+    d.setStatusLineVisible(false);
     //d.getYAxis().setVisible(true);
-    //d.setImageMargin(new Insets(0,0,5,0));
+    //d.setImageMargin(new Insets(0,0,0,0));
     //d.setBorder(null);
     //d.setZoom(2);
     //d.setVerticalExtent(10);
@@ -4574,7 +4003,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     int mid = d.addHorizontalLineMarker(512, Color.GREEN);
     d.setCrossCursor(true);
     d.setMarkerPos(mid,0,256,0,0);
-//    d.setSelectionEnabled(false);
+    d.setSelectionEnabled(false);
 
     f.getContentPane().setLayout(new BorderLayout());
     f.getContentPane().add(d, BorderLayout.CENTER);

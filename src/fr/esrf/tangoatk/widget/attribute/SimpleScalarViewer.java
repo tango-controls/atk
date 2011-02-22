@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.attribute;
 
 import javax.swing.*;
@@ -30,7 +8,6 @@ import java.beans.PropertyChangeListener;
 import fr.esrf.tangoatk.widget.util.*;
 import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
 import fr.esrf.tangoatk.core.*;
-
 import com.braju.format.Format;
 import fr.esrf.TangoDs.AttrManip;
 
@@ -48,11 +25,10 @@ import fr.esrf.TangoDs.AttrManip;
  */
 
 public class SimpleScalarViewer extends JAutoScrolledText
-       implements INumberScalarListener, IStringScalarListener, IBooleanScalarListener, PropertyChangeListener, IErrorListener, JDrawable {
+       implements INumberScalarListener, IStringScalarListener, PropertyChangeListener, IErrorListener, JDrawable {
 
   INumberScalar numberModel = null;
   IStringScalar stringModel = null;
-  IBooleanScalar booleanModel = null;
   boolean alarmEnabled = true;
   String userFormat = "";
   ATKFormat atkUserFormat = null;
@@ -73,7 +49,6 @@ public class SimpleScalarViewer extends JAutoScrolledText
   public SimpleScalarViewer() {
     backgroundColor = ATKConstant.getColor4Quality(IAttribute.VALID);
     setOpaque(true);
-    setMargin( new Insets(0,0,0,0) ); // text will have the maximum available space
   }
 
   /** Returns the current background color of this viewer. Color used for the VALID attribute quality state */
@@ -262,13 +237,6 @@ public class SimpleScalarViewer extends JAutoScrolledText
 
   }
 
-  public void booleanScalarChange (BooleanScalarEvent evt) {
-      String val;
-      val = getDisplayString(evt);
-      String oldVal=getText();
-      if(!val.equals(oldVal)) setText(val);
-  }
-
   private String getDisplayString(StringScalarEvent evt) {
 
     if( atkUserFormat!=null )
@@ -309,15 +277,6 @@ public class SimpleScalarViewer extends JAutoScrolledText
     }
 
     return dispStr;
-  }
-
-  private String getDisplayString(BooleanScalarEvent evt) {
-
-    if( atkUserFormat!=null )
-      return atkUserFormat.format( new Boolean( evt.getValue() ) );
-    else
-      return Boolean.toString( evt.getValue() );
-
   }
 
   /**
@@ -448,13 +407,6 @@ public class SimpleScalarViewer extends JAutoScrolledText
       stringModel.refresh();
     }
 
-    if (booleanModel != null) {
-      if (src.getName().equalsIgnoreCase("format")) {
-        format = src.getValue().toString();
-      }
-      booleanModel.refresh();
-    }
-
   }
 
   /**
@@ -472,8 +424,7 @@ public class SimpleScalarViewer extends JAutoScrolledText
       numberModel.getProperty("format").addPresentationListener(this);
       numberModel.getProperty("unit").addPresentationListener(this);
       if (hasToolTip)
-    	  setToolTipText(scalar.getName());
-      numberModel.refresh();
+	setToolTipText(scalar.getName());
     }
 
   }
@@ -491,29 +442,8 @@ public class SimpleScalarViewer extends JAutoScrolledText
       stringModel = scalar;
       stringModel.addStringScalarListener(this);
       stringModel.getProperty("format").addPresentationListener(this);
-      stringModel.refresh();
       if (hasToolTip)
 	setToolTipText(scalar.getName());
-    }
-
-  }
-
-  /**
-   * Sets the model for this viewer.
-   * @param scalar model
-   */
-  public void setModel(IBooleanScalar scalar) {
-
-    clearModel();
-
-    if (scalar != null) {
-      format = scalar.getProperty("format").getPresentation();
-      booleanModel = scalar;
-      booleanModel.addBooleanScalarListener(this);
-      booleanModel.getProperty("format").addPresentationListener(this);
-      booleanModel.refresh();
-      if (hasToolTip)
-        setToolTipText(scalar.getName());
     }
 
   }
@@ -537,13 +467,6 @@ public class SimpleScalarViewer extends JAutoScrolledText
       numberModel.getProperty("unit").removePresentationListener(this);
       numberModel = null;
     }
-
-    if (booleanModel != null) {
-      booleanModel.removeBooleanScalarListener(this);
-      booleanModel.getProperty("format").removePresentationListener(this);
-      booleanModel = null;
-    }
-
 
   }
 
@@ -572,11 +495,7 @@ public class SimpleScalarViewer extends JAutoScrolledText
   {
       return stringModel;     
   }
-
-  public IBooleanScalar getBooleanModel() {
-      return booleanModel;
-  }
-
+  
   /**
    * <code>getHasToolTip</code> returns true if the viewer has a tooltip (attribute full name)
    *
@@ -593,7 +512,9 @@ public class SimpleScalarViewer extends JAutoScrolledText
    */
   public void setHasToolTip(boolean b)
   {
-
+  
+    IAttribute    attModel = null;
+    
     if (hasToolTip == b) return;
     
     hasToolTip = b;
@@ -614,12 +535,6 @@ public class SimpleScalarViewer extends JAutoScrolledText
     if (numberModel != null)
     {
       setToolTipText(numberModel.getName());
-      return;
-    }
-    
-    if (booleanModel != null)
-    {
-      setToolTipText(booleanModel.getName());
       return;
     }
   }
@@ -653,16 +568,13 @@ public class SimpleScalarViewer extends JAutoScrolledText
     {
        if (stringModel != null)
        {
-         attModel = (IAttribute) stringModel;
+	 attModel = (IAttribute) stringModel;
        }
-       else if (numberModel != null)
-	   {
-         attModel = (IAttribute) numberModel;
-       }
-       else if (booleanModel != null)
-       {
-         attModel = (IAttribute) booleanModel;
-       }
+       else
+	  if (numberModel != null)
+	  {
+	    attModel = (IAttribute) numberModel;
+          }
        
        if (b == false)
           if (attModel != null)
@@ -683,37 +595,13 @@ public class SimpleScalarViewer extends JAutoScrolledText
     fr.esrf.tangoatk.core.AttributeList attributeList = new
         fr.esrf.tangoatk.core.AttributeList();
     SimpleScalarViewer snv = new SimpleScalarViewer();
-    String attributeName = "jlp/test/1/att_quatre";
-    //String attributeName = "tango://pcantares:12345/fp/dev/01#dbase=no/Float_attr";
-    if (args != null && args.length > 0) {
-        attributeName = args[0];
-    }
-    IAttribute attribute = null;
-    try {
-        attribute = (IAttribute) attributeList.add(attributeName);
-        //attribute = (IAttribute) attributeList.add("tango://pcantares:12345/fp/dev/01#dbase=no"+"/Float_attr");
-    }
-    catch(Exception e) {
-        attribute = null;
-    }
-    if (attribute instanceof INumberScalar) {
-        snv.setModel( (INumberScalar)attribute );
-    }
-    else if (attribute instanceof IStringScalar) {
-        snv.setModel( (IStringScalar)attribute );
-    }
-    else if (attribute instanceof IBooleanScalar) {
-        snv.setModel( (IBooleanScalar)attribute );
-    }
-    else {
-        System.err.println(attributeName + " is not a valid attribute or is not available");
-        System.exit(1);
-    }
+    INumberScalar model = (INumberScalar) attributeList.add("jlp/test/1/att_quatre");
+    snv.setModel(model);
     snv.setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());
     snv.setBackgroundColor(java.awt.Color.WHITE);
     snv.setForeground(java.awt.Color.BLACK);
     snv.setFont(new java.awt.Font("Dialog", Font.BOLD, 30));
-    attribute.refresh();
+    model.refresh();
     JFrame f = new JFrame();
     f.setContentPane(snv);
     f.pack();

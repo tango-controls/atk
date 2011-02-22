@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  *   The package  fr.esrf.tangoatk.widget.util.chart.math has been added to
  *   extend the JLChart's features with the mathematique expressions calculation
  * 
@@ -45,50 +23,45 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
-import fr.esrf.tangoatk.widget.util.chart.AdvancedJLChart;
 import fr.esrf.tangoatk.widget.util.chart.CfFileReader;
 import fr.esrf.tangoatk.widget.util.chart.IJLChartActionListener;
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
+import fr.esrf.tangoatk.widget.util.chart.JLChart;
 import fr.esrf.tangoatk.widget.util.chart.JLChartActionEvent;
 import fr.esrf.tangoatk.widget.util.chart.JLDataView;
 import fr.esrf.tangoatk.widget.util.chart.OFormat;
 
-public class StaticChartMathExpression extends AdvancedJLChart
-                                       implements IJLChartActionListener {
-
+public class StaticChartMathExpression extends JLChart implements
+        IJLChartActionListener
+{
     protected final static String EVALUATE_EXPRESSION = "Evaluate an expression";
 
-    /** Used to put a DataView on Y1 axis */
+    /** Used with expressions management to put the DataView representing the expression on Y1 axis */
     public final static int Y1_AXIS = 0;
 
-    /** Used to put a DataView on Y2 axis */
+    /** Used with expressions management to put the DataView representing the expression on Y2 axis */
     public final static int Y2_AXIS = 1;
 
-    /** Used to put a DataView on X axis */
+    /** Used with expressions management to put the DataView representing the expression on X axis */
     public final static int X_AXIS  = 2;
 
-    /** Used to allow or not the use of X axis JLDataView with expressions */
-    private boolean useXViewsWithExpressions = true;
-
-    /** Used to allow or not to put expressions on X Axis */
-    private boolean canPutExpressionOnX = true;
-
     // Used to save expressions in files, but can be used to dynamically update
-    // the expression JLDataViews.
-    // Key : The expression JLDataView
-    // Associated value : Object[]
-    //   0 : Integer <-> axis
-    //   1 : String  <-> expression
-    //   2 : Boolean <-> x
-    //   3..length-1 : variables
-    protected HashMap<JLDataView,Object[]> expressionMap;
+    // the expression JLDataViews
+    protected HashMap expressionMap; // Key : The expression JLDataView
+                                     // Associated value : Object[]
+                                     //   0 : Integer <-> axis
+                                     //   1 : String  <-> expression
+                                     //   2 : Boolean <-> x
+                                     //   3..length-1 : variables
 
-    public StaticChartMathExpression () {
+    public StaticChartMathExpression ()
+    {
         super();
-        expressionMap = new HashMap<JLDataView,Object[]>();
+        expressionMap = new HashMap();
         addUserAction(EVALUATE_EXPRESSION);
         addJLChartActionListener(this);
     }
@@ -96,36 +69,41 @@ public class StaticChartMathExpression extends AdvancedJLChart
     /**
      * Display the expression dialog.
      */
-    public void showExpressionDialog () {
+    public void showExpressionDialog ()
+    {
         JLDataView expressionDataView = new JLDataView();
         Object dlgParent = getRootPane().getParent();
         ParserOptionDialog optionDlg;
-        if (dlgParent instanceof JDialog) {
+        if ( dlgParent instanceof JDialog )
+        {
             optionDlg = new ParserOptionDialog(
                     (JDialog) dlgParent,
                     this,
                     expressionDataView
             );
         }
-        else if (dlgParent instanceof JFrame) {
+        else if ( dlgParent instanceof JFrame )
+        {
             optionDlg = new ParserOptionDialog(
                     (JFrame) dlgParent,
                     this,
                     expressionDataView
             );
         }
-        else {
+        else
+        {
             optionDlg = new ParserOptionDialog(
                     (JFrame) null,
                     this,
                     expressionDataView
             );
         }
-        ATKGraphicsUtils.centerDialog(optionDlg);
-        optionDlg.setVisible(true);
+        ATKGraphicsUtils.centerDialog( optionDlg );
+        optionDlg.setVisible( true );
         boolean ok = optionDlg.isValidated;
         int selectedAxis = optionDlg.selectedAxis;
-        if (ok) {
+        if ( ok )
+        {
             applyExpressionToChart(
                     optionDlg.expressionField.getText().trim(),
                     expressionDataView,
@@ -170,82 +148,76 @@ public class StaticChartMathExpression extends AdvancedJLChart
      * @see #Y2_AXIS
      * @return The JLDataView used to draw the expression result (the one given
      *         in parameter if not null, the automatically created one
-     *         otherwise). Returns <code>null</code> if you try to put an
-     *         expression on x axis when it is not allowed
+     *         otherwise)
      */
     public JLDataView applyExpressionToChart (String expression,
             JLDataView expressionDataView, int selectedAxis,
-            String[] variables, boolean x) {
-
-        JLDataView resultView;
-
-        if ( selectedAxis == X_AXIS && !isCanPutExpressionOnX() ) {
-            return null;
+            String[] variables, boolean x)
+    {
+        //--Cleaning when necessary--//
+        if ( expressionDataView != null
+                && expressionMap.containsKey( expressionDataView ) ) {
+            Object[] parameters = (Object[]) expressionMap.get( 
+                    expressionDataView );
+            Integer axis = (Integer) parameters[0];
+            switch(axis.intValue()) {
+                case X_AXIS :
+                    getXAxis().removeDataView( expressionDataView );
+                    break;
+                case Y1_AXIS :
+                    getY1Axis().removeDataView( expressionDataView );
+                    break;
+                case Y2_AXIS :
+                    getY2Axis().removeDataView( expressionDataView );
+                    break;
+            }
+            expressionMap.remove( expressionDataView );
+            expressionDataView.reset();
         }
+        //--END Cleaning when necessary--//
 
-        synchronized(expressionMap) {
-
-            //--Cleaning when necessary--//
-            if ( expressionDataView != null
-                    && expressionMap.containsKey(expressionDataView) ) {
-                Object[] parameters = expressionMap.get(expressionDataView);
-                Integer axis = (Integer) parameters[0];
-                switch(axis.intValue()) {
-                    case X_AXIS :
-                        getXAxis().removeDataView(expressionDataView);
-                        break;
-                    case Y1_AXIS :
-                        getY1Axis().removeDataView(expressionDataView);
-                        break;
-                    case Y2_AXIS :
-                        getY2Axis().removeDataView(expressionDataView);
-                        break;
-                }
-                expressionMap.remove(expressionDataView);
-                expressionDataView.reset();
-            }
-            //--END Cleaning when necessary--//
-
-            //--Registering Expression View--//
-            resultView = applyExpression( expression,
-                    expressionDataView, variables, x );
-            Object[] parameters = new Object[variables.length + 3];
-            parameters[0] = new Integer(selectedAxis);
-            parameters[1] = expression;
-            parameters[2] = new Boolean(x);
-            for (int i = 0; i < variables.length; i++) {
-                parameters[i+3] = variables[i];
-            }
-            expressionMap.put(resultView, parameters);
-            //--END Registering Expression View--//
-
-        } // end synchronized(expressionMap)
+        //--Registering Expression View--//
+        JLDataView resultView = applyExpression( expression,
+                expressionDataView, variables, x );
+        Object[] parameters = new Object[variables.length + 3];
+        parameters[0] = new Integer(selectedAxis);
+        parameters[1] = expression;
+        parameters[2] = new Boolean(x);
+        for (int i = 0; i < variables.length; i++) {
+            parameters[i+3] = variables[i];
+        }
+        expressionMap.put( resultView, parameters );
+        //--END Registering Expression View--//
 
         //--Adding Expression View to Axis--//
         switch(selectedAxis) {
             case X_AXIS:
-                getXAxis().addDataView(resultView);
-                if ( !getXAxis().isVisible() ) {
-                    getXAxis().setVisible(true);
-                    getXAxis().setAutoScale(true);
+                getXAxis().addDataView( resultView );
+                if ( !getXAxis().isVisible() )
+                {
+                    getXAxis().setVisible( true );
+                    getXAxis().setAutoScale( true );
                 }
                 break;
             case Y1_AXIS:
-                getY1Axis().addDataView(resultView);
-                if ( !getY1Axis().isVisible() ) {
-                    getY1Axis().setVisible(true);
-                    getY1Axis().setAutoScale(true);
+                getY1Axis().addDataView( resultView );
+                if ( !getY1Axis().isVisible() )
+                {
+                    getY1Axis().setVisible( true );
+                    getY1Axis().setAutoScale( true );
                 }
                 break;
             case Y2_AXIS:
-                getY2Axis().addDataView(resultView);
-                if ( !getY2Axis().isVisible() ) {
-                    getY2Axis().setVisible(true);
-                    getY2Axis().setAutoScale(true);
+                getY2Axis().addDataView( resultView );
+                if ( !getY2Axis().isVisible() )
+                {
+                    getY2Axis().setVisible( true );
+                    getY2Axis().setAutoScale( true );
                 }
                 break;
         }
         //--END Adding Expression View to Axis--//
+
         repaint();
         return resultView;
     }
@@ -255,108 +227,43 @@ public class StaticChartMathExpression extends AdvancedJLChart
     //If you want to do so, you should clean your dataview first.
     protected JLDataView applyExpression (String expression,
             JLDataView expressionDataView, String[] variables, boolean x) {
-
+        Vector views = new Vector();
         JLDataView resultView = null;
-
-        Vector<JLDataView> views = prepareViews();
-
-        ExpressionParser parser = new ExpressionParser(
-                variables.length,
-                expression
-        );
-        parser.setX(x);
+        if ( getXAxis().isXY() ) views.addAll( getXAxis().getViews() );
+        views.addAll( getY1Axis().getViews() );
+        views.addAll( getY2Axis().getViews() );
+        ExpressionParser parser = new ExpressionParser( variables.length, expression );
+        parser.setX( x );
         parser.setPrecision( getTimePrecision() );
-        for (int i = 0; i < variables.length; i++) {
-            for (int v = 0; v < views.size(); v++) {
-                if ( variables[i].equals( views.get(v).getName() ) ) {
-                    parser.add( i, (JLDataView) views.get(v) );
+        for (int i = 0; i < variables.length; i++)
+        {
+            for (int v = 0; v < views.size(); v++)
+            {
+                if ( variables[i].equals( ( (JLDataView) views.get( v ) ).getName() ) )
+                {
+                    parser.add( i, (JLDataView) views.get( v ) );
                     break;
                 }
             }
         }
         views.clear();
         views = null;
-
-        resultView = parser.buildDataView(expressionDataView);
+        resultView = parser.buildDataView( expressionDataView );
         parser.clean();
         parser = null;
-
         return resultView;
     }
 
-    public Vector<JLDataView> prepareViews() {
-        Vector<JLDataView> views = new Vector<JLDataView>();
-        if ( getXAxis().isXY() && isUseXViewsWithExpressions() ) {
-            views.addAll( getXAxis().getViews() );
-        }
-        views.addAll( getY1Axis().getViews() );
-        views.addAll( getY2Axis().getViews() );
-
-        return views;
-    }
-
-    public synchronized void clearExpressions() {
-        Set<JLDataView> keySet = expressionMap.keySet();
-        Iterator<JLDataView> keyIterator = keySet.iterator();
-        while (keyIterator.hasNext()) {
-            JLDataView data = keyIterator.next();
-            Object[] parameters = expressionMap.get(data);
-            Integer axis = (Integer)parameters[0];
-            switch(axis.intValue()) {
-                case X_AXIS :
-                    getXAxis().removeDataView(data);
-                    break;
-                case Y1_AXIS :
-                    getY1Axis().removeDataView(data);
-                    break;
-                case Y2_AXIS :
-                    getY2Axis().removeDataView(data);
-                    break;
-            }
-        }
-        expressionMap.clear();
-    }
-
-    // Tries to update all the expression JLDataViews associated with the
-    // JLDataView given in parameter
-    protected synchronized void updateExpressions(JLDataView view) {
-        Vector<JLDataView> expressions = new Vector<JLDataView>();
-        expressions.addAll( expressionMap.keySet() );
-        for (int i = 0; i < expressions.size(); i++) {
-            JLDataView expressionView = expressions.get(i);
-            Object[] parameters = expressionMap.get(expressionView);
-            if (parameters != null) {
-                for (int j = 3; j < parameters.length; j++) {
-                    if (parameters[j].equals( view.getName() )) {
-                        String expression = (String)parameters[1];
-                        Boolean x = (Boolean)parameters[2];
-                        String[] variables = new String[parameters.length - 3];
-                        for (int k = 0; k < variables.length; k++) {
-                            variables[k] = (String)parameters[k+3];
-                        }
-                        // Commit Change
-                        expressionView.reset();
-                        applyExpression(
-                                expression,
-                                expressionView,
-                                variables,
-                                x.booleanValue()
-                        );
-                        updateExpressions(expressionView);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    public void actionPerformed (JLChartActionEvent evt) {
-        if ( EVALUATE_EXPRESSION.equals( evt.getName() ) ) {
+    public void actionPerformed (JLChartActionEvent evt)
+    {
+        if ( EVALUATE_EXPRESSION.equals( evt.getName() ) )
+        {
             showExpressionDialog();
         }
     }
 
-    public boolean getActionState (JLChartActionEvent evt) {
+    public boolean getActionState (JLChartActionEvent evt)
+    {
         return false;
     }
 
@@ -364,12 +271,12 @@ public class StaticChartMathExpression extends AdvancedJLChart
       String to_write = super.getConfiguration();
 
       to_write += "expressions:" + expressionMap.size() + "\n";
-      Set<JLDataView> keySet = expressionMap.keySet();
-      Iterator<JLDataView> keyIterator = keySet.iterator();
+      Set keySet = expressionMap.keySet();
+      Iterator keyIterator = keySet.iterator();
       int i = 0;
       while (keyIterator.hasNext()) {
-          JLDataView keyView = keyIterator.next();
-          Object[] expressionData = expressionMap.get( keyView );
+          JLDataView keyView = (JLDataView)keyIterator.next();
+          Object[] expressionData = (Object[])expressionMap.get( keyView );
           to_write += "expression_" + i + "_name:\'"
                     + keyView.getName() + "\'\n";
           to_write += "expression_" + i + "_axis:"
@@ -461,11 +368,48 @@ public class StaticChartMathExpression extends AdvancedJLChart
     }
 
     protected void reset (boolean showConfirmDialog) {
-        super.reset(showConfirmDialog);
+        Vector existingViews = new Vector();
+        if ( getXAxis().isXY() ) existingViews.addAll( getXAxis().getViews() );
+        existingViews.addAll( getY1Axis().getViews() );
+        existingViews.addAll( getY2Axis().getViews() );
+        if ( existingViews.size() != 0 && showConfirmDialog ) {
+            String warning = "Reseting chart will remove "
+                    + "all the existing dataviews.\n"
+                    + "Your component may not work any more.\n"
+                    + "Are you sure to reset chart ?";
+            int choice = JOptionPane.showConfirmDialog(
+                    this,
+                    warning,
+                    "Risk of breaking component",
+                    JOptionPane.WARNING_MESSAGE
+            );
+            if ( choice != JOptionPane.OK_OPTION ) {
+                existingViews.clear();
+                existingViews = null;
+                return;
+            }
+        }
+        existingViews.clear();
+        existingViews = null;
+        maxDisplayDuration = Double.POSITIVE_INFINITY;
+        setDisplayDuration( Double.POSITIVE_INFINITY );
+        getY1Axis().clearDataView();
+        getY1Axis().setLabels( null, null );
+        getY1Axis().setScale( JLAxis.LINEAR_SCALE );
+        getY1Axis().setAutoScale( true );
+        getY2Axis().clearDataView();
+        getY2Axis().setLabels( null, null );
+        getY2Axis().setScale( JLAxis.LINEAR_SCALE );
+        getY2Axis().setAutoScale( true );
+        getXAxis().clearDataView();
+        getXAxis().setLabels( null, null );
+        getXAxis().setScale( JLAxis.LINEAR_SCALE );
+        getXAxis().setAutoScale( true );
         expressionMap.clear();
     }
 
-    public static void main (String[] args) {
+    public static void main(String[] args)
+    {
         final JFrame f = new JFrame();
         final StaticChartMathExpression chart = new StaticChartMathExpression();
 
@@ -482,14 +426,14 @@ public class StaticChartMathExpression extends AdvancedJLChart
         chart.getY1Axis().setGridVisible(true);
         chart.getY1Axis().setSubGridVisible(true);
         chart.getY2Axis().setVisible(false);
-        chart.setUseXViewsWithExpressions(false);
-        chart.setCanPutExpressionOnX(false);
 
         String fileName;
-        if (args.length > 0) {
+        if (args.length > 0)
+        {
             fileName = args[0];
         }
-        else {
+        else
+        {
             JFileChooser chooser = new JFileChooser(".");
             chooser.addChoosableFileFilter(new FileFilter() {
                 public boolean accept(File f) {
@@ -511,15 +455,15 @@ public class StaticChartMathExpression extends AdvancedJLChart
                     return "text files ";
                 }
             });
-            chooser.setDialogTitle(
-                    "Load Graph Data (Text file with TAB separated fields)"
-            );
+            chooser.setDialogTitle("Load Graph Data (Text file with TAB separated fields)");
             int returnVal = chooser.showOpenDialog(null);
-            if (returnVal == JFileChooser.APPROVE_OPTION) {
+            if (returnVal == JFileChooser.APPROVE_OPTION)
+            {
                 File file = chooser.getSelectedFile();
                 fileName = file.getAbsolutePath();
             }
-            else {
+            else
+            {
                 fileName = "";
                 System.exit( 0 );
             }
@@ -533,8 +477,9 @@ public class StaticChartMathExpression extends AdvancedJLChart
 
         JButton b = new JButton("Exit");
         b.addMouseListener( new MouseAdapter() {
-            public void mouseClicked (MouseEvent e) {
-                System.exit(0);
+            public void mouseClicked (MouseEvent e)
+            {
+                System.exit( 0 );
             }
         } );
 
@@ -542,7 +487,8 @@ public class StaticChartMathExpression extends AdvancedJLChart
 
         JButton c = new JButton("Options");
         c.addMouseListener( new MouseAdapter() {
-            public void mouseClicked (MouseEvent e) {
+            public void mouseClicked (MouseEvent e)
+            {
                 chart.showOptionDialog();
             }
         } );
@@ -555,46 +501,6 @@ public class StaticChartMathExpression extends AdvancedJLChart
         f.setSize(400, 300);
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         f.setVisible(true);
-    }
-
-    /**
-     * @return the useXViewsWithExpressions
-     */
-    public boolean isUseXViewsWithExpressions () {
-        return useXViewsWithExpressions;
-    }
-
-    /**
-     * @param useXViewsWithExpressions the useXViewsWithExpressions to set
-     */
-    public void setUseXViewsWithExpressions (boolean useXViewsWithExpressions) {
-        this.useXViewsWithExpressions = useXViewsWithExpressions;
-    }
-
-    /**
-     * @return the canSetExpressionOnX
-     */
-    public boolean isCanPutExpressionOnX () {
-        return canPutExpressionOnX;
-    }
-
-    /**
-     * @param canSetExpressionOnX the canSetExpressionOnX to set
-     */
-    public void setCanPutExpressionOnX (boolean canSetExpressionOnX) {
-        this.canPutExpressionOnX = canSetExpressionOnX;
-    }
-
-    @Override
-    public void removeDataView (JLDataView view) {
-        if (view != null) {
-            super.removeDataView(view);
-            if ( expressionMap.containsKey(view) ) {
-                expressionMap.remove(view);
-                view.reset();
-                updateExpressions(view);
-            }
-        }
     }
 
 }

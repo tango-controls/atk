@@ -25,10 +25,6 @@ BEANINFO= StringScalarViewerBeanInfo.java            \
 	  BooleanScalarSetPanelBeanInfo.java \
 	  ScalarAttributeSetPanelBeanInfo.java \
 	  MultiScalarTableViewerBeanInfo.java \
-	  NumberSpectrumItemTrendBeanInfo.java \
-	  DevStateSpectrumViewerBeanInfo.java \
-          SimpleStateViewerBeanInfo.java	\
-	  NumberSpectrumStateBarChartViewerBeanInfo.java    \
 
 
 include ../../../../../../.make-include
@@ -48,7 +44,6 @@ ALL =	$(TARGET)/IAttributeViewer.class            \
 	$(TARGET)/TrendRenderer.class               \
 	$(TARGET)/NumberScalarWheelEditor.class     \
 	$(TARGET)/NumberSpectrumViewer.class        \
-	$(TARGET)/NumberSpectrumTableEditor.class   \
 	$(TARGET)/DualSpectrumImageViewer.class     \
 	$(TARGET)/NumberScalarListViewer.class      \
 	$(TARGET)/StringScalarEditor.class          \
@@ -94,15 +89,6 @@ ALL =	$(TARGET)/IAttributeViewer.class            \
 	$(TARGET)/BooleanScalarSetPanel.class \
 	$(TARGET)/ScalarAttributeSetPanel.class \
 	$(TARGET)/MultiScalarTableViewer.class \
-	$(TARGET)/NumberSpectrumItemTrend.class        \
-	$(TARGET)/SignalScalarCheckBoxViewer.class \
-	$(TARGET)/SignalScalarComboEditor.class \
-	$(TARGET)/NumberImageJViewer.class           \
-	$(TARGET)/DevStateSpectrumViewer.class       \
-	$(TARGET)/SimpleStateViewer.class           \
-	$(TARGET)/NumberSpectrumTrend3DViewer.class \
-	$(TARGET)/NumberSpectrumStateBarChartViewer.class 
-	
 
 #	$(TARGET)/AttributeBarChart.class
 
@@ -166,7 +152,7 @@ stsv: attributes
 abc: attributes
 	$(JAVA) fr.esrf.tangoatk.widget.attribute.AttributeBarChart	
 amc: attributes
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.AttributeMultiChart fp/test/1/double_scalar fp/test/1/short_scalar_ro
+	$(JAVA) fr.esrf.tangoatk.widget.attribute.AttributeMultiChart jlp/test/1/att_un jlp/test/1/att_deux jlp/test/1/att_trois
 aqlv: attributes
 	$(JAVA) fr.esrf.tangoatk.widget.attribute.AttributeQualityLightViewer jlp/test/1/att_un
 nscbv: attributes
@@ -199,9 +185,3 @@ mnsv: attributes
 	$(JAVA) fr.esrf.tangoatk.widget.attribute.MultiNumberSpectrumViewer	
 mstv: attributes
 	$(JAVA) fr.esrf.tangoatk.widget.attribute.MultiScalarTableViewer	
-nstv: attributes
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.NumberSpectrumTrendViewer	
-nsit: attributes
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.NumberSpectrumItemTrend	
-dssv: attributes
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.DevStateSpectrumViewer	

@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * Trend.java
  *
  * Created on May 13, 2002, 4:28 PM
@@ -32,11 +10,11 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.FileWriter;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
@@ -72,7 +50,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
   public final static int DEVICE_LABEL_ALWAYS=2;
 
   //Default Color
-  protected static Color[] defaultColor = {
+  static final Color[] defaultColor = {
     Color.red,
     Color.blue,
     Color.cyan,
@@ -84,58 +62,51 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     Color.black};
 
   // Local declaration
-  protected JFrame parent = null;
+  JFrame parent = null;
 
   // Toolbar stuff
-  protected JToolBar theToolBar;
-  protected JPopupMenu toolMenu;
+  JToolBar theToolBar;
+  JPopupMenu toolMenu;
 
-  protected JButton optionButton;
-  protected JMenuItem optionMenuI;
-  protected JButton stopButton;
-  protected JMenuItem stopMenuI;
-  protected JButton startButton;
-  protected JMenuItem startMenuI;
-  protected JButton loadButton;
-  protected JMenuItem loadMenuI;
-  protected JButton saveButton;
-  protected JMenuItem saveMenuI;
-  protected JButton zoomButton;
-  protected JMenuItem zoomMenuI;
-  protected JButton timeButton;
-  protected JMenuItem timeMenuI;
-  protected JButton cfgButton;
-  protected JMenuItem cfgMenuI;
-  protected JButton resetButton;
-  protected JMenuItem resetMenuI;
-  protected JCheckBoxMenuItem offLineButton;
-  protected JMenuItem showErrorMenuI;
-  protected JMenuItem showDiagMenuI;
+  JButton optionButton;
+  JMenuItem optionMenuI;
+  JButton stopButton;
+  JMenuItem stopMenuI;
+  JButton startButton;
+  JMenuItem startMenuI;
+  JButton loadButton;
+  JMenuItem loadMenuI;
+  JButton saveButton;
+  JMenuItem saveMenuI;
+  JButton zoomButton;
+  JMenuItem zoomMenuI;
+  JButton timeButton;
+  JMenuItem timeMenuI;
+  JButton cfgButton;
+  JMenuItem cfgMenuI;
 
-  protected JMenuItem showtoolMenuI;
+  JMenuItem showtoolMenuI;
 
-  protected JPanel innerPanel;
+  JPanel innerPanel;
 
-  protected JLabel dateLabel;
+  JLabel dateLabel;
 
   // Selection tree stuff
-  protected JScrollPane treeView = null;
-  protected JTree mainTree = null;
-  protected DefaultTreeModel mainTreeModel = null;
-  protected TrendSelectionNode rootNode = null;
-  protected JPopupMenu treeMenu;
-  protected JMenuItem addXMenuItem;
-  protected JMenuItem addY1MenuItem;
-  protected JMenuItem addY2MenuItem;
-  protected JCheckBoxMenuItem showMinAlarmMenuItem;
-  protected JCheckBoxMenuItem showMaxAlarmMenuItem;
-  protected JMenuItem removeMenuItem;
-  protected JMenuItem optionMenuItem;
-  protected JMenuItem attOptionMenuItem;
+  JScrollPane treeView = null;
+  JTree mainTree = null;
+  DefaultTreeModel mainTreeModel = null;
+  TrendSelectionNode rootNode = null;
+  JPopupMenu treeMenu;
+  JMenuItem addXMenuItem;
+  JMenuItem addY1MenuItem;
+  JMenuItem addY2MenuItem;
+  JMenuItem removeMenuItem;
+  JMenuItem optionMenuItem;
+  JMenuItem attOptionMenuItem;
 
 
   // Chart stuff
-  protected JLChart theGraph;
+  JLChart theGraph;
   private String graphTitle="";
   private ConfigPanel cfgPanel = null;
   static private Point framePos=new Point(0,0);
@@ -143,7 +114,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
 
 
   // The models
-  protected AttributePolledList attList = null;
+  AttributePolledList attList = null;
   private TrendSelectionNode lastAdded = null;
   private AttributePolledList lastCreatedList = null;
 
@@ -201,36 +172,8 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
    * Corresponds to the button "Add new attribute"
    */
   public static final String config = "CONFIG";
-
-  /**
-   * Corresponds to the button "Reset trend"
-   */
-  public static final String reset = "RESET";
   
   private int timePrecision = 0;
-
-  protected int minRefreshInterval = 0;
-  
-  //Seperate Trend management   
-  private boolean manageIntervalTrend = false;
-  
-  private long currentTime = 0;
-  private long oldCurrentTime = 0; 
- 
-  protected JToolBar panelToolBarTrend;
-  protected JToolBar panelToolBar;    
-  protected JButton timeButtonTrend;
-  protected JButton refreshButton;
-  protected JMenuItem timeMenuTrendI; 
-  protected JMenuItem refreshMenuI;
-  
-  protected int minRefreshTrendInterval = 0;  
-  private int refreshIntervalTrend = 1000;
-
-  protected boolean offLineMode = false;
-
-  protected ErrorHistory errWin;
-
 
   /**
    * Trend constructor.
@@ -239,7 +182,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
   public Trend(JFrame parent) {
     this();
     this.parent = parent;
-    theGraph.setFrameParent(parent);
   }
 
   /**
@@ -284,16 +226,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     cfgButton.setToolTipText("Add new attribute");
     cfgMenuI = new JMenuItem("Add new attribute");
 
-    resetButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_reset.gif")));
-    resetButton.setToolTipText("Reset trend");
-    resetMenuI = new JMenuItem("Reset trend");
-
     showtoolMenuI = new JMenuItem("Hide toolbar");
-
-    offLineButton = new JCheckBoxMenuItem("Off line mode");
-
-    showErrorMenuI = new JMenuItem("View errors");
-    showDiagMenuI = new JMenuItem("Diagnostic");
 
     theToolBar.setFloatable(true);
 
@@ -313,12 +246,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     timeMenuI.addActionListener(this);
     cfgButton.addActionListener(this);
     cfgMenuI.addActionListener(this);
-    resetButton.addActionListener(this);
-    resetMenuI.addActionListener(this);
     showtoolMenuI.addActionListener(this);
-    offLineButton.addActionListener(this);
-    showErrorMenuI.addActionListener(this);
-    showDiagMenuI.addActionListener(this);
 
     theToolBar.add(loadButton);
     theToolBar.add(saveButton);
@@ -328,7 +256,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     theToolBar.add(stopButton);
     theToolBar.add(timeButton);
     theToolBar.add(cfgButton);
-    theToolBar.add(resetButton);
 
     buttonMap.put(load,loadButton);
     buttonMap.put(save,saveButton);
@@ -338,7 +265,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     buttonMap.put(stop,stopButton);
     buttonMap.put(time,timeButton);
     buttonMap.put(config,cfgButton);
-    buttonMap.put(reset,resetButton);
 
     toolMenu.add(loadMenuI);
     toolMenu.add(saveMenuI);
@@ -348,11 +274,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     toolMenu.add(stopMenuI);
     toolMenu.add(timeMenuI);
     toolMenu.add(cfgMenuI);
-    toolMenu.add(resetMenuI);
     toolMenu.add(showtoolMenuI);
-    toolMenu.add(offLineButton);
-    toolMenu.add(showErrorMenuI);
-    toolMenu.add(showDiagMenuI);
 
     // Create the graph
     theGraph = new JLChart();
@@ -367,12 +289,9 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     theGraph.addUserAction("chkShow date");
     theGraph.addUserAction("Load configuration");
     theGraph.addUserAction("Save configuration");
-    theGraph.addUserAction("View errors");
-    theGraph.addUserAction("Diagnostic");
     theGraph.addJLChartActionListener(this);
-    // Commented revision 1.43 modifications :
     // refuse displayDuration greater than 1 day, in order to limit memory use
-    //theGraph.setMaxDisplayDuration(24 * 60 * 60 * 1000);
+    theGraph.setMaxDisplayDuration(24 * 60 * 60 * 1000);
 
     innerPanel = new JPanel();
     innerPanel.setLayout(new BorderLayout());
@@ -388,22 +307,14 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     addY1MenuItem = new JMenuItem("Add to Y1");
     addY2MenuItem = new JMenuItem("Add to Y2");
     removeMenuItem = new JMenuItem("Remove");
-    showMinAlarmMenuItem = new JCheckBoxMenuItem("Show min alarm");
-    showMaxAlarmMenuItem = new JCheckBoxMenuItem("Show max alarm");
     optionMenuItem = new JMenuItem("Graphic properties");
     attOptionMenuItem = new JMenuItem("Attribute properties");
     treeMenu.add(addXMenuItem);
     treeMenu.add(addY1MenuItem);
     treeMenu.add(addY2MenuItem);
     treeMenu.add(removeMenuItem);
-    treeMenu.add(showMinAlarmMenuItem);
-    treeMenu.add(showMaxAlarmMenuItem);
     treeMenu.add(optionMenuItem);
     treeMenu.add(attOptionMenuItem);
-    
-    setManageIntervalTrend();
-    if(manageIntervalTrend)
-        initTrendRefresher();
 
     addXMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -474,40 +385,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
       }
     });
 
-    showMinAlarmMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        TreePath[] selPaths = mainTree.getSelectionPaths();
-        for (int i = 0; i < selPaths.length; i++) {
-          TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
-          if (selNode.getModel() != null) {
-            if(showMinAlarmMenuItem.isSelected())
-              selNode.showMinAlarm();
-            else
-              selNode.hideMinAlarm();
-          }
-        }
-        mainTree.repaint();
-        theGraph.repaint();
-      }
-    });
-
-    showMaxAlarmMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        TreePath[] selPaths = mainTree.getSelectionPaths();
-        for (int i = 0; i < selPaths.length; i++) {
-          TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
-          if (selNode.getModel() != null) {
-            if(showMaxAlarmMenuItem.isSelected())
-              selNode.showMaxAlarm();
-            else
-              selNode.hideMaxAlarm();
-          }
-        }
-        mainTree.repaint();
-        theGraph.repaint();
-      }
-    });
-
     optionMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         TrendSelectionNode selNode = (TrendSelectionNode) mainTree.getSelectionPath().getLastPathComponent();
@@ -538,58 +415,11 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     dateLabel.setVisible(false);
     add(dateLabel,BorderLayout.SOUTH);
 
-    errWin = new ErrorHistory();
-
   }
 
   void refreshNode(TrendSelectionNode n) {
     theGraph.repaint();
     mainTreeModel.nodeChanged(n);
-  }
-  
-  private void initTrendRefresher()
-  {
-  	panelToolBar = new JToolBar();
-    panelToolBarTrend = new JToolBar();
-    
-    timeButtonTrend = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_refresh_time.png")));
-    timeButtonTrend.setToolTipText("Set refresh interval Trend");
-    timeMenuTrendI = new JMenuItem("Set refresh interval Trend");
-    	
-    refreshButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_refresh.png")));
-    refreshButton.setToolTipText("Refresh trend");
-    refreshMenuI = new JMenuItem("Refresh trend");
-    	
-    timeButtonTrend.addActionListener(this);
-    timeMenuTrendI.addActionListener(this);    	
-    refreshButton.addActionListener(this);
-    	
-    panelToolBar.setFloatable(false);
-    panelToolBarTrend.setFloatable(false);
-    
-    panelToolBar.add(loadButton);
-    panelToolBar.add(saveButton);
-    panelToolBar.add(optionButton);
-    panelToolBar.add(zoomButton);
-    panelToolBar.add(startButton);
-    panelToolBar.add(stopButton);
-    panelToolBar.add(timeButton);
-    panelToolBar.add(cfgButton);
-    panelToolBar.add(resetButton);
-    panelToolBarTrend.add(timeButtonTrend);
-    panelToolBarTrend.add(refreshButton);
-          
-    theToolBar.setLayout(new BorderLayout());
-    theToolBar.add(panelToolBar,BorderLayout.WEST);
-    
-    JPanel jPanel = new JPanel();
-    jPanel.setLayout(new BorderLayout());
-    jPanel.add(panelToolBarTrend,BorderLayout.CENTER);
-    theToolBar.add(jPanel,BorderLayout.EAST);
-    
-    buttonMap.put(reset,refreshButton);
-    toolMenu.add(timeMenuTrendI);
-    
   }
 
   // -------------------------------------------------------------
@@ -630,19 +460,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
       boolean b = isButtonBarVisible();
       b = !b;
       setButtonBarVisible(b);
-    } else if (o == resetButton || o == resetMenuI) {
-      resetTrend();
-    } else if (o == refreshButton || o == refreshButton) {
-      refreshTrend();
-    } else if (o == timeButtonTrend || o == timeMenuTrendI) {
-      setRefreshIntervalTrend();
-    } else if (o == offLineButton) {
-      setOffLineMode(offLineButton.isSelected());
-    } else if (o == showErrorMenuI) {
-      ATKGraphicsUtils.centerFrameOnScreen(errWin);
-      errWin.setVisible(true);      
-    } else if (o == showDiagMenuI) {
-      fr.esrf.tangoatk.widget.util.ATKDiagnostic.showDiagnostic();
     }
 
   }
@@ -662,11 +479,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
       loadButtonActionPerformed();
     } else if (evt.getName().equalsIgnoreCase("Save configuration")) {
       saveButtonActionPerformed();
-    } else if (evt.getName().equalsIgnoreCase("View errors")) {
-      ATKGraphicsUtils.centerFrameOnScreen(errWin);
-      errWin.setVisible(true);
-    } else if (evt.getName().equalsIgnoreCase("Diagnostic")) {
-      fr.esrf.tangoatk.widget.util.ATKDiagnostic.showDiagnostic();
     }
 
   }
@@ -696,38 +508,12 @@ public void setTimePrecision(int timePrecision) {
   // Refresher listener
   // -------------------------------------------------------------
   public void refreshStep() {
-
-    if (isDateVisible()) {
+    // All attribute has been read, we can repaint the graph
+    if(isDateVisible()) {
       calendar.setTimeInMillis(System.currentTimeMillis());
       dateLabel.setText(genFormat.format(calendar.getTime()));
     }
-
-    if (theGraph.getXAxis().getPercentScrollback() == 0.0) {
-
-      if (!offLineMode) {
-        // All attribute has been read, we can repaint the graph
-        if (!manageIntervalTrend)
-          theGraph.repaint();
-        else {
-          // repaint Trend after IntervalTrend time
-          currentTime = System.currentTimeMillis();
-          if (currentTime - oldCurrentTime > getRefreshIntervalTrend()) {
-            theGraph.repaint();
-            oldCurrentTime = currentTime;
-          }
-        }
-      }
-
-    }
-
-  }
-
-  /**
-   * Sets or unset the offline mode (data are updated but not painted)
-   * @param mode Offline mode
-   */
-  public void setOffLineMode(boolean mode) {
-    offLineMode = mode;
+    theGraph.repaint();
   }
 
   private void setRefreshInterval() {
@@ -737,16 +523,6 @@ public void setTimePrecision(int timePrecision) {
     if (i != null) {
       try {
         int it = Integer.parseInt(i);
-        if (it < getMinRefreshInterval()) {
-          JOptionPane.showMessageDialog(
-                  parent,
-                  "Invalid number ! Can not be less than "
-                    + getMinRefreshInterval(),
-                  "Error",
-                  JOptionPane.ERROR_MESSAGE
-          );
-          return;
-        }
         attList.setRefreshInterval(it);
       } catch (NumberFormatException e) {
         JOptionPane.showMessageDialog(parent, "Invalid number !", "Error", JOptionPane.ERROR_MESSAGE);
@@ -754,34 +530,6 @@ public void setTimePrecision(int timePrecision) {
     }
 
   }
-  
-  private void setRefreshIntervalTrend() {
-        int old_it = getRefreshIntervalTrend();
-        String i = JOptionPane.showInputDialog(this, "Enter refresh interval Trend (ms)", new Integer(old_it));
-        if (i != null) {
-          try {
-            int it = Integer.parseInt(i);
-            if (it < getMinRefreshInterval()) {
-              JOptionPane.showMessageDialog(
-                      parent,
-                      "Invalid number ! Can not be less than " + getMinRefreshInterval(),
-                      "Error",
-                      JOptionPane.ERROR_MESSAGE
-              );
-              return;
-            }
-            if (it < attList.getRefreshInterval() || it % attList.getRefreshInterval() != 0) {
-                JOptionPane.showMessageDialog(parent, "Invalid values !" +
-                        "\nThe value must be greater and multiple than the refresh interval Values " +
-                        attList.getRefreshInterval(), "Error", JOptionPane.ERROR_MESSAGE);
-            }else{
-                setRefreshIntervalTrend(it);               
-            }
-          } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(parent, "Invalid number !", "Error", JOptionPane.ERROR_MESSAGE);
-          }
-        }
-      }
 
   private void updateModel() {
     singleDevice = true;
@@ -832,7 +580,6 @@ public void setTimePrecision(int timePrecision) {
     // Remove old listeners and clean former list
     if (attList != null)
     {
-        attList.removeErrorListener(errWin);
         attList.removeRefresherListener(this);
     }
 
@@ -895,8 +642,6 @@ public void setTimePrecision(int timePrecision) {
                   addY1MenuItem.setEnabled(selNode.getSelected() != SEL_Y1);
                   addY2MenuItem.setEnabled(selNode.getSelected() != SEL_Y2);
                   removeMenuItem.setEnabled(selNode.getSelected() != SEL_NONE);
-                  showMinAlarmMenuItem.setSelected(selNode.isShowingMinAlarm());
-                  showMaxAlarmMenuItem.setSelected(selNode.isShowingMaxAlarm());
                   treeMenu.show(mainTree, e.getX(), e.getY());
                 } else if (selNode == rootNode) {
 
@@ -928,15 +673,12 @@ public void setTimePrecision(int timePrecision) {
                     addY1MenuItem.setEnabled(lastAttributeNode.getSelected() != SEL_Y1);
                     addY2MenuItem.setEnabled(lastAttributeNode.getSelected() != SEL_Y2);
                     removeMenuItem.setEnabled(lastAttributeNode.getSelected() != SEL_NONE);
-                    showMinAlarmMenuItem.setSelected(lastAttributeNode.isShowingMinAlarm());
-                    showMaxAlarmMenuItem.setSelected(lastAttributeNode.isShowingMaxAlarm());
-                  } else {
+                  }
+                  else {
                     addXMenuItem.setEnabled(false);
                     addY1MenuItem.setEnabled(true);
                     addY2MenuItem.setEnabled(true);
                     removeMenuItem.setEnabled(true);
-                    showMinAlarmMenuItem.setSelected(false);
-                    showMaxAlarmMenuItem.setSelected(false);
                   }
                   treeMenu.show(mainTree, e.getX(), e.getY());
                   lastAttributeNode = null;
@@ -961,10 +703,8 @@ public void setTimePrecision(int timePrecision) {
     innerPanel.revalidate();
 
     attList = list;
-    if(attList!=null) {
+    if(attList!=null)
       attList.addRefresherListener(this);
-      attList.addErrorListener(errWin);
-    }
 
     updateModel();
   }
@@ -1081,11 +821,42 @@ public void setTimePrecision(int timePrecision) {
     theGraph.showOptionDialog();
   }
 
+  /**
+   * <code>getExtension</code> returns the extension of a given file,
+   * that is the part after the last `.' in the filename.
+   *
+   * @param f a <code>File</code> value
+   * @return a <code>String</code> value
+   */
+  private String getExtension(File f) {
+		String ext = null;
+		String s = f.getName();
+		int i = s.lastIndexOf('.');
+		if (i > 0 &&  i < s.length() - 1) {
+		    ext = s.substring(i+1).toLowerCase();
+		}
+		return ext;
+  }
+
   private void saveButtonActionPerformed() {
 
     int ok = JOptionPane.YES_OPTION;
     JFileChooser chooser = new JFileChooser(".");
-    chooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
+    chooser.addChoosableFileFilter(new FileFilter() {
+        public boolean accept(File f) {
+            if (f.isDirectory()) {
+                return true;
+            }
+            String extension = getExtension(f);
+            if (extension != null && extension.equals("txt"))
+                return true;
+            return false;
+        }
+
+        public String getDescription() {
+            return "text files ";
+        }
+    });
     if(lastConfig.length()>0)
       chooser.setSelectedFile(new File(lastConfig));
     int returnVal = chooser.showSaveDialog(parent);
@@ -1093,7 +864,7 @@ public void setTimePrecision(int timePrecision) {
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       File f = chooser.getSelectedFile();
       if (f != null) {
-        if (MultiExtFileFilter.getExtension(f) == null) {
+        if (getExtension(f) == null) {
   		  f = new File(f.getAbsolutePath() + ".txt");
         }
         if (f.exists())
@@ -1110,8 +881,22 @@ public void setTimePrecision(int timePrecision) {
   private void loadButtonActionPerformed() {
 
     int ok = JOptionPane.YES_OPTION;
-    JFileChooser chooser = new JFileChooser(".");
-    chooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
+    JFileChooser chooser = new JFileChooser();
+    chooser.addChoosableFileFilter(new FileFilter() {
+        public boolean accept(File f) {
+            if (f.isDirectory()) {
+                return true;
+            }
+            String extension = getExtension(f);
+            if (extension != null && extension.equals("txt"))
+                return true;
+            return false;
+        }
+
+        public String getDescription() {
+            return "text files ";
+        }
+    });
     if(lastConfig.length()>0)
       chooser.setSelectedFile(new File(lastConfig));
     int returnVal = chooser.showOpenDialog(parent);
@@ -1149,7 +934,6 @@ public void setTimePrecision(int timePrecision) {
     to_write += "show_device_name:" + isShowingDeviceNames() + "\n";
 
     if (attList != null) to_write += "refresh_time:" + attList.getRefreshInterval() + "\n";
-    to_write += "min_refresh_time:" + getMinRefreshInterval() + "\n";
 
     // Axis
     to_write += theGraph.getXAxis().getConfiguration("x");
@@ -1168,11 +952,7 @@ public void setTimePrecision(int timePrecision) {
       n = (TrendSelectionNode) dv.get(i);
       to_write += "dv" + i + "_name:\'" + n.getModelName() + "\'\n";
       to_write += "dv" + i + "_selected:" + n.getSelected() + "\n";
-      to_write += "dv" + i + "_showminalarm:" + n.isShowingMinAlarm() + "\n";
-      to_write += "dv" + i + "_showmaxalarm:" + n.isShowingMaxAlarm() + "\n";
       to_write += n.getData().getConfiguration("dv" + i);
-      if( n.isShowingMinAlarm() ) to_write += n.getMinAlarmData().getConfiguration("dv_min_alarm" + i);
-      if( n.isShowingMaxAlarm() ) to_write += n.getMaxAlarmData().getConfiguration("dv_max_alarm" + i);
     }
 
     return to_write;
@@ -1183,15 +963,10 @@ public void setTimePrecision(int timePrecision) {
     String errBuff = "";
     Vector p;
     int i,nbDv;
-    // Commented revision 1.46 modifications :
-    //theGraph.setMaxDisplayDuration(Double.POSITIVE_INFINITY);
+    theGraph.setMaxDisplayDuration(Double.POSITIVE_INFINITY);
 
     // Reset display duration (to avoid history reading side FX)
     theGraph.setDisplayDuration(Double.POSITIVE_INFINITY);
-
-    // Load isShowingDeviceName parameter before creating dataview
-    p = f.getParam("show_device_name");
-    if (p != null) setShowingDeviceNames(OFormat.getInt(p.get(0).toString()));
 
     //Create a new Attribute List
     AttributePolledList alist = new AttributePolledList();
@@ -1204,7 +979,6 @@ public void setTimePrecision(int timePrecision) {
         return false;
       }
     });
-    alist.addErrorListener(errWin);
 
     // Get all dataviews
     p = f.getParam("dv_number");
@@ -1234,13 +1008,6 @@ public void setTimePrecision(int timePrecision) {
 
       }
 
-      p = f.getParam("min_refresh_time");
-      if (p != null) {
-        setMinRefreshInterval( OFormat.getInt(p.get(0).toString()) );
-      }
-      if (alist.getRefreshInterval() < getMinRefreshInterval()) {
-        alist.setRefreshInterval( getMinRefreshInterval() );
-      }
       //We have the attList
       //Set the devicePropertyModel
       if (nbDv > 0) {
@@ -1251,14 +1018,10 @@ public void setTimePrecision(int timePrecision) {
         }
 
         p = f.getParam("refresh_time");
-        int refreshInterval = 1000;
-        if (p != null) {
-          refreshInterval = OFormat.getInt(p.get(0).toString());
-        }
-        if (refreshInterval < getMinRefreshInterval()) {
-          refreshInterval = getMinRefreshInterval();
-        }
-        alist.setRefreshInterval(refreshInterval);
+        if (p != null)
+          alist.setRefreshInterval(OFormat.getInt(p.get(0).toString()));
+        else
+          alist.setRefreshInterval(1000);
 
         alist.startRefresher();
         setModel(alist);
@@ -1275,8 +1038,7 @@ public void setTimePrecision(int timePrecision) {
     // Now we can set up the graph
     // General settings
     theGraph.applyConfiguration(f);
-    // Commented revision 1.46 modifications :
-    //theGraph.setMaxDisplayDuration(24 * 60 * 60 * 1000);
+    theGraph.setMaxDisplayDuration(24 * 60 * 60 * 1000);
     p = f.getParam("toolbar_visible");
     if (p != null) setButtonBarVisible(OFormat.getBoolean(p.get(0).toString()));
     p = f.getParam("tree_visible");
@@ -1284,14 +1046,13 @@ public void setTimePrecision(int timePrecision) {
     p = f.getParam("date_visible");
     if (p != null) setDateVisible(OFormat.getBoolean(p.get(0).toString()));
     p = f.getParam("frame_title");
-    if (p != null) {
-      graphTitle = p.get(0).toString();
-      if(parent!=null) parent.setTitle(graphTitle);
-    }
+    if (p != null) graphTitle = p.get(0).toString();
     p = f.getParam("window_pos");
     if( p != null ) framePos=OFormat.getPoint(p);
     p = f.getParam("window_size");
     if( p != null ) frameDimension=OFormat.getPoint(p);
+    p = f.getParam("show_device_name");
+    if (p != null) setShowingDeviceNames(OFormat.getInt(p.get(0).toString()));
 
     // Axis
     theGraph.getXAxis().applyConfiguration("x",f);
@@ -1328,33 +1089,6 @@ public void setTimePrecision(int timePrecision) {
 
           // Dataview options
           d.applyConfiguration(pref,f);
-
-          // Min alarm
-          p=f.getParam(pref + "_showminalarm");
-          if(p!=null) {
-            boolean showMinAlarm = OFormat.getBoolean(p.get(0).toString());
-            if( showMinAlarm ) {
-              n.showMinAlarm();
-              String prefMinAlarm = "dv_min_alarm" + i;
-              n.getMinAlarmData().applyConfiguration(prefMinAlarm,f);
-            } else {
-              n.hideMinAlarm();
-            }
-          }
-
-          // Max alarm
-          p=f.getParam(pref + "_showmaxalarm");
-          if(p!=null) {
-            boolean showMaxAlarm = OFormat.getBoolean(p.get(0).toString());
-            if( showMaxAlarm ) {
-              n.showMaxAlarm();
-              String prefMaxAlarm = "dv_max_alarm" + i;
-              n.getMaxAlarmData().applyConfiguration(prefMaxAlarm,f);
-            } else {
-              n.hideMaxAlarm();
-            }
-          }
-
         }
       }
     }
@@ -1854,72 +1588,12 @@ public void setTimePrecision(int timePrecision) {
       return theGraph.getMaxDisplayDuration();
   }
 
-  protected int getMinRefreshInterval () {
-    return minRefreshInterval;
-  }
-
-  protected void setMinRefreshInterval (int minRefreshInterval) {
-    this.minRefreshInterval = minRefreshInterval;
-    if (attList != null && attList.getRefreshInterval() < minRefreshInterval) {
-      attList.setRefreshInterval( minRefreshInterval );
-    }
-  }
-
-  public void resetTrend() {
-
-    if( rootNode!=null ) {
-      Vector dv = rootNode.getSelectableItems();
-      TrendSelectionNode n;
-      for(int i = 0;i < dv.size(); i++) {
-        n = (TrendSelectionNode)dv.get(i);
-        if (n != null && n.getData() != null) {
-          n.getData().reset();
-        }
-      }
-      theGraph.repaint();
-    }
-
-  }
-  
-    protected int getMinRefreshTrendInterval() {
-        return minRefreshTrendInterval;
-      }
-
-      protected void setMinRefreshTrendInterval (int minRefreshTrendInterval) {
-        this.minRefreshTrendInterval = minRefreshTrendInterval;
-        if (attList != null && getRefreshIntervalTrend() < minRefreshTrendInterval) {
-          setRefreshIntervalTrend(minRefreshTrendInterval);
-        }
-      }     
-     
-  	public int getRefreshIntervalTrend() {
-        return refreshIntervalTrend;
-    }
-
-    public void setRefreshIntervalTrend(int refreshIntervalTrend) {
-        this.refreshIntervalTrend = refreshIntervalTrend;
-    }
-
-	public boolean isManageIntervalTrend() {
-        return manageIntervalTrend;
-    }
-
-    public void setManageIntervalTrend() {
-            URL tmpUrl = getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend.properties");
-            if(tmpUrl != null)
-                manageIntervalTrend = true;
-    }
-    
-  	public void refreshTrend() {
-          theGraph.repaint();
-    }
-
   // End of variables declaration//GEN-END:variables
 
   public static void main(String[] args) throws Exception {
 
     final JFrame f = new JFrame();
-    final Trend t = new Trend(f);
+    final Trend t = new Trend();
 
     //DeviceFactory.getInstance().setTraceMode(DeviceFactory.TRACE_ALL);
     /*
@@ -1933,9 +1607,6 @@ public void setTimePrecision(int timePrecision) {
                  "dv1_selected:3 "+
                  "dv1_linecolor:0,0,255 ");
      */
-
-    // Default title
-    f.setTitle("Trends");
 
     if (args.length > 0) {
       String err = t.loadSetting(args[0]);
@@ -1952,6 +1623,8 @@ public void setTimePrecision(int timePrecision) {
 
     if( t.getTitle().length()>0 )
       f.setTitle(t.getTitle());
+    else
+      f.setTitle("Trends");
 
     f.setContentPane(t);
     Image image = Toolkit.getDefaultToolkit().getImage(t.getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_icon.gif"));
@@ -2023,5 +1696,5 @@ class ConfigPanel extends JDialog implements ActionListener {
     ATKGraphicsUtils.centerDialog(this);
     setVisible(true);
   }
-  
+
 }

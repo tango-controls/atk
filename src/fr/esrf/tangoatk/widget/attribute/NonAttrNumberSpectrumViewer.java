@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 
 package fr.esrf.tangoatk.widget.attribute;
 
@@ -47,7 +25,6 @@ import fr.esrf.tangoatk.core.util.AttrDualSpectrum;
 import fr.esrf.tangoatk.core.util.INonAttrNumberSpectrum;
 import fr.esrf.tangoatk.core.util.INonAttrSpectrumListener;
 import fr.esrf.tangoatk.core.util.NonAttrNumberSpectrumEvent;
-import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
 import fr.esrf.tangoatk.widget.util.chart.CfFileReader;
 import fr.esrf.tangoatk.widget.util.chart.IJLChartActionListener;
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
@@ -511,7 +488,23 @@ public class NonAttrNumberSpectrumViewer extends JLChart implements
     {
         int ok = JOptionPane.YES_OPTION;
         JFileChooser chooser = new JFileChooser();
-        chooser.addChoosableFileFilter( new MultiExtFileFilter("Text files", "txt"));
+        chooser.addChoosableFileFilter( new FileFilter() {
+            public boolean accept (File f)
+            {
+                if ( f.isDirectory() )
+                {
+                    return true;
+                }
+                String extension = getExtension( f );
+                if ( extension != null && extension.equals( "txt" ) ) return true;
+                return false;
+            }
+
+            public String getDescription ()
+            {
+                return "text files ";
+            }
+        } );
         if ( lastConfig.length() > 0 ) chooser.setSelectedFile( new File( lastConfig ) );
         int returnVal = chooser.showOpenDialog( null );
         if ( returnVal == JFileChooser.APPROVE_OPTION )
@@ -534,6 +527,26 @@ public class NonAttrNumberSpectrumViewer extends JLChart implements
         }
     }
 
+    /**
+     * <code>getExtension</code> returns the extension of a given file, that
+     * is the part after the last `.' in the filename.
+     * 
+     * @param f
+     *            a <code>File</code> value
+     * @return a <code>String</code> value
+     */
+    protected String getExtension (File f)
+    {
+        String ext = null;
+        String s = f.getName();
+        int i = s.lastIndexOf( '.' );
+        if ( i > 0 && i < s.length() - 1 )
+        {
+            ext = s.substring( i + 1 ).toLowerCase();
+        }
+        return ext;
+    }
+
     public void actionPerformed(JLChartActionEvent evt)
     {
         if (evt.getName().equals("Load Settings"))
@@ -550,7 +563,23 @@ public class NonAttrNumberSpectrumViewer extends JLChart implements
     {
         int ok = JOptionPane.YES_OPTION;
         JFileChooser chooser = new JFileChooser( "." );
-        chooser.addChoosableFileFilter( new MultiExtFileFilter("Text files", "txt"));
+        chooser.addChoosableFileFilter( new FileFilter() {
+            public boolean accept (File f)
+            {
+                if ( f.isDirectory() )
+                {
+                    return true;
+                }
+                String extension = getExtension( f );
+                if ( extension != null && extension.equals( "txt" ) ) return true;
+                return false;
+            }
+
+            public String getDescription ()
+            {
+                return "text files ";
+            }
+        } );
         if ( lastConfig.length() > 0 ) chooser.setSelectedFile( new File(
                 lastConfig ) );
         int returnVal = chooser.showSaveDialog( null );
@@ -559,7 +588,7 @@ public class NonAttrNumberSpectrumViewer extends JLChart implements
             File f = chooser.getSelectedFile();
             if ( f != null )
             {
-                if ( MultiExtFileFilter.getExtension( f ) == null )
+                if ( getExtension( f ) == null )
                 {
                     f = new File( f.getAbsolutePath() + ".txt" );
                 }
@@ -586,116 +615,36 @@ public class NonAttrNumberSpectrumViewer extends JLChart implements
         try
         {
             AttributePolledList attributelist = new AttributePolledList();
-            String xAttributeName = "";
-            String yAttributeName = "";
-            IAttribute xAttribute = null;
-            IAttribute yAttribute = null;
-            AttrDualSpectrum attributeDualSpectrum = null;
-            final AttrDualSpectrum[] attributeDualSpectrumList = new AttrDualSpectrum[args.length - 1];
-            JButton button = new JButton("remove/add");
-            button.setToolTipText( "Removes/Adds the models of the viewer" );
-            
-            if(args.length >=2)
+            String xname = "tango/tangotest/1/double_spectrum_ro";
+            String yname1 = "tango/tangotest/1/float_spectrum_ro";
+            String yname2 = "tango/tangotest/1/short_spectrum_ro";
+            if (args.length >= 2)
             {
-                xAttributeName = args[0].trim();
-                xAttribute = (IAttribute) attributelist.add( xAttributeName );
-                for(int i = 1 ; i < args.length; i++)
-                {
-                    yAttributeName = args[i].trim();
-                    yAttribute = (IAttribute) attributelist.add( yAttributeName );
-                    attributeDualSpectrum = new AttrDualSpectrum ( 
-                            xAttribute.getDevice(),
-                            xAttribute.getNameSansDevice(),
-                            yAttribute.getDevice(),
-                            yAttribute.getNameSansDevice());
-                    attributeDualSpectrum.setRefreshInterval(1000);
-                    attributeDualSpectrumList[i-1]=attributeDualSpectrum;
+                xname = args[0];
+                yname1 = args[1];
+                if (args.length >= 3) {
+                    yname2 = args[2];
                 }
-                for (int j = 0; j < attributeDualSpectrumList.length; j++)
-                    viewer.addModel( attributeDualSpectrumList[j], Y1_AXIS );
-                
-                
-                attributelist.addRefresherListener( new IRefresherListener() {
-                    public void refreshStep ()
-                    {
-                        for (int i = 0; i < attributeDualSpectrumList.length; i++)
-                            attributeDualSpectrumList[i].refresh();
-                        viewer.repaint();
-                    }
-                } );
-                
-                button.addActionListener( new ActionListener() {
-                    int count = 1;
-                    public void actionPerformed (ActionEvent e) {
-                        switch(count) {
-                            case 0:
-                                for (int j = 0; j < attributeDualSpectrumList.length; j++)
-                                    viewer.addModel( attributeDualSpectrumList[j], Y1_AXIS );
-                                count = 1;
-                                break;
-                            case 1:
-                                viewer.reset();
-                                count = 0;
-                                break;
-                        }
-                    }
-                });
-                
             }
-            else
-            {
-                xAttributeName = "tango/tangotest/1/double_spectrum_ro";
-                yAttributeName = "tango/tangotest/1/float_spectrum_ro";
-                String yname2 = "tango/tangotest/1/short_spectrum_ro";
-           
-                xAttribute = (IAttribute) attributelist.add( xAttributeName );
-                yAttribute = (IAttribute) attributelist.add( yAttributeName );
-                IAttribute yattr2 = (IAttribute) attributelist.add( yname2 );
-                final AttrDualSpectrum dual = new AttrDualSpectrum( 
-                        xAttribute.getDevice(),
-                        xAttribute.getNameSansDevice(),
-                        yAttribute.getDevice(),
-                        yAttribute.getNameSansDevice()
-                );
-                dual.setYUnit( "UNITE" );
-                dual.setYName( "NOM" );
-                dual.setRefreshInterval( 1000 );
-                final AttrDualSpectrum dual2 = new AttrDualSpectrum( 
-                        xAttribute.getDevice(),
-                        xAttribute.getNameSansDevice(),
-                        yattr2.getDevice(),
-                        yattr2.getNameSansDevice()
-                );
-                dual2.setRefreshInterval( 1000 );
-                viewer.addModel( dual, Y1_AXIS );
-                viewer.addModel( dual2, Y2_AXIS );
-                attributelist.addRefresherListener( new IRefresherListener() {
-                    public void refreshStep ()
-                    {
-                        dual.refresh();
-                        dual2.refresh();
-                        viewer.repaint();
-                    }
-                } );
-                
-                button.addActionListener( new ActionListener() {
-                    int count = 1;
-                    public void actionPerformed (ActionEvent e) {
-                        switch(count) {
-                            case 0:
-                                viewer.addModel( dual, Y1_AXIS );
-                                viewer.addModel( dual2, Y2_AXIS );
-                                count = 1;
-                                break;
-                            case 1:
-                                viewer.reset();
-                                count = 0;
-                                break;
-                        }
-                    }
-                });
-            }
-            
+            IAttribute xattr = (IAttribute) attributelist.add( xname );
+            IAttribute yattr1 = (IAttribute) attributelist.add( yname1 );
+            IAttribute yattr2 = (IAttribute) attributelist.add( yname2 );
+            final AttrDualSpectrum dual = new AttrDualSpectrum( 
+                    xattr.getDevice(),
+                    xattr.getNameSansDevice(),
+                    yattr1.getDevice(),
+                    yattr1.getNameSansDevice()
+            );
+            dual.setYUnit( "UNITE" );
+            dual.setYName( "NOM" );
+            dual.setRefreshInterval( 1000 );
+            final AttrDualSpectrum dual2 = new AttrDualSpectrum( 
+                    xattr.getDevice(),
+                    xattr.getNameSansDevice(),
+                    yattr2.getDevice(),
+                    yattr2.getNameSansDevice()
+            );
+            dual2.setRefreshInterval( 1000 );
             GridBagConstraints gbc1 = new GridBagConstraints();
             gbc1.fill = GridBagConstraints.BOTH;
             gbc1.gridx = 0;
@@ -708,9 +657,26 @@ public class NonAttrNumberSpectrumViewer extends JLChart implements
             gbc2.gridy = 1;
             gbc2.weighty = 0;
             gbc2.weightx = 1;
-         
-           
-            
+            viewer.addModel( dual, Y1_AXIS );
+            viewer.addModel( dual2, Y2_AXIS );
+            JButton button = new JButton("remove/add");
+            button.setToolTipText( "Removes/Adds the models of the viewer" );
+            button.addActionListener( new ActionListener() {
+                int count = 1;
+                public void actionPerformed (ActionEvent e) {
+                    switch(count) {
+                        case 0:
+                            viewer.addModel( dual, Y1_AXIS );
+                            viewer.addModel( dual2, Y2_AXIS );
+                            count = 1;
+                            break;
+                        case 1:
+                            viewer.reset();
+                            count = 0;
+                            break;
+                    }
+                }
+            });
             button.setMargin( new Insets(0,0,0,0) );
             jframe.getContentPane().setLayout( new GridBagLayout() );
             jframe.getContentPane().add( viewer, gbc1 );
@@ -719,7 +685,14 @@ public class NonAttrNumberSpectrumViewer extends JLChart implements
             jframe.setTitle( "DualSpectrumViewer:" );
             jframe.setSize( 640, 480 );
             jframe.setVisible( true );
-          
+            attributelist.addRefresherListener( new IRefresherListener() {
+                public void refreshStep ()
+                {
+                    dual.refresh();
+                    dual2.refresh();
+                    viewer.repaint();
+                }
+            } );
             attributelist.startRefresher();
         }
         catch (Exception exception)

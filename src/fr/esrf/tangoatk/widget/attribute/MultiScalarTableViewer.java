@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          MultiScalarTableViewer.java
 // Created:       2007-05-09 15:03:37, poncet
 // By:            <poncet@esrf.fr>
@@ -33,7 +11,6 @@ package fr.esrf.tangoatk.widget.attribute;
 import java.util.*;
 
 import javax.swing.*;
-import javax.swing.event.TableModelEvent;
 import javax.swing.table.*;
 import java.awt.Component;
 
@@ -44,7 +21,6 @@ import java.awt.event.*;
 
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.widget.util.ATKConstant;
-import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
 
 
@@ -75,8 +51,6 @@ public class MultiScalarTableViewer extends JTable
    private RootPaneContainer              rpcParent = null;
    private JDialog                        attSetDialWindow=null;
    private ScalarAttributeSetPanel        attSetPanel=null;
-   
-   private boolean                        noAttModel=true;
 
    // ---------------------------------------------------
    // Contruction
@@ -109,18 +83,9 @@ public class MultiScalarTableViewer extends JTable
 	
    }
    
-   //override the getCellRenderer method of JTable
+   //override the getCellRenderer methode of JTable
    public TableCellRenderer getCellRenderer(int row, int column)
    {
-       if ( (nbRows<=0) || (nbColumns<=0) )
-          return new MultiScalarViewerCellRenderer();
-
-       if (attModels == null)
-          return new MultiScalarViewerCellRenderer();
-	  
-       if (attModels.length <= 0) 
-          return new MultiScalarViewerCellRenderer();
-	  
        if (tabModel.getHasRowLabels())
        {
 	  if (column == 0)
@@ -143,15 +108,6 @@ public class MultiScalarTableViewer extends JTable
 
        return super.getCellRenderer(row, column);
    } 
-   
-   //Should override the setModel method of JTable because it is not autorized to call the setModel method of the superclass
-   // But overriding this method make a bug in NetBeans IDE when trying to add
-   // MultiScalarTableViewer from the palette inside the form editor.
-   // the issue has been submitted to http://www.netbeans.org/community/issues.html
-   
-   //public void setModel(TableModel  tm)
-   //{
-   //}
    
    public Color getPanelBackground()
    {
@@ -228,7 +184,6 @@ public class MultiScalarTableViewer extends JTable
 	  attSetDialWindow.setTitle(iatt.getName());
 	  attSetDialWindow.pack();
        }
-       ATKGraphicsUtils.centerDialog(attSetDialWindow);
        attSetDialWindow.setVisible(true);
    }
    
@@ -392,8 +347,7 @@ public class MultiScalarTableViewer extends JTable
          nbColumns = colIds.length;
 
       columnIdents = colIds;
-      if ((noAttModel) && (nbRows > 0))
-         initAttModels();
+      //tabModel.setColumnIdentifiers(colIds);
    }
 
 
@@ -430,8 +384,6 @@ public class MultiScalarTableViewer extends JTable
          nbRows = rowIds.length;
 
       rowIdents = rowIds;
-      if ((noAttModel) && (nbColumns > 0))
-         initAttModels();
    }
 
 
@@ -554,8 +506,6 @@ public class MultiScalarTableViewer extends JTable
        {
           initAttModels();
        }
-       
-       if (noAttModel) noAttModel=false;
        
        if ((r < 0) || (c < 0)) return;
        if ((r >= nbRows) || (c >= nbColumns)) return;
@@ -691,23 +641,10 @@ public class MultiScalarTableViewer extends JTable
        if (attModels == null) return;
        
        for (int i=0; i<attModels.length; i++)
-       {
           for (int j=0; j<attModels[i].length; j++)
 	       clearModelAt(i,j);
-       }
-       
+      
        attModels = null;
-       noAttModel=true;
-       columnIdents=null;
-       rowIdents=null;
-       nbRows=0;
-       nbColumns=0;
-
-       tabModel.setColumnCount(0);
-       tabModel.setRowCount(0);
-       
-       tabModel = new MultiScalarViewerTableModel();
-       setModel(tabModel);
    }
 
 
@@ -718,25 +655,10 @@ public class MultiScalarTableViewer extends JTable
          System.out.println("Please set the number of columns and rows before calling initAttModels.");
 	 return;
       }
-      
-      // The following block of code has been added because NetBeans sets the JTable model
-      // just after instantiation of MultiScalarTableViewer. So we should take the occasion
-      // of initAttModels to restore the normal MultiScalarViewerTableModel. The best solution would
-      // be to override the inherited method setModel but this will lead to a bug in NetBeans IDE
-      // The following 6 lines are a workaround to this problem.
-      TableModel   tm = super.getModel();
-      if (! (tm instanceof MultiScalarViewerTableModel) )
-      {
-	  tabModel = new MultiScalarViewerTableModel();
-	  setModel(tabModel);
-      }
-
       attModels = new IAttribute[nbRows][nbColumns];
       for (int i=0; i<nbRows; i++)
           for (int j=0; j<nbColumns; j++)
 	       attModels[i][j] = null;
-      if (columnIdents == null)
-         columnIdents = new String[nbColumns];
       tabModel.init();
       initColumnHeaderRenderers();
    }
@@ -766,13 +688,13 @@ public class MultiScalarTableViewer extends JTable
 					            IEnumScalarListener,
 						    IBooleanScalarListener
        {
-	   private boolean                                hasRowLabels = false;
-	   private HashMap<IAttribute, Vector<Integer>>   attMap = null;
+	   private boolean   hasRowLabels = false;
+	   private HashMap   attMap = null;
 
 	   /** Creates a new instance of MSviewerTableModel */
 	   MultiScalarViewerTableModel()
 	   {
-	       attMap = new HashMap<IAttribute, Vector<Integer>> ();
+	       attMap = new HashMap();
 	   }
 	   
 	   public boolean isCellEditable(int row, int column)
@@ -803,12 +725,6 @@ public class MultiScalarTableViewer extends JTable
 		      for (int j=0; j<columnIdents.length; j++)
 		          colIds[j+1] = columnIdents[j];
 		  }
-                  else
-                  {
-                      colIds = new String[nbColumns+1];
-                      for (int j=0; j<nbColumns+1; j++)
-		          colIds[j] =" ";
-                  }
 		  Object[][] tableData= new Object[attModels.length][attModels[0].length+1];
                   setDataVector(tableData, colIds);
 		  
@@ -818,9 +734,6 @@ public class MultiScalarTableViewer extends JTable
 	       }
 	       else
 	          this.setDataVector(attModels, columnIdents);
-               //this.fireTableStructureChanged();
-               //this.fireTableDataChanged();
-               //doLayout();
 	   }
 
 	   void addAttributeAt(int r, int c, IAttribute iatt, SimpleScalarViewer ssViewer)
@@ -848,12 +761,11 @@ public class MultiScalarTableViewer extends JTable
 	      if (hasRowLabels)
 	         col = c+1;
 	      setValueAt(ssViewer, r, col);
-	      Vector<Integer>  attIndexes = new Vector<Integer> ();
+	      Vector  attIndexes = new Vector();
 	      attIndexes.add(0, new Integer(r));
 	      attIndexes.add(1, new Integer(col));
 	      if (!attMap.containsKey(iatt))
 	         attMap.put(iatt, attIndexes);
-              fireTableDataChanged();
 	   }
 
 	   void addAttributeAt(int r, int c, IAttribute iatt, SimpleEnumScalarViewer enumViewer)
@@ -874,12 +786,11 @@ public class MultiScalarTableViewer extends JTable
 	      ies.addEnumScalarListener(this);
 	      setValueAt(enumViewer, r, col);
 	      
-	      Vector<Integer>  attIndexes = new Vector<Integer> ();
+	      Vector  attIndexes = new Vector();
 	      attIndexes.add(0, new Integer(r));
 	      attIndexes.add(1, new Integer(col));
 	      if (!attMap.containsKey(iatt))
 	         attMap.put(iatt, attIndexes);
-              fireTableDataChanged();
 	   }
 
 	   void addAttributeAt(int r, int c, IAttribute iatt, BooleanScalarCheckBoxViewer boolViewer)
@@ -900,12 +811,11 @@ public class MultiScalarTableViewer extends JTable
 	      ibs.addBooleanScalarListener(this);
 	      setValueAt(boolViewer, r, col);
 	      
-	      Vector<Integer>  attIndexes = new Vector<Integer> ();
+	      Vector  attIndexes = new Vector();
 	      attIndexes.add(0, new Integer(r));
 	      attIndexes.add(1, new Integer(col));
 	      if (!attMap.containsKey(iatt))
 	         attMap.put(iatt, attIndexes);
-              fireTableDataChanged();
 	   }
 
 	   void removeAttributeAt(int r, int c)
@@ -963,7 +873,6 @@ public class MultiScalarTableViewer extends JTable
 	      ssv.clearModel();
 	      ssv=null;
 	      setValueAt(null, r, c);
-              fireTableDataChanged();
 	   }
 	   
 	   private void removeAttributeAt(SimpleEnumScalarViewer enumv, int r, int c)
@@ -978,7 +887,6 @@ public class MultiScalarTableViewer extends JTable
 	      enumv.clearModel();
 	      enumv=null;
 	      setValueAt(null, r, c);
-              fireTableDataChanged();
 	   }
 	   
 	   private void removeAttributeAt(BooleanScalarCheckBoxViewer boolv, int r, int c)
@@ -993,7 +901,6 @@ public class MultiScalarTableViewer extends JTable
 	      boolv.clearModel();
 	      boolv=null;
 	      setValueAt(null, r, c);
-              fireTableDataChanged();
 	   }
 	   
 	   boolean getHasRowLabels()
@@ -1062,16 +969,18 @@ public class MultiScalarTableViewer extends JTable
 	       if (!attMap.containsKey(iatt))
 	          return;
 		  
-	       Vector<Integer> attIndexes = attMap.get(iatt);
-	       if (attIndexes == null)
+	       Object obj = attMap.get(iatt);
+	       if (!(obj instanceof Vector))
 	          return;
 		  
+	       Vector attIndexes = (Vector) obj;
+
 	       if (attIndexes.size() >= 2)
 	       {
-		  Integer  indObj = attIndexes.get(0);
+		  Integer  indObj = (Integer) attIndexes.get(0);
 		  int row = indObj.intValue();
 		  
-		  indObj = attIndexes.get(1);
+		  indObj = (Integer) attIndexes.get(1);
 		  int col = indObj.intValue();
 		  
 		  fireTableCellUpdated(row, col);
@@ -1185,63 +1094,45 @@ public class MultiScalarTableViewer extends JTable
 	JFrame                    f = new JFrame();
 	MultiScalarTableViewer    mstv = new MultiScalarTableViewer();
 	
-        IAttribute[][]            attArray=null;
+        mstv.setNbRows(2);
+	mstv.setNbColumns(6);
+	mstv.setColumnIdents(colLabs);
+	mstv.setRowIdents(rowLabs);
 	//mstv.setAlarmEnabled(false);
 	mstv.setUnitVisible(false);
         mstv.setFont(new java.awt.Font("Dialog", java.awt.Font.PLAIN, 16));
 	//mstv.getRowIdCellRenderer().setBackground(f.getBackground());
-        //mstv.setNbRows(2);
-	//mstv.setNbColumns(6);
-        //mstv.setRowIdents(rowLabs);
-	//mstv.setColumnIdents(colLabs);
-        mstv.setNbRows(2);
-	mstv.setNbColumns(6);
-        mstv.setRowIdents(rowLabs);
-	mstv.setColumnIdents(colLabs); 
-        attArray = new IAttribute[2][6];
-	
+
 	try
 	{
 	   att = (IAttribute) attl.add("jlp/test/1/att_un");
-           attArray[0][0] = att;
-	   //mstv.setModelAt(att, 0, 0);
+	   mstv.setModelAt(att, 0, 0);
            att = (IAttribute) attl.add("jlp/test/1/att_deux");
-           attArray[0][1] = att;
-	   //mstv.setModelAt(att, 0, 1);
+	   mstv.setModelAt(att, 0, 1);
            att = (IAttribute) attl.add("jlp/test/1/att_trois");
-           attArray[0][2] = att;
-	   //mstv.setModelAt(att, 0, 2);
+	   mstv.setModelAt(att, 0, 2);
            //att = (IAttribute) attl.add("jlp/test/1/att_quatre");
-           att = (IAttribute) attl.add("jlp/test/1/att_cinq");
-           //att = (IAttribute) attl.add("fp/test/1/string_scalar");
-           attArray[0][3] = att;
-	   //mstv.setModelAt(att, 0, 3);
+           //att = (IAttribute) attl.add("jlp/test/1/att_cinq");
+           att = (IAttribute) attl.add("fp/test/1/string_scalar");
+	   mstv.setModelAt(att, 0, 3);
            att = (IAttribute) attl.add("jlp/test/1/att_six");
-           attArray[0][4] = att;
-	   //mstv.setModelAt(att, 0, 4);
+	   mstv.setModelAt(att, 0, 4);
            att = (IAttribute) attl.add("jlp/test/1/att_boolean");
-           attArray[0][5] = att;
-	   //mstv.setModelAt(att, 0, 5);
+	   mstv.setModelAt(att, 0, 5);
 	   att = (IAttribute) attl.add("jlp/test/2/att_un");
-           attArray[1][0] = att;
-	   //mstv.setModelAt(att, 1, 0);
+	   mstv.setModelAt(att, 1, 0);
            att = (IAttribute) attl.add("jlp/test/2/att_deux");
-           attArray[1][1] = att;
-	   //mstv.setModelAt(att, 1, 1);
+	   mstv.setModelAt(att, 1, 1);
            att = (IAttribute) attl.add("jlp/test/2/att_trois");
-           attArray[1][2] = att;
-	   //mstv.setModelAt(att, 1, 2);
+	   mstv.setModelAt(att, 1, 2);
            //att = (IAttribute) attl.add("jlp/test/2/att_quatre");
-           att = (IAttribute) attl.add("jlp/test/2/att_cinq");
-           //att = (IAttribute) attl.add("fp/test/2/string_scalar");
-           attArray[1][3] = att;
-	   //mstv.setModelAt(att, 1, 3);
+           //att = (IAttribute) attl.add("jlp/test/2/att_cinq");
+           att = (IAttribute) attl.add("fp/test/2/string_scalar");
+	   mstv.setModelAt(att, 1, 3);
            att = (IAttribute) attl.add("jlp/test/2/att_six");
-           attArray[1][4] = att;
-	   //mstv.setModelAt(att, 1, 4);
+	   mstv.setModelAt(att, 1, 4);
            att = (IAttribute) attl.add("jlp/test/2/att_boolean");
-           attArray[1][5] = att;
-	  // mstv.setModelAt(att, 1, 5);
+	   mstv.setModelAt(att, 1, 5);
 	}
 	catch (Exception ex)
 	{
@@ -1250,7 +1141,6 @@ public class MultiScalarTableViewer extends JTable
 	}
 
         attl.startRefresher();
-
 	
 	// It is necessary to put the table inside a JScrollPane. The JTable does not
 	// display the column names if the JTable is not in a scrollPane!!!
@@ -1259,33 +1149,9 @@ public class MultiScalarTableViewer extends JTable
 	
 	f.setContentPane(scrollPane);
 	f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	//mstv.doLayout();
+	mstv.doLayout();
 	f.pack();
 	f.setVisible(true);
-        //mstv.setModelAt(attArray[0][2], 0, 2);
-        mstv.setModelAt(attArray[0][2], 2, 0);
-
-        try
-	{
-	   System.in.read();
-	}
-	catch (Exception ex)
-	{
-	   System.out.println("cannot read");
-	}
-        
-	mstv.clearModel();
-        //mstv.setNbRows(6);
-	//mstv.setNbColumns(2);
-        //mstv.setRowIdents(colLabs);
-	//mstv.setColumnIdents(rowLabs); 
-        mstv.setNbRows(2);
-	mstv.setNbColumns(6);
-        mstv.setRowIdents(rowLabs);
-	mstv.setColumnIdents(colLabs);
-        
-        mstv.setModelAt(attArray[1][4], 1, 4);
-        //mstv.setModelAt(attArray[1][4], 4, 1);
    }
     
 

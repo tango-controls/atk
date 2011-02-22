@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          MultiNumberSpectrumViewer.java
 // Created:       2007-05-14 14:41:03, poncet
 // By:            <poncet@esrf.fr>
@@ -45,7 +23,8 @@ import com.braju.format.Format;
  *
  */
 public class MultiNumberSpectrumViewer extends JLChart 
-                                       implements ISpectrumListener, IJLChartListener
+                                       implements ISpectrumListener, 
+				                  IJLChartListener
 {
 
    public static final String         AXIS_X="X";
@@ -53,23 +32,22 @@ public class MultiNumberSpectrumViewer extends JLChart
    public static final String         AXIS_Y2="Y2";
    
    //Default Color
-   protected final Color[] defColors = { Color.red,
-					 Color.blue,
-					 Color.magenta,
-					 Color.cyan,
-					 new Color(50,120,0), //forestGreen
-					 Color.black,
-					 new Color(255,120,0), //orange
-					 Color.pink,
-					 Color.green,
-					 Color.yellow};
+   static final Color[] defColors = { Color.red,
+				      Color.blue,
+				      Color.magenta,
+				      Color.cyan,
+				      new Color(50,120,0), //forestGreen
+				      Color.black,
+				      new Color(255,120,0), //orange
+				      Color.pink,
+				      Color.green,
+				      Color.yellow};
 
-   protected Map<INumberSpectrum, JLDataView>    attMap = null;
+   private Map       attMap = null;
+   private double    affineA0=0.0;
+   private double    affineA1=1.0;
    
-   protected double    affineA0=0.0;
-   protected double    affineA1=1.0;
-   
-   protected String    defaultAxis=null;
+   private String    defaultAxis=null;
 
 
    // ---------------------------------------------------
@@ -80,7 +58,7 @@ public class MultiNumberSpectrumViewer extends JLChart
        // Create the graph
        super();
        
-       attMap = new HashMap<INumberSpectrum, JLDataView> ();
+       attMap = new HashMap();
        defaultAxis = new String(AXIS_Y1);
 
        setBorder(new javax.swing.border.EtchedBorder());
@@ -182,7 +160,7 @@ public class MultiNumberSpectrumViewer extends JLChart
        ins.refresh();
    }
    
-   protected void addNumberSpectrumModelToX(INumberSpectrum ins)
+   private void addNumberSpectrumModelToX(INumberSpectrum ins)
    {
        String       attFormat = null;
        JLDataView   attDvx = null;
@@ -197,14 +175,14 @@ public class MultiNumberSpectrumViewer extends JLChart
            JLDataView dvx = getXAxis().getDataView(0);
 	   if (attMap.containsValue(dvx))
 	   {
-	       Set<INumberSpectrum> attSet = attMap.keySet();
+	       Set attSet = attMap.keySet();
 	       if (attSet != null)
 	       {
-		   Iterator<INumberSpectrum>  attIt=attSet.iterator();
+		   Iterator attIt=attSet.iterator();
 		   while ( attIt.hasNext() )
 		   {
-		       INumberSpectrum currIns = attIt.next();
-		       JLDataView attDv = attMap.get(currIns);
+		       INumberSpectrum currIns = (INumberSpectrum) attIt.next();
+		       JLDataView attDv = (JLDataView) attMap.get(currIns);
 		       if (attDv == dvx)
 		       {
 		          currIns.removeSpectrumListener(this);
@@ -216,12 +194,15 @@ public class MultiNumberSpectrumViewer extends JLChart
 	   }
 	   getXAxis().clearDataView();
        }
-                     
+       
+       //orderNumber = attMap.size();
+              
        attFormat = ins.getFormat();
        attDvx = new JLDataView();
        attDvx.setUserFormat(attFormat);
        attDvx.setUnit(ins.getUnit());
        attDvx.setName(ins.getName());
+       //attDvx.setColor(defColors[orderNumber % defColors.length]);
        getXAxis().addDataView(attDvx);
        
        attMap.put(ins, attDvx);
@@ -290,19 +271,9 @@ public class MultiNumberSpectrumViewer extends JLChart
 	   }
        }
        
-       attMap = new HashMap<INumberSpectrum, JLDataView> ();
+       attMap = new HashMap();
    }
-   
-   
-   public JLDataView getDataView(INumberSpectrum  ins)
-   {
-       if (ins == null) return null;
-       if (attMap == null) return null;
-       if (attMap.containsKey(ins) == false) return null;
-       
-       JLDataView attDvy = attMap.get(ins);
-       return attDvy;
-   }
+
 
    // ---------------------------------------------------
    // Bean Property stuff
@@ -466,41 +437,21 @@ public class MultiNumberSpectrumViewer extends JLChart
 	//mnsv.setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());
 	//mnsv.setFont(new java.awt.Font("Dialog", 0, 12));
 	//mnsv.setXAxisAffineTransform(0.0,1000);
-        if (args != null && args.length > 0)
+	try
 	{
-            for (int i = 0; i < args.length; i++) {
-                try {
-                    ins = (INumberSpectrum) attl.add(args[i]);
-                    mnsv.addNumberSpectrumModel(ins);
-                }
-                catch (ClassCastException cce) {
-                    System.out.println(args[i] + " is not a valid spectrum");
-                    cce.printStackTrace();
-                }
-                catch (Exception ex) {
-                    System.out.println("Cannot connect to " + args[i]);
-                    ex.printStackTrace();
-                }
-            }
-        }
-        else
+	   ins = (INumberSpectrum) attl.add("jlp/test/1/att_spectrum");
+	   mnsv.addNumberSpectrumModel(ins);
+	   ins = (INumberSpectrum) attl.add("jlp/test/1/Rwspectrum");
+	   mnsv.addNumberSpectrumModel(ins);
+	   ins = (INumberSpectrum) attl.add("jlp/test/2/att_spectrum");
+	   mnsv.addNumberSpectrumModel(ins);
+	   ins = (INumberSpectrum) attl.add("jlp/test/2/Rwspectrum");
+	   mnsv.addNumberSpectrumModel(ins);
+	}
+	catch (Exception ex)
 	{
-	    try
-	    {
-	       ins = (INumberSpectrum) attl.add("jlp/test/1/att_spectrum");
-	       mnsv.addNumberSpectrumModel(ins);
-	       //ins = (INumberSpectrum) attl.add("jlp/test/1/Rwspectrum");
-	       //mnsv.addNumberSpectrumModel(ins);
-	       ins = (INumberSpectrum) attl.add("jlp/test/2/att_spectrum");
-	       mnsv.addNumberSpectrumModel(ins);
-	       //ins = (INumberSpectrum) attl.add("jlp/test/2/Rwspectrum");
-	       //mnsv.addNumberSpectrumModel(ins);
-	    }
-	    catch (Exception ex)
-	    {
-	       System.out.println("Cannot connect to jlp/test/1");
-               ex.printStackTrace();
-	    }
+	   System.out.println("Cannot connect to jlp/test/1");
+           ex.printStackTrace();
 	}
 
         attl.startRefresher();
