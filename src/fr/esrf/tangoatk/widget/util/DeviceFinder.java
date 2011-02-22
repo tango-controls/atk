@@ -64,8 +64,6 @@ public class DeviceFinder extends JPanel {
   public final static int MODE_ATTRIBUTE_BOOLEAN_SCALAR = 5;
   /** Select all string scalar attributes */
   public final static int MODE_ATTRIBUTE_STRING_SCALAR = 6;
-  /** Select all number spectrum attributes */
-  public final static int MODE_ATTRIBUTE_NUMBER_SPECTRUM = 7;
 
   static Database  db;
   JTree            tree;
@@ -96,17 +94,6 @@ public class DeviceFinder extends JPanel {
   }
 
   /**
-   * Sets the selection model for the tree
-   * @see TreeSelectionModel#SINGLE_TREE_SELECTION
-   * @see TreeSelectionModel#CONTIGUOUS_TREE_SELECTION
-   * @see TreeSelectionModel#SINGLE_TREE_SELECTION
-   * @param selectionModel The selection model
-   */
-  public void setSelectionModel(int selectionModel) {
-    tree.getSelectionModel().setSelectionMode(selectionModel);
-  }
-
-  /**
    * Returns the list of selected entities.
    */
   public String[] getSelectedNames() {
@@ -133,7 +120,6 @@ public class DeviceFinder extends JPanel {
           case MODE_ATTRIBUTE_NUMBER_SCALAR:
           case MODE_ATTRIBUTE_STRING_SCALAR:
           case MODE_COMMAND:
-          case MODE_ATTRIBUTE_NUMBER_SPECTRUM:
             if (pth.length == 5) {
               name = pth[1] + "/" + pth[2] + "/" + pth[3] + "/" + pth[4];
               completePath.add(name);
@@ -165,15 +151,10 @@ public class DeviceFinder extends JPanel {
 
   }
 
-  public JTree getTree() {
-    return tree;
-  }
-
   /** test function */
   public static void main(String[] args) {
 
-    final DeviceFinder df = new DeviceFinder(MODE_ATTRIBUTE_NUMBER_SPECTRUM);
-    df.setSelectionModel(TreeSelectionModel.SINGLE_TREE_SELECTION);
+    final DeviceFinder df = new DeviceFinder(MODE_ATTRIBUTE_SCALAR);
 
     JFrame f = new JFrame();
     JPanel p = new JPanel();
@@ -365,26 +346,6 @@ class MemberNode extends Node {
               }
               ain = null;
               break;
-          case DeviceFinder.MODE_ATTRIBUTE_NUMBER_SPECTRUM:
-              AttributeInfo[] aisp = ds.get_attribute_info();
-              for(int i=0;i<aisp.length;i++) {
-                if(aisp[i].data_format.value() == AttrDataFormat._SPECTRUM)
-                  switch(aisp[i].data_type)
-                  {
-                      case TangoConst.Tango_DEV_CHAR:
-                      case TangoConst.Tango_DEV_UCHAR:
-                      case TangoConst.Tango_DEV_SHORT:
-                      case TangoConst.Tango_DEV_USHORT:
-                      case TangoConst.Tango_DEV_LONG:
-                      case TangoConst.Tango_DEV_ULONG:
-                      case TangoConst.Tango_DEV_FLOAT:
-                      case TangoConst.Tango_DEV_DOUBLE:
-                          add(new EntityNode(mode,aisp[i].name));
-                          break;
-                  }
-              }
-              ain = null;
-              break;
           case DeviceFinder.MODE_ATTRIBUTE_STRING_SCALAR:
             AttributeInfo[] ais = ds.get_attribute_info();
             for(int i=0;i<ais.length;i++) {
@@ -482,7 +443,6 @@ class TreeNodeRenderer extends DefaultTreeCellRenderer {
         case DeviceFinder.MODE_ATTRIBUTE_SCALAR:
         case DeviceFinder.MODE_ATTRIBUTE_BOOLEAN_SCALAR:
         case DeviceFinder.MODE_ATTRIBUTE_NUMBER_SCALAR:
-        case DeviceFinder.MODE_ATTRIBUTE_NUMBER_SPECTRUM:
         case DeviceFinder.MODE_ATTRIBUTE_STRING_SCALAR:
           setIcon(atticon);
           break;

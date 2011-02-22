@@ -130,8 +130,6 @@ public class StateViewer extends javax.swing.JPanel
 	 return;
 
       this.model = stateAtt;
-      if (!stateAtt.areAttPropertiesLoaded())
-          stateAtt.loadAttProperties();
       stateAtt.addDevStateScalarListener(this);
       
       if (!externalSetText)
@@ -320,7 +318,6 @@ public class StateViewer extends javax.swing.JPanel
     valueLabel.setFont(font);
   }
 
-  @Override
   public void setFont(java.awt.Font font) {
     if (valueLabel != null) {
       valueLabel.setFont(font);
@@ -346,7 +343,6 @@ public class StateViewer extends javax.swing.JPanel
   }
 
 
-    @Override
   public void setForeground(java.awt.Color color) {
     if (valueLabel != null) {
       valueLabel.setForeground(color);
@@ -409,9 +405,9 @@ public class StateViewer extends javax.swing.JPanel
        // Connect to a list of number scalar attributes
        try
        {
-          attState = (IDevStateScalar) attList.add("fp/test/1/State");
+          attState = (IDevStateScalar) attList.add("jlp/test/1/State");
 	  stv.setModel(attState);
-	  stv.setLabel("FP status");
+	  stv.setLabel("jlp status");
        }
        catch (Exception ex)
        {

@@ -22,22 +22,18 @@
  
 package fr.esrf.tangoatk.widget.util;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.event.TableModelListener;
 import javax.swing.event.TableModelEvent;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Clipboard;
 import java.awt.event.*;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Vector;
 
 /**
  * A class to handle a 2 dimension Table with fixed row name and column name, also
@@ -376,7 +372,7 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
     wT = nwT;
     hT = nhT;
     //Create table if it is null
-    if(theTable==null || (rowTable==null && rowData!=null)) {
+    if( theTable==null ) {
 
       //System.out.println("Rebuild table");
       createTable();
@@ -572,7 +568,7 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
       return str.toString();
 
     }
-  
+
   public void mouseClicked(MouseEvent e) {}
 
   public void mousePressed(MouseEvent e) {
@@ -636,7 +632,7 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
   }
 
   protected void placeComponent() {
-    if ((rowData!=null) && (rowTable != null)){
+    if(rowData!=null) {
       Dimension d = getSize();
       int hFont = 17;
       cornerPanel.setBounds(-5,-5 ,54,hFont+5);
@@ -869,7 +865,7 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
     }
 
   }
-  
+
   /**
    * Test function.
    */
@@ -906,4 +902,84 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
 
   }
 
+}
+
+class TableRowModel extends DefaultTableModel {
+    protected String[]   colName  = null;
+    protected Object[][] data     = null;
+    protected boolean    editable = false;
+
+    public TableRowModel () {
+        super();
+        data = new Object[0][0];
+        colName = new String[0];
+    }
+
+    public void setValueAt (Object aValue, int rowIndex, int columnIndex) {
+        if ( editable && data != null ) data[rowIndex][columnIndex] = aValue;
+    }
+
+    public Class<?> getColumnClass (int columnIndex) {
+        return String.class;
+    }
+
+    public boolean isCellEditable (int row, int col) {
+        return editable;
+    }
+
+    public String getColumnName (int column) {
+        if ( colName != null ) return colName[column];
+        else return "";
+    }
+
+    public int getRowCount () {
+        if (data == null) {
+            return 0;
+        }
+        else {
+            return data.length;
+        }
+    }
+
+    public int getColumnCount () {
+        if (colName == null) {
+            return 0;
+        }
+        else {
+            return colName.length;
+        }
+    }
+
+    public Object getValueAt (int row, int column) {
+        if ( data != null ) {
+            return data[row][column];
+        }
+        else {
+            return "";
+        }
+    }
+
+    public String[] getColName () {
+        return colName;
+    }
+
+    public void setColName (String[] colName) {
+        this.colName = colName;
+    }
+
+    public boolean isEditable () {
+        return editable;
+    }
+
+    public void setEditable (boolean editable) {
+        this.editable = editable;
+    }
+
+    public Object[][] getData () {
+        return data;
+    }
+
+    public void setData (Object[][] theData) {
+        this.data = theData;
+    }
 }

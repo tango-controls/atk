@@ -42,8 +42,6 @@ public interface IStringSpectrum extends IAttribute {
 
     public String[] getStringSpectrumValue();
     
-    public String[] getStringSpectrumSetPoint();
-    
     public void setStringSpectrumValue(String[] strSpect);
 
 }

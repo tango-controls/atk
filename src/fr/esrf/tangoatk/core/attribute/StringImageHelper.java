@@ -37,24 +37,24 @@ import fr.esrf.TangoApi.*;
 
 class StringImageHelper implements java.io.Serializable
 {
-    AAttribute      attribute;
+    IAttribute      attribute;
     EventSupport    propChanges;
     String[][]      retval = new String[1][1];
 
-    public StringImageHelper(AAttribute attribute)
+    public StringImageHelper(IAttribute attribute)
     {
         init(attribute);
     }
 
 
-    void init(AAttribute attribute)
+    void init(IAttribute attribute)
     {
         setAttribute(attribute);
-        propChanges = attribute.getPropChanges();
+        propChanges = ((AAttribute) attribute).getPropChanges();
     }
 
 
-    public void setAttribute(AAttribute attribute)
+    public void setAttribute(IAttribute attribute)
     {
         this.attribute = attribute;
     }

@@ -48,7 +48,7 @@ import fr.esrf.tangoatk.widget.util.*;
 public class StateViewer extends javax.swing.JPanel
         implements fr.esrf.tangoatk.core.IStateListener {
 
-  IDevice device;
+  Device device;
   String state = IDevice.UNKNOWN;
   boolean externalSetText = false;
   boolean stateClickable = true;
@@ -148,21 +148,14 @@ public class StateViewer extends javax.swing.JPanel
    * shown on the textLabel.
    * @param device a <code>Device</code> to surveil
    */
-  public void setModel(IDevice devModel) {
+  public void setModel(Device devModel) {
     clearModel();
     
     if (devModel == null)
        return;
        
     this.device = devModel;
-    if (this.device instanceof Device)
-    {
-          Device dev = (Device) this.device;
-          if (!dev.areDevPropertiesLoaded())
-          {
-              dev.loadDevProperties();
-          }
-    }
+    device.addStateListener(this);
     setState(device.getState());
     if (!externalSetText)
       textLabel.setText(device.getName());
@@ -194,7 +187,7 @@ public javax.swing.JLabel getValueLabel() {
    *
    * @return a <code>Device</code> value
    */
-  public IDevice getModel() {
+  public Device getModel() {
     return device;
   }
 

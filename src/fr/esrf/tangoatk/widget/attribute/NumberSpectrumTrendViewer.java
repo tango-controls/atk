@@ -53,7 +53,6 @@ import fr.esrf.tangoatk.core.INumberSpectrum;
 import fr.esrf.tangoatk.core.ISpectrumListener;
 import fr.esrf.tangoatk.core.NumberSpectrumEvent;
 import fr.esrf.tangoatk.widget.util.ATKConstant;
-import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
 import fr.esrf.tangoatk.widget.util.chart.CfFileReader;
 import fr.esrf.tangoatk.widget.util.chart.JLChart;
 import fr.esrf.tangoatk.widget.util.chart.JLDataView;
@@ -143,14 +142,6 @@ public class NumberSpectrumTrendViewer extends JPanel implements ISpectrumListen
 
     public void setModel(INumberSpectrum attribute)
     {
-        if (model != null)
-        {
-            model.removeSpectrumListener(this);
-        }
-        
-        if(attribute == null || !(attribute instanceof INumberSpectrum))
-            return;
-        
         attList.stopRefresher();
         attList.clear();
         chart.getY1Axis().clearDataView();
@@ -158,29 +149,31 @@ public class NumberSpectrumTrendViewer extends JPanel implements ISpectrumListen
         if (model != null)
         {
             model.removeSpectrumListener(this);
+            model.removeStateListener(this);
+            model.removeErrorListener(this);
         }
-        try
+        model = attribute;
+        if (model == null)
         {
-            model = (INumberSpectrum)attribute;
-            model.addSpectrumListener(this);
-            attList.add(model);
-            attList.startRefresher();
-
-            String quality = model.getState();
-            nameLabel.setText(model.getName());
-            nameLabel.setBackground(ATKConstant.getColor4Quality(quality));
-            nameLabel.setToolTipText(quality);
-            nameLabel.repaint();
-            quality = null;
-        }
-        catch (Exception e)
-        {
-            model = null;
             nameLabel.setText(DEFAULT_NAME);
-            nameLabel.setToolTipText(DEFAULT_NAME);
             nameLabel.setBackground(ATKConstant.getColor4Quality(IAttribute.UNKNOWN));
-            JOptionPane.showMessageDialog(this, "Failed to set " + attribute.getName() + " as model", "Error", JOptionPane.ERROR_MESSAGE);
+            nameLabel.setToolTipText(DEFAULT_NAME);
+            nameLabel.repaint();
+            chart.repaint();
+            return;
         }
+        model.addSpectrumListener(this);
+        model.addStateListener(this);
+        model.addErrorListener(this);
+        attList.add(model);
+        attList.startRefresher();
+
+        String quality = model.getState();
+        nameLabel.setText(model.getName());
+        nameLabel.setBackground(ATKConstant.getColor4Quality(quality));
+        nameLabel.setToolTipText(quality);
+        nameLabel.repaint();
+        quality = null;
     }
 
     public void clearModel()
@@ -368,7 +361,23 @@ public class NumberSpectrumTrendViewer extends JPanel implements ISpectrumListen
     {
         int ok = JOptionPane.YES_OPTION;
         JFileChooser chooser = new JFileChooser();
-        chooser.addChoosableFileFilter( new MultiExtFileFilter("Text files", "txt"));
+        chooser.addChoosableFileFilter( new FileFilter() {
+            public boolean accept (File f)
+            {
+                if ( f.isDirectory() )
+                {
+                    return true;
+                }
+                String extension = getExtension( f );
+                if ( extension != null && extension.equals( "txt" ) ) return true;
+                return false;
+            }
+
+            public String getDescription ()
+            {
+                return "text files ";
+            }
+        } );
         if ( lastConfig.length() > 0 ) chooser.setSelectedFile( new File(
                 lastConfig ) );
         int returnVal = chooser.showOpenDialog( this );
@@ -390,6 +399,23 @@ public class NumberSpectrumTrendViewer extends JPanel implements ISpectrumListen
             }
         }
 
+    }
+
+    /**
+     * <code>getExtension</code> returns the extension of a given file,
+     * that is the part after the last `.' in the filename.
+     *
+     * @param f a <code>File</code> value
+     * @return a <code>String</code> value
+     */
+    protected String getExtension(File f) {
+        String ext = null;
+        String s = f.getName();
+        int i = s.lastIndexOf('.');
+        if (i > 0 &&  i < s.length() - 1) {
+            ext = s.substring(i+1).toLowerCase();
+        }
+        return ext;
     }
 
     /**
@@ -475,7 +501,23 @@ public class NumberSpectrumTrendViewer extends JPanel implements ISpectrumListen
     {
         int ok = JOptionPane.YES_OPTION;
         JFileChooser chooser = new JFileChooser( "." );
-        chooser.addChoosableFileFilter( new MultiExtFileFilter("Text files", "txt"));
+        chooser.addChoosableFileFilter( new FileFilter() {
+            public boolean accept (File f)
+            {
+                if ( f.isDirectory() )
+                {
+                    return true;
+                }
+                String extension = getExtension( f );
+                if ( extension != null && extension.equals( "txt" ) ) return true;
+                return false;
+            }
+
+            public String getDescription ()
+            {
+                return "text files ";
+            }
+        } );
         if ( lastConfig.length() > 0 ) chooser.setSelectedFile( new File(
                 lastConfig ) );
         int returnVal = chooser.showSaveDialog( this );
@@ -484,7 +526,7 @@ public class NumberSpectrumTrendViewer extends JPanel implements ISpectrumListen
             File f = chooser.getSelectedFile();
             if ( f != null )
             {
-                if ( MultiExtFileFilter.getExtension( f ) == null )
+                if ( getExtension( f ) == null )
                 {
                     f = new File( f.getAbsolutePath() + ".txt" );
                 }

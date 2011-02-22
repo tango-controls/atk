@@ -66,12 +66,6 @@ public class NumberScalarListViewer extends javax.swing.JPanel
     private boolean          unitVisible;
     private String           setterType;
     private Color            arrowColor;
-    private String           toolTipDisplay;
-    
-    
-    public static final String      TOOLTIP_DISPLAY_NONE = "None";
-    public static final String      TOOLTIP_DISPLAY_NAME_ONLY = "Name";
-    public static final String      TOOLTIP_DISPLAY_ALL = "All";
     
 
     /** Creates new form NumberScalarListViewer */
@@ -97,7 +91,6 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	propertyListEditable = true;
 	unitVisible = true;
 	setterType = DEFAULT_SETTER;
-	toolTipDisplay = TOOLTIP_DISPLAY_NONE;
         setLayout(new java.awt.GridBagLayout());
 	
 	setVisible(false);
@@ -488,34 +481,6 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 
     }
      
-     
-     
-   /**
-    * Returns the current toolTipDisplay
-    * @see #setToolTipDisplay
-    */
-    public String getToolTipDisplay()
-    {
-         return toolTipDisplay;
-    }
-    
-   /**
-    * Sets the current toolTipDisplay. This property should be set before the call to setModel()
-    * @see #getToolTipDisplay
-    */
-    public void setToolTipDisplay(String  ttType)
-    {
-	if (listModel != null)
-	   return;
-	   
-        if (ttType.equalsIgnoreCase(TOOLTIP_DISPLAY_ALL))
-	   toolTipDisplay = TOOLTIP_DISPLAY_ALL;
-	else
-	   if (ttType.equalsIgnoreCase(TOOLTIP_DISPLAY_NAME_ONLY))
-	       toolTipDisplay = TOOLTIP_DISPLAY_NAME_ONLY;
-	   else
-	       toolTipDisplay = TOOLTIP_DISPLAY_NONE;
-    }
 
      
     /**
@@ -719,22 +684,6 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 		   setter = wheelSetter;
 	      }
 	 
-              if (toolTipDisplay.equalsIgnoreCase(TOOLTIP_DISPLAY_ALL))
-              {
-                 viewer.setHasToolTip(true);
-                 viewer.setQualityInTooltip(true);
-              }
-              else
-                 if (toolTipDisplay.equalsIgnoreCase(TOOLTIP_DISPLAY_NAME_ONLY))
-                 {
-                    viewer.setHasToolTip(true);
-                    viewer.setQualityInTooltip(false);
-                 }
-                 else
-                 {
-                    viewer.setHasToolTip(false);
-                    viewer.setQualityInTooltip(false);
-                 }
 
               viewer.setFont(theFont);
 	      viewer.setUnitVisible(unitVisible);
@@ -905,7 +854,6 @@ public class NumberScalarListViewer extends javax.swing.JPanel
           //nslv.setPropertyButtonVisible(false);
           //att = (INumberScalar) attList.add("sr/d-tm/ntm/BandWidth");
 	  //att.setPossibleValues(vals);
-          //nslv.setToolTipDisplay(TOOLTIP_DISPLAY_NAME_ONLY);
 	  nslv.setModel(attList);
        }
        catch (Exception ex)

@@ -36,8 +36,7 @@ import fr.esrf.Tango.DevFailed;
 
 abstract class ANumberSpectrumHelper extends NumberAttributeHelper {
 
-    @Override
-    void init(AAttribute attribute) {
+    void init(IAttribute attribute) {
 	super.init(attribute);
     }
 
@@ -68,16 +67,9 @@ abstract class ANumberSpectrumHelper extends NumberAttributeHelper {
     }
 	
     abstract double[] getNumberSpectrumValue(DeviceAttribute attribute) throws DevFailed;
-
-    abstract double[] getNumberSpectrumSetPoint(DeviceAttribute attribute) throws DevFailed;
     
     abstract double[] getNumberSpectrumDisplayValue(DeviceAttribute deviceAttribute) throws DevFailed;
 
-    abstract double[] getNumberSpectrumDisplaySetPoint(DeviceAttribute attribute) throws DevFailed;
-
-    protected abstract IAttributeSpectrumHistory[] getSpectrumAttHistory(DeviceDataHistory[] attPollHist);
-
-    protected abstract IAttributeSpectrumHistory[] getSpectrumDeviceAttHistory(DeviceDataHistory[] attPollHist);
 
     abstract void insert(double [] d);
 

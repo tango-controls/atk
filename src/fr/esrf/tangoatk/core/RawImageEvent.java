@@ -33,26 +33,20 @@ package fr.esrf.tangoatk.core;
 
 public class RawImageEvent extends ATKEvent {
 
-  byte[] value;
-  String encFormat;
+  byte[][] value;
   long timeStamp;
 
-  public RawImageEvent(IRawImage source, String encFormat, byte[] value, long timeStamp) {
+  public RawImageEvent(IRawImage source, byte[][] value, long timeStamp) {
     super(source, timeStamp);
-    setValue(encFormat,value);
+    setValue(value);
   }
 
-  public byte[] getValue() {
+  public byte[][] getValue() {
     return value;
   }
 
-  public String getEncodedFormat() {
-    return encFormat;
-  }
-
-  public void setValue(String encFormat,byte[] value) {
+  public void setValue(byte[][] value) {
     this.value = value;
-    this.encFormat = encFormat;
   }
 
   public void setSource(IRawImage source) {

@@ -40,8 +40,7 @@ public interface IBooleanSpectrum extends IAttribute {
     
     public void removeBooleanSpectrumListener(IBooleanSpectrumListener l) ;
 
-    public boolean[] getValue();
-    public boolean[] getSetPoint();
+    public boolean[] getValue() throws DevFailed;
 
     public void setValue(boolean[] b) throws AttributeSetException;
 

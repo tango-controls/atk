@@ -32,11 +32,15 @@ package fr.esrf.tangoatk.widget.attribute;
 
 
 import javax.swing.*;
+import javax.swing.table.*;
+
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.widget.util.ATKConstant;
-import fr.esrf.tangoatk.widget.util.JTableRow;
+import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
 
 
 /** A StringImageTableViewer is a Swing JTable provided for the StringImage attributes.
@@ -46,11 +50,13 @@ import fr.esrf.tangoatk.widget.util.JTableRow;
  * interface. The viewer is updated when the string image attribute value changes.
  *
  */
-public class StringImageTableViewer extends JTableRow implements IStringImageListener
+public class StringImageTableViewer extends JTable implements IStringImageListener
 {
 
 
   private IStringImage          attModel=null;
+  private DefaultTableModel     tabModel=null;
+  private String[]              columnIdents=null;
   private boolean               qualityEnabled = false;
   private Color                 background;
   
@@ -61,6 +67,8 @@ public class StringImageTableViewer extends JTableRow implements IStringImageLis
   public StringImageTableViewer()
   {
       background = getBackground();
+      tabModel = new DefaultTableModel();
+      super.setModel(tabModel);
   }
 
   // ---------------------------------------------------
@@ -75,7 +83,11 @@ public class StringImageTableViewer extends JTableRow implements IStringImageLis
 
   public void setAttModel( IStringImage siModel)
   {
-      clearModel();
+      if (attModel != null)
+      {
+	  attModel.removeStringImageListener(this);
+	  attModel = null;
+      }
 
       if (siModel != null)
       {
@@ -115,14 +127,32 @@ public class StringImageTableViewer extends JTableRow implements IStringImageLis
      }
   }
 
+  /**
+   *<code>getColumnIdents</code> returns a String Array corresponding to the column identifiers
+   * 
+   * @return a <code>String[]</code> value
+   */
+  public String[] getColumnIdents ()
+  {
+      return columnIdents;
+  }
+
+  /**
+   * <code>setColumnIdents</code> sets the table's column identifiers
+   *
+   * @param columnIdents
+   */
+  public void setColumnIdents (String[] colIds)
+  {
+     columnIdents = colIds;
+     tabModel.setColumnIdentifiers(colIds);
+  }
+
+
+
   public void clearModel()
   {
-      if (attModel != null)
-      {
-	  attModel.removeStringImageListener(this);
-	  attModel = null;
-          clearData();
-      }
+      setAttModel( (IStringImage) null);
   }
 
 
@@ -157,23 +187,11 @@ public class StringImageTableViewer extends JTableRow implements IStringImageLis
   {
       if (val == null)
       {
-	 clearData();
+	 tabModel = new DefaultTableModel();
+	 super.setModel(tabModel);
 	 return;
       }
-      
-      if (val.length == 0)
-      {
-	 clearData();
-	 return;
-      }
-      
-      int nbCol = val[0].length;
-      if (nbCol == 0)
-      {
-	 clearData();
-	 return;
-      }
-      super.setData(val, 0, 0);      
+      tabModel.setDataVector(val, columnIdents);
   }
 
   // ---------------------------------------------------
@@ -182,33 +200,31 @@ public class StringImageTableViewer extends JTableRow implements IStringImageLis
   static public void main(String args[])
   {
        IEntity                   ie;
-       IStringImage              ismAtt=null;
+       IStringImage              ismAtt;
        AttributeList             attl = new AttributeList();
        JFrame                    f = new JFrame();
        StringImageTableViewer    sitv = new StringImageTableViewer();
 
        try
        {
-          ie = attl.add("fp/test/1/string_image_ro");
+	  ie = attl.add("tests/machine/status/operatorMessageHistory");
 	  if (!(ie instanceof IStringImage))
 	  {
-              System.out.println("fp/test/1/string_image_ro is not a IStringImage");
-	      System.exit(-1);
+              System.out.println("tests/machine/status/operatorMessageHistory is not a IStringImage");
+	      System.exit(0);
 	  }
 
           ismAtt = (IStringImage) ie;
+	  sitv.setAttModel(ismAtt);
        }
        catch (Exception ex)
        {
-          System.out.println("Cannot connect to fp/test/1/string_image_ro");
-          System.exit(-1);
+          System.out.println("Cannot connect to tests/machine/status");
        }
-       
-	
+
+
        f.setContentPane(sitv);
        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-       sitv.setAttModel(ismAtt);
-       attl.startRefresher();
        f.pack();
        f.setVisible(true);
   }

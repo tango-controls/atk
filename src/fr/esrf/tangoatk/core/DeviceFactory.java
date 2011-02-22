@@ -56,8 +56,6 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
   public final static int TRACE_ATTFACTORY=512;
   // Debug trace for command factory.
   public final static int TRACE_CMDFACTORY=1024;
-  // Debug trace for attributes refreshed by att config events.
-  public final static int TRACE_ATT_CONFIG_EVENT=2048;
   // Trace all
   public final static int TRACE_ALL=0xFF;
 
@@ -273,68 +271,6 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
     return d;
 
   }
-
-    /**
-     * Get a handle to a device and add it to the global state/status refresher list.
-     * @param name Device name
-     * @return Device handle
-     * @throws ConnectionException In case of failure.
-     */
-    public synchronized Device getConnectionlessDevice(String name) throws ConnectionException
-    {
-
-        int pos;
-        Device d = null;
-        String lowerName = name.toLowerCase();
-
-        pos = Arrays.binarySearch(deviceNames, lowerName);
-        //if(pos>=0) d = (Device)devices.get(pos);
-        if (pos >= 0)
-        {
-            d = devices.get(pos);
-        }
-
-        if (pos < 0)
-        {
-
-            // The device has not been found, we have to create it
-            long t0 = System.currentTimeMillis();
-            try
-            {
-                d = new Device(name, true);
-                trace(TRACE_SUCCESS, "DeviceFactory.getConnectionlessDevice(" + name + ") ok", t0);
-            }
-            catch (DevFailed e)
-            {
-                trace(TRACE_FAIL, "DeviceFactory.getConnectionlessDevice(" + name + ") failed", t0);
-                throw new ConnectionException(e);
-            }
-
-            // Build the new deviceNames array
-            int ipos = -(pos + 1);
-            int lgth = deviceNames.length;
-            String[] newDeviceNames = new String[lgth + 1];
-            System.arraycopy(deviceNames, 0, newDeviceNames, 0, ipos);
-            System.arraycopy(deviceNames, ipos, newDeviceNames, ipos + 1, lgth - ipos);
-            newDeviceNames[ipos] = lowerName;
-
-            synchronized (deviceMonitor)
-            {
-                // Update list
-                devices.add(ipos, d);
-                deviceNames = newDeviceNames;
-            }
-
-            dumpFactory("Adding " + lowerName);
-
-            if (autoStart)
-            {
-                startRefresher();
-            }
-
-        }
-        return d;
-    }
 
   /**
    * Executes the global state/status refresh on all device registered.

@@ -28,7 +28,6 @@
 package fr.esrf.tangoatk.widget.util.jdraw;
 
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
-import fr.esrf.tangoatk.widget.jdraw.SimpleSynopticAppli;
 
 import javax.swing.*;
 import java.awt.*;
@@ -86,8 +85,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
   public  JMenuItem viewsTransformMenuItem;
   /** Views->Play menu item. */
   public  JMenuItem viewsPlayMenuItem;
-  /** Views->Tango Synoptic menu item. */
-  public  JMenuItem viewsTangoSynopticMenuItem;  
   /** Views->Object properties menu item. */
   public  JMenuItem viewsOptionMenuItem;
   /** Views->Browse menu item. */
@@ -193,10 +190,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
   private JComboBox libCombo;
   private JDLibraryViewer[] libViewer;
   private int nLibs;
-  private JDDeviceTree deviceTree;
-  private JPanel editorPanel;
-
-  private SimpleSynopticAppli theSynopticAppli = null;
+  
   /**
    * Contruct an Editor frame.
    * @see #main
@@ -204,16 +198,12 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
   public JDrawEditorFrame() {
 
     setTitle(APP_RELEASE);
-    JSplitPane sPane = new JSplitPane();
-    editorPanel = new JPanel();
-    editorPanel.setLayout(new BorderLayout());
-
-    // Device tree
-    deviceTree = new JDDeviceTree();
+    Container pane=getContentPane();
+    pane.setLayout(new BorderLayout());
 
     // Help label
     statusLine = new JPanel(new GridLayout(1,1));
-    editorPanel.add(statusLine,BorderLayout.SOUTH);
+    pane.add(statusLine,BorderLayout.SOUTH);
 
     statusLabel = new JLabel();
     statusLabel.setFont(JDUtils.labelFont);
@@ -224,7 +214,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     // The toolbar
     // -------------------------------------
     createMenu = new JDCreationMenu();
-    editorPanel.add(createMenu.getToolbar(),BorderLayout.WEST);
+    pane.add(createMenu.getToolbar(),BorderLayout.WEST);
 
     // -------------------------------------
     // The edit toolbar
@@ -282,7 +272,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     editToolBar.add(editToolAlignRightBtn);
     
     editToolBar.setOrientation(JToolBar.HORIZONTAL);
-    editorPanel.add(editToolBar,BorderLayout.NORTH);
+    pane.add(editToolBar,BorderLayout.NORTH);
     // -------------------------------------
     // Main menu
     // -------------------------------------
@@ -329,7 +319,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     editPasteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,InputEvent.CTRL_MASK));
     editPasteMenuItem.addActionListener(this);
     editDeleteMenuItem = new JMenuItem("Delete");
-    editDeleteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE,0));
+    editDeleteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,0));
     editDeleteMenuItem.addActionListener(this);
     editSelectAllMenuItem = new JMenuItem("Select all");
     editSelectAllMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,InputEvent.CTRL_MASK));
@@ -361,8 +351,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     // Views -----------------------------------------
     viewsPlayMenuItem = new JMenuItem("Player view");
     viewsPlayMenuItem.addActionListener(this);
-    viewsTangoSynopticMenuItem = new JMenuItem("Tango Synoptic view");
-    viewsTangoSynopticMenuItem.addActionListener(this);
     viewsOptionMenuItem = new JMenuItem("Object properties...");
     viewsOptionMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,InputEvent.CTRL_MASK));
     viewsOptionMenuItem.addActionListener(this);
@@ -382,7 +370,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     viewsMenu = new JMenu("Views");
     viewsMenu.setMnemonic('V');
     viewsMenu.add(viewsPlayMenuItem);
-    viewsMenu.add(viewsTangoSynopticMenuItem);
     viewsMenu.add(viewsGlobalMenuItem);
     viewsMenu.add(viewsTransformMenuItem);
     viewsMenu.add(viewsOptionMenuItem);
@@ -456,10 +443,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
 
     setJMenuBar(theMenu);
 
-    sPane.setRightComponent(editorPanel);
-    sPane.setLeftComponent(deviceTree);
-    setContentPane(sPane);
-
   }
 
   // ----------------------------------------------------
@@ -475,7 +458,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     theEditor.setBorder(BorderFactory.createEtchedBorder());
     theEditorView = new JScrollPane(editor);
     theEditorView.setWheelScrollingEnabled(true);
-    editorPanel.add(theEditorView,BorderLayout.CENTER);
+    getContentPane().add(theEditorView,BorderLayout.CENTER);
     // Update controls
     selectionChanged();
     valueChanged();
@@ -590,11 +573,11 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
       theEditor.scaleSelection(-1.0,1.0);
     } else if (src==editToolVMirrorBtn || src==toolsVMirrorMenuItem) {
       theEditor.scaleSelection( 1.0,-1.0);
-    } else if (src==fileSaveasMenuItem) {
+    } else if (src==editToolFileSaveBtn || src==fileSaveasMenuItem) {
       theEditor.showSaveDialog(".");
     } else if (src==editToolFileOpenBtn || src==fileOpenMenuItem) {
       theEditor.showOpenDialog(".");
-    } else if(src==editToolFileSaveBtn || src==fileSaveMenuItem) {
+    } else if( src==fileSaveMenuItem) {
       theEditor.instantSave(".");
     } else if (src==editToolZoomInBtn) {
       theEditor.zoomIn();
@@ -622,8 +605,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
       theEditor.showBrowserWindow();
     } else if (src==viewsPlayMenuItem) {
       showPlayer();
-    } else if (src==viewsTangoSynopticMenuItem) {
-      showSimpleSynopticAppli();
     } else if (src == viewsGroupEditMenuItem) {
       theEditor.showGroupEditorWindow();
     } else if (src == viewsJavaMenuItem) {
@@ -860,46 +841,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     framePlayer.setVisible(true);
   }
 
-  private void showSimpleSynopticAppli()
-  {
-      if (theSynopticAppli != null)
-      {
-          theSynopticAppli.setVisible(false);
-          theSynopticAppli.stopSimpleSynopticAppli();
-          theSynopticAppli=null;
-      }
-      
-      theEditor.instantSave(".");
-      String  fileName = theEditor.getFileName();
-      if ((fileName == null) || (fileName.length() == 0)) return;
-      
-      java.io.File  f = new java.io.File(fileName);
-      String        absolutePathName = null;
-      try
-      {
-          absolutePathName = f.getAbsolutePath();
-      }
-      catch (Exception ex)
-      {
-          return;
-      }
-      
-      if ((absolutePathName==null) || (absolutePathName.length()==0))
-          return;
-      
-      theSynopticAppli = new SimpleSynopticAppli(absolutePathName);
-      theSynopticAppli.addWindowListener(
-            new java.awt.event.WindowAdapter()
-            {
-                @Override
-                public void windowClosed(java.awt.event.WindowEvent evt)
-                {
-                    theSynopticAppli = null;
-                }
-            });
-  }
-
- 
   /** Ask to save if some modifications are still unsaved then exit the application. Called
    * when the file exit menu is selected or when the frame is closed */
   public void exitApp() {
@@ -943,7 +884,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     final JDrawEditor ed = new JDrawEditor(JDrawEditor.MODE_EDIT);
     final JDrawEditor py = new JDrawEditor(JDrawEditor.MODE_PLAY);
     final JDrawEditorFrame jde = new JDrawEditorFrame();
-    jde.setAppTitle("JDraw Editor 1.13");
+    jde.setAppTitle("JDraw Editor 1.11");
     jde.setEditor(ed);
     jde.setPlayer(py);
     jde.setLibraries(null);

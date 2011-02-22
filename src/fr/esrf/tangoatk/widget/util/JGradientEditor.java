@@ -330,11 +330,9 @@ public class JGradientEditor extends JComponent implements ActionListener,MouseM
     } else if (evt.getSource() == addMenuItem) {
 
       Color nColor = JColorChooser.showDialog(this, "Choose new color", Color.black);
-      if (nColor != null) {
       grad.addEntry(nColor, currentPos);
       palette = grad.buildColorMap(256);
       repaint();
-      }
 
     } else if (evt.getSource() == removeMenuItem) {
 
@@ -390,7 +388,7 @@ public class JGradientEditor extends JComponent implements ActionListener,MouseM
     Object p = parent.getRootPane().getParent();
     if (p instanceof JDialog) {
       gDialog = new JDialog((JDialog) p, true);
-    } else if (p instanceof JFrame) {
+    } else if (p instanceof JDialog) {
       gDialog = new JDialog((JFrame) p, true);
     } else {
       gDialog = new JDialog((JFrame) null, true);
@@ -466,42 +464,20 @@ public class JGradientEditor extends JComponent implements ActionListener,MouseM
     int ye = e.getY();
     int startX = (d.width - 256) / 2;
     int startY = (d.height - barHeight) / 2;
-    int i = grad.getEntryNumber()-2;
+    int i = 0;
 
-    while (i > 0 && !found) {
+    while (i < grad.getEntryNumber() && !found) {
       double p = grad.getPosAt(i);
       int xc = startX + (int) (p * 256.0);
       int yc = startY + barHeight / 2;
       found = (xe > xc - 8) && (xe < xc + 8) && (ye > yc - 15) && (ye < yc + 15);
-      if (!found) i--;
+      if (!found) i++;
     }
 
     if (found) {
       currentSel = i;
     } else {
-
-      // Now check boundary entries
-      double p = grad.getPosAt(0);
-      int xc = startX + (int) (p * 256.0);
-      int yc = startY + barHeight / 2;
-      found = (xe > xc - 8) && (xe < xc + 8) && (ye > yc - 15) && (ye < yc + 15);
-
-      if (!found) {
-
-        p = grad.getPosAt(grad.getEntryNumber()-1);
-        xc = startX + (int) (p * 256.0);
-        yc = startY + barHeight / 2;
-        found = (xe > xc - 8) && (xe < xc + 8) && (ye > yc - 15) && (ye < yc + 15);
-        if( !found ) {
-          currentSel = -1;
-        } else {
-          currentSel = grad.getEntryNumber()-1;
-        }
-
-      } else {
-        currentSel=0;
-      }
-
+      currentSel = -1;
     }
 
     currentPos = ((xe - startX) / 256.0);
