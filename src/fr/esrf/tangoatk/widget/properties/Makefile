@@ -1,5 +1,6 @@
-BEANINFO=LabelViewerBeanInfo.java \
-	UnitViewerBeanInfo.java \
+# BEANINFO=PropertyViewerBeanInfo.java\
+#          PropertyListViewerBeanInfo.java \
+#          PropertyFrameBeanInfo.java \
 
 
 include ../../../../../../.make-include
@@ -8,18 +9,17 @@ include ../../../../../../.make-include
 ALL =  	$(TARGET)/PropertyViewer.class \
 	$(TARGET)/PropertyListAdapter.class \
 	$(TARGET)/PropertyListViewer2.class \
-	$(TARGET)/LabelViewer.class \
-	$(TARGET)/DevicePropertyDialog.class \
-	$(TARGET)/DevicePropertyListPanel.class \
-	$(TARGET)/UnitViewer.class \
-	$(TARGET)/PropertyAreaEditor.class \
-	$(TARGET)/PropertyFieldEditor.class \
 
 
 all: properties beaninfo
 
 properties: $(ALL)
 	$(J)
+
+ci:
+	@cvs ci Makefile `echo $(ALL) \
+                     | sed 's|$(TARGET)/||g' |  \
+                     sed 's|\.class|.java|g'`
 
 
 manifest: manifest-file

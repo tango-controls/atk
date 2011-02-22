@@ -1,8 +1,0 @@
-#!/bin/sh
-JAVALIB=/segfs/tango/lib/java;
-MYLIB=/users/pons/atk/lib;
-CLASSPATH=$JAVALIB/TangORB.jar:$MYLIB:.
-export CLASSPATH
-echo $CLASSPATH
-echo Runnig ChartExample$1...
-java ChartExample$1

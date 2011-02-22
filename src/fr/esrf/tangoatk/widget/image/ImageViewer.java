@@ -1,29 +1,7 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          ImageViewer.java
 // Created:       2002-06-05 15:37:33, assum
 // By:            <assum@esrf.fr>
-// Time-stamp:    <2002-07-05 16:6:7, assum>
+// Time-stamp:    <2002-07-01 13:56:18, assum>
 // 
 // $Id$
 // 
@@ -106,9 +84,33 @@ public class ImageViewer extends JPanel implements IImageViewer {
 
     ImageController controller;
 
+    /**
+     * variable <code>rasterControl</code>
+     * @deprecated use rasterConverter instead
+     *
+     */
+    IRasterControl rasterControl;
 
     IRasterConverter rasterConverter;
     
+    /**
+     * Get the value of rasterControl.
+     * @return value of rasterControl.
+     * @deprecated use getRasterConverter instead
+     */
+    public IRasterControl getRasterControl() {
+	return rasterControl;
+    }
+    
+    /**
+     * Set the value of rasterControl.
+     * @param v  Value to assign to rasterControl.
+     * @deprecated use setRasterConverter(IRasterConverter v) instead
+     */
+    public void setRasterControl(IRasterControl  v) {
+	this.rasterControl = v;
+	rasterControl.setImageViewer(this);
+    }
 
     public void setRasterConverter(IRasterConverter v) {
 	this.rasterConverter = v;
@@ -213,7 +215,9 @@ public class ImageViewer extends JPanel implements IImageViewer {
 	this.raster = v;
 	rasterChanged = true;
 	image = rasterConverter.convertRaster(raster);
-
+	if (rasterControl != null) {
+	    image = rasterControl.convertRaster(raster);
+	}
 	setSize(new Dimension(image.getWidth(), image.getHeight()));
 	repaint();
     }
@@ -248,7 +252,7 @@ public class ImageViewer extends JPanel implements IImageViewer {
 
 	if (l instanceof IImagePanel) {
 	    addImagePanel((IImagePanel)l);
-	    l.setImageViewer(this);
+	    l.setModel(this);
 	}
     }
 
@@ -308,7 +312,7 @@ public class ImageViewer extends JPanel implements IImageViewer {
 	JFrame f = new JFrame();
 	f.getContentPane().add(iv);
 	f.pack();
-	f.setVisible(true);
+	f.show();
 
     } // end of main ()
     

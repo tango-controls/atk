@@ -18,17 +18,14 @@ ALL   = $(TARGET)/Splash.class \
 
 
 
-all: icon-components       \
-     widget-util           \
-     widget-dnd            \
+all: widget-util \
      properties-components \
      device-components     \
-     image-components      \
+     image-components    \
      attribute-components  \
      command-components    \
-     jdraw-components       \
-     image-components      \
-
+     loox-components     \
+     image-components   \
 
 widgets: $(ALL)
 	$(J)
@@ -61,12 +58,6 @@ image-components:
 image-clean:
 	(cd image && $(MAKE) class-clean) ; 
 
-widget-dnd:
-	(cd dnd && $(MAKE) all)
-
-widget-dnd-clean:
-	(cd dnd && $(MAKE) class-clean)
-
 widget-util:
 	(cd util && $(MAKE) all)
 
@@ -82,14 +73,17 @@ command-components:
 device-components:
 	(cd device && $(MAKE) all)
 
-jdraw-components:
-	(cd jdraw && $(MAKE) all)
+loox-components:
+	(cd loox && $(MAKE) all)
 
 properties-components:
 	(cd properties && $(MAKE) all)
 
-icon-components:
-	(cd icons && $(MAKE) all)
+image-components:
+	(cd image && $(MAKE) all)
+
+image-clean:
+	(cd image && $(MAKE) class-clean);
 
 device-clean:
 	(cd device && $(MAKE) class-clean) ;
@@ -102,10 +96,10 @@ properties-clean:
 command-clean:
 	(cd command && $(MAKE) class-clean) ; 
 
-clean:  attribute-clean    \
+clean:  class-clean        \
+	attribute-clean    \
 	properties-clean   \
 	widget-util-clean  \
-      widget-dnd-clean \
 	device-clean       \
         image-clean       \
 
@@ -118,6 +112,9 @@ trun:
 vrun:
 	$(JAVA) fr.esrf.TangoATK.Widget.VisadTest
 
+properties-manifest:
+	(cd properties && $(MAKE) manifest.mf)
+
 attributes-manifest:
 	(cd attribute && $(MAKE) manifest.mf)
 
@@ -127,21 +124,15 @@ device-manifest:
 command-manifest:
 	(cd command && $(MAKE) manifest.mf)
 
-jdraw-manifest:
-	(cd jdraw && $(MAKE) manifest.mf)
-
-
-manifest: attributes-manifest \
+manifest: properties-manifest \
+          attributes-manifest \
           device-manifest     \
-          command-manifest \
-	  jdraw-manifest
+          command-manifest    
 	mv manifest.mf manifest.mf.tmp; \
            cat manifest.mf.tmp          \
-            jdraw/manifest.mf         \
             command/manifest.mf         \
             attribute/manifest.mf       \
-            util/manifest.mf       \
-            properties/manifest.mf       \
-            device/manifest.mf > manifest.mf ; \
+            device/manifest.mf          \
+            properties/manifest.mf  > manifest.mf ; \
 	    rm manifest.mf.tmp
 
