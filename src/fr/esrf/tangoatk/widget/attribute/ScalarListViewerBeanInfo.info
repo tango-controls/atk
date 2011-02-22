@@ -1,8 +1,0 @@
-name = ScalarListViewer
-package fr.esrf.tangoatk.widget.attribute
-
-properties = theFont, labelVisible, setterVisible, propertyButtonVisible, unitVisible, arrowColor, booleanSetterType, toolTipDisplay, setterEnabled
-ICON_MONO_16x16 = ScalarListViewer.gif
-ICON_MONO_32x32 = ScalarListViewer.gif
-ICON_COLOR_16x16 = ScalarListViewer.gif
-ICON_COLOR_32x32 = ScalarListViewer.gif

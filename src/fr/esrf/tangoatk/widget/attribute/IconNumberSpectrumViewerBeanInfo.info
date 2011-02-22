@@ -1,3 +1,0 @@
-name =  IconNumberSpectrumViewer
-package = fr.esrf.tangoatk.widget.attribute 
-properties = model, icons, invalidIcon, rows, columns, texts, colors

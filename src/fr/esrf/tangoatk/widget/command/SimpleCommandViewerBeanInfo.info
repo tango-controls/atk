@@ -1,4 +1,0 @@
-name = SimpleCommandViewer
-package = fr.esrf.tangoatk.widget.command
-
-properties = deviceButtonVisible, infoButtonVisible, descriptionVisible, inputVisible, outputVisible, model, infoButtonFont, deviceButtonFont, descriptionFont, inputFont, outputFont
