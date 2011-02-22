@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          Tree.java
 // Created:       2002-09-17 11:53:27, erik
 // By:            <erik@assum.net>
@@ -31,6 +9,7 @@
 
 package fr.esrf.tangoatk.widget.device;
 
+import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.event.ComponentListener;
 import java.awt.event.FocusListener;
@@ -48,6 +27,8 @@ import java.util.Vector;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeWillExpandListener;
@@ -74,7 +55,7 @@ import fr.esrf.tangoatk.widget.device.tree.DomainNode;
 import fr.esrf.tangoatk.widget.device.tree.FamilyNode;
 import fr.esrf.tangoatk.widget.device.tree.MemberNode;
 import fr.esrf.tangoatk.widget.dnd.NodeFactory;
-import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
+import fr.esrf.tangoatk.widget.util.LoadingDialog;
 
 public class Tree extends JTree {
     DomainNode[] domains;
@@ -194,10 +175,10 @@ public class Tree extends JTree {
 		public void mousePressed(MouseEvent e) {
 		    /*if (!e.isPopupTrigger())
 			return;*/ //removed because it avoided selection by rightclicking
-            if (getPathForLocation(e.getX(),e.getY()) != null)
-            {
-              clearSelection();
-			  setSelectionPath( getPathForLocation(e.getX(),e.getY()) );
+
+		    if (getPathForLocation(e.getX(),e.getY()) != null) {
+			clearSelection();
+			setSelectionPath( getPathForLocation(e.getX(),e.getY()) );
 		    }
 		}
 	    });
@@ -237,7 +218,7 @@ public class Tree extends JTree {
     protected void initialAddMembers(FamilyNode top, Database db,
 				   String [] members) throws DevFailed {
 
-	//DefaultMutableTreeNode memberNode = null;
+	DefaultMutableTreeNode memberNode = null;
 	for (int i = 0; i < members.length; i++) {
 	    String m = members[i];
 
@@ -276,14 +257,11 @@ public class Tree extends JTree {
     protected void addMembers(FamilyNode family) {
 	if (family.isFilled()) return;
 	
-	JDialog waitingDialog = new JDialog((Frame)null,"Importing devices on " + family + "...");
-	waitingDialog.setVisible(true);
-	ATKGraphicsUtils.centerDialog(waitingDialog,400,0);
-	
+	LoadingDialog.showMessageDialog("Importing devices on " + family + "...");
 	propChanges.fireStatusEvent(this, "Importing devices on " + family + "...");
 	family.setFilled(true);
 	List  members = family.getChildren();
-	List<IDevice> devices = new Vector<IDevice> ();
+	List devices = new Vector();
 	DeviceFactory factory = DeviceFactory.getInstance();
 
 	for (int i = 0; i < members.size(); i++) {
@@ -297,8 +275,7 @@ public class Tree extends JTree {
 	    } // end of try-catch
 	} // end of for ()
 	addDevices(family, devices);
-	waitingDialog.setVisible(false);
-	waitingDialog=null;
+	LoadingDialog.hideMessageDialog();
 	propChanges.fireStatusEvent(this, "Importing devices on " + family + "..." +
 				    "done");
     }	
@@ -321,7 +298,7 @@ public class Tree extends JTree {
 	    device.setCommandList(cl);
 	    device.setDevice(d);
 
-	    //IAttribute a;
+	    IAttribute a;
 	    try {
 		al.add(d.getName() + "/*");
 	    } catch (ATKException e) {
@@ -335,7 +312,7 @@ public class Tree extends JTree {
 		addAttributes(attributes, al);
 	    }
 	    
-	    //ICommand c;
+	    ICommand c;
 	    try {
 		cl.add(d.getName() + "/*");
 	    } catch (ConnectionException e) {
@@ -379,7 +356,7 @@ public class Tree extends JTree {
 	tree.setShowEntities(true);
 	frame.setContentPane(tree);
 	frame.pack();
-	frame.setVisible(true);
+	frame.show();
 
     }
 	

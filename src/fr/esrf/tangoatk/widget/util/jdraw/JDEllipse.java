@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util.jdraw;
 
 import java.awt.*;
@@ -94,56 +72,6 @@ public class JDEllipse extends JDRectangular implements JDPolyConvert {
     double y = jlxObj.boundRect.getY();
     double w = jlxObj.boundRect.getWidth();
     double h = jlxObj.boundRect.getHeight();
-
-    setOrigin(new Point2D.Double(x+w/2.0, y+h/2.0));
-    summit = new Point2D.Double[8];
-    createSummit();
-
-    summit[0].x = x;
-    summit[0].y = y;
-
-    summit[1].x = x+w/2;
-    summit[1].y = y;
-
-    summit[2].x = x+w;
-    summit[2].y = y;
-
-    summit[3].x = x+w;
-    summit[3].y = y+h/2;
-
-    summit[4].x = x+w;
-    summit[4].y = y+h;
-
-    summit[5].x = x+w/2;
-    summit[5].y = y+h;
-
-    summit[6].x = x;
-    summit[6].y = y+h;
-
-    summit[7].x = x;
-    summit[7].y = y+h/2;
-
-    step = stepDefault;
-    angleStart  = a;
-    angleExtent = b;
-    if(fillStyle==JDObject.FILL_STYLE_NONE)
-      arcType = ARC_OPEN;
-    else
-      arcType = (atype==1)?ARC_CLOSED:ARC_PIE;
-
-    updateShape();
-
-  }
-
-  JDEllipse(LXObject lxObj,int a,int b,int atype) {
-
-    initDefault();
-    loadObject(lxObj);
-
-    double x = lxObj.boundRect.getX();
-    double y = lxObj.boundRect.getY();
-    double w = lxObj.boundRect.getWidth();
-    double h = lxObj.boundRect.getHeight();
 
     setOrigin(new Point2D.Double(x+w/2.0, y+h/2.0));
     summit = new Point2D.Double[8];
@@ -525,14 +453,14 @@ public class JDEllipse extends JDRectangular implements JDPolyConvert {
     w -= 0.5;
     h -= 0.5;
 
-    int nbp = (arcType==ARC_PIE && angleExtent!=360)?step+1:step;
+    int nbp = (arcType==ARC_PIE && angleExtent!=360)?step+2:step+1;
     ptsx = new int[nbp];
     ptsy = new int[nbp];
     double r  = ((double)angleExtent/180.0)*Math.PI / (double)step;
     double r0 = ((double)angleStart/180.0)*Math.PI;
 
     int i;
-    for(i=0;i<step;i++) {
+    for(i=0;i<=step;i++) {
       double x = w * Math.cos(r0 + r * (double)i);
       double y = h * Math.sin(r0 + r * (double)i);
       ptsx[i]        = (int)(xc + x);

@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * SimpleSynopticAppli.java
  *
  * Created on May 25, 2005
@@ -30,7 +8,7 @@ package fr.esrf.tangoatk.widget.jdraw;
 
 import java.io.*;
 import java.util.*;
-import fr.esrf.tangoatk.widget.util.Splash;
+import fr.esrf.tangoatk.widget.jdraw.*;
 import fr.esrf.tangoatk.widget.util.ErrorHistory;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.jdraw.JDFileFilter;
@@ -43,33 +21,21 @@ import javax.swing.*;
  */
 public class SimpleSynopticAppli extends javax.swing.JFrame {
 
-    private  final Splash        splash = new Splash();
     private  ErrorHistory        errorHistory;
-    private  boolean	         standAlone = false;
-    private  boolean             fileLoaded = false;
 
     /** Creates new form SimpleSynopticAppli */
     public SimpleSynopticAppli()
     {
-	fileLoaded = false;
-	standAlone = false;
         errorHistory = new ErrorHistory();
-	splash.setTitle("SimpleSynopticAppli  ");
-	splash.setCopyright("(c) ESRF 2003-2009");
-	splash.setMessage("Loading synoptic ...");
-	splash.initProgress();
-        splash.setMaxProgress(5);
         initComponents();
     }
     
     public SimpleSynopticAppli(String jdrawFullFileName)
     {
-	this();	
+	this();  	
         try
         {
             tangoSynopHandler.setSynopticFileName(jdrawFullFileName);
-            splash.progress(4);
-            splash.setMessage("Synoptic file loaded ...");
             tangoSynopHandler.setToolTipMode(TangoSynopticHandler.TOOL_TIP_NAME);
 	    tangoSynopHandler.setAutoZoom(true);
         }
@@ -82,9 +48,7 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
                   + fnfEx,
                   "No such file",
                   javax.swing.JOptionPane.ERROR_MESSAGE);
-            //System.exit(-1); don't exit if not standalone
-            splash.setVisible(false);
-	    return;
+            System.exit(-1);
         }
         catch (IllegalArgumentException  illEx)
         {
@@ -95,9 +59,7 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
                   + illEx,
                   "Cannot parse the file",
                   javax.swing.JOptionPane.ERROR_MESSAGE);
-            //System.exit(-1); don't exit if not standalone
-            splash.setVisible(false);
-	    return;
+            System.exit(-1);
         }
         catch (MissingResourceException  mrEx)
         {
@@ -107,22 +69,9 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
                   + mrEx,
                   "Cannot parse the file",
                   javax.swing.JOptionPane.ERROR_MESSAGE);
-            //System.exit(-1); don't exit if not standalone
-            splash.setVisible(false);
-	    return;
+            System.exit(-1);
         }
-        splash.setVisible(false);
-	
-	fileLoaded = true;
-	setTitle(jdrawFullFileName);
         pack();
-	setVisible(true);
-    }
-    
-    public SimpleSynopticAppli(String jdrawFullFileName, boolean stand)
-    {
-	this(jdrawFullFileName);	
-	standAlone = stand;
      }
     
     /** This method is called from within the constructor to
@@ -225,80 +174,59 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
 
     private void quitJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_quitJMenuItemActionPerformed
         // TODO add your handling code here:
-        stopSimpleSynopticAppli();
+        System.exit(0);
     }//GEN-LAST:event_quitJMenuItemActionPerformed
     
     /** Exit the Application */
     private void exitForm(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_exitForm
-        stopSimpleSynopticAppli();
+        System.exit(0);
     }//GEN-LAST:event_exitForm
-
-    public void stopSimpleSynopticAppli()
-    {
-        if (standAlone == true)
-	   System.exit(0);
-	else
-	{
-	   tangoSynopHandler.getAttributeList().stopRefresher();
-	   this.dispose();
-	}
-    }
     
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[])
-    {
-	String fullFileName = null;
-	SimpleSynopticAppli syApp = null;
-	String arg0 = null, arg1 = null;
+    public static void main(String args[]) {
 
-	if (args.length >= 2) // The synoptic file name and the directory are specified
-	{
-	    arg0 = args[0];
-	    arg1 = args[1];
+      String fullFileName = null;
+      SimpleSynopticAppli syApp = null;
+      String arg0 = null, arg1 = null;
 
-	    if (arg0 == null)
-               fullFileName = arg1;
-	    else
-	       if (arg0.length() <= 0)
-        	  fullFileName = arg1;
-	       else
-        	  fullFileName = arg0 + "/" + arg1;
-	} 
-	else
-	    if (args.length == 1) // Only the synoptic absolute file name is specified
-	    {
-	       fullFileName = args[0];
-	    };
+      if (args.length >= 2) // The synoptic file name and the directory are specified
+      {
+        arg0 = args[0];
+        arg1 = args[1];
 
-	// If Synoptic file name is not specified, launch a file chooser window to let the user select the file name
-	if (fullFileName == null)
-	{
-	    JFileChooser chooser = new JFileChooser(".");
-	    chooser.setDialogTitle("[SimpleSynopticAppli] Open a synoptic file");
-	    JDFileFilter jdwFilter = new JDFileFilter("JDraw synoptic",new String[]{"jdw"});
-	    chooser.addChoosableFileFilter(jdwFilter);
-	    int returnVal = chooser.showOpenDialog(null);
-	    if (returnVal == JFileChooser.APPROVE_OPTION)
-	    {
-               File f = chooser.getSelectedFile();
-               fullFileName = f.getAbsolutePath();
-	    }
-	    else
-	    {
-               System.exit(0);
-	    }
-	}
+        if (arg0 == null)
+          fullFileName = arg1;
+        else if (arg0.length() <= 0)
+          fullFileName = arg1;
+        else
+          fullFileName = arg0 + "/" + arg1;
+      } else if (args.length == 1) // Only the synoptic absolute file name is specified
+      {
+        fullFileName = args[0];
+      }
 
-	syApp = new SimpleSynopticAppli(fullFileName, true);
-	
-	if (!syApp.fileLoaded) // failed to load the synoptic file : constructor failure
-           System.exit(-1);
-	   
-	//syApp.setTitle("Simple Synoptic Application");
-	ATKGraphicsUtils.centerFrameOnScreen(syApp);
-	//syApp.setVisible(true);
+      if (fullFileName == null) {
+
+        JFileChooser chooser = new JFileChooser(".");
+        chooser.setDialogTitle("[SimpleSynopticAppli] Open a synoptic file.");
+        JDFileFilter jdwFilter = new JDFileFilter("JDraw synoptic",new String[]{"jdw"});
+        chooser.addChoosableFileFilter(jdwFilter);
+        int returnVal = chooser.showOpenDialog(null);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+          File f = chooser.getSelectedFile();
+          fullFileName = f.getAbsolutePath();
+        } else {
+          System.exit(0);
+        }
+
+      }
+
+      syApp = new SimpleSynopticAppli(fullFileName);
+      ATKGraphicsUtils.centerFrameOnScreen(syApp);
+      syApp.setVisible(true);
+
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

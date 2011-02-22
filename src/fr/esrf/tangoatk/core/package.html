@@ -19,7 +19,7 @@ to get things started.
 
 Most of the code in this package is written to facilitate the
 handling of Attributes and Commands. Normally, users of this package
-should not try to instanciate attributes and commands by themselves,
+should not try to instanciate attributes and commands by them selves,
 but rather use the AttributeList and the CommandList respectively.
 For more finegrained control, a CommandFactory and an
 AttributeFactory is provided.
@@ -43,25 +43,20 @@ There are two ways of obtaining properties from a command or
 attribute. Either by calling <code>getPropertyMap()</code> which
 returns a <code>java.util.Map</code> with all propeties, or by
 calling specialized methods in the objects, such
-as <code>getName()</code> which returns the value for a particular property.
+as <code>getName()</code>
 
 
 <h3>Overview of the attribute hierarchy</h3>
 
 The Attributes in TangoATK come in different flavors. As an
 abstraction over Tango, all numeric types are coerced into doubles,
-and there exists no String types for images, which
+and there exists no String types for images nor spectrums, which
 leaves us with:
 <ul>
 <li>NumberImage, represented by the interface INumberImage
 <li>NumberSpectrum, represented by the interface INumberSpectrum
 <li>NumberScalar, represented by the interface INumberScalar
 <li>StringScalar, represented by the intervace IStringScalar
-<li>StringSpectrum, represented by the intervace IStringSpectrum
-<li>DevStateScalar, represented by the interface IDevStateScalar
-<li>BooleanScalar, represented by the interface IBooleanScalar
-<li>BooleanSpectrum, represented by the interface IBooleanSpectrum
-<li>BooleanImage, represented by the interface IBooleanImage
 </ul>
 
 All of the interfaces inherit from IAttribute, which is the interface
@@ -76,8 +71,6 @@ classes:
   <li>VoidScalarCommand 
   <li>VoidArrayCommand 
   <li>ScalarVoidCommand
-  <li>BooleanVoidCommand
-  <li>StringVoidCommand
   <li>ScalarScalarCommand
   <li>ScalarArrayCommand
   <li>ArrayVoidCommand

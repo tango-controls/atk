@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util;
 
 import javax.swing.*;
@@ -174,60 +152,12 @@ public class ATKGraphicsUtils {
     // Center
     int xe,ye,wx,wy;
     wx = fr.getPreferredSize().width;
-    if(wx>screenSize.width) wx = screenSize.width;
     wy = fr.getPreferredSize().height;
-    if(wy>screenSize.height) wy = screenSize.height;
     xe = r.x + (r.width - wx) / 2;
     ye = r.y + (r.height - wy) / 2;
 
     // Set bounds
     fr.setBounds(xe, ye, wx, wy);
-
-  }
-
-  /**
-   * Center the given frame according to the given componenent. The frame is
-   * not displayed after a call to this function, a call to setVisible()
-   * is needed.
-   * @param parent Parent component
-   * @param fr Frame to be centered.
-   */
-  public static void centerFrame(JComponent parent,Frame fr) {
-
-    fr.pack();
-    Window parentWin = getWindowForComponent(parent);
-
-    // Get the parent rectangle
-    Rectangle r = new Rectangle(0,0,0,0);
-    if (parentWin!=null && parentWin.isVisible())
-      r = parentWin.getBounds();
-
-    // Check rectangle validity
-    if(r.width==0 || r.height==0) {
-      r.x = 0;
-      r.y = 0;
-      r.width  = screenSize.width;
-      r.height = screenSize.height;
-    }
-
-    // Center
-    int xe,ye,wx,wy;
-    wx = fr.getPreferredSize().width;
-    wy = fr.getPreferredSize().height;
-    xe = r.x + (r.width - wx) / 2;
-    ye = r.y + (r.height - wy) / 2;
-
-    // Saturate
-    if( xe<0 ) xe=0;
-    if( ye<0 ) ye=0;
-    if( (xe+wx) > screenSize.width )
-      xe = screenSize.width - wx;
-    if( (ye+wy) > screenSize.height )
-      ye = screenSize.height - wy;
-
-    // Set bounds
-    fr.setBounds(xe, ye, wx, wy);
-
 
   }
 
@@ -344,15 +274,10 @@ public class ATKGraphicsUtils {
 
         // Print it
         java.awt.Graphics g = printJob.getGraphics();
-        if( g!=null ) {
-          g.translate(tx, ty);
-          g.setClip(0, 0, w, h);
-          g.drawImage(img, 0, 0, null);
-          g.dispose();
-        } else {
-          JOptionPane.showMessageDialog(parent, "Unexpected error while printing.\nCheck you printer",
-                                        title, JOptionPane.ERROR_MESSAGE);
-        }
+        g.translate(tx, ty);
+        g.setClip(0, 0, w, h);
+        g.drawImage(img, 0, 0, null);
+        g.dispose();
         printJob.end();
 
       } catch (Exception e) {

@@ -36,22 +36,12 @@ public class NonAttrNumberSpectrum implements INonAttrNumberSpectrum {
     }
     
     public void setXYValue(double[] xd,double[] yd) {
-        int xLength = 0;
-        int yLength = 0;
-        if (xd != null)
-        {
-            xLength = xd.length;
-        }
-        if (yd != null)
-        {
-            yLength = yd.length;
-        }
-        xValue = new double[xLength];
-        for (int i=0; i < xLength ; i++ )
+        xValue = new double[xd.length];
+        for (int i=0; i < xd.length ; i++ )
              xValue[i] = xd[i];
         
-        spectrumValue = new double[yLength];
-        for (int i=0; i < yLength ; i++ )
+        spectrumValue = new double[yd.length];
+        for (int i=0; i < yd.length ; i++ )
              spectrumValue[i] = yd[i];
         
         fireNonAttrNumberSpectrumEvent(xValue,spectrumValue);

@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * ConfirmCommandViewer.java
  *
  * Created on May 12, 2005
@@ -29,7 +7,6 @@
 package fr.esrf.tangoatk.widget.command;
 
 import fr.esrf.tangoatk.core.*;
-import fr.esrf.tangoatk.core.command.VoidVoidCommand;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -46,7 +23,7 @@ public class ConfirmCommandViewer extends VoidVoidCommandViewer
     protected Component   confirmDialParent=null;
     protected String      confirmTitle="Command Execute Confirm Window";
     protected String      confirmMessage="Do you really want to execute this command?\n";
-    protected String      commandLabel = null;
+
 
     /** Creates new ConfirmCommandViewer */
     public ConfirmCommandViewer()
@@ -94,51 +71,6 @@ public class ConfirmCommandViewer extends VoidVoidCommandViewer
     {
         confirmMessage = msg;
     }
-
-
-    
-    public String getCommandLabel()
-    {
-        return commandLabel;
-    }
-
-    
-    public void setCommandLabel(String cmdLabel)
-    {
-	commandLabel = cmdLabel;
-	if (commandLabel == null)
-           setText(model.getNameSansDevice()+" ...");
-    }
-
-
-
-    public void setModel(ICommand cmd)
-    {
-
-	if (model != null)
-	{
-	    setText("command-name ...");
-	    setToolTipText(null);
-	    model = null;
-	}
-
-	if (cmd != null)
-	{
-	    if (cmd instanceof VoidVoidCommand)
-	    {
-  //System.out.println("The command is a VoidVoidCommand");
-	       model = cmd;
-	       if (commandLabel != null)
-	          setText(commandLabel);
-	       else
-		  setText(model.getNameSansDevice()+" ...");
-		  
-	       setToolTipText(model.getDevice().toString());
-	    }
-	}
-    }
-
-    
     
     protected void executeButtonActionPerformed(ActionEvent actionevent)
     {
@@ -203,7 +135,7 @@ public class ConfirmCommandViewer extends VoidVoidCommandViewer
        f.getContentPane().add(ccv, gbc);
        ccv.setConfirmDialParent(f);
        f.pack();
-       f.setVisible(true);
+       f.show();
     }
 
 

@@ -4,8 +4,7 @@ BEANINFO = VoidVoidCommandViewerBeanInfo.java \
 	   OnOffSwitchCommandViewerBeanInfo.java \
 	   OnOffCheckBoxCommandViewerBeanInfo.java \
 	   OptionComboCommandViewerBeanInfo.java \
-	   ConfirmCommandViewerBeanInfo.java \
-	   GroupCommandViewerBeanInfo.java
+	   ConfirmCommandViewerBeanInfo.java
 
 #            CommandOutputBeanInfo.java \
 #            ScalarCommandInputBeanInfo.java \
@@ -37,10 +36,7 @@ ALL =	$(TARGET)/PropertyFrame.class         \
 	$(TARGET)/OnOffCheckBoxCommandViewer.class \
 	$(TARGET)/OptionComboCommandViewer.class \
 	$(TARGET)/ScalarCommandViewer.class \
-	$(TARGET)/ConfirmCommandViewer.class    \
-	$(TARGET)/SimpleCommandButtonViewer.class \
-	$(TARGET)/GroupCommandViewer.class \
-	$(TARGET)/SettableCommandButtonViewer.class
+	$(TARGET)/ConfirmCommandViewer.class
 
 all: commands beaninfo icons
 
@@ -80,9 +76,5 @@ option:	all
 
 confirm:	all
 	$(JAVA) fr.esrf.tangoatk.widget.command.ConfirmCommandViewer
-	
-
-gcmd:	all
-	$(JAVA) fr.esrf.tangoatk.widget.command.GroupCommandViewer
 	
 	

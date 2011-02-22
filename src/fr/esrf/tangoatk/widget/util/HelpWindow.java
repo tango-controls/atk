@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          HelpWindow.java
 // Created:       2002-09-24 14:51:03, erik
 // By:            <erik@assum.net>
@@ -212,7 +190,7 @@ public class HelpWindow extends JFrame implements IControlee {
 	if (node == null) return;
 
 	topics.setSelectionPath(new TreePath(node.getPath()));
-	showHelpWindow();
+	show();
     }
 
     public void goBack() {
@@ -291,9 +269,9 @@ public class HelpWindow extends JFrame implements IControlee {
 	pack();
     }
 
-    public void showHelpWindow() {
+    public void show() {
 	topics.expandRow(0);
-	super.setVisible(true);
+	super.show();
     }
 
     public static void main(String [] args) throws Exception {
@@ -305,7 +283,7 @@ public class HelpWindow extends JFrame implements IControlee {
 	    addTop("first", new URL("http://www.skiinfo.no"));
 	HelpWindow.getInstance().
 	    addCategory("Skiinfo", "second", new URL("http://www.skiinfo.no"));
-	HelpWindow.getInstance().showHelpWindow();
+	HelpWindow.getInstance().show();
 
     }
 

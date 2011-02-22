@@ -1,7 +1,7 @@
 name =  ConfirmCommandViewer
 package = fr.esrf.tangoatk.widget.command
 
-properties = confirmTitle, confirmMessage, commandLabel
+properties = confirmTitle, confirmMessage
 
 ICON_COLOR_16x16 = ConfirmCommandViewer.gif
 ICON_MONO_16x16 = ConfirmCommandViewer.gif

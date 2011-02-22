@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /**
  * User: Jean Luc
  * Date: Aug 9, 2003
@@ -30,7 +8,6 @@ package fr.esrf.tangoatk.widget.util.jdraw;
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.io.IOException;
-import java.util.Vector;
 
 /** JDraw Spline graphic object.
  *  <p>Here is an example of few JDSpline:<p>
@@ -114,67 +91,6 @@ public class JDSpline extends JDPolyline implements JDPolyConvert {
     step = 10;
 
     updateShape();
-
-  }
-
-  JDSpline(LXObject lxObj,double[] ptsx,double[] ptsy,boolean closed) {
-
-    double x,y;
-    int i;
-
-    initDefault();
-    loadObject(lxObj);
-
-    int nbp = ptsx.length;
-    Vector newPts = new Vector();
-
-    // First step
-
-    x = (ptsx[0] + ptsx[1]) / 2.0;
-    y = (ptsy[0] + ptsy[1]) / 2.0;
-    newPts.add(new Point.Double(ptsx[0],ptsy[0]));
-    newPts.add(new Point.Double(ptsx[0],ptsy[0]));
-    newPts.add(new Point.Double(x,y));
-    newPts.add(new Point.Double(x,y));
-
-    // Spline
-
-    for(i=1;i<nbp;i++) {
-
-      if(i<nbp-1) {
-        x = (ptsx[i] + ptsx[i+1]) / 2.0;
-        y = (ptsy[i] + ptsy[i+1]) / 2.0;
-      } else {
-        x = (ptsx[i] + ptsx[0]) / 2.0;
-        y = (ptsy[i] + ptsy[0]) / 2.0;
-      }
-
-      newPts.add(new Point.Double(ptsx[i],ptsy[i]));
-      newPts.add(new Point.Double(ptsx[i],ptsy[i]));
-      newPts.add(new Point.Double(x,y));
-
-    }
-
-    // Last step
-
-    newPts.add(new Point.Double(x,y));
-    newPts.add(new Point.Double(ptsx[0],ptsy[0]));
-    newPts.add(new Point.Double(ptsx[0],ptsy[0]));
-
-    summit = new Point2D.Double[newPts.size()];
-    for(i=0;i<summit.length;i++)
-      summit[i] = (Point.Double)newPts.get(i);
-
-    isClosed = closed;
-    step = 10;
-
-    updateShape();
-
-    double bx = boundRect.getX();
-    double by = boundRect.getY();
-    double bw = boundRect.getWidth();
-    double bh = boundRect.getHeight();
-    setOrigin(new Point2D.Double(bx+bw/2.0, by+bh/2.0));
 
   }
 

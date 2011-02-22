@@ -1,25 +1,8 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
+// File:          NumberAttribute.java
+// Created:       2001-10-08 16:35:01, assum
+// By:            <assum@esrf.fr>
+// Time-stamp:    <2002-07-10 15:40:49, assum>
+//
 // $Id$
 //
 // Description:
@@ -31,24 +14,39 @@ import fr.esrf.Tango.*;
 import fr.esrf.TangoApi.*;
 import fr.esrf.TangoApi.events.*;
 
-public class NumberScalar extends ANumber
+public class NumberScalar extends NumberSpectrum
   implements INumberScalar {
   double              scalarValue;
   double              setPointValue;
-  double              devScalarValue;
-  double              devSetPointValue;
+  ANumberScalarHelper numberScalarHelper;
   double[]            possibleValues = null;
 
 
-  // TODO better solution : TEMP
-  public ANumberScalarHelper getNumberScalarHelper()
-  {
-	  return (ANumberScalarHelper)getNumberHelper();
+  public void addSpectrumListener(ISpectrumListener l) {
+    numberScalarHelper.addSpectrumListener(l);
+    addStateListener(l);
   }
-  
-  // ----------------------------------
-  
-  
+
+  public void removeSpectrumListener(ISpectrumListener l) {
+    numberScalarHelper.removeSpectrumListener(l);
+    removeStateListener(l);
+  }
+
+  public void addImageListener(IImageListener l) {
+    numberScalarHelper.addImageListener(l);
+    addStateListener(l);
+  }
+
+  public void removeImageListener(IImageListener l) {
+    numberScalarHelper.removeImageListener(l);
+    removeStateListener(l);
+  }
+
+  public double[] getStandardSpectrumValue() {
+    return null;
+
+  }
+
   public IScalarAttribute getWritableAttribute() {
     return null;
   }
@@ -65,13 +63,28 @@ public class NumberScalar extends ANumber
     return 1;
   }
 
+  public double[][] getStandardValue() {
+    return null;
+  }
+
+  public double[][] getValue() {
+    double[][] d = new double[1][1];
+    d[0][0] = getNumberScalarValue();
+    return d;
+  }
+
+  public void setNumberHelper(ANumberScalarHelper helper) {
+    numberHelper = helper;
+    numberScalarHelper = helper;
+  }
+
   public void addNumberScalarListener(INumberScalarListener l) {
-    getNumberScalarHelper().addNumberScalarListener(l);
+    numberScalarHelper.addNumberScalarListener(l);
     addStateListener(l);
   }
 
   public void removeNumberScalarListener(INumberScalarListener l) {
-    getNumberScalarHelper().removeNumberScalarListener(l);
+    numberScalarHelper.removeNumberScalarListener(l);
     removeStateListener(l);
   }
 
@@ -117,9 +130,9 @@ public class NumberScalar extends ANumber
     setValue(d[0][0]);
   }
 
- // protected String scalarExtract() {
- //  return new Double(getNumberScalarValue()).toString();
- // }
+  protected String scalarExtract() {
+    return new Double(getNumberScalarValue()).toString();
+  }
 
 
 
@@ -127,7 +140,7 @@ public class NumberScalar extends ANumber
   {
       DeviceAttribute       att = null;
       long                  t0 = System.currentTimeMillis();
-
+      
       if (skippingRefresh) return;
       refreshCount++;
       trace(DeviceFactory.TRACE_REFRESHER, "NumberScalar.refresh() method called for " + getName(), t0);
@@ -138,13 +151,13 @@ public class NumberScalar extends ANumber
 	      // Read the attribute from device cache (readValueFromNetwork)
 	      att = readValueFromNetwork();
 	      if (att == null) return;
-	            
+	      
 	      // Retreive the read value for the attribute
-	      scalarValue = getNumberScalarHelper().getNumberScalarDisplayValue(att);
-	      setPointValue = getNumberScalarHelper().getNumberScalarDisplaySetPoint(att);
+	      scalarValue = numberScalarHelper.getNumberScalarValue(att);
+	      setPointValue = numberScalarHelper.getNumberScalarSetPoint(att);
 
 	      // Fire valueChanged
-	      getNumberScalarHelper().fireScalarValueChanged(scalarValue, timeStamp);
+	      numberScalarHelper.fireScalarValueChanged(scalarValue, timeStamp);
 	  }
 	  catch (DevFailed e)
 	  {
@@ -168,56 +181,33 @@ public class NumberScalar extends ANumber
       } // end of catch
   }
 
-  public void dispatch(DeviceAttribute attValue) {
 
-    if (skippingRefresh) return;
-    refreshCount++;
 
-    try {
-
-      try {
-        // symetric with refresh
-        if (attValue == null) return;
-        attribute = attValue;
-
-        setState(attValue);
-        timeStamp = attValue.getTimeValMillisSec();
-
-	// Retreive the read value for the attribute
-        scalarValue = getNumberScalarHelper().getNumberScalarDisplayValue(attValue);
-        setPointValue = getNumberScalarHelper().getNumberScalarDisplaySetPoint(attValue);
-
-        // Fire valueChanged
-        getNumberScalarHelper().fireScalarValueChanged(scalarValue, timeStamp);
-
-      } catch (DevFailed e) {
-
-        dispatchError(e);
-
-      }
-
-    } catch (Exception e) {
-      // Code failure
-      scalarValue = Double.NaN;
-      setPointValue = Double.NaN;
-
-      System.out.println("NumberScalar.dispatch() Exception caught ------------------------------");
-      e.printStackTrace();
-      System.out.println("NumberScalar.dispatch()------------------------------------------------");
-    } // end of catch
-
+  public double getMinValue() {
+    return getNumberProperty("min_value");
   }
 
-  public void dispatchError(DevFailed e) {
-
-    // Tango error
-    scalarValue = Double.NaN;
-    setPointValue = Double.NaN;
-
-    // Fire error event
-    readAttError(e.getMessage(), new AttributeReadException(e));
-
+  public double getMaxValue() {
+    return getNumberProperty("max_value");
   }
+
+  public double getMinAlarm() {
+    return getNumberProperty("min_alarm");
+  }
+
+  public double getMaxAlarm() {
+    return getNumberProperty("max_alarm");
+  }
+
+  protected double getNumberProperty(String s) {
+    NumberProperty p =
+      (NumberProperty) getProperty(s);
+    if (p != null && p.isSpecified())
+      return ((Number) p.getValue()).doubleValue();
+
+    return Double.NaN;
+  }
+
 
   public void setValue(double d) {
     try {
@@ -250,7 +240,7 @@ public class NumberScalar extends ANumber
   }
 
   protected void insert(double d) {
-    getNumberScalarHelper().insert(d);
+    numberScalarHelper.insert(d);
   }
 
   protected void insert(String s) {
@@ -258,104 +248,40 @@ public class NumberScalar extends ANumber
   }
 
 
-  // getNumberScalarValue returns the attribute value after conversion into display_unit
+
   public double getNumberScalarValue()
   {
       return scalarValue;
   }
 
-  // getNumberScalarDeviceValue returns the attribute value got from the device (without conversion into display_unit)
-  public double getNumberScalarDeviceValue()
+  public double getStandardNumberScalarValue()
   {
-      double    dispUnitFactor=1.0;
-      
-      dispUnitFactor = getDisplayUnitFactor();
-      if (dispUnitFactor <= 0)
-	 dispUnitFactor = 1.0;
-	 
-      devScalarValue = scalarValue / dispUnitFactor;
-
-      return devScalarValue;
+      return getNumberScalarValue() * getStandardUnit();
   }
 
-  // getNumberScalarStandardValue returns the attribute value converted into the standard unit
-  public double getNumberScalarStandardValue()
-  {
-	double  devVal;
-        double  stdVal;
-        double  stdUnitFactor = 1.0;
-	
-        devVal = getNumberScalarDeviceValue(); // First get the value in the device server unit
-	stdUnitFactor = getStandardUnitFactor();
-	      
-	if (stdUnitFactor <= 0)
-	   stdUnitFactor = 1.0;
-	   	   
-	if (stdUnitFactor == 1.0)
-	   return devVal;
-	   
-        stdVal = devVal * stdUnitFactor; //return the value in the standard unit
-	return stdVal;
-  }
-  
 
 
 
-
-  // getNumberScalarSetPoint returns the attribute's setpoint value after conversion into display_unit
   public double getNumberScalarSetPoint()
   {
       return setPointValue;
   }
 
-  // getNumberScalarDeviceSetPoint returns the attribute setPoint value got from the device (without conversion into display_unit)
-  public double getNumberScalarDeviceSetPoint()
+  public double getStandardNumberScalarSetPoint()
   {
-      double    dispUnitFactor=1.0;
-      
-      dispUnitFactor = getDisplayUnitFactor();
-      if (dispUnitFactor <= 0)
-	 dispUnitFactor = 1.0;
-	 
-      devSetPointValue = setPointValue / dispUnitFactor;
-
-      return devSetPointValue;
+       return getNumberScalarSetPoint() * getStandardUnit();
   }
-
-  // getNumberScalarStandardSetPoint returns the attribute setPoint value converted into the standard unit
-  public double getNumberScalarStandardSetPoint()
-  {
-	double  devVal;
-        double  stdVal;
-        double  stdUnitFactor = 1.0;
-	
-        devVal = getNumberScalarDeviceSetPoint(); // First get the setPoint in the device server unit
-	stdUnitFactor = getStandardUnitFactor();
-	      
-	if (stdUnitFactor <= 0)
-	   stdUnitFactor = 1.0;
-	   	   
-	if (stdUnitFactor == 1.0)
-	   return devVal;
-	   
-        stdVal = devVal * stdUnitFactor; //return the setPoint in the standard unit
-	return stdVal;
-
-  }
-
     
 
 
-  // getNumberScalarSetPointFromDevice  returns the attribute's setpoint value after conversion into display_unit
-  // This method makes a call to read attribute on the device proxy
-  // Will force value reading via the device , ignore polling buffer
-  public double getNumberScalarSetPointFromDevice()
+
+  public double getNumberScalarDeviceSetPoint()
   {
       double setPoint;
       try
       {
 	  setPoint =
-	  getNumberScalarHelper().getNumberScalarDisplaySetPoint(readDeviceValueFromNetwork());
+	  numberScalarHelper.getNumberScalarSetPoint(readDeviceValueFromNetwork());
 	  setPointValue = setPoint;
       }
       catch (DevFailed e)
@@ -374,6 +300,12 @@ public class NumberScalar extends ANumber
       return setPoint;
   }
 
+  public double getStandardNumberScalarDeviceSetPoint()
+  {
+      return getNumberScalarDeviceSetPoint() * getStandardUnit();
+  }
+
+
 
 
   public INumberScalarHistory[] getNumberScalarHistory() {
@@ -382,7 +314,7 @@ public class NumberScalar extends ANumber
     attHist = null;
     try {
       attHist =
-        (NumberScalarHistory[]) getNumberScalarHelper().getScalarAttHistory(readAttHistoryFromNetwork());
+        (NumberScalarHistory[]) numberScalarHelper.getScalarAttHistory(readAttHistoryFromNetwork());
     } catch (DevFailed e) {
       readAttError(e.getMessage(), new AttributeReadException(e));
       attHist = null;
@@ -393,31 +325,6 @@ public class NumberScalar extends ANumber
 
     return attHist;
   }
-
-  
-  public INumberScalarHistory[] getNumberScalarDeviceHistory()
-  {
-     NumberScalarHistory[] attHist;
-
-     attHist = null;
-     try
-     {
-        attHist =
-            (NumberScalarHistory[]) getNumberScalarHelper().getScalarDeviceAttHistory(readAttHistoryFromNetwork());
-     } 
-     catch (DevFailed e)
-     {
-        readAttError(e.getMessage(), new AttributeReadException(e));
-        attHist = null;
-     } catch (Exception e)
-     {
-        readAttError(e.getMessage(), e);
-        attHist = null;
-     } // end of catch
-
-     return attHist;
-  }
-
   
   
   public void setPossibleValues(double[]  vals)
@@ -446,85 +353,75 @@ public class NumberScalar extends ANumber
   {
       periodicCount++;
       DeviceAttribute     da=null;
-      long t0 = System.currentTimeMillis();
-
-      trace(DeviceFactory.TRACE_PERIODIC_EVENT, "NumberScalar.periodic method called for " + getName(), t0);
-
+      
+//System.out.println("NumberScalar.periodic() called for : " + getName());
+      
       try
       {
           da = evt.getValue();
-          trace(DeviceFactory.TRACE_PERIODIC_EVENT, "NumberScalar.periodicEvt.getValue(" + getName() + ") success", t0);
       }
       catch (DevFailed  dfe)
       {
-	  trace(DeviceFactory.TRACE_PERIODIC_EVENT, "NumberScalar.periodicEvt.getValue(" + getName() + ") failed, caught DevFailed", t0);
-	  if (dfe.errors[0].reason.equals("API_EventTimeout")) //heartbeat error
+//System.out.println("NumberScalar.periodic() caught DevFailed for : " + getName());
+          if (dfe.errors[0].reason.equals("API_EventTimeout")) //heartbeat error
 	  {
-	    // Tango error
-	    scalarValue = Double.NaN;
-	    setPointValue = Double.NaN;
+//System.out.println("NumberScalar.periodic() caught heartbeat DevFailed : " + getName());
+	      // Tango error
+	      scalarValue = Double.NaN;
+	      setPointValue = Double.NaN;
 
-	    // Fire error event
-	    readAttError(dfe.getMessage(), new AttributeReadException(dfe));
+	      // Fire error event
+	      readAttError(dfe.getMessage(), new AttributeReadException(dfe));
 	  }
 	  else // For the moment the behaviour for all DevFailed is the same
 	  {
-	    trace(DeviceFactory.TRACE_PERIODIC_EVENT, "NumberScalar.periodicEvt.getValue(" + getName() + ") failed, got other error", t0);
-	    // Tango error
-	    scalarValue = Double.NaN;
-	    setPointValue = Double.NaN;
+//System.out.println("NumberScalar.periodic() caught other DevFailed : " + getName() );
+	      // Tango error
+	      scalarValue = Double.NaN;
+	      setPointValue = Double.NaN;
 
-	    // Fire error event
-	    readAttError(dfe.getMessage(), new AttributeReadException(dfe));
+	      // Fire error event
+	      readAttError(dfe.getMessage(), new AttributeReadException(dfe));
 	  }
-	  return;
+          return;
       }
       catch (Exception e) // Code failure
       {
-	  trace(DeviceFactory.TRACE_PERIODIC_EVENT, "NumberScalar.periodicEvt.getValue(" + getName() + ") failed, caught Exception, code failure", t0);
 	  scalarValue = Double.NaN;
 	  setPointValue = Double.NaN;
 
 	  System.out.println("NumberScalar.periodic.getValue() Exception caught ------------------------------");
 	  e.printStackTrace();
 	  System.out.println("NumberScalar.periodic.getValue()------------------------------------------------");
-	  return;
+          return;
       } // end of catch
 
 
       // read the attribute value from the received event!
-      if (da != null)
+    if (da != null) {
+      try {
+      setState(da); // To set the quality factor and fire AttributeState event
+      attribute = da;
+      timeStamp = da.getTimeValMillisSec();
+        // Retreive the read value for the attribute
+        scalarValue = numberScalarHelper.getNumberScalarValue(da);
+        setPointValue = numberScalarHelper.getNumberScalarSetPoint(da);
+
+        // Fire valueChanged
+        numberScalarHelper.fireScalarValueChanged(scalarValue, timeStamp);
+      } catch (DevFailed e) {
+
+      } catch (Exception e) // Code failure
       {
-	 try
-	 {
-	    setState(da); // To set the quality factor and fire AttributeState event
-	    attribute = da;
-	    timeStamp = da.getTimeValMillisSec();
-	    // Retreive the read value for the attribute
-	    scalarValue = getNumberScalarHelper().getNumberScalarDisplayValue(da);
-	    setPointValue = getNumberScalarHelper().getNumberScalarDisplaySetPoint(da);
+        scalarValue = Double.NaN;
+        setPointValue = Double.NaN;
 
-	    // Fire valueChanged
-	    getNumberScalarHelper().fireScalarValueChanged(scalarValue, timeStamp);
-	 }
-	 catch (DevFailed dfe)
-	 {
-            scalarValue = Double.NaN;
-            setPointValue = Double.NaN;
-
-            // Fire error event
-            readAttError(dfe.getMessage(), new AttributeReadException(dfe));
-	 }
-	 catch (Exception e) // Code failure
-	 {
-            scalarValue = Double.NaN;
-            setPointValue = Double.NaN;
-
-            System.out.println("NumberScalar.periodic.getNumberScalarDisplayValue() Exception caught ------------------------------");
-            e.printStackTrace();
-            System.out.println("NumberScalar.periodic.getNumberScalarDisplayValue()------------------------------------------------");
-	 } // end of catch
-      }
+        System.out.println("NumberScalar.periodic.getNumberScalarValue() Exception caught ------------------------------");
+        e.printStackTrace();
+        System.out.println("NumberScalar.periodic.getNumberScalarValue()------------------------------------------------");
+      } // end of catch
+    }
+      
   }
  
   
@@ -591,11 +488,11 @@ public class NumberScalar extends ANumber
         attribute = da;
         timeStamp = da.getTimeValMillisSec();
         // Retreive the read value for the attribute
-        scalarValue = getNumberScalarHelper().getNumberScalarDisplayValue(da);
-        setPointValue = getNumberScalarHelper().getNumberScalarDisplaySetPoint(da);
+        scalarValue = numberScalarHelper.getNumberScalarValue(da);
+        setPointValue = numberScalarHelper.getNumberScalarSetPoint(da);
 
         // Fire valueChanged
-        getNumberScalarHelper().fireScalarValueChanged(scalarValue, timeStamp);
+        numberScalarHelper.fireScalarValueChanged(scalarValue, timeStamp);
 
       }
       catch (DevFailed dfe)
@@ -613,9 +510,9 @@ public class NumberScalar extends ANumber
         scalarValue = Double.NaN;
         setPointValue = Double.NaN;
 
-        System.out.println("NumberScalar.change.getNumberScalarDisplayValue() Exception caught ------------------------------");
+        System.out.println("NumberScalar.change.getNumberScalarValue() Exception caught ------------------------------");
         e.printStackTrace();
-        System.out.println("NumberScalar.change.getNumberScalarDisplayValue()------------------------------------------------");
+        System.out.println("NumberScalar.change.getNumberScalarValue()------------------------------------------------");
       } // end of catch
     }
 

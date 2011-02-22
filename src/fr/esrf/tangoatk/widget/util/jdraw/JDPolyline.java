@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /**
  * JDraw Polyline graphic object
  */
@@ -104,34 +82,6 @@ public class JDPolyline extends JDObject implements JDRotatable {
 
   }
 
-  JDPolyline(LXObject lxObj,double[] ptsx,double[] ptsy,boolean closed) {
-
-    initDefault();
-    loadObject(lxObj);
-
-    int nbp = ptsx.length;
-    summit = new Point2D.Double[nbp];
-    createSummit();
-
-    for(int i=0;i<nbp;i++) {
-      summit[i].x = ptsx[i];
-      summit[i].y = ptsy[i];
-    }
-
-    isClosed = closed;
-    step = stepDefault;
-
-    updateShape();
-
-    double x = boundRect.getX();
-    double y = boundRect.getY();
-    double w = boundRect.getWidth();
-    double h = boundRect.getHeight();
-    setOrigin(new Point2D.Double(x+w/2.0, y+h/2.0));
-
-
-  }
-
   // -----------------------------------------------------------
   // Overrides
   // -----------------------------------------------------------
@@ -151,12 +101,6 @@ public class JDPolyline extends JDObject implements JDRotatable {
     Graphics2D g2 = (Graphics2D) g;
     prepareRendering(g2);
 
-    if (fillStyle != FILL_STYLE_NONE) {
-      Paint p = GraphicsUtils.createPatternForFilling(this);
-      if (p != null) g2.setPaint(p);
-      g.fillPolygon(ptsx, ptsy, ptsx.length);
-    }
-
     if (!isClosed) {
 
       if (lineWidth > 0) {
@@ -174,6 +118,12 @@ public class JDPolyline extends JDObject implements JDRotatable {
       }
 
     } else {
+
+      if (fillStyle != FILL_STYLE_NONE) {
+        Paint p = GraphicsUtils.createPatternForFilling(this);
+        if (p != null) g2.setPaint(p);
+        g.fillPolygon(ptsx, ptsy, ptsx.length);
+      }
 
       if (lineWidth > 0) {
         g.setColor(foreground);
