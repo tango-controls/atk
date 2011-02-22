@@ -1,3 +1,0 @@
-name = DeviceViewer
-package = fr.esrf.tangoatk.widget.device
-properties = model,

@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          TableCommandHelper.java
 // Created:       2002-06-24 15:27:18, assum
 // By:            <assum@esrf.fr>
@@ -50,7 +28,6 @@ class TableCommandHelper extends ACommandHelper {
     protected DeviceData setInput(List numerics, List strings) {
 	int length = strings.size();
 	int i;
-	Double  element;
 
 	String [] str = new String[length];
 
@@ -66,9 +43,7 @@ class TableCommandHelper extends ACommandHelper {
 	    int [] ints = new int[length];
 
 	    for (i = 0; i < length; i++) {
-//		ints[i] = Integer.parseInt((String)numerics.get(i));
-                element = (Double) numerics.get(i);
-		ints[i] = element.intValue();
+		ints[i] = Integer.parseInt((String)numerics.get(i));
 	    } // end of for ()
 
 	    data.insert(new DevVarLongStringArray(ints, str));
@@ -78,9 +53,7 @@ class TableCommandHelper extends ACommandHelper {
 	    double [] doubles = new double[length];
 
 	    for (i = 0; i < length; i++) {
-//		doubles[i] = Double.parseDouble((String)numerics.get(i));
-                element = (Double) numerics.get(i);
-		doubles[i] = element.doubleValue();
+		doubles[i] = Double.parseDouble((String)numerics.get(i));
 	    } // end of for ()
 
 	    data.insert(new DevVarDoubleStringArray(doubles, str));
@@ -93,10 +66,10 @@ class TableCommandHelper extends ACommandHelper {
 	return data;
     }
 
-    protected List<List> extractOutput(DeviceData d) {
-	List<String> strings = new Vector<String> ();
-	List<Number> numerics = new Vector<Number> ();
-	List<List> res = new Vector<List> ();
+    protected List extractOutput(DeviceData d) {
+	List strings = new Vector();
+	List numerics = new Vector();
+	List res = new Vector();
 	
 	switch (getOutType()) {
 	case Tango_DEVVAR_LONGSTRINGARRAY:
