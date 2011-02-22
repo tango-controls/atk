@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * PropertyListViewer2.java
  *
  * Created on April 25, 2002, 6:09 PM
@@ -127,14 +105,7 @@ public class PropertyListViewer2 extends javax.swing.JPanel {
 	    controlee = new IApplicable() {
 		    public void ok() {
 			apply();
-			getRootPane().getParent().setVisible(false);
-			java.awt.Container cont = getTopLevelAncestor();
-			if (cont instanceof java.awt.Window)
-			{
-			  java.awt.event.WindowEvent  we;
-			  we = new java.awt.event.WindowEvent((java.awt.Window) cont, java.awt.event.WindowEvent.WINDOW_CLOSING);
-			  cont.dispatchEvent(we);
-			}
+			getRootPane().getParent().setVisible(false);	
 		    }
 
 		    public void apply() {
@@ -160,13 +131,6 @@ public class PropertyListViewer2 extends javax.swing.JPanel {
     public void _cancel() {
 	adapter.cancel();
 	getRootPane().getParent().setVisible(false);
-	java.awt.Container cont = getTopLevelAncestor();
-	if (cont instanceof java.awt.Window)
-	{
-	  java.awt.event.WindowEvent  we;
-	  we = new java.awt.event.WindowEvent((java.awt.Window) cont, java.awt.event.WindowEvent.WINDOW_CLOSING);
-	  cont.dispatchEvent(we);
-	}
     }
 
     IControlee controlee = new DefaultControlee();
@@ -202,7 +166,7 @@ public class PropertyListViewer2 extends javax.swing.JPanel {
 	list.startRefresher();
 	frame.setContentPane(v);
 	frame.pack();
-	frame.setVisible(true);
+	frame.show();
     } // end of main ()
     
 }

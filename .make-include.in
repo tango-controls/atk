@@ -35,15 +35,23 @@ J = @if [ -f .targets ]; then \
     fi
 
 
-beaninfo:
-	$(JAVA) $(PGENERATOR) $(BEANINFO)
-	@if [ "x$(BEANINFO)" == "x" ]; then           \
-	  files="";                                   \
-	else                                          \
-	  files="$(BEANINFO)";                        \
-	  echo $(JAVAC) -d $(JTARGETDIR) $$files;     \
-	  $(JAVAC) -d $(JTARGETDIR) $$files;	      \
-	fi                                            \
+%.info:
+	@echo "name = " `echo $@ | sed 's/BeanInfo.info//g'` >> $@ ; \
+	echo "package = $(PACKAGE) " >> $@ ; \
+
+%.java: %.info
+	$(JAVA) $(PGENERATOR) $(subst java,info, $@) $@
+
+beaninfo: $(BEANINFO)
+	@if [ "x$(BEANINFO)" == "x" ]; then            \
+           files="";                                   \
+        else                                           \
+           files="$(BEANINFO)";                        \
+   	    for d in $$files; do                       \
+	       echo $(JAVAC) -d $(JTARGETDIR) $$d;     \
+               $(JAVAC) -d $(JTARGETDIR) $$d;          \
+            done                                       \
+        fi                                             \
 
 manifest.mf: .force
 	rm manifest.mf ;                                                     \
@@ -67,7 +75,6 @@ class-clean:
 
 icons:
 	cp *.gif $(TARGET) > /dev/null 2>&1 || true; 
-	cp *.jpg $(TARGET) > /dev/null 2>&1 || true; 
 
 verifyjar = pwd=`pwd`;               \
 	jardir=$(1) ;   \
