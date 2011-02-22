@@ -33,7 +33,6 @@ import fr.esrf.TangoApi.AttributeInfo;
 import fr.esrf.TangoApi.DeviceAttribute;
 import fr.esrf.TangoDs.TangoConst;
 import fr.esrf.tangoatk.core.Device;
-import fr.esrf.tangoatk.core.IDevice;
 
 /**
  *
@@ -51,18 +50,18 @@ public class AttrDualSpectrum extends AttrFunctionSpectrum {
     /**
      * Creates a new instance of AttrDualSpectrum
      */
-    public AttrDualSpectrum (IDevice device_x, String attr_x, IDevice device_y,
+    public AttrDualSpectrum (Device device_x, String attr_x, Device device_y,
             String attr_y) {
-        this.device_x = (Device) device_x;
-        this.device_y = (Device) device_y;
+        this.device_x = device_x;
+        this.device_y = device_y;
         this.attr_x = attr_x;
         this.attr_y = attr_y;
         this.setXName( attr_x );
         this.setYName( attr_y );
         try {
-            AttributeInfo attr_info = this.device_x.getAttributeInfo(attr_x);
+            AttributeInfo attr_info = device_x.getAttributeInfo(attr_x);
             this.setXUnit(attr_info.unit);
-            attr_info = this.device_y.getAttributeInfo(attr_y);
+            attr_info = device_y.getAttributeInfo(attr_y);
             this.setYUnit(attr_info.unit);
         }
         catch (DevFailed e) {

@@ -30,6 +30,9 @@
 package fr.esrf.tangoatk.widget.util.interlock;
 
 import javax.swing.*;
+
+import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
+
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
@@ -262,7 +265,7 @@ public class NetEditor extends JComponent implements MouseListener, MouseMotionL
    * @see NetEditorListener#sizeChanged
    * @see NetFileFilter#NetFileFilter
    */
-  public void showOpenFileDialog(String defaultDir,NetFileFilter filter) {
+  public void showOpenFileDialog(String defaultDir,MultiExtFileFilter filter) {
 
     int ok = JOptionPane.YES_OPTION;
     JFileChooser chooser = new JFileChooser(defaultDir);
@@ -272,10 +275,8 @@ public class NetEditor extends JComponent implements MouseListener, MouseMotionL
     if( filter!=null ) {
       chooser.addChoosableFileFilter(filter);
     } else {
-      String[] ext    = {defaultExtension};
-      String[] extPss = {"xpss","pss"};
-      chooser.addChoosableFileFilter(new NetFileFilter("PSS Network description file",extPss));
-      chooser.addChoosableFileFilter(new NetFileFilter("Network description file",ext));
+      chooser.addChoosableFileFilter(new MultiExtFileFilter("PSS Network description file", "xpss", "pss"));
+      chooser.addChoosableFileFilter(new MultiExtFileFilter("Network description file", defaultExtension));
     }
 
     int returnVal = chooser.showOpenDialog(this);
@@ -359,7 +360,7 @@ public class NetEditor extends JComponent implements MouseListener, MouseMotionL
    * @see NetEditor#saveNetFile
    * @see NetEditor#setFileExtension
    */
-  public void showSaveFileDialog(String defaultDir,NetFileFilter filter) {
+  public void showSaveFileDialog(String defaultDir,MultiExtFileFilter filter) {
 
     int ok = JOptionPane.YES_OPTION;
     JFileChooser chooser = new JFileChooser(defaultDir);
@@ -369,8 +370,7 @@ public class NetEditor extends JComponent implements MouseListener, MouseMotionL
     if( filter!=null ) {
       chooser.addChoosableFileFilter(filter);
     } else {
-      String[] ext = {defaultExtension};
-      chooser.addChoosableFileFilter(new NetFileFilter("Network description file",ext));
+      chooser.addChoosableFileFilter(new MultiExtFileFilter("Network description file", defaultExtension));
     }
 
     int returnVal = chooser.showSaveDialog(this);

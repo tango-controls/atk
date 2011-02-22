@@ -103,7 +103,7 @@ public class MultiExtFileFilter extends FileFilter {
 		StringBuilder sb = new StringBuilder(prefix);
 		sb.append(" (");
 		Iterator<String> iterator = extensions.iterator();
-		// there is at least the default one
+		//there is at least the default one
 		do {
 			String ext = iterator.next();
 			sb.append("*.").append(ext);
@@ -114,11 +114,6 @@ public class MultiExtFileFilter extends FileFilter {
 		while (iterator.hasNext());
 		sb.append(")");
 		description = sb.toString();
-	}
-
-	@Override
-	public String toString() {
-		return description;
 	}
 
 	/**

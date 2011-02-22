@@ -22,7 +22,6 @@
  
 package fr.esrf.tangoatk.core;
 
-import fr.esrf.tangoatk.core.attribute.AAttribute;
 import java.util.Vector;
 
 // --------------------------------------------------------------
@@ -31,12 +30,12 @@ import java.util.Vector;
 public class DeviceItem 
 {
 
-     private Vector<AAttribute> entities;
+     private Vector<IAttribute> entities;
      private Device device;
 
      DeviceItem(Device dev) {
        device   = dev;
-       entities = new Vector<AAttribute> ();
+       entities = new Vector<IAttribute> ();
      }
 
      Device getDevice() {
@@ -47,8 +46,8 @@ public class DeviceItem
        return entities.size();
      }
 
-     AAttribute getEntity(int idx) {
-       return (AAttribute)entities.get(idx);
+     IAttribute getEntity(int idx) {
+       return (IAttribute)entities.get(idx);
      }
 
      String[] getNames() {
@@ -58,11 +57,11 @@ public class DeviceItem
        return ret;
      }
 
-     void add(AAttribute entity) {
+     void add(IAttribute entity) {
        entities.add(entity);
      }
 
-     void remove(AAttribute entity) {
+     void remove(IAttribute entity) {
        entities.remove(entity);
      }
 }
