@@ -1,0 +1,9 @@
+name = StringScalarViewer
+package fr.esrf.tangoatk.widget.attribute
+
+properties = unitVisible, model, labelVisible, infoVisible, valuePreferredSize, labelPreferredSize, unitPreferredSize,valueFont, labelFont, unitFont, valueMaximumLength, labelMaximumLength, unitMaximumLength, propertyListEditable, labelBorder, valueBorder, unitBorder, valueOpaque, unitOpaque, labelOpaque
+
+ICON_COLOR_16x16 = StringScalarViewer.gif
+ICON_MONO_16x16 = StringScalarViewer.gif
+ICON_MONO_32x32 = StringScalarViewer.gif
+ICON_COLOR_32x32 = StringScalarViewer.gif

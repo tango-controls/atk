@@ -1,0 +1,107 @@
+<html>
+<head>
+<title>core</title>
+</head>
+<body>
+This package contains the model part of TangoATK.
+core has no knowledge of its viewers, core only knows how to send
+events to its listeners.<br>
+
+Most users will only need to access
+<ul>
+<li>AttributeList
+<li>CommandList
+<li>DeviceFactory
+</ul>
+
+to get things started.
+
+<h2>Overview</h2>
+
+Most of the code in this package is written to facilitate the
+handling of Attributes and Commands. Normally, users of this package
+should not try to instanciate attributes and commands by them selves,
+but rather use the AttributeList and the CommandList respectively.
+For more finegrained control, a CommandFactory and an
+AttributeFactory is provided.
+
+<h3>Communication model</h3>
+
+The communication model of TangoATK is based on the model used by
+java-beans, that is, objects register themselves as listeners to
+other object's events. All the listener-interfaces in core are
+derived from <code>IErrorListener</code>, so that all listeners are
+forced to implement some kind of errorhandling.
+
+<h3>Properties</h3>
+
+Both commands and attributes have properties attached to them. Some
+properties are common to both commands and attributes, and thus the
+hierarchy of classes representing the properties work with both
+commands and properties.
+<p>
+There are two ways of obtaining properties from a command or
+attribute. Either by calling <code>getPropertyMap()</code> which
+returns a <code>java.util.Map</code> with all propeties, or by
+calling specialized methods in the objects, such
+as <code>getName()</code>
+
+
+<h3>Overview of the attribute hierarchy</h3>
+
+The Attributes in TangoATK come in different flavors. As an
+abstraction over Tango, all numeric types are coerced into doubles,
+and there exists no String types for images nor spectrums, which
+leaves us with:
+<ul>
+<li>NumberImage, represented by the interface INumberImage
+<li>NumberSpectrum, represented by the interface INumberSpectrum
+<li>NumberScalar, represented by the interface INumberScalar
+<li>StringScalar, represented by the intervace IStringScalar
+</ul>
+
+All of the interfaces inherit from IAttribute, which is the interface
+that defines an attribute.
+
+<h3>Overview of the command hierarchy</h3>
+
+Commands are defined by the ICommand inteface, and implemented in the
+classes:
+<ul>
+  <li>VoidVoidCommand 
+  <li>VoidScalarCommand 
+  <li>VoidArrayCommand 
+  <li>ScalarVoidCommand
+  <li>ScalarScalarCommand
+  <li>ScalarArrayCommand
+  <li>ArrayVoidCommand
+  <li>ArrayScalarCommand
+  <li>ArrayArrayCommand
+</ul>
+To interpret these names, the type of the input parameter is given as
+the first part of the class name, the type of the output parameter is
+given as the second part of the class name.
+<br>
+So a command which is of type ScalarArrayCommand takes a scalar value
+as input and returns an array as output.
+
+<h4>How to obtain the results of a command</h4>
+As with everything else in TangoATK, the commands also work with
+events, that is, every time a command is executed, it sends out
+a <code>ResultEvent</code> to all its listeners with the result of
+the command.
+
+<h4>The Finer points of commands</h4>
+
+To make life easier for the programmer, all types commands accept a
+<code>java.util.List</code> as input. A command which doesn't take
+any input will silently ignore the input, a command which takes a
+scalar as input will use only the first value in the list. Array
+command will parse the list as best it can.
+<p>
+ Regarding input, a command will accept any input to any command,
+ there are no compiletime checks to make sure a string is not passed
+ to a command accepting a double allthough this error will be caught
+ at runtime.
+</body>
+</html>

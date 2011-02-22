@@ -1,0 +1,9 @@
+name = StatusViewer
+package = fr.esrf.tangoatk.widget.device
+
+properties = model, rows, columns
+
+ICON_COLOR_16x16 = StatusViewer.gif
+ICON_MONO_16x16 = StatusViewer.gif
+ICON_MONO_32x32 = StatusViewer32.gif
+ICON_COLOR_32x32 = StatusViewer32.gif

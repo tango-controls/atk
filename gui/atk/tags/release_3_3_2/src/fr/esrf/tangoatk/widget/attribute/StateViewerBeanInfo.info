@@ -1,0 +1,9 @@
+name = StateViewer
+package = fr.esrf.tangoatk.widget.attribute
+
+properties = model, stateVisible, labelVisible, stateText, label, statePreferredSize, stateFont, stateBorder, useDeviceAlias, stateInTooltip
+
+ICON_COLOR_16x16 = AttStateViewer.gif
+ICON_MONO_16x16 = AttStateViewer.gif
+ICON_MONO_32x32 = AttStateViewer32.gif
+ICON_COLOR_32x32 = AttStateViewer32.gif

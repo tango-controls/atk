@@ -1,0 +1,3 @@
+Name: fr/esrf/tangoatk/widget/jloox/SynopticFileViewer.class
+Java-Bean: True
+

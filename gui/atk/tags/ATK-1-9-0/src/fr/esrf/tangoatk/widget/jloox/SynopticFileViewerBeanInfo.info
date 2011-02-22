@@ -1,0 +1,9 @@
+name = SynopticFileViewer
+package = fr.esrf.tangoatk.widget.jloox
+
+properties = jlooxDir
+
+ICON_COLOR_16x16 = SynopticFileViewer.gif
+ICON_MONO_16x16 = SynopticFileViewer.gif
+ICON_MONO_32x32 = SynopticFileViewer32.gif
+ICON_COLOR_32x32 = SynopticFileViewer32.gif

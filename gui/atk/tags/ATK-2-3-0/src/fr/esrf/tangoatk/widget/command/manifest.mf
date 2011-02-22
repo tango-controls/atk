@@ -1,0 +1,21 @@
+Name: fr/esrf/tangoatk/widget/command/VoidVoidCommandViewer.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/command/CommandComboViewer.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/command/CommandButtonViewer.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/command/OnOffSwitchCommandViewer.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/command/OnOffCheckBoxCommandViewer.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/command/OptionComboCommandViewer.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/command/ConfirmCommandViewer.class
+Java-Bean: True
+

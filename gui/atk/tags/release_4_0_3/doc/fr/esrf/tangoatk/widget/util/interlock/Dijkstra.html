@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<HTML lang="en"><HEAD>
+<TITLE>Source Code: Dijkstra.java</TITLE>
+<STYLE>
+body {
+    background: ivory;
+    color: black;
+}
+DIV.description {
+    color: maroon;
+    margin-top: -0.4cm;
+}
+SPAN.linenumber {
+    color: maroon;
+}
+SPAN.string {
+    color: #008080;
+}
+SPAN.comment {
+    color: green;
+}
+SPAN.keyword {
+    color: blue;
+    font-weight: bold;
+}
+SPAN.userkeyword {
+    color: purple;
+    font-weight: bold;
+}
+</STYLE>
+</HEAD><BODY>
+<H2>Dijkstra.java</H2>
+<PRE>
+<SPAN class="comment">/** An application example that uses the NetEditor */</SPAN>
+<SPAN class="keyword">import</SPAN> javax.swing.*;
+<SPAN class="keyword">import</SPAN> java.io.IOException;
+<SPAN class="keyword">import</SPAN> java.awt.*;
+
+<SPAN class="keyword">public</SPAN> <SPAN class="keyword">class</SPAN> Dijkstra <SPAN class="keyword">extends</SPAN> JFrame  {
+
+  DjNetViewer  netViewer;   <SPAN class="comment">// The viewer
+</SPAN>
+  <SPAN class="comment">/** Main constructor */</SPAN>
+  <SPAN class="keyword">public</SPAN> Dijkstra() {
+
+    <SPAN class="comment">// Construct the viewer
+</SPAN>    netViewer = <SPAN class="keyword">new</SPAN> DjNetViewer(<SPAN class="keyword">this</SPAN>);
+
+    <SPAN class="comment">// Load the network file
+</SPAN>    <SPAN class="keyword">try</SPAN> {
+      netViewer.loadFile(<SPAN class="string">"dijkstra.net"</SPAN>);
+    } <SPAN class="keyword">catch</SPAN> (IOException ex) {
+      JOptionPane.showMessageDialog(<SPAN class="keyword">this</SPAN>, <SPAN class="string">"Cannot load dijkstra.net\n"</SPAN> + ex.getMessage() , <SPAN class="string">"Error"</SPAN>, JOptionPane.ERROR_MESSAGE);
+    }
+
+    setTitle(<SPAN class="string">"Dijkstra"</SPAN>);
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setContentPane(netViewer);
+    pack();
+
+  }
+
+  <SPAN class="comment">/** Main function */</SPAN>
+  <SPAN class="keyword">public</SPAN> <SPAN class="keyword">static</SPAN> <SPAN class="keyword">void</SPAN> main(String[] args) {
+
+    <SPAN class="keyword">final</SPAN> Dijkstra f = <SPAN class="keyword">new</SPAN> Dijkstra();
+    f.setVisible(<SPAN class="keyword">true</SPAN>);
+
+  }
+
+}</PRE>
+</BODY></HTML>

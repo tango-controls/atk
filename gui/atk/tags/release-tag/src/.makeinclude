@@ -1,0 +1,18 @@
+export JAVA_HOME=/opt/j2sdk1_3_1
+export JAVAC=$(JAVA_HOME)/bin/javac
+
+TANGOHOST=TANGO_HOST=tango:20000
+
+export JAVA=$(JAVA_HOME)/bin/java -D$(TANGOHOST)
+TANGOHOME=/segfs/tango
+ATKHOME=$(TANGOHOME)/tools/jclient_framework/ATK
+
+ATKLIB=$(ATKHOME)/lib
+LIB=$(TANGOHOME)/lib/java
+
+TANGO=$(LIB)/Tango.jar
+TANGOAPI=$(TANGOHOME)/tools/api
+ORB=$(LIB)/OB.jar
+
+export CLASSPATH=$(TANGO):$(TANGOAPI):$(ORB):$(ATKLIB)
+export JTARGETDIR=$(ATKLIB)

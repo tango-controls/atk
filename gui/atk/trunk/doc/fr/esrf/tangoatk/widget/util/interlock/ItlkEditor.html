@@ -1,0 +1,140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<HTML lang="en"><HEAD>
+<TITLE>Source Code: ItlkEditor.java</TITLE>
+<STYLE>
+body {
+    background: ivory;
+    color: black;
+}
+DIV.description {
+    color: maroon;
+    margin-top: -0.4cm;
+}
+SPAN.linenumber {
+    color: maroon;
+}
+SPAN.string {
+    color: #008080;
+}
+SPAN.comment {
+    color: green;
+}
+SPAN.keyword {
+    color: blue;
+    font-weight: bold;
+}
+SPAN.userkeyword {
+    color: purple;
+    font-weight: bold;
+}
+</STYLE>
+</HEAD><BODY>
+<H2>ItlkEditor.java</H2>
+<PRE>
+<SPAN class="comment">/** An application example that uses the NetEditor */</SPAN>
+
+<SPAN class="keyword">import</SPAN> fr.esrf.tangoatk.widget.util.interlock.*;
+
+<SPAN class="keyword">import</SPAN> javax.swing.*;
+<SPAN class="keyword">import</SPAN> java.awt.event.*;
+
+<SPAN class="comment">/** The main Interlock editor frame */</SPAN>
+<SPAN class="keyword">public</SPAN> <SPAN class="keyword">class</SPAN> ItlkEditor <SPAN class="keyword">extends</SPAN> NetEditorFrame {
+
+  <SPAN class="comment">// The Interlock editor component
+</SPAN>  ItlkNetEditor  itlkEditor;
+
+  <SPAN class="comment">// New menu items
+</SPAN>  JMenuItem traceMode;
+  JMenuItem editMode;
+
+  <SPAN class="comment">// New toolbar items
+</SPAN>  JButton bubbleBtn;
+  JButton permitBtn;
+  JButton joinBtn;
+  JButton vccBtn;
+  JButton groundBtn;
+
+  <SPAN class="comment">// ---------------------------------------------------------------
+</SPAN>  <SPAN class="comment">// Construction
+</SPAN>  <SPAN class="comment">// ---------------------------------------------------------------
+</SPAN>  <SPAN class="keyword">public</SPAN> ItlkEditor() {
+
+    setAppTitle(<SPAN class="string">"Interlock Simulator Editor"</SPAN>);
+
+    <SPAN class="comment">// Create the editor -------------------------------------------
+</SPAN>    itlkEditor = <SPAN class="keyword">new</SPAN> ItlkNetEditor(<SPAN class="keyword">this</SPAN>);
+    setEditor(itlkEditor);
+
+    <SPAN class="comment">// Customize options menu ---------------------------------------
+</SPAN>    traceMode = NetUtils.createMenuItem(<SPAN class="string">"Trace mode"</SPAN>,0,0,<SPAN class="keyword">this</SPAN>);
+    editMode = NetUtils.createMenuItem(<SPAN class="string">"Edit mode"</SPAN>,0,0,<SPAN class="keyword">this</SPAN>);
+    getOptionMenu().add(traceMode,0);
+    getOptionMenu().add(editMode,1);
+    getOptionMenu().add(<SPAN class="keyword">new</SPAN> JSeparator(),2);
+
+    <SPAN class="comment">// Cutomize toollbar --------------------------------------------
+</SPAN>    JToolBar tb = getToolbar();
+    tb.remove(getToobarButton(NetEditorFrame.TOOL_BUBBLE));
+    String rPth = <SPAN class="string">"/fr/esrf/tangoatk/widget/util/interlock/gif/"</SPAN>;
+    bubbleBtn = createIconButton(rPth,<SPAN class="string">"bubble"</SPAN>,<SPAN class="string">"Create an interlock object (physical switch)"</SPAN>,<SPAN class="keyword">this</SPAN>);
+    tb.add(bubbleBtn,0);
+    permitBtn = createIconButton(rPth,<SPAN class="string">"permit"</SPAN>,<SPAN class="string">"Create a permit object (logical sensor)"</SPAN>,<SPAN class="keyword">this</SPAN>);
+    tb.add(permitBtn,1);
+    joinBtn = createIconButton(rPth,<SPAN class="string">"join"</SPAN>,<SPAN class="string">"Create a join object (intersection point)"</SPAN>,<SPAN class="keyword">this</SPAN>);
+    tb.add(joinBtn,2);
+    vccBtn = createIconButton(rPth,<SPAN class="string">"start"</SPAN>,<SPAN class="string">"Create a VCC object"</SPAN>,<SPAN class="keyword">this</SPAN>);
+    tb.add(vccBtn,3);
+    groundBtn = createIconButton(rPth,<SPAN class="string">"end"</SPAN>,<SPAN class="string">"Create a Ground object"</SPAN>,<SPAN class="keyword">this</SPAN>);
+    tb.add(groundBtn,4);
+
+  }
+
+  <SPAN class="keyword">public</SPAN> <SPAN class="keyword">void</SPAN> objectClicked(NetEditor src,NetObject obj,MouseEvent e) {
+
+    itlkEditor.swapItlkState(obj);
+
+  }
+
+  <SPAN class="keyword">public</SPAN> <SPAN class="keyword">void</SPAN> actionPerformed(ActionEvent e) {
+
+    Object src = e.getSource();
+    <SPAN class="keyword">if</SPAN>( src == bubbleBtn ) {
+      itlkEditor.setCreateMode(NetEditor.CREATE_BUBBLE,ItlkNetEditor.ITLK_BUBBLE);
+      getHelpLabel().setText(<SPAN class="string">"Interlock creation: Left click to create a interlock object, right click to cancel."</SPAN>);
+    } <SPAN class="keyword">else</SPAN> <SPAN class="keyword">if</SPAN> (src == permitBtn ) {
+      itlkEditor.setCreateMode(NetEditor.CREATE_BUBBLE,ItlkNetEditor.SENSOR_BUBBLE);
+      getHelpLabel().setText(<SPAN class="string">"Sensor creation: Left click to create a sensor object, right click to cancel."</SPAN>);
+    } <SPAN class="keyword">else</SPAN> <SPAN class="keyword">if</SPAN> (src == joinBtn ) {
+      itlkEditor.setCreateMode(NetEditor.CREATE_BUBBLE,ItlkNetEditor.JOIN_BUBBLE);
+      getHelpLabel().setText(<SPAN class="string">"Join creation: Left click to create a join object, right click to cancel."</SPAN>);
+    } <SPAN class="keyword">else</SPAN> <SPAN class="keyword">if</SPAN> (src == vccBtn ) {
+      itlkEditor.setCreateMode(NetEditor.CREATE_BUBBLE,ItlkNetEditor.VCC_BUBBLE);
+      getHelpLabel().setText(<SPAN class="string">"VCC creation: Left click to create a VCC object, right click to cancel."</SPAN>);
+    } <SPAN class="keyword">else</SPAN> <SPAN class="keyword">if</SPAN> (src == groundBtn ) {
+      itlkEditor.setCreateMode(NetEditor.CREATE_BUBBLE,ItlkNetEditor.GROUND_BUBBLE);
+      getHelpLabel().setText(<SPAN class="string">"Ground creation: Left click to create a ground object, right click to cancel."</SPAN>);
+    } <SPAN class="keyword">else</SPAN> <SPAN class="keyword">if</SPAN> (src == traceMode) {
+      itlkEditor.setEditable(<SPAN class="keyword">false</SPAN>);
+    } <SPAN class="keyword">else</SPAN> <SPAN class="keyword">if</SPAN> (src == editMode) {
+      itlkEditor.setEditable(<SPAN class="keyword">true</SPAN>);
+    } <SPAN class="keyword">else</SPAN> {
+      <SPAN class="keyword">super</SPAN>.actionPerformed(e);
+    }
+
+  }
+
+  <SPAN class="comment">// -----------------------------------------------------
+</SPAN>  <SPAN class="comment">// Main function
+</SPAN>  <SPAN class="comment">// -----------------------------------------------------
+</SPAN>  <SPAN class="keyword">public</SPAN> <SPAN class="keyword">static</SPAN> <SPAN class="keyword">void</SPAN> main(String[] args) {
+
+    ItlkEditor iE = <SPAN class="keyword">new</SPAN> ItlkEditor();
+    iE.pack();
+    iE.setVisible(<SPAN class="keyword">true</SPAN>);
+
+  }
+
+}
+</PRE>
+</BODY></HTML>

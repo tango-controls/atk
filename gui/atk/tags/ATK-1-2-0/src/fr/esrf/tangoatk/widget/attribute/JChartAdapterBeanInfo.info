@@ -1,0 +1,9 @@
+name =  JChartAdapter
+package = fr.esrf.tangoatk.widget.attribute 
+
+ICON_COLOR_16x16 = JChartAdapter.gif
+ICON_MONO_16x16 = JChartAdapter.gif
+ICON_COLOR_32x32 = JChartAdapter.gif
+ICON_MONO_32x32 = JChartAdapter.gif
+
+properties = model, chart

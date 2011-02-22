@@ -1,0 +1,39 @@
+Name: fr/esrf/tangoatk/widget/attribute/NumberScalarViewer.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/attribute/StringScalarViewer.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/attribute/SimpleScalarViewer.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/attribute/JChartAdapter.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/attribute/NumberSpectrumJChartAdapter.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/attribute/IconNumberScalarViewer.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/attribute/IconNumberSpectrumViewer.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/attribute/NumberScalarListViewer.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/attribute/ScalarListViewer.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/attribute/NumberScalarStateViewer.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/attribute/SimpleStringSpectrumViewer.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/attribute/NumberSpectrumPeakViewer.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/attribute/NumberScalarProgressBar.class
+Java-Bean: True
+

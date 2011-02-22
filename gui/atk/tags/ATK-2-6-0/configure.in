@@ -1,0 +1,83 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(confdefs.h)
+
+AC_DEFUN(AC_CHECK_JAVAHOME,[
+if test "x$JAVA_HOME" = x; then
+        AC_MSG_ERROR([Required environment variable JAVA_HOME is missing. Please set it.])
+	else
+	echo "JAVA_HOME=$JAVA_HOME"
+fi
+])
+
+AC_DEFUN(AC_PROG_JAR,[
+AC_REQUIRE([AC_EXEEXT])dnl
+if test "x$JAVAPREFIX" = x; then
+	test "x$JAR" = x && AC_CHECK_PROGS(JAR, "jar$EXEEXT")
+else
+	test "x$JAR" = x && AC_CHECK_PROGS(JAR, "jar$EXEEXT", $JAVAPREFIX)
+fi
+test "x$JAVAC" = x && AC_MSG_ERROR([no acceptable jar found in \$PATH])
+AC_PROVIDE([$0])dnl
+])
+
+AC_DEFUN(AC_PROG_JAVADOC,[
+AC_REQUIRE([AC_EXEEXT])dnl
+if test "x$JAVAPREFIX" = x; then
+	test "x$JAVADOC" = x && AC_CHECK_PROGS(JAVADOC, "javadoc$EXEEXT")
+else
+	test "x$JAVADOC" = x && AC_CHECK_PROGS(JAVADOC, "javadoc$EXEEXT", $JAVAPREFIX)
+fi
+test "x$JAVAC" = x && AC_MSG_ERROR([no acceptable jar found in \$PATH])
+AC_PROVIDE([$0])dnl
+])
+
+ATKHOME=$PWD
+ATKSRC=$ATKHOME/src	
+ATKLIB=$ATKHOME/lib
+ATKDOC=$ATKHOME/doc
+TANGOHOST=TANGO_HOST=$TANGO_HOST
+TANGOHOME=/segfs/tango/release
+TANGOLIB=$TANGOHOME/java/lib
+TANGO=$TANGOLIB/TangORB.jar
+PRINTF=$ATKLIB/printf.jar
+TANGOTEST=$LIB/
+JTARGETDIR=$ATKLIB	
+BEANBOX=$JAVA_HOME/beans/beanbox/classes:$JAVA_HOME/beans/infobus.jar:$JAVA_HOME/beans/lib/methodtracer.jar
+CLASSPATH=$TANGO:$PRINTF:$ATKLIB:$TANGOTEST:$BEANBOX:.;export CLASSPATH
+
+AC_SUBST(ATKSRC)
+AC_SUBST(TANGOHOME)
+AC_SUBST(JTARGETDIR)
+AC_SUBST(JAVACFLAGS)
+AC_SUBST(CLASSPATH)
+AC_SUBST(JAR)
+AC_SUBST(TANGOHOST)
+AC_SUBST(ATKLIB)
+AC_SUBST(ATKHOME)
+AC_SUBST(ATKDOC)
+AC_SUBST(JAVA_HOME)
+
+				
+dnl Checks for programs.
+
+dnl Checks for libraries.
+AC_CHECK_JAVAHOME()    
+AC_CHECK_CLASSPATH()
+AC_PROG_JAVA()
+AC_PROG_JAVAC()
+if test `basename $JAVAC` = "jikes"; then
+   JAVACFLAGS="+E"
+fi
+AC_PROG_JAR()
+AC_PROG_JAVADOC()	
+AC_PROG_JAVAC_WORKS()	
+AC_CHECK_RQRD_CLASS(fr.esrf.TangoDs.Attribute)
+AC_CHECK_RQRD_CLASS(fr.esrf.Tango.Device)
+AC_CHECK_RQRD_CLASS(fr.esrf.TangoApi.Connection)
+dnl Checks for header files.
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+
+dnl Checks for library functions.
+
+AC_OUTPUT(.make-include)

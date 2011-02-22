@@ -1,0 +1,4 @@
+name = UnitViewer
+package = fr.esrf.tangoatk.widget.properties
+
+properties = model
