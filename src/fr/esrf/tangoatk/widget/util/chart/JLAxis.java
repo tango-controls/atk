@@ -206,7 +206,6 @@ public class JLAxis implements java.io.Serializable {
   private double tickStep;    // In pixel
   private double minTickStep;
   private int subTickStep; // 0 => NONE , -1 => Log step , 1.. => Linear step
-  private int subTickTimeAnno=0; // Number of sub tick interval in TIME_ANNO
   private boolean fitXAxisToDisplayDuration;
   
   private boolean zeroAlwaysVisible = false;
@@ -322,7 +321,7 @@ public class JLAxis implements java.io.Serializable {
    * @return scrollback percent
    */
   public double getPercentScrollback() {
-    return percentScrollback * 100;
+    return percentScrollback;
   }
 
   /**
@@ -670,22 +669,6 @@ public class JLAxis implements java.io.Serializable {
    */
   public int getOrientation() {
     return orientation;
-  }
-
-  /**
-   * Sets the number of sub tick interval in TIME_ANNO
-   * @param nb Number of interval (0 to disable)
-   */
-  public void setTimeAnnoSubTickInterval(int nb) {
-    subTickTimeAnno = nb;
-  }
-
-  /**
-   * Returns the number of sub tick interval in TIME_ANNO
-   * @see #setTimeAnnoSubTickInterval
-   */
-  public int getTimeAnnoSubTickInterval() {
-    return subTickTimeAnno;
   }
 
   /** Zoom axis.
@@ -2011,7 +1994,7 @@ public class JLAxis implements java.io.Serializable {
         tickStep = length * prec/sz;
         startx += prec;
         if(inverted) tickStep = -tickStep;
-        subTickStep = subTickTimeAnno;
+        subTickStep = 0;
 
         // Build labels
         while (startx <= (max + precDelta)) {
@@ -2319,9 +2302,8 @@ public class JLAxis implements java.io.Serializable {
    */
   public void drawFast(Graphics g, Point lp, Point p, JLDataView v) {
 
-    g.setClip(boundRect.x,boundRect.y,boundRect.width,boundRect.height);
-
     if (lp != null) {
+      if (boundRect.contains(lp)) {
 
         Graphics2D g2 = (Graphics2D) g;
         Stroke old = g2.getStroke();
@@ -2334,7 +2316,7 @@ public class JLAxis implements java.io.Serializable {
 
         //restore default stroke
         g2.setStroke(old);
-
+      }
     }
 
     //Paint marker
@@ -2585,50 +2567,18 @@ public class JLAxis implements java.io.Serializable {
                                 Paint fPattern,
                                 int y0,
                                 int x,
-                                int y,
-                                int idx) {
+                                int y) {
 
     if (v.getViewType() == JLDataView.TYPE_BAR) {
 
-      if(idx>=0) {
-
-        Color fillColor = v.getBarFillColorAt(idx);
-        if( fillColor==null ) {
-
-          paintBar(g2,
-            fPattern,
-            barWidth,
-            v.getFillColor(),
-            v.getFillStyle(),
-            y0,
-            x,
-            y);
-
-        } else {
-
-          paintBar(g2,
-            null,
-            barWidth,
-            fillColor,
-            v.getFillStyle(),
-            y0,
-            x,
-            y);
-
-        }
-
-      } else {
-
-        paintBar(g2,
-          fPattern,
-          barWidth,
-          v.getFillColor(),
-          v.getFillStyle(),
-          y0,
-          x,
-          y);
-
-      }
+      paintBar(g2,
+        fPattern,
+        barWidth,
+        v.getFillColor(),
+        v.getFillStyle(),
+        y0,
+        x,
+        y);
 
       // Draw bar border
       if (v.getLineWidth() > 0) {
@@ -2684,7 +2634,6 @@ public class JLAxis implements java.io.Serializable {
   private void paintDataViewNormal(Graphics g, JLDataView v, JLAxis xAxis, int xOrg, int yOrg) {
 
     DataList l = v.getData();
-    int idx = 0;
 
     if (l != null) {
 
@@ -2781,13 +2730,12 @@ public class JLAxis implements java.io.Serializable {
               }
 
               // Draw bar
-              paintDataViewBar(g2, v, barWidth, bs, fPattern, y0, pointX[j], pointY[j], idx);
+              paintDataViewBar(g2, v, barWidth, bs, fPattern, y0, pointX[j], pointY[j]);
 
               j++;
             }
 
             l = l.next;
-            idx++;
           }
 
         }
@@ -2798,7 +2746,6 @@ public class JLAxis implements java.io.Serializable {
         j = 0;
         if (!valid) {
           l = l.next;
-          idx++;
           valid = true;
         }
 
@@ -2917,7 +2864,7 @@ public class JLAxis implements java.io.Serializable {
               }
 
               // Draw bar
-              paintDataViewBar(g2, v, barWidth, bs, fPattern, y0, pointX[j], pointY[j], -1);
+              paintDataViewBar(g2, v, barWidth, bs, fPattern, y0, pointX[j], pointY[j]);
 
               j++;
             }
@@ -3458,7 +3405,7 @@ public class JLAxis implements java.io.Serializable {
             g.drawString(li.value, x + li.offset.x - li.size.width / 2, y + tr - 2);
           }
           else {
-            g.drawString(li.value, x + li.offset.x - li.size.width / 2, y + tr + li.offset.y + li.size.height + 2);
+            g.drawString(li.value, x + li.offset.x - li.size.width / 2, y + tr + li.offset.y + li.size.height);
           }
 
           //Draw sub tick
@@ -3685,8 +3632,6 @@ public class JLAxis implements java.io.Serializable {
     if (p != null) setGridVisible(OFormat.getBoolean(p.get(0).toString()));
     p = f.getParam(prefix + "subgrid");
     if (p != null) setSubGridVisible(OFormat.getBoolean(p.get(0).toString()));
-    p = f.getParam(prefix + "timeannosubtick");
-    if (p != null) setTimeAnnoSubTickInterval(OFormat.getInt(p.get(0).toString()));
     p = f.getParam(prefix + "grid_style");
     if (p != null) setGridStyle(OFormat.getInt(p.get(0).toString()));
     p = f.getParam(prefix + "min");
@@ -3713,8 +3658,6 @@ public class JLAxis implements java.io.Serializable {
     if (p != null) setFont(OFormat.getFont(p));
     p = f.getParam(prefix + "fit_display_duration");
     if (p != null) this.setFitXAxisToDisplayDuration(OFormat.getBoolean(p.get(0).toString()));
-    p = f.getParam(prefix + "percentscrollback");
-    if (p != null) this.setPercentScrollback(OFormat.getDouble(p.get(0).toString()));
 
   }
 
@@ -3734,7 +3677,6 @@ public class JLAxis implements java.io.Serializable {
     to_write += prefix + "visible:" + isVisible() + "\n";
     to_write += prefix + "grid:" + isGridVisible() + "\n";
     to_write += prefix + "subgrid:" + isSubGridVisible() + "\n";
-    to_write += prefix + "timeannosubtick:" + getTimeAnnoSubTickInterval() + "\n";
     to_write += prefix + "grid_style:" + getGridStyle() + "\n";
     to_write += prefix + "min:" + getMinimum() + "\n";
     to_write += prefix + "max:" + getMaximum() + "\n";
@@ -3745,7 +3687,6 @@ public class JLAxis implements java.io.Serializable {
     to_write += prefix + "color:" + OFormat.color(getAxisColor()) + "\n";
     to_write += prefix + "label_font:" + OFormat.font(getFont()) + "\n";
     to_write += prefix + "fit_display_duration:" + isFitXAxisToDisplayDuration() + "\n";
-    to_write += prefix + "percentscrollback:" + getPercentScrollback() + "\n";
 
     return to_write;
   }

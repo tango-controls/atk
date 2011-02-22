@@ -152,15 +152,6 @@ class JDBrowserPanel extends JPanel implements TreeSelectionListener,ActionListe
   public void actionPerformed(ActionEvent e) {
     Object src = e.getSource();
     if(src==dismissBtn) {
-      if(objectPanel.nameHasChanged()) {
-        if( JOptionPane.showConfirmDialog(this,
-            "Object name has changed but has not been applied\nDo you want to apply ?",
-            "Confirmation",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION ) {
-          objectPanel.applyName();
-        }  else {
-          objectPanel.cancelNameChanged();
-        }
-      }
       ATKGraphicsUtils.getWindowForComponent(this).setVisible(false);
     }
   }

@@ -37,27 +37,27 @@ import fr.esrf.TangoApi.DeviceAttribute;
 
 public class StringSpectrumHelper implements java.io.Serializable
 {
-  AAttribute attribute;
+  IAttribute attribute;
   EventSupport propChanges;
 
-  public StringSpectrumHelper(AAttribute attribute)
+  public StringSpectrumHelper(IAttribute attribute)
   {
     init(attribute);
   }
 
-  void init(AAttribute attribute)
+  void init(IAttribute attribute)
   {
     setAttribute(attribute);
-    propChanges = attribute.getPropChanges();
+    propChanges = ((AAttribute) attribute).getPropChanges();
   }
   
   
-  public void setAttribute(AAttribute attribute)
+  public void setAttribute(IAttribute attribute)
   {
     this.attribute = attribute;
   }
 
-  public AAttribute getAttribute()
+  public IAttribute getAttribute()
   {
     return attribute;
   }

@@ -98,7 +98,6 @@ import fr.esrf.tangoatk.widget.util.JImage;
 import fr.esrf.tangoatk.widget.util.JImageJ;
 import fr.esrf.tangoatk.widget.util.JSmoothLabel;
 import fr.esrf.tangoatk.widget.util.JTableRow;
-import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
 import fr.esrf.tangoatk.widget.util.chart.AxisPanel;
 import fr.esrf.tangoatk.widget.util.chart.CfFileReader;
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
@@ -2030,7 +2029,21 @@ protected INumberImage model;
 
     int ok = JOptionPane.YES_OPTION;
     JFileChooser chooser = new JFileChooser(".");
-    chooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
+    chooser.addChoosableFileFilter(new FileFilter() {
+        public boolean accept(File f) {
+            if (f.isDirectory()) {
+                return true;
+            }
+            String extension = getExtension(f);
+            if (extension != null && extension.equals("txt"))
+                return true;
+            return false;
+        }
+
+        public String getDescription() {
+            return "text files ";
+        }
+    });
     if(lastConfig.length()>0)
       chooser.setSelectedFile(new File(lastConfig));
     int returnVal = chooser.showSaveDialog(this);
@@ -2038,7 +2051,7 @@ protected INumberImage model;
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       File f = chooser.getSelectedFile();
       if (f != null) {
-        if (MultiExtFileFilter.getExtension(f) == null) {
+        if (getExtension(f) == null) {
           f = new File(f.getAbsolutePath() + ".txt");
         }
         if (f.exists())
@@ -2056,7 +2069,21 @@ protected INumberImage model;
 
     int ok = JOptionPane.YES_OPTION;
     JFileChooser chooser = new JFileChooser();
-    chooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
+    chooser.addChoosableFileFilter(new FileFilter() {
+        public boolean accept(File f) {
+            if (f.isDirectory()) {
+                return true;
+            }
+            String extension = getExtension(f);
+            if (extension != null && extension.equals("txt"))
+                return true;
+            return false;
+        }
+
+        public String getDescription() {
+            return "text files ";
+        }
+    });
     if(lastConfig.length()>0)
       chooser.setSelectedFile(new File(lastConfig));
     int returnVal = chooser.showOpenDialog(this);
@@ -3071,6 +3098,24 @@ protected INumberImage model;
 
   }
 
+  /**
+   * <code>getExtension</code> returns the extension of a given file,
+   * that is the part after the last `.' in the filename.
+   *
+   * @param f a <code>File</code> value
+   * @return a <code>String</code> value
+   */
+  protected String getExtension(File f) {
+	String ext = null;
+	String s = f.getName();
+	int i = s.lastIndexOf('.');
+	
+	if (i > 0 &&  i < s.length() - 1) {
+	    ext = s.substring(i+1).toLowerCase();
+	}
+	return ext;
+  }
+
   // ----------------------------------------------------------
   // Action Listener
   // ----------------------------------------------------------
@@ -3868,7 +3913,7 @@ protected INumberImage model;
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("edf"))
           return true;
         return false;
@@ -3898,7 +3943,7 @@ protected INumberImage model;
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("jpg"))
           return true;
         return false;
@@ -3928,7 +3973,7 @@ protected INumberImage model;
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("jpg"))
           return true;
         return false;
@@ -3958,7 +4003,7 @@ protected INumberImage model;
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("png"))
           return true;
         return false;
@@ -3988,7 +4033,7 @@ protected INumberImage model;
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("png"))
           return true;
         return false;
@@ -4039,17 +4084,17 @@ protected INumberImage model;
         FileFilter filter = chooser.getFileFilter();
 
         if (edfFilter.equals(filter)) {
-          if (MultiExtFileFilter.getExtension(f) == null || !MultiExtFileFilter.getExtension(f).equalsIgnoreCase("edf")) {
+          if (getExtension(f) == null || !getExtension(f).equalsIgnoreCase("edf")) {
             f = new File(f.getAbsolutePath() + ".edf");
           }
           lastFileFilter = filter;
         } else if (jpgFilter.equals(filter) || jpg8Filter.equals(filter)) {
-          if (MultiExtFileFilter.getExtension(f) == null || !MultiExtFileFilter.getExtension(f).equalsIgnoreCase("jpg")) {
+          if (getExtension(f) == null || !getExtension(f).equalsIgnoreCase("jpg")) {
             f = new File(f.getAbsolutePath() + ".jpg");
           }
           lastFileFilter = filter;
         } else if (pngFilter.equals(filter) || png8Filter.equals(filter)) {
-          if (MultiExtFileFilter.getExtension(f) == null || !MultiExtFileFilter.getExtension(f).equalsIgnoreCase("png")) {
+          if (getExtension(f) == null || !getExtension(f).equalsIgnoreCase("png")) {
             f = new File(f.getAbsolutePath() + ".png");
           }
           lastFileFilter = filter;
@@ -4349,6 +4394,7 @@ protected INumberImage model;
     if (logValues != this.logValues) {
       synchronized(this) {
         if (model != null) {
+          try {
             double[][] values = model.getValue();
             if (logValues) {
               setData( computeLog(values) );
@@ -4356,6 +4402,10 @@ protected INumberImage model;
             else {
               setData(values);
             }
+          }
+          catch (DevFailed e) {
+            setData(null);
+          }
         }
       }
     }

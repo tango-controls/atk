@@ -502,11 +502,9 @@ public class AnyCommandViewer extends JPanel
     public static void main(String args[]) throws Exception {
 	fr.esrf.tangoatk.core.CommandList commandlist =
 	    new fr.esrf.tangoatk.core.CommandList();
-	ICommand  ic = (ICommand) commandlist.add("fp/test/1/DevVarCharArray");
+	commandlist.add("eas/test-api/1/IOString");
 	AnyCommandViewer anyCommandViewer = new AnyCommandViewer();
-        anyCommandViewer.initialize(ic);
-
-	//anyCommandViewer.setModel((ICommand)commandlist.get(0));
+	anyCommandViewer.setModel((ICommand)commandlist.get(0));
 	JFrame jframe = new JFrame();
 	jframe.getContentPane().add(anyCommandViewer);
 	jframe.pack();

@@ -142,7 +142,7 @@ public class JDCreationMenu implements ActionListener {
     objectToolPolylineBtn = JDUtils.createIconButton("jdraw_polyline",false,"Create a polyline",this);
     objectToolLabelBtn = JDUtils.createIconButton("jdraw_label",false,"Create a label",this);
     objectToolSplineBtn = JDUtils.createIconButton("jdraw_spline",false,"Create a spline",this);
-    objectToolImageBtn = JDUtils.createIconButton("jdraw_image",false,"Insert an image",this);
+    objectToolImageBtn = JDUtils.createIconButton("jdraw_image",false,"Create an image",this);
     objectToolAxisBtn = JDUtils.createIconButton("jdraw_axis",false,"Create an axis",this);
     objectToolBarBtn = JDUtils.createIconButton("jdraw_bar",false,"Create a bar",this);
     objectToolSliderBtn = JDUtils.createIconButton("jdraw_slider",false,"Create a slider",this);
