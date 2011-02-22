@@ -39,10 +39,8 @@ import fr.esrf.TangoApi.*;
 import fr.esrf.TangoApi.events.*;
 import fr.esrf.tangoatk.util.AtkTimer;
 
-public abstract class AAttribute implements IAttribute, 
-        ITangoPeriodicListener, ITangoChangeListener, ITangoAttConfigListener
+public abstract class AAttribute implements IAttribute, ITangoPeriodicListener, ITangoChangeListener
 {
-  static final String    RAW_IMAGE_FORMAT = "RawImage";
   // CONFIG and attr info
   transient protected AttributeInfoEx config;
   protected PropertyStorage propertyStorage = null;
@@ -67,7 +65,6 @@ public abstract class AAttribute implements IAttribute,
   private  boolean  hasEvents=false;
   
   protected boolean attPropertiesLoaded=false;
-  private  boolean  shouldDoEvent=true;
 
 
   private static String VERSION = "$Id$";
@@ -105,13 +102,13 @@ public abstract class AAttribute implements IAttribute,
       setDevice(d);
       nameSansDevice = name;
       setName(device + "/" + name);
-      shouldDoEvent = doEvent;
       setConfiguration(config);
 
       if (doEvent && d.doesEvent())
       {
 	 subscribeAttributeEvent();
       }
+
 
       if (!hasEvents)
       {
@@ -125,39 +122,6 @@ public abstract class AAttribute implements IAttribute,
 	 } // end of try-catch
       }
   }
-
-  protected void connectionlessInit(Device d, String name, boolean doEvent)
-  {
-      timer = timer.getInstance();
-      propertyStorage = new PropertyStorage();
-
-      setDevice(d);
-      nameSansDevice = name;
-      setName(device + "/" + name);
-      shouldDoEvent = doEvent;
-  }
-
-
-  protected void reconnectAtt()
-  {
-      getDevice().reconnect();
-      if (!getDevice().isConnected()) return;
-      try
-      {
-          AttributeInfoEx configAtt = getDevice().getAttributeInfo(getNameSansDevice());
-          setConfiguration(configAtt);
-      }
-      catch (DevFailed ex)
-      {
-          return;
-      }
-
-      if (shouldDoEvent && getDevice().doesEvent())
-      {
-	 subscribeAttributeEvent();
-      }
-  }
-
 
 
   private void subscribeAttributeEvent()
@@ -181,7 +145,8 @@ public abstract class AAttribute implements IAttribute,
       {
           evtAdapt.addTangoChangeListener(this, nameSansDevice, filters);
 	  hasEvents = true;
-          trace(DeviceFactory.TRACE_SUCCESS,"AAttribute.subscribeAttributeChangeEvent("+name+") ok:",t0);
+          trace(DeviceFactory.TRACE_SUCCESS,"AATtribute.subscribeAttributeChangeEvent("+name+") ok:",t0);
+          return;
       }
       catch (DevFailed dfe)
       {
@@ -192,82 +157,22 @@ public abstract class AAttribute implements IAttribute,
 	     {
         	evtAdapt.addTangoPeriodicListener(this, nameSansDevice, filters);
 	        hasEvents = true;
-        	trace(DeviceFactory.TRACE_SUCCESS,"AAttribute.subscribeAttributePeriodicEvent("+name+") ok:",t0);
+        	trace(DeviceFactory.TRACE_SUCCESS,"AATtribute.subscribeAttributePeriodicEvent("+name+") ok:",t0);
+		return;
 	     }
 	     catch (DevFailed dfe2)
 	     {
 		hasEvents = false;
         	eventError = dfe2;
         	trace(DeviceFactory.TRACE_FAIL,"AATtribute.subscribeAttributePeriodicEvent("+name+") failed:",t0);
+		return;
 	     }
 	  }
-          else
-          {
-              hasEvents = false;
-              eventError = dfe;
-              trace(DeviceFactory.TRACE_FAIL, "AAttribute.subscribeAttributeEvent(" + name + ") failed:", t0);
-          }
+	  hasEvents = false;
+          eventError = dfe;
+          trace(DeviceFactory.TRACE_FAIL,"AATtribute.subscribeAttributeEvent("+name+") failed:",t0);
+	  return;
       }
-
-      try
-      {
-          evtAdapt.addTangoAttConfigListener(this, nameSansDevice, filters);
-          trace(DeviceFactory.TRACE_SUCCESS,"AAttribute.subscribeAttributeConfigEvent("+name+") ok:",t0);
-          return;
-      }
-      catch (DevFailed dfe)
-      {
-          trace(DeviceFactory.TRACE_FAIL, "AAttribute.subscribeAttributeConfigEvent(" + name + ") failed:", t0);
-      }
-  }
-
-
-  // Implement the method of ITangoAttConfigListener
-  public void attConfig(TangoAttConfigEvent  evt)
-  {
-      periodicCount++;
-      AttributeInfoEx     attInfo=null;
-      long t0 = System.currentTimeMillis();
-
-      trace(DeviceFactory.TRACE_ATT_CONFIG_EVENT, "AAttribute.attConfig method called for " + getName(), t0);
-
-      try
-      {
-          attInfo = evt.getValue();
-          trace(DeviceFactory.TRACE_ATT_CONFIG_EVENT, "AAttribute.attConfigEvt.getValue(" + getName() + ") success", t0);
-
-          // update the attribute properties
-          if (attInfo != null)
-          {
-              updateConfiguration(attInfo); // To update the att config and fire the property change events.
-          }
-      }
-      catch (DevFailed  dfe)
-      {
-          trace(DeviceFactory.TRACE_ATT_CONFIG_EVENT, "AAttribute.attConfigEvt.getValue(" + getName() + ") failed, caught DevFailed", t0);
-          if (dfe.errors[0].reason.equals("API_EventTimeout")) //heartbeat error
-	  {
-              trace(DeviceFactory.TRACE_ATT_CONFIG_EVENT, "AAttribute.attConfigEvt.getValue(" + getName() + ") failed, got heartbeat error", t0);
-
-              // Fire error event
-              //readAttError(dfe.getMessage(), new AttributeReadException(dfe));
-	  }
-	  else // For the moment the behaviour for all DevFailed is the same
-	  {
-              trace(DeviceFactory.TRACE_ATT_CONFIG_EVENT, "AAttribute.attConfigEvt.getValue(" + getName() + ") failed, got other DevFailed error", t0);
-
-              // Fire error event
-              //readAttError(dfe.getMessage(), new AttributeReadException(dfe));
-	  }
-      }
-      catch (Exception e) // Code failure
-      {
-          trace(DeviceFactory.TRACE_ATT_CONFIG_EVENT, "AAttribute.attConfigEvt.getValue(" + getName() + ") failed, caught Exception, code failure", t0);
-
-	  System.out.println("AAttribute.attConfigEvt.getValue() Exception caught ------------------------------");
-	  e.printStackTrace();
-	  System.out.println("AAttribute.attConfigEvt.getValue()------------------------------------------------");
-      } // end of catch
   }
 
   public boolean hasEvents()
@@ -379,7 +284,13 @@ public abstract class AAttribute implements IAttribute,
 	int dataType = config.data_type;
 	return dataType;
     }
-      
+    
+    public AttrDataFormat getTangoDataFormat()
+    {
+    AttrDataFormat dataFormat = config.data_format;
+    return dataFormat;
+    }
+  
 
   public void storeConfig() {
 
@@ -612,14 +523,6 @@ public abstract class AAttribute implements IAttribute,
   }
 
 
-
-    private void updateConfiguration(AttributeInfoEx newConfig)
-    {
-        setConfiguration(newConfig);
-        propertyStorage.refreshProperties();
-    }
-
-
   protected void setConfiguration(AttributeInfoEx c) {
       timer.startTimer(Thread.currentThread());
       config = c;
@@ -731,21 +634,6 @@ public abstract class AAttribute implements IAttribute,
     setState();
     return attribute;
   }
-
-
-    /**
-     * Method used by optimized AttributePolledList (one read per device)
-     * @param attValue Attribute value
-     */
-    abstract public void dispatch(DeviceAttribute attValue);
-
-    /**
-     * Method used by optimized AttributePolledList (one read per device)
-     * @param e Attribute arror
-     */
-    abstract public void dispatchError(DevFailed e);
-
-
 
   protected void setState() throws DevFailed
   {

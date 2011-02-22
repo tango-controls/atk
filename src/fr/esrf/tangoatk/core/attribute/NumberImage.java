@@ -167,7 +167,7 @@ public class NumberImage extends ANumber implements INumberImage
   }
 
   public String[][] extract() throws DevFailed {
-    return getNumberImageHelper().getImageValueAsString(readValueFromNetwork());
+    return getNumberImageHelper().getImageValue(readValueFromNetwork());
 
   }
 

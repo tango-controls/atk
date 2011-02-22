@@ -26,25 +26,25 @@
 
 package fr.esrf.tangoatk.core.attribute;
 
+import fr.esrf.tangoatk.core.*;
 
 import fr.esrf.TangoApi.DeviceAttribute;
-import fr.esrf.tangoatk.core.EventSupport;
 
 abstract class NumberAttributeHelper implements java.io.Serializable {
-  AAttribute attribute;
+  IAttribute attribute;
   transient DeviceAttribute deviceAttribute;
   EventSupport propChanges;
 
-  public void setAttribute(AAttribute attribute) {
+  public void setAttribute(IAttribute attribute) {
     this.attribute = attribute;
   }
 
-  void init(AAttribute attribute) {
+  void init(IAttribute attribute) {
     setAttribute(attribute);
-    propChanges = attribute.getPropChanges();
+    propChanges = ((AAttribute) attribute).getPropChanges();
   }
 
-  public AAttribute getAttribute() {
+  public IAttribute getAttribute() {
     return attribute;
   }
 
@@ -58,12 +58,11 @@ abstract class NumberAttributeHelper implements java.io.Serializable {
   }
 
   public static double[] flatten(double[][] src) {
-    int lineSize = src[0].length;
     int size = src.length * src[0].length;
     double[] dst = new double[size];
 
     for (int i = 0; i < src.length; i++)
-    	System.arraycopy(src[i], 0, dst, i * lineSize, lineSize);
+      System.arraycopy(src[i], 0, dst, i * src.length, src.length);
     return dst;
   }
 

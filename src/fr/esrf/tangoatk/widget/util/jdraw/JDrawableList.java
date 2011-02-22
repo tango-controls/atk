@@ -44,8 +44,6 @@ public class JDrawableList {
       drawableList.add("fr.esrf.tangoatk.widget.attribute.BooleanScalarCheckBoxViewer");
       drawableList.add("fr.esrf.tangoatk.widget.attribute.NumberScalarComboEditor");
       drawableList.add("fr.esrf.tangoatk.widget.attribute.StringScalarComboEditor");
-      drawableList.add("fr.esrf.tangoatk.widget.attribute.EnumScalarComboEditor");
-      drawableList.add("fr.esrf.tangoatk.widget.attribute.SimpleEnumScalarViewer");
 
       inited=true;
     }

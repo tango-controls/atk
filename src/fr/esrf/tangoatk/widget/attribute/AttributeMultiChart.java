@@ -79,7 +79,6 @@ import fr.esrf.tangoatk.core.INumberScalar;
 import fr.esrf.tangoatk.core.INumberScalarListener;
 import fr.esrf.tangoatk.core.NumberScalarEvent;
 import fr.esrf.tangoatk.widget.util.ATKConstant;
-import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
 import fr.esrf.tangoatk.widget.util.chart.CfFileReader;
 import fr.esrf.tangoatk.widget.util.chart.DataList;
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
@@ -1633,7 +1632,21 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
         boolean flag = false;
         JFileChooser jfilechooser = new JFileChooser();
         jfilechooser.setSelectedFile(new File(lastConfig));
-        jfilechooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
+        jfilechooser.addChoosableFileFilter(new FileFilter() {
+            public boolean accept(File f) {
+                if (f.isDirectory()) {
+                    return true;
+                }
+                String extension = getExtension(f);
+                if (extension != null && extension.equals("txt"))
+                    return true;
+                return false;
+            }
+
+            public String getDescription() {
+                return "text files ";
+            }
+        });
         int i = jfilechooser.showOpenDialog(this.getParent());
         if (i == JFileChooser.APPROVE_OPTION) {
             File file = jfilechooser.getSelectedFile();
@@ -1651,12 +1664,26 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
     protected void savePerformed() {
         int i = 0;
         JFileChooser jfilechooser = new JFileChooser(".");
-        jfilechooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
+        jfilechooser.addChoosableFileFilter(new FileFilter() {
+            public boolean accept(File f) {
+                if (f.isDirectory()) {
+                    return true;
+                }
+                String extension = getExtension(f);
+                if (extension != null && extension.equals("txt"))
+                    return true;
+                return false;
+            }
+
+            public String getDescription() {
+                return "text files ";
+            }
+        });
         jfilechooser.setSelectedFile(new File(lastConfig));
         int j = jfilechooser.showSaveDialog(this.getParent());
         if (j == JFileChooser.APPROVE_OPTION) {
             File file = jfilechooser.getSelectedFile();
-            if (MultiExtFileFilter.getExtension(file) == null) {
+            if (getExtension(file) == null) {
                 file = new File(file.getAbsolutePath() + ".txt");
             }
             if (file != null) {
@@ -1671,6 +1698,24 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
                 }
             }
         }
+    }
+
+    /**
+     * <code>getExtension</code> returns the extension of a given file, that
+     * is the part after the last `.' in the filename.
+     * 
+     * @param f
+     *            a <code>File</code> value
+     * @return a <code>String</code> value
+     */
+    public String getExtension(File f) {
+        String ext = null;
+        String s = f.getName();
+        int i = s.lastIndexOf('.');
+        if (i > 0 && i < s.length() - 1) {
+            ext = s.substring(i + 1).toLowerCase();
+        }
+        return ext;
     }
 
     /**

@@ -47,7 +47,6 @@ import fr.esrf.tangoatk.core.util.AttrDualSpectrum;
 import fr.esrf.tangoatk.core.util.INonAttrNumberSpectrum;
 import fr.esrf.tangoatk.core.util.INonAttrSpectrumListener;
 import fr.esrf.tangoatk.core.util.NonAttrNumberSpectrumEvent;
-import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
 import fr.esrf.tangoatk.widget.util.chart.CfFileReader;
 import fr.esrf.tangoatk.widget.util.chart.IJLChartActionListener;
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
@@ -511,7 +510,23 @@ public class NonAttrNumberSpectrumViewer extends JLChart implements
     {
         int ok = JOptionPane.YES_OPTION;
         JFileChooser chooser = new JFileChooser();
-        chooser.addChoosableFileFilter( new MultiExtFileFilter("Text files", "txt"));
+        chooser.addChoosableFileFilter( new FileFilter() {
+            public boolean accept (File f)
+            {
+                if ( f.isDirectory() )
+                {
+                    return true;
+                }
+                String extension = getExtension( f );
+                if ( extension != null && extension.equals( "txt" ) ) return true;
+                return false;
+            }
+
+            public String getDescription ()
+            {
+                return "text files ";
+            }
+        } );
         if ( lastConfig.length() > 0 ) chooser.setSelectedFile( new File( lastConfig ) );
         int returnVal = chooser.showOpenDialog( null );
         if ( returnVal == JFileChooser.APPROVE_OPTION )
@@ -534,6 +549,26 @@ public class NonAttrNumberSpectrumViewer extends JLChart implements
         }
     }
 
+    /**
+     * <code>getExtension</code> returns the extension of a given file, that
+     * is the part after the last `.' in the filename.
+     * 
+     * @param f
+     *            a <code>File</code> value
+     * @return a <code>String</code> value
+     */
+    protected String getExtension (File f)
+    {
+        String ext = null;
+        String s = f.getName();
+        int i = s.lastIndexOf( '.' );
+        if ( i > 0 && i < s.length() - 1 )
+        {
+            ext = s.substring( i + 1 ).toLowerCase();
+        }
+        return ext;
+    }
+
     public void actionPerformed(JLChartActionEvent evt)
     {
         if (evt.getName().equals("Load Settings"))
@@ -550,7 +585,23 @@ public class NonAttrNumberSpectrumViewer extends JLChart implements
     {
         int ok = JOptionPane.YES_OPTION;
         JFileChooser chooser = new JFileChooser( "." );
-        chooser.addChoosableFileFilter( new MultiExtFileFilter("Text files", "txt"));
+        chooser.addChoosableFileFilter( new FileFilter() {
+            public boolean accept (File f)
+            {
+                if ( f.isDirectory() )
+                {
+                    return true;
+                }
+                String extension = getExtension( f );
+                if ( extension != null && extension.equals( "txt" ) ) return true;
+                return false;
+            }
+
+            public String getDescription ()
+            {
+                return "text files ";
+            }
+        } );
         if ( lastConfig.length() > 0 ) chooser.setSelectedFile( new File(
                 lastConfig ) );
         int returnVal = chooser.showSaveDialog( null );
@@ -559,7 +610,7 @@ public class NonAttrNumberSpectrumViewer extends JLChart implements
             File f = chooser.getSelectedFile();
             if ( f != null )
             {
-                if ( MultiExtFileFilter.getExtension( f ) == null )
+                if ( getExtension( f ) == null )
                 {
                     f = new File( f.getAbsolutePath() + ".txt" );
                 }

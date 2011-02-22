@@ -39,17 +39,8 @@ public interface INumberSpectrum extends INumber
     public void removeSpectrumListener(ISpectrumListener l);
 
     public double[] getSpectrumValue();
-    public double[] getSpectrumDeviceValue();
-    public double[] getSpectrumStandardValue();
     
-    public double[] getSpectrumSetPoint();
-    public double[] getSpectrumDeviceSetPoint();
-    public double[] getSpectrumStandardSetPoint();
-    
-    public void setValue(double[] d);
-
-    public INumberSpectrumHistory[] getNumberSpectrumHistory();
-    public INumberSpectrumHistory[] getNumberSpectrumDeviceHistory();
+    public void setValue(double[] d) throws AttributeSetException;
     
     public boolean hasMinxMaxxAttributes();
     

@@ -34,9 +34,6 @@ import fr.esrf.TangoApi.events.*;
 public class NumberSpectrum extends ANumber  implements INumberSpectrum
 {
   double[] spectrumValue;
-  double[] spectrumSetPointValue;
-  double[] devSpectrumValue;
-  double[] devSpectrumSetPointValue;
   boolean  hasXminmaxProperties = false;
   boolean  hasXminmaxAttributes = false;
   String   XminAttName = null;
@@ -82,7 +79,8 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
     try {
       insert(d);
       writeAtt();
-      refresh();
+      getNumberSpectrumHelper().fireSpectrumValueChanged(d,
+        System.currentTimeMillis());
     } catch (DevFailed df) {
       setAttError("Couldn't set value", new AttributeSetException(df));
     }
@@ -109,12 +107,8 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
       try {
 
 	// Retreive the value from the device
-        DeviceAttribute     da = readValueFromNetwork();
-	spectrumValue = getNumberSpectrumHelper().getNumberSpectrumDisplayValue(da); //convert to display unit
-	spectrumSetPointValue = getNumberSpectrumHelper().getNumberSpectrumDisplaySetPoint(da); //convert to display unit
-	devSpectrumValue = getNumberSpectrumHelper().getNumberSpectrumValue(da); 
-	devSpectrumSetPointValue = getNumberSpectrumHelper().getNumberSpectrumSetPoint(da);
-        timeStamp = da.getTimeValMillisSec();
+	spectrumValue = getNumberSpectrumHelper().getNumberSpectrumDisplayValue(readValueFromNetwork()); //convert to display unit
+
         // Fire valueChanged
         getNumberSpectrumHelper().fireSpectrumValueChanged(spectrumValue, timeStamp);
 
@@ -122,9 +116,6 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
 
         // Tango error
         spectrumValue = null;
-        spectrumSetPointValue = null;
-        devSpectrumValue = null;
-        devSpectrumSetPointValue = null;
 
         // Fire error event
         readAttError(e.getMessage(), new AttributeReadException(e));
@@ -135,9 +126,6 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
 
       // Code failure
       spectrumValue = null;
-      spectrumSetPointValue = null;
-      devSpectrumValue = null;
-      devSpectrumSetPointValue = null;
 
       System.out.println("NumberSpectrum.refresh() Exception caught ------------------------------");
       e.printStackTrace();
@@ -163,9 +151,6 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
 
         // Retreive the value from the device
         spectrumValue = getNumberSpectrumHelper().getNumberSpectrumDisplayValue(attValue); //convert to display unit
-	spectrumSetPointValue = getNumberSpectrumHelper().getNumberSpectrumDisplaySetPoint(attValue); //convert to display unit
-	devSpectrumValue = getNumberSpectrumHelper().getNumberSpectrumValue(attValue); 
-	devSpectrumSetPointValue = getNumberSpectrumHelper().getNumberSpectrumSetPoint(attValue);
 
         // Fire valueChanged
         getNumberSpectrumHelper().fireSpectrumValueChanged(spectrumValue, timeStamp);
@@ -180,9 +165,6 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
 
       // Code failure
       spectrumValue = null;
-      spectrumSetPointValue = null;
-      devSpectrumValue = null;
-      devSpectrumSetPointValue = null;
 
       System.out.println("NumberSpectrum.dispatch() Exception caught ------------------------------");
       e.printStackTrace();
@@ -196,125 +178,14 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
 
     // Tango error
     spectrumValue = null;
-    spectrumSetPointValue = null;
-    devSpectrumValue = null;
-    devSpectrumSetPointValue = null;
 
     // Fire error event
     readAttError(e.getMessage(), new AttributeReadException(e));
 
   }
 
-
-
-  // getSpectrumValue returns the attribute value in display_unit
-  public double[] getSpectrumValue()
-  {
-      return spectrumValue;
-  }
-  
-  // getSpectrumDeviceValue returns the attribute value in the device server unit
-  public double[] getSpectrumDeviceValue()
-  {
-      return devSpectrumValue;      
-  }
-  
-  // getSpectrumStandardValue returns the attribute value in the standard unit
-  public double[] getSpectrumStandardValue()
-  {
-        double[]  stdVal;
-        double    stdUnitFactor = 1.0;
-        	
-	stdUnitFactor = getStandardUnitFactor();
-	      
-	if (stdUnitFactor <= 0)
-	   stdUnitFactor = 1.0;
-	   	   
-	if (stdUnitFactor == 1.0)
-	   return devSpectrumValue;
-        
-        if (devSpectrumValue == null) return null;
-
-        stdVal = new double[devSpectrumValue.length];
-        for (int i=0; i < devSpectrumValue.length; i++)
-            stdVal[i] = devSpectrumValue[i] * stdUnitFactor; //return the value in the standard unit
-	return stdVal;      
-  }
-    
-  // getSpectrumSetPoint returns the attribute's setpoint value in display_unit
-  public double[] getSpectrumSetPoint()
-  {
-      return spectrumSetPointValue;
-  }
-  
-  // getSpectrumDeviceSetPoint returns the attribute's setpoint value in the device server unit
-  public double[] getSpectrumDeviceSetPoint()
-  {
-      return devSpectrumSetPointValue;
-  }
-  
-  // getSpectrumStandardSetPoint returns the attribute's setpoint value in the standard unit
-  public double[] getSpectrumStandardSetPoint()
-  {
-        double[]  stdVal;
-        double    stdUnitFactor = 1.0;
-	
-	stdUnitFactor = getStandardUnitFactor();
-	      
-	if (stdUnitFactor <= 0)
-	   stdUnitFactor = 1.0;
-	   	   
-	if (stdUnitFactor == 1.0)
-	   return devSpectrumSetPointValue;
-        
-        if (devSpectrumSetPointValue == null) return null;
-
-        stdVal = new double[devSpectrumSetPointValue.length];
-        for (int i=0; i < devSpectrumSetPointValue.length; i++)
-            stdVal[i] = devSpectrumSetPointValue[i] * stdUnitFactor; //return the value in the standard unit
-	return stdVal;            
-  }
-
-  public INumberSpectrumHistory[] getNumberSpectrumHistory() {
-    NumberSpectrumHistory[] attHist;
-
-    attHist = null;
-    try {
-      attHist =
-        (NumberSpectrumHistory[]) getNumberSpectrumHelper().getSpectrumAttHistory(readAttHistoryFromNetwork());
-    } catch (DevFailed e) {
-      readAttError(e.getMessage(), new AttributeReadException(e));
-      attHist = null;
-    } catch (Exception e) {
-      readAttError(e.getMessage(), e);
-      attHist = null;
-    } // end of catch
-
-    return attHist;
-  }
-
-
-  public INumberSpectrumHistory[] getNumberSpectrumDeviceHistory()
-  {
-     NumberSpectrumHistory[] attHist;
-
-     attHist = null;
-     try
-     {
-        attHist =
-            (NumberSpectrumHistory[]) getNumberSpectrumHelper().getSpectrumDeviceAttHistory(readAttHistoryFromNetwork());
-     }
-     catch (DevFailed e)
-     {
-        readAttError(e.getMessage(), new AttributeReadException(e));
-        attHist = null;
-     } catch (Exception e)
-     {
-        readAttError(e.getMessage(), e);
-        attHist = null;
-     } // end of catch
-
-     return attHist;
+  public double[] getSpectrumValue() {
+    return spectrumValue;
   }
 
   // Implement the method of ITangoPeriodicListener
@@ -338,9 +209,6 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
               trace(DeviceFactory.TRACE_PERIODIC_EVENT, "NumberSpectrum.periodicEvt.getValue(" + getName() + ") failed, got heartbeat error", t0);
               // Tango error
               spectrumValue = null;
-              spectrumSetPointValue = null;
-              devSpectrumValue = null;
-              devSpectrumSetPointValue = null;
 
               // Fire error event
               readAttError(dfe.getMessage(), new AttributeReadException(dfe));
@@ -350,9 +218,6 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
               trace(DeviceFactory.TRACE_PERIODIC_EVENT, "NumberSpectrum.periodicEvt.getValue(" + getName() + ") failed, got other error", t0);
               // Tango error
               spectrumValue = null;
-              spectrumSetPointValue = null;
-              devSpectrumValue = null;
-              devSpectrumSetPointValue = null;
 
               // Fire error event
               readAttError(dfe.getMessage(), new AttributeReadException(dfe));
@@ -362,10 +227,7 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
       catch (Exception e) // Code failure
       {
           trace(DeviceFactory.TRACE_PERIODIC_EVENT, "NumberSpectrum.periodicEvt.getValue(" + getName() + ") failed, caught Exception, code failure", t0);
-          spectrumValue = null;
-          spectrumSetPointValue = null;
-          devSpectrumValue = null;
-          devSpectrumSetPointValue = null;
+	  spectrumValue = null;
 
 	  System.out.println("NumberSpectrum.periodic.getValue() Exception caught ------------------------------");
 	  e.printStackTrace();
@@ -384,9 +246,6 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
             timeStamp = da.getTimeValMillisSec();
             // Retreive the value from the device
             spectrumValue = getNumberSpectrumHelper().getNumberSpectrumDisplayValue(da); //convert to display unit
-            spectrumSetPointValue = getNumberSpectrumHelper().getNumberSpectrumDisplaySetPoint(da); //convert to display unit
-            devSpectrumValue = getNumberSpectrumHelper().getNumberSpectrumValue(da); 
-            devSpectrumSetPointValue = getNumberSpectrumHelper().getNumberSpectrumSetPoint(da);
 
             // Fire valueChanged
             getNumberSpectrumHelper().fireSpectrumValueChanged(spectrumValue, timeStamp);
@@ -394,18 +253,12 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
 	 catch (DevFailed dfe)
 	 {
             spectrumValue = null;
-            spectrumSetPointValue = null;
-            devSpectrumValue = null;
-            devSpectrumSetPointValue = null;
             // Fire error event
             readAttError(dfe.getMessage(), new AttributeReadException(dfe));
 	 }
 	 catch (Exception e) // Code failure
 	 {
             spectrumValue = null;
-            spectrumSetPointValue = null;
-            devSpectrumValue = null;
-            devSpectrumSetPointValue = null;
             System.out.println("NumberSpectrum.periodic.getNumberSpectrumDisplayValue() Exception caught ------------------------------");
             e.printStackTrace();
             System.out.println("NumberSpectrum.periodic.getNumberSpectrumDisplayValue()------------------------------------------------");
@@ -435,9 +288,6 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
               trace(DeviceFactory.TRACE_CHANGE_EVENT, "NumberSpectrum.changeEvt.getValue(" + getName() + ") failed, got heartbeat error", t0);
               // Tango error
               spectrumValue = null;
-              spectrumSetPointValue = null;
-              devSpectrumValue = null;
-              devSpectrumSetPointValue = null;
 
               // Fire error event
               readAttError(dfe.getMessage(), new AttributeReadException(dfe));
@@ -447,9 +297,6 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
               trace(DeviceFactory.TRACE_CHANGE_EVENT, "NumberSpectrum.changeEvt.getValue(" + getName() + ") failed, got other error", t0);
               // Tango error
               spectrumValue = null;
-              spectrumSetPointValue = null;
-              devSpectrumValue = null;
-              devSpectrumSetPointValue = null;
 
               // Fire error event
               readAttError(dfe.getMessage(), new AttributeReadException(dfe));
@@ -459,10 +306,7 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
       catch (Exception e) // Code failure
       {
           trace(DeviceFactory.TRACE_CHANGE_EVENT, "NumberSpectrum.changeEvt.getValue(" + getName() + ") failed, caught Exception, code failure", t0);
-          spectrumValue = null;
-          spectrumSetPointValue = null;
-          devSpectrumValue = null;
-          devSpectrumSetPointValue = null;
+	  spectrumValue = null;
 
 	  System.out.println("NumberSpectrum.change.getValue() Exception caught ------------------------------");
 	  e.printStackTrace();
@@ -481,9 +325,6 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
             timeStamp = da.getTimeValMillisSec();
             // Retreive the value from the device
             spectrumValue = getNumberSpectrumHelper().getNumberSpectrumDisplayValue(da); //convert to display unit
-            spectrumSetPointValue = getNumberSpectrumHelper().getNumberSpectrumDisplaySetPoint(da); //convert to display unit
-            devSpectrumValue = getNumberSpectrumHelper().getNumberSpectrumValue(da); 
-            devSpectrumSetPointValue = getNumberSpectrumHelper().getNumberSpectrumSetPoint(da);
 
             // Fire valueChanged
             getNumberSpectrumHelper().fireSpectrumValueChanged(spectrumValue, timeStamp);
@@ -491,18 +332,12 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
 	 catch (DevFailed dfe)
 	 {
             spectrumValue = null;
-            spectrumSetPointValue = null;
-            devSpectrumValue = null;
-            devSpectrumSetPointValue = null;
             // Fire error event
             readAttError(dfe.getMessage(), new AttributeReadException(dfe));
 	 }
 	 catch (Exception e) // Code failure
 	 {
             spectrumValue = null;
-            spectrumSetPointValue = null;
-            devSpectrumValue = null;
-            devSpectrumSetPointValue = null;
             System.out.println("NumberSpectrum.change.getNumberSpectrumDisplayValue() Exception caught ------------------------------");
             e.printStackTrace();
             System.out.println("NumberSpectrum.change.getNumberSpectrumDisplayValue()------------------------------------------------");

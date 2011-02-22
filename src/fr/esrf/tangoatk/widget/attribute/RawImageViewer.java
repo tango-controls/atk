@@ -1432,6 +1432,20 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
   }
 
+  private String getExtension(File f) {
+
+    String ext = null;
+    String s = f.getName();
+    int i = s.lastIndexOf('.');
+
+    if (i > 0 && i < s.length() - 1) {
+      ext = s.substring(i + 1).toLowerCase();
+    }
+
+    return ext;
+
+  }
+
   // Save a screenshot
   private void saveFile() {
 
@@ -1442,7 +1456,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("jpg"))
           return true;
         return false;
@@ -1458,7 +1472,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("jpg"))
           return true;
         return false;
@@ -1474,7 +1488,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("png"))
           return true;
         return false;
@@ -1490,7 +1504,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("png"))
           return true;
         return false;
@@ -1516,11 +1530,11 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
         FileFilter filter = chooser.getFileFilter();
 
         if (filter == jpgFilter || filter == jpg8Filter) {
-          if (MultiExtFileFilter.getExtension(f) == null || !MultiExtFileFilter.getExtension(f).equalsIgnoreCase("jpg")) {
+          if (getExtension(f) == null || !getExtension(f).equalsIgnoreCase("jpg")) {
             f = new File(f.getAbsolutePath() + ".jpg");
           }
         } else if (filter == pngFilter || filter == png8Filter) {
-          if (MultiExtFileFilter.getExtension(f) == null || !MultiExtFileFilter.getExtension(f).equalsIgnoreCase("png")) {
+          if (getExtension(f) == null || !getExtension(f).equalsIgnoreCase("png")) {
             f = new File(f.getAbsolutePath() + ".png");
           }
         } else {
@@ -2136,11 +2150,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
     try {
 
       IRawImage theAtt;
-      //theAtt = (IRawImage) attributeList.add("jlp/image/1/image");
-      //theAtt = (IRawImage) attributeList.add("et/jpeg/01/TheImage");
-      //theAtt = (IRawImage) attributeList.add("et/jpeg/01/AnotherImage");
-      //theAtt = (IRawImage) attributeList.add("et/jpeg/01/YetAnother");
-      theAtt = (IRawImage) attributeList.add("et/jpeg/01/TheRGBAattr");
+      theAtt = (IRawImage) attributeList.add("jlp/image/1/image");
       d.setModel(theAtt);
 
     } catch (Exception e) {

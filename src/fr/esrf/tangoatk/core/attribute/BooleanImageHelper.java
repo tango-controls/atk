@@ -37,24 +37,24 @@ import fr.esrf.TangoApi.*;
 
 class BooleanImageHelper implements java.io.Serializable
 {
-  AAttribute      attribute;
+  IAttribute      attribute;
   EventSupport    propChanges;
   boolean[][]     retval = new boolean[1][1];
 
-  public BooleanImageHelper(AAttribute attribute)
+  public BooleanImageHelper(IAttribute attribute)
   {
     init(attribute);
   }
 
 
-  void init(AAttribute attribute)
+  void init(IAttribute attribute)
   {
     setAttribute(attribute);
-    propChanges = attribute.getPropChanges();
+    propChanges = ((AAttribute) attribute).getPropChanges();
   }
   
   
-  public void setAttribute(AAttribute attribute)
+  public void setAttribute(IAttribute attribute)
   {
     this.attribute = attribute;
   }
@@ -86,18 +86,17 @@ class BooleanImageHelper implements java.io.Serializable
   {
       boolean[]   flatBool;
       flatBool = flatten(boolImage);
-      attribute.getAttribute().insert(flatBool, boolImage[0].length, boolImage.length);
+      attribute.getAttribute().insert(flatBool, boolImage.length, boolImage[0].length);
   }
   
   
   boolean[] flatten(boolean[][] src)
   {
-     int lineSize = src[0].length;
      int  size = src.length * src[0].length;
      boolean[] dst = new boolean[size];
 
      for (int i = 0; i < src.length; i++)
-       System.arraycopy(src[i], 0, dst, i * lineSize, lineSize);
+       System.arraycopy(src[i], 0, dst, i * src.length, src.length);
      return dst;
   }
 

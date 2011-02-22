@@ -3612,9 +3612,10 @@ public class JImageJ extends JPanel implements ActionListener {
                 case KeyEvent.VK_DOWN:
                 case KeyEvent.VK_LEFT:
                 case KeyEvent.VK_RIGHT:
-                    // TODO This test is necessary because of a focus problem.
-                	// A click outside the selected ROI makes it loose focus although it remains selected
-                    // (?! -> imp.getRoi() == null) so keyboard doesn't operate
+                    // TODO nécessaire à cause d'un problème de focus
+                    // si on clique à côté de la roi sélectionnée, elle reste
+                    // sélectionnée mais n'a plus le focus (?! -> imp.getRoi()
+                    // == null) du coup le clavier n'opère plus
                     if (bounds != null) {
                         int onMask = InputEvent.ALT_DOWN_MASK;
                         if ((e.getModifiersEx() & onMask) == onMask) {

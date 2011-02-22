@@ -31,30 +31,32 @@
 package fr.esrf.tangoatk.core.attribute;
 
 
+import java.util.*;
 
 import fr.esrf.tangoatk.core.*;
 
 import fr.esrf.TangoApi.*;
+import fr.esrf.Tango.AttrQuality;
 import fr.esrf.Tango.DevFailed;
 
 class BooleanScalarHelper implements java.io.Serializable
 {
-    AAttribute attribute;
+    IAttribute attribute;
     EventSupport propChanges;
 
-    public BooleanScalarHelper(AAttribute attribute)
+    public BooleanScalarHelper(IAttribute attribute)
     {
       init(attribute);
     }
 
-    void init(AAttribute attribute)
+    void init(IAttribute attribute)
     {
       setAttribute(attribute);
-      propChanges = attribute.getPropChanges();
+      propChanges = ((AAttribute) attribute).getPropChanges();
     }
 
 
-    public void setAttribute(AAttribute attribute)
+    public void setAttribute(IAttribute attribute)
     {
       this.attribute = attribute;
     }
