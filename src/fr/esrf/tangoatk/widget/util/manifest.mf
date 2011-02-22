@@ -1,3 +1,0 @@
-Name: fr/esrf/tangoatk/widget/util/JSmoothLabel.class
-Java-Bean: True
-
