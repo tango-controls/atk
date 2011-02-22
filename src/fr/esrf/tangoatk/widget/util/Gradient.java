@@ -47,16 +47,6 @@ public class Gradient {
   }
 
   /**
-   * Construct a gradient from a set of color and position
-   * @param pos Color positions
-   * @param colors Colors
-   */
-  public Gradient(double[] pos,Color[] colors) {
-    colorVal = colors;
-    colorPos = pos;
-  }
-
-  /**
    * Please use buildRainbowGradient() instead.
    * @deprecated
    */

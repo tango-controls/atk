@@ -24,6 +24,7 @@
 // 
 // Description:       
 package fr.esrf.tangoatk.core;
+import java.beans.*;
 import java.util.Map;
 import java.io.*;
 
@@ -84,7 +85,7 @@ public interface IEntity extends TangoConst, IRefreshee, Serializable {
      *
      * @return a <code>fr.esrf.tangoatk.core.Device</code> value
      */
-    public IDevice getDevice();
+    public fr.esrf.tangoatk.core.Device getDevice();
 
     public void storeConfig();
     

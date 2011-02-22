@@ -17,6 +17,7 @@ ERRORHANDLER = 	$(TARGET)/ErrorHandlerAdapter.class \
 
 DEVICE = $(TARGET)/DeviceFactory.class \
 	$(TARGET)/DeviceProperty.class \
+	$(TARGET)/DeviceItem.class \
         $(TARGET)/Device.class 
 
 
@@ -76,8 +77,6 @@ INTERFACES = $(TARGET)/INumber.class   \
         $(TARGET)/IStringImageListener.class \
         $(TARGET)/IDevStateSpectrum.class \
         $(TARGET)/IDevStateSpectrumListener.class \
-        $(TARGET)/IAttributeSpectrumHistory.class \
-        $(TARGET)/INumberSpectrumHistory.class
 
 
 PROPERTIES = $(TARGET)/Property.class \
@@ -121,8 +120,7 @@ ABSTRACTS = $(TARGET)/AEntityList.class \
 
 
 
-LISTS = $(TARGET)/DeviceItem.class \
-	$(TARGET)/AttributeList.class \
+LISTS = $(TARGET)/AttributeList.class \
 	$(TARGET)/AttributePolledList.class \
 	$(TARGET)/CommandList.class \
         $(TARGET)/CommandGroup.class \

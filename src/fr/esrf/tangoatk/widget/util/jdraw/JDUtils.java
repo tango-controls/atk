@@ -103,16 +103,6 @@ class JDUtils {
     if(nonModalPropDlg==null)
       return;
 
-    if(objectPanel.nameHasChanged()) {
-      if( JOptionPane.showConfirmDialog(nonModalPropDlg,
-          "Object name has changed but has not been applied\nDo you want to apply ?",
-          "Confirmation",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION ) {
-        objectPanel.applyName();
-      } else {
-        objectPanel.cancelNameChanged();
-      }
-    }
-
     if(objects.size()==0) {
       nonModalPropDlg.setTitle("Properties [None selected]");
       objectPanel.updatePanel(null);
@@ -271,15 +261,6 @@ class JDUtils {
       dismissBtn.setFont(labelFont);
       dismissBtn.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          if(objectPanel.nameHasChanged()) {
-            if( JOptionPane.showConfirmDialog(nonModalPropDlg,
-                "Object name has changed but has not been applied\nDo you want to apply ?",
-                "Confirmation",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION ) {
-              objectPanel.applyName();
-            } else {
-              objectPanel.cancelNameChanged();
-            }
-          }
           nonModalPropDlg.setVisible(false);
         }
       });

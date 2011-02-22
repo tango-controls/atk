@@ -275,48 +275,6 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
 	return stdVal;            
   }
 
-  public INumberSpectrumHistory[] getNumberSpectrumHistory() {
-    NumberSpectrumHistory[] attHist;
-
-    attHist = null;
-    try {
-      attHist =
-        (NumberSpectrumHistory[]) getNumberSpectrumHelper().getSpectrumAttHistory(readAttHistoryFromNetwork());
-    } catch (DevFailed e) {
-      readAttError(e.getMessage(), new AttributeReadException(e));
-      attHist = null;
-    } catch (Exception e) {
-      readAttError(e.getMessage(), e);
-      attHist = null;
-    } // end of catch
-
-    return attHist;
-  }
-
-
-  public INumberSpectrumHistory[] getNumberSpectrumDeviceHistory()
-  {
-     NumberSpectrumHistory[] attHist;
-
-     attHist = null;
-     try
-     {
-        attHist =
-            (NumberSpectrumHistory[]) getNumberSpectrumHelper().getSpectrumDeviceAttHistory(readAttHistoryFromNetwork());
-     }
-     catch (DevFailed e)
-     {
-        readAttError(e.getMessage(), new AttributeReadException(e));
-        attHist = null;
-     } catch (Exception e)
-     {
-        readAttError(e.getMessage(), e);
-        attHist = null;
-     } // end of catch
-
-     return attHist;
-  }
-
   // Implement the method of ITangoPeriodicListener
   public void periodic (TangoPeriodicEvent evt) 
   {

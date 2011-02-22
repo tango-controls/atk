@@ -329,7 +329,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     editPasteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,InputEvent.CTRL_MASK));
     editPasteMenuItem.addActionListener(this);
     editDeleteMenuItem = new JMenuItem("Delete");
-    editDeleteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE,0));
+    editDeleteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,0));
     editDeleteMenuItem.addActionListener(this);
     editSelectAllMenuItem = new JMenuItem("Select all");
     editSelectAllMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,InputEvent.CTRL_MASK));
@@ -590,11 +590,11 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
       theEditor.scaleSelection(-1.0,1.0);
     } else if (src==editToolVMirrorBtn || src==toolsVMirrorMenuItem) {
       theEditor.scaleSelection( 1.0,-1.0);
-    } else if (src==fileSaveasMenuItem) {
+    } else if (src==editToolFileSaveBtn || src==fileSaveasMenuItem) {
       theEditor.showSaveDialog(".");
     } else if (src==editToolFileOpenBtn || src==fileOpenMenuItem) {
       theEditor.showOpenDialog(".");
-    } else if(src==editToolFileSaveBtn || src==fileSaveMenuItem) {
+    } else if( src==fileSaveMenuItem) {
       theEditor.instantSave(".");
     } else if (src==editToolZoomInBtn) {
       theEditor.zoomIn();
@@ -943,7 +943,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     final JDrawEditor ed = new JDrawEditor(JDrawEditor.MODE_EDIT);
     final JDrawEditor py = new JDrawEditor(JDrawEditor.MODE_PLAY);
     final JDrawEditorFrame jde = new JDrawEditorFrame();
-    jde.setAppTitle("JDraw Editor 1.13");
+    jde.setAppTitle("JDraw Editor 1.12");
     jde.setEditor(ed);
     jde.setPlayer(py);
     jde.setLibraries(null);

@@ -47,9 +47,6 @@ public interface INumberSpectrum extends INumber
     public double[] getSpectrumStandardSetPoint();
     
     public void setValue(double[] d);
-
-    public INumberSpectrumHistory[] getNumberSpectrumHistory();
-    public INumberSpectrumHistory[] getNumberSpectrumDeviceHistory();
     
     public boolean hasMinxMaxxAttributes();
     

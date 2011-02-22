@@ -28,10 +28,8 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
-class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, KeyListener {
+class JDObjectPanel extends JPanel implements ActionListener, ChangeListener {
 
   private JTextField nameText;
   private JButton applyNameBtn;
@@ -62,7 +60,6 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
   private JDBrowserPanel invoker2;
   private Rectangle oldRect;
   private boolean isUpdating = false;
-  private boolean nameHasChanged;
 
   public JDObjectPanel() {
     this(null,null,null);
@@ -90,9 +87,7 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
     nameText.setFont(JDUtils.labelFont);
     nameText.setBounds(10, 20, 260, 24);
     nameText.addActionListener(this);
-    nameText.addKeyListener(this);
     namePanel.add(nameText);
-    nameHasChanged = false;
 
     applyNameBtn = new JButton("Apply");
     applyNameBtn.setFont(JDUtils.labelFont);
@@ -237,30 +232,10 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
     updatePanel(p);
   }
 
-  public boolean nameHasChanged() {
-    return nameHasChanged;
-  }
-
-  public void applyName() {
-    
-    for (int i = 0; i < allObjects.length; i++)
-      allObjects[i].setName(nameText.getText());
-    invoker.setNeedToSave(true,"Change name");
-    if(invoker2!=null) invoker2.updateNode();
-    nameText.setCaretPosition(0);
-    nameHasChanged = false;
-
-  }
-
-  public void cancelNameChanged() {
-    nameHasChanged = false;
-  }
-
   public void updatePanel(JDObject[] objs) {
 
     allObjects = objs;
     isUpdating = true;
-    nameHasChanged = false;
 
     if (objs == null || objs.length <= 0) {
       
@@ -375,7 +350,11 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
         allObjects[i].setInverseShadow(invertShadowCheckBox.isSelected());
       invoker.setNeedToSave(true,"Change invert shadow");
     } else if (src == nameText || src == applyNameBtn) {
-      applyName();
+      for (i = 0; i < allObjects.length; i++)
+        allObjects[i].setName(nameText.getText());
+      invoker.setNeedToSave(true,"Change name");
+      if(invoker2!=null) invoker2.updateNode();
+      nameText.setCaretPosition(0);
     } else if (src == visibleCheckBox) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setVisible(visibleCheckBox.isSelected());
@@ -392,19 +371,6 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
 
     repaintObjects();
   }
-
-  // ---------------------------------------------------------
-  // Key listener
-  // ---------------------------------------------------------
-  public void keyTyped(KeyEvent e) {}
-  public void keyReleased(KeyEvent e) {}
-  public void keyPressed(KeyEvent e) {
-    Object src = e.getSource();
-    if( src==nameText ) {
-      nameHasChanged = true;
-    }
-  }
-
 
   // ---------------------------------------------------------
   //Change listener

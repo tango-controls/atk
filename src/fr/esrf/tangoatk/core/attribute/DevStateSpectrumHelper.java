@@ -31,40 +31,37 @@
 package fr.esrf.tangoatk.core.attribute;
 
 
+import java.util.*;
 
+import fr.esrf.tangoatk.core.*;
 
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.Tango.DevState;
-
 import fr.esrf.TangoApi.DeviceAttribute;
-import fr.esrf.tangoatk.core.Device;
-import fr.esrf.tangoatk.core.EventSupport;
-import fr.esrf.tangoatk.core.IDevStateSpectrum;
-import fr.esrf.tangoatk.core.IDevStateSpectrumListener;
 
 class DevStateSpectrumHelper implements java.io.Serializable
 {
-    AAttribute attribute;
+    IAttribute attribute;
     EventSupport propChanges;
 
-    public DevStateSpectrumHelper(AAttribute attribute)
+    public DevStateSpectrumHelper(IAttribute attribute)
     {
        init(attribute);
     }
 
-    void init(AAttribute attribute)
+    void init(IAttribute attribute)
     {
       setAttribute(attribute);
-      propChanges = attribute.getPropChanges();
+      propChanges = ((AAttribute) attribute).getPropChanges();
     }
 
 
-    public void setAttribute(AAttribute attribute)
+    public void setAttribute(IAttribute attribute)
     {
       this.attribute = attribute;
     }
 
-    public AAttribute getAttribute()
+    public IAttribute getAttribute()
     {
       return attribute;
     }

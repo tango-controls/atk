@@ -37,7 +37,7 @@ public interface IStringScalar extends IScalarAttribute, IString {
 
     public void removeStringScalarListener(IStringScalarListener l);
 
-    public void setValue(String s);
+    public void setValue(String s) throws AttributeSetException;
 
     public String getStringValue();
     

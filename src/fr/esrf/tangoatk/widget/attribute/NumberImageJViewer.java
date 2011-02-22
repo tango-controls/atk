@@ -4349,6 +4349,7 @@ protected INumberImage model;
     if (logValues != this.logValues) {
       synchronized(this) {
         if (model != null) {
+          try {
             double[][] values = model.getValue();
             if (logValues) {
               setData( computeLog(values) );
@@ -4356,6 +4357,10 @@ protected INumberImage model;
             else {
               setData(values);
             }
+          }
+          catch (DevFailed e) {
+            setData(null);
+          }
         }
       }
     }

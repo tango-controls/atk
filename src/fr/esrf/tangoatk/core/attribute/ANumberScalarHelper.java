@@ -32,10 +32,11 @@
 package fr.esrf.tangoatk.core.attribute;
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.TangoApi.*;
+import fr.esrf.Tango.DevFailed;
 
 public abstract class ANumberScalarHelper extends NumberAttributeHelper {
 
-    void init(AAttribute attribute) {
+    void init(IAttribute attribute) {
 	super.init(attribute);
     }
 
