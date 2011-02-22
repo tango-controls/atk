@@ -19,7 +19,6 @@ import java.io.*;
 import javax.swing.JFrame;
 
 import com.loox.jloox.*;
-import fr.esrf.tangoatk.widget.util.ErrorHistory;
 
 public class SynopticFileViewer extends javax.swing.JPanel
 {
@@ -27,7 +26,6 @@ public class SynopticFileViewer extends javax.swing.JPanel
     private String                 jlooxDir = null;    
     private String                 jlooxFileName = null;
     private fr.esrf.tangoatk.widget.jloox.TangoSynopticHandler   tsh = null;
-    private ErrorHistory           errorHistWind = null;
 
 
     public SynopticFileViewer()
@@ -65,22 +63,6 @@ public class SynopticFileViewer extends javax.swing.JPanel
 	   return;
 	jlooxDir = new String(newDir);
     }
-    
-    
-    public int getToolTipMode() throws IllegalStateException
-    {
-	if (tsh == null)
-	   throw new IllegalStateException ("toto");
-	return tsh.getToolTipMode();
-    }  
-    
-   
-    public void setToolTipMode(int ttm) throws IllegalStateException
-    {
-	if (tsh == null)
-	   throw new IllegalStateException ("toto");
-        tsh.setToolTipMode(ttm);
-    }
      
     
     public String getJlooxFileName()
@@ -97,10 +79,7 @@ public class SynopticFileViewer extends javax.swing.JPanel
        jlooxFileName = jlxf;
        fullFileName =  jlooxDir + "/" + jlooxFileName;
 
-       if (errorHistWind != null)
-          tsh = new fr.esrf.tangoatk.widget.jloox.TangoSynopticHandler(fullFileName, errorHistWind);
-       else
-          tsh = new fr.esrf.tangoatk.widget.jloox.TangoSynopticHandler(fullFileName);
+       tsh = new fr.esrf.tangoatk.widget.jloox.TangoSynopticHandler(fullFileName);
        
        
     
@@ -125,15 +104,6 @@ public class SynopticFileViewer extends javax.swing.JPanel
        
        this.add(lxv, gbc);
     }  
-
-    public void setErrorWindow(ErrorHistory  errw) throws IllegalStateException
-    {
-	if (tsh != null)
-	   throw new IllegalStateException ("set error window before setJlooxFileName");
-	   
-        if (errw != null)
-	   errorHistWind = errw;
-    }
 
     private void initComponents()
     {//initComponents

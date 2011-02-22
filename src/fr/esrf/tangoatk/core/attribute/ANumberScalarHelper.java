@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          ANumberScalarHelper.java
 // Created:       2002-01-24 10:17:37, assum
 // By:            <assum@esrf.fr>
@@ -33,9 +11,10 @@ package fr.esrf.tangoatk.core.attribute;
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.TangoApi.*;
 
-public abstract class ANumberScalarHelper extends NumberAttributeHelper {
+abstract class ANumberScalarHelper extends ANumberSpectrumHelper {
+    ANumberSpectrumHelper spectrumHelper;
 
-    void init(AAttribute attribute) {
+    void init(IAttribute attribute) {
 	super.init(attribute);
     }
 
@@ -44,28 +23,53 @@ public abstract class ANumberScalarHelper extends NumberAttributeHelper {
     }
 
     void removeNumberScalarListener(INumberScalarListener l) {
+	log.debug("ANumberScalarListener: removing " + l);
 	propChanges.removeNumberScalarListener(l);
+	log.debug("done");
     }
     
+    void fireSpectrumValueChanged(double newValue, long timeStamp) {
+	double [] newSValue = {newValue};
+	fireSpectrumValueChanged(newSValue, timeStamp);
+    }
 
     void fireScalarValueChanged(double newValue, long timeStamp) {
 	propChanges.fireNumberScalarEvent((INumberScalar)attribute,
 					  newValue, timeStamp);
+	fireSpectrumValueChanged(newValue, timeStamp);
     }
+				
+    abstract void setMinAlarm(double d, boolean writable);
+
+    abstract void setMaxAlarm(double d, boolean writable);
+
+    abstract void setMaxValue(double d, boolean writable);
+
+    abstract void setMinValue(double d, boolean writable);
+    
+    abstract void setMinAlarm(double d);
+
+    abstract void setMaxAlarm(double d);
+
+    abstract void setMaxValue(double d);
+
+    abstract void setMinValue(double d);
 
     abstract double getNumberScalarValue(DeviceAttribute attribute);
 
     abstract double getNumberScalarSetPoint(DeviceAttribute attribute);
 
-    protected abstract IAttributeScalarHistory[] getScalarAttHistory(DeviceDataHistory[] attPollHist);
-
-    protected abstract IAttributeScalarHistory[] getScalarDeviceAttHistory(DeviceDataHistory[] attPollHist);
+    abstract protected IAttributeScalarHistory[] getScalarAttHistory(DeviceDataHistory[] attPollHist);
 
     abstract void insert(double d);
 
-    abstract double getNumberScalarDisplayValue(DeviceAttribute attribute);
+    double[] getNumberSpectrumValue(DeviceAttribute attribute) {
+	return spectrumHelper.getNumberSpectrumValue(attribute);
+    }
 
-    abstract double getNumberScalarDisplaySetPoint(DeviceAttribute attribute);
+    void insert(double [] d) {
+	spectrumHelper.insert(d);
+    }
 
     public String getVersion() {
 	return "$Id$";

@@ -17,8 +17,8 @@ import fr.esrf.Tango.DevFailed;
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.core.attribute.AttributeFactory;
 import fr.esrf.tangoatk.core.command.*;
+import fr.esrf.tangoatk.widget.device.StateViewer;
 import fr.esrf.tangoatk.widget.command.AnyCommandViewer;
-import fr.esrf.tangoatk.widget.util.*;
 
 import atkpanel.MainPanel;
 
@@ -83,24 +83,12 @@ import java.util.regex.Pattern;
   */
   
 
-public class TangoSynopticHandler implements IStateListener, IStatusListener,
-                                             INumberScalarListener
+public class TangoSynopticHandler implements IStateListener
 {
-
-   public static final int          TOOL_TIP_NONE = 0;
-   public static final int          TOOL_TIP_STATE = 1;
-   public static final int          TOOL_TIP_STATUS = 2;
-   public static final int          TOOL_TIP_NAME = 3;
-   
-   
-
    private static final String      TACO_HEADER = "taco:";
-   private static final int         STATE_INDEX = 0;
-   private static final int         STATUS_INDEX = 1;
    
    private static Map               dynoState;
    
-   private    int                   toolTipMode;
    private    LxAbstractGraph       graph = null;
    private    LxView                view = null;
    private    String                jlooxFileName = null;
@@ -114,13 +102,10 @@ public class TangoSynopticHandler implements IStateListener, IStatusListener,
    private    LxComponent[]         lxComps = null;
    
    private    Map                   lxHash;
-   private    Map                   stateCashHash;
    private    Map                   panelHash;
 
    private    AnyCommandViewer      acv = null; 
    private    JFrame                argFrame = null;
-   
-   private    ErrorHistory          errorHistWind = null;
       
 
    static
@@ -148,8 +133,6 @@ public class TangoSynopticHandler implements IStateListener, IStatusListener,
       esrfSynopticJLM.ExtendedGraph lxg = new esrfSynopticJLM.ExtendedGraph();
       LxView                    lxv = new LxView();
       
-      toolTipMode = TOOL_TIP_NONE;
-      jlooxFileName = null;
       lxv.setGraph(lxg);
       graph = lxg;
       view = lxv;
@@ -213,60 +196,6 @@ public class TangoSynopticHandler implements IStateListener, IStatusListener,
    }
 
 
-   public TangoSynopticHandler(String  jlxFileName, ErrorHistory errh)
-              throws MissingResourceException, FileNotFoundException, IllegalArgumentException
-   {
-      this();
-      
-      if (errh != null)
-         errorHistWind = errh;
-
-      setJlooxFileName(jlxFileName);
-   }
-   
-   
-
-
-   public TangoSynopticHandler(String  jlxFileName, int ttMode)
-              throws MissingResourceException, FileNotFoundException, IllegalArgumentException
-   {
-      this();
-      
-      if (     (ttMode == TOOL_TIP_NONE)    ||  (ttMode == TOOL_TIP_STATE)
-           ||  (ttMode == TOOL_TIP_STATUS)  ||  (ttMode == TOOL_TIP_NAME)   )
-	  toolTipMode = ttMode;
-
-      setJlooxFileName(jlxFileName);
-   }
-   
-   
-   
-   public int getToolTipMode()
-   {
-     return(toolTipMode);
-   }
-   
-   
-   
-   public void setToolTipMode( int  ttMode)
-   {
-
-      if (     (ttMode == TOOL_TIP_NONE)    ||  (ttMode == TOOL_TIP_STATE)
-           ||  (ttMode == TOOL_TIP_STATUS)  ||  (ttMode == TOOL_TIP_NAME)   )
-      {
-	  if (toolTipMode != ttMode)
-	  {
-	     if (ttMode == TOOL_TIP_NONE)
-		view.activateEnterLeaveNotification(false);
-	     else
-		view.activateEnterLeaveNotification(true);
-	     toolTipMode = ttMode;
-	  }
-      }
-
-   }
-
-
    public com.loox.jloox.LxView getJlooxView()
    {
       return (view);
@@ -288,7 +217,6 @@ public class TangoSynopticHandler implements IStateListener, IStatusListener,
                throws MissingResourceException, FileNotFoundException, IllegalArgumentException
    {
       lxHash = new HashMap();
-      stateCashHash = new HashMap();
 // Here should disconnect from all attributes and devices in the previous
 // Loox file.
       
@@ -304,9 +232,6 @@ public class TangoSynopticHandler implements IStateListener, IStatusListener,
          throw new MissingResourceException(
 	   "The JLoox file has no component inside. First draw a JLoox File.",
 	   "LxGraph", null);
-	   
-      jlooxFileName = jlxFileName;
-      
       parseJlooxComponents(lxComps);
 // not needed : automatically started in dFac class      dFac.startRefresher();
    }
@@ -314,8 +239,6 @@ public class TangoSynopticHandler implements IStateListener, IStatusListener,
    
    protected void parseJlooxComponents(LxComponent alxcomponent[])
    {
-      
-      
       for (int i = 0; i < alxcomponent.length; i++)
       {
 	 LxComponent component = alxcomponent[i];
@@ -459,7 +382,6 @@ public class TangoSynopticHandler implements IStateListener, IStatusListener,
 	 addDeviceListener(dFac.getDevice(s));
 	 mouseify(lxcomp, s);
 	 stashComponent(s, lxcomp);
-	 addDevToStateCashHashMap(s);
       } catch (ConnectionException connectionexception)
       {
 	 System.out.println("Couldn't load device " + s + " " +
@@ -471,11 +393,6 @@ public class TangoSynopticHandler implements IStateListener, IStatusListener,
    {
       System.out.println("connecting to " + device);
       device.addStateListener(this);
-      /* Added on 16/june/2003 to add status tooltip into synoptic */
-      device.addStatusListener(this);      
-      /* Added on 23/june/2003 to add the errors of state reading into error history window */
-      if (errorHistWind != null) 
-         device.addErrorListener(errorHistWind);      
    }
    
 
@@ -492,19 +409,6 @@ public class TangoSynopticHandler implements IStateListener, IStatusListener,
 		}
 		
              });
-      lxc.addEnterLeaveListener(new LxEnterLeaveAdapter()
-                                     {
-					 public void mouseEntered(LxMouseEvent e)
-					 {
-					     devDisplayToolTip(e);
-					 }
-					 
-					 public void mouseExited(LxMouseEvent e)
-					 {
-					     devRemoveToolTip(e);
-					 }
-				     }
-				 );
    }
     
     
@@ -595,8 +499,6 @@ System.out.println("params[0]= "+ params[0]);
       try // Instantiate the device panel class
       {
          panelClNew.newInstance(params);
-	 // Added a sleep to allow some applications long to start
-	 Thread.sleep(500);
       }
       catch (InstantiationException  instex)
       {
@@ -632,23 +534,6 @@ invoqex.printStackTrace();
 	  list = new Vector();
       list.add(lxcomp);
       lxHash.put(s, list);
-   }
-   
-
-   private void addDevToStateCashHashMap(String s)
-   {
-      List        list;
-      String      str;
-      
-      list = (List)stateCashHash.get(s);
-      if (list != null)
-         return;
-      
-      list = new Vector();
-      str = new String("no status");
-      list.add(STATE_INDEX, str);
-      list.add(STATUS_INDEX, str);
-      stateCashHash.put(s, list);
    }
 
 
@@ -762,80 +647,10 @@ invoqex.printStackTrace();
 
    private void addAttribute(LxComponent lxcomp, String s)
    {
-      if (lxcomp instanceof LxDigit)
-	 addAttribute((LxDigit)lxcomp, s);
-      if (lxcomp instanceof LxSlider)
-	 addAttribute((LxSlider)lxcomp, s);
    }
 
-
-   private void addAttribute(LxDigit lxdg, String s)
-   {
-      IAttribute  att = null;
-
-      try
-      {
-         att = aFac.getAttribute(s);
-	 if (att != null)
-	 {
-	    if (att instanceof INumberScalar)
-	    {
-	       addAttributeListener((INumberScalar) att);
-	       // set min, max, value for the digit? lxdg.setAll();
-	       stashComponent(s, lxdg);
-	    }
-	 }
-      } 
-      catch (ConnectionException connectionexception)
-      {
-	 System.out.println("Couldn't load device for attribute" + s + " " + connectionexception);
-      }
-      catch (DevFailed dfEx)
-      {
-	 System.out.println("Couldn't find the attribute" + s + " " + dfEx);
-      }
-
-   }
-
-
-   private void addAttribute(LxSlider lxsl, String s)
-   {
-      IAttribute  att = null;
-
-      try
-      {
-         att = aFac.getAttribute(s);
-	 if (att != null)
-	 {
-	    if (att instanceof INumberScalar)
-	    {
-	       addAttributeListener((INumberScalar) att);
-	       // set min, max, value for the digit? lxdg.setAll();
-	       stashComponent(s, lxsl);
-	    }
-	 }
-      } 
-      catch (ConnectionException connectionexception)
-      {
-	 System.out.println("Couldn't load device for attribute" + s + " " + connectionexception);
-      }
-      catch (DevFailed dfEx)
-      {
-	 System.out.println("Couldn't find the attribute" + s + " " + dfEx);
-      }
-
-   }
-
-
- 
-   private void addAttributeListener(INumberScalar ins)
-   {
-      System.out.println("connecting to a number scalar attribute : " + ins);
-      ins.addNumberScalarListener(this);
-      if (errorHistWind != null) 
-         ins.addErrorListener(errorHistWind);      
-   }
    
+
 
 
 
@@ -843,66 +658,7 @@ invoqex.printStackTrace();
 // Implement the interface methods for synoptic animation 
 // -------------------------------------------------------
 
-
-   // Interface INumberScalarListener
-   public void numberScalarChange(NumberScalarEvent evt)
-   {
-      LxComponent    lxComp;
-      INumberScalar  ins;
-      LxDigit        lxdg;
-      LxSlider       lxsl;
-      double         value;
-
-      
-      ins = null;
-      ins = evt.getNumberSource();
-      
-      String s = ins.getName();
-      
-      if (ins != null)
-      {
-	 List list = (List) lxHash.get(s);
-	 if (list == null)
-            return;
-
-	 int  nbLxComps = list.size();
-	 int  i;
-
-	 for (i=0; i<nbLxComps; i++)
-	 {
-            lxComp = null;
-	    lxComp = (LxComponent) list.get(i);
-
-	    if (lxComp != null)
-	    {
-	       if (lxComp instanceof LxDigit)
-	       {
-	          lxdg = (LxDigit) lxComp;
-		  value = evt.getValue();
-		  lxdg.setValue(value);
-	       }
-	       
-	       if (lxComp instanceof LxSlider)
-	       {
-	          lxsl = (LxSlider) lxComp;
-		  value = evt.getValue();
-		  lxsl.setValue(value);
-	       }
-	    }
-	 }
-      }
-   }
-
-
-
-   // Interface INumberScalarListener (superclass of IStateListener and INumberScalarListener)
-   public void stateChange(AttributeStateEvent evt)
-   {
-   }
-
-
-
-   // Interface IErrorListener (superclass of IStateListener and INumberScalarListener)
+   // Interface IErrorListener (superclass of IStateListener)
    public void errorChange(ErrorEvent evt)
    {
    }
@@ -917,43 +673,13 @@ invoqex.printStackTrace();
 
       Device device = (Device)event.getSource();
       String s = device.getName();
-      
-      /* Added on 16/june/2003 to add state tooltip into synoptic */
-      
-      // Update and test the "cashed" state
-      List  stateStatusCash = null;
-      
-      stateStatusCash = (List) stateCashHash.get(s);
-      if (stateStatusCash != null)
-      {
-         String  stateCash = null;
-	 try
-	 {
-	    stateCash = (String) stateStatusCash.get(STATE_INDEX);
 
-	    if (stateCash != null)
-	    {
-	       if (stateCash.equals(event.getState()))
-		  return;
-	    }
-
-	    stateCash = new String(event.getState());
-	    stateStatusCash.set(STATE_INDEX, stateCash);
-            stateCashHash.put(s, stateStatusCash);
-	 }
-	 catch (IndexOutOfBoundsException  iob)
-	 {
-	 }
-      }
-      /* */
-
-      // Here we are sure that the new state is different from the "cashed" state
-
-//System.out.println("State has changed for "+s+" : "+event.getState());
       List list = (List) lxHash.get(s);
       if (list == null)
          return;
 	 
+//System.out.println("stateChange : device name = "+s);    
+//System.out.println("stateChange : device state = "+event.getState());    
       int  nbLxComps = list.size();
       int  i;
       
@@ -964,9 +690,9 @@ invoqex.printStackTrace();
 	 if (lxComp instanceof LxElement)
 	 {
 	    if (((LxElement) lxComp).getPaint().getTransparency() == java.awt.Paint.OPAQUE)
-	       ((LxElement) lxComp).setPaint(ATKConstant.getColor4State(event.getState()));
+	       ((LxElement) lxComp).setPaint(StateViewer.getColor4State(event.getState()));
 	    else
-	       ((LxElement) lxComp).setLineColor(ATKConstant.getColor4State(event.getState()));
+	       ((LxElement) lxComp).setLineColor(StateViewer.getColor4State(event.getState()));
 	 }
 	 else
 	 {
@@ -977,55 +703,14 @@ invoqex.printStackTrace();
 	    else
 	    {
 	       if (lxComp instanceof LxMultiState)
-                  multiStateDynoChange((LxMultiState)lxComp, event.getState());
+	          multiStateDynoChange((LxMultiState)lxComp, event.getState());
 	    }
 	 }
-//System.out.println("Before call to view.forceRepaint for lxComp of "+s);
 	 //view.forceRepaint(lxComp);
-//System.out.println("After call to view.forceRepaint for lxComp of "+s);
       }
-//System.out.println("Left state change for "+s);
 //after = System.currentTimeMillis();
 //duree = after - before;
 //System.out.println("TangoSynopticHandler.stateChange took "+  duree + " milli seconds.");		
-   }
-
-
-   // Interface IStatusListener
-   /* Added on 16/june/2003 to add status tooltip into synoptic */
-   public void statusChange(StatusEvent event)
-   {
-
-      Device device = (Device)event.getSource();
-      String s = device.getName();
-      
-      List  stateStatusCash = null;
-      
-      stateStatusCash = (List) stateCashHash.get(s);
-      if (stateStatusCash != null)
-      {
-         String  statusCash = null;
-	 
-	 try
-	 {
-	    statusCash = (String) stateStatusCash.get(STATUS_INDEX);
-
-	    if (statusCash != null)
-	    {
-	       if (statusCash.equals(event.getStatus()))
-		  return;
-	    }
-
-	    statusCash = new String(event.getStatus());
-	    stateStatusCash.set(STATUS_INDEX, statusCash);
-            stateCashHash.put(s, stateStatusCash);
-	 }
-	 catch (IndexOutOfBoundsException  iob)
-	 {
-	    return;
-	 }
-      }
-      /* */
    }
    
 
@@ -1047,14 +732,14 @@ invoqex.printStackTrace();
 	 {
 	    if (((LxElement)lxc).getPaint() == null)
 	    {
-	       ((LxElement)lxc).setLineColor(ATKConstant.getColor4State(state));
+	       ((LxElement)lxc).setLineColor(StateViewer.getColor4State(state));
 	    }
 	    else
 	    {
 	       if (((LxElement)lxc).getPaint().getTransparency() == java.awt.Paint.OPAQUE)
-		  ((LxElement)lxc).setPaint(ATKConstant.getColor4State(state));
+		  ((LxElement)lxc).setPaint(StateViewer.getColor4State(state));
 	       else
-		  ((LxElement)lxc).setLineColor(ATKConstant.getColor4State(state));
+		  ((LxElement)lxc).setLineColor(StateViewer.getColor4State(state));
 	    }
 	 }
 	 else
@@ -1088,98 +773,9 @@ invoqex.printStackTrace();
       int    dynoState;
       
       dynoState = getDynoState(state);
-      try
-      {
-         lxms.setValue(dynoState);
-      }
-      // Added catch to avoid exceptions when the multiState drawing has not
-      // enough drawing for the states
-      catch (java.lang.IllegalArgumentException iae)
-      {
-          dynoState = getDynoState("UNKNOWN");
-	  lxms.setValue(dynoState);
-      }
+      lxms.setValue(dynoState);
    }
-   
- 
- 
- 
- 
- 
-    
-   
 
-   public void devDisplayToolTip(LxMouseEvent e)
-   {
-       String              devName;
-       LxComponent         lxc;
-       List                stateStatusCash = null;
-       String              stateCash = null;
-       
-       
-       if ( toolTipMode == TOOL_TIP_NONE )
-       {
-          view.setToolTipText(null);
-	  return;
-       }
-       
-
-
-
-       if ( toolTipMode == TOOL_TIP_NAME)
-       {
-          lxc = e.getLxComponent();
-	  devName = lxc.getName();     // The name of the device
-          view.setToolTipText(devName);
-	  return;
-       }
-       
-
-
-
-       if ( toolTipMode == TOOL_TIP_STATE)
-       {
-          lxc = e.getLxComponent();
-	  devName = lxc.getName();     // The name of the device
-	  
-	  // get the "cashed" state for the device
-          stateStatusCash = (List) stateCashHash.get(devName);
-	  if (stateStatusCash == null)
-	  {
-             view.setToolTipText(null);
-	     return;
-	  }
-	  
-	  try
-	  {
-	       stateCash = (String) stateStatusCash.get(STATE_INDEX);
-	       if (stateCash == null)
-	       {
-        	  view.setToolTipText(null);
-		  return;
-	       }
-	       
-               view.setToolTipText(stateCash);
-	       return;
-	  }
-	  catch (IndexOutOfBoundsException  iob)
-	  {
-               view.setToolTipText(null);
-	       return;
-	  }
-       }
-       
-       
-       
-       view.setToolTipText(null);
-   }
-   
-   
-
-   public void devRemoveToolTip(LxMouseEvent e)
-   {
-       view.setToolTipText(null);
-   }
 
 
 
