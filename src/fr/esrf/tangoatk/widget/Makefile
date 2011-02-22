@@ -26,7 +26,7 @@ all: icon-components       \
      image-components      \
      attribute-components  \
      command-components    \
-     jdraw-components       \
+     loox-components       \
      image-components      \
 
 
@@ -82,8 +82,8 @@ command-components:
 device-components:
 	(cd device && $(MAKE) all)
 
-jdraw-components:
-	(cd jdraw && $(MAKE) all)
+loox-components:
+	(cd loox && $(MAKE) all)
 
 properties-components:
 	(cd properties && $(MAKE) all)
@@ -118,6 +118,9 @@ trun:
 vrun:
 	$(JAVA) fr.esrf.TangoATK.Widget.VisadTest
 
+properties-manifest:
+	(cd properties && $(MAKE) manifest.mf)
+
 attributes-manifest:
 	(cd attribute && $(MAKE) manifest.mf)
 
@@ -127,21 +130,15 @@ device-manifest:
 command-manifest:
 	(cd command && $(MAKE) manifest.mf)
 
-jdraw-manifest:
-	(cd jdraw && $(MAKE) manifest.mf)
-
-
-manifest: attributes-manifest \
+manifest: properties-manifest \
+          attributes-manifest \
           device-manifest     \
-          command-manifest \
-	  jdraw-manifest
+          command-manifest    
 	mv manifest.mf manifest.mf.tmp; \
            cat manifest.mf.tmp          \
-            jdraw/manifest.mf         \
             command/manifest.mf         \
             attribute/manifest.mf       \
-            util/manifest.mf       \
-            properties/manifest.mf       \
-            device/manifest.mf > manifest.mf ; \
+            device/manifest.mf          \
+            properties/manifest.mf  > manifest.mf ; \
 	    rm manifest.mf.tmp
 

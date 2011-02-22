@@ -1,0 +1,3 @@
+Name: fr/esrf/tangoatk/widget/device/StateViewer.class
+Java-Bean: True
+
