@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          NumberSpectrumItemTrend.java
 // Created:       2007-11-15 15:03:37, poncet
 // By:            <poncet@esrf.fr>
@@ -76,8 +54,8 @@ public class NumberSpectrumItemTrend extends JLChart
     private   boolean                             plotAll = true;
     private   boolean                             plotting = true;
     protected INumberSpectrum                     model = null;
-    protected Map<Integer, JLDataView>            itemMap = null; //index in spectrum attribute -> JLDataview
-    protected Map<JLDataView, Integer>            dvAxisMap = null; //JLDataView -> Axis number (AXIS_NONE or AXIS_Y1 or AXIS_Y2)
+    protected Map<Integer, JLDataView>            itemMap = null;
+    protected Map<JLDataView, Integer>            dvAxisMap = null;
     protected List<JLDataView>                    allItems = null;
     private   String                              qualityFactor = null;
 
@@ -408,39 +386,33 @@ public class NumberSpectrumItemTrend extends JLChart
         }
     }
 
-    public void spectrumChange (NumberSpectrumEvent evt)
+    public void spectrumChange (NumberSpectrumEvent e)
     {
+	int         spectrumSize = ((INumberSpectrum)e.getSource()).getXDimension(); 
 	JLDataView  data=null;
-        double[]    spectValue = evt.getValue();
-        int         currItemIndex;
-        double      currItemValue;
 
         if (!plotting) return;
 	
 	if (plotAll)
-	   plotAllItems(evt);
+	   plotAllItems(e);
 	else
 	{	   
-            Set<Integer> itemSet = itemMap.keySet();
-            if (itemSet == null) return;
-
-            Iterator<Integer>  itemIt=itemSet.iterator();
-            while ( itemIt.hasNext() )
-            {
-                Integer currItem= itemIt.next();
-                data = itemMap.get(currItem);
-                currItemIndex = currItem.intValue();               
-                try
-                {
-                    currItemValue = spectValue[currItemIndex];
-                    data.add(evt.getTimeStamp(), currItemValue);
-                }
-                catch(Exception iobEx)
-                {
-                    data.add(evt.getTimeStamp(), Double.NaN);
-                }  
-                garbageData(data);
-            }
+	   for (int i = 0; i < e.getValue().length; i++)
+	   {
+               if (i >= spectrumSize)
+		  break;
+	       data = getDataViewForItem(i);
+	       if (data == null)
+		  continue;
+	       if (qualityFactor == null)
+	          data.add(e.getTimeStamp(), Double.NaN);
+	       else
+	          if (qualityFactor.equals(IAttribute.INVALID))
+		     data.add(e.getTimeStamp(), Double.NaN);
+		  else
+                     data.add(e.getTimeStamp(), e.getValue()[i]);
+               garbageData(data);
+	   }
 	}
 	repaint();
     }
@@ -448,21 +420,6 @@ public class NumberSpectrumItemTrend extends JLChart
     public void stateChange (AttributeStateEvent e)
     {
         qualityFactor = e.getState();
-        if (qualityFactor.equals(IAttribute.INVALID))
-        {
-	   Set<Integer> itemSet = itemMap.keySet();
-	   if (itemSet != null)
-	   {
-	       Iterator<Integer>  itemIt=itemSet.iterator();
-	       while ( itemIt.hasNext() )
-	       {
-		   Integer currItem= itemIt.next();
-		   JLDataView data = itemMap.get(currItem);
-        	   data.add(e.getTimeStamp(), Double.NaN);
-        	   garbageData(data);
-	       }
-	   }            
-        }
     }
 
     public void errorChange (ErrorEvent evt)
@@ -518,7 +475,7 @@ public class NumberSpectrumItemTrend extends JLChart
 	 else
 	 {
              //attributeName = "sr/xfrefflibera/1/Results";
-             attributeName = "fp/test/1/wave";
+             attributeName = "jlp/test/1/att_spectrum";
 	 }
 
 	 // Connect to 2 DevStateScalar attributes
@@ -537,8 +494,8 @@ public class NumberSpectrumItemTrend extends JLChart
 	    
 	    nsit.setPlotAll(false);
 	    nsit.setModel(ins);
-	    nsit.plotItem(30, NumberSpectrumItemTrend.AXIS_Y1, "wave[30]");
-	    nsit.plotItem(1, NumberSpectrumItemTrend.AXIS_Y1, "wave[1]");
+	    nsit.plotItem(7, NumberSpectrumItemTrend.AXIS_Y1, "SrCurrentDelta");
+	    nsit.plotItem(1, NumberSpectrumItemTrend.AXIS_Y2, "TL2SRTrEfficiency");
 	 }
 	 catch (Exception ex)
 	 {

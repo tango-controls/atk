@@ -1,43 +1,17 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.*;
 import javax.swing.event.TableModelListener;
 import javax.swing.event.TableModelEvent;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Clipboard;
 import java.awt.event.*;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Vector;
 
 /**
  * A class to handle a 2 dimension Table with fixed row name and column name, also
@@ -376,7 +350,7 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
     wT = nwT;
     hT = nhT;
     //Create table if it is null
-    if(theTable==null || (rowTable==null && rowData!=null)) {
+    if( theTable==null ) {
 
       //System.out.println("Rebuild table");
       createTable();
@@ -527,17 +501,9 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
       printTable(PRINT_SMALL);
 
     } else if ( src == saveMenuItem ) {
-        saveDataFile();
-    }
 
-  }
-  
-  //Add a method saveDataFile, in order to save data without opening the JtableRow
-  public void saveDataFile()
-  {
       JFileChooser fc = new JFileChooser(".");
-      if(currentFile!=null)
-          fc.setSelectedFile(currentFile);
+      if(currentFile!=null) fc.setSelectedFile(currentFile);
       int status = fc.showSaveDialog(this);
       if(status==JFileChooser.APPROVE_OPTION) {
         currentFile = fc.getSelectedFile();
@@ -549,30 +515,11 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
           JOptionPane.showMessageDialog(this,ex,"Error while saving data",JOptionPane.ERROR_MESSAGE);
         }
       }
-  }
-  
-  protected String makeDataString() {
-
-      int[] cols = theTable.getSelectedColumns();
-      int[] rows = theTable.getSelectedRows();
-
-      StringBuffer str = new StringBuffer();
-      for (int i = 0; i < cols.length; i++) {
-        str.append(theTable.getColumnName(cols[i]));
-        if (i < cols.length - 1) str.append('\t');
-      }
-      str.append('\n');
-      for (int j = 0; j < rows.length; j++) {
-        for (int i = 0; i < cols.length; i++) {
-          str.append(theData[rows[j]][cols[i]]);
-          if (i < cols.length - 1) str.append('\t');
-        }
-        str.append('\n');
-      }
-      return str.toString();
 
     }
-  
+
+  }
+
   public void mouseClicked(MouseEvent e) {}
 
   public void mousePressed(MouseEvent e) {
@@ -636,7 +583,7 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
   }
 
   protected void placeComponent() {
-    if ((rowData!=null) && (rowTable != null)){
+    if(rowData!=null) {
       Dimension d = getSize();
       int hFont = 17;
       cornerPanel.setBounds(-5,-5 ,54,hFont+5);
@@ -650,24 +597,7 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
 
     int[] cols = theTable.getSelectedColumns();
     int[] rows = theTable.getSelectedRows();
-        
-    //If nothing is selected, save all the table.
-    if((cols == null || cols.length == 0)&& (rows == null|| rows.length == 0))
-    {
-        
-        int nbCols = theTable.getColumnCount();
-        cols = new int[nbCols];
-        for (int i = 0; i < nbCols; i++) {
-            cols[i]=i;            
-        }
-        
-        int nbRows = theTable.getRowCount();
-        rows = new int[nbRows];
-        for (int i = 0; i < nbRows; i++) {
-            rows[i]=i;            
-        }
-    }
-        
+
     StringBuffer str = new StringBuffer();
     for (int i = 0; i < cols.length; i++) {
       str.append(theTable.getColumnName(cols[i]));
@@ -869,7 +799,7 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
     }
 
   }
-  
+
   /**
    * Test function.
    */
@@ -906,4 +836,84 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
 
   }
 
+}
+
+class TableRowModel extends DefaultTableModel {
+    protected String[]   colName  = null;
+    protected Object[][] data     = null;
+    protected boolean    editable = false;
+
+    public TableRowModel () {
+        super();
+        data = new Object[0][0];
+        colName = new String[0];
+    }
+
+    public void setValueAt (Object aValue, int rowIndex, int columnIndex) {
+        if ( editable && data != null ) data[rowIndex][columnIndex] = aValue;
+    }
+
+    public Class<?> getColumnClass (int columnIndex) {
+        return String.class;
+    }
+
+    public boolean isCellEditable (int row, int col) {
+        return editable;
+    }
+
+    public String getColumnName (int column) {
+        if ( colName != null ) return colName[column];
+        else return "";
+    }
+
+    public int getRowCount () {
+        if (data == null) {
+            return 0;
+        }
+        else {
+            return data.length;
+        }
+    }
+
+    public int getColumnCount () {
+        if (colName == null) {
+            return 0;
+        }
+        else {
+            return colName.length;
+        }
+    }
+
+    public Object getValueAt (int row, int column) {
+        if ( data != null ) {
+            return data[row][column];
+        }
+        else {
+            return "";
+        }
+    }
+
+    public String[] getColName () {
+        return colName;
+    }
+
+    public void setColName (String[] colName) {
+        this.colName = colName;
+    }
+
+    public boolean isEditable () {
+        return editable;
+    }
+
+    public void setEditable (boolean editable) {
+        this.editable = editable;
+    }
+
+    public Object[][] getData () {
+        return data;
+    }
+
+    public void setData (Object[][] theData) {
+        this.data = theData;
+    }
 }

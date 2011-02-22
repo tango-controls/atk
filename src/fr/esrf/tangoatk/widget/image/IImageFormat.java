@@ -1,69 +1,40 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.image;
 
 import fr.esrf.tangoatk.widget.util.JGradientViewer;
-
-import java.io.IOException;
 
 /**
  * An abstract class for image format (Used by the RawImageViewer).
  */
 public abstract class IImageFormat {
 
-  final static byte[][] zImg = new byte[0][0];
-
-  byte[][] data = zImg;  // Handle to data
-  double bfA0;           // Fitting offset
-  double bfA1;           // Fitting factor
-  boolean bestFit;       // Automatic best fit enabled
-  JGradientViewer tool;  // Gradient tool
+  byte[][] data = new byte[0][0];  // Handle to data
+  double bfA0;                     // Fitting offset
+  double bfA1;                     // Fitting factor
+  boolean bestFit;                 // Automatic best fit enabled
+  JGradientViewer tool;            // Gradient tool
 
   /**
-   * Sets and decode the data.
-   * @param rawData Pointer to image data
+   * Sets the data as a byte buffer (as defined by the Tango CCD abstract class).
+   * @param data Pointer to image data
    */
-  public abstract void setData(byte[] rawData) throws IOException;
+  public void setData(byte[][] data) {
+    if(data==null)
+      this.data = new byte[0][0];
+    else
+      this.data = data;
+  }
 
   /**
    * Init static variable.
    * @param gradTool Gradient viewer
    */
-  public void initDefault(JGradientViewer gradTool) {
+  public void initDefault(boolean bestFit,JGradientViewer gradTool) {
 
     tool = gradTool;
-    bestFit = false;
+    this.bestFit = bestFit;
     bfA0 = 0.0;
     bfA1 = 1.0;
 
-  }
-
-  /**
-   * Returns true if the image has a null size, false otherwise
-   */
-  public boolean isNull() {
-    int s = getWidth()*getHeight();
-    return (s==0);
   }
 
   /**
@@ -123,13 +94,6 @@ public abstract class IImageFormat {
    * @param y vertical coordinate
    */
   public abstract double getValue(int x,int y);
-
-  /**
-   * Gets the pixel value as string (Used for pixel info display).
-   * @param x horizontal coordinate
-   * @param y vertical coordinate
-   */
-  public abstract String getValueStr(int x,int y);
 
   /**
    * Returns the histogram width.

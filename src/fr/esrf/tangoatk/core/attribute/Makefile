@@ -29,7 +29,6 @@ ALL = $(TARGET)/ANumber.class \
       $(TARGET)/PolledAttributeFactory.class \
       $(TARGET)/AAttributeHistory.class \
       $(TARGET)/NumberScalarHistory.class \
-      $(TARGET)/NumberSpectrumHistory.class \
       $(TARGET)/StringScalarHistory.class \
       $(TARGET)/StringSpectrum.class \
       $(TARGET)/StringSpectrumHelper.class \
@@ -53,11 +52,6 @@ ALL = $(TARGET)/ANumber.class \
       $(TARGET)/EnumScalar.class \
       $(TARGET)/StringImageHelper.class \
       $(TARGET)/StringImage.class \
-      $(TARGET)/DevStateSpectrumHelper.class \
-      $(TARGET)/DevStateSpectrum.class \
-      $(TARGET)/ULongScalarHelper.class \
-      $(TARGET)/ULongSpectrumHelper.class \
-      $(TARGET)/ULongImageHelper.class \
 
 
 all: $(ALL)

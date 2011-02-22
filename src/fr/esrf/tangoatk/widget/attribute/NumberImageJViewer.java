@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.attribute;
 
 import ij.gui.Line;
@@ -33,6 +11,7 @@ import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
@@ -98,7 +77,6 @@ import fr.esrf.tangoatk.widget.util.JImage;
 import fr.esrf.tangoatk.widget.util.JImageJ;
 import fr.esrf.tangoatk.widget.util.JSmoothLabel;
 import fr.esrf.tangoatk.widget.util.JTableRow;
-import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
 import fr.esrf.tangoatk.widget.util.chart.AxisPanel;
 import fr.esrf.tangoatk.widget.util.chart.CfFileReader;
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
@@ -114,12 +92,7 @@ import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
 
 public class NumberImageJViewer extends JPanel implements IImageListener, MouseMotionListener, MouseListener, MouseWheelListener, ActionListener, KeyListener, JDrawable {
 
-  /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-
-protected INumberImage model;
+  protected INumberImage model;
 
   // ------------------------------------------------------
   // Private data
@@ -213,7 +186,6 @@ protected INumberImage model;
   protected JMenuItem settingsMenuItem;
   protected JMenuItem loadMenuItem;
   protected JMenuItem saveMenuItem;
-  protected JMenuItem saveDataFileMenuItem;
   protected JMenuItem printMenuItem;
   protected JCheckBoxMenuItem displayLogMenuItem;
 
@@ -593,9 +565,6 @@ protected INumberImage model;
 
       saveMenuItem = new JMenuItem("Save settings");
       saveMenuItem.addActionListener(this);
-      
-      saveDataFileMenuItem = new JMenuItem("Save data file");
-      saveDataFileMenuItem.addActionListener(this);
 
       printMenuItem = new JMenuItem("Print image");
       printMenuItem.addActionListener(this);
@@ -625,7 +594,6 @@ protected INumberImage model;
       imgMenu.add(new JSeparator());
       imgMenu.add(loadMenuItem);
       imgMenu.add(saveMenuItem);
-      imgMenu.add(saveDataFileMenuItem);
       imgMenu.add(new JSeparator());
       imgMenu.add(printMenuItem);
       imgMenu.add(new JSeparator());
@@ -1299,12 +1267,67 @@ protected INumberImage model;
   }
 
   protected double[] buildProfileData() {
-    Roi tmpRoi = imagePanel.getImagePlus().getRoi();
-    if(tmpRoi != null && tmpRoi instanceof Line)
-        return ((Line)tmpRoi).getPixels();
-    
-    return null;
- }
+
+    double[] profile;
+
+    Dimension d = getCurrentImageSize();
+
+    Point[] p = imagePanel.getSelectionPoint();
+
+    if (p != null) {
+
+      int dx = p[1].x - p[0].x;
+      int dy = p[1].y - p[0].y;
+      int adx = Math.abs(dx);
+      int ady = Math.abs(dy);
+      double delta;
+      int i,xe,ye;
+
+      if (adx > ady) {
+
+        delta = (double) dy / (double) adx;
+        profile = new double[adx + 1];
+        xe = p[0].x;
+        for (i = 0; i <= adx; i++) {
+          ye = p[0].y + (int) (delta * (double) i);
+          if (xe >= 0 && xe < d.width && ye >= 0 && ye < d.height)
+            profile[i] = doubleValues[ye][xe];
+          else
+            profile[i] = Double.NaN;
+          if (dx < 0)
+            xe--;
+          else
+            xe++;
+        }
+
+      } else {
+
+        delta = (double) dx / (double) ady;
+        profile = new double[ady + 1];
+        ye = p[0].y;
+        for (i = 0; i <= ady; i++) {
+          xe = p[0].x + (int) (delta * (double) i);
+          if (xe >= 0 && xe < d.width && ye >= 0 && ye < d.height)
+            profile[i] = doubleValues[ye][xe];
+          else
+            profile[i] = Double.NaN;
+          if (dy < 0)
+            ye--;
+          else
+            ye++;
+        }
+
+      }
+
+      return profile;
+
+    } else {
+
+      return null;
+
+    }
+
+  }
 
   protected double[] buildHistogramData() {
 
@@ -1481,11 +1504,27 @@ protected INumberImage model;
 
   protected void refreshStatusLine() {
 
-   
+    int m = 1/*imagePanel.getSelectionMode()*/;
     String selStr = "None";
-    Roi tmpRoi = imagePanel.getImagePlus().getRoi();
-    if(tmpRoi != null)
-        selStr = tmpRoi.toString();
+
+    switch (m) {
+      case 0: // Line
+        Point[] pts = imagePanel.getSelectionPoint();
+        if (pts != null) {
+//          mulPoint(pts[0]);
+//          mulPoint(pts[1]);
+          selStr = "Line (" + pts[0].x + "," + pts[0].y + ") - (" + pts[1].x + "," + pts[1].y + ")";
+        }
+        break;
+      case 1:
+        Rectangle sel = imagePanel.getCurrentRoiBounds();
+        if (sel != null) {
+//          mulRect(sel);
+          selStr = "Rect (" + sel.x + "," + sel.y + ") - [" + sel.width + "," + sel.height + "]";
+        }
+        break;
+    }
+
     selText.setText(selStr);
 
 
@@ -1581,8 +1620,7 @@ protected INumberImage model;
     * @see #saveSetting
     */
   public String getSettings() {
-    constructSettingsPanel();    
-    initSettings();  
+    constructSettingsPanel();
 
     String to_write = "";
 
@@ -2030,7 +2068,21 @@ protected INumberImage model;
 
     int ok = JOptionPane.YES_OPTION;
     JFileChooser chooser = new JFileChooser(".");
-    chooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
+    chooser.addChoosableFileFilter(new FileFilter() {
+        public boolean accept(File f) {
+            if (f.isDirectory()) {
+                return true;
+            }
+            String extension = getExtension(f);
+            if (extension != null && extension.equals("txt"))
+                return true;
+            return false;
+        }
+
+        public String getDescription() {
+            return "text files ";
+        }
+    });
     if(lastConfig.length()>0)
       chooser.setSelectedFile(new File(lastConfig));
     int returnVal = chooser.showSaveDialog(this);
@@ -2038,7 +2090,7 @@ protected INumberImage model;
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       File f = chooser.getSelectedFile();
       if (f != null) {
-        if (MultiExtFileFilter.getExtension(f) == null) {
+        if (getExtension(f) == null) {
           f = new File(f.getAbsolutePath() + ".txt");
         }
         if (f.exists())
@@ -2056,7 +2108,21 @@ protected INumberImage model;
 
     int ok = JOptionPane.YES_OPTION;
     JFileChooser chooser = new JFileChooser();
-    chooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
+    chooser.addChoosableFileFilter(new FileFilter() {
+        public boolean accept(File f) {
+            if (f.isDirectory()) {
+                return true;
+            }
+            String extension = getExtension(f);
+            if (extension != null && extension.equals("txt"))
+                return true;
+            return false;
+        }
+
+        public String getDescription() {
+            return "text files ";
+        }
+    });
     if(lastConfig.length()>0)
       chooser.setSelectedFile(new File(lastConfig));
     int returnVal = chooser.showOpenDialog(this);
@@ -2117,33 +2183,30 @@ protected INumberImage model;
       });
 
     }
-    
+
     ATKGraphicsUtils.centerDialog(axisDialog);
     axisDialog.setVisible(true);
 
   }
 
-  private void initSettings(){
-
-      minBestFitText.setText(Double.toString(bfMin));
-      maxBestFitText.setText(Double.toString(bfMax));
-
-      minBestFitLabel.setEnabled(!autoBestFit);
-      minBestFitText.setEnabled(!autoBestFit);
-      maxBestFitLabel.setEnabled(!autoBestFit);
-      maxBestFitText.setEnabled(!autoBestFit);
-
-      bestFitCheck.setSelected(isBestFit);
-      autoBestFitCheck.setSelected(autoBestFit);
-      sigHistogramCheck.setSelected(sigHistogram);
-      negativeCheck.setSelected(isNegative);
-      imageSizeCombo.setSelectedIndex(getZoom());      
-}   
 
   protected void showSettings() {
 
     constructSettingsPanel();
-    initSettings();  
+
+    minBestFitText.setText(Double.toString(bfMin));
+    maxBestFitText.setText(Double.toString(bfMax));
+
+    minBestFitLabel.setEnabled(!autoBestFit);
+    minBestFitText.setEnabled(!autoBestFit);
+    maxBestFitLabel.setEnabled(!autoBestFit);
+    maxBestFitText.setEnabled(!autoBestFit);
+
+    bestFitCheck.setSelected(isBestFit);
+    autoBestFitCheck.setSelected(autoBestFit);
+    sigHistogramCheck.setSelected(sigHistogram);
+    negativeCheck.setSelected(isNegative);
+    imageSizeCombo.setSelectedIndex(getZoom());
 
     ATKGraphicsUtils.centerDialog(settingsDialog);
     settingsDialog.setVisible(true);
@@ -3071,6 +3134,24 @@ protected INumberImage model;
 
   }
 
+  /**
+   * <code>getExtension</code> returns the extension of a given file,
+   * that is the part after the last `.' in the filename.
+   *
+   * @param f a <code>File</code> value
+   * @return a <code>String</code> value
+   */
+  protected String getExtension(File f) {
+	String ext = null;
+	String s = f.getName();
+	int i = s.lastIndexOf('.');
+	
+	if (i > 0 &&  i < s.length() - 1) {
+	    ext = s.substring(i+1).toLowerCase();
+	}
+	return ext;
+  }
+
   // ----------------------------------------------------------
   // Action Listener
   // ----------------------------------------------------------
@@ -3136,6 +3217,7 @@ protected INumberImage model;
     } else if (evt.getSource() == profileButton ||
         evt.getSource() == lineProfileMenuItem) {
 
+//      imagePanel.setSelectionMode(0);
       AdvancedImagePlus imp = imagePanel.getImagePlus();
       if (imp != null) {
           Vector<Roi> rois = imp.getAllRois();
@@ -3148,9 +3230,8 @@ protected INumberImage model;
               }
               rois = null;
           }
-         imp = null;
+          imp = null;
       }
-      
       constructLineProfiler();
       lineProfiler.setLineProfileMode();
       lineProfiler.setVisible(true);
@@ -3164,6 +3245,7 @@ protected INumberImage model;
     } else if (evt.getSource() == histoButton ||
         evt.getSource() == histogramMenuItem) {
 
+//      imagePanel.setSelectionMode(1);
       constructLineProfiler();
       lineProfiler.setHistogramMode();
       lineProfiler.setVisible(true);
@@ -3229,8 +3311,6 @@ protected INumberImage model;
       loadButtonActionPerformed();
     } else if (evt.getSource() == saveButton || evt.getSource() == saveMenuItem) {
       saveButtonActionPerformed();
-    } else if (evt.getSource() == saveDataFileMenuItem) {
-          saveDataFile();
     } else if (evt.getSource() == printButton || evt.getSource() == printMenuItem) {
       printImage();
     } else if (evt.getSource() == displayLogMenuItem) {
@@ -3598,22 +3678,6 @@ protected INumberImage model;
     }
 
   }
-  
-//This method is used to construct table without displaying the table
-  private void constructTable() {
-
-      constructTablePanel();
-      synchronized (this) {
-        if (!buildTable()) return;
-      }
-  }
-  
-  //This method is used to save data file without displaying the table
-  private void saveDataFile() {
-      constructTable();
-      if (tablePanel != null)
-          tablePanel.saveDataFile();
-  }
 
   protected String getLabelInfoString() {
     Dimension imgsize = getCurrentImageSize();
@@ -3868,7 +3932,7 @@ protected INumberImage model;
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("edf"))
           return true;
         return false;
@@ -3898,7 +3962,7 @@ protected INumberImage model;
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("jpg"))
           return true;
         return false;
@@ -3928,7 +3992,7 @@ protected INumberImage model;
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("jpg"))
           return true;
         return false;
@@ -3958,7 +4022,7 @@ protected INumberImage model;
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("png"))
           return true;
         return false;
@@ -3988,7 +4052,7 @@ protected INumberImage model;
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("png"))
           return true;
         return false;
@@ -4039,17 +4103,17 @@ protected INumberImage model;
         FileFilter filter = chooser.getFileFilter();
 
         if (edfFilter.equals(filter)) {
-          if (MultiExtFileFilter.getExtension(f) == null || !MultiExtFileFilter.getExtension(f).equalsIgnoreCase("edf")) {
+          if (getExtension(f) == null || !getExtension(f).equalsIgnoreCase("edf")) {
             f = new File(f.getAbsolutePath() + ".edf");
           }
           lastFileFilter = filter;
         } else if (jpgFilter.equals(filter) || jpg8Filter.equals(filter)) {
-          if (MultiExtFileFilter.getExtension(f) == null || !MultiExtFileFilter.getExtension(f).equalsIgnoreCase("jpg")) {
+          if (getExtension(f) == null || !getExtension(f).equalsIgnoreCase("jpg")) {
             f = new File(f.getAbsolutePath() + ".jpg");
           }
           lastFileFilter = filter;
         } else if (pngFilter.equals(filter) || png8Filter.equals(filter)) {
-          if (MultiExtFileFilter.getExtension(f) == null || !MultiExtFileFilter.getExtension(f).equalsIgnoreCase("png")) {
+          if (getExtension(f) == null || !getExtension(f).equalsIgnoreCase("png")) {
             f = new File(f.getAbsolutePath() + ".png");
           }
           lastFileFilter = filter;
@@ -4349,6 +4413,7 @@ protected INumberImage model;
     if (logValues != this.logValues) {
       synchronized(this) {
         if (model != null) {
+          try {
             double[][] values = model.getValue();
             if (logValues) {
               setData( computeLog(values) );
@@ -4356,6 +4421,10 @@ protected INumberImage model;
             else {
               setData(values);
             }
+          }
+          catch (DevFailed e) {
+            setData(null);
+          }
         }
       }
     }

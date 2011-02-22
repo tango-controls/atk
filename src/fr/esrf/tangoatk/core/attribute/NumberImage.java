@@ -1,37 +1,18 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
+// File:          ShortSpectrum.java
+// Created:       2001-10-10 13:50:57, assum
+// By:            <assum@esrf.fr>
+// Time-stamp:    <2002-07-16 10:31:19, assum>
+//
 // $Id$
 //
 // Description:
 
 package fr.esrf.tangoatk.core.attribute;
 
-import fr.esrf.Tango.DevFailed;
-import fr.esrf.TangoApi.DeviceAttribute;
-import fr.esrf.TangoApi.events.TangoPeriodicEvent;
-import fr.esrf.TangoApi.events.TangoChangeEvent;
-
 import fr.esrf.tangoatk.core.*;
+import fr.esrf.Tango.*;
+import fr.esrf.TangoApi.*;
+import fr.esrf.TangoApi.events.*;
 
 public class NumberImage extends ANumber implements INumberImage
 {
@@ -161,13 +142,83 @@ public class NumberImage extends ANumber implements INumberImage
     }
   }
 
+  public void setConfiguration(AttributeInfoEx c) {
+    super.setConfiguration(c);
+
+    try {
+      setMinValue(new Double(config.min_value).doubleValue(), true);
+    } catch (NumberFormatException e) {
+      setMinValue(Double.NaN, true);
+      getProperty("min_value").setSpecified(false);
+    } // end of try-catch
+
+    try {
+      setMaxValue(new Double(config.max_value).doubleValue(), true);
+    } catch (NumberFormatException e) {
+      setMaxValue(Double.NaN, true);
+      getProperty("max_value").setSpecified(false);
+    } // end of try-catch
+
+    try {
+      if(config.alarms!=null)
+        setMinAlarm(new Double(config.alarms.min_alarm).doubleValue(), true);
+      else
+        setMinAlarm(new Double(config.min_alarm).doubleValue(), true);
+    } catch (NumberFormatException e) {
+      setMinAlarm(Double.NaN, true);
+      getProperty("min_alarm").setSpecified(false);
+    } // end of try-catch
+
+    try {
+      if(config.alarms!=null)
+        setMaxAlarm(new Double(config.alarms.max_alarm).doubleValue(), true);
+      else
+        setMaxAlarm(new Double(config.max_alarm).doubleValue(), true);
+    } catch (NumberFormatException e) {
+      setMaxAlarm(Double.NaN, true);
+      getProperty("max_alarm").setSpecified(false);
+    } // end of try-catch
+
+    try {
+      if(config.alarms!=null)
+        setMinWarning(new Double(config.alarms.min_warning).doubleValue(), true);
+    } catch (NumberFormatException e) {
+      setMinWarning(Double.NaN, true);
+      getProperty("min_warning").setSpecified(false);
+    } // end of try-catch
+
+    try {
+      if(config.alarms!=null)
+        setMaxWarning(new Double(config.alarms.max_warning).doubleValue(), true);
+    } catch (NumberFormatException e) {
+      setMaxWarning(Double.NaN, true);
+      getProperty("max_warning").setSpecified(false);
+    } // end of try-catch
+
+    try {
+      if(config.alarms!=null)
+        setDeltaT(new Double(config.alarms.delta_t).doubleValue(), true);
+    } catch (NumberFormatException e) {
+      setDeltaT(Double.NaN, true);
+      getProperty("delta_t").setSpecified(false);
+    } // end of try-catch
+
+    try {
+      if(config.alarms!=null)
+        setDeltaVal(new Double(config.alarms.delta_val).doubleValue(), true);
+    } catch (NumberFormatException e) {
+      setDeltaVal(Double.NaN, true);
+      getProperty("delta_val").setSpecified(false);
+    } // end of try-catch
+
+  }
 
   void insert(double[][] d) {
     getNumberImageHelper().insert(d);
   }
 
   public String[][] extract() throws DevFailed {
-    return getNumberImageHelper().getImageValueAsString(readValueFromNetwork());
+    return getNumberImageHelper().getImageValue(readValueFromNetwork());
 
   }
 

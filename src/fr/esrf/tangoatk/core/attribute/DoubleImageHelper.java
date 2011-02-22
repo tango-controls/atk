@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          DoubleImageHelper.java
 // Created:       2002-01-24 10:13:21, assum
 // By:            <assum@esrf.fr>
@@ -30,6 +8,7 @@
 // Description:
 package fr.esrf.tangoatk.core.attribute;
 
+import fr.esrf.tangoatk.core.*;
 
 
 import fr.esrf.Tango.*;
@@ -37,7 +16,7 @@ import fr.esrf.TangoApi.*;
 
 class DoubleImageHelper extends ANumberImageHelper {
 
-  public DoubleImageHelper(AAttribute attribute) {
+  public DoubleImageHelper(IAttribute attribute) {
     init(attribute);
   }
 
@@ -65,7 +44,7 @@ class DoubleImageHelper extends ANumberImageHelper {
       flatd = NumberAttributeHelper.flatten(d);
       if (dUnitFactor==1.0)
       {
-    	 da.insert(flatd, d[0].length, d.length);
+         da.insert(flatd, d.length, d[0].length);
 	 return;
       }
       
@@ -76,7 +55,7 @@ class DoubleImageHelper extends ANumberImageHelper {
           tmp[i] = (flatd[i] / dUnitFactor);
       }
       
-      da.insert(tmp, d[0].length, d.length);
+      da.insert(tmp, d.length, d[0].length);
   }
 
   void setMinAlarm(double d, boolean writable) {
@@ -146,8 +125,8 @@ class DoubleImageHelper extends ANumberImageHelper {
   double[][] getNumberImageValue(DeviceAttribute deviceAttribute) throws DevFailed {
     double[] tmp;
     tmp = deviceAttribute.extractDoubleArray();
-    int ydim = deviceAttribute.getDimY();
-    int xdim = deviceAttribute.getDimX();
+    int ydim = attribute.getYDimension();
+    int xdim = attribute.getXDimension();
 
     if (ydim != retval.length || retval.length == 0 || xdim != retval[0].length) {
 
@@ -157,7 +136,7 @@ class DoubleImageHelper extends ANumberImageHelper {
     int k = 0;
     for (int y = 0; y < ydim; y++)
       for (int x = 0; x < xdim; x++) {
-          retval[y][x] = tmp[k++];
+        retval[y][x] = tmp[k++];
       }
 
     return retval;
@@ -170,8 +149,8 @@ class DoubleImageHelper extends ANumberImageHelper {
     
     tmp = deviceAttribute.extractDoubleArray();
     dUnitFactor = this.attribute.getDisplayUnitFactor();
-    int ydim = deviceAttribute.getDimY();
-    int xdim = deviceAttribute.getDimX();
+    int ydim = attribute.getYDimension();
+    int xdim = attribute.getXDimension();
 
     if (ydim != retval.length || retval.length == 0 || xdim != retval[0].length) {
 
@@ -187,20 +166,20 @@ class DoubleImageHelper extends ANumberImageHelper {
     return retval;
   }
 
-  String[][] getImageValueAsString(DeviceAttribute deviceAttribute) throws DevFailed {
+  String[][] getImageValue(DeviceAttribute deviceAttribute) throws DevFailed {
     double[] tmp;
     tmp = deviceAttribute.extractDoubleArray();
-    int ydim = deviceAttribute.getDimY();
-    int xdim = deviceAttribute.getDimX();
-    String[][] retval_str = new String[ydim][xdim];
+    int ydim = attribute.getYDimension();
+    int xdim = attribute.getXDimension();
+    String[][] retval = new String[ydim][xdim];
 
     int k = 0;
     for (int i = 0; i < ydim; i++)
       for (int j = 0; j < xdim; j++) {
-        retval_str[i][j] = Double.toString(tmp[k++]);
+        retval[i][j] = Double.toString(tmp[k++]);
       }
 
-    return retval_str;
+    return retval;
   }
 
   public String getVersion() {

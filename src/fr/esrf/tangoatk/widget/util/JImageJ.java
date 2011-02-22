@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 
 package fr.esrf.tangoatk.widget.util;
 
@@ -58,9 +36,9 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+import java.util.Iterator;
 import java.util.Vector;
 
-import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -73,10 +51,10 @@ import javax.swing.border.LineBorder;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-import java.awt.event.InputEvent;
 
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
 
+@SuppressWarnings("deprecation")
 public class JImageJ extends JPanel implements ActionListener {
 
     protected BufferedImage       theImage                  = null;
@@ -106,7 +84,7 @@ public class JImageJ extends JPanel implements ActionListener {
         new Color(255, 100, 255);
     protected Color               roiOutsideColor           =
         new Color(0, 200, 0);
-    protected Color               roiOutsideSelectionColor  = Color.GREEN;
+    protected Color               roiOutsideSelectionColor  = Color.GREEN;;
 
 
     // ImageJ part
@@ -118,7 +96,6 @@ public class JImageJ extends JPanel implements ActionListener {
 
     // Toolbar
     protected JPanel              toolbarPanel;
-    protected ButtonGroup 		  buttonGroup;
     protected JToggleButton       rectangleButton;
     protected JToggleButton       ellipseButton;
     protected JToggleButton       freeHandButton;
@@ -133,6 +110,7 @@ public class JImageJ extends JPanel implements ActionListener {
     protected JToggleButton       arrowButton;
     protected JButton             clearButton;
     protected JButton             deleteButton;
+    protected JToggleButton       allButton;
     protected JToggleButton       selectedButton;
     protected JButton             innerButton;
     protected JButton             outerButton;
@@ -192,7 +170,7 @@ public class JImageJ extends JPanel implements ActionListener {
 
     protected final static Insets NO_MARGIN = new Insets(0,0,0,0);
 
-
+    
     public JImageJ () {
         super();
         undoManager = new UndoManager();
@@ -211,7 +189,7 @@ public class JImageJ extends JPanel implements ActionListener {
             }
         };
         imp = new AdvancedImagePlus();
-        initCanvasRenderer();
+        canvasRenderer = new CanvasRenderer();
         canvas = new RenderedImageCanvas(imp);
         canvas.removeMouseListener(canvas);
         canvas.removeMouseMotionListener(canvas);
@@ -260,13 +238,6 @@ public class JImageJ extends JPanel implements ActionListener {
         Roi.setColor(roiColor);
     }
 
-    /**
-     * 
-     */
-    protected void initCanvasRenderer() {
-        canvasRenderer = new CanvasRenderer();
-    }
-
     protected void initToolbar() {
         toolbarPanel = new JPanel();
         toolbarPanel.setBackground( getBackground() );
@@ -290,8 +261,8 @@ public class JImageJ extends JPanel implements ActionListener {
         rectangleButton.addActionListener(this);
         rectangleButton.setBounds(0,0,18,18);
         rectangleButton.setBackground(Color.WHITE);
-        
-        
+        rectangleButton.setSelected(true);
+        selectedButton = rectangleButton;
         toolbarPanel.add(rectangleButton);
         ellipseButton = new JToggleButton();
         ellipseButton.setMargin(NO_MARGIN);
@@ -624,19 +595,8 @@ public class JImageJ extends JPanel implements ActionListener {
         redoButton.setBackground(Color.WHITE);
         toolbarPanel.add(redoButton);
         updateUndoRedoButtons();
-        
-        buttonGroup = new ButtonGroup();
-		buttonGroup.add(rectangleButton);
-		buttonGroup.add(ellipseButton);
-		buttonGroup.add(polygonButton);
-		buttonGroup.add(freeHandButton);
-		buttonGroup.add(lineButton);
-		buttonGroup.add(angleButton);
-		buttonGroup.add(wandButton);
-		buttonGroup.add(zoomButton);
-		buttonGroup.add(handButton);
-		buttonGroup.add(arrowButton);
-        rectangleButton.doClick();
+
+        Toolbar.getInstance().setTool(Toolbar.RECTANGLE);
     }
 
     protected void updateUndoRedoButtons() {
@@ -686,8 +646,8 @@ public class JImageJ extends JPanel implements ActionListener {
     protected void measureAxis () {
         xAxisHeight = 0;
         yAxisWidth = 0;
-        xAxisUpMargin = xAxis.getThickness();
-        yAxisRightMargin = xAxis.getFontOverWidth() - 1;
+        xAxisUpMargin = Toolbar.getInstance().getHeight() + 7;
+        yAxisRightMargin = 15;
         Dimension imageSize = canvas.getPreferredSize();
         int imageWidth = imageSize.width;
         int imageHeight = imageSize.height;
@@ -851,46 +811,60 @@ public class JImageJ extends JPanel implements ActionListener {
 
     public void actionPerformed (ActionEvent e) {
         if (e.getSource() instanceof JToggleButton) {
+            if ( selectedButton != null ) {
+                selectedButton.setSelected(false);
+            }
             selectedButton = (JToggleButton)e.getSource();
-            canvas.setSelectionMode(e.getSource() == arrowButton);
+            selectedButton.setSelected(true);
         }
-
         if (e.getSource() == rectangleButton) {
             Toolbar.getInstance().setTool(Toolbar.RECTANGLE);
+            canvas.setSelectionMode(false);
             imp.setHandledRoi(null);
         }
         else if (e.getSource() == ellipseButton) {
             Toolbar.getInstance().setTool(Toolbar.OVAL);
+            canvas.setSelectionMode(false);
         }
         else if (e.getSource() == polygonButton) {
             Toolbar.getInstance().setTool(Toolbar.POLYGON);
+            canvas.setSelectionMode(false);
         }
         else if (e.getSource() == freeHandButton) {
             Toolbar.getInstance().setTool(Toolbar.FREEROI);
+            canvas.setSelectionMode(false);
         }
         else if (e.getSource() == lineButton) {
             Toolbar.getInstance().setTool(Toolbar.LINE);
+            canvas.setSelectionMode(false);
         }
         else if (e.getSource() == angleButton) {
             Toolbar.getInstance().setTool(Toolbar.ANGLE);
+            canvas.setSelectionMode(false);
         }
 //        else if (e.getSource() == pointButton) {
 //            Toolbar.getInstance().setTool(Toolbar.POINT);
+//            canvas.setSelectionMode(false);
 //        }
         else if (e.getSource() == wandButton) {
             Toolbar.getInstance().setTool(Toolbar.WAND);
+            canvas.setSelectionMode(false);
         }
 //        else if (e.getSource() == textButton) {
 //            Toolbar.getInstance().setTool(Toolbar.TEXT);
+//            canvas.setSelectionMode(false);
 //        }
         else if (e.getSource() == zoomButton) {
             Toolbar.getInstance().setTool(Toolbar.MAGNIFIER);
+            canvas.setSelectionMode(false);
         }
         else if (e.getSource() == handButton) {
             Toolbar.getInstance().setTool(Toolbar.HAND);
+            canvas.setSelectionMode(false);
         }
         else if (e.getSource() == arrowButton) {
             Toolbar.getInstance().setTool(Toolbar.RECTANGLE);
+            canvas.setSelectionMode(true);
         }
         else if (e.getSource() == deleteButton) {
             deleteSelectedRois();
@@ -957,13 +931,9 @@ public class JImageJ extends JPanel implements ActionListener {
                 formerImage.flush();
                 formerImage = null;
             }
-            boolean selectionMode = false; 
-            if(canvas != null)
-            	selectionMode = canvas.isSelectionMode();
             canvas = new RenderedImageCanvas(imp);
             canvas.removeMouseListener(canvas);
             canvas.removeMouseMotionListener(canvas);
-            canvas.setSelectionMode(selectionMode);
             // called this to create link between imp and canvas, and between
             // toolbar and canvas
             new HiddenWindow(imp, canvas);
@@ -990,6 +960,7 @@ public class JImageJ extends JPanel implements ActionListener {
         if (canvas != null) {
             canvas.computeZoom(zoom);
             canvasRenderer.revalidate();
+            imagePane.setViewportView(canvasRenderer);
             revalidate();
             repaint();
         }
@@ -1061,7 +1032,7 @@ public class JImageJ extends JPanel implements ActionListener {
 
     /**
      * Returns size of the image (does not include margin)
-     *
+     * 
      * @return Image size
      */
     public Dimension getImageSize () {
@@ -2081,6 +2052,13 @@ public class JImageJ extends JPanel implements ActionListener {
     }
 
     /**
+     * @return the allButton
+     */
+    public JToggleButton getAllButton () {
+        return allButton;
+    }
+
+    /**
      * @return the selectedButton
      */
     public JToggleButton getSelectedButton () {
@@ -2627,6 +2605,8 @@ public class JImageJ extends JPanel implements ActionListener {
     public void zoomIn() {
         canvas.zoomInNoTranslation(0, 0);
         canvasRenderer.revalidate();
+        imagePane.setViewportView(canvasRenderer);
+        imagePane.getViewport().revalidate();
         imagePane.revalidate();
         repaint();
     }
@@ -2634,6 +2614,8 @@ public class JImageJ extends JPanel implements ActionListener {
     public void zoomOut() {
         canvas.zoomOutNoTranslation(0, 0);
         canvasRenderer.revalidate();
+        imagePane.setViewportView(canvasRenderer);
+        imagePane.getViewport().revalidate();
         imagePane.revalidate();
         repaint();
     }
@@ -2680,6 +2662,7 @@ public class JImageJ extends JPanel implements ActionListener {
      */
     protected class RenderedImageCanvas extends ImageCanvas {
 
+        protected boolean roiSelected = false;
         protected boolean selectionMode = false;
 
         public RenderedImageCanvas (ImagePlus imp) {
@@ -2793,90 +2776,30 @@ public class JImageJ extends JPanel implements ActionListener {
          *            boolean to know whether to keep previous selected Roi
          *            selected
          */
-        public void findSelectedRoi (int x, int y, boolean keepSelection) {
-            findRoiSelected(x, y, keepSelection);
-        }
-
-        @Deprecated
         public void findRoiSelected (int x, int y, boolean keepSelection) {
             if (imp instanceof AdvancedImagePlus) {
-                Roi closestRoi = findRoiAtPoint(x, y);
-
                 Roi validatedRoi = ((AdvancedImagePlus)imp).getValidatedRoi();
-                Vector<Roi> selectedRois = ((AdvancedImagePlus)imp).getSelectedRois();
+                Roi currentRoi = null;
+                roiSelected = false;
+                Vector<Roi> allRois = ((AdvancedImagePlus)imp).getAllRois();
                 Vector<Roi> innerRois = ((AdvancedImagePlus)imp).getInnerRois();
                 Vector<Roi> outerRois = ((AdvancedImagePlus)imp).getOuterRois();
-                boolean roiSelected = false;
-                boolean alreadySelected = false;
-
-                if (closestRoi != null) {
-                    roiSelected = true;
-                    alreadySelected = selectedRois.contains(closestRoi);
-                }
-
-                if (keepSelection) {
-                    if (roiSelected) {
-                        boolean isValidatedRoi = innerRois.contains(closestRoi) || outerRois.contains(closestRoi);
-                        if (alreadySelected) {
-                            //remove it from selection
-                            selectedRois.remove(closestRoi);
-                            if (!isValidatedRoi) {
-                                ((AdvancedImagePlus)imp).setHandledRoi(closestRoi);
-                            }
-                            if (closestRoi == validatedRoi) {
-                                ((AdvancedImagePlus)imp).setValidatedRoi(null);
-                            }
-                        }
-                        else {
-                            selectedRois.add(closestRoi);
-                            if (isValidatedRoi) {
-                                //only one validated roi can be selected at a time
-                                if (validatedRoi != null && closestRoi != validatedRoi) {
-                                    selectedRois.remove(validatedRoi);
-                                }
-                                ((AdvancedImagePlus)imp).setValidatedRoi(closestRoi);
-                            }
-                            else {
-                                ((AdvancedImagePlus)imp).setHandledRoi(closestRoi);
-                            }
-                        }
-                    }
-                }
-                else {
-                    selectedRois.clear();
-                    ((AdvancedImagePlus)imp).setValidatedRoi(null);//only inner or outer roi
-                    ((AdvancedImagePlus)imp).setHandledRoi(null);//validated roi cannot be handled
-
-                    if (roiSelected) {
-                        selectedRois.add(closestRoi);
-                        if ( innerRois.contains(closestRoi) || outerRois.contains(closestRoi) ) {
-                            ((AdvancedImagePlus)imp).setValidatedRoi(closestRoi);
-                        }
-                        else {
-                            ((AdvancedImagePlus)imp).setHandledRoi(closestRoi);
-                        }
-                    }
-                }
-            }
-        }
-
-        /**
-         * Method used to find the Roi which is corresponding to the given coordinates
-         * 
-         * @param x
-         * @param y
-         * @return the roi pointed if any, null otherwise
-         */
-        private Roi findRoiAtPoint(int x, int y) {
-            Roi closestRoi = null;
-            int minDistance = Integer.MAX_VALUE;
-            for (Roi currentRoi : ((AdvancedImagePlus)imp).getAllRois()) {
-                if ( currentRoi != null && currentRoi.getState() != Roi.CONSTRUCTING) {
-                    if ( currentRoi.isHandle((int)(x*magnification), (int)(y*magnification)) >= 0 ) {
+                Roi closestRoi = null;
+                int minDistance = Integer.MAX_VALUE;
+                Iterator<Roi> it = allRois.iterator();
+                boolean selectionExists = false;
+                while ( it.hasNext() ) {
+                    currentRoi = it.next();
+                    if ( currentRoi != null
+                            && currentRoi.getState() != Roi.CONSTRUCTING
+                            && currentRoi.isHandle((int)(x*magnification), (int)(y*magnification)) >= 0 ) {
                         closestRoi = currentRoi;
                         break;
                     }
-                    else if ( currentRoi.contains(x, y) ) {
+                    else if ( currentRoi != null
+                              && currentRoi.getState() != Roi.CONSTRUCTING
+                              && currentRoi.contains(x, y)
+                            ) {
                         Rectangle r = currentRoi.getBounds();
                         // Look for the closest Roi :
                         // This is the Roi whose bounds sides distance to
@@ -2886,52 +2809,136 @@ public class JImageJ extends JPanel implements ActionListener {
                                 Math.abs(r.x - x),
                                 Math.abs(r.x+r.width - (x+1))
                         );
-//                            distanceX = Math.min(
-//                                    Math.abs( (int)r.getCenterX() - x ),
-//                                    distanceX
-//                            );
+//                        distanceX = Math.min(
+//                                Math.abs( (int)r.getCenterX() - x ),
+//                                distanceX
+//                        );
                         int distanceY = Math.min(
                                 Math.abs(r.y - y),
                                 Math.abs(r.y+r.width - (y+1))
                         );
-//                            distanceY = Math.min(
-//                                    Math.abs( (int)r.getCenterY() - y ),
-//                                    distanceY
-//                            );
+//                        distanceY = Math.min(
+//                                Math.abs( (int)r.getCenterY() - y ),
+//                                distanceY
+//                        );
                         int distance = Math.min(distanceX, distanceY);
                         if (distance < minDistance) {
                             minDistance = distance;
                             closestRoi = currentRoi;
                         }
                     }
+                    currentRoi = null;
+                }
+                if (closestRoi != null) {
+                    roiSelected = true;
+                    selectionExists = ( (AdvancedImagePlus) imp )
+                            .getSelectedRois().contains(closestRoi);
+                }
+                if (!keepSelection) {
+                    ((AdvancedImagePlus)imp).getSelectedRois().clear();
+                    ((AdvancedImagePlus)imp).setValidatedRoi(null);
+                }
+                if (roiSelected) {
+                    ((AdvancedImagePlus)imp).getSelectedRois().removeAll(
+                            ((AdvancedImagePlus)imp).getInnerRois()
+                    );
+                    ((AdvancedImagePlus)imp).getSelectedRois().removeAll(
+                            ((AdvancedImagePlus)imp).getOuterRois()
+                    );
+                    ((AdvancedImagePlus)imp).getSelectedRois().add(closestRoi);
+                    if ( ((AdvancedImagePlus)imp).getInnerRois().contains(closestRoi)
+                         || ((AdvancedImagePlus)imp).getOuterRois().contains(closestRoi) ) {
+                        ((AdvancedImagePlus)imp).setValidatedRoi(closestRoi);
+                        if (keepSelection && validatedRoi != null && validatedRoi != closestRoi) {
+                            ((AdvancedImagePlus)imp).getSelectedRois().remove(validatedRoi);
+                        }
+                    }
+                }
+                else if (selectionExists) {
+                    ((AdvancedImagePlus)imp).getSelectedRois().remove(closestRoi);
+                    if ( ( !innerRois.contains(closestRoi) )
+                            && ( !outerRois.contains(closestRoi) ) ) {
+                        ((AdvancedImagePlus)imp).setHandledRoi(closestRoi);
+                    }
+                    if (closestRoi == validatedRoi) {
+                        ((AdvancedImagePlus)imp).setValidatedRoi(null);
+                    }
+                }
+                else {
+                    ((AdvancedImagePlus)imp).getSelectedRois().clear();
+                    ((AdvancedImagePlus)imp).setValidatedRoi(null);
                 }
             }
-            return closestRoi;
         }
 
         /**
          * Method used to find the Roi which can be moved/resized by mouse,
          * corresponding to given coordinates
-         *
+         * 
          * @param x
          *            X-coordinate
          * @param y
          *            Y-coordinate
          */
-        public void findHandledRoi(int x, int y) {
+        public void findHandledRoi (int x, int y) {
             if (imp instanceof AdvancedImagePlus) {
-                Roi closestRoi = findRoiAtPoint(x, y);
-
-                Vector<Roi> innerRois = ((AdvancedImagePlus) imp).getInnerRois();
-                Vector<Roi> outerRois = ((AdvancedImagePlus) imp).getOuterRois();
-                boolean isValidatedRoi = innerRois.contains(closestRoi)
-                || outerRois.contains(closestRoi);
-
-                if (!isValidatedRoi) {
-                    //we don't allow validated roi's modification
-                    if (closestRoi != null) {
-                        ((AdvancedImagePlus) imp).setHandledRoi(closestRoi);
+                Roi currentRoi = null;
+                Vector<Roi> allRois = ((AdvancedImagePlus)imp).getAllRois();
+                Vector<Roi> innerRois = ((AdvancedImagePlus)imp).getInnerRois();
+                Vector<Roi> outerRois = ((AdvancedImagePlus)imp).getOuterRois();
+                Iterator<Roi> it = allRois.iterator();
+                Roi closestRoi = null;
+                int minDistance = Integer.MAX_VALUE;
+                while (it.hasNext()) {
+                    currentRoi = it.next();
+                    if ( ( !innerRois.contains( currentRoi ) )
+                            && ( !outerRois.contains( currentRoi ) ) ) {
+                        if ( currentRoi != null
+                                && currentRoi.getState() != Roi.CONSTRUCTING
+                                && currentRoi.isHandle(
+                                        (int) ( x * magnification ),
+                                        (int) ( y * magnification ) ) >= 0 ) {
+                            closestRoi = currentRoi;
+                            break;
+                        }
+                        else if ( currentRoi != null
+                                && currentRoi.getState() != Roi.CONSTRUCTING
+                                && currentRoi.contains( x, y ) ) {
+                            Rectangle r = currentRoi.getBounds();
+                            // Look for the closest Roi :
+                            // This is the Roi whose bounds sides distance to
+                            // point and bounds center distance to point are the
+                            // smallest
+                            int distanceX = Math.min(
+                                    Math.abs(r.x - x),
+                                    Math.abs(r.x+r.width - (x+1))
+                            );
+//                            distanceX = Math.min(
+//                                    Math.abs( (int)r.getCenterX() - x ),
+//                                    distanceX
+//                            );
+                            int distanceY = Math.min(
+                                    Math.abs(r.y - y),
+                                    Math.abs(r.y+r.width - (y+1))
+                            );
+//                            distanceY = Math.min(
+//                                    Math.abs( (int)r.getCenterY() - y ),
+//                                    distanceY
+//                            );
+                            int distance = Math.min(distanceX, distanceY);
+                            if (distance < minDistance) {
+                                minDistance = distance;
+                                closestRoi = currentRoi;
+                            }
+                        }
                     }
+                    currentRoi = null;
+                }
+                allRois = null;
+                innerRois = null;
+                outerRois = null;
+                if (closestRoi != null) {
+                    ((AdvancedImagePlus)imp).setHandledRoi(closestRoi);
                 }
             }
         }
@@ -2952,7 +2959,7 @@ public class JImageJ extends JPanel implements ActionListener {
                 boolean keepSelection = ( e.isShiftDown()
                         || e.isControlDown()
                 );
-                findSelectedRoi(x, y, keepSelection);
+                findRoiSelected(x, y, keepSelection);
             }
             else {
                 super.mouseClicked(e);
@@ -3191,10 +3198,12 @@ public class JImageJ extends JPanel implements ActionListener {
                 else {
                     setMagnification(zoom);
                 }
+                imp.getWindow().pack();
             }
             else {
                 reAdjustSourceRect(zoom);
             }
+            imagePane.setViewportView(canvasRenderer);
             repaint();
         }
 
@@ -3228,6 +3237,8 @@ public class JImageJ extends JPanel implements ActionListener {
                         (int)(rect.width*newMag),
                         (int)(rect.height*newMag)
                 );
+                imagePane.setViewportView(canvasRenderer);
+                imagePane.getViewport().revalidate();
                 imagePane.revalidate();
                 scrollTo(visible.x, visible.y);
                 rect = null;
@@ -3320,11 +3331,11 @@ public class JImageJ extends JPanel implements ActionListener {
             int imageWidth = imageSize.width;
             int imageHeight = imageSize.height;
             xOrg = (d.width
-                    - ( imageWidth + yAxisWidth + yAxisRightMargin )
-            ) / 2;
+                     - ( imageWidth + yAxisWidth + yAxisRightMargin )
+                   ) / 2;
             yOrg = (d.height
-                    - ( imageHeight + xAxisHeight + xAxisUpMargin )
-            ) / 2;
+                     - ( imageHeight + xAxisHeight + xAxisUpMargin )
+                   ) / 2;
             g.translate(xOrg + yAxisWidth, yOrg + xAxisUpMargin);
         }
 
@@ -3335,11 +3346,11 @@ public class JImageJ extends JPanel implements ActionListener {
             int imageWidth = imageSize.width;
             int imageHeight = imageSize.height;
             xOrg = (d.width
-                    - ( imageWidth + yAxisWidth + yAxisRightMargin )
-            ) / 2;
+                     - ( imageWidth + yAxisWidth + yAxisRightMargin )
+                   ) / 2;
             yOrg = (d.height
-                    - ( imageHeight + xAxisHeight + xAxisUpMargin )
-            ) / 2;
+                     - ( imageHeight + xAxisHeight + xAxisUpMargin )
+                   ) / 2;
             return new MouseEvent(
                     e.getComponent(),
                     e.getID(),
@@ -3486,7 +3497,18 @@ public class JImageJ extends JPanel implements ActionListener {
             Graphics2D g2d = (Graphics2D)g;
             Stroke oldStroke = g2d.getStroke();
             if (canvas != null && theImage != null) {
-                adaptAxes();
+                if ( xAxis.isAutoScale() ) {
+                    xAxis.setAutoScale(false);
+                    xAxis.setMinimum(0);
+                    xAxis.setMaximum( theImage.getWidth() );
+                    xAxis.setAutoScale(true);
+                }
+                if ( yAxis.isAutoScale() ) {
+                    yAxis.setAutoScale(false);
+                    yAxis.setMinimum(0);
+                    yAxis.setMaximum( theImage.getHeight() );
+                    yAxis.setAutoScale(true);
+                }
                 Dimension d = getSize();
                 if ( isOpaque() ) {
                     g2d.setColor( getBackground() );
@@ -3495,70 +3517,55 @@ public class JImageJ extends JPanel implements ActionListener {
                 translateGraphics(g2d);
                 canvas.paint(g2d);
                 paintAxis(g2d);
-                Vector<Roi> innerRois = imp.getInnerRois();
-                Vector<Roi> outerRois = imp.getOuterRois();
-                Vector<Roi> selectedRois = imp.getSelectedRois();
-                boolean manySelected = (selectedRois.size() > 1);
-                for (Roi roi : imp.getAllRois()) {
-                    if (roi != null) {
-                        int selectedIndex = selectedRois.indexOf(roi);
-                        if ( selectedIndex > -1 ) {
-                            if (manySelected) {
-                                g2d.setColor(Color.WHITE);
-                                Rectangle bounds = roi.getBounds();
-                                int x = bounds.x + bounds.width/2;
-                                int y = bounds.y + bounds.height/2;
-                                g2d.drawString(
-                                        Integer.toString(selectedIndex + 1),
-                                        (int)( x*canvas.getMagnification() ),
-                                        (int)( y*canvas.getMagnification() )
-                                );
-                            }
-
+                Vector<Roi> rois = imp.getAllRois();
+                boolean manySelected = (imp.getSelectedRois().size() > 1);
+                for (int i = 0; i < rois.size(); i++) {
+                    if (rois.get(i) != null) {
+                        Color roiColor = Roi.getColor();
+                        if ( imp.getSelectedRois().contains( rois.get(i) ) ) {
                             g2d.setStroke(selectionStroke);
-                            if ( innerRois.contains( roi ) ) {
+                            if ( imp.getInnerRois().contains( rois.get(i) ) ) {
                                 Roi.setColor(roiInsideSelectionColor);
                             }
-                            else if ( outerRois.contains( roi ) ) {
+                            else if ( imp.getOuterRois().contains( rois.get(i) ) ) {
                                 Roi.setColor(roiOutsideSelectionColor);
                             }
                             else {
                                 Roi.setColor(roiSelectionColor);
                             }
+                            if (manySelected) {
+                                int selectedIndex = imp.getSelectedRois().indexOf(
+                                        rois.get(i)
+                                );
+                                Color color = g2d.getColor();
+                                g2d.setColor(Color.WHITE);
+                                Rectangle bounds = rois.get(i).getBounds();
+                                int x = bounds.x;
+                                int y = bounds.y;
+                                int halfWidth = bounds.width/2;
+                                int halfHeight = bounds.height/2;
+                                x += halfWidth;
+                                y += halfHeight;
+                                g2d.drawString(
+                                        Integer.toString(selectedIndex + 1),
+                                        (int)( x*canvas.getMagnification() ),
+                                        (int)( y*canvas.getMagnification() )
+                                );
+                                g2d.setColor(color);
+                                color = null;
+                            }
                         }
-                        else {
-                            g2d.setStroke(oldStroke);
-                            if ( innerRois.contains( roi ) ) {
-                                Roi.setColor(roiInsideColor);
-                            }
-                            else if ( outerRois.contains( roi ) ) {
-                                Roi.setColor(roiOutsideColor);
-                            }
-                            else {
-                                Roi.setColor(roiColor);
-                            }
+                        else if ( imp.getInnerRois().contains( rois.get(i) ) ) {
+                            Roi.setColor(roiInsideColor);
                         }
-                        roi.draw(g2d);
+                        else if ( imp.getOuterRois().contains( rois.get(i) ) ) {
+                            Roi.setColor(roiOutsideColor);
+                        }
+                        rois.get(i).draw(g2d);
+                        g2d.setStroke(oldStroke);
+                        Roi.setColor(roiColor);
                     }
                 }
-            }
-        }
-
-        /**
-         * 
-         */
-        protected void adaptAxes() {
-            if ( xAxis.isAutoScale() ) {
-                xAxis.setAutoScale(false);
-                xAxis.setMinimum(0);
-                xAxis.setMaximum( theImage.getWidth() );
-                xAxis.setAutoScale(true);
-            }
-            if ( yAxis.isAutoScale() ) {
-                yAxis.setAutoScale(false);
-                yAxis.setMinimum(0);
-                yAxis.setMaximum( theImage.getHeight() );
-                yAxis.setAutoScale(true);
             }
         }
 
@@ -3591,7 +3598,7 @@ public class JImageJ extends JPanel implements ActionListener {
                     deleteSelectedRois();
                     break;
                 case KeyEvent.VK_ESCAPE:
-                    getArrowButton().doClick();
+                    canvas.setSelectionMode(true);
                     canvas.setCursor( canvas.getDefaultCursor() );
                     break;
                 case KeyEvent.VK_CONTROL:
@@ -3609,20 +3616,29 @@ public class JImageJ extends JPanel implements ActionListener {
                     }
                     break;
                 case KeyEvent.VK_UP:
+                    if (bounds != null && bounds.y > 0 && bounds.x >= 0) {
+                        roi.setLocation(bounds.x, bounds.y - 1);
+                    }
+                    break;
                 case KeyEvent.VK_DOWN:
+                    if (bounds != null
+                            && theImage != null
+                            && (bounds.y + bounds.height) < theImage.getHeight() - 1
+                            && bounds.x >= 0) {
+                        roi.setLocation(bounds.x, bounds.y + 1);
+                    }
+                    break;
                 case KeyEvent.VK_LEFT:
+                    if (bounds != null && bounds.y >= 0 && bounds.x > 0) {
+                        roi.setLocation(bounds.x - 1, bounds.y);
+                    }
+                    break;
                 case KeyEvent.VK_RIGHT:
-                    // TODO This test is necessary because of a focus problem.
-                	// A click outside the selected ROI makes it loose focus although it remains selected
-                    // (?! -> imp.getRoi() == null) so keyboard doesn't operate
-                    if (bounds != null) {
-                        int onMask = InputEvent.ALT_DOWN_MASK;
-                        if ((e.getModifiersEx() & onMask) == onMask) {
-                            roi.nudgeCorner(e.getKeyCode());
-                        }
-                        else {
-                            roi.nudge(e.getKeyCode());
-                        }
+                    if (bounds != null
+                            && theImage != null
+                            && (bounds.x + bounds.width) < theImage.getWidth() - 1
+                            && bounds.y >= 0) {
+                        roi.setLocation(bounds.x + 1, bounds.y);
                     }
                     break;
                 default:

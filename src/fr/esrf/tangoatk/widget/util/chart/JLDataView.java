@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 //
 // JLDataView.java
 // Description: A Class to handle 2D graphics plot
@@ -163,7 +141,6 @@ public class JLDataView implements java.io.Serializable {
 
   //Local declaration
   private JLAxis parentAxis;
-  private Vector<ColorItem> barFillColor;
   private Color lineColor;
   private Color fillColor;
   private Color markerColor;
@@ -243,7 +220,6 @@ public class JLDataView implements java.io.Serializable {
     dataLength = 0;
     name = "";
     unit = "";
-    barFillColor = new Vector<ColorItem>();
     lineColor = Color.red;
     fillColor = Color.lightGray;
     markerColor = Color.red;
@@ -355,72 +331,6 @@ public class JLDataView implements java.io.Serializable {
    */
   public Color getFillColor() {
     return fillColor;
-  }
-
-  /**
-   * Change the default bar filling color for the specified index.
-   * @param idx Value index
-   * @param fillColor Filling color
-   */
-  public void setBarFillColorAt(int idx,Color fillColor) {
-
-    boolean found = false;
-    int i=0;
-    while(!found && i<barFillColor.size()) {
-      ColorItem ci = (ColorItem)barFillColor.get(i);
-      found = ci.idx == idx;
-      if(!found) i++;
-    }
-    if(found) {
-      barFillColor.get(i).idx = idx;
-      barFillColor.get(i).fillColor = fillColor;
-    } else {
-      ColorItem ci = new ColorItem(idx,fillColor);
-      barFillColor.add(ci);
-    }
-
-  }
-
-  /**
-   * Return the fill color for the specified index
-   * @param idx Value index
-   * @return The filling color or default fill color if index not found.
-   */
-  public Color getBarFillColorAt(int idx) {
-
-    boolean found = false;
-    int i=0;
-    while(!found && i<barFillColor.size()) {
-      ColorItem ci = (ColorItem)barFillColor.get(i);
-      found = ci.idx == idx;
-      if(!found) i++;
-    }
-    if(found) {
-      return ((ColorItem)barFillColor.get(i)).fillColor;
-    } else {
-      return null;
-    }
-
-  }
-
-
-  /**
-   * Sets the filling color vector for a barchart.
-   * @param bfColors A vector of Filling colors for barchart
-   * @see JLDataView#getBarFillColors
-   */
-  public void setBarFillColors(Vector<ColorItem> bfColors) {
-    barFillColor = bfColors;
-  }
-
-
-  /**
-   * Gets the filling color vector for a barchart.
-   * @return A vector of Filling colors for barchart
-   * @see JLDataView#setBarFillColors
-   */
-  public Vector<ColorItem> getBarFillColors() {
-    return barFillColor;
   }
 
   /* ----------------------------- Line config --------------------------------- */
@@ -683,8 +593,6 @@ public class JLDataView implements java.io.Serializable {
   public void setMathFunction(int function) {
     mathFunction = function;
     updateFilters();
-    if(function==MATH_NONE)
-      computeDataBounds();
   }
 
   /**
@@ -1191,27 +1099,6 @@ public class JLDataView implements java.io.Serializable {
   }
 
   /**
-   * Set data of this dataview and order value according to the x value
-   * @param x x values
-   * @param y y values
-   * @see JLDataView#add
-   */
-  public void setUnorderedData(double[] x,double[] y) {
-
-    if(x.length != y.length) {
-      System.out.println("Warning: Cannot set data, x vector and y vector have not the same length");
-      return;
-    }
-    double[] xOrd = new double[x.length];
-    double[] yOrd = new double[y.length];
-    System.arraycopy(x,0,xOrd,0,x.length);
-    System.arraycopy(y,0,yOrd,0,y.length);
-    mergeSort(xOrd,yOrd);
-    setData(xOrd,yOrd);
-
-  }
-
-  /**
    * Add datum to the dataview. If you call this routine directly the graph will be updated only after a repaint
    * and your data won't be garbaged (if a display duration is specified). You should use JLChart.addData instead.
    * @param p point (real space)
@@ -1496,7 +1383,7 @@ public class JLDataView implements java.io.Serializable {
    * @return Last value
    */
   public DataList getLastValue() {
-    if(!hasFilter())
+    if(hasFilter())
       return theDataEnd;
     else
       return theFilteredDataEnd;
@@ -1509,7 +1396,6 @@ public class JLDataView implements java.io.Serializable {
     theData = null;
     theDataEnd = null;
     dataLength = 0;
-    barFillColor.clear();
     updateFilters();
     computeDataBounds();
   }
@@ -2024,10 +1910,10 @@ public class JLDataView implements java.io.Serializable {
         }
         break;
       case MATH_FFT_MODULUS:
-        doFFT(source,0);
+        // TODO
         break;
       case MATH_FFT_PHASE:
-        doFFT(source,1);
+        // TODO
         break;
     }
 
@@ -2073,7 +1959,6 @@ public class JLDataView implements java.io.Serializable {
       real[idx] = 0.0;
       imag[idx] = 0.0;
     }
-    double fs = 1.0 / (in[1].x - in[0].x); // Sampling frequency
 
     // Do the FFT
     int blockEnd = 1;
@@ -2120,19 +2005,15 @@ public class JLDataView implements java.io.Serializable {
     }
 
     // Create modulus of arguments results
-    double nS = (double)nbSample;
     switch(mode) {
       case 0: // Modulus
-        for(i=0;i<nbSample/2;i++) {
-          double n = Math.sqrt( real[i]*real[i] + imag[i]*imag[i] );
-          addInt((double)i*fs/nS,n/nS);
-        }
-        break;
-      case 1: // Arguments (in radians)
         for(i=0;i<nbSample;i++) {
           double n = Math.sqrt( real[i]*real[i] + imag[i]*imag[i] );
-          double arg = Math.asin( imag[i]/n );
-          addInt((double)i*fs/nS,arg);
+          addInt((double)i,n);
+        }
+        break;
+      case 1: // Arguments
+        for(i=0;i<nbSample;i++) {
         }
         break;
     }

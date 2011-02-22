@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.attribute;
 
 import java.awt.BorderLayout;
@@ -76,6 +54,7 @@ import javax.swing.filechooser.FileFilter;
 
 import com.braju.format.Format;
 
+import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoDs.AttrManip;
 import fr.esrf.tangoatk.core.IImageListener;
 import fr.esrf.tangoatk.core.INumberImage;
@@ -90,7 +69,6 @@ import fr.esrf.tangoatk.widget.util.JGradientViewer;
 import fr.esrf.tangoatk.widget.util.JImage;
 import fr.esrf.tangoatk.widget.util.JSmoothLabel;
 import fr.esrf.tangoatk.widget.util.JTableRow;
-import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
 import fr.esrf.tangoatk.widget.util.chart.AxisPanel;
 import fr.esrf.tangoatk.widget.util.chart.CfFileReader;
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
@@ -119,8 +97,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   private boolean sigHistogram;
   private boolean rectXYmode;
   private boolean isNegative;
-  private int integrationWidthH;
-  private int integrationWidthV;
   protected int startHisto;
   private Gradient gColor;
   private int[] gColormap;
@@ -207,7 +183,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   protected JMenuItem settingsMenuItem;
   protected JMenuItem loadMenuItem;
   protected JMenuItem saveMenuItem;
-  protected JMenuItem saveDataFileMenuItem;
   protected JMenuItem printMenuItem;
   protected JCheckBoxMenuItem displayLogMenuItem;
 
@@ -248,10 +223,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   private JTextField minBestFitText;
   private JLabel maxBestFitLabel;
   private JTextField maxBestFitText;
-  private JLabel integrationWidthHLabel;
-  private JTextField integrationWidthHText;
-  private JLabel integrationWidthVLabel;
-  private JTextField integrationWidthVText;
   private JCheckBox snapToGridCheck;
   private JLabel snapToGridLabel;
   private JTextField snapToGridText;
@@ -300,10 +271,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
   protected boolean logValues = false;
 
-  
-  private int		rgbNaN = 0; //Added by Pascal Verdier to manage a specified color for NaN values.
-  private Color	        colorNaN = null; //Added by Pascal Verdier to manage a specified color for NaN values.
-
   /**
    * Create a new NumberImageViewer
    */
@@ -339,8 +306,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     // Private stuff
     isBestFit = true;
     rectXYmode = false;
-    integrationWidthH = 1;
-    integrationWidthV = 1;
     setAlignToGrid(true);
     autoBestFit = true;
     sigHistogram = false;
@@ -482,7 +447,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       printButton.setBounds(2, 535, 36, 36);
       printButton.addActionListener(this);
       buttonPanel.add(printButton);
-
   }
 
   protected void initGradient() {
@@ -600,9 +564,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
       fileMenuItem = new JMenuItem("Save selection");
       fileMenuItem.addActionListener(this);
-      
-      saveDataFileMenuItem = new JMenuItem("Save selection in data file");
-      saveDataFileMenuItem.addActionListener(this);            
 
       zoomMenuItem = new JMenuItem("Zoom selection");
       zoomMenuItem.addActionListener(this);
@@ -618,7 +579,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
       saveMenuItem = new JMenuItem("Save settings");
       saveMenuItem.addActionListener(this);
-      
+
       printMenuItem = new JMenuItem("Print image");
       printMenuItem.addActionListener(this);
 
@@ -638,7 +599,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       imgMenu.add(selectionMaxMenuItem);
       imgMenu.add(selectionColorMenuItem);
       imgMenu.add(fileMenuItem);
-      imgMenu.add(saveDataFileMenuItem);
       imgMenu.add(zoomMenuItem);
       imgMenu.add(tableMenuItem);
       imgMenu.add(new JSeparator());
@@ -1574,107 +1534,40 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     int adx = Math.abs(dx);
     int ady = Math.abs(dy);
     double delta;
-    int i, j, xe, ye;
+    int i, xe, ye;
 
-    if( dx==0 && dy==0 ) {
-      return new double[0];
-    }
+    if (adx > ady) {
 
-    if (dx == 0 && dy != 0) {
-
-      // Vertical profile
-      profile = new double[ady + 1];
-      ye = p1.y;
-      xe = p1.x;
-      int dxi = integrationWidthV/2;
-
-      for (i = 0; i <= ady; i++) {
-
-        double sum=0;
-        double n=0;
-
-        for(j=-dxi;j<=dxi;j++) {
-          if ( (xe+j) >= 0 && (xe+j) < d.width && ye >= 0 && ye < d.height)
-            sum += doubleValues[ye][xe+j];
-          else
-            sum = Double.NaN;
-          n = n + 1.0;
-        }
-        profile[i] = sum/n;
-
-        if (dy < 0)
-          ye--;
-        else
-          ye++;
-
-      }
-
-    } else if (dx != 0 && dy == 0) {
-
-      // Horizontal profile
+      delta = (double) dy / (double) adx;
       profile = new double[adx + 1];
       xe = p1.x;
-      ye = p1.y;
-      int dxi = integrationWidthH/2;
-
       for (i = 0; i <= adx; i++) {
-
-        double sum=0;
-        double n=0;
-
-        for(j=-dxi;j<=dxi;j++) {
-          if (xe >= 0 && xe < d.width && (ye+j) >= 0 && (ye+j) < d.height)
-            sum += doubleValues[ye+j][xe];
-          else
-            sum = Double.NaN;
-          n = n + 1.0;
-        }
-        profile[i] = sum/n;
-
+        ye = p1.y + (int) (delta * (double) i);
+        if (xe >= 0 && xe < d.width && ye >= 0 && ye < d.height)
+          profile[i] = doubleValues[ye][xe];
+        else
+          profile[i] = Double.NaN;
         if (dx < 0)
           xe--;
         else
           xe++;
-        
       }
 
     } else {
 
-      // Skew profile
-      if (adx > ady) {
-
-        delta = (double) dy / (double) adx;
-        profile = new double[adx + 1];
-        xe = p1.x;
-        for (i = 0; i <= adx; i++) {
-          ye = p1.y + (int) (delta * (double) i);
-          if (xe >= 0 && xe < d.width && ye >= 0 && ye < d.height)
-            profile[i] = doubleValues[ye][xe];
-          else
-            profile[i] = Double.NaN;
-          if (dx < 0)
-            xe--;
-          else
-            xe++;
-        }
-
-      } else {
-
-        delta = (double) dx / (double) ady;
-        profile = new double[ady + 1];
-        ye = p1.y;
-        for (i = 0; i <= ady; i++) {
-          xe = p1.x + (int) (delta * (double) i);
-          if (xe >= 0 && xe < d.width && ye >= 0 && ye < d.height)
-            profile[i] = doubleValues[ye][xe];
-          else
-            profile[i] = Double.NaN;
-          if (dy < 0)
-            ye--;
-          else
-            ye++;
-        }
-
+      delta = (double) dx / (double) ady;
+      profile = new double[ady + 1];
+      ye = p1.y;
+      for (i = 0; i <= ady; i++) {
+        xe = p1.x + (int) (delta * (double) i);
+        if (xe >= 0 && xe < d.width && ye >= 0 && ye < d.height)
+          profile[i] = doubleValues[ye][xe];
+        else
+          profile[i] = Double.NaN;
+        if (dy < 0)
+          ye--;
+        else
+          ye++;
       }
 
     }
@@ -1964,34 +1857,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
     try {
 
-      int iwh = Integer.parseInt(integrationWidthHText.getText());
-
-      if( iwh%2==0 ) {
-        JOptionPane.showMessageDialog(null, "Integration width (H) must be an odd number", "Error", JOptionPane.ERROR_MESSAGE);
-      } else {
-        integrationWidthH = iwh;
-      }
-
-    } catch (Exception e) {
-      JOptionPane.showMessageDialog(null, "Invalid syntax for integration width (H)", "Error", JOptionPane.ERROR_MESSAGE);
-    }
-
-    try {
-
-      int iwv = Integer.parseInt(integrationWidthVText.getText());
-
-      if( iwv%2==0 ) {
-        JOptionPane.showMessageDialog(null, "Integration width (V) must be an odd number", "Error", JOptionPane.ERROR_MESSAGE);
-      } else {
-        integrationWidthV = iwv;
-      }
-
-    } catch (Exception e) {
-      JOptionPane.showMessageDialog(null, "Invalid syntax for integration width (V)", "Error", JOptionPane.ERROR_MESSAGE);
-    }
-
-    try {
-
       int g = Integer.parseInt(gridStr);
       imagePanel.setSnapGrid(g);
 
@@ -2048,7 +1913,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     */
   public String getSettings() {
     constructSettingsPanel();
-    initSettings();
+
     String to_write = "";
 
     synchronized(this)
@@ -2535,9 +2400,17 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
         gradientPos[i] = pos;
       }
 
-      gColor = new Gradient(gradientPos,gradientColor);
+      gColor = new Gradient();
+      if (gradientCount == 5)
+      {
+        gColor.buildRainbowGradient();
+      }
+      for (int i = 0; i < gradientCount; i++)
+      {
+        gColor.setColorAt(i, gradientColor[i]);
+        gColor.setPosAt(i, gradientPos[i]);
+      }
       gColormap = gColor.buildColorMap(65536);
-      gradientTool.setGradient(gColor);
 
       applySettings();
       setToolbarVisible(toolbarMenuItem.isSelected());
@@ -2559,7 +2432,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
             if (f.isDirectory()) {
                 return true;
             }
-            String extension = MultiExtFileFilter.getExtension(f);
+            String extension = getExtension(f);
             if (extension != null && extension.equals("txt"))
                 return true;
             return false;
@@ -2576,7 +2449,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       File f = chooser.getSelectedFile();
       if (f != null) {
-        if (MultiExtFileFilter.getExtension(f) == null) {
+        if (getExtension(f) == null) {
           f = new File(f.getAbsolutePath() + ".txt");
         }
         if (f.exists())
@@ -2599,7 +2472,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
             if (f.isDirectory()) {
                 return true;
             }
-            String extension = MultiExtFileFilter.getExtension(f);
+            String extension = getExtension(f);
             if (extension != null && extension.equals("txt"))
                 return true;
             return false;
@@ -2668,7 +2541,24 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   private void showSettings() {
 
     constructSettingsPanel();
-    initSettings();  
+
+    minBestFitText.setText(Double.toString(bfMin));
+    maxBestFitText.setText(Double.toString(bfMax));
+
+    minBestFitLabel.setEnabled(!autoBestFit);
+    minBestFitText.setEnabled(!autoBestFit);
+    maxBestFitLabel.setEnabled(!autoBestFit);
+    maxBestFitText.setEnabled(!autoBestFit);
+
+    bestFitCheck.setSelected(isBestFit);
+    autoBestFitCheck.setSelected(autoBestFit);
+    sigHistogramCheck.setSelected(sigHistogram);
+    snapToGridCheck.setSelected(snapToGrid);
+    negativeCheck.setSelected(isNegative);
+    imageSizeCombo.setSelectedIndex(getZoom());
+
+    snapToGridText.setText(Integer.toString(imagePanel.getSnapGrid()));
+    rectDisplayCheck.setSelected(rectXYmode);
 
     ATKGraphicsUtils.centerDialog(settingsDialog);
     settingsDialog.setVisible(true);
@@ -2679,34 +2569,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     }
 
   }
-  
-  private void initSettings(){
-
-      minBestFitText.setText(Double.toString(bfMin));
-      maxBestFitText.setText(Double.toString(bfMax));
-
-      integrationWidthVText.setText(Integer.toString(integrationWidthV));
-      integrationWidthHText.setText(Integer.toString(integrationWidthH));
-
-      minBestFitLabel.setEnabled(!autoBestFit);
-      minBestFitText.setEnabled(!autoBestFit);
-      maxBestFitLabel.setEnabled(!autoBestFit);
-      maxBestFitText.setEnabled(!autoBestFit);
-
-      bestFitCheck.setSelected(isBestFit);
-      autoBestFitCheck.setSelected(autoBestFit);
-      sigHistogramCheck.setSelected(sigHistogram);
-      snapToGridCheck.setSelected(snapToGrid);
-      negativeCheck.setSelected(isNegative);
-
-      imageSizeCombo.setSelectedIndex(getZoom());
-      snapToGridText.setText(Integer.toString(imagePanel.getSnapGrid()));
-      rectDisplayCheck.setSelected(rectXYmode);
-
-      gradViewer.setGradient(gColor);
-}
-
-
 
   private boolean buildTable() {
 
@@ -2798,22 +2660,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     tableDialog.setVisible(true);
 
   }
-  
-  //This method is used to construct table without displaying the table
-  private void constructTable() {
-
-      constructTablePanel();
-      synchronized (this) {
-        if (!buildTable()) return;
-      }
-  }
-  
-  //This method is used to save data file without displaying the table
-  private void saveDataFile() {
-      constructTable();
-      if (tablePanel != null)
-          tablePanel.saveDataFile();
-  }
 
   private void showPropertyFrame() {
 
@@ -2837,8 +2683,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       gradientTool.setGradient(gColor);
       gradientTool.repaint();
     }
-    
-    
 
   }
 
@@ -2943,8 +2787,8 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       // ------------------------------------------------------
       settingsPanel = new JPanel();
       settingsPanel.setLayout(null);
-      settingsPanel.setMinimumSize(new Dimension(290, 330));
-      settingsPanel.setPreferredSize(new Dimension(290, 330));
+      settingsPanel.setMinimumSize(new Dimension(290, 270));
+      settingsPanel.setPreferredSize(new Dimension(290, 270));
 
       attNameLabel = new LabelViewer();
       attNameLabel.setOpaque(false);
@@ -3058,74 +2902,49 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       js2.setBounds(0, 153, 500, 10);
       settingsPanel.add(js2);
 
-      integrationWidthHLabel = new JLabel("Integration width (Horizontal profile)");
-      integrationWidthHLabel.setFont(panelFont);
-      integrationWidthHLabel.setBounds(5,160,220,20);
-      settingsPanel.add(integrationWidthHLabel);
-
-      integrationWidthHText = new JTextField();
-      integrationWidthHText.setEditable(true);
-      integrationWidthHText.setBounds(230,160,50,20);
-      settingsPanel.add(integrationWidthHText);
-
-      integrationWidthVLabel = new JLabel("Integration width (Vertical profile)");
-      integrationWidthVLabel.setFont(panelFont);
-      integrationWidthVLabel.setBounds(5,185,220,20);
-      settingsPanel.add(integrationWidthVLabel);
-
-      integrationWidthVText = new JTextField();
-      integrationWidthVText.setEditable(true);
-      integrationWidthVText.setBounds(230,185,50,20);
-      settingsPanel.add(integrationWidthVText);
-
-      // ------------------------------------------------------------------------------------
-      JSeparator js3 = new JSeparator();
-      js3.setBounds(0, 218, 500, 10);
-      settingsPanel.add(js3);
-
       snapToGridCheck = new JCheckBox("Align to grid");
       snapToGridCheck.setSelected(false);
       snapToGridCheck.setFont(panelFont);
-      snapToGridCheck.setBounds(5, 225, 100, 20);
+      snapToGridCheck.setBounds(5, 160, 100, 20);
       snapToGridCheck.setToolTipText("Align the selection to the grid");
       settingsPanel.add(snapToGridCheck);
 
       snapToGridLabel = new JLabel("Grid spacing");
       snapToGridLabel.setFont(panelFont);
-      snapToGridLabel.setBounds(110, 225, 90, 20);
+      snapToGridLabel.setBounds(110, 160, 90, 20);
       settingsPanel.add(snapToGridLabel);
 
       snapToGridText = new JTextField("");
       snapToGridText.setMargin(noMargin);
       snapToGridText.setFont(panelFont);
-      snapToGridText.setBounds(205, 225, 50, 20);
+      snapToGridText.setBounds(205, 160, 50, 20);
       settingsPanel.add(snapToGridText);
 
-      sigHistogramCheck = new JCheckBox("Display significant data for histogram");
+      sigHistogramCheck = new JCheckBox("Display significative data for histogram");
       sigHistogramCheck.setSelected(false);
       sigHistogramCheck.setFont(panelFont);
-      sigHistogramCheck.setBounds(5, 250, 280, 20);
-      sigHistogramCheck.setToolTipText("Clip the histogram to significant data");
+      sigHistogramCheck.setBounds(5, 185, 280, 20);
+      sigHistogramCheck.setToolTipText("Clip the histogram to significative data");
       settingsPanel.add(sigHistogramCheck);
 
       rectDisplayCheck = new JCheckBox("Display rectangle as (x1,y1) - (x2,y2)");
       rectDisplayCheck.setSelected(false);
       rectDisplayCheck.setFont(panelFont);
-      rectDisplayCheck.setBounds(5, 275, 280, 20);
+      rectDisplayCheck.setBounds(5, 210, 280, 20);
       rectDisplayCheck.setToolTipText("Display rectangle as (x1,y1) - (x2,y2) instead of (x1,y1) - [width,height]");
       settingsPanel.add(rectDisplayCheck);
 
       okButton = new JButton();
       okButton.setText("Apply");
       okButton.setFont(panelFont);
-      okButton.setBounds(5, 300, 80, 25);
+      okButton.setBounds(5, 240, 80, 25);
       okButton.addActionListener(this);
       settingsPanel.add(okButton);
 
       cancelButton = new JButton();
       cancelButton.setText("Dismiss");
       cancelButton.setFont(panelFont);
-      cancelButton.setBounds(205, 300, 80, 25);
+      cancelButton.setBounds(205, 240, 80, 25);
       cancelButton.addActionListener(this);
       settingsPanel.add(cancelButton);
 
@@ -3143,6 +2962,24 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
     }
 
+  }
+
+  /**
+   * <code>getExtension</code> returns the extension of a given file,
+   * that is the part after the last `.' in the filename.
+   *
+   * @param f a <code>File</code> value
+   * @return a <code>String</code> value
+   */
+  private String getExtension(File f) {
+    String ext = null;
+    String s = f.getName();
+    int i = s.lastIndexOf('.');
+
+    if (i > 0 && i < s.length() - 1) {
+      ext = s.substring(i + 1).toLowerCase();
+    }
+    return ext;
   }
 
 
@@ -3271,8 +3108,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       loadButtonActionPerformed();
     } else if (evt.getSource() == saveButton || evt.getSource() == saveMenuItem) {
       saveButtonActionPerformed();
-    } else if (evt.getSource() == saveDataFileMenuItem) {
-          saveDataFile();
     } else if (evt.getSource() == printButton || evt.getSource() == printMenuItem) {
       printImage();
     } else if (evt.getSource() == displayLogMenuItem) {
@@ -3400,7 +3235,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     }
 
   }
-  
+
   // ----------------------------------------------------------
   // Keyboard listener
   // ----------------------------------------------------------
@@ -3892,7 +3727,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("edf"))
           return true;
         return false;
@@ -3922,7 +3757,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("jpg"))
           return true;
         return false;
@@ -3952,7 +3787,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("jpg"))
           return true;
         return false;
@@ -3982,7 +3817,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("png"))
           return true;
         return false;
@@ -4012,7 +3847,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("png"))
           return true;
         return false;
@@ -4063,17 +3898,17 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
         FileFilter filter = chooser.getFileFilter();
 
         if (edfFilter.equals(filter)) {
-          if (MultiExtFileFilter.getExtension(f) == null || !MultiExtFileFilter.getExtension(f).equalsIgnoreCase("edf")) {
+          if (getExtension(f) == null || !getExtension(f).equalsIgnoreCase("edf")) {
             f = new File(f.getAbsolutePath() + ".edf");
           }
           lastFileFilter = filter;
         } else if (jpgFilter.equals(filter) || jpg8Filter.equals(filter)) {
-          if (MultiExtFileFilter.getExtension(f) == null || !MultiExtFileFilter.getExtension(f).equalsIgnoreCase("jpg")) {
+          if (getExtension(f) == null || !getExtension(f).equalsIgnoreCase("jpg")) {
             f = new File(f.getAbsolutePath() + ".jpg");
           }
           lastFileFilter = filter;
         } else if (pngFilter.equals(filter) || png8Filter.equals(filter)) {
-          if (MultiExtFileFilter.getExtension(f) == null || !MultiExtFileFilter.getExtension(f).equalsIgnoreCase("png")) {
+          if (getExtension(f) == null || !getExtension(f).equalsIgnoreCase("png")) {
             f = new File(f.getAbsolutePath() + ".png");
           }
           lastFileFilter = filter;
@@ -4094,7 +3929,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
           } else if (jpgFilter.equals(filter)) {
 
             try {
-              ImageIO.write(getSelectionImage(), "jpg", f);
+              ImageIO.write(imagePanel.getImage(), "jpg", f);
             }
             catch (IOException ioe) {
               JOptionPane.showMessageDialog(this, "File could not be saved", "Error", JOptionPane.ERROR_MESSAGE);
@@ -4112,7 +3947,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
           } else if (pngFilter.equals(filter)) {
 
             try {
-              ImageIO.write(getSelectionImage(), "png", f);
+              ImageIO.write(imagePanel.getImage(), "png", f);
             }
             catch (IOException ioe) {
               JOptionPane.showMessageDialog(this, "File could not be saved", "Error", JOptionPane.ERROR_MESSAGE);
@@ -4145,73 +3980,17 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
   }
 
-  private BufferedImage getSelectionImage() {
-
-    Rectangle r = imagePanel.getSelectionRect();
-    if( r!=null ) {
-
-      BufferedImage newImage = new BufferedImage(r.width,r.height,BufferedImage.TYPE_INT_RGB);
-      Graphics2D g2 = newImage.createGraphics();
-      g2.drawImage(imagePanel.getImage(),0 ,0 ,r.width-1 ,r.height-1 ,
-                                         r.x, r.y, r.x+r.width-1, r.y+r.height-1,null);
-      g2.dispose();
-      return newImage;
-
-    } else {
-
-      int w = imagePanel.getImage().getWidth();
-      int h = imagePanel.getImage().getHeight();
-      BufferedImage newImage = new BufferedImage(w,h,BufferedImage.TYPE_INT_RGB);
-      Graphics2D g2 = newImage.createGraphics();
-      g2.drawImage(imagePanel.getImage(),0,0,null);
-      g2.dispose();
-      return newImage;
-
-    }
-
-  }
-
   private BufferedImage get8BitImage() {
 
     // Convert to 8 bits
-    Rectangle r = imagePanel.getSelectionRect();
-    if( r!=null ) {
+    int w = imagePanel.getImage().getWidth();
+    int h = imagePanel.getImage().getHeight();
+    BufferedImage newImage = new BufferedImage(w,h,BufferedImage.TYPE_BYTE_GRAY);
+    Graphics2D g2 = newImage.createGraphics();
+    g2.drawImage(imagePanel.getImage(),0,0,null);
+    g2.dispose();
+    return newImage;
 
-      BufferedImage newImage = new BufferedImage(r.width,r.height,BufferedImage.TYPE_BYTE_GRAY);
-      Graphics2D g2 = newImage.createGraphics();
-      g2.drawImage(imagePanel.getImage(),0 ,0 ,r.width-1 ,r.height-1 ,
-                                       r.x, r.y, r.x+r.width-1, r.y+r.height-1,null);
-      g2.dispose();
-      return newImage;
-
-    } else {
-
-      int w = imagePanel.getImage().getWidth();
-      int h = imagePanel.getImage().getHeight();
-      BufferedImage newImage = new BufferedImage(w,h,BufferedImage.TYPE_BYTE_GRAY);
-      Graphics2D g2 = newImage.createGraphics();
-      g2.drawImage(imagePanel.getImage(),0,0,null);
-      g2.dispose();
-      return newImage;
-
-    }
-
-  }
-
- //	Added by Pascal Verdier to manage a specified color for NaN values.
-  
- /**
-  *	Set a specified color for NaN values.
-  *
-  *	@param color the specified color for NaN values (if null NaN color is not managed) 
-  */
-  public void setNaNcolor(Color color)
-  {
-       if (color==null)
-           rgbNaN = 0;
-       else
-           rgbNaN = color.getRGB();
-       colorNaN = color;
   }
 
   // Convert the image from TANGO format to SCREEN format according
@@ -4270,166 +4049,77 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
           // Bigger image
           int sz = -iSz;
 
-          for (int j = 0; j<dimy; j++)
-          {
-               if (colorNaN==null) //	NaN color not managed
-               {
-		     
-        	 if (isBestFit)
-                 {
+          for (int j = 0; j<dimy; j++) {
 
-                    if (isNegative) {
-                      for (int i = 0; i < dimx; i++) {
-                            int c = gColormap[(~bestFit(doubleValues[j][i])) & 65535];
-                            for(int k=0;k<sz;k++)
-                          rgb[i*sz+k] = c;
-                      }
-                    } else {
-                      for (int i = 0; i < dimx; i++) {
-                            int c = gColormap[bestFit(doubleValues[j][i])];
-                            for(int k=0;k<sz;k++)
-                          rgb[i*sz+k] = c;
-                      }
-                    }
+            if (isBestFit) {
 
-                 } 
-                 else // not BestFit
-                 {
+              if (isNegative) {
+                for (int i = 0; i < dimx; i++) {
+                  int c = gColormap[(~bestFit(doubleValues[j][i])) & 65535];
+                  for(int k=0;k<sz;k++)
+                    rgb[i*sz+k] = c;
+                }
+              } else {
+                for (int i = 0; i < dimx; i++) {
+                  int c = gColormap[bestFit(doubleValues[j][i])];
+                  for(int k=0;k<sz;k++)
+                    rgb[i*sz+k] = c;
+                }
+              }
 
-                    if (isNegative) {
-                      for (int i = 0; i < dimx; i++) {
-                            int c = gColormap[(~(int)(doubleValues[j][i])) & 65535];
-                            for(int k=0;k<sz;k++)
-                          rgb[i*sz+k] = c;
-                      }
-                    } else {
-                      for (int i = 0; i < dimx; i++) {
-                            int c = gColormap[((int) doubleValues[j][i]) & 65535];
-                            for(int k=0;k<sz;k++)
-                          rgb[i*sz+k] = c;
-                      }
-                    }
+            } else {
 
-                 }
-               }
-               else //	Manage NaN NaN color
-               {
-		      
-         	 if (isBestFit)
-                 {
-                    if (isNegative) {
-                      for (int i = 0; i < dimx; i++) {
-                            int c = (Double.isNaN(doubleValues[j][i])) ? rgbNaN :
-                                                                    gColormap[(~bestFit(doubleValues[j][i])) & 65535];
-                            for(int k=0;k<sz;k++)
-                               rgb[i*sz+k] = c;
-                      }
-                    } else {
-                      for (int i = 0; i < dimx; i++) {
-                            int c = (Double.isNaN(doubleValues[j][i])) ? rgbNaN :
-                                                                    gColormap[bestFit(doubleValues[j][i])];
-                            for(int k=0;k<sz;k++)
-                               rgb[i*sz+k] = c;
-                      }
-                    }
+              if (isNegative) {
+                for (int i = 0; i < dimx; i++) {
+                  int c = gColormap[(~(int)(doubleValues[j][i])) & 65535];
+                  for(int k=0;k<sz;k++)
+                    rgb[i*sz+k] = c;
+                }
+              } else {
+                for (int i = 0; i < dimx; i++) {
+                  int c = gColormap[((int) doubleValues[j][i]) & 65535];
+                  for(int k=0;k<sz;k++)
+                    rgb[i*sz+k] = c;
+                }
+              }
 
-                 }
-                 else // not BestFit
-                 {
-            	    if (isNegative) {
-                      for (int i = 0; i < dimx; i++) {
-                            int c = (Double.isNaN(doubleValues[j][i])) ? rgbNaN :
-                                                                    gColormap[(~(int)(doubleValues[j][i])) & 65535];
-                            for(int k=0;k<sz;k++)
-                               rgb[i*sz+k] = c;
-                      }
-            	    } else {
-                      for (int i = 0; i < dimx; i++) {
-                            int c = (Double.isNaN(doubleValues[j][i])) ? rgbNaN :
-                                                                    gColormap[((int) doubleValues[j][i]) & 65535];
-                            for(int k=0;k<sz;k++)
-                                rgb[i*sz+k] = c;
-                      }
-            	    }
+            }
 
-                 }
-               }
             for(int k=0;k<sz;k++)
               lastImg.setRGB(0, j*sz+k, rdimx, 1, rgb, 0, rdimx);
 
           }
 
-        } 
-        else //Smaller
-        {
-           if (colorNaN==null)
-           { //	NaN color not managed
-             
-             for (int j = 0,l = 0; l < rdimy; j += iSz, l++) {
+        } else {
 
-               if (isBestFit) {
+          //Smaller
+          for (int j = 0,l = 0; l < rdimy; j += iSz, l++) {
 
-            	 if (isNegative) {
-                   for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
-                	 rgb[k] = gColormap[(~bestFit(doubleValues[j][i])) & 65535];
-            	 } else {
-                   for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
-                	 rgb[k] = gColormap[bestFit(doubleValues[j][i])];
-            	 }
+            if (isBestFit) {
 
-               } else {
+              if (isNegative) {
+                for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
+                  rgb[k] = gColormap[(~bestFit(doubleValues[j][i])) & 65535];
+              } else {
+                for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
+                  rgb[k] = gColormap[bestFit(doubleValues[j][i])];
+              }
 
-            	 if (isNegative) {
-                   for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
-                	 rgb[k] = gColormap[(~(int) doubleValues[j][i]) & 65535];
-            	 } else {
-                   for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
-                	 rgb[k] = gColormap[((int) doubleValues[j][i]) & 65535];
-            	 }
-               }
-               lastImg.setRGB(0, l, rdimx, 1, rgb, 0, rdimx);
-             }	//	end of for (int j = 0,l = 0; ..
-           }
-	   else // Manage NaN NaN color
-	   {
-		      
-             for (int j = 0,l = 0; l < rdimy; j += iSz, l++) {
+            } else {
 
-               if (isBestFit) {
+              if (isNegative) {
+                for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
+                  rgb[k] = gColormap[(~(int) doubleValues[j][i]) & 65535];
+              } else {
+                for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
+                  rgb[k] = gColormap[((int) doubleValues[j][i]) & 65535];
+              }
 
-            	 if (isNegative) {
-                   for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
-                     if (Double.isNaN(doubleValues[j][i]))
-		        rgb[k] = rgbNaN;
-		     else
-                    	rgb[k] = gColormap[(~bestFit(doubleValues[j][i])) & 65535];
-            	 } else {
-                   for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
-                     if (Double.isNaN(doubleValues[j][i]))
-			rgb[k] = rgbNaN;
-		     else
-                    	rgb[k] = gColormap[bestFit(doubleValues[j][i])];
-            	 }
+            }
 
-               } else {
+            lastImg.setRGB(0, l, rdimx, 1, rgb, 0, rdimx);
+          }
 
-            	 if (isNegative) {
-                   for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
-                     if (Double.isNaN(doubleValues[j][i]))
-			rgb[k] = rgbNaN;
-		     else
-                    	rgb[k] = gColormap[(~(int) doubleValues[j][i]) & 65535];
-            	 } else {
-                   for (int i = 0,k = 0; k < rdimx; i += iSz, k++)
-                     if (Double.isNaN(doubleValues[j][i]))
-			rgb[k] = rgbNaN;
-		     else
-                    	rgb[k] = gColormap[((int) doubleValues[j][i]) & 65535];
-            	 }
-               }
-               lastImg.setRGB(0, l, rdimx, 1, rgb, 0, rdimx);
-             }	//	end of for (int j = 0,l = 0; ..
- 	   }
         }
 
         imagePanel.repaint();
@@ -4465,28 +4155,27 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   /**
    * @param logValues the logValues to set
    */
-    public void setLogValues(boolean logValues)
-    {
-        if (logValues != this.logValues)
-        {
-            synchronized (this)
-            {
-                if (model != null)
-                {
-                    double[][] values = model.getValue();
-                    if (logValues)
-                    {
-                        setData(computeLog(values));
-                    }
-                    else
-                    {
-                        setData(values);
-                    }
-                }
+  public void setLogValues (boolean logValues) {
+    if (logValues != this.logValues) {
+      synchronized(this) {
+        if (model != null) {
+          try {
+            double[][] values = model.getValue();
+            if (logValues) {
+              setData( computeLog(values) );
             }
+            else {
+              setData(values);
+            }
+          }
+          catch (DevFailed e) {
+            setData(null);
+          }
         }
-        this.logValues = logValues;
+      }
     }
+    this.logValues = logValues;
+  }
 
   protected double[][] computeLog(double[][] values) {
     if (values == null) {
@@ -4537,7 +4226,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     //d.setToolbarVisible(false);
     //d.setStatusLineVisible(false);
     //d.getYAxis().setVisible(true);
-    //d.setImageMargin(new Insets(0,0,5,0));
+    //d.setImageMargin(new Insets(0,0,0,0));
     //d.setBorder(null);
     //d.setZoom(2);
     //d.setVerticalExtent(10);

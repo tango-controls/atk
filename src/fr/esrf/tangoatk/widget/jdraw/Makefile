@@ -7,8 +7,7 @@ ALL = $(TARGET)/TangoSynopticHandler.class \
       $(TARGET)/SynopticFileViewer.class \
       $(TARGET)/DeviceSynopticViewer.class \
       $(TARGET)/DeviceSynopticFrame.class \
-      $(TARGET)/SimpleSynopticAppli.class \
-      $(TARGET)/../util/jdraw/JDrawEditorFrame.class
+      $(TARGET)/SimpleSynopticAppli.class
       
 
 all: jdraw beaninfo icons
