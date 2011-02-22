@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * StateViewer.java
  *
  * Created on February 09, 2005, 14:07
@@ -29,9 +7,8 @@
 package fr.esrf.tangoatk.widget.attribute;
 
 import fr.esrf.tangoatk.core.*;
+import fr.esrf.tangoatk.core.attribute.*;
 import fr.esrf.tangoatk.widget.util.ATKConstant;
-
-import javax.swing.JFrame;
 
 
 /**
@@ -55,11 +32,8 @@ public class StateViewer extends javax.swing.JPanel
   
   
   private IDevStateScalar  model = null;
-  private boolean          useDeviceAlias = true;
   private String           currentState = IDevice.UNKNOWN;
   private boolean          externalSetText = false;
-  private boolean          stateInTooltip = false;
-  
 
   public StateViewer()
   {
@@ -103,51 +77,33 @@ public class StateViewer extends javax.swing.JPanel
     add(valueLabel, gridBagConstraints1);
 
   }
-  
-  
-  public void clearModel()
-  {
-      if (model != null)
-      {
-	 model.removeDevStateScalarListener(this);
-	 model = null;
-      }
-  }
 
 
    /**
    * <code>setModel</code> sets the model of this viewer.
    * If the textLabel property is not set, the name of the devState attribute is
    * shown on the textLabel.
-   * @param stateAtt a <code>DevStateScalar</code> to surveil
+   * @param state a <code>DevStateScalar</code> to surveil
    */
   public void setModel(IDevStateScalar stateAtt)
   {
       if (model != null)
-	 clearModel();
+      {
+	 model.removeDevStateScalarListener(this);
+	 model = null;
+      }
 
       if (stateAtt == null) 
 	 return;
 
       this.model = stateAtt;
-      if (!stateAtt.areAttPropertiesLoaded())
-          stateAtt.loadAttProperties();
       stateAtt.addDevStateScalarListener(this);
       
       if (!externalSetText)
-        if (useDeviceAlias)
-	{
-	   if (model.getDevice().getAlias() != null)
-	      textLabel.setText(model.getDevice().getAlias());
-	   else
-	      textLabel.setText(model.getDevice().getName());
-	}
-	else
-	   textLabel.setText(model.getDevice().getName());
+	textLabel.setText(stateAtt.getName());
 
-      valueLabel.setToolTipText(model.getDevice().getName());
-      //stateAtt.refresh();
-      setCurrentState(model.getDeviceValue());
+      valueLabel.setToolTipText(stateAtt.getName());
+      stateAtt.refresh();
   }
 
   /**
@@ -192,24 +148,6 @@ public class StateViewer extends javax.swing.JPanel
   }
 
   /**
-   * <code>getUseDeviceAlias</code> returns true if the device alias is displayed instead of device name
-   *
-   * @return a <code>boolean</code> value
-   */
-  public boolean getUseDeviceAlias() {
-    return useDeviceAlias;
-  }
-
-  /**
-   * <code>setUseDeviceAlias</code> use or not use device alias
-   *
-   * @param b True to enable the usage of device alias.
-   */
-  public void setUseDeviceAlias(boolean b) {
-    useDeviceAlias=b;
-  }
-
-  /**
    * <code>setStateVisible</code> makes the state value lable visible or not.
    *
    * @param visible a <code>boolean</code> value
@@ -226,37 +164,13 @@ public class StateViewer extends javax.swing.JPanel
   public boolean isStateVisible() {
     return valueLabel.isVisible();
   }
-  
-  /**
-   * <code>getStateInTooltip</code> returns true if the device state is displayed inside the viewer's tooltip
-   *
-   * @return a <code>boolean</code> value
-   */
-  public boolean getStateInTooltip() {
-    return stateInTooltip;
-  }
-
-  /**
-   * <code>setStateInTooltip</code> display or not the device state inside the tooltip
-   *
-   * @param b If True the device state will be displayed inside the tooltip.
-   */
-  public void setStateInTooltip(boolean b) {
-    if (stateInTooltip != b)
-    {
-       if (b == false)
-          if (model != null)
-              valueLabel.setToolTipText(model.getDevice().getName());
-       stateInTooltip=b;
-    }
-  }
 
 
   /**
    * <code>stateChange</code> inherited from IAttributeStateListener called when the
    * attribute quality factor changes.
    *
-   * @param e A <code>AttributeStateEvent</code> value
+   * @param evt a <code>AttributeStateEvent</code> value
    */
   public void stateChange(AttributeStateEvent e)
   {
@@ -265,26 +179,24 @@ public class StateViewer extends javax.swing.JPanel
 
   public void devStateScalarChange(DevStateScalarEvent evt)
   {
-      setCurrentState(evt.getValue());
+    setCurrentState(evt.getValue());
   }
 
   public void errorChange(ErrorEvent evt)
   {
-      setCurrentState(IDevice.UNKNOWN);
+    setCurrentState(IDevice.UNKNOWN);
   }
 
 
     /**
    * <code>setCurrentState</code>
    *
-   * @param stateStr a <code>String</code> value
+   * @param state a <code>String</code> value
    */
   private void setCurrentState(String stateStr)
   {
     this.currentState = stateStr;
-    valueLabel.setBackground(ATKConstant.getColor4State(currentState, model.getInvertedOpenClose(), model.getInvertedInsertExtract()));
-    if (stateInTooltip)
-       valueLabel.setToolTipText(model.getDevice().getName() + " : " + currentState);
+    valueLabel.setBackground(ATKConstant.getColor4State(currentState));
   }
 
   /**
@@ -320,7 +232,6 @@ public class StateViewer extends javax.swing.JPanel
     valueLabel.setFont(font);
   }
 
-  @Override
   public void setFont(java.awt.Font font) {
     if (valueLabel != null) {
       valueLabel.setFont(font);
@@ -346,7 +257,6 @@ public class StateViewer extends javax.swing.JPanel
   }
 
 
-    @Override
   public void setForeground(java.awt.Color color) {
     if (valueLabel != null) {
       valueLabel.setForeground(color);
@@ -363,8 +273,7 @@ public class StateViewer extends javax.swing.JPanel
    * @see javax.swing.SwingConstants
    * @param i an <code>int</code> value
    */
-  public void setStateHorizontalAlignment(int i)
-  {
+  public void setStateHorizontalAlignment(int i) {
     valueLabel.setHorizontalAlignment(i);
   }
 
@@ -391,56 +300,5 @@ public class StateViewer extends javax.swing.JPanel
 
     return valueLabel.getBorder();
   }
-
-
-
-    
-    public static void main(String[] args)
-    {
-       final fr.esrf.tangoatk.core.AttributeList  attList = new fr.esrf.tangoatk.core.AttributeList();
-       IDevStateScalar                            attState;
-       JFrame                                     mainFrame;
-       
-       StateViewer                                stv = new StateViewer();
-
-       //nslv.setBackground(java.awt.Color.white);
-       //nslv.setForeground(java.awt.Color.black);
-
-       // Connect to a list of number scalar attributes
-       try
-       {
-          attState = (IDevStateScalar) attList.add("fp/test/1/State");
-	  stv.setModel(attState);
-	  stv.setLabel("FP status");
-       }
-       catch (Exception ex)
-       {
-          System.out.println("caught exception : "+ ex.getMessage());
-	  System.exit(-1);
-       }
-       
-       mainFrame = new JFrame();
-       
-       mainFrame.addWindowListener(
-	       new java.awt.event.WindowAdapter()
-			  {
-			      public void windowActivated(java.awt.event.WindowEvent evt)
-			      {
-				 // To be sure that the refresher (an independente thread)
-				 // will begin when the the layout manager has finished
-				 // to size and position all the components of the window
-				 attList.startRefresher();
-			      }
-			  }
-                                     );
-				     
-
-       mainFrame.setContentPane(stv);
-       mainFrame.pack();
-
-       mainFrame.setVisible(true);
-
-    } // end of main ()
-
 
 }

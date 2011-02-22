@@ -1,40 +1,17 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /** A panel for JDLabel private properties */
 package fr.esrf.tangoatk.widget.util.jdraw;
 
-import fr.esrf.tangoatk.widget.util.ATKFontChooser;
-
 import javax.swing.*;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-class JDLabelPanel extends JPanel implements ActionListener {
+class JDLabelPanel extends JPanel implements ActionListener, DocumentListener {
 
   private JScrollPane textView;
   private JTextArea textText;
-  private JButton applyTextBtn;
 
   private JLabel fontLabel;
   private JButton fontBtn;
@@ -48,42 +25,37 @@ class JDLabelPanel extends JPanel implements ActionListener {
   private JLabel orientationLabel;
   private JComboBox orientationCombo;
 
-  private JDLabel allObjects[] = null;
-  private JDrawEditor invoker;
-  private Rectangle oldRect;
-  private boolean isUpdating = false;
+  JDLabel allObjects[];
+  JComponent invoker;
+  Rectangle oldRect;
 
-  public JDLabelPanel(JDLabel[] p, JDrawEditor jc) {
+  public JDLabelPanel(JDLabel[] p, JComponent jc) {
 
+    allObjects = p;
     invoker = jc;
     setLayout(null);
     setBorder(BorderFactory.createEtchedBorder());
-    setPreferredSize(new Dimension(380, 290));
+    setPreferredSize(new Dimension(380, 210));
 
     // ------------------------------------------------------------------------------------
     JPanel namePanel = new JPanel(null);
     namePanel.setBorder(JDUtils.createTitleBorder("Text"));
-    namePanel.setBounds(5,5,370,130);
+    namePanel.setBounds(5,5,370,120);
 
     textText = new JTextArea();
     textText.setEditable(true);
     textText.setFont(JDUtils.labelFont);
+    textText.setText(p[0].getText());
+    textText.getDocument().addDocumentListener(this);
     textView = new JScrollPane(textText);
-    textView.setBounds(10, 20, 350, 70);
+    textView.setBounds(10, 25, 350, 80);
     namePanel.add(textView);
-
-    applyTextBtn = new JButton("Apply");
-    applyTextBtn.setFont(JDUtils.labelFont);
-    applyTextBtn.addActionListener(this);
-    applyTextBtn.setBounds(260,95,100,25);
-    namePanel.add(applyTextBtn);
-
     add(namePanel);
 
     // ------------------------------------------------------------------------------------
     JPanel stylePanel = new JPanel(null);
     stylePanel.setBorder(JDUtils.createTitleBorder("Text styles"));
-    stylePanel.setBounds(5,140,370,145);
+    stylePanel.setBounds(5,130,370,150);
 
     fontLabel = new JLabel("Font");
     fontLabel.setFont(JDUtils.labelFont);
@@ -110,6 +82,7 @@ class JDLabelPanel extends JPanel implements ActionListener {
     alignmentCombo.addItem("Center");
     alignmentCombo.addItem("Left");
     alignmentCombo.addItem("Right");
+    alignmentCombo.setSelectedIndex(p[0].getHorizontalAlignment());
     alignmentCombo.addActionListener(this);
     alignmentCombo.setBounds(220, 50, 140, 25);
     stylePanel.add(alignmentCombo);
@@ -125,6 +98,7 @@ class JDLabelPanel extends JPanel implements ActionListener {
     alignment2Combo.addItem("Center");
     alignment2Combo.addItem("Up");
     alignment2Combo.addItem("Down");
+    alignment2Combo.setSelectedIndex(p[0].getHorizontalAlignment());
     alignment2Combo.addActionListener(this);
     alignment2Combo.setBounds(220, 80, 140, 25);
     stylePanel.add(alignment2Combo);
@@ -141,53 +115,21 @@ class JDLabelPanel extends JPanel implements ActionListener {
     orientationCombo.addItem("Bottom to top");
     orientationCombo.addItem("Left to right");
     orientationCombo.addItem("Top to bottom");
+    orientationCombo.setSelectedIndex(p[0].getOrientation());
     orientationCombo.addActionListener(this);
     orientationCombo.setBounds(220, 110, 140, 25);
     stylePanel.add(orientationCombo);
     add(stylePanel);
 
-    updatePanel(p);
-
-  }
-
-  public void updatePanel(JDLabel[] objs) {
-
-    allObjects = objs;
-    isUpdating = true;
-
-    if (objs == null || objs.length <= 0) {
-
-      textText.setText("");
-      fontLabel.setText("Font: ");
-      alignmentCombo.setSelectedIndex(-1);
-      alignment2Combo.setSelectedIndex(-1);
-      orientationCombo.setSelectedIndex(-1);
-
-    } else {
-
-      JDLabel p = objs[0];
-
-      fontLabel.setText("Font: [" + JDUtils.buildFontName(p.getFont())+ "]"); 
-      textText.setText(p.getText());
-      alignmentCombo.setSelectedIndex(p.getHorizontalAlignment());
-      alignment2Combo.setSelectedIndex(p.getHorizontalAlignment());
-      orientationCombo.setSelectedIndex(p.getOrientation());
-
-    }
-
-    isUpdating = false;
-
   }
 
   private void initRepaint() {
-    if(allObjects==null) return;
     oldRect = allObjects[0].getRepaintRect();
     for (int i = 1; i < allObjects.length; i++)
       oldRect = oldRect.union(allObjects[i].getRepaintRect());
   }
 
   private void repaintObjects() {
-    if(allObjects==null) return;
     Rectangle newRect = allObjects[0].getRepaintRect();
     for (int i = 1; i < allObjects.length; i++)
       newRect = newRect.union(allObjects[i].getRepaintRect());
@@ -198,39 +140,55 @@ class JDLabelPanel extends JPanel implements ActionListener {
   // Action listener
   // ---------------------------------------------------------
   public void actionPerformed(ActionEvent e) {
-
-    if(allObjects==null || isUpdating) return;
-
     int i;
     initRepaint();
     Object src = e.getSource();
     if (src == fontBtn) {
-      Font newFont = ATKFontChooser.getNewFont(this,"Choose label font",allObjects[0].getFont());
+      JDFontChooser jf = new JDFontChooser((JDialog) getRootPane().getParent(), "Choose label font", allObjects[0].getFont());
+      Font newFont = jf.getNewFont();
       if (newFont != null) {
         for (i = 0; i < allObjects.length; i++)
-          allObjects[i].setFont(newFont,invoker.resizeLabelOnFontChange);
-        fontLabel.setText("Font: [" + JDUtils.buildFontName(newFont) + "]");
-        invoker.setNeedToSave(true,"Change font");
+          allObjects[i].setFont(newFont);
+        JDUtils.modified=true;
       }
     } else if (src == alignmentCombo) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setHorizontalAlignment(alignmentCombo.getSelectedIndex());
-      invoker.setNeedToSave(true,"Change H. alignment");
+      JDUtils.modified=true;
     } else if (src == alignment2Combo) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setVerticalAlignment(alignment2Combo.getSelectedIndex());
-      invoker.setNeedToSave(true,"Change V. alignment");
+      JDUtils.modified=true;
     } else if (src == orientationCombo) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setOrientation(orientationCombo.getSelectedIndex());
-      invoker.setNeedToSave(true,"Change orientation");
-    } else if (src == applyTextBtn ) {
-      for (i = 0; i < allObjects.length; i++)
-        allObjects[i].setText(textText.getText(),invoker.resizeLabelOnTextChange);
-      invoker.setNeedToSave(true,"Change text");
+      JDUtils.modified=true;
     }
-
     repaintObjects();
+  }
+
+  // ---------------------------------------------------------
+  // Documents listener
+  // ---------------------------------------------------------
+  private void updateText() {
+    int i;
+    initRepaint();
+    for (i = 0; i < allObjects.length; i++)
+      allObjects[i].setText(textText.getText());
+    repaintObjects();
+    JDUtils.modified=true;
+  }
+
+  public void changedUpdate(DocumentEvent e) {
+    updateText();
+  }
+
+  public void insertUpdate(DocumentEvent e) {
+    updateText();
+  }
+
+  public void removeUpdate(DocumentEvent e) {
+    updateText();
   }
 
 

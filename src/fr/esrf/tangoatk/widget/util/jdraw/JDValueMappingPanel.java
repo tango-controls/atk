@@ -1,29 +1,5 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /** A panel for value to JDraw object property mapping */
 package fr.esrf.tangoatk.widget.util.jdraw;
-
-import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
@@ -177,22 +153,16 @@ class JDValueMappingPanel extends JPanel implements ActionListener {
 
   private JButton       newEntryBtn;
   private JButton       removeEntryBtn;
-
-  private JButton       applyBtn;
-  private JButton       cancelBtn;
-
   private boolean       hasChanged;
-  private boolean       isUpdating;
 
   public JDValueMappingPanel(JDObject[] p, JComponent jc,String desc,int type,JDValueProgram mapper) {
 
     allObjects = p;
     invoker = jc;
     hasChanged=false;
-    isUpdating=false;
     propName=desc;
     if(mapper==null)  theMapper= new JDValueProgram(type);
-    else              theMapper = mapper.copy();
+    else              theMapper = mapper;
 
     setLayout(null);
     setBorder(BorderFactory.createEtchedBorder());
@@ -231,7 +201,6 @@ class JDValueMappingPanel extends JPanel implements ActionListener {
     tablePanel.add(defaultValueLabel);
 
     defaultValueText = new JTextField();
-    defaultValueText.setMargin(JDUtils.zMargin);
     defaultValueText.setText(theMapper.getDefaultMapping());
     defaultValueText.setBounds(140, 20, 115, 25);
     defaultValueText.addActionListener(this);
@@ -286,7 +255,6 @@ class JDValueMappingPanel extends JPanel implements ActionListener {
     linearPanel.add(minValueLabel);
 
     minValueText = new JTextField();
-    minValueText.setMargin(JDUtils.zMargin);
     minValueText.setEditable(true);
     minValueText.setFont(JDUtils.labelFont);
     minValueText.setBounds(195, 20, 50, 24);
@@ -298,7 +266,6 @@ class JDValueMappingPanel extends JPanel implements ActionListener {
     linearPanel.add(maxValueLabel);
 
     maxValueText = new JTextField();
-    maxValueText.setMargin(JDUtils.zMargin);
     maxValueText.setEditable(true);
     maxValueText.setFont(JDUtils.labelFont);
     maxValueText.setBounds(195, 45, 50, 24);
@@ -310,24 +277,8 @@ class JDValueMappingPanel extends JPanel implements ActionListener {
 
 
     // ------------------------------------------------------------------------------------
-    cancelBtn = new JButton("Cancel");
-    cancelBtn.setFont(JDUtils.labelFont);
-    cancelBtn.setMargin(new Insets(0, 0, 0, 0));
-    cancelBtn.setForeground(Color.BLACK);
-    cancelBtn.addActionListener(this);
-    cancelBtn.setBounds(217, 400, 80, 25);
-    add(cancelBtn);
-
-    applyBtn = new JButton("Apply");
-    applyBtn.setFont(JDUtils.labelFont);
-    applyBtn.setMargin(new Insets(0, 0, 0, 0));
-    applyBtn.setForeground(Color.BLACK);
-    applyBtn.addActionListener(this);
-    applyBtn.setBounds(127, 400, 80, 25);
-    add(applyBtn);
-
     refreshControls();
-    setPreferredSize(new Dimension(304, 430));
+    setPreferredSize(new Dimension(305, 400));
 
   }
 
@@ -370,9 +321,6 @@ class JDValueMappingPanel extends JPanel implements ActionListener {
   // ---------------------------------------------------------
 
   public void actionPerformed(ActionEvent e) {
-
-    if(isUpdating) return;
-
     Object src = e.getSource();
     int m;
 
@@ -468,26 +416,12 @@ class JDValueMappingPanel extends JPanel implements ActionListener {
       }
       refreshControls();
 
-    } else if (src==cancelBtn) {
-
-      hasChanged = false;
-      ATKGraphicsUtils.getWindowForComponent(this).setVisible(false);
-
-    } else if (src==applyBtn) {
-
-      if(theTable.getCellEditor()!=null)
-        theTable.getCellEditor().stopCellEditing();
-      ATKGraphicsUtils.getWindowForComponent(this).setVisible(false);
-
     }
 
   }
 
   // ---------------------------------------------------------
   private void refreshControls() {
-
-    isUpdating=true;
-
     int mode = theMapper.getMode();
     modelCombo.setSelectedIndex(mode);
     switch(mode) {
@@ -508,8 +442,6 @@ class JDValueMappingPanel extends JPanel implements ActionListener {
         tablePanel.setVisible(false);
         break;
     }
-
-    isUpdating=false;
 
   }
 

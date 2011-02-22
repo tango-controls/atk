@@ -1,28 +1,4 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util.jdraw;
-
-import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
@@ -46,8 +22,6 @@ class JDGradientDialog extends JDialog implements ActionListener,ChangeListener 
   private JDObject[] allObjects;
   private JComponent invoker;
   private JButton applyButton;
-  private JButton dismissButton;
-  private boolean modified = false;
 
   public JDGradientDialog(JDialog parent,JDObject[] p, JComponent jc) {
 
@@ -155,14 +129,8 @@ class JDGradientDialog extends JDialog implements ActionListener,ChangeListener 
     applyButton = new JButton("Apply");
     applyButton.setFont(JDUtils.labelFont);
     applyButton.addActionListener(this);
-    applyButton.setBounds(5, 210, 100, 26);
+    applyButton.setBounds(260, 180, 100, 26);
     innerPanel.add(applyButton);
-
-    dismissButton = new JButton("Dismiss");
-    dismissButton.setFont(JDUtils.labelFont);
-    dismissButton.addActionListener(this);
-    dismissButton.setBounds(260, 210, 100, 26);
-    innerPanel.add(dismissButton);
 
     setTitle("Gradient properties");
     setContentPane(innerPanel);
@@ -176,11 +144,10 @@ class JDGradientDialog extends JDialog implements ActionListener,ChangeListener 
     invoker.repaint(newRect);
   }
 
-  public boolean editGradient() {
+  public void show() {
 
-    ATKGraphicsUtils.centerDialog(this,367,240);
-    setVisible(true);
-    return modified;
+    JDUtils.centerDialog(this,367,210);
+    super.show();
 
   }
 
@@ -207,11 +174,8 @@ class JDGradientDialog extends JDialog implements ActionListener,ChangeListener 
                                            viewer.getX2(),viewer.getY2(),viewer.getColor2(),
                                            viewer.isCyclic());
       }
-      modified = true;
+      JDUtils.modified = true;
       repaintObjects();
-    } else if( src==dismissButton ) {
-      dispose();
-      setVisible(false);
     }
 
   }

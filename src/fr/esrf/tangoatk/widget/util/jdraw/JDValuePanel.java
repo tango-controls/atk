@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /** A panel to control the user interaction */
 package fr.esrf.tangoatk.widget.util.jdraw;
 
@@ -38,7 +16,6 @@ class JDValuePanel extends JPanel implements ActionListener {
   private JTextField minValueText;
   private JLabel     maxValueLabel;
   private JTextField maxValueText;
-  private JButton    applyValueBtn;
 
   private JLabel    userBehaviorLabel;
   private JComboBox userBehaviorCombo;
@@ -60,75 +37,63 @@ class JDValuePanel extends JPanel implements ActionListener {
   private JCheckBox affectYScaleCheckBox;
   private JButton   affectYScaleBtn;
 
-  private JDObject[] allObjects = null;
-  private JDrawEditor invoker;
-  private JDBrowserPanel invoker2;
-  private boolean isUpdating = false;
+  JDObject[] allObjects;
+  JComponent invoker;
+  Rectangle oldRect;
 
-  public JDValuePanel(JDObject[] p, JDrawEditor jc,JDBrowserPanel jb) {
+  public JDValuePanel(JDObject[] p, JComponent jc) {
 
+    allObjects = p;
     invoker = jc;
-    invoker2 = jb;
 
     setForeground(JDUtils.labelColor);
     setFont(JDUtils.labelFont);
     setLayout(null);
     setBorder(BorderFactory.createEtchedBorder());
-    setPreferredSize(new Dimension(380, 290));
+    setPreferredSize(new Dimension(380, 280));
 
     // ----- User value panel
 
     JPanel userPanel = new JPanel(null);
     userPanel.setBorder(JDUtils.createTitleBorder("Object value"));
-    userPanel.setBounds(5, 5, 370, 145);
+    userPanel.setBounds(5, 10, 370, 140);
 
     userValueCheckBox = JDUtils.createCheckBox("Enable user interaction (Play mode)",this);
     userValueCheckBox.setBounds(5, 20, 330, 25);
     userPanel.add(userValueCheckBox);
 
     initValueLabel = JDUtils.createLabel("Init");
-    initValueLabel.setBounds(10, 50, 30, 25);
+    initValueLabel.setBounds(10, 50, 35, 25);
     userPanel.add(initValueLabel);
 
     initValueText = new JTextField();
-    initValueText.setMargin(JDUtils.zMargin);
     initValueText.setEditable(true);
     initValueText.setFont(JDUtils.labelFont);
-    initValueText.setBounds(45, 50, 40, 24);
+    initValueText.setBounds(50, 50, 40, 24);
     initValueText.addActionListener(this);
     userPanel.add(initValueText);
 
-    minValueLabel =JDUtils.createLabel("Min");
-    minValueLabel.setBounds(90, 50, 30, 25);
+    minValueLabel =JDUtils.createLabel("Minimum");
+    minValueLabel.setBounds(95, 50, 70, 25);
     userPanel.add(minValueLabel);
 
     minValueText = new JTextField();
-    minValueText.setMargin(JDUtils.zMargin);
     minValueText.setEditable(true);
     minValueText.setFont(JDUtils.labelFont);
-    minValueText.setBounds(125, 50, 40, 24);
+    minValueText.setBounds(165, 50, 40, 24);
     minValueText.addActionListener(this);
     userPanel.add(minValueText);
 
-    maxValueLabel = JDUtils.createLabel("Max");
-    maxValueLabel.setBounds(170, 50, 30, 25);
+    maxValueLabel = JDUtils.createLabel("Maximum");
+    maxValueLabel.setBounds(210, 50, 70, 25);
     userPanel.add(maxValueLabel);
 
     maxValueText = new JTextField();
-    maxValueText.setMargin(JDUtils.zMargin);
     maxValueText.setEditable(true);
     maxValueText.setFont(JDUtils.labelFont);
-    maxValueText.setBounds(205, 50, 40, 24);
+    maxValueText.setBounds(280, 50, 40, 24);
     maxValueText.addActionListener(this);
     userPanel.add(maxValueText);
-
-    applyValueBtn = new JButton("Apply values");
-    applyValueBtn.setFont(JDUtils.labelFont);
-    applyValueBtn.setMargin(new Insets(0, 0, 0, 0));
-    applyValueBtn.setForeground(Color.BLACK);
-    applyValueBtn.addActionListener(this);
-    applyValueBtn.setBounds(255, 50, 105, 25);
-    userPanel.add(applyValueBtn);
 
     userBehaviorLabel = JDUtils.createLabel("Object value change when nouse");
     userBehaviorLabel.setBounds(10, 83, 300, 20);
@@ -220,58 +185,11 @@ class JDValuePanel extends JPanel implements ActionListener {
     add(dynaPanel);
     dynaPanel.setBounds(5, 155, 370, curY+10);
 
-    updatePanel(p);
-    
-  }
-
-  public void updatePanel(JDObject[] objs) {
-
-    allObjects = objs;
-    isUpdating = true;
-
-    if(objs==null || objs.length<=0) {
-
-      minValueText.setText("");
-      maxValueText.setText("");
-      initValueText.setText("");
-      userValueCheckBox.setSelected(false);
-      userBehaviorCombo.setSelectedIndex(-1);
-      userBehaviorCombo.setEnabled(false);
-
-      // Mappers
-      affectBackgroundCheckBox.setSelected(false);
-      affectBackgroundBtn.setEnabled(false);
-      affectForegroundCheckBox.setSelected(false);
-      affectForegroundBtn.setEnabled(false);
-      affectVisibleCheckBox.setSelected(false);
-      affectVisibleBtn.setEnabled(false);
-      affectInvertShadowCheckBox.setSelected(false);
-      affectInvertShadowBtn.setEnabled(false);
-      affectInvertShadowCheckBox.setSelected(false);
-      affectInvertShadowBtn.setEnabled(false);
-      affectXPosCheckBox.setSelected(false);
-      affectXPosBtn.setEnabled(false);
-      affectYPosCheckBox.setSelected(false);
-      affectYPosBtn.setEnabled(false);
-      affectXScaleCheckBox.setEnabled(false);
-      affectXScaleBtn.setEnabled(false);
-      affectYScaleCheckBox.setEnabled(false);
-      affectYScaleBtn.setEnabled(false);
-
-    } else {
-
-      refreshControls();
-
-    }
-    isUpdating = false;
+    refreshControls();
 
   }
 
   private void refreshControls() {
-
-    if(allObjects==null) return;
-    isUpdating = true;
-
     minValueText.setText(Integer.toString(allObjects[0].getMinValue()));
     minValueText.setCaretPosition(0);
     maxValueText.setText(Integer.toString(allObjects[0].getMaxValue()));
@@ -305,8 +223,6 @@ class JDValuePanel extends JPanel implements ActionListener {
     affectYScaleCheckBox.setEnabled(false);
     affectYScaleBtn.setEnabled(false);
 
-    isUpdating = false;
-
   }
   // --------------------------------------------------------
   private void editBackgroundMapper() {
@@ -322,8 +238,7 @@ class JDValuePanel extends JPanel implements ActionListener {
       for(i=0;i<allObjects.length;i++) allObjects[i].setBackgroundMapper(null);
     else
       for(i=0;i<allObjects.length;i++) allObjects[i].setBackgroundMapper(bm.copy());
-    invoker.setNeedToSave(true,"Change background program");
-    if(invoker2!=null) invoker2.updateNode();
+    JDUtils.modified=true;
     refreshControls();
   }
   // --------------------------------------------------------
@@ -340,8 +255,7 @@ class JDValuePanel extends JPanel implements ActionListener {
       for(i=0;i<allObjects.length;i++) allObjects[i].setForegroundMapper(null);
     else
       for(i=0;i<allObjects.length;i++) allObjects[i].setForegroundMapper(bm.copy());
-    invoker.setNeedToSave(true,"Change foreground program");
-    if(invoker2!=null) invoker2.updateNode();
+    JDUtils.modified=true;
     refreshControls();
   }
   // --------------------------------------------------------
@@ -358,8 +272,7 @@ class JDValuePanel extends JPanel implements ActionListener {
       for(i=0;i<allObjects.length;i++) allObjects[i].setVisibilityMapper(null);
     else
       for(i=0;i<allObjects.length;i++) allObjects[i].setVisibilityMapper(bm.copy());
-    invoker.setNeedToSave(true,"Change visibility program");
-    if(invoker2!=null) invoker2.updateNode();
+    JDUtils.modified=true;
     refreshControls();
   }
   // --------------------------------------------------------
@@ -376,8 +289,7 @@ class JDValuePanel extends JPanel implements ActionListener {
       for(i=0;i<allObjects.length;i++) allObjects[i].setInvertShadowMapper(null);
     else
       for(i=0;i<allObjects.length;i++) allObjects[i].setInvertShadowMapper(bm.copy());
-    invoker.setNeedToSave(true,"Change shadow program");
-    if(invoker2!=null) invoker2.updateNode();
+    JDUtils.modified=true;
     refreshControls();
   }
   // --------------------------------------------------------
@@ -394,8 +306,7 @@ class JDValuePanel extends JPanel implements ActionListener {
       for(i=0;i<allObjects.length;i++) allObjects[i].setHTranslationMapper(null);
     else
       for(i=0;i<allObjects.length;i++) allObjects[i].setHTranslationMapper(bm.copy());
-    invoker.setNeedToSave(true,"Change htranslation program");
-    if(invoker2!=null) invoker2.updateNode();
+    JDUtils.modified=true;
     refreshControls();
   }
   // --------------------------------------------------------
@@ -412,8 +323,7 @@ class JDValuePanel extends JPanel implements ActionListener {
       for(i=0;i<allObjects.length;i++) allObjects[i].setVTranslationMapper(null);
     else
       for(i=0;i<allObjects.length;i++) allObjects[i].setVTranslationMapper(bm.copy());
-    invoker.setNeedToSave(true,"Change vtranslation program");
-    if(invoker2!=null) invoker2.updateNode();
+    JDUtils.modified=true;
     refreshControls();
   }
 
@@ -421,68 +331,46 @@ class JDValuePanel extends JPanel implements ActionListener {
   // Action listener
   // ---------------------------------------------------------
   public void actionPerformed(ActionEvent e) {
-
-    if(allObjects==null ||  isUpdating) return;
-
-    int i;
+    int i,m;
     Object src = e.getSource();
     if( src == minValueText ) {
       try {
-        int m = Integer.parseInt( minValueText.getText() );
+        m = Integer.parseInt( minValueText.getText() );
         for(i=0;i<allObjects.length;i++) allObjects[i].setMinValue(m);
-        invoker.setNeedToSave(true,"Change min value");
+        JDUtils.modified=true;
       } catch (Exception ex) {
         JOptionPane.showMessageDialog(this,"Invalid syntax for min value");
       }
       refreshControls();
     } else if( src == maxValueText ) {
       try {
-        int m = Integer.parseInt( maxValueText.getText() );
+        m = Integer.parseInt( maxValueText.getText() );
         for(i=0;i<allObjects.length;i++) allObjects[i].setMaxValue(m);
-        invoker.setNeedToSave(true,"Change max value");
+        JDUtils.modified=true;
+        refreshControls();
       } catch (Exception ex) {
         JOptionPane.showMessageDialog(this,"Invalid syntax for max value");
       }
       refreshControls();
     } else if( src == initValueText ) {
       try {
-        int m = Integer.parseInt( initValueText.getText() );
+        m = Integer.parseInt( initValueText.getText() );
         for(i=0;i<allObjects.length;i++) allObjects[i].setInitValue(m);
-        invoker.setNeedToSave(true,"Change init value");
+        JDUtils.modified=true;
+        refreshControls();
       } catch (Exception ex) {
         JOptionPane.showMessageDialog(this,"Invalid syntax for init value");
       }
       refreshControls();
-
-    } else  if( src==applyValueBtn ) {
-
-      try {
-
-        int min  = Integer.parseInt( minValueText.getText() );
-        int max  = Integer.parseInt( maxValueText.getText() );
-        int init = Integer.parseInt( initValueText.getText() );
-        for(i=0;i<allObjects.length;i++) {
-          allObjects[i].setMinValue(min);
-          allObjects[i].setMaxValue(max);
-          allObjects[i].setInitValue(init);
-        }
-        invoker.setNeedToSave(true,"Change value range");
-
-      } catch (Exception ex) {
-        JOptionPane.showMessageDialog(this,"One or more value are incorrect");
-      }
-      refreshControls();
-
     } else  if( src==userValueCheckBox ) {
       for(i=0;i<allObjects.length;i++) allObjects[i].setInteractive(userValueCheckBox.isSelected());
-      invoker.setNeedToSave(true,"Change interactive flag");
-      if(invoker2!=null) invoker2.updateNode();
       refreshControls();
+      JDUtils.modified = true;
     } else if ( src==userBehaviorCombo ) {
       int s = userBehaviorCombo.getSelectedIndex();
       if(s>=0) {
         for(i=0;i<allObjects.length;i++) allObjects[i].setValueChangeMode(s);
-        invoker.setNeedToSave(true,"Change interactive behavior");
+        JDUtils.modified = true;
       }
     } else if( src == affectBackgroundBtn ) {
 

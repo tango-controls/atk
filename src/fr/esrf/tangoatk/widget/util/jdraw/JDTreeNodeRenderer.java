@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * TangoTreeNodeCellRenderer.java
  *
  */
@@ -104,10 +82,7 @@ class JDTreeNodeRenderer extends DefaultTreeCellRenderer {
   ImageIcon groupIcon;
   ImageIcon rrectangleIcon;
   ImageIcon imgIcon;
-  ImageIcon swgIcon;
-  ImageIcon axisIcon;
-  ImageIcon barIcon;
-  ImageIcon sliderIcon;
+  JLabel renderProperties;
   MasterNodeRenderer renderMaster;
 
   private static Color selColor = new Color(204,204,255);
@@ -122,10 +97,9 @@ class JDTreeNodeRenderer extends DefaultTreeCellRenderer {
     splineIcon = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/util/jdraw/gif/jdraw_spline_icon.gif"));
     groupIcon = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/util/jdraw/gif/jdraw_group_icon.gif"));
     imgIcon = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/util/jdraw/gif/jdraw_image_icon.gif"));
-    swgIcon = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/util/jdraw/gif/jdraw_swing_icon.gif"));
-    axisIcon = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/util/jdraw/gif/jdraw_axis_icon.gif"));
-    barIcon = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/util/jdraw/gif/jdraw_bar_icon.gif"));
-    sliderIcon = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/util/jdraw/gif/jdraw_slider_icon.gif"));
+    renderProperties = new JLabel();
+    renderProperties.setOpaque(true);
+    renderProperties.setFont(JDUtils.labelFont);
     renderMaster = new MasterNodeRenderer();
   }
 
@@ -147,6 +121,12 @@ class JDTreeNodeRenderer extends DefaultTreeCellRenderer {
     JDObject o = n.getObject();
     // Root node
     if(o==null) return this;
+
+    if(n.propertyName!=null) {
+      renderProperties.setText(n.propertyName);
+      renderProperties.setBackground((sel)?selColor:tree.getBackground());
+      return renderProperties;
+    }
 
     renderMaster.setBackground((sel)?selColor:tree.getBackground());
 
@@ -176,13 +156,13 @@ class JDTreeNodeRenderer extends DefaultTreeCellRenderer {
       return renderMaster;
     }
 
-    if (n.getObject() instanceof JDSpline) {
-      renderMaster.setValues(splineIcon,o.getNodeName(),(o.hasValueProgram())?"[change with value]":"");
-      return renderMaster;
-    }
-    
     if (n.getObject() instanceof JDPolyline) {
       renderMaster.setValues(polyIcon,o.getNodeName(),(o.hasValueProgram())?"[change with value]":"");
+      return renderMaster;
+    }
+
+    if (n.getObject() instanceof JDSpline) {
+      renderMaster.setValues(splineIcon,o.getNodeName(),(o.hasValueProgram())?"[change with value]":"");
       return renderMaster;
     }
 
@@ -193,26 +173,6 @@ class JDTreeNodeRenderer extends DefaultTreeCellRenderer {
 
     if (n.getObject() instanceof JDImage) {
       renderMaster.setValues(imgIcon,o.getNodeName(),(o.hasValueProgram())?"[change with value]":"");
-      return renderMaster;
-    }
-
-    if (n.getObject() instanceof JDSwingObject) {
-      renderMaster.setValues(swgIcon,o.getNodeName(),(o.hasValueProgram())?"[change with value]":"");
-      return renderMaster;
-    }
-
-    if (n.getObject() instanceof JDBar) {
-      renderMaster.setValues(barIcon,o.getNodeName(),(o.hasValueProgram())?"[change with value]":"");
-      return renderMaster;
-    }
-
-    if (n.getObject() instanceof JDSlider) {
-      renderMaster.setValues(sliderIcon,o.getNodeName(),(o.hasValueProgram())?"[change with value]":"");
-      return renderMaster;
-    }
-
-    if (n.getObject() instanceof JDAxis) {
-      renderMaster.setValues(axisIcon,o.getNodeName(),(o.hasValueProgram())?"[change with value]":"");
       return renderMaster;
     }
 

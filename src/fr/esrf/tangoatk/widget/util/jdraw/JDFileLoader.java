@@ -1,28 +1,5 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util.jdraw;
 
-import java.io.InputStreamReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -56,30 +33,16 @@ public class JDFileLoader {
 
   private String word;
   private String version;
-  //FileReader f;
-  InputStreamReader f;
+  FileReader f;
 
   // Global param section
   Color globalBackground = JDrawEditor.defaultBackground;
 
-  /**
-   * Construct a JDFileLoader.
-   * @param fr File to be read.
-   * @see #parseFile
-   */
+  // ****************************************************
+  // Contruction
+  // ****************************************************
   public JDFileLoader(FileReader fr) {
     f = fr;
-    CrtLine = 1;
-    CurrentChar = ' ';
-  }
-  
-  /**
-   * Construct a JDFileLoader.
-   * @param insr File to be read.
-   * @see #parseFile
-   */
-  public JDFileLoader(InputStreamReader insr) {
-    f = insr;
     CrtLine = 1;
     CurrentChar = ' ';
   }
@@ -467,14 +430,6 @@ public class JDFileLoader {
       return new JDGroup(this);
     } else if (className.equals("JDImage")) {
       return new JDImage(this);
-    } else if (className.equals("JDSwingObject")) {
-      return new JDSwingObject(this);
-    } else if (className.equals("JDAxis")) {
-      return new JDAxis(this);
-    } else if (className.equals("JDBar")) {
-      return new JDBar(this);
-    } else if (className.equals("JDSlider")) {
-      return new JDSlider(this);
     } else if (className.equals("Global")) {
       parseGlobalSection();
       return null;
@@ -487,43 +442,20 @@ public class JDFileLoader {
   }
 
   String parseParamString() throws IOException {
-
-    Vector v = new Vector();
-    boolean end = false;
-    int lex;
-
-    while (!end && word!=null) {
-
-      // Get the string array
-      // (interpret number as string in param list)
-      // (interpret kw as string in param list)
-      lex = class_lex(word);
-
-      if (lex != STRING && lex != NUMBER)
-        throw new IOException("Error at line " + StartLine + ", '" + lexical_word[NUMBER] + "' or '" + lexical_word[STRING] + "' expected");
-
-      v.add(extractQuote(word));
-      word = read_word();
-
-      end = class_lex(word)!=COMA;
-      if(!end)  word = read_word();
-
-    }
-    if (word == null) throw new IOException("Unexpected end of file");
-
-    // Build String
-    String ret = "";
-    for(int i=0;i<v.size();i++) {
-      ret += (String)v.get(i);
-      if(i<v.size()-1) ret += "\n";
-    }
-    return ret;
-
+    String ret = word;
+    int lex = class_lex(word);
+    // Get the string
+    // (interpret number as string in param list)
+    // (interpret kw as string in param list)
+    if (lex != STRING && lex != NUMBER)
+      throw new IOException("Error at line " + StartLine + ", '" + lexical_word[NUMBER] + "' or '" + lexical_word[STRING] + "' expected");
+    word = read_word();
+    return extractQuote(ret);
   }
 
   /**
    * Parse a JDFile (jdw format).
-   * @return Vector of JDObject.
+   * @return Vector of object.
    * @throws IOException In case of failure
    */
   public Vector parseFile() throws IOException {

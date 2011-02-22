@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /**
  * JDraw Line graphic object
  */
@@ -30,29 +8,18 @@ import java.awt.geom.Point2D;
 import java.io.FileWriter;
 import java.io.IOException;
 
-/** JDraw Line graphic object.
-  *  <p>Here is an example of few JDLine:<p>
-  *  <img src="JDLine.gif" border="0" alt="JDLine examples"></img>
-  */
-public class JDLine extends JDObject implements JDRotatable {
+/** JDraw Line graphic object */
+public class JDLine extends JDObject {
 
-  /** No arrow. */
+  // Global vars
   final public static int ARROW_NONE = 0;
-  /** Left arrow type 1. */
   final public static int ARROW1_LEFT = 1;
-  /** right arrow type 1. */
   final public static int ARROW1_RIGHT = 2;
-  /** Left and right arrow type 1. */
   final public static int ARROW1_BOTH = 3;
-  /**center arrow type 1. */
   final public static int ARROW1_CENTER = 4;
-  /** Left arrow type 2. */
   final public static int ARROW2_LEFT = 5;
-  /** right arrow type 2. */
   final public static int ARROW2_RIGHT = 6;
-  /** Left and right arrow type 2. */
   final public static int ARROW2_BOTH = 7;
-  /**center arrow type 2. */
   final public static int ARROW2_CENTER = 8;
 
   // Default
@@ -66,14 +33,9 @@ public class JDLine extends JDObject implements JDRotatable {
   int[] ashx;
   int[] ashy;
 
-  /**
-   * Construct a JDLine.
-   * @param objectName Line name
-   * @param x1 X position First point
-   * @param y1 Y position First point
-   * @param x2 X position Second point
-   * @param y2 Y position Second point
-   */
+  // -----------------------------------------------------------
+  // Construction
+  // -----------------------------------------------------------
   public JDLine(String objectName, int x1, int y1, int x2, int y2) {
     initDefault();
     summit = new Point.Double[2];
@@ -85,7 +47,7 @@ public class JDLine extends JDObject implements JDRotatable {
     setOrigin(org);
   }
 
-  JDLine(JDLine e, int x, int y) {
+  public JDLine(JDLine e, int x, int y) {
     cloneObject(e, x, y);
     arrowMode = e.arrowMode;
     arrowWidth = e.arrowWidth;
@@ -124,35 +86,10 @@ public class JDLine extends JDObject implements JDRotatable {
 
   }
 
-  JDLine(LXObject lxObj,double x1,double y1,double x2,double y2,int arrow) {
-
-    initDefault();
-    loadObject(lxObj);
-
-    double x = lxObj.boundRect.getX();
-    double y = lxObj.boundRect.getY();
-    double w = lxObj.boundRect.getWidth();
-    double h = lxObj.boundRect.getHeight();
-
-    setOrigin(new Point2D.Double(x+w/2.0, y+h/2.0));
-    summit = new Point2D.Double[2];
-    createSummit();
-
-    summit[0].x = x1;
-    summit[0].y = y1;
-    summit[1].x = x2;
-    summit[1].y = y2;
-
-    arrowMode = arrow;
-
-    updateShape();
-
-  }
-
   // -----------------------------------------------------------
   // Ovverides
   // -----------------------------------------------------------
-  void initDefault() {
+  public void initDefault() {
     super.initDefault();
     ashx = new int[4];
     ashy = new int[4];
@@ -160,53 +97,28 @@ public class JDLine extends JDObject implements JDRotatable {
     arrowWidth = arrowWidthDefault;
   }
 
-  /**
-   * Sets the arrow for this line.
-   * @param arrow Arrow mode
-   * @see #ARROW1_LEFT
-   * @see #ARROW1_RIGHT
-   * @see #ARROW1_BOTH
-   * @see #ARROW1_CENTER
-   * @see #ARROW2_LEFT
-   * @see #ARROW2_RIGHT
-   * @see #ARROW2_BOTH
-   * @see #ARROW2_CENTER
-   */
   public void setArrow(int arrow) {
     arrowMode = arrow;
     updateShape();
   }
 
-  /**
-   * Returns the current arrow of this line.
-   * @see #setArrow
-   */
   public int getArrow() {
     return arrowMode;
   }
 
-  /**
-   * Sets the arrow size.
-   * @param s Arrow size.
-   */
   public void setArrowSize(int s) {
     arrowWidth = s;
     updateShape();
   }
 
-  /**
-   * Returns the current arrow width.
-   * @see #setArrowSize
-   */
   public int getArrowSize() {
     return arrowWidth;
   }
 
-  public void paint(JDrawEditor parent,Graphics g) {
+  public void paint(Graphics g) {
     if (!visible) return;
 
     Graphics2D g2 = (Graphics2D) g;
-    prepareRendering(g2);    
 
     if (lineWidth > 0) {
       g.setColor(foreground);
@@ -215,19 +127,16 @@ public class JDLine extends JDObject implements JDRotatable {
       if (bs != null) {
         Stroke old = g2.getStroke();
         g2.setStroke(bs);
-        //g2.drawPolyline(ptsx, ptsy, summit.length);
-        g2.drawLine(ptsx[0],ptsy[0],ptsx[1],ptsy[1]);
+        g2.drawPolyline(ptsx, ptsy, summit.length);
         g2.setStroke(old);
       } else {
-        //g.drawPolyline(ptsx, ptsy, summit.length);
-        g2.drawLine(ptsx[0],ptsy[0],ptsx[1],ptsy[1]);
+        g.drawPolyline(ptsx, ptsy, summit.length);
       }
     }
 
     // Paint arrow
     if (arrows != null) {
 
-      // Force anti alias for arrow
       g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
           RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -236,21 +145,22 @@ public class JDLine extends JDObject implements JDRotatable {
         g2.fillPolygon(arrows[i]);
       }
 
+      g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+          RenderingHints.VALUE_ANTIALIAS_OFF);
     }
 
   }
 
-  /** Returns false, Line cannot be shadowed. */
   public boolean hasShadow() {
     return false;
   }
 
-  Rectangle getShadowBoundRect() {
+  public Rectangle getShadowBoundRect() {
     return null;
   }
 
-  int getSummitMotion(int id) {
-    return JDObject.BOTH_SM;
+  public int getSummitMotion(int id) {
+    return JDObject.BOTH;
   }
 
   public void moveSummit(int id, double x, double y) {
@@ -266,7 +176,7 @@ public class JDLine extends JDObject implements JDRotatable {
     return isPointOnLine(x, y, (int) summit[0].x, (int) summit[0].y, (int) summit[1].x, (int) summit[1].y);
   }
 
-  Rectangle getRepaintRect() {
+  public Rectangle getRepaintRect() {
 
     Rectangle r = super.getRepaintRect();
 
@@ -286,25 +196,10 @@ public class JDLine extends JDObject implements JDRotatable {
     updateShape();
   }
 
-  public void rotate(double angle,double xCenter,double yCenter) {
-
-    double sn = Math.sin(angle);
-    double cs = Math.cos(angle);
-    double vx,vy;
-    for(int i=0;i<summit.length;i++) {
-      vx = summit[i].x - xCenter;
-      vy = summit[i].y - yCenter;
-      summit[i].x = (vx*cs + vy*sn) + xCenter;
-      summit[i].y = (-vx*sn + vy*cs) + yCenter;
-    }
-    updateShape();
-
-  }
-
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
-  void saveObject(FileWriter f, int level) throws IOException {
+  public void saveObject(FileWriter f, int level) throws IOException {
 
     String decal = saveObjectHeader(f, level);
 
@@ -324,7 +219,7 @@ public class JDLine extends JDObject implements JDRotatable {
 
   }
 
-  JDLine(JDFileLoader f) throws IOException {
+  public JDLine(JDFileLoader f) throws IOException {
     initDefault();
     int l = f.getCurrentLine();
 
@@ -390,8 +285,9 @@ public class JDLine extends JDObject implements JDRotatable {
       double nx = -(ptsy[1] - ptsy[0]);
       double ny = (ptsx[1] - ptsx[0]);
       double n = Math.sqrt(nx * nx + ny * ny);
-      double aw = (double)arrowWidth;
-      double lw = (double)lineWidth;
+      double aw = (double) arrowWidth;
+      double lw = (double) (lineWidth-2)/2.0;
+      if(lw<0.0) lw=0.0;
 
       if (n < 1.0) {
         // Cannot build arrow for null line
@@ -401,14 +297,8 @@ public class JDLine extends JDObject implements JDRotatable {
         int i = 0;
         double dx = (double)(ptsx[1] - ptsx[0])  * aw/n;
         double dy = (double)(ptsy[1] - ptsy[0])  * aw/n;
-        double dpx=0;
-        double dpy=0;
-
-        if(lineWidth>1) {
-          // No correction for lw<=1
-          dpx = (double)(ptsx[1] - ptsx[0]) * (lw+1.0)/n;
-          dpy = (double)(ptsy[1] - ptsy[0]) * (lw+1.0)/n;
-        }
+        double dpx = (double)(ptsx[1] - ptsx[0]) * lw/n;
+        double dpy = (double)(ptsy[1] - ptsy[0]) * lw/n;
 
         if (arrowMode == ARROW1_BOTH || arrowMode == ARROW2_BOTH)
           arrows = new Polygon[2];
@@ -417,15 +307,15 @@ public class JDLine extends JDObject implements JDRotatable {
 
         if (arrowMode == ARROW1_BOTH || arrowMode == ARROW1_LEFT) {
 
-          ashx[0] = (int)Math.round(ptsx[0] + dx + (-nx / n * aw));
-          ashy[0] = (int)Math.round(ptsy[0] + dy + (-ny / n * aw));
-          ashx[1] = (int)Math.round(ptsx[0] + dx + (nx / n * aw));
-          ashy[1] = (int)Math.round(ptsy[0] + dy + (ny / n * aw));
+          ashx[0] = (int)( ptsx[0] + dx + (-nx / n * aw) + 0.5);
+          ashy[0] = (int)( ptsy[0] + dy + (-ny / n * aw) + 0.5);
+          ashx[1] = (int)( ptsx[0] + dx + (nx / n * aw) + 0.5);
+          ashy[1] = (int)( ptsy[0] + dy + (ny / n * aw) + 0.5);
           ashx[2] = ptsx[0];
           ashy[2] = ptsy[0];
 
-          ptsx[0] += (int)Math.round(dpx);
-          ptsy[0] += (int)Math.round(dpy);
+          ptsx[0] += (int)(dx+dpx+0.5);
+          ptsy[0] += (int)(dy+dpy+0.5);
 
           arrows[i] = new Polygon(ashx, ashy, 3);
           i++;
@@ -433,15 +323,15 @@ public class JDLine extends JDObject implements JDRotatable {
 
         if (arrowMode == ARROW1_BOTH || arrowMode == ARROW1_RIGHT) {
 
-          ashx[0] = (int)Math.round(ptsx[1] - dx + (-nx/n * aw));
-          ashy[0] = (int)Math.round(ptsy[1] - dy + (-ny/n * aw));
-          ashx[1] = (int)Math.round(ptsx[1] - dx + (nx/n * aw));
-          ashy[1] = (int)Math.round(ptsy[1] - dy + (ny/n * aw));
+          ashx[0] = (int) (ptsx[1] - dx + (-nx/n * aw) + 0.5);
+          ashy[0] = (int) (ptsy[1] - dy + (-ny/n * aw) + 0.5);
+          ashx[1] = (int) (ptsx[1] - dx + (nx/n * aw) + 0.5);
+          ashy[1] = (int) (ptsy[1] - dy + (ny/n * aw) + 0.5);
           ashx[2] = ptsx[1];
           ashy[2] = ptsy[1];
 
-          ptsx[1] -= (int)Math.round(dpx);
-          ptsy[1] -= (int)Math.round(dpy);
+          ptsx[1] -= (int)(dx+dpx+0.5);
+          ptsy[1] -= (int)(dy+dpy+0.5);
 
           arrows[i] = new Polygon(ashx, ashy, 3);
         }
@@ -451,48 +341,48 @@ public class JDLine extends JDObject implements JDRotatable {
           double xc = (double)(ptsx[1] + ptsx[0]) / 2.0;
           double yc = (double)(ptsy[1] + ptsy[0]) / 2.0;
 
-          ashx[0] = (int)Math.round(xc + (-nx / n * aw));
-          ashy[0] = (int)Math.round(yc + (-ny / n * aw));
-          ashx[1] = (int)Math.round(xc + (nx / n * aw));
-          ashy[1] = (int)Math.round(yc + (ny / n * aw));
-          ashx[2] = (int)Math.round(xc + (dx));
-          ashy[2] = (int)Math.round(yc + (dy));
+          ashx[0] = (int)(0.5 + xc + (-nx / n * aw));
+          ashy[0] = (int)(0.5 + yc + (-ny / n * aw));
+          ashx[1] = (int)(0.5 + xc + (nx / n * aw));
+          ashy[1] = (int)(0.5 + yc + (ny / n * aw));
+          ashx[2] = (int)(0.5 + xc + (dx));
+          ashy[2] = (int)(0.5 + yc + (dy));
 
           arrows[i] = new Polygon(ashx, ashy, 3);
         }
 
         if (arrowMode == ARROW2_BOTH || arrowMode == ARROW2_LEFT) {
 
-          ashx[0] = (int)Math.round( ptsx[0] + dx + (-nx / n * aw) + (dx / 2.0) );
-          ashy[0] = (int)Math.round( ptsy[0] + dy + (-ny / n * aw) + (dy / 2.0) );
-          ashx[1] = (int)Math.round( ptsx[0] + dx );
-          ashy[1] = (int)Math.round( ptsy[0] + dy );
-          ashx[2] = (int)Math.round( ptsx[0] + dx + (nx / n * aw) + (dx / 2.0) );
-          ashy[2] = (int)Math.round( ptsy[0] + dy + (ny / n * aw) + (dy / 2.0) );
+          ashx[0] = (int)( ptsx[0] + dx + (-nx / n * aw) + (dx / 2.0) + 0.5);
+          ashy[0] = (int)( ptsy[0] + dy + (-ny / n * aw) + (dy / 2.0) + 0.5);
+          ashx[1] = (int)( ptsx[0] + dx + 0.5);
+          ashy[1] = (int)( ptsy[0] + dy + 0.5);
+          ashx[2] = (int)( ptsx[0] + dx + (nx / n * aw) + (dx / 2.0) + 0.5);
+          ashy[2] = (int)( ptsy[0] + dy + (ny / n * aw) + (dy / 2.0) + 0.5);
           ashx[3] = ptsx[0];
           ashy[3] = ptsy[0];
 
           arrows[i] = new Polygon(ashx, ashy, 4);
           i++;
 
-          ptsx[0] += (int)Math.round(dpx);
-          ptsy[0] += (int)Math.round(dpy);
+          ptsx[0] += (int)(dx+dpx+0.5);
+          ptsy[0] += (int)(dy+dpy+0.5);
 
         }
 
         if (arrowMode == ARROW2_BOTH || arrowMode == ARROW2_RIGHT) {
 
-          ashx[0] = (int)Math.round( ptsx[1] - dx + (-nx / n * aw) - (dx / 2.0));
-          ashy[0] = (int)Math.round( ptsy[1] - dy + (-ny / n * aw) - (dy / 2.0));
-          ashx[1] = (int)Math.round( ptsx[1] - dx);
-          ashy[1] = (int)Math.round( ptsy[1] - dy);
-          ashx[2] = (int)Math.round( ptsx[1] - dx + (nx / n * aw) - (dx / 2.0));
-          ashy[2] = (int)Math.round( ptsy[1] - dy + (ny / n * aw) - (dy / 2.0));
+          ashx[0] = (int)( ptsx[1] - dx + (-nx / n * aw) - (dx / 2.0) + 0.5);
+          ashy[0] = (int)( ptsy[1] - dy + (-ny / n * aw) - (dy / 2.0) + 0.5);
+          ashx[1] = (int)( ptsx[1] - dx + 0.5);
+          ashy[1] = (int)( ptsy[1] - dy + 0.5);
+          ashx[2] = (int)( ptsx[1] - dx + (nx / n * aw) - (dx / 2.0) + 0.5);
+          ashy[2] = (int)( ptsy[1] - dy + (ny / n * aw) - (dy / 2.0) + 0.5);
           ashx[3] = ptsx[1];
           ashy[3] = ptsy[1];
 
-          ptsx[1] -= (int)Math.round(dpx);
-          ptsy[1] -= (int)Math.round(dpy);
+          ptsx[1] -= (int)(dx+dpx+0.5);
+          ptsy[1] -= (int)(dy+dpy+0.5);
 
           arrows[i] = new Polygon(ashx, ashy, 4);
         }

@@ -1,28 +1,4 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util.jdraw;
-
-import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
@@ -61,24 +37,18 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
   JCheckBox rot90CheckBox;
   JCheckBox rot180CheckBox;
   JCheckBox rot270CheckBox;
-  JSlider scaleRSlider;
-  JLabel scaleRLabel;
-  JTextField scaleRText;
 
   JCheckBox scaleRatioCheckBox;
 
   JButton resetTransformBtn;
-  JButton dismissBtn;
 
   int transX;
   int transY;
   int scaleX;
   int scaleY;
   int angle;
-  double rotatableAngle;
   boolean transformInited = false;
   Point org;
-  boolean isUpdating = false;
 
   public JDTransformPanel(JDObject[] p, JComponent jc) {
 
@@ -87,7 +57,7 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
 
     setLayout(null);
     setBorder(BorderFactory.createEtchedBorder());
-    setPreferredSize(new Dimension(280, 380));
+    setPreferredSize(new Dimension(280, 360));
 
     // ------------------------------------------------------------------------------------
     JPanel translationPanel = new JPanel(null);
@@ -129,7 +99,6 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
     translationPanel.add(transXLabel);
 
     transXText = new JTextField();
-    transXText.setMargin(JDUtils.zMargin);
     transXText.setEditable(true);
     transXText.setFont(JDUtils.labelFont);
     transXText.setBounds(220, 20, 40, 24);
@@ -144,7 +113,6 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
     translationPanel.add(transYLabel);
 
     transYText = new JTextField();
-    transYText.setMargin(JDUtils.zMargin);
     transYText.setEditable(true);
     transYText.setFont(JDUtils.labelFont);
     transYText.setBounds(220, 50, 40, 24);
@@ -160,7 +128,6 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
     scaleX = 100;
     scaleY = 100;
     angle=0;
-    rotatableAngle=0.0;
     org = JDUtils.getCenter(allObjects);
 
     scaleXSlider = new JSlider(10, 500, scaleX);
@@ -190,7 +157,6 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
     scalePanel.add(scaleXLabel);
 
     scaleXText = new JTextField();
-    scaleXText.setMargin(JDUtils.zMargin);
     scaleXText.setEditable(true);
     scaleXText.setFont(JDUtils.labelFont);
     scaleXText.setBounds(220, 30, 40, 24);
@@ -205,7 +171,6 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
     scalePanel.add(scaleYLabel);
 
     scaleYText = new JTextField();
-    scaleYText.setMargin(JDUtils.zMargin);
     scaleYText.setEditable(true);
     scaleYText.setFont(JDUtils.labelFont);
     scaleYText.setBounds(220, 80, 40, 24);
@@ -225,7 +190,7 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
     // ------------------------------------------------------------------------------------
     JPanel rotatePanel = new JPanel(null);
     rotatePanel.setBorder(JDUtils.createTitleBorder("Rotate"));
-    rotatePanel.setBounds(5, 255, 270, 90);
+    rotatePanel.setBounds(5, 260, 270, 60);
 
     rot90CheckBox = new JCheckBox("90deg");
     rot90CheckBox.setFont(JDUtils.labelFont);
@@ -248,71 +213,28 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
     rot270CheckBox.addActionListener(this);
     rotatePanel.add(rot270CheckBox);
 
-    scaleRSlider = new JSlider(-180, 180, 0);
-    scaleRSlider.setMinorTickSpacing(45);
-    scaleRSlider.setMajorTickSpacing(90);
-    scaleRSlider.setPaintTicks(true);
-    scaleRSlider.setPaintLabels(false);
-    scaleRSlider.addChangeListener(this);
-    scaleRSlider.setBounds(5, 45, 135, 40);
-    rotatePanel.add(scaleRSlider);
-
-    scaleRLabel = new JLabel("Angle [deg]");
-    scaleRLabel.setFont(JDUtils.labelFont);
-    scaleRLabel.setHorizontalAlignment(JLabel.RIGHT);
-    scaleRLabel.setForeground(JDUtils.labelColor);
-    scaleRLabel.setBounds(140, 50, 75, 24);
-    rotatePanel.add(scaleRLabel);
-
-    scaleRText = new JTextField();
-    scaleRText.setMargin(JDUtils.zMargin);
-    scaleRText.setEditable(true);
-    scaleRText.setFont(JDUtils.labelFont);
-    scaleRText.setBounds(220, 50, 40, 24);
-    scaleRText.addActionListener(this);
-    rotatePanel.add(scaleRText);
-
-    // Validate free rotate if only JDRotatable are selected
-    boolean valid=true;
-    for(int i=0;i<p.length && valid;i++)
-      valid = p[i] instanceof JDRotatable;
-    scaleRSlider.setEnabled(valid);
-    scaleRLabel.setEnabled(valid);
-    scaleRText.setEnabled(valid);
-
     add(rotatePanel);
 
     resetTransformBtn = new JButton("Reset transfom");
     resetTransformBtn.setMargin(new Insets(0, 0, 0, 0));
     resetTransformBtn.setFont(JDUtils.labelFont);
     resetTransformBtn.addActionListener(this);
-    resetTransformBtn.setBounds(7, 350, 120, 24);
+    resetTransformBtn.setBounds(7, 325, 120, 24);
     add(resetTransformBtn);
-
-    dismissBtn = new JButton("Dismiss");
-    dismissBtn.setMargin(new Insets(0, 0, 0, 0));
-    dismissBtn.setFont(JDUtils.labelFont);
-    dismissBtn.addActionListener(this);
-    dismissBtn.setBounds(192, 350, 80, 24);
-    add(dismissBtn);
 
     updateControls();
   }
 
   private void updateControls() {
-    isUpdating = true;
     transXText.setText(Integer.toString(transX));
     transYText.setText(Integer.toString(transY));
     scaleXText.setText(Integer.toString(scaleX));
     scaleYText.setText(Integer.toString(scaleY));
-    scaleRText.setText(Double.toString(rotatableAngle));
     scaleXSlider.setValue(scaleX);
     scaleYSlider.setValue(scaleY);
-    scaleRSlider.setValue((int)Math.round(rotatableAngle));
     rot90CheckBox.setSelected(angle==90);
     rot180CheckBox.setSelected(angle==180);
     rot270CheckBox.setSelected(angle==270);
-    isUpdating = false;
   }
 
   private void initTransform() {
@@ -343,11 +265,6 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
       allObjects[i].scaleTranslate(org.x, org.y, (double) (scaleX) / 100.0, (double) (scaleY) / 100.0, transX, transY);
       for(int a=0;a<angle;a+=90)
         allObjects[i].rotate90(org.x, org.y);
-      if(rotatableAngle!=0.0) {
-        if(allObjects[i] instanceof JDRotatable) {
-          ((JDRotatable)allObjects[i]).rotate(rotatableAngle * Math.PI / 180.0,org.x, org.y);
-        }
-      }
     }
 
   }
@@ -356,10 +273,6 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
   // Action listener
   // ---------------------------------------------------------
   public void actionPerformed(ActionEvent e) {
-
-    if(isUpdating)
-      return;
-
     initRepaint();
     initTransform();
     Object src = e.getSource();
@@ -404,13 +317,6 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
       } catch (Exception ex) {
         JOptionPane.showMessageDialog(this, "Invalid number", "Error", JOptionPane.ERROR_MESSAGE);
       }
-    } else if (src == scaleRText) {
-      try {
-        rotatableAngle = Double.parseDouble(scaleRText.getText());
-        JDUtils.modified = true;
-      } catch (Exception ex) {
-        JOptionPane.showMessageDialog(this, "Invalid number", "Error", JOptionPane.ERROR_MESSAGE);
-      }
     } else if (src == rot90CheckBox) {
       angle=90;
       JDUtils.modified = true;
@@ -426,8 +332,6 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
       transX = 0;
       transY = 0;
       angle=0;
-    } else if (src == dismissBtn) {
-      ATKGraphicsUtils.getWindowForComponent(this).setVisible(false);
     }
 
     updateTransform();
@@ -440,9 +344,6 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
   // ---------------------------------------------------------
   public void stateChanged(ChangeEvent e) {
 
-    if(isUpdating)
-      return;
-
     initRepaint();
     initTransform();
     Object src = e.getSource();
@@ -454,9 +355,6 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
     } else if (src == scaleYSlider) {
       scaleY = scaleYSlider.getValue();
       if (scaleRatioCheckBox.isSelected()) scaleX = scaleY;
-      JDUtils.modified = true;
-    } else if (src == scaleRSlider) {
-      rotatableAngle = (double)scaleRSlider.getValue();
       JDUtils.modified = true;
     }
 

@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /** A panel for JDEllipse private properties */
 package fr.esrf.tangoatk.widget.util.jdraw;
 
@@ -44,23 +22,24 @@ class JDEllipsePanel extends JPanel implements ActionListener,ChangeListener {
   private JLabel    arcTypeLabel;
   private JComboBox arcTypeCombo;
 
-  private JDEllipse[] allObjects = null;
-  private JDrawEditor invoker;
-  private Rectangle oldRect;
-  private boolean isUpdating = false;
+  JDEllipse[] allObjects;
+  JComponent invoker;
+  Rectangle oldRect;
 
-  public JDEllipsePanel(JDEllipse[] p, JDrawEditor jc) {
 
+  public JDEllipsePanel(JDEllipse[] p, JComponent jc) {
+
+    allObjects = p;
     invoker = jc;
 
     setLayout(null);
     setBorder(BorderFactory.createEtchedBorder());
-    setPreferredSize(new Dimension(380, 290));
+    setPreferredSize(new Dimension(380, 280));
 
     // ------------------------------------------------------------------------------------
     JPanel polyPanel = new JPanel(null);
     polyPanel.setBorder(JDUtils.createTitleBorder("Ellipse"));
-    polyPanel.setBounds(5,5,370,120);
+    polyPanel.setBounds(5,5,370,130);
 
     startLabel = new JLabel("Angle start");
     startLabel.setFont(JDUtils.labelFont);
@@ -69,6 +48,12 @@ class JDEllipsePanel extends JPanel implements ActionListener,ChangeListener {
     polyPanel.add(startLabel);
 
     startSpinner = new JSpinner();
+    Integer value = new Integer(p[0].getAngleStart());
+    Integer min = new Integer(0);
+    Integer max = new Integer(360);
+    Integer step = new Integer(1);
+    SpinnerNumberModel spModel = new SpinnerNumberModel(value, min, max, step);
+    startSpinner.setModel(spModel);
     startSpinner.addChangeListener(this);
     startSpinner.setBounds(115, 20, 60, 25);
     polyPanel.add(startSpinner);
@@ -80,6 +65,12 @@ class JDEllipsePanel extends JPanel implements ActionListener,ChangeListener {
     polyPanel.add(extentLabel);
 
     extentSpinner = new JSpinner();
+    value = new Integer(p[0].getAngleExtent());
+    min = new Integer(0);
+    max = new Integer(360);
+    step = new Integer(1);
+    spModel = new SpinnerNumberModel(value, min, max, step);
+    extentSpinner.setModel(spModel);
     extentSpinner.addChangeListener(this);
     extentSpinner.setBounds(295, 20, 60, 25);
     polyPanel.add(extentSpinner);
@@ -91,12 +82,18 @@ class JDEllipsePanel extends JPanel implements ActionListener,ChangeListener {
     polyPanel.add(stepLabel);
 
     stepSpinner = new JSpinner();
+    value = new Integer(p[0].getStep());
+    min = new Integer(1);
+    max = new Integer(256);
+    step = new Integer(1);
+    spModel = new SpinnerNumberModel(value, min, max, step);
+    stepSpinner.setModel(spModel);
     stepSpinner.addChangeListener(this);
     stepSpinner.setBounds(115, 50, 60, 25);
     polyPanel.add(stepSpinner);
 
     arcTypeLabel = JDUtils.createLabel("Arc Type");
-    arcTypeLabel.setBounds(10, 80, 90, 20);
+    arcTypeLabel.setBounds(10, 80, 100, 20);
     polyPanel.add(arcTypeLabel);
 
     arcTypeCombo = new JComboBox();
@@ -104,69 +101,22 @@ class JDEllipsePanel extends JPanel implements ActionListener,ChangeListener {
     arcTypeCombo.addItem("Open");
     arcTypeCombo.addItem("Closed");
     arcTypeCombo.addItem("Pie");
+    arcTypeCombo.setSelectedIndex(p[0].getArcType());
     arcTypeCombo.addActionListener(this);
     arcTypeCombo.setBounds(115, 80, 60, 25);
     polyPanel.add(arcTypeCombo);
+
     add(polyPanel);
 
-    updatePanel(p);
-
-  }
-
-  public void updatePanel(JDEllipse[] objs) {
-
-    allObjects = objs;
-    isUpdating = true;
-
-    if (objs == null || objs.length <= 0) {
-
-      SpinnerNumberModel nullModel = new SpinnerNumberModel(0, 0, 0, 0);
-      startSpinner.setModel(nullModel);
-      extentSpinner.setModel(nullModel);
-      stepSpinner.setModel(nullModel);
-      arcTypeCombo.setSelectedIndex(-1);
-
-    } else {
-
-      JDEllipse p = objs[0];
-
-      Integer value = new Integer(p.getAngleStart());
-      Integer min = new Integer(-360);
-      Integer max = new Integer(360);
-      Integer step = new Integer(1);
-      SpinnerNumberModel spModel = new SpinnerNumberModel(value, min, max, step);
-      startSpinner.setModel(spModel);
-
-      value = new Integer(p.getAngleExtent());
-      min = new Integer(0);
-      max = new Integer(360);
-      step = new Integer(1);
-      spModel = new SpinnerNumberModel(value, min, max, step);
-      extentSpinner.setModel(spModel);
-
-      value = new Integer(p.getStep());
-      min = new Integer(1);
-      max = new Integer(256);
-      step = new Integer(1);
-      spModel = new SpinnerNumberModel(value, min, max, step);
-      stepSpinner.setModel(spModel);
-
-      arcTypeCombo.setSelectedIndex(p.getArcType());
-
-    }
-
-    isUpdating = false;
   }
 
   private void initRepaint() {
-    if(allObjects==null) return;
     oldRect = allObjects[0].getRepaintRect();
     for (int i = 1; i < allObjects.length; i++)
       oldRect = oldRect.union(allObjects[i].getRepaintRect());
   }
 
   private void repaintObjects() {
-    if(allObjects==null) return;
     Rectangle newRect = allObjects[0].getRepaintRect();
     for (int i = 1; i < allObjects.length; i++)
       newRect = newRect.union(allObjects[i].getRepaintRect());
@@ -178,18 +128,14 @@ class JDEllipsePanel extends JPanel implements ActionListener,ChangeListener {
   // Action listener
   // ---------------------------------------------------------
   public void actionPerformed(ActionEvent e) {
-
-    if(allObjects==null || isUpdating) return;
-
     initRepaint();
     Object src = e.getSource();
     if(src==arcTypeCombo) {
       for (int i = 0; i < allObjects.length; i++)
         allObjects[i].setArcType(arcTypeCombo.getSelectedIndex());
-      invoker.setNeedToSave(true,"Change arc type");
+      JDUtils.modified=true;
     }
     repaintObjects();
-
   }
 
 
@@ -197,8 +143,6 @@ class JDEllipsePanel extends JPanel implements ActionListener,ChangeListener {
   //Change listener
   // ---------------------------------------------------------
   public void stateChanged(ChangeEvent e) {
-
-    if(allObjects==null || isUpdating) return;
 
     int i;
     initRepaint();
@@ -209,17 +153,17 @@ class JDEllipsePanel extends JPanel implements ActionListener,ChangeListener {
       v = (Integer) stepSpinner.getValue();
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setStep(v.intValue());
-      invoker.setNeedToSave(true,"Change arc step");
+      JDUtils.modified=true;
     } else if (src == startSpinner) {
       v = (Integer) startSpinner.getValue();
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setAngleStart(v.intValue());
-      invoker.setNeedToSave(true,"Change arc angle");
+      JDUtils.modified=true;
     } else if (src == extentSpinner) {
       v = (Integer) extentSpinner.getValue();
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setAngleExtent(v.intValue());
-      invoker.setNeedToSave(true,"Change arc angle");
+      JDUtils.modified=true;
     }
     repaintObjects();
 

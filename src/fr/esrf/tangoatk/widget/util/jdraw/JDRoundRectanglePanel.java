@@ -1,30 +1,10 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util.jdraw;
 
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.border.TitledBorder;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,13 +17,13 @@ class JDRoundRectanglePanel extends JPanel implements ActionListener,ChangeListe
   private JLabel cornerWidthLabel;
   private JSpinner cornerWidthSpinner;
 
-  private JDRoundRectangle[] allObjects = null;
-  private JDrawEditor invoker;
-  private Rectangle oldRect;
-  private boolean isUpdating = false;
+  JDRoundRectangle[] allObjects;
+  JComponent invoker;
+  Rectangle oldRect;
 
-  public JDRoundRectanglePanel(JDRoundRectangle[] p, JDrawEditor jc) {
+  public JDRoundRectanglePanel(JDRoundRectangle[] p, JComponent jc) {
 
+    allObjects = p;
     invoker = jc;
 
     setLayout(null);
@@ -62,6 +42,12 @@ class JDRoundRectanglePanel extends JPanel implements ActionListener,ChangeListe
     polyPanel.add(cornerWidthLabel);
 
     cornerWidthSpinner = new JSpinner();
+    Integer value = new Integer(p[0].getCornerWidth());
+    Integer min = new Integer(1);
+    Integer max = new Integer(256);
+    Integer step = new Integer(1);
+    SpinnerNumberModel spModel = new SpinnerNumberModel(value, min, max, step);
+    cornerWidthSpinner.setModel(spModel);
     cornerWidthSpinner.addChangeListener(this);
     cornerWidthSpinner.setBounds(115, 20, 60, 25);
     polyPanel.add(cornerWidthSpinner);
@@ -73,58 +59,27 @@ class JDRoundRectanglePanel extends JPanel implements ActionListener,ChangeListe
     polyPanel.add(stepLabel);
 
     stepSpinner = new JSpinner();
+    Integer value2 = new Integer(p[0].getStep());
+    Integer min2 = new Integer(1);
+    Integer max2 = new Integer(256);
+    Integer step2 = new Integer(1);
+    SpinnerNumberModel spModel2 = new SpinnerNumberModel(value2, min2, max2, step2);
+    stepSpinner.setModel(spModel2);
     stepSpinner.addChangeListener(this);
     stepSpinner.setBounds(115, 50, 60, 25);
     polyPanel.add(stepSpinner);
+
     add(polyPanel);
 
-    updatePanel(p);
-
-  }
-
-  public void updatePanel(JDRoundRectangle[] objs) {
-
-    allObjects = objs;
-    isUpdating = true;
-
-    if (objs == null || objs.length <= 0) {
-
-      SpinnerNumberModel nullModel = new SpinnerNumberModel(0, 0, 0, 0);
-      cornerWidthSpinner.setModel(nullModel);
-      stepSpinner.setModel(nullModel);
-
-    } else {
-
-      JDRoundRectangle p = objs[0];
-
-      Integer value = new Integer(p.getCornerWidth());
-      Integer min = new Integer(1);
-      Integer max = new Integer(256);
-      Integer step = new Integer(1);
-      SpinnerNumberModel spModel = new SpinnerNumberModel(value, min, max, step);
-      cornerWidthSpinner.setModel(spModel);
-
-      Integer value2 = new Integer(p.getStep());
-      Integer min2 = new Integer(1);
-      Integer max2 = new Integer(256);
-      Integer step2 = new Integer(1);
-      SpinnerNumberModel spModel2 = new SpinnerNumberModel(value2, min2, max2, step2);
-      stepSpinner.setModel(spModel2);
-
-    }
-
-    isUpdating = false;
   }
 
   private void initRepaint() {
-    if(allObjects==null) return;
     oldRect = allObjects[0].getRepaintRect();
     for (int i = 1; i < allObjects.length; i++)
       oldRect = oldRect.union(allObjects[i].getRepaintRect());
   }
 
   private void repaintObjects() {
-    if(allObjects==null) return;
     Rectangle newRect = allObjects[0].getRepaintRect();
     for (int i = 1; i < allObjects.length; i++)
       newRect = newRect.union(allObjects[i].getRepaintRect());
@@ -136,17 +91,12 @@ class JDRoundRectanglePanel extends JPanel implements ActionListener,ChangeListe
   // Action listener
   // ---------------------------------------------------------
   public void actionPerformed(ActionEvent e) {
-
-    if(allObjects==null || isUpdating) return;
-
   }
 
   // ---------------------------------------------------------
   //Change listener
   // ---------------------------------------------------------
   public void stateChanged(ChangeEvent e) {
-
-    if(allObjects==null || isUpdating) return;
 
     int i;
     initRepaint();
@@ -157,13 +107,13 @@ class JDRoundRectanglePanel extends JPanel implements ActionListener,ChangeListe
       v = (Integer) stepSpinner.getValue();
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setStep(v.intValue());
-      invoker.setNeedToSave(true,"Change step");
+      JDUtils.modified=true;
     }
     if (src == cornerWidthSpinner) {
       v = (Integer) cornerWidthSpinner.getValue();
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setCornerWidth(v.intValue());
-      invoker.setNeedToSave(true,"Change corner width");
+      JDUtils.modified=true;
     }
     repaintObjects();
 
