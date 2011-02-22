@@ -1,11 +1,5 @@
 BEANINFO = VoidVoidCommandViewerBeanInfo.java \
-	   CommandComboViewerBeanInfo.java \
-	   CommandButtonViewerBeanInfo.java \
-	   OnOffSwitchCommandViewerBeanInfo.java \
-	   OnOffCheckBoxCommandViewerBeanInfo.java \
-	   OptionComboCommandViewerBeanInfo.java \
-	   ConfirmCommandViewerBeanInfo.java \
-	   GroupCommandViewerBeanInfo.java
+	   CommandComboViewerBeanInfo.java 
 
 #            CommandOutputBeanInfo.java \
 #            ScalarCommandInputBeanInfo.java \
@@ -18,29 +12,16 @@ ALL =	$(TARGET)/PropertyFrame.class         \
 	$(TARGET)/CommandList.class           \
 	$(TARGET)/VoidVoidCommandViewer.class \
 	$(TARGET)/IInput.class                \
-	$(TARGET)/NoInput.class               \
-	$(TARGET)/ArrayCommandInput.class	\
-	$(TARGET)/CommandArrayInputAdapter.class \
 	$(TARGET)/ScalarCommandInput.class    \
-	$(TARGET)/TableCommandInput.class	\
 	$(TARGET)/CommandTableInputAdapter.class   \
 	$(TARGET)/CommandInputOutputFactory.class   \
+	$(TARGET)/ArrayInput.class            \
+	$(TARGET)/NoInput.class               \
 	$(TARGET)/SimpleCommandOutput.class	\
 	$(TARGET)/CommandOutput.class         \
 	$(TARGET)/SimpleCommandViewer.class   \
 	$(TARGET)/AnyCommandViewer.class   \
 	$(TARGET)/CommandComboViewer.class    \
-	$(TARGET)/CommandMenuViewer.class    \
-	$(TARGET)/CommandButtonViewer.class    \
-	$(TARGET)/ThreeStateSwitchCommandViewer.class \
-	$(TARGET)/OnOffSwitchCommandViewer.class  \
-	$(TARGET)/OnOffCheckBoxCommandViewer.class \
-	$(TARGET)/OptionComboCommandViewer.class \
-	$(TARGET)/ScalarCommandViewer.class \
-	$(TARGET)/ConfirmCommandViewer.class    \
-	$(TARGET)/SimpleCommandButtonViewer.class \
-	$(TARGET)/GroupCommandViewer.class \
-	$(TARGET)/SettableCommandButtonViewer.class
 
 all: commands beaninfo icons
 
@@ -49,40 +30,18 @@ commands: $(ALL)
 
 manifest: manifest-file
 
+ci:
+	@cvs ci Makefile `echo $(ALL) \
+                     | sed 's|$(TARGET)/||g' |  \
+                     sed 's|\.class|.java|g'`
 
 
 run:
 	$(JAVA) fr.esrf.tangoatk.widget.command.SimpleCommandViewer
 
 ai:	all
-	$(JAVA) fr.esrf.tangoatk.widget.command.ArrayCommandInput
+	$(JAVA) fr.esrf.tangoatk.widget.command.ArrayInput
 	
 
 combo:	all
 	$(JAVA) fr.esrf.tangoatk.widget.command.CommandComboViewer
-	
-
-cmdBut:	all
-	$(JAVA) fr.esrf.tangoatk.widget.command.CommandButtonViewer
-	
-
-onOffsw:	all
-	$(JAVA) fr.esrf.tangoatk.widget.command.OnOffSwitchCommandViewer
-	
-
-onOffch:	all
-	$(JAVA) fr.esrf.tangoatk.widget.command.OnOffCheckBoxCommandViewer
-	
-
-option:	all
-	$(JAVA) fr.esrf.tangoatk.widget.command.OptionComboCommandViewer
-	
-
-confirm:	all
-	$(JAVA) fr.esrf.tangoatk.widget.command.ConfirmCommandViewer
-	
-
-gcmd:	all
-	$(JAVA) fr.esrf.tangoatk.widget.command.GroupCommandViewer
-	
-	

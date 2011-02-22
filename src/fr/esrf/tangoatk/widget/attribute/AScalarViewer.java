@@ -1,40 +1,24 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
+ * NumberScalarViewer.java
+ *
+ * Created on November 21, 2001, 3:35 PM
  */
 
 package fr.esrf.tangoatk.widget.attribute;
 import fr.esrf.tangoatk.core.*;
-import fr.esrf.tangoatk.widget.properties.PropertyViewer;
-import fr.esrf.tangoatk.widget.attribute.SimplePropertyFrame;
+import fr.esrf.tangoatk.widget.properties.*;
 import fr.esrf.tangoatk.widget.util.*;
+import java.beans.*;
 import java.awt.*;
 import javax.swing.*;
-
+import java.util.*;
 /**
  *
  * @author  root 
  */
 public class AScalarViewer extends javax.swing.JPanel
     implements IAttributeStateListener, IErrorListener, IAttributeViewer {
-    SimplePropertyFrame f;
+    PropertyFrame f;
     IScalarAttribute supermodel;
     Color background = getBackground();
     Trend globalTrend;
@@ -64,6 +48,7 @@ public class AScalarViewer extends javax.swing.JPanel
     protected void setValueField(ATKField field) {
 
  	GridBagLayout layout =  (GridBagLayout)jPanel1.getLayout();
+ 	GridBagConstraints c = layout.getConstraints(value);
  	jPanel1.remove(value);
  	value = field;
  	jPanel1.add(value, 1);
@@ -74,7 +59,7 @@ public class AScalarViewer extends javax.swing.JPanel
 	    setBackground(background);
 	    return;
 	}
-	setBackground(ATKConstant.getColor4Quality(state));
+	setBackground(AttributeStateViewer.getColor4State(state));
     }
 	
     public void stateChange(String state) {
@@ -91,7 +76,7 @@ public class AScalarViewer extends javax.swing.JPanel
 	    return;
 	}
 	
-	value.setState(ATKConstant.getColor4Quality(state));
+	value.setState(AttributeStateViewer.getColor4State(state));
 
     }
 
@@ -301,17 +286,55 @@ public class AScalarViewer extends javax.swing.JPanel
     private void infoMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_infoMouseClicked
         // Add your handling code here:
 	if (f == null) {
-	    f = new SimplePropertyFrame();
+	    f = new PropertyFrame();
 	    f.setSize(300, 400);
 	    f.setEditable(propertyListEditable);
-	    f.setModel(supermodel);
+	    f.setModel(this);
 	    f.pack();
 	}
 	
-        f.setVisible(true);
+        f.show();
     }//GEN-LAST:event_infoMouseClicked
 
     public static void main(String [] args) {
+	fr.esrf.tangoatk.core.AttributeList attributeList = new
+	    fr.esrf.tangoatk.core.AttributeList();
+	final NumberScalarViewer nsv = new NumberScalarViewer();
+	nsv.setLabelMaximumLength(20);
+	try {
+	    final INumberScalar attr = (INumberScalar)attributeList.add("eas/test-api/1/Short_attr_rw");
+	    nsv.setValueEditable(false);
+	    nsv.setModel(attr);
+	    final INumberScalar attr1 = (INumberScalar)attributeList.add("eas/test-api/1/Short_attr_w");
+	    nsv.setPropertyListEditable(true);
+	    attributeList.startRefresher();
+	    int i = 0;
+	    new Thread() {
+		public void run() {
+		    while (true) {
+			nsv.setModel(attr1);
+			try {
+			    Thread.sleep(3000);			     
+			} catch (Exception e) {
+			    ;
+			} // end of try-catch
+			
+
+			nsv.setModel(attr);
+		    }
+		}
+	    }.start();
+	    
+
+	} catch (Exception e) {
+	    System.out.println(e);
+	} // end of try-catch
+	
+
+        javax.swing.JFrame f = new javax.swing.JFrame();
+        f.getContentPane().add(nsv);
+        f.pack();
+        f.show();
     }
 
 

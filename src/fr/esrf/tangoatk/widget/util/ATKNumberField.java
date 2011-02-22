@@ -1,29 +1,7 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          ATKNumberField.java
 // Created:       2001-11-20 15:19:39, assum
 // By:            <erik@assum.net>
-// Time-stamp:    <2002-07-19 12:52:52, assum>
+// Time-stamp:    <2002-06-17 16:24:49, assum>
 // 
 // $Id$
 // 
@@ -35,9 +13,8 @@ import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.font.*;
 import javax.swing.plaf.*;
-import fr.esrf.tangoatk.core.*;
+import fr.esrf.tangoatk.core.INumber;
 import com.braju.format.Format;
 import fr.esrf.TangoDs.AttrManip;
 
@@ -53,7 +30,7 @@ import fr.esrf.TangoDs.AttrManip;
  */
 public class ATKNumberField extends ATKField {
     protected boolean wheelSwitchEnabled = true;
-    protected INumberScalar model;
+    protected INumber model;
     protected Color   bg;
     protected boolean insertOK = false;
 
@@ -109,10 +86,10 @@ public class ATKNumberField extends ATKField {
      *
      * @param m an <code>INumber</code> value
      */
-    public void setModel(INumberScalar m) {
+    public void setModel(INumber m) {
 	model = m;
 	receivedEvent = false;
-	modelEditable = model.isWritable();
+	modelEditable = model.isWriteable();
 	super.setEditable(editable && modelEditable);
 	Number number = model.getNumber();
 
@@ -365,7 +342,7 @@ public class ATKNumberField extends ATKField {
 	field.setFont(new java.awt.Font("Times", 1, 60));
 	f.setContentPane(field);
 	f.pack();
-	f.setVisible(true);
+	f.show();
     } // end of main ()
 
 
@@ -386,7 +363,7 @@ class XORCaret extends DefaultCaret {
     public void paint(Graphics g) {
 	super.paint(g);
 	if (this.isVisible()) {
-	    frc = ((Graphics2D)g).getFontRenderContext();
+
 	    JTextComponent c = getComponent();
 	    TextUI ui = c.getUI();
 	    Rectangle r = null;
@@ -401,7 +378,7 @@ class XORCaret extends DefaultCaret {
 	    
 	    g.setColor(Color.red);
 	    lastPaintedWidth = currentWidth();
-	    g.fillRect(r.x, r.y, (int)lastPaintedWidth, r.height);
+	    g.fillRect(r.x, r.y, lastPaintedWidth, r.height);
 
 
 	    g.setColor(c.getBackground());
@@ -410,7 +387,7 @@ class XORCaret extends DefaultCaret {
 		if ((dot < c.getDocument().getLength())) {
 		    String s = getComponent().getText(dot, 1);
 		    if (!Character.isISOControl(s.charAt(0))) {
-			g.drawString(s, r.x, r.y + (int)currentAscent);
+			g.drawString(s, r.x, r.y + currentAscent);
 			     
 		    } 
 		} 
@@ -434,8 +411,15 @@ class XORCaret extends DefaultCaret {
 //	getComponent().repaint();
     }
 
-    protected double currentWidth() {
+    protected int currentWidth() {
 	Font f = getComponent().getFont();
+
+	if (f != currentFont) {
+	    currentFontMetrics =
+		Toolkit.getDefaultToolkit().getFontMetrics(f);
+	    currentAscent = currentFontMetrics.getAscent();
+	}
+
 	String current = null;
 
 	try {
@@ -444,13 +428,6 @@ class XORCaret extends DefaultCaret {
 	    // ignore
 	} 
 		
-
-	if (f != currentFont) {
-	    currentLineMetrics = f.getLineMetrics(current, frc);
-	    currentAscent = currentLineMetrics.getAscent();
-	}
-
-
 	char currentChar;
 
 	if (current != null && current.length() > 0) {
@@ -459,15 +436,18 @@ class XORCaret extends DefaultCaret {
 	    currentChar = ' ';
 	} // end of else
 
-	return f.getStringBounds(Character.toString(currentChar), frc).getWidth();
+	if (Character.isWhitespace(currentChar)) {
+	    return currentFontMetrics.charWidth(' ');
+	} else {
+	    return currentFontMetrics.charWidth(currentChar);
+	} // end of else
     }
 
-    protected double lastPaintedWidth = 0;
+    protected int lastPaintedWidth = 0;
     protected Font currentFont = null;
-    protected float currentAscent = 0;
-    protected LineMetrics currentLineMetrics = null;
+    protected int currentAscent = 0;
+    protected FontMetrics currentFontMetrics = null;
     protected Rectangle currentRectangle = null;
-    protected FontRenderContext frc = null;
 
     
 }

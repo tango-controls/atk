@@ -1,37 +1,13 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * AnyCommandViewer.java
  *
- * Created on July 18, 2002, 4:13 PM
+ * Created on March 20, 2002, 4:13 PM
  */
 
 package fr.esrf.tangoatk.widget.command;
 
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.widget.device.DeviceViewer;
-import fr.esrf.tangoatk.widget.util.IControlee;
-
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.*;
@@ -46,190 +22,38 @@ import javax.swing.border.*;
 public class AnyCommandViewer extends JPanel
     implements IResultListener {
 
-    ICommand                     model;
-    DeviceViewer                 dv;
-    JFrame                       deviceFrame;
-    public PropertyFrame         propertyFrame;
-    private JButton              infoButton;
-    private JButton              deviceButton;
-    private JLabel               descriptionLabel;
-    private IInput               commandInput;
-    private CommandOutput        commandOutput;
-    private IControlee           controlee = new CommandArgControlee();
-    private fr.esrf.tangoatk.widget.util.ButtonBar buttonBar1;
-
-
-    public AnyCommandViewer()
-    {
-       model = null;       
-       dv = new DeviceViewer();
-       deviceFrame = new JFrame();
-       propertyFrame = new PropertyFrame();
-       infoButton = null;
-       deviceButton = null;
-       commandInput = null;
-       commandOutput = null;
-    }
-
-
-    public AnyCommandViewer(ICommand  icommand)
-    {
-        model = null;       
-        dv = new DeviceViewer();
-        deviceFrame = new JFrame();
-        propertyFrame = new PropertyFrame();
-        infoButton = null;
-        deviceButton = null;
-        commandInput = null;
-        commandOutput = null;
-        setModel(icommand);
-	try
-	{
-	   initComponents();
-	}
-	catch (Exception e)
-	{
-	    throw new IllegalStateException
-		("Please do a initialize(ICommand) with a not null icommand. ");
-	}
-    }
-    
-    public void initialize(ICommand icommand)
-    {
-	
-	if (model != null)
-	    model.removeResultListener(this);
-	model = icommand;
-	model.addResultListener(this);
-	propertyFrame.setModel(model);
-	propertyFrame.pack();
-	dv.setModel(model.getDevice());
-	deviceFrame.getContentPane().add(dv);
-	deviceFrame.pack();
-
-		
-	try
-	{
-	    if (infoButton == null)
-	    {
-	       initComponents();
-	    }
-	    else
-	    {
-	       if (commandInput != null)
-	          remove((JPanel) commandInput);
-	       if (commandOutput != null)
-	          remove((JPanel) commandOutput);
-	       commandInput = null;
-	       commandOutput = null;
-	       createInputOutput();
-	    }
-	
-	    if (getBorder() != null)
-	       ((TitledBorder)getBorder()).setTitle(model.getName());
-	       
-	    
-	    Property property = model.getProperty("out_type_desc");
-	    if (property != null)
-	       descriptionLabel.setText(property.getPresentation());
-	    
-	    clearInput();
-	    clearOutput();
-	
-	}
-	catch (Exception e)
-	{
-	    throw new IllegalStateException
-		("Please do a initialize(ICommand) with a not null icommand. ");
-	}
-    }
-    
-    
-    public ICommand getModel()
-    {
+    public ICommand getModel() {
 	return model;
     }
 
-    public void setModel(ICommand icommand)
-    {
-        if (infoButton == null)
-	{
-	    throw new IllegalStateException
-		("This AnyCommandViewer object has never been initialized.\n"+
-		"Please use initialize(ICommand) instead of setModel(ICommand). ");
-	}
-	
+    public void setModel(ICommand icommand) {
 	if (model != null)
 	    model.removeResultListener(this);
 	model = icommand;
+	if (getBorder() != null)
+	    ((TitledBorder)getBorder()).setTitle(model.getName());
+	clearInput();
+	clearOutput();
 	model.addResultListener(this);
 	propertyFrame.setModel(model);
 	propertyFrame.pack();
 	dv.setModel(model.getDevice());
 	deviceFrame.getContentPane().add(dv);
 	deviceFrame.pack();
-
-	if (commandInput != null)
-	   remove((JPanel) commandInput);
-	if (commandOutput != null)
-	   remove((JPanel) commandOutput);
-	commandInput = null;
-	commandOutput = null;
-	createInputOutput();
-	
-	if (getBorder() != null)
-	    ((TitledBorder)getBorder()).setTitle(model.getName());
-	    
-
+	scalarCommandInput.setInputEnabled(model.takesInput());
 	Property property = model.getProperty("out_type_desc");
 	if (property != null)
 	    descriptionLabel.setText(property.getPresentation());
-	    
-	clearInput();
-	clearOutput();
-	
-	
     }
 
-
-
-
-
-    private void initComponents()
-    {
-	GridBagConstraints gridbagconstraints;
-
-
+    private void initComponents() {
 	infoButton = new JButton();
 	deviceButton = new JButton();
 	descriptionLabel = new JLabel();
-	
+	scalarCommandInput = new ScalarCommandInput();
+	commandOutput = new CommandOutput();
 	setLayout(new GridBagLayout());
-
-        // Border
 	setBorder(new TitledBorder("Not Connected"));
-	if (getBorder() != null)
-	    ((TitledBorder)getBorder()).setTitle(model.getName());
-
-
-        // Description Label
-	descriptionLabel.setFont(new Font("Dialog", 0, 12));
-	descriptionLabel.setHorizontalAlignment(2);
-	descriptionLabel.setText("Not Connected");
-	descriptionLabel.setBorder(new TitledBorder("Description"));
-	Property property = model.getProperty("out_type_desc");
-	if (property != null)
-	    descriptionLabel.setText(property.getPresentation());
-	gridbagconstraints = new GridBagConstraints();
-	gridbagconstraints.gridx = 0;
-	gridbagconstraints.gridy = 0;
-	gridbagconstraints.gridwidth = 3;
-	gridbagconstraints.fill = 2;
-	gridbagconstraints.insets = new Insets(4, 4, 4, 4);
-	add(descriptionLabel, gridbagconstraints);
-	    
-	
-	// infoButton
 	infoButton.setText("Info");
 	infoButton.setToolTipText("Click to get Command info");
 	
@@ -239,13 +63,11 @@ public class AnyCommandViewer extends JPanel
             }
         });
 	
-	gridbagconstraints = new GridBagConstraints();
+	GridBagConstraints gridbagconstraints = new GridBagConstraints();
 	gridbagconstraints.gridx = 1;
 	gridbagconstraints.gridy = 3;
 	gridbagconstraints.anchor = 17;
 	add(infoButton, gridbagconstraints);
-
-	// deviceButton
 	deviceButton.setText("Device");
 	
         deviceButton.addActionListener(new java.awt.event.ActionListener() {
@@ -259,100 +81,59 @@ public class AnyCommandViewer extends JPanel
 	gridbagconstraints.gridy = 3;
 	gridbagconstraints.anchor = 17;
 	add(deviceButton, gridbagconstraints);
-
-        createInputOutput();    
-
-	// ButtonBar
-        buttonBar1 = new fr.esrf.tangoatk.widget.util.ButtonBar();
-	buttonBar1.setControlee(controlee);
-	
+	descriptionLabel.setFont(new Font("Dialog", 0, 12));
+	descriptionLabel.setHorizontalAlignment(2);
+	descriptionLabel.setText("Not Connected");
+	descriptionLabel.setBorder(new TitledBorder("Description"));
 	gridbagconstraints = new GridBagConstraints();
 	gridbagconstraints.gridx = 0;
-	gridbagconstraints.gridy = 4;
-	gridbagconstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-	gridbagconstraints.weightx = 1.0;
-	add(buttonBar1, gridbagconstraints);
-
-    }
-    
-    private void createInputOutput()
-    {
-	GridBagConstraints gridbagconstraints;
-	    
-        commandInput = CommandInputOutputFactory.getInstance().getInputter4Command(model);
-	
-        if (commandInput != null)
-	   if (commandInput instanceof NoInput)
-	      commandInput = null;
-	   
-	if (commandInput != null)
-	{
-	   commandInput.setInputEnabled(model.takesInput());
-	   
-	   JPanel panelInput = (JPanel) commandInput;
-	   panelInput.addPropertyChangeListener(new _cls1());
-	   gridbagconstraints = new GridBagConstraints();
-	   gridbagconstraints.gridx = 0;
-	   gridbagconstraints.gridy = 1;
-	   gridbagconstraints.gridwidth = 3;
-	   gridbagconstraints.fill = java.awt.GridBagConstraints.BOTH;
-	   gridbagconstraints.weightx = 1.0;
-	   gridbagconstraints.weighty = 0.3;
-	   add(panelInput, gridbagconstraints);
-	}
-	
-	
-	
-	commandOutput = new CommandOutput();
-
+	gridbagconstraints.gridy = 0;
+	gridbagconstraints.gridwidth = 3;
+	gridbagconstraints.fill = 2;
+	gridbagconstraints.insets = new Insets(4, 4, 4, 4);
+	add(descriptionLabel, gridbagconstraints);
+	scalarCommandInput.setMinimumSize(new Dimension(200, 17));
+	scalarCommandInput.setPreferredSize(new Dimension(200, 60));
+	scalarCommandInput.addPropertyChangeListener(new _cls1());
+	gridbagconstraints = new GridBagConstraints();
+	gridbagconstraints.gridx = 0;
+	gridbagconstraints.gridy = 1;
+	gridbagconstraints.gridwidth = 3;
+	gridbagconstraints.fill = 1;
+	gridbagconstraints.weighty = 0.01D;
+	add(scalarCommandInput, gridbagconstraints);
 	gridbagconstraints = new GridBagConstraints();
 	gridbagconstraints.gridx = 0;
 	gridbagconstraints.gridy = 2;
 	gridbagconstraints.gridwidth = 3;
-	gridbagconstraints.fill = java.awt.GridBagConstraints.BOTH;
-	gridbagconstraints.weightx = 1.0;
-	gridbagconstraints.weighty = 0.7;
+	gridbagconstraints.fill = 1;
+	gridbagconstraints.weightx = 0.10000000000000001D;
+	gridbagconstraints.weighty = 0.29999999999999999D;
 	add(commandOutput, gridbagconstraints);
     }
 
-
-    private void commandInputPropertyChange(PropertyChangeEvent propertychangeevent)
-    {
-	if ("execute".equals(propertychangeevent.getPropertyName()))
-	{
+    private void scalarCommandInputPropertyChange(PropertyChangeEvent propertychangeevent) {
+	if ("execute".equals(propertychangeevent.getPropertyName())) {
+	    input.set(0, scalarCommandInput.getInput());
 	    if (model == null)
 		return;
-	    if (model.takesInput())
-	    {
-	       java.util.List  inputArg;
-	       
-	       if (commandInput == null)
-	          return;
-	       if (commandInput instanceof NoInput)
-	          return;
-	       inputArg = commandInput.getInput();
-	       model.execute(inputArg);
-	    }
-	    else
-	       model.execute();
+	    model.execute(input);
 	}
     }
 
     private void deviceButtonActionPerformed(ActionEvent actionevent) {
-	deviceFrame.setVisible(true);
+	deviceFrame.show();
     }
 
     private void infoButtonActionPerformed(ActionEvent actionevent) {
-	propertyFrame.setVisible(true);
+	propertyFrame.show();
     }
 
     public void errorChange(ErrorEvent errorevent) {
-	if (commandOutput == null) return;
 	commandOutput.setResult(errorevent.getError().toString());
     }
 
     public void resultChange(ResultEvent resultevent) {
-	if (commandOutput == null) return;
 	commandOutput.setResult(resultevent.getResult());
     }
 
@@ -381,41 +162,36 @@ public class AnyCommandViewer extends JPanel
     }
 
     public void setInputVisible(boolean flag) {
-	if (commandInput == null) return;
-	commandInput.setVisible(flag);
+	scalarCommandInput.setVisible(flag);
     }
 
     public boolean isInputVisible() {
-	if (commandInput == null) return false;
-	return commandInput.isVisible();
+	return scalarCommandInput.isVisible();
     }
 
     public void setOutputVisible(boolean flag) {
-	if (commandOutput == null) return;
 	commandOutput.setVisible(flag);
     }
 
     public boolean isOutputVisible() {
-	if (commandOutput == null) return false;
 	return commandOutput.isVisible();
     }
 
-    public void clearInput()
-    {
-	if (commandInput == null) return;
-	   commandInput.setInput(null);
+    public void clearInput() {
+	scalarCommandInput.setInput("");
     }
 
-    public void clearOutput()
-    {
-	if (commandOutput == null) return;
-        commandOutput.setResult("");
+    public void clearOutput() {
+	commandOutput.setResult("");
     }
 
-    public void setOutputFont(Font font)
-    {
-	if (commandOutput == null) return;
-        commandOutput.setFont(font);
+    public void setOutputFont(Font font) {
+	if (commandOutput == null) {
+	    return;
+	} else {
+	    commandOutput.setFont(font);
+	    return;
+	}
     }
 
     public Font getOutputFont() {
@@ -426,16 +202,16 @@ public class AnyCommandViewer extends JPanel
     }
 
     public void setInputFont(Font font) {
-	if (commandInput == null) return;
+	if (scalarCommandInput == null) return;
 
-	commandInput.setFont(font);
+	scalarCommandInput.setFont(font);
 
     }
 
     public Font getInputFont() {
-	if (commandInput == null) return getFont();
+	if (scalarCommandInput == null) return getFont();
 
-	return commandInput.getFont();
+	return scalarCommandInput.getFont();
     }
 
     public void setDescriptionFont(Font font) {
@@ -476,42 +252,43 @@ public class AnyCommandViewer extends JPanel
 	return infoButton.getFont();
     }
 
-
-    class CommandArgControlee implements IControlee {
-	public void ok() {
-	    getRootPane().getParent().setVisible(false);
-	}
-	
-	public void cancel() {
-	    getRootPane().getParent().setVisible(false);
-	}
-
-    }
-
-
-
-
-
-
-//    private void readObject(ObjectInputStream objectinputstream)
-//	throws IOException, ClassNotFoundException {
+    private void readObject(ObjectInputStream objectinputstream)
+	throws IOException, ClassNotFoundException {
 //	objectinputstream.defaultReadObject();
 //	serializeInit();
-//    }
+    }
 
     public static void main(String args[]) throws Exception {
 	fr.esrf.tangoatk.core.CommandList commandlist =
 	    new fr.esrf.tangoatk.core.CommandList();
-	ICommand  ic = (ICommand) commandlist.add("fp/test/1/DevVarCharArray");
+	commandlist.add("eas/test-api/1/IOString");
 	AnyCommandViewer anyCommandViewer = new AnyCommandViewer();
-        anyCommandViewer.initialize(ic);
-
-	//anyCommandViewer.setModel((ICommand)commandlist.get(0));
+	anyCommandViewer.setModel((ICommand)commandlist.get(0));
 	JFrame jframe = new JFrame();
 	jframe.getContentPane().add(anyCommandViewer);
 	jframe.pack();
-	jframe.setVisible(true);
+	jframe.show();
     }
+
+    public AnyCommandViewer() {
+	dv = new DeviceViewer();
+	deviceFrame = new JFrame();
+	input = new Vector();
+	propertyFrame = new PropertyFrame();
+	initComponents();
+	input.add("");
+    }
+
+    ICommand model;
+    DeviceViewer dv;
+    JFrame deviceFrame;
+    java.util.List input;
+    public PropertyFrame propertyFrame;
+    private JButton infoButton;
+    private JButton deviceButton;
+    private JLabel descriptionLabel;
+    private ScalarCommandInput scalarCommandInput;
+    private CommandOutput commandOutput;
 
 
 
@@ -519,7 +296,7 @@ public class AnyCommandViewer extends JPanel
     private class _cls1 implements PropertyChangeListener {
 
 	public void propertyChange(PropertyChangeEvent propertychangeevent) {
-	    commandInputPropertyChange(propertychangeevent);
+	    scalarCommandInputPropertyChange(propertychangeevent);
 	}
 
     }

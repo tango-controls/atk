@@ -1,25 +1,7 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: packimports(3) space 
+// Source File Name:   SimpleCommandViewer.java
 
 package fr.esrf.tangoatk.widget.command;
 
@@ -58,7 +40,7 @@ public class SimpleCommandViewer extends JPanel
 	deviceFrame.getContentPane().add(dv);
 	deviceFrame.pack();
 	scalarCommandInput.setInputEnabled(model.takesInput());
-	Property property = model.getProperty("in_type_desc");
+	Property property = model.getProperty("out_type_desc");
 	if (property != null)
 	    descriptionLabel.setText(property.getPresentation());
     }
@@ -127,11 +109,11 @@ public class SimpleCommandViewer extends JPanel
     }
 
     private void deviceButtonActionPerformed(ActionEvent actionevent) {
-	deviceFrame.setVisible(true);
+	deviceFrame.show();
     }
 
     private void infoButtonActionPerformed(ActionEvent actionevent) {
-	propertyFrame.setVisible(true);
+	propertyFrame.show();
     }
 
     public void errorChange(ErrorEvent errorevent) {
@@ -183,7 +165,7 @@ public class SimpleCommandViewer extends JPanel
     }
 
     public void clearInput() {
-	scalarCommandInput.setInput(null);
+	scalarCommandInput.setInput("");
     }
 
     public void clearOutput() {
@@ -280,22 +262,22 @@ public class SimpleCommandViewer extends JPanel
 	JFrame jframe = new JFrame();
 	jframe.getContentPane().add(simplecommandviewer);
 	jframe.pack();
-	jframe.setVisible(true);
+	jframe.show();
     }
 
     public SimpleCommandViewer() {
 	dv = new DeviceViewer();
 	deviceFrame = new JFrame();
-	input = new Vector<java.util.List> ();
+	input = new Vector();
 	propertyFrame = new PropertyFrame();
 	initComponents();
-	input.add(new Vector<String> ());
+	input.add("");
     }
 
     ICommand model;
     DeviceViewer dv;
     JFrame deviceFrame;
-    java.util.List<java.util.List> input;
+    java.util.List input;
     public PropertyFrame propertyFrame;
     private JButton infoButton;
     private JButton deviceButton;
