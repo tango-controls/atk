@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * ScalarListSetter.java
  *
  * Created on January 28, 2005, 4:10 PM
@@ -38,10 +16,14 @@ import java.awt.Color;
 
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.core.attribute.AAttribute;
+import fr.esrf.tangoatk.widget.attribute.NumberScalarWheelEditor;
+import fr.esrf.tangoatk.widget.attribute.StringScalarEditor;
+import fr.esrf.tangoatk.widget.attribute.SimpleScalarViewer;
 import fr.esrf.tangoatk.widget.util.JSmoothLabel;
 import fr.esrf.tangoatk.widget.util.JAutoScrolledText;
 import fr.esrf.tangoatk.widget.util.JAutoScrolledTextListener;
 import fr.esrf.tangoatk.widget.properties.LabelViewer;
+import fr.esrf.tangoatk.widget.attribute.SimplePropertyFrame;
 
 public class ScalarListSetter extends javax.swing.JPanel
              implements JAutoScrolledTextListener
@@ -858,11 +840,6 @@ public class ScalarListSetter extends javax.swing.JPanel
 	      if (elem instanceof INumberScalar)
 	      {
                  ssViewer = new SimpleScalarViewer();
-		 java.awt.Insets  marge = ssViewer.getMargin();
-		 marge.left = marge.left + 2;
-		 marge.right = marge.right + 2;
-		 ssViewer.setMargin(marge);
-		 
 		 viewer = ssViewer;
 	         ins = (INumberScalar) elem;
 		 insHasValueList = false;
@@ -1059,25 +1036,19 @@ public class ScalarListSetter extends javax.swing.JPanel
 	               if (ies != null)
 			  ies.refresh();
 		
-	      // Compute the height of the "highest" element of the CURRENT row
-	      // apply vertical margin to the viewer and setters if needed
-	      maxRowElementHeight = 0;
-	      currH = scalarLabel.getPreferredSize().height+4;
+	      currH = scalarLabel.getPreferredSize().height+2;
 	      if (currH > maxRowElementHeight)
 	         maxRowElementHeight = currH;
 		 
-	      currH = setter.getPreferredSize().height+4;
+	      currH = viewer.getPreferredSize().height+2;
 	      if (currH > maxRowElementHeight)
 	         maxRowElementHeight = currH;
 		 	 
-	      if (viewer != null)
+	      if (setter != null)
 	      {
-		 if (viewer.isVisible())
-		 {
-		    currH = viewer.getPreferredSize().height+4;
-		    if (currH > maxRowElementHeight)
-	               maxRowElementHeight = currH;
-		 }
+		 currH = setter.getPreferredSize().height+2;
+		 if (currH > maxRowElementHeight)
+	            maxRowElementHeight = currH;
 	      }
 	      
 
@@ -1152,61 +1123,59 @@ public class ScalarListSetter extends javax.swing.JPanel
 	      scalarViewers.add(viewer);
 	      scalarPropButtons.add(propertyButton);
 
-	      
-	      // Apply Vertical Margins if needed
-	      if (setter instanceof StringScalarEditor)
-	      {
-	          StringScalarEditor   sse = (StringScalarEditor) setter;
-		  currH = setter.getPreferredSize().height;
-		  if (currH < maxRowElementHeight)
-	             hMargin = (maxRowElementHeight - currH) / 2;
-		  else
-		     hMargin = 0;
-		  java.awt.Insets  marge = sse.getMargin();
-		  marge.top = marge.top + hMargin;
-		  marge.bottom = marge.bottom + hMargin;
-		  marge.left = marge.left+2;
-		  marge.right = marge.right+2;
-		  sse.setMargin(marge);
-	      } 
-
-	      if (viewer.isVisible())
-	      {
-		 if (viewer instanceof SimpleScalarViewer)
-		 {
-	             SimpleScalarViewer  sv = (SimpleScalarViewer) viewer;
-		     currH = viewer.getPreferredSize().height;
-		     if (currH < maxRowElementHeight)
-	        	hMargin = (maxRowElementHeight - currH) / 2;
-		     else
-			hMargin = 0;
-		     java.awt.Insets  marge = sv.getMargin();
-		     marge.top = marge.top + hMargin;
-		     marge.bottom = marge.bottom + hMargin;
-		     marge.left = marge.left+2;
-		     marge.right = marge.right+2;
-		     sv.setMargin(marge);
-		 }
-		 else	      
-		     if (viewer instanceof SimpleEnumScalarViewer)
-		     {
-	        	 SimpleEnumScalarViewer  sesv = (SimpleEnumScalarViewer) viewer;
-	        	 currH = viewer.getPreferredSize().height;
-			 if (currH < maxRowElementHeight)
-	        	    hMargin = (maxRowElementHeight - currH) / 2;
-			 else
-			    hMargin = 0;
-			 java.awt.Insets  marge = sesv.getMargin();
-			 marge.top = marge.top + hMargin;
-			 marge.bottom = marge.bottom + hMargin;
-			 marge.left = marge.left+2;
-			 marge.right = marge.right+2;
-			 sesv.setMargin(marge);
-		     } 
-	      }
-	      	      
 	      viewerRow++;
 	   }
+	}
+
+
+	nbScalarViewers = scalarViewers.size();
+	for (idx=0; idx < nbScalarViewers; idx++)
+	{
+	    jcomp = scalarViewers.get(idx);
+	    if (jcomp instanceof SimpleScalarViewer)
+	    {
+	       ssViewer = (SimpleScalarViewer) jcomp;
+	       currH = ssViewer.getPreferredSize().height+2;
+	       if (currH < maxRowElementHeight)
+	       {
+	          hMargin = (maxRowElementHeight - currH) / 2;
+		  java.awt.Insets  marge = ssViewer.getMargin();
+		  marge.top = marge.top + hMargin;
+		  marge.bottom = marge.bottom + hMargin;
+		  ssViewer.setMargin(marge);
+	       }
+	    }
+	    else
+	       if (jcomp instanceof SimpleEnumScalarViewer)
+	       {
+		  enumViewer = (SimpleEnumScalarViewer) jcomp;
+		  currH = enumViewer.getPreferredSize().height+2;
+		  if (currH < maxRowElementHeight)
+		  {
+	             hMargin = (maxRowElementHeight - currH) / 2;
+		     java.awt.Insets  marge = enumViewer.getMargin();
+		     marge.top = marge.top + hMargin;
+		     marge.bottom = marge.bottom + hMargin;
+		     enumViewer.setMargin(marge);
+		  }
+	       }
+
+	    jcomp = scalarSetters.get(idx);
+	    if (jcomp != null)
+	       if (jcomp instanceof StringScalarEditor)
+	       {
+		  stringSetter = (StringScalarEditor) jcomp;
+		  currH = stringSetter.getPreferredSize().height+2;
+		  if (currH < maxRowElementHeight)
+		  {
+	             hMargin = (maxRowElementHeight - currH) / 2;
+		     java.awt.Insets  marge = stringSetter.getMargin();
+		     marge.top = marge.top + hMargin;
+		     marge.bottom = marge.bottom + hMargin;
+		     stringSetter.setMargin(marge);
+		     stringSetter.setMargin(new java.awt.Insets(hMargin, 3, hMargin+2, 3));
+		  }
+	       }
 	}
 	
     }

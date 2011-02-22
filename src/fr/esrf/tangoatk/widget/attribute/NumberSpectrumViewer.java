@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * NumberSpectrumViewer.java
  *
  * Author:JL Pons 2003
@@ -28,7 +6,6 @@
 
 package fr.esrf.tangoatk.widget.attribute;
 
-import fr.esrf.tangoatk.core.NumberScalarEvent;
 import javax.swing.*;
 import java.util.*;
 import java.awt.*;
@@ -41,8 +18,6 @@ import fr.esrf.tangoatk.core.INumberSpectrum;
 import fr.esrf.tangoatk.core.ISpectrumListener;
 import fr.esrf.TangoDs.AttrManip;
 import com.braju.format.Format;
-import fr.esrf.tangoatk.core.INumberScalar;
-import fr.esrf.tangoatk.core.INumberScalarListener;
 
 /**
  * A class to display a scalar spectrum attribute . The NumberSpectrumViewer
@@ -50,10 +25,7 @@ import fr.esrf.tangoatk.core.INumberScalarListener;
  *
  * @author  E.S.R.F
  */
-public class NumberSpectrumViewer extends AdvancedJLChart 
-                                  implements ISpectrumListener, INumberScalarListener,
-                                             IJLChartActionListener, IJLChartListener, JDrawable
-{
+public class NumberSpectrumViewer extends AdvancedJLChart implements ISpectrumListener, IJLChartActionListener, IJLChartListener, JDrawable {
 
   protected INumberSpectrum model = null;
   protected JLDataView dvy;
@@ -66,31 +38,12 @@ public class NumberSpectrumViewer extends AdvancedJLChart
   protected boolean qualityVisible = false;//DO NOT display quality by default for backward compatibility
   protected final static String DISPLAY_UNIT_STRING = "Display/Hide Unit";
   protected final static String DISPLAY_QUALITY_STRING = "Display/Hide Attribute Quality";
-  protected final static String SET_SPECTRUM_MENU_LABEL = "Set attribute";
-  
-  private boolean manageXaxis = false;
-  
-  private boolean xAxisManagedByProps = false;
-  private boolean xAxisManagedByAtts = false;
-  private boolean xAxisMinMaxApplied = false;
-  private double  xAxisMin = -1.0;
-  private double  xAxisMax = -1.0;
- 
-  private INumberScalar   x_min_model = null;
-  private INumberScalar   x_max_model = null;
-  private double          x_min_value = 0;
-  private double          x_max_value = 0;
-  
-  // For writable attributes only :  used for setting the numberspectrum attribute
-  private NumberSpectrumTableEditor        spectrumEditor = null;
-  private JMenuItem                        setAttMenuItem = null;
 
-  static String[] exts = {"manageXaxis", "graphSettings"};
+  static String[] exts = {"graphSettings"};
 
 
   /** Creates new fNumberSpectrumViewer */
-  public NumberSpectrumViewer()
-  {
+  public NumberSpectrumViewer() {
 
     // Create the graph
     super();
@@ -103,20 +56,10 @@ public class NumberSpectrumViewer extends AdvancedJLChart
 
     dvy = new JLDataView();
     getY1Axis().addDataView(dvy);
-        
-    //Suppress non applyable menuItems in the context of a simple NumberSpectrumViewer
-    removeMenuItem(AdvancedJLChart.MENU_DATALOAD);
-    removeMenuItem(AdvancedJLChart.MENU_RESET);
 
     addUserAction("Attribute properties");
     addUserAction(DISPLAY_UNIT_STRING);
     addUserAction(DISPLAY_QUALITY_STRING);
-    addUserAction(SET_SPECTRUM_MENU_LABEL);
-    
-    setAttMenuItem = getUserActionMenuItem(SET_SPECTRUM_MENU_LABEL);
-    if (setAttMenuItem != null)
-        setAttMenuItem.setEnabled(false);
-    
     addJLChartActionListener(this);
     setJLChartListener(this);
   }
@@ -124,25 +67,8 @@ public class NumberSpectrumViewer extends AdvancedJLChart
   /* Bean Property stuff */
 
   /**
-   * Gets if the viewer should manage the X axis according to a min and max value.
-   */
-  public boolean getManageXaxis()
-  {
-    return (manageXaxis);
-  }
-
-  /**
-   * Sets if the viewer should manage the X axis according to a min and max value. This method should be called BEFORE setModel()
-   * @param b
-   */
-  public void setManageXaxis(boolean b)
-  {
-     if (model != null) return;
-     manageXaxis = b;
-  }
-
-  /**
    * Gets the x Axis unit.
+   * @param u
    */
   public String getXAxisUnit() {
     return (xAxisUnit);
@@ -187,18 +113,10 @@ public class NumberSpectrumViewer extends AdvancedJLChart
     return this;
   }
 
-  public String getDescription(String name)
-  {
-    if (name.equalsIgnoreCase("manageXaxis"))
-    {
-       return "When enabled, the viewer will adapt the Xaxis min and Xaxis max \n" +
-              "to the attribute properties defined in the Tango DataBase. \n" +
-              "Possible values are: true, false.";
-    }
-    
-    if (name.equalsIgnoreCase("graphSettings"))
-    {
-       return getHelpString();
+  public String getDescription(String name) {
+
+    if (name.equalsIgnoreCase("graphSettings")) {
+      return getHelpString();
     }
 
     return "";
@@ -209,30 +127,10 @@ public class NumberSpectrumViewer extends AdvancedJLChart
     return exts;
   }
 
-  public boolean setExtendedParam(String name,String value,boolean popupErr)
-  {
-    if (name.equalsIgnoreCase("manageXaxis"))
-    {
-        if(value.equalsIgnoreCase("true"))
-        {
-           setManageXaxis(true);
-           return true;
-        } 
-        else 
-           if (value.equalsIgnoreCase("false"))
-           {
-              setManageXaxis(false);
-              return true;
-           } 
-           else
-           {
-              showJdrawError(popupErr,"manageXaxis","Wrong syntax: 'true' or 'false' expected.");
-              return false;
-           }  
-    }
+  public boolean setExtendedParam(String name,String value,boolean popupErr) {
 
-    if (name.equalsIgnoreCase("graphSettings"))
-    {
+    if (name.equalsIgnoreCase("graphSettings")) {
+
       // Handle a 'bug' in CFFileReader parsing
       if(!value.endsWith("\n")) value = value + "\n";
       String err = setSettings(value);
@@ -245,22 +143,14 @@ public class NumberSpectrumViewer extends AdvancedJLChart
 
   }
 
-  public String getExtendedParam(String name)
-  {
-     if(name.equalsIgnoreCase("manageXaxis"))
-     {
-        if (getManageXaxis())
-           return "true";
-        else
-           return "false";
-     }
-     
-     if(name.equalsIgnoreCase("graphSettings"))
-     {
-        return getSettings();
-     }
+  public String getExtendedParam(String name) {
 
-     return "";
+     if(name.equalsIgnoreCase("graphSettings")) {
+      return getSettings();
+    }
+
+    return "";
+
   }
 
   private void showJdrawError(boolean popup,String paramName,String message) {
@@ -273,32 +163,20 @@ public class NumberSpectrumViewer extends AdvancedJLChart
   // JLChart action listener
   // -------------------------------------------------------------
 
-  public void actionPerformed(JLChartActionEvent evt)
-  {
-     if (evt.getName().equals("Attribute properties"))
-     {
-        if (pf == null)
-        {
-           pf = new SimplePropertyFrame();
-           pf.setModel(model);
-        }
-        pf.setVisible(true);
-     }
-     else
-        if (DISPLAY_UNIT_STRING.equals( evt.getName() ))
-        {
-           setUnitVisible( !isUnitVisible() );
-        }
-        else 
-           if (DISPLAY_QUALITY_STRING.equals( evt.getName() ))
-           {
-              setQualityVisible( !isQualityVisible() );
-           }
-           else 
-              if (SET_SPECTRUM_MENU_LABEL.equals( evt.getName() ))
-              {
-                 setSpectrumAttribute();
-              }
+  public void actionPerformed(JLChartActionEvent evt) {
+    if (evt.getName().equals("Attribute properties")) {
+      if (pf == null) {
+        pf = new SimplePropertyFrame();
+        pf.setModel(model);
+      }
+      pf.setVisible(true);
+    }
+    else if (DISPLAY_UNIT_STRING.equals( evt.getName() )) {
+      setUnitVisible( !isUnitVisible() );
+    }
+    else if (DISPLAY_QUALITY_STRING.equals( evt.getName() )) {
+      setQualityVisible( !isQualityVisible() );
+    }
   }
 
   public boolean getActionState(JLChartActionEvent evt) {
@@ -309,20 +187,15 @@ public class NumberSpectrumViewer extends AdvancedJLChart
   // Spectrum listener
   // -------------------------------------------------------------
 
-  public void errorChange(fr.esrf.tangoatk.core.ErrorEvent errorEvent)
-  {
-     if (errorEvent.getSource() != model) //source is not the spectrum
-	return;
-
-     if (isQualityVisible())
-     {
-       setToolTipText( model.getName() + ": " + IAttribute.UNKNOWN );
-       dvy.setLabelColor( ATKConstant.getColor4Quality(IAttribute.UNKNOWN) );
-     }
-     // Clear the graph
-     dvy.reset();
-     repaint();
-     refreshTableSingle(dvy);
+  public void errorChange(fr.esrf.tangoatk.core.ErrorEvent errorEvent) {
+    if (isQualityVisible()) {
+      setToolTipText( model.getName() + ": " + IAttribute.UNKNOWN );
+      dvy.setLabelColor( ATKConstant.getColor4Quality(IAttribute.UNKNOWN) );
+    }
+    // Clear the graph
+    dvy.reset();
+    repaint();
+    refreshTableSingle(dvy);
   }
 
   public void stateChange(fr.esrf.tangoatk.core.AttributeStateEvent evt) {
@@ -333,43 +206,21 @@ public class NumberSpectrumViewer extends AdvancedJLChart
     // no repaint() needed because spectrumChange() already does it
   }
 
-  public void spectrumChange(fr.esrf.tangoatk.core.NumberSpectrumEvent numberSpectrumEvent)
-  {
-     double[] value = numberSpectrumEvent.getValue();
-     int length = value.length;
-     
-     if (xAxisManagedByProps) // the viewer must manage the Xaxis min and max
-     {
-        if (!xAxisMinMaxApplied) //min and max have never been taken into account
-           changeXaxisAffineTransform(xAxisMin, xAxisMax, length);
-        else
-           if (dvy == null) // the data view has never been initialized
-              changeXaxisAffineTransform(xAxisMin, xAxisMax, length);
-           else
-              if (dvy.getDataLength() != length) // the number of the points in the spectrum has changed
-                 changeXaxisAffineTransform(xAxisMin, xAxisMax, length); 
-     }
-     
-     if (xAxisManagedByAtts) // the viewer must manage the Xaxis min and max according to two attributes
-     {
-        if (!xAxisMinMaxApplied) //min and max have never been taken into account
-           changeXaxisAffineTransform(x_min_value, x_max_value, length);
-     }
-   
-     synchronized(dvy)
-     {
-        dvy.reset();
+  public void spectrumChange(fr.esrf.tangoatk.core.NumberSpectrumEvent numberSpectrumEvent) {
 
-        for (int i = 0; i < length; i++)
-        {
-           dvy.add(A0 + A1 * (double) i, value[i], false);
-        }
-        dvy.updateFilters();
+    double[] value = numberSpectrumEvent.getValue();
+    int length = value.length;
+    synchronized(dvy) {
+      dvy.reset();
 
-        // Commit change
-        repaint();
-        refreshTableSingle(dvy);
-     }     
+      for (int i = 0; i < length; i++) {
+        dvy.add(A0 + A1 * (double) i, value[i]);
+      }
+
+      // Commit change
+      repaint();
+      refreshTableSingle(dvy);
+    }
   }
 
   public String[] clickOnChart(JLChartEvent e) {
@@ -415,105 +266,43 @@ public class NumberSpectrumViewer extends AdvancedJLChart
   /**<code>setModel</code> Set the model.
    * @param v  Value to assign to model.
    */
-  public void setModel(INumberSpectrum v)
-  {
-      clearModel();
-      if (v == null) 
-      {
-         repaint();
-         return;
-      }
-      
-      this.model = v;
-      if (model.isWritable())
-      {
-         if (setAttMenuItem != null)
-            setAttMenuItem.setEnabled(true);
-         spectrumEditor = new NumberSpectrumTableEditor();
-         spectrumEditor.setModel(this.model);
-      }
-      
-      if (manageXaxis)
-      {
-          if (!model.areAttPropertiesLoaded())
-              model.loadAttProperties();
+  public void setModel(INumberSpectrum v) {
 
-          if (model.hasMinxMaxxAttributes())
-             xAxisManagedByAtts = true;
-          else
-          {
-             if (model.hasMinxMaxxProperties())
-             {
-                xAxisManagedByProps = true;
-                getXAxis().setAutoScale(false);
-                xAxisMin = model.getMinx();
-                xAxisMax = model.getMaxx();
-             }
-          }
-          xAxisMinMaxApplied = false;
-      }
-         
+    if (model != null) {
+      model.removeSpectrumListener(this);
+      model.removeStateListener( this );
+      if (pf != null) pf.setModel(null);
+    }
+
+    this.model = v;
+
+    if (v != null) {
       format = model.getFormat();
       dvy.setUserFormat(format);
       dvy.setUnit(v.getUnit());
       dvy.setName(v.getName());
-      if (isQualityVisible())
-      {
-         setToolTipText( model.getName() + ": " + model.getState() );
-         dvy.setLabelColor( ATKConstant.getColor4Quality(model.getState()) );
+      if (isQualityVisible()) {
+        setToolTipText( model.getName() + ": " + model.getState() );
+        dvy.setLabelColor( ATKConstant.getColor4Quality(model.getState()) );
       }
-      
       model.addSpectrumListener(this);
-      if (pf != null)
-         pf.setModel(model);
-      if (unitVisible)
-         getY1Axis().setName( v.getUnit() );
+      model.addStateListener(this);
+      if (pf != null) pf.setModel(model);
+      if (unitVisible) {
+        getY1Axis().setName( v.getUnit() );
+      }
       else
-         getY1Axis().setName( "" );
-      repaint();
-  }
-
-  /**<code>clearModel</code> removes the model.
-   */
-  
-  public void clearModel()
-  {
-      xAxisManagedByProps = false;
-      xAxisManagedByAtts = false;
-      xAxisMinMaxApplied = false;
-      xAxisMin = -1.0;
-      xAxisMax = -1.0;
-      x_min_value = 0;
-      x_max_value = 0;
-      if (model != null)
       {
-          model.removeSpectrumListener(this);
-          if (pf != null) pf.setModel(null);
-          model = null;
+        getY1Axis().setName( "" );
       }
-      
-      if (x_min_model != null)
-      {
-         x_min_model.removeNumberScalarListener(this);
-         x_min_model = null;
-      }
-      
-      if (x_max_model != null)
-      {
-         x_max_model.removeNumberScalarListener(this);
-         x_max_model = null;
-      }
+    }
+    else {
       setToolTipText(null);
       dvy.setLabelColor(Color.BLACK);
-      if (spectrumEditor != null)
-      {
-          spectrumEditor.clearModel();
-          spectrumEditor = null;
-      }
-      if (setAttMenuItem != null)
-         setAttMenuItem.setEnabled(false);      
+    }
+    repaint();
+
   }
-  
 
   /**
    * Apply configuration.
@@ -587,7 +376,7 @@ public class NumberSpectrumViewer extends AdvancedJLChart
 
   /**
    * Sets whether unit shoud be visible or not
-   * @param displayUnit corresponding to the choice
+   * @param boolean corresponding to the choice
    */
   public void setUnitVisible (boolean displayUnit) {
     this.unitVisible = displayUnit;
@@ -622,13 +411,6 @@ public class NumberSpectrumViewer extends AdvancedJLChart
     }
   }
 
-  public void setSpectrumAttribute ()
-  {
-      if (spectrumEditor == null) return;
-      spectrumEditor.centerWindow();
-      spectrumEditor.setVisible(true);    
-  }
-
   @Override
   public void removeDataView (JLDataView view) {
     if (view != dvy) {
@@ -643,164 +425,7 @@ public class NumberSpectrumViewer extends AdvancedJLChart
     boolean  b = super.prepareDataViewMenu(dataView);
     return b;
   }
-  
-  private void changeXaxisAffineTransform(double minx, double maxx, int nb)
-  {
-      if (maxx <= minx) return;
-      if (nb <= 0) return;
 
-      getXAxis().setMinimum(minx);
-      getXAxis().setMaximum(maxx);
-      double  step = (maxx - minx) / nb;
-      setXAxisAffineTransform(minx, step);
-      xAxisMinMaxApplied = true;
-  }
-
-  
-  private void changeXaxisAffineTransform ()
-  {
-      if (dvy == null)
-         return;
-	 
-      changeXaxisAffineTransform(x_min_value, x_max_value, dvy.getDataLength());
-  }
-
-
-  /**
-   * Sets the min and max  for X axis to two scalar attributes
-   *
-   * @param min
-   * @param max
-   */
-  public void setXaxisModels(INumberScalar min, INumberScalar max)
-  {
-     if (!manageXaxis) return;
-     if (!xAxisManagedByAtts) return;
-     
-     if (x_min_model != null)
-     {
-        x_min_model.removeNumberScalarListener(this);
-	x_min_model = null;
-     }
-	
-     if (x_max_model != null)
-     {
-        x_max_model.removeNumberScalarListener(this);
- 	x_max_model = null;
-     }
-     x_min_value = 0;
-     x_max_value = 0;
-     getXAxis().setAutoScale(true);
-     xAxisMinMaxApplied	= false;
-     
-     if ( (min == null) || (max == null) )
-       return;
-       
-     if (min == max)
-       return;
-     
-     if (!(min.getNameSansDevice().equalsIgnoreCase(model.getMinxAttName())))
-        return;
-     if (!(max.getNameSansDevice().equalsIgnoreCase(model.getMaxxAttName())))
-        return;
-     
-     x_min_model = min;
-     x_max_model = max;
-     getXAxis().setAutoScale(false);
-     
-     x_min_model.addNumberScalarListener(this);
-     x_max_model.addNumberScalarListener(this);
-     
-     min.refresh();
-     max.refresh();
-     
-  }
-  
-
-  public void numberScalarChange(NumberScalarEvent evt)
-  {
-     if (evt.getSource() == x_min_model)
-     {
-        minXchange(evt);
-	return;
-     }
-     
-     if (evt.getSource() == x_max_model)
-     {
-        maxXchange(evt);
-	return;
-     }
-  }
-
-
-  private void minXchange(NumberScalarEvent evt)
-  {
-       x_min_value = evt.getValue();
-       
-       if (x_min_value < x_max_value)
-       {
-	  if (getXAxis().isAutoScale() != true);
-	  {
-             getXAxis().setMinimum(x_min_value);
-             getXAxis().setMaximum(x_max_value);
-          }
-	  changeXaxisAffineTransform();
-       }
-  }
-
-
-  private void maxXchange(NumberScalarEvent evt)
-  {
-       x_max_value = evt.getValue();
-       
-       if (x_min_value < x_max_value)
-       {
-	  if (getXAxis().isAutoScale() != true);
-	  {
-             getXAxis().setMinimum(x_min_value);
-             getXAxis().setMaximum(x_max_value);
-          }
-	  changeXaxisAffineTransform();
-       }
-  }
-  
-private static void addXaxisMinMaxAtt (NumberSpectrumViewer viewer, INumberSpectrum vModel)
-{
-    if (viewer == null) return;
-    if (vModel == null) return;
-    if (vModel.hasMinxMaxxAttributes())
-    {
-        String          attFullName = null;
-        fr.esrf.tangoatk.core.IEntity         ie;
-        fr.esrf.tangoatk.core.AttributeList       attl = new fr.esrf.tangoatk.core.AttributeList();
-        INumberScalar   minAtt=null, maxAtt=null; 
-        try
-        {
-        if ((vModel.getMinxAttName() != null) && (vModel.getMaxxAttName() != null))
-        {
-            attFullName = vModel.getDevice().getName()+"/"+ vModel.getMinxAttName();                          
-            ie = attl.add(attFullName);
-            if (ie != null)
-            if (ie instanceof INumberScalar)
-            minAtt = (INumberScalar) ie;
-
-            attFullName = vModel.getDevice().getName()+"/"+ vModel.getMaxxAttName();                          
-            ie = attl.add(attFullName);
-            if (ie != null)
-            if (ie instanceof INumberScalar)
-            maxAtt = (INumberScalar) ie;                          
-        }
-        if ((minAtt != null) && (maxAtt != null))
-            viewer.setXaxisModels(minAtt, maxAtt); 
-        }
-        catch (Exception ex)
-        {
-            
-        }
-    }
-}
-
-  
   // Variables declaration - do not modify//GEN-BEGIN:variables
   // End of variables declaration//GEN-END:variables
 
@@ -811,17 +436,11 @@ private static void addXaxisMinMaxAtt (NumberSpectrumViewer viewer, INumberSpect
         fr.esrf.tangoatk.core.AttributeList();
 
       NumberSpectrumViewer nsv = new NumberSpectrumViewer();
-      nsv.setManageXaxis(true);
-      //INumberSpectrum      ins = (INumberSpectrum) attributeList.add("sr/d-mfdbk/horizontal/FFT");
-      //INumberSpectrum      ins = (INumberSpectrum) attributeList.add("//orion:10000/sr/d-tm/ts2/Spectrum");
-      INumberSpectrum      ins = (INumberSpectrum) attributeList.add("//kidiboo:10000/fp/test/1/double_spectrum");
-      nsv.setModel(ins);
-      addXaxisMinMaxAtt(nsv, ins);
-      //nsv.setModel((INumberSpectrum) attributeList.add("jlp/test/1/att_spectrum"));
+      nsv.setModel((INumberSpectrum) attributeList.add("jlp/test/1/att_spectrum"));
       //nsv.setModel((INumberSpectrum) attributeList.add("sr/d-tm/agilent4395/spectrum"));
       nsv.setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());
       nsv.setFont(new java.awt.Font("Dialog", 0, 12));
-      //nsv.setXAxisAffineTransform(0.0,1000);
+      nsv.setXAxisAffineTransform(0.0,1000);
       nsv.setXAxisUnit("mA");
       JFrame f = new JFrame();
       attributeList.startRefresher();

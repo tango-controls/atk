@@ -1,4 +1,4 @@
 name =  CommandComboViewer
 package = fr.esrf.tangoatk.widget.command 
 
-properties = model, font, background, foreground, infoButtonVisible, deviceButtonVisible, descriptionVisible, cancelButtonVisible
+properties = model, font, background, foreground, infoButtonVisible, deviceButtonVisible, borderVisible, descriptionVisible, cancelButtonVisible

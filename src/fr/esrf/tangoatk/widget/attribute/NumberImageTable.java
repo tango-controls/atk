@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * Synchrotron Soleil File : NumberImageTable.java Project : ATK Description :
  * Author : SOLEIL Original : 20 sept. 2005 Revision: Author: Date: State: Log:
  * NumberImageTable.java,v
@@ -37,23 +15,15 @@ import fr.esrf.tangoatk.core.AttributeStateEvent;
 import fr.esrf.tangoatk.core.ConnectionException;
 import fr.esrf.tangoatk.core.ErrorEvent;
 import fr.esrf.tangoatk.core.IImageListener;
-import fr.esrf.tangoatk.core.INumber;
 import fr.esrf.tangoatk.core.INumberImage;
-import fr.esrf.tangoatk.core.INumberSpectrum;
-import fr.esrf.tangoatk.core.ISpectrumListener;
 import fr.esrf.tangoatk.core.NumberImageEvent;
-import fr.esrf.tangoatk.core.NumberSpectrumEvent;
-import javax.swing.JOptionPane;
-import fr.esrf.tangoatk.core.IAttribute;
-import fr.esrf.tangoatk.core.IEntity;
 
 /**
  * @author SOLEIL
  */
-public class NumberImageTable extends JTable implements IImageListener, ISpectrumListener {
-    protected INumber imageModel;
+public class NumberImageTable extends JTable implements IImageListener {
+    protected INumberImage imageModel;
     protected NumberImageTableModel tableModel;
-    private boolean valueEditable = false;
 
     public NumberImageTable () {
         super();
@@ -62,85 +32,32 @@ public class NumberImageTable extends JTable implements IImageListener, ISpectru
         setModel( tableModel );
     }
 
-    public void setImageModel(INumberImage v)
-    {
-        // Free old model
-        if ( imageModel != null ) {
-        	if(imageModel instanceof INumberImage)
-        	{
-	            ((INumberImage)imageModel).removeImageListener( this );
-	            imageModel = null;
-        	}
-        	else if(imageModel instanceof INumberSpectrum)
-        	{
-	            ((INumberSpectrum)imageModel).removeSpectrumListener( this );
-	            imageModel = null;
-        	}
-        }
-        if ( v != null ) {
-            // Init new model
-            imageModel = v;
-        	// I don't know why... but we need to add the test here because we may have INumberSpectrum with old jars. 
-            if(imageModel instanceof INumberImage)
-            	((INumberImage)imageModel).addImageListener( this );
-            else
-            {
-            	if(imageModel instanceof INumberSpectrum) 
-                   	((INumberSpectrum)imageModel).addSpectrumListener(this);
-            }		
-            // Force a reading to initialise the viewer size before
-            // make it visible
-            if(!imageModel.isWritable())
-                setValueEditable(false);
-            imageModel.refresh();
-        }
-    	
-    }
-        
     /**
-     * <code>setSpectrumModel</code> Set the model.
+     * <code>setModel</code> Set the model.
      * 
-     * @param v Value to assign to model. This image must have a height equals
+     * @param v
+     *            Value to assign to model. This image must have a height equals
      *            to 2.
      */
-    public void setSpectrumModel (INumberSpectrum v) {
+    public void setImageModel (INumberImage v) {
         // Free old model
         if ( imageModel != null ) {
-        	if(imageModel instanceof INumberImage)
-        	{
-	            ((INumberImage)imageModel).removeImageListener( this );
-	            imageModel = null;
-        	}
-        	else if(imageModel instanceof INumberSpectrum)
-        	{
-	            ((INumberSpectrum)imageModel).removeSpectrumListener( this );
-	            imageModel = null;
-        	}
+            imageModel.removeImageListener( this );
+            imageModel = null;
         }
         if ( v != null ) {
             // Init new model
             imageModel = v;
-           	((INumberSpectrum)imageModel).addSpectrumListener(this);
-            if(!imageModel.isWritable())
-                setValueEditable(false);
+            imageModel.addImageListener( this );
             // Force a reading to initialise the viewer size before
             // make it visible
             imageModel.refresh();
         }
     }
-    
-    public INumberImage getImageModel() {
-      if(imageModel instanceof INumberImage)
-        return (INumberImage)imageModel;
-      return null;
-    }
-    
-    public INumberSpectrum getSpectrumModel() {
-        if(imageModel instanceof INumberSpectrum)
-            return (INumberSpectrum)imageModel;
-        return null;
-    }
 
+    public INumberImage getImageModel() {
+        return imageModel;
+    }
 
     /*
      * (non-Javadoc)
@@ -148,15 +65,7 @@ public class NumberImageTable extends JTable implements IImageListener, ISpectru
      * @see fr.esrf.tangoatk.core.IImageListener#imageChange(fr.esrf.tangoatk.core.NumberImageEvent)
      */
     public void imageChange (NumberImageEvent event) {
-    	imageChange(event.getValue());
-    }
-
-    public void spectrumChange(NumberSpectrumEvent event) {
-	    imageChange(new double[][]{event.getValue()});		
-    }
-    
-    
-    public void imageChange (double[][] val) {
+        double[][] val = event.getValue();
         boolean change = false;
         if (val == null)
         {
@@ -213,28 +122,16 @@ public class NumberImageTable extends JTable implements IImageListener, ISpectru
             tableModel.setValue( new double[0][0] );
         }
     }
-    
-    public boolean isValueEditable() {
-        return valueEditable;
-    }
 
-    public void setValueEditable(boolean valueEditable) {
-        this.valueEditable = valueEditable;
-    }
- 
     public static void main (String[] args) throws ConnectionException {
-        JFrame frame = new JFrame("Test NumberImageTable");
+        JFrame frame = new JFrame("test math");
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         String parameter = "tango/tangotest/1/double_spectrum";
         if (args.length > 0) parameter = args[0];
         NumberImageTable table = new NumberImageTable();
-        table.setValueEditable(true);
         AttributePolledList list = new AttributePolledList();
-        IEntity image = list.add( parameter ); 
-        if(image instanceof INumberSpectrum)
-            table.setSpectrumModel( (INumberSpectrum)image );
-        if(image instanceof INumberImage)
-            table.setImageModel((INumberImage)image );      
+        INumberImage image = (INumberImage)list.add( parameter ); 
+        table.setImageModel( image );
         frame.getContentPane().add( new JScrollPane(table) );
         frame.setSize( 400,400 );
         frame.setVisible( true );
@@ -303,59 +200,7 @@ public class NumberImageTable extends JTable implements IImageListener, ISpectru
         public String getColumnName (int column) {
             return Integer.toString( column );
         }
-        
-        public void setValueAt (Object object, int row, int column) {
-            try{
-                double tmpDoubleValue = Double.parseDouble((String)object);                
-                writeValue (tmpDoubleValue,row,column);
-            }
-            catch(NumberFormatException exc){}
-        }
-        
-        public void writeValue (double aValue, int row, int column) {
-            double[][] tmpReadValue = tableModel.getValue();  
-            double[][] tmpNewValue = new double[0][0];
-            if(tmpReadValue != null) {
-                if(getSpectrumModel() != null)
-                    tmpNewValue = new double[tmpReadValue.length][(tmpReadValue[0].length)/2];
-                else
-                    tmpNewValue = tmpReadValue;
-               
-                for (int i = 0; i < tmpNewValue.length; i++)
-                {
-                    for (int j = 0; j < tmpNewValue[i].length; j++){
-                        if(i == row && j == column){                           
-                            tmpNewValue [i][j] = aValue;
-                        }
-                        else{
-                            tmpNewValue [i][j] =  tmpReadValue [i][j];
-                        }
-                    }
-                }
-                if(getImageModel() != null){
-                    INumberImage model = getImageModel() ;                   
-                    try {
-                        model.setValue(tmpNewValue);
-                    }
-                    catch (Exception e) {     
-                        JOptionPane.showMessageDialog(null,"Write error", e.getMessage(), JOptionPane.ERROR_MESSAGE); 
-                    }
-                }
-                if(getSpectrumModel() != null){                    
-                    INumberSpectrum model = getSpectrumModel() ;                   
-                    try {
-                        model.setValue(tmpNewValue[0]);
-                    }
-                    catch (Exception e) {     
-                        JOptionPane.showMessageDialog(null,"Write error", e.getMessage(), JOptionPane.ERROR_MESSAGE); 
-                    }
-                }
-            }
-        }
- 
-        public boolean isCellEditable(int arg0, int arg1) {            
-            return isValueEditable();
-        }
+
     }
 
 }

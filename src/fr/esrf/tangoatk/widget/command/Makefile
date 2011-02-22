@@ -40,7 +40,7 @@ ALL =	$(TARGET)/PropertyFrame.class         \
 	$(TARGET)/ConfirmCommandViewer.class    \
 	$(TARGET)/SimpleCommandButtonViewer.class \
 	$(TARGET)/GroupCommandViewer.class \
-	$(TARGET)/SettableCommandButtonViewer.class
+	$(TARGET)/SettableCommandButtonViewer
 
 all: commands beaninfo icons
 
