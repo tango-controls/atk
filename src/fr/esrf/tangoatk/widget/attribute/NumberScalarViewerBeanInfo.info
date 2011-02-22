@@ -1,8 +1,0 @@
-name = NumberScalarViewer
-package fr.esrf.tangoatk.widget.attribute
-
-properties = model
-ICON_COLOR_16x16 = NumberScalarViewer.gif
-ICON_MONO_16x16 = NumberScalarViewer.gif
-ICON_MONO_32x32 = NumberScalarViewer.gif
-ICON_COLOR_32x32 = NumberScalarViewer.gif

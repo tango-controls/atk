@@ -31,24 +31,25 @@ test "x$JAVAC" = x && AC_MSG_ERROR([no acceptable jar found in \$PATH])
 AC_PROVIDE([$0])dnl
 ])
 
-ATKHOME=$PWD
-ATKSRC=$ATKHOME/src	
+ATKHOME=`pwd`
 ATKLIB=$ATKHOME/lib
 ATKDOC=$ATKHOME/doc
-TANGOHOST=TANGO_HOST=$TANGO_HOST
-TANGOHOME=/segfs/tango/release
-TANGOLIB=$TANGOHOME/java/lib
-TANGO=$TANGOLIB/TangORB.jar
-PRINTF=$ATKLIB/printf.jar
-IMAGEJ=$ATKLIB/ij.jar
-JEP=$ATKLIB/jep.jar:$ATKLIB/jepext.jar
-JOGL=$ATKLIB/jogl.jar:$ATKLIB/gluegen-rt.jar
+TANGOHOST=TANGO_HOST=tango:20000
+TANGOHOME=/segfs/tango
+LIB=$TANGOHOME/lib/java
+TANGO=$LIB/Tango.jar
+TANGOTEST=$LIB/
+TANGOAPI=$TANGOHOME/tools/api
+ORB=$LIB/OB.jar
+RT=$JAVA_HOME/jre/lib/rt.jar
 JTARGETDIR=$ATKLIB	
-BEANBOX=$JAVA_HOME/beans/beanbox/classes:$JAVA_HOME/beans/infobus.jar:$JAVA_HOME/beans/lib/methodtracer.jar
-CLASSPATH=$TANGO:$PRINTF:$JEP:$IMAGEJ:$JOGL:$ATKLIB:$BEANBOX:.;export CLASSPATH
+LOG4J=$ATKLIB/log4j.jar
+JUNIT=$ATKLIB/junit.jar
+PPLOT=$ATKLIB/plot.jar:$ATKLIB/gui.jar
+VISAD=$ATKLIB/visad.jar
+JCCHART=$ATKLIB/jcchart.jar	
+CLASSPATH=$RT:$VISAD:$PPLOT:$TANGOAPI:$TANGO:$ORB:$ATKLIB:$LOG4J:$JUNIT:$TANGOTEST:$JAVA_HOME/beans/beanbox/classes:$JAVA_HOME/beans/infobus.jar:$JAVA_HOME/beans/lib/methodtracer.jar:$JCCHART;export CLASSPATH
 
-AC_SUBST(ATKSRC)
-AC_SUBST(TANGOHOME)
 AC_SUBST(JTARGETDIR)
 AC_SUBST(JAVACFLAGS)
 AC_SUBST(CLASSPATH)
@@ -57,7 +58,6 @@ AC_SUBST(TANGOHOST)
 AC_SUBST(ATKLIB)
 AC_SUBST(ATKHOME)
 AC_SUBST(ATKDOC)
-AC_SUBST(JAVA_HOME)
 
 				
 dnl Checks for programs.
@@ -73,9 +73,11 @@ fi
 AC_PROG_JAR()
 AC_PROG_JAVADOC()	
 AC_PROG_JAVAC_WORKS()	
+AC_CHECK_RQRD_CLASS(org.apache.log4j.Category)
 AC_CHECK_RQRD_CLASS(fr.esrf.TangoDs.Attribute)
 AC_CHECK_RQRD_CLASS(fr.esrf.Tango.Device)
 AC_CHECK_RQRD_CLASS(fr.esrf.TangoApi.Connection)
+AC_CHECK_RQRD_CLASS(org.omg.CORBA.StringValueHelper)		
 dnl Checks for header files.
 
 dnl Checks for typedefs, structures, and compiler characteristics.
