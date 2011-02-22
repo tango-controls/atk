@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  *   The package  fr.esrf.tangoatk.widget.util.chart.math has been added to
  *   extend the JLChart's features with the mathematique expressions calculation
  * 
@@ -470,8 +448,8 @@ public class ParserOptionDialog extends JLDataViewOption
         }
         axisLabel.setBounds( 0, 315, 50, 25 );
         axisBox.setBounds( 50, 315, 50, 25 );
-        innerPanel.setBounds( 0, 340, 270, 310 );
-        cancelButton.setBounds( 5, 280, 80, 25);
+        innerPanel.setBounds( 0, 340, 270, 265 );
+        cancelButton.setBounds( 5, 230, 80, 25);
         closeBtn.setText( "Ok" );
         innerPanel.remove( nameLabel );
         innerPanel.add( cancelButton );
@@ -486,7 +464,7 @@ public class ParserOptionDialog extends JLDataViewOption
         newPanel.add( axisBox );
         newPanel.add( innerPanel );
         setResizable( false );
-        newPanel.setPreferredSize( new Dimension( 270, 650 ) );
+        newPanel.setPreferredSize( new Dimension( 270, 600 ) );
         this.setContentPane( newPanel );
     }
 

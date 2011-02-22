@@ -11,15 +11,12 @@ ALL = 	$(TARGET)/IImageManipulator.class           \
 	$(TARGET)/BWRaster.class                    \
 	$(TARGET)/ImageController.class             \
 	$(TARGET)/ImageViewer.class                 \
-	$(TARGET)/LineProfilerPanel.class           \
-	$(TARGET)/LineProfilerViewer.class          \
-	$(TARGET)/IImageFormat.class                \
-	$(TARGET)/RGB24ImageFormat.class            \
-	$(TARGET)/Mono8ImageFormat.class            \
-	$(TARGET)/Mono16ImageFormat.class           \
-	$(TARGET)/Jpeg24ImageFormat.class           \
-	$(TARGET)/Jpeg8ImageFormat.class            \
-	$(TARGET)/JpegDecoder.class                 \
+	$(TARGET)/LineProfilerPanel.class          \
+    $(TARGET)/LineProfilerViewer.class          \
+	$(TARGET)/IImageFormat.class          \
+	$(TARGET)/RGB24ImageFormat.class          \
+	$(TARGET)/Mono8ImageFormat.class          \
+	$(TARGET)/Mono16ImageFormat.class          \
 
 all:	image icons
 

@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * StateViewer.java
  *
  * Created on February 09, 2005, 14:07
@@ -103,16 +81,6 @@ public class StateViewer extends javax.swing.JPanel
     add(valueLabel, gridBagConstraints1);
 
   }
-  
-  
-  public void clearModel()
-  {
-      if (model != null)
-      {
-	 model.removeDevStateScalarListener(this);
-	 model = null;
-      }
-  }
 
 
    /**
@@ -124,30 +92,31 @@ public class StateViewer extends javax.swing.JPanel
   public void setModel(IDevStateScalar stateAtt)
   {
       if (model != null)
-	 clearModel();
+      {
+	 model.removeDevStateScalarListener(this);
+	 model = null;
+      }
 
       if (stateAtt == null) 
 	 return;
 
       this.model = stateAtt;
-      if (!stateAtt.areAttPropertiesLoaded())
-          stateAtt.loadAttProperties();
       stateAtt.addDevStateScalarListener(this);
       
       if (!externalSetText)
         if (useDeviceAlias)
 	{
-	   if (model.getDevice().getAlias() != null)
-	      textLabel.setText(model.getDevice().getAlias());
+	   if (stateAtt.getDevice().getAlias() != null)
+	      textLabel.setText(stateAtt.getDevice().getAlias());
 	   else
-	      textLabel.setText(model.getDevice().getName());
+	      textLabel.setText(stateAtt.getDevice().getName());
 	}
 	else
-	   textLabel.setText(model.getDevice().getName());
+	   textLabel.setText(stateAtt.getDevice().getName());
 
-      valueLabel.setToolTipText(model.getDevice().getName());
+      valueLabel.setToolTipText(stateAtt.getDevice().getName());
       //stateAtt.refresh();
-      setCurrentState(model.getDeviceValue());
+      setCurrentState(stateAtt.getDeviceValue());
   }
 
   /**
@@ -265,12 +234,12 @@ public class StateViewer extends javax.swing.JPanel
 
   public void devStateScalarChange(DevStateScalarEvent evt)
   {
-      setCurrentState(evt.getValue());
+    setCurrentState(evt.getValue());
   }
 
   public void errorChange(ErrorEvent evt)
   {
-      setCurrentState(IDevice.UNKNOWN);
+    setCurrentState(IDevice.UNKNOWN);
   }
 
 
@@ -282,7 +251,7 @@ public class StateViewer extends javax.swing.JPanel
   private void setCurrentState(String stateStr)
   {
     this.currentState = stateStr;
-    valueLabel.setBackground(ATKConstant.getColor4State(currentState, model.getInvertedOpenClose(), model.getInvertedInsertExtract()));
+    valueLabel.setBackground(ATKConstant.getColor4State(currentState));
     if (stateInTooltip)
        valueLabel.setToolTipText(model.getDevice().getName() + " : " + currentState);
   }
@@ -320,7 +289,6 @@ public class StateViewer extends javax.swing.JPanel
     valueLabel.setFont(font);
   }
 
-  @Override
   public void setFont(java.awt.Font font) {
     if (valueLabel != null) {
       valueLabel.setFont(font);
@@ -346,7 +314,6 @@ public class StateViewer extends javax.swing.JPanel
   }
 
 
-    @Override
   public void setForeground(java.awt.Color color) {
     if (valueLabel != null) {
       valueLabel.setForeground(color);
@@ -409,9 +376,9 @@ public class StateViewer extends javax.swing.JPanel
        // Connect to a list of number scalar attributes
        try
        {
-          attState = (IDevStateScalar) attList.add("fp/test/1/State");
+          attState = (IDevStateScalar) attList.add("jlp/test/1/State");
 	  stv.setModel(attState);
-	  stv.setLabel("FP status");
+	  stv.setLabel("jlp status");
        }
        catch (Exception ex)
        {

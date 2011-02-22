@@ -26,9 +26,6 @@ BEANINFO= StringScalarViewerBeanInfo.java            \
 	  ScalarAttributeSetPanelBeanInfo.java \
 	  MultiScalarTableViewerBeanInfo.java \
 	  NumberSpectrumItemTrendBeanInfo.java \
-	  DevStateSpectrumViewerBeanInfo.java \
-          SimpleStateViewerBeanInfo.java	\
-	  NumberSpectrumStateBarChartViewerBeanInfo.java    \
 
 
 include ../../../../../../.make-include
@@ -48,7 +45,6 @@ ALL =	$(TARGET)/IAttributeViewer.class            \
 	$(TARGET)/TrendRenderer.class               \
 	$(TARGET)/NumberScalarWheelEditor.class     \
 	$(TARGET)/NumberSpectrumViewer.class        \
-	$(TARGET)/NumberSpectrumTableEditor.class   \
 	$(TARGET)/DualSpectrumImageViewer.class     \
 	$(TARGET)/NumberScalarListViewer.class      \
 	$(TARGET)/StringScalarEditor.class          \
@@ -98,11 +94,6 @@ ALL =	$(TARGET)/IAttributeViewer.class            \
 	$(TARGET)/SignalScalarCheckBoxViewer.class \
 	$(TARGET)/SignalScalarComboEditor.class \
 	$(TARGET)/NumberImageJViewer.class           \
-	$(TARGET)/DevStateSpectrumViewer.class       \
-	$(TARGET)/SimpleStateViewer.class           \
-	$(TARGET)/NumberSpectrumTrend3DViewer.class \
-	$(TARGET)/NumberSpectrumStateBarChartViewer.class 
-	
 
 #	$(TARGET)/AttributeBarChart.class
 
@@ -203,5 +194,3 @@ nstv: attributes
 	$(JAVA) fr.esrf.tangoatk.widget.attribute.NumberSpectrumTrendViewer	
 nsit: attributes
 	$(JAVA) fr.esrf.tangoatk.widget.attribute.NumberSpectrumItemTrend	
-dssv: attributes
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.DevStateSpectrumViewer	

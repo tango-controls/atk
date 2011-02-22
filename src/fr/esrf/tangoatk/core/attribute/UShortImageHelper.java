@@ -1,26 +1,4 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-// File:          UShortImageHelper.java
+// File:          ShortImageHelper.java
 // Created:       2002-01-24 10:08:28, assum
 // By:            <assum@esrf.fr>
 // Time-stamp:    <2002-07-16 10:32:16, assum>
@@ -30,16 +8,28 @@
 // Description:
 package fr.esrf.tangoatk.core.attribute;
 
+import fr.esrf.tangoatk.core.*;
 
 import fr.esrf.Tango.*;
 import fr.esrf.TangoApi.*;
 
 class UShortImageHelper extends ANumberImageHelper {
 
-  public UShortImageHelper(AAttribute attribute) {
+  public UShortImageHelper(IAttribute attribute) {
     init(attribute);
   }
 
+/* Modified to add support for display_unit property
+  protected void insert(double[] d) {
+    int[] tmp = new int[d.length];
+    for (int i = 0; i < tmp.length; i++) {
+      tmp[i] = new Double(d[i]).intValue();
+    }
+
+    deviceAttribute.insert_us(tmp, attribute.getXDimension(),
+      attribute.getYDimension());
+  }
+  */
 
   protected void insert(double[][] d)
   {
@@ -56,7 +46,7 @@ class UShortImageHelper extends ANumberImageHelper {
           tmp[i] = (int) (flatd[i] / dUnitFactor);
       }
       
-      da.insert_us(tmp, d[0].length, d.length);
+      da.insert_us(tmp, d.length, d[0].length);
   }
 
   void setMinAlarm(double d) {
@@ -126,8 +116,8 @@ class UShortImageHelper extends ANumberImageHelper {
 
   double[][] getNumberImageValue(DeviceAttribute deviceAttribute) throws DevFailed {
 
-    int ydim = deviceAttribute.getDimY();
-    int xdim = deviceAttribute.getDimX();
+    int ydim = attribute.getYDimension();
+    int xdim = attribute.getXDimension();
 
     if (ydim != retval.length || xdim != retval[0].length) {
       retval = new double[ydim][xdim];
@@ -150,8 +140,8 @@ class UShortImageHelper extends ANumberImageHelper {
     tmp = deviceAttribute.extractUShortArray();
     dUnitFactor = this.attribute.getDisplayUnitFactor();
 
-    int ydim = deviceAttribute.getDimY();
-    int xdim = deviceAttribute.getDimX();
+    int ydim = attribute.getYDimension();
+    int xdim = attribute.getXDimension();
 
     if (ydim != retval.length || xdim != retval[0].length) {
       retval = new double[ydim][xdim];
@@ -166,20 +156,20 @@ class UShortImageHelper extends ANumberImageHelper {
     return retval;
   }
 
-  String[][] getImageValueAsString(DeviceAttribute deviceAttribute) throws DevFailed {
+  String[][] getImageValue(DeviceAttribute deviceAttribute) throws DevFailed {
 
     int[] tmp = deviceAttribute.extractUShortArray();
 
-    int ydim = deviceAttribute.getDimY();
-    int xdim = deviceAttribute.getDimX();
-    String[][] retval_str = new String[ydim][xdim];
+    int ydim = attribute.getYDimension();
+    int xdim = attribute.getXDimension();
+    String[][] retval = new String[ydim][xdim];
 
     int k = 0;
     for (int i = 0; i < ydim; i++)
       for (int j = 0; j < xdim; j++) {
-        retval_str[i][j] = Integer.toString(tmp[k++]);
+        retval[i][j] = Integer.toString(tmp[k++]);
       }
-    return retval_str;
+    return retval;
 
   }
 

@@ -1,25 +1,8 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
+// File:          TangoListModel.java
+// Created:       2001-09-28 10:46:59, assum
+// By:            <erik@assum.net>
+// Time-stamp:    <2002-07-23 10:25:29, assum>
+// 
 // $Id$
 // 
 // Description:       
@@ -33,12 +16,15 @@ import fr.esrf.tangoatk.core.AEntityFactory;
 import javax.swing.ComboBoxModel;
 
 public abstract class AEntityList extends javax.swing.DefaultListModel
-                implements IEntityCollection, ComboBoxModel, IEntityList 
-{
+implements IEntityCollection, ComboBoxModel  {
 
   protected int refreshInterval = 1000;
   protected AEntityFactory factory;
   protected Refresher refresher = null;
+  protected static ThreadGroup refreshers;
+  //protected List errorListeners = new Vector();
+  //protected List refresherListeners = new Vector();
+  //protected List setErrorListeners = new Vector();
   protected List<IErrorListener> errorListeners = new Vector<IErrorListener> ();
   protected List<IRefresherListener> refresherListeners = new Vector<IRefresherListener> ();
   protected List<ISetErrorListener> setErrorListeners = new Vector<ISetErrorListener> ();
@@ -55,9 +41,17 @@ public abstract class AEntityList extends javax.swing.DefaultListModel
   protected boolean synchronizedPeriod = false;
   protected boolean traceUnexpected = false;
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#setRefreshInterval(int)
- */
+  static {
+    refreshers = new ThreadGroup("listRefreshers");
+  }
+
+  /**
+   * <code>setRefreshInterval</code> sets the refresh interval for
+   * the EntityList. This interval decides how often an entity is polled
+   * to see if its value has changed. The default value is 1000, that is,
+   * the entity is polled once a second.
+   * @param milliSeconds an <code>int</code> value
+   */
   public void setRefreshInterval(int milliSeconds) {
     refreshInterval = milliSeconds;
     if (refresher != null) {
@@ -65,30 +59,28 @@ public abstract class AEntityList extends javax.swing.DefaultListModel
     }
   }
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#getRefreshInterval()
- */
+  /**
+   * <code>getRefreshInterval</code> gets the refresh-interval for
+   * the entity list. The default value is 1000 milliseconds.
+   * @return an <code>int</code> value which is the refresh-interval
+   */
   public int getRefreshInterval() {
     return refreshInterval;
   }
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#getSelectedItem()
- */
   public Object getSelectedItem() {
     return selectedItem;
   }
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#setSelectedItem(java.lang.Object)
- */
   public void setSelectedItem(Object obj) {
     selectedItem = (IEntity) obj;
   }
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#refresh()
- */
+  /**
+   * <code>refresh</code> refreshes the EntityList, that is, it asks
+   * all its entities to poll its Tango peer to see if its value has
+   * changed.
+   */
   public void refresh() {
     IEntity ie = null;
     long t0 = System.currentTimeMillis();
@@ -118,32 +110,24 @@ public abstract class AEntityList extends javax.swing.DefaultListModel
 
   }
 
-
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#isRefresherStarted()
- */
   public boolean isRefresherStarted(){
       return refresherStarted;
   }
 
-
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#stopRefresher()
- */  
+  
   public void stopRefresher() {
     if (refresher != null)
-    {
       refresher.stop = true;
-      refresher.refreshee = null;
-    }
     refresher = null;
     refresherStarted = false;
   }
 
-
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#startRefresher()
- */
+  /**
+   * <code>startRefresher</code>  starts the default refresher thread
+   * for the entity list,which sleeps for refreshInterval seconds.
+   * @see fr.esrf.tangoatk.core.AEntityList#setRefreshInterval
+   * @see java.lang.Thread
+   */
   public void startRefresher() {
     if ( this.isRefresherStarted() ) return;
     if (refresher == null) {
@@ -158,11 +142,12 @@ public abstract class AEntityList extends javax.swing.DefaultListModel
   }
 
 
-
-
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#setRefresher(fr.esrf.tangoatk.core.Refresher)
- */
+  /**
+   * <code>setRefresher</code> sets the resher thread
+   * for this EntityList.
+   * @param r an <code>Refresher</code> value
+   * @see fr.esrf.tangoatk.core.Refresher
+   */
   public void setRefresher(Refresher r) {
     if (r!= null) {
       synchronizedPeriod = r.isSynchronizedPeriod();
@@ -171,25 +156,20 @@ public abstract class AEntityList extends javax.swing.DefaultListModel
     refresher = r;
   }
 
-
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#setFilter(fr.esrf.tangoatk.core.IEntityFilter)
- */
+  /**
+   * <code>setFilter</code> to filter out which IEntities
+   * should be added to the list and which should not be added.
+   * @see IEntityFilter
+   * @param filter an <code>IEntityFilter</code> value
+   */
   public void setFilter(IEntityFilter filter) {
     this.filter = filter;
   }
 
-
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#getFilter()
- */
   public IEntityFilter getFilter() {
     return filter;
   }
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#get(java.lang.String[])
- */
   public List<IEntity> get(String[] names)
   {
     //List l = new Vector();
@@ -202,9 +182,6 @@ public abstract class AEntityList extends javax.swing.DefaultListModel
   }
 
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#get(java.lang.String)
- */
   public IEntity get(String attributeName) {
 
     for (int i = 0; i < size(); i++) {
@@ -215,9 +192,6 @@ public abstract class AEntityList extends javax.swing.DefaultListModel
     return null;
   }
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#add(java.lang.String[])
- */
   public void add(String[] names) throws ConnectionException {
     for (int i = 0; i < names.length; i++) {
       if (names[i] == null) continue;
@@ -225,9 +199,6 @@ public abstract class AEntityList extends javax.swing.DefaultListModel
     }
   }
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#add(fr.esrf.tangoatk.core.IEntity)
- */
   public void add(IEntity entity) {
     if (contains(entity)) return;
     if (!filter.keep(entity)) return;
@@ -257,78 +228,55 @@ public abstract class AEntityList extends javax.swing.DefaultListModel
 
   }
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#add(java.lang.String)
- */
-public IEntity add(String name) throws ConnectionException
-{
+
+  public IEntity add(String name) throws ConnectionException {
     IEntity e = get(name);
 
-    if (e == null)
-    {
-        List l = null;
-        try
-        {
-            l = factory.getEntities(name);
+    if (e == null) {
+      List l=null;
+      try {
+        l = factory.getEntities(name);
+      } catch (ConnectionException ex) {
+        // Fire an error event when initialisation failed.
+        if( factory.isWildCard(name))
+          name = name.substring(0,name.length()-2);
+        fireErrorEvent(ex,name);
+        throw ex;
+      }
+
+      Iterator i = l.iterator();
+
+      while (i.hasNext()) {
+        e = (IEntity) i.next();
+        if (e == null || contains(e))
+          continue;
+        if (!filter.keep(e))
+          continue;
+
+
+        // error listeners
+        if (errorListeners != null) {
+          for (int j = 0; j < errorListeners.size(); j++) {
+            //e.addErrorListener((IErrorListener) errorListeners.get(j));
+            e.addErrorListener(errorListeners.get(j));
+          }
         }
-        catch (ConnectionException ex)
-        {
-            // Fire an error event when initialisation failed.
-            if (factory.isWildCard(name))
-            {
-                name = name.substring(0, name.length() - 2);
-            }
-            fireErrorEvent(ex, name);
-            throw ex;
-        }
 
-        Iterator i = l.iterator();
-
-        while (i.hasNext())
-        {
-            e = (IEntity) i.next();
-            if (e == null || contains(e))
-            {
-                continue;
+        // set attribute error listeners meaningful only for attributes
+        if (e instanceof IAttribute)
+          if (setErrorListeners != null) {
+            for (int j = 0; j < setErrorListeners.size(); j++) {
+              //((IAttribute) e).addSetErrorListener((ISetErrorListener) setErrorListeners.get(j));
+              ((IAttribute) e).addSetErrorListener(setErrorListeners.get(j));
             }
-            if (!filter.keep(e))
-            {
-                continue;
-            }
-
-
-            // error listeners
-            if (errorListeners != null)
-            {
-                for (int j = 0; j < errorListeners.size(); j++)
-                {
-                    //e.addErrorListener((IErrorListener) errorListeners.get(j));
-                    e.addErrorListener(errorListeners.get(j));
-                }
-            }
-
-            // set attribute error listeners meaningful only for attributes
-            if (e instanceof IAttribute)
-            {
-                if (setErrorListeners != null)
-                {
-                    for (int j = 0; j < setErrorListeners.size(); j++)
-                    {
-                        //((IAttribute) e).addSetErrorListener((ISetErrorListener) setErrorListeners.get(j));
-                        ((IAttribute) e).addSetErrorListener(setErrorListeners.get(j));
-                    }
-                }// end of if ()
-            }
-            addElement(e);
-        }// end of while ()
+          }// end of if ()
+        addElement(e);
+      }// end of while ()
     }
     return e;
-}
+  }
 
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#remove(java.lang.String)
- */
   public boolean remove(String entityName)
   {
      IEntity a = get(entityName);
@@ -344,26 +292,23 @@ public IEntity add(String name) throws ConnectionException
 
 
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#addErrorListener(fr.esrf.tangoatk.core.IErrorListener)
- */
   public void addErrorListener(IErrorListener l) {
     errorListeners.add(l);
   }
 
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#addSetErrorListener(fr.esrf.tangoatk.core.ISetErrorListener)
- */
   public void addSetErrorListener(ISetErrorListener l) {
     /* Sensless for a CommandList */
     setErrorListeners.add(l);
   }
 
+  /**
+   * Remove an ErrorListener for all entities in the entitylist. Invokes
+   * removeErrorListener on all list members.
+   * 
+   * @param errl Error Listener
+   */
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#removeErrorListener(fr.esrf.tangoatk.core.IErrorListener)
- */
   public void removeErrorListener(IErrorListener errl) {
     IEntity ie = null;
 
@@ -384,9 +329,13 @@ public IEntity add(String name) throws ConnectionException
   }
 
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#removeSetErrorListener(fr.esrf.tangoatk.core.ISetErrorListener)
- */
+  /**
+   * Remove a SetErrorListener for all entities in the entitylist. Invokes
+   * removeSetErrorListener on all list members.
+   * 
+   * @param setErrl SetError Listener
+   */
+
   public void removeSetErrorListener(ISetErrorListener setErrl)
   {
      IEntity     ie=null;
@@ -417,26 +366,20 @@ public IEntity add(String name) throws ConnectionException
      
   }
 
-
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#addRefresherListener(fr.esrf.tangoatk.core.IRefresherListener)
- */
+  /**
+   * Add a listener on the refresher. Listeners are triggered
+   * at each refresher step after models refresh.
+   * @param l Refresher listener
+   */
   public void addRefresherListener(IRefresherListener l) {
     if( !refresherListeners.contains(l) )
       refresherListeners.add(l);
   }
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#removeRefresherListener(fr.esrf.tangoatk.core.IRefresherListener)
- */
   public void removeRefresherListener(IRefresherListener l) {
-    if(refresherListeners != null)
-	    refresherListeners.remove(l);
+    refresherListeners.remove(l);
   }
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#clearRefresherListener()
- */
   public void clearRefresherListener() {
     refresherListeners.clear();
   }
@@ -476,25 +419,16 @@ public IEntity add(String name) throws ConnectionException
     }
   }
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#finalize()
- */
   public void finalize() {
     stopRefresher();
   }
 
   private static String VERSION = "$Id$";
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#getVersion()
- */
   public String getVersion() {
     return VERSION;
   }
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#setSynchronizedPeriod(boolean)
- */
   public void setSynchronizedPeriod(boolean synchro) {
     synchronizedPeriod = synchro;
     if (refresher == null) {
@@ -505,9 +439,6 @@ public IEntity add(String name) throws ConnectionException
     refresher.setTraceUnexpected(traceUnexpected);
   }
 
-/* (non-Javadoc)
- * @see fr.esrf.tangoatk.core.IEntityList#setTraceUnexpected(boolean)
- */
   public void setTraceUnexpected(boolean trace) {
     traceUnexpected = trace;
     if (refresher == null) {

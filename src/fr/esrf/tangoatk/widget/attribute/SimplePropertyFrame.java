@@ -1,33 +1,11 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.attribute;
 
 import fr.esrf.tangoatk.core.*;
+import fr.esrf.tangoatk.core.attribute.NumberImage;
 import fr.esrf.tangoatk.widget.util.JAutoScrolledText;
 import fr.esrf.Tango.AttrWriteType;
 import fr.esrf.Tango.DispLevel;
 
-import fr.esrf.tangoatk.core.attribute.ANumber;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
@@ -329,9 +307,8 @@ public class SimplePropertyFrame extends JDialog {
     p.setValue(nameText.getText());
     p.refresh();
 
-    if (model instanceof ANumber)
-    {
-      ANumber aNbModel = (ANumber) model;
+    if (model instanceof INumberImage) {
+
       // Update min
       p = (Property) pmap.get("min_value");
       String v = minText.getText();
@@ -339,7 +316,7 @@ public class SimplePropertyFrame extends JDialog {
         p.setValue("NaN");
       } else {
         try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
+          Double d = new Double(v);
           p.setValue(d);
           p.refresh();
         } catch (NumberFormatException e) {
@@ -354,7 +331,7 @@ public class SimplePropertyFrame extends JDialog {
         p.setValue("NaN");
       } else {
         try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
+          Double d = new Double(v);
           p.setValue(d);
           p.refresh();
         } catch (NumberFormatException e) {
@@ -369,7 +346,7 @@ public class SimplePropertyFrame extends JDialog {
         p.setValue("NaN");
       } else {
         try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
+          Double d = new Double(v);
           p.setValue(d);
           p.refresh();
         } catch (NumberFormatException e) {
@@ -384,7 +361,7 @@ public class SimplePropertyFrame extends JDialog {
         p.setValue("NaN");
       } else {
         try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
+          Double d = new Double(v);
           p.setValue(d);
           p.refresh();
         } catch (NumberFormatException e) {
@@ -399,7 +376,7 @@ public class SimplePropertyFrame extends JDialog {
         p.setValue("NaN");
       } else {
         try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
+          Double d = new Double(v);
           p.setValue(d);
           p.refresh();
         } catch (NumberFormatException e) {
@@ -414,7 +391,7 @@ public class SimplePropertyFrame extends JDialog {
         p.setValue("NaN");
       } else {
         try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
+          Double d = new Double(v);
           p.setValue(d);
           p.refresh();
         } catch (NumberFormatException e) {
@@ -444,7 +421,7 @@ public class SimplePropertyFrame extends JDialog {
         p.setValue("NaN");
       } else {
         try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
+          Double d = new Double(v);
           p.setValue(d);
           p.refresh();
         } catch (NumberFormatException e) {
@@ -567,33 +544,33 @@ public class SimplePropertyFrame extends JDialog {
 
     nameText.setText(model.getLabel());
 
-    if (model instanceof ANumber) {
+    if (model instanceof NumberImage) {
       double v;
-      ANumber m = (ANumber) model;
+      NumberImage m = (NumberImage) model;
 
       v = m.getMinValue();
       if( Double.isNaN(v) ) minText.setText("Not specified");
-      else                  minText.setText(Double.toString(m.getValueInDisplayUnit(v)));
+      else                  minText.setText(Double.toString(v));
 
       v = m.getMaxValue();
       if (Double.isNaN(v))   maxText.setText("Not specified");
-      else                   maxText.setText(Double.toString(m.getValueInDisplayUnit(v)));
+      else                   maxText.setText(Double.toString(v));
 
       v = m.getMinAlarm();
       if (Double.isNaN(v))   alminText.setText("Not specified");
-      else                   alminText.setText(Double.toString(m.getValueInDisplayUnit(v)));
+      else                   alminText.setText(Double.toString(v));
 
       v = m.getMaxAlarm();
       if (Double.isNaN(v))   almaxText.setText("Not specified");
-      else                   almaxText.setText(Double.toString(m.getValueInDisplayUnit(v)));
+      else                   almaxText.setText(Double.toString(v));
 
       v = m.getMinWarning();
       if (Double.isNaN(v))   minWarningText.setText("Not specified");
-      else                   minWarningText.setText(Double.toString(m.getValueInDisplayUnit(v)));
+      else                   minWarningText.setText(Double.toString(v));
 
       v = m.getMaxWarning();
       if (Double.isNaN(v))   maxWarningText.setText("Not specified");
-      else                   maxWarningText.setText(Double.toString(m.getValueInDisplayUnit(v)));
+      else                   maxWarningText.setText(Double.toString(v));
 
       v = m.getDeltaT();
       if (Double.isNaN(v))   deltaTText.setText("Not specified");
@@ -601,7 +578,7 @@ public class SimplePropertyFrame extends JDialog {
 
       v = m.getDeltaVal();
       if (Double.isNaN(v))   deltaValText.setText("Not specified");
-      else                   deltaValText.setText(Double.toString(m.getValueInDisplayUnit(v)));
+      else                   deltaValText.setText(Double.toString(v));
 
     } else {
       minText.setText("None");
