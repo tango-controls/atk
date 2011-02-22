@@ -1,9 +1,0 @@
-name =  VoidVoidCommandViewer
-package = fr.esrf.tangoatk.widget.command
-
-properties = model, enabled
-
-ICON_COLOR_16x16 = VoidVoidCommandViewer.gif
-ICON_MONO_16x16 = VoidVoidCommandViewer.gif
-ICON_MONO_32x32 = VoidVoidCommandViewer.gif
-ICON_COLOR_32x32 = VoidVoidCommandViewer.gif
