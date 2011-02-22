@@ -1,29 +1,7 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          EdgeDetector.java
 // Created:       2002-06-12 14:43:49, assum
 // By:            <erik@assum.net>
-// Time-stamp:    <2002-07-05 16:5:35, assum>
+// Time-stamp:    <2002-06-13 14:5:43, assum>
 // 
 // $Id$
 // 
@@ -34,11 +12,9 @@ import java.awt.image.*;
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.*;
-import fr.esrf.tangoatk.widget.util.IApplicable;
-public class ConvolveFilter extends JPanel
-    implements IImageManipulator, IImagePanel, IApplicable {
+
+public class ConvolveFilter extends JPanel implements IImageManipulatorPanel {
     IImageViewer viewer;
-    boolean customFilter = false;
     int i = 0;
     final float ninth = 1f/9f;
 
@@ -55,46 +31,34 @@ public class ConvolveFilter extends JPanel
 		      ninth, ninth, ninth };
     Kernel kernel;
     ConvolveOp cop;
-    ButtonGroup group = new ButtonGroup();
-    JRadioButton edgeButton = new JRadioButton("Edge");
-    JRadioButton blurButton = new JRadioButton("Blur");
-    JRadioButton sharpButton = new JRadioButton("Sharpen");
-    JRadioButton resetButton = new JRadioButton("No filter");
-    float [] myFilter = { 0f, -1f, 0f,
-			  -1f, 4f, -1f,
-			  0f, -1f, 0f};
+    JButton edgeButton = new JButton("Edge");
+    JButton blurButton = new JButton("Blur");
+    JButton sharpButton = new JButton("Sharpen");
+    JButton resetButton = new JButton("Reset");
+    float [][] myFilter = { {0f, -1f, 0f},
+			    {-1f, 4f, -1f},
+			    {0f, -1f, 0f}};
 
-    float [] currentFilter = myFilter;
-    
-    JRadioButton setButton = new JRadioButton("Custom");
-    
+    JButton setButton = new JButton("Set");
     boolean newFilter = false;
     boolean filter = false;
-    MyTableModel tableModel = new MyTableModel();
-    JTable table = new JTable(tableModel);
+    JTable table = new JTable(new myTableModel());
 
-    class MyTableModel extends javax.swing.table.AbstractTableModel {
-
+    class myTableModel extends javax.swing.table.AbstractTableModel {
 	public int getRowCount() {
 	    return 3;
 	}
 
-	public void filterChanged() {
-	    table.setBackground(java.awt.Color.white);
-	    fireTableStructureChanged();
-	}
-	
 	public int getColumnCount() {
 	    return 3;
 	}
 
 	public Object getValueAt(int row, int column) {
-	    return new Float(currentFilter[row * getColumnCount() + column]);
+	    return new Float(myFilter[row][column]);
 	}
 
 	public void setValueAt(Object val, int row, int column) {
-	    currentFilter[row * getColumnCount() + column] =
-		((Float)val).floatValue();
+	    myFilter[row][column] = ((Float)val).floatValue();
 	}
 
 	public Class getColumnClass(int i) {
@@ -102,105 +66,101 @@ public class ConvolveFilter extends JPanel
 	}
 
 	public boolean isCellEditable(int row, int column) {
-	    return setButton.isSelected();
+	    return true;
 	}
     }
 
     public ConvolveFilter() {
-	group.add(edgeButton);
-	group.add(blurButton);
-	group.add(sharpButton);
-	group.add(setButton);
-	group.add(resetButton);
-	resetButton.setSelected(true);
-	resetAction();
 	GridBagConstraints constraints = new GridBagConstraints();
 	kernel = new Kernel(3, 3, sharpen);
 	cop = new ConvolveOp(kernel);
 	setLayout(new GridBagLayout());
-	constraints.gridx = 2;
-	constraints.gridy = 1;
-	constraints.anchor = GridBagConstraints.EAST;
-	constraints.fill = GridBagConstraints.BOTH;
+	constraints.gridx = 0;
+	constraints.gridy = 0;
 	add(edgeButton, constraints);
-
-	constraints.gridy = 2;
-	add(blurButton, constraints);
-
-	constraints.gridy = 3;
-	add(sharpButton, constraints);
-
-	constraints.gridy = 4;
-
-	add(setButton, constraints);
-
-	constraints.gridx = 2;
-	constraints.gridy = 5;
-
-	
-	add(resetButton, constraints);
-	constraints = new GridBagConstraints();
-	constraints.gridy = 1;
-	constraints.gridx = 1;
- 	add(table, constraints);
-
 	edgeButton.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 		    edgeAction();
 		}
 	    });
-	setButton.addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-		    setAction();
-		}
-	    });
+	constraints.gridx = 1;
+	add(blurButton, constraints);
 	blurButton.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 		    blurAction();
 		}
 	    });
-	resetButton.addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-		    resetAction();
-		}
-	    });
+	constraints.gridx = 2;
+	add(sharpButton, constraints);
 	sharpButton.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 		    sharpAction();
 		}
 	    });
-	
+	constraints.gridy = 1;
+	constraints.gridx = 0;
+	add(table, constraints);
+	constraints.gridy = 2;
+	constraints.gridx = 0;
+
+	add(setButton, constraints);
+	setButton.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+		    setAction();
+		}
+	    });
+	constraints.gridx = 0;
+	constraints.gridy = 3;
+	add(resetButton, constraints);
+	resetButton.addActionListener(new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+		    resetAction();
+		}
+	    });
+		
     }
 
     protected void edgeAction() {
-	currentFilter = edge;
-	tableModel.filterChanged();
+	kernel = new Kernel(3, 3, edge);
+	cop = new ConvolveOp(kernel);
 	newFilter = filter = true;
+	viewer.repaint();
     }
  
     protected void setAction() {
-
-	currentFilter = myFilter;
-	tableModel.filterChanged();	
-
+	float [] tmp = new float[9];
+	int k = 0;
+	for (int i = 0; i < 3; i++) {
+	    for (int j = 0; j < 3; j++) {
+		tmp[k++] = myFilter[i][j];
+	    } // end of for ()
+	    
+	    
+	} // end of for ()
+	
+	kernel = new Kernel(3, 3, tmp);
+	cop = new ConvolveOp(kernel);
 	newFilter = filter = true;
+	viewer.repaint();
     }
 
     protected void blurAction() {
-	currentFilter = blur;
-	tableModel.filterChanged();
+	kernel = new Kernel(3, 3, blur);
+	cop = new ConvolveOp(kernel);
 	newFilter = filter = true;
+	viewer.repaint();
     }
 
     protected void resetAction() {
-	table.setBackground(getBackground());
 	filter = false;
+	viewer.repaint();
     }
 
     protected void sharpAction() {
-	currentFilter = sharpen;
-	tableModel.filterChanged();
+	kernel = new Kernel(3, 3, sharpen);
+	cop = new ConvolveOp(kernel);
 	newFilter = filter = true;
+	viewer.repaint();
     }
 
 
@@ -235,27 +195,12 @@ public class ConvolveFilter extends JPanel
     public void roiChanged(int startx, int endx, int starty, int endy) {
 
     }
-    public void ok() {
-	apply();
-	cancel();
-    }
 
-    public void cancel() {
-	getRootPane().getParent().setVisible(false);
-    }
-
-    public void apply() {
-	kernel = new Kernel(3, 3, currentFilter);
-	cop = new ConvolveOp(kernel);
-	
-	viewer.repaint();
-    }
-	
     public static void main (String[] args) {
 	JFrame f = new JFrame();
 	f.getContentPane().add(new ConvolveFilter());
 	f.pack();
-	f.setVisible(true);
+	f.show();
     } // end of main ()
     
 }

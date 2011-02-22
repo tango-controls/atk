@@ -1,532 +1,196 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          ErrorAdapter.java
 // Created:       2002-04-25 14:56:45, assum
 // By:            <erik@assum.net>
-// Time-stamp:    <2002-07-05 15:6:41, assum>
-//
+// Time-stamp:    <2002-05-16 10:51:38, assum>
+// 
 // $Id$
-//
-// Description:
+// 
+// Description:       
 
 package fr.esrf.tangoatk.widget.util;
-
 import javax.swing.table.AbstractTableModel;
-
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.Tango.DevError;
-
+import javax.swing.*;
 import java.util.*;
 import java.text.SimpleDateFormat;
 
-// An inner class to handle error
-class ErrorObject {
-
-  private Throwable exception;
-  private long      time;
-  private String    source;
-  private String    severity;
-
-  ErrorObject(Throwable err,long t,String src,String severity) {
-    time = t;
-    exception = err;
-    source=src;
-    this.severity=severity;
-  }
-
-  public String toString() {
-    return exception.toString();
-  }
-
-  public String getMessage() {
-
-    if (!(exception instanceof ATKException))
-      return exception.toString();
-
-    return ((ATKException) exception).getDescription();
-
-  }
-  public String getSource() {
-    return source;
-  }
-  public String getSeverity() {
-    return severity;
-  }
-  public Throwable getError() {
-    return exception;
-  }
-  public long getTime() {
-    return time;
-  }
-  public void setTime(long t) {
-    time=t;
-  }
-
-}
-
-// An inner class to handle errors coming from the same source
-class ErrorList {
-
-  String source;  // Source of the error (Attribute,Device,Command name)
-  Vector errors;  // List of errors (ErrorObject) belonging to the source
-
-  ErrorList(String source) {
-    this.source=source;
-    errors=new Vector();
-  }
-
-  boolean addError(Throwable t,long timeStamp) {
-
-    if(errors.size()>0) {
-      ErrorObject last = (ErrorObject)errors.lastElement();
-      if(last.toString().equals(t.toString())) {
-        // Does not add same error
-        // Simply update the error time
-        last.setTime(timeStamp);
-        return false;
-      }
-    }
-
-    String severity = "";
-    if (t instanceof ATKException)
-      severity = ATKException.severity[((ATKException) t).getSeverity()];
-
-    // Add the error
-    errors.add( new ErrorObject(t,timeStamp,source,severity) );
-    return true;
-
-  }
-
-  ErrorObject get(int idx) {
-    return (ErrorObject)errors.get(idx);
-  }
-
-  int size() {
-    return errors.size();
-  }
-
-  void removeFirst() {
-    errors.remove(0);
-  }
-
-}
-
 class ErrorAdapter extends AbstractTableModel {
+    boolean showError = true;
+    boolean showWarning = true;
+    boolean showPanic   = true;
 
-  public static final int TIME = 0;
-  public static final int SEVERITY = 1;
-  public static final int SOURCE = 2;
-  public static final int DESCRIPTION = 3;
-  public static final int ORIGIN = 4;
-  public static final int REASON = 5;
-
-  // The error buffer size (number of errors saved before deciding to delete)
-  // should at least be >= to MIN_ERROR_BUFFER_SIZE
-  private static final int MIN_ERROR_BUFFER_SIZE = 100;
-
-  String columnNames[] = {"Time", "Severity", "Source", "Description"};
-  SimpleDateFormat format;
-
-  int errorBufferSize;     // Buffer size
-  int nbError;             // Total number of error
-  Vector errors;           // The global errors array
-
-  Vector filteredErrors;   // Filtered errors array
-  int sortColumn = -1;     // No sort
-  String visibleSource = null; // Filter source (null=no filter)
-  boolean showPanic = true;
-  boolean showError = true;
-  boolean showWarning = true;
-
-  ErrorPanel peerPanel = null;
-
-  /**
-   * Construct an error adapter.
-   */
-  ErrorAdapter() {
-
-    format = new SimpleDateFormat("HH:mm:ss");
-    errors = new Vector();
-    filteredErrors = new Vector();
-    errorBufferSize = MIN_ERROR_BUFFER_SIZE;
-    nbError=0;
-
-  }
-
-  /**
-   * Sets the error panel which handle this ErrorAdapter.
-   * This will trigger updateSource() on the ErrorPanel
-   * when the source list is modified.
-   * @param p ErrorPanel
-   */
-  public void setErrorPanel(ErrorPanel p) {
-    peerPanel = p;
-  }
-
-  /**
-   * Clear all error present in this adapter.
-   */
-  synchronized void clearError() {
-    errors = new Vector();
-    filteredErrors = new Vector();
-    nbError=0;
-    fireSourceChange();
-    updateFilters();
-  }
-
-  /**
-   * Add an error to this error table.
-   * @param errorevent Error to be added
-   */
-  synchronized public void addError(ErrorEvent errorevent) {
-
-    String src = errorevent.getSource().toString();
-
-    if(src==null) {
-      System.out.println("ErrorAdapter.addError() : Warning cannot handle error with null source !");
-      System.out.println("ErrorAdapter.addError() : " + errorevent.getError());
-      return;
+    public void addError(ErrorEvent errorevent) {
+	ErrorEvent errorevent1 = null;
+	if (!wanted(errorevent)) return;
+	
+	if (errors.size() > 0)
+	    errorevent1 = (ErrorEvent)errors.get(errors.size() - 1);
+	
+	if (errorevent1 != null &&
+	    errorevent.getError().toString().
+	    equals(errorevent1.getError().toString())) {
+	    errorevent1.setTimeStamp(errorevent.getTimeStamp());
+	    fireTableRowsUpdated(errors.size() - 1, errors.size() - 1);
+	    return;
+	} 
+	errors.add(errorevent.clone());
+	fireTableRowsInserted(errors.size() - 1, errors.size());
     }
 
-    // Find the source
-    boolean added;
-    int i=getSourceIndex(src);
+    protected boolean wanted(ErrorEvent evt) {
+	Throwable t = evt.getError();
 
-    if( i>=0 ) {
-      added = ((ErrorList)errors.get(i)).addError(errorevent.getError(),errorevent.getTimeStamp());
-    } else {
-      // Create a new ErrorList
-      ErrorList nList = new ErrorList(src);
-      added = nList.addError(errorevent.getError(),errorevent.getTimeStamp());
-      errors.add(nList);
-      fireSourceChange();
+	if (!(t instanceof ATKException)) return true;
+
+	ATKException  exp = (ATKException)t;
+	
+	
+	if (exp.getSeverity() == ATKException.PANIC && showPanic)
+	    return true;
+
+	if (exp.getSeverity() == ATKException.ERROR && showError)
+	    return true;
+	
+	if (exp.getSeverity() == ATKException.WARNING && showWarning)
+	    return true;
+	
+	return false;
     }
 
-    // Truncate the array
-    if(added) {
-
-      if(nbError>=errorBufferSize) {
-
-        // Find the oldest error
-        int  imin=-1;
-        long tmin=Long.MAX_VALUE;
-        i=0;
-        for(i=0;i<errors.size();i++) {
-          ErrorList el = (ErrorList)errors.get(0);
-          if(el.get(0).getTime()<tmin) {
-            tmin=el.get(0).getTime();
-            imin=i;
-          }
-        }
-
-        // Remove it
-        if(imin>=0) {
-          ErrorList el = (ErrorList)errors.get(imin);
-          el.removeFirst();
-          if(el.size()==0) {
-            // Remove this source
-            errors.remove(el);
-            fireSourceChange();
-          }
-        }
-
-      } else {
-        nbError++;
-      }
-
+    public void showPanic(boolean b) {
+	showPanic = b;
     }
 
-    updateFilters();
-
-  }
-
-  /**
-   * @return The error buffer size.
-   */
-  public int getErrorBufferSize() {
-    return errorBufferSize;
-  }
-
-  /**
-   * Sets the Error buffer size.
-   * @param bs Buffer size
-   */
-  public void setErrorBufferSize(int bs) {
-    if (bs > MIN_ERROR_BUFFER_SIZE) {
-      errorBufferSize = bs;
-    }
-  }
-
-  /**
-   * Sets the date format.
-   * @param simpledateformat Date format
-   */
-  public void setTimeFormat(SimpleDateFormat simpledateformat) {
-    format = simpledateformat;
-  }
-
-  /**
-   * @return Current data format.
-   */
-  public SimpleDateFormat getTimeFormat() {
-    return format;
-  }
-
-  /**
-   * Sets the source to be displayed.
-   * @param s Source (pass null for all source)
-   */
-  public void setSourceFilter(String s) {
-    visibleSource = s;
-    updateFilters();
-  }
-
-  /**
-   * Sorts the given column.
-   * @param column Column to be sorted (Pass -1 for no sort)
-   */
-  public void setSortedColumn(int column) {
-    sortColumn = column;
-    updateFilters();
-  }
-
-  /**
-   * Display Panic message.
-   * @param b True to display false otherwise.
-   */
-  public void showPanic(boolean b) {
-    showPanic = b;
-    updateFilters();
-  }
-
-  /**
-   * Display Error message.
-   * @param b True to display false otherwise.
-   */
-  public void showError(boolean b) {
-    showError = b;
-    updateFilters();
-  }
-
-  /**
-   * Display Warning message.
-   * @param b True to display false otherwise.
-   */
-  public void showWarning(boolean b) {
-    showWarning = b;
-    updateFilters();
-  }
-
-  /**
-   * Return the error associated to the selected line.
-   * @param i Selected line
-   * @return A tango error stack or null.
-   */
-  public DevError[] getErrorNumber(int i) {
-    Throwable throwable = ((ErrorObject) filteredErrors.get(i)).getError();
-    if (!(throwable instanceof ATKException)) return null;
-    return ((ATKException) throwable).getErrors();
-  }
-
-  /**
-   * Return the error associated to the selected line.
-   * @param i Selected line
-   * @return A Throwable object
-   */
-  public Throwable getErrorAt(int i) {    
-    return ((ErrorObject) filteredErrors.get(i)).getError();
-  }
-
-  /**
-   * Returns an array of string containing all source.
-   */
-  public Vector getAllSource() {
-
-    Vector ret = new Vector();
-    for(int i=0;i<errors.size();i++)
-      ret.add( ((ErrorList)errors.get(i)).source );
-    return ret;
-
-  }
-
-  // ----------------------------------------------------------------
-  // Table model
-  // ----------------------------------------------------------------
-
-  public Object getValueAt(int i, int j) {
-
-    ErrorObject err = (ErrorObject) filteredErrors.get(i);
-
-    switch (j) {
-      case TIME:
-        Date date = new Date(err.getTime());
-        return format.format(date);
-
-      case SEVERITY:
-        return err.getSeverity();
-
-      case DESCRIPTION:
-        return err.getMessage();
-
-      case SOURCE:
-        return err.getSource();
-
-    }
-    return "";
-
-  }
-
-  public int getRowCount() {
-    return filteredErrors.size();
-  }
-
-  public int getColumnCount() {
-    return columnNames.length;
-  }
-
-  public String getColumnName(int i) {
-     return columnNames[i];
-  }
-
-  // ----------------------------------------------------------------
-  // Private stuff
-  // ----------------------------------------------------------------
-
-  private int getSourceIndex(String src) {
-
-    int i=0;
-    boolean found=false;
-    if(src==null) return -1;
-
-    while(!found && i<errors.size()) {
-      found = src.equalsIgnoreCase( ((ErrorList)errors.get(i)).source );
-      if(!found) i++;
+    public void showError(boolean b) {
+	showError = b;
     }
 
-    if(!found)
-      return -1;
-    else
-      return i;
+    public void showWarning(boolean b) {
+	showWarning = b;
+    }
+    
+    public DevError[] getErrorNumber(int i) {
+	Throwable throwable = ((ErrorEvent)errors.get(i)).getError();
 
-  }
+	if (!(throwable instanceof ATKException))  return null;
 
-  private void updateFilters() {
-
-    Vector nErrors = new Vector();
-
-    // Source filter
-    int src = getSourceIndex(visibleSource);
-    int i,j;
-
-    if(src>=0) {
-      ErrorList el = (ErrorList)errors.get(src);
-      for(i=0;i<el.size();i++) insertError(nErrors,el.get(i));
-    } else {
-      // Get all source
-      for(j=0;j<errors.size();j++) {
-        ErrorList el = (ErrorList)errors.get(j);
-        for(i=0;i<el.size();i++) insertError(nErrors,el.get(i));
-      }
+	return ((ATKException)throwable).getErrors();
     }
 
-    // Now update the table
-    filteredErrors = nErrors;
-    fireTableDataChanged();
-
-  }
-
-  private void insertError(Vector errs,ErrorObject e) {
-
-    if(!wanted(e))
-      return;
-
-    int sz = errs.size();
-    int i=0;
-    int cp;
-    boolean found=false;
-
-    switch(sortColumn) {
-      case TIME:
-        while(!found && i<sz) {
-          ErrorObject c = (ErrorObject)errs.get(i);
-          found = e.getTime() <= c.getTime();
-          if(!found) i++;
-        }
-        break;
-      case SEVERITY:
-        while(!found && i<sz) {
-          ErrorObject c = (ErrorObject)errs.get(i);
-          cp = e.getSeverity().compareToIgnoreCase(c.getSeverity());
-          found = (cp<0) || (cp==0 && (e.getTime() <= c.getTime()));
-          if(!found) i++;
-        }
-        break;
-      case SOURCE:
-        while(!found && i<sz) {
-          ErrorObject c = (ErrorObject)errs.get(i);
-          cp = e.getSource().compareToIgnoreCase(c.getSource());
-          found = (cp<0) || (cp==0 && (e.getTime() <= c.getTime()));
-          if(!found) i++;
-        }
-        break;
-      case DESCRIPTION:
-        while(!found && i<sz) {
-          ErrorObject c = (ErrorObject)errs.get(i);
-          cp = e.getMessage().compareToIgnoreCase(c.getMessage());
-          found = (cp<0) || (cp==0 && (e.getTime() <= c.getTime()));
-          if(!found) i++;
-        }
-        break;
-      default:
-        // No sort
-        errs.add(e);
-        return;
+    public void setTable(JTable jtable) {
+	table = jtable;
     }
 
-    errs.add(i,e);
+    public Object getValueAt(int i, int j) {
+	ErrorEvent errorevent = (ErrorEvent)errors.get(i);
+	Throwable throwable = errorevent.getError();
 
-  }
+	Object obj = errorevent.getSource();
+	switch (j) {
+	case 0: 
+	    return getTime(errorevent);
 
-  private boolean wanted(ErrorObject evt) {
+	case 1: 
+	    return getSeverity(errorevent);
 
-    if (!showPanic && evt.getSeverity().equals(ATKException.severity[ATKException.PANIC]))
-      return false;
+	case 2: 
+	    return getMessage(errorevent);
 
-    if (!showError && evt.getSeverity().equals(ATKException.severity[ATKException.ERROR]))
-      return false;
+	case 3: 
+	    return getSource(errorevent);
 
-    if (!showWarning && evt.getSeverity().equals(ATKException.severity[ATKException.WARNING]))
-      return false;
+	case 4: 
+	    return getOrigin(errorevent);
 
-    return true;
+	case 5:
+	    return getReason(errorevent);
+	}
+	return "";
+    }
 
-  }
+    public void setTimeFormat(SimpleDateFormat simpledateformat) {
+	format = simpledateformat;
+    }
 
-  private void fireSourceChange() {
-    if(peerPanel!=null)
-      peerPanel.sourceChange();
-  }
+    public SimpleDateFormat getTimeFormat()  {
+	return format;
+    }
 
+    public String getTime(ErrorEvent errorevent) {
+	Date date = new Date(errorevent.getTimeStamp());
+	return format.format(date);
+    }
+
+    public String getSeverity(ErrorEvent errorevent) {
+	Throwable throwable = errorevent.getError();
+	if (!(throwable instanceof ATKException)) return "";
+	return ATKException.severity[((ATKException)throwable).getSeverity()];
+    }
+
+    public String getMessage(ErrorEvent errorevent) {
+	Throwable throwable = errorevent.getError();
+
+	if (!(throwable instanceof ATKException))
+	    return throwable.toString();
+
+	return ((ATKException)throwable).getDescription();
+    }
+
+    public Object getSource(ErrorEvent errorevent) {
+	return errorevent.getSource();
+    }
+
+    public String getOrigin(ErrorEvent errorevent) {
+	Throwable throwable = errorevent.getError();
+	if (!(throwable instanceof ATKException))
+	    return "";
+	return ((ATKException)throwable).getOrigin();
+    }
+
+    public String getReason(ErrorEvent errorevent) {
+	Throwable throwable = errorevent.getError();
+	if (!(throwable instanceof ATKException))
+	    return "";
+	
+	return ((ATKException)throwable).getReason();
+    }
+
+    public int getRowCount() {
+	return errors.size();
+    }
+
+    public int getColumnCount() {
+	return columnNames.length;
+    }
+
+    public String getColumnName(int i) {
+	return columnNames[i];
+    }
+
+    IErrorListener listener;
+    JTable table;
+    final int TIME = 0;
+    final int SEVERITY = 1;
+    final int MESSAGE = 2;
+    final int SOURCE = 3;
+    final int ORIGIN = 4;
+    final int REASON = 5;
+    String columnNames[] = { "Time",
+			     "Severity",
+			     "Message",
+			     "Source",
+			     "Origin",
+			     "Reason"
+    };
+
+    java.util.List errors;
+    SimpleDateFormat format;
+    
+    ErrorAdapter() {
+	format = new SimpleDateFormat("HH:mm:ss");
+	errors = new Vector();
+    }
 }
 
 
