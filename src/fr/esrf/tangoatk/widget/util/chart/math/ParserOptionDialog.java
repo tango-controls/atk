@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  *   The package  fr.esrf.tangoatk.widget.util.chart.math has been added to
  *   extend the JLChart's features with the mathematique expressions calculation
  * 
@@ -393,7 +371,8 @@ public class ParserOptionDialog extends JLDataViewOption
     protected VariablePanel       variablePanel = null;
     protected JScrollPane         variableScrollPane = null;
 
-    public ParserOptionDialog (JDialog parent, JLChart chart, JLDataView v) {
+    public ParserOptionDialog (JDialog parent, JLChart chart, JLDataView v)
+    {
         super( parent, chart, v );
         initComponents();
         dataView = v;
@@ -401,7 +380,8 @@ public class ParserOptionDialog extends JLDataViewOption
         setTitle();
     }
 
-    public ParserOptionDialog (JFrame parent, JLChart chart, JLDataView v) {
+    public ParserOptionDialog (JFrame parent, JLChart chart, JLDataView v)
+    {
         super( parent, chart, v );
         initComponents();
         dataView = v;
@@ -409,27 +389,18 @@ public class ParserOptionDialog extends JLDataViewOption
         setTitle();
     }
 
-    protected void initComponents () {
+    protected void initComponents ()
+    {
         JPanel innerPanel = (JPanel) this.getContentPane();
         JPanel newPanel = new JPanel();
-        Vector<JLDataView> views;
-        boolean canSetOnX = true;
-        if (chart instanceof StaticChartMathExpression) {
-            views = ( (StaticChartMathExpression) chart ).prepareViews();
-            canSetOnX = ( (StaticChartMathExpression) chart )
-                    .isCanPutExpressionOnX();
-        }
-        else {
-            views = new Vector<JLDataView>();
-            if ( chart.getXAxis().isXY() ) {
-                views.addAll(chart.getXAxis().getViews());
-            }
-            views.addAll( chart.getY1Axis().getViews() );
-            views.addAll( chart.getY2Axis().getViews() );
-        }
+        Vector views = new Vector();
+        if (chart.getXAxis().isXY()) views.addAll(chart.getXAxis().getViews());
+        views.addAll(chart.getY1Axis().getViews());
+        views.addAll(chart.getY2Axis().getViews());
         String[] variables = new String[views.size()];
-        for (int i = 0; i < views.size(); i++) {
-            variables[i] = ( (JLDataView)views.get(i) ).getName();
+        for (int i = 0; i < views.size(); i++)
+        {
+            variables[i] = ((JLDataView)views.get(i)).getName();
         }
         views.clear();
         views = null;
@@ -463,15 +434,13 @@ public class ParserOptionDialog extends JLDataViewOption
         variableScrollPane.setBorder( BorderFactory.createTitledBorder(new EtchedBorder(), "Variables") );
         axisLabel = new JLabel( "Axis:" );
         axisBox = new JComboBox();
-        axisBox.addItem("Y1");
-        axisBox.addItem("Y2");
-        if (canSetOnX) {
-            axisBox.addItem("X");
-        }
+        axisBox.addItem( "Y1" );
+        axisBox.addItem( "Y2" );
+        axisBox.addItem( "X" );
         axisLabel.setBounds( 0, 315, 50, 25 );
         axisBox.setBounds( 50, 315, 50, 25 );
-        innerPanel.setBounds( 0, 340, 270, 310 );
-        cancelButton.setBounds( 5, 280, 80, 25);
+        innerPanel.setBounds( 0, 340, 270, 265 );
+        cancelButton.setBounds( 5, 230, 80, 25);
         closeBtn.setText( "Ok" );
         innerPanel.remove( nameLabel );
         innerPanel.add( cancelButton );
@@ -486,59 +455,72 @@ public class ParserOptionDialog extends JLDataViewOption
         newPanel.add( axisBox );
         newPanel.add( innerPanel );
         setResizable( false );
-        newPanel.setPreferredSize( new Dimension( 270, 650 ) );
+        newPanel.setPreferredSize( new Dimension( 270, 600 ) );
         this.setContentPane( newPanel );
     }
 
-    protected void addWindowListener () {
+    protected void addWindowListener ()
+    {
         this.addWindowListener( new WindowAdapter() {
-            public void windowClosing (WindowEvent e) {
+            public void windowClosing (WindowEvent e)
+            {
                 isValidated = false;
                 setVisible( false );
             }
         } );
     }
 
-    protected void setTitle () {
+    protected void setTitle ()
+    {
         setTitle( "Expression Evaluation" );
     }
 
-    public void mouseClicked (MouseEvent e) {
-        if ( e.getSource() == cancelButton ) {
+    public void mouseClicked (MouseEvent e)
+    {
+        if ( e.getSource() == cancelButton )
+        {
             isValidated = false;
             setVisible( false );
         }
-        else if ( e.getSource() == closeBtn ) {
+        else if ( e.getSource() == closeBtn )
+        {
             isValidated = true;
             selectedAxis = axisBox.getSelectedIndex();
             if ( dvNameField.getText() == null
-                    || "".equals( dvNameField.getText().trim() ) ) {
+                    || "".equals( dvNameField.getText().trim() ) )
+            {
                 dataView.setName( expressionField.getText().trim() );
             }
-            else {
+            else
+            {
                 dataView.setName( dvNameField.getText().trim() );
             }
             setVisible( false );
         }
-        else if ( e.getSource() == generateButton ) {
-            variablePanel.setExpression( expressionField.getText() );
+        else if (e.getSource() == generateButton)
+        {
+            variablePanel.setExpression(expressionField.getText());
             variablePanel.generateVariables();
         }
-        else if ( e.getSource() == helpButton ) {
-            new ParserHelpDialog( this ).setVisible( true );
+        else if (e.getSource() == helpButton)
+        {
+            new ParserHelpDialog(this).setVisible(true);
         }
         else super.mouseClicked( e );
     }
 
-    public boolean isX () {
+    public boolean isX()
+    {
         return variablePanel.isX();
     }
 
-    public String[] getVariables () {
+    public String[] getVariables()
+    {
         return variablePanel.getVariables();
     }
 
-    public void dispose () {
+    public void dispose ()
+    {
         cancelButton = null;
         dataView = null;
         expressionField = null;

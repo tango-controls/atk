@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * BooleanScalarComboEditor.java
  *
  * Author:Faranguiss Poncet (december 2006)
@@ -49,12 +27,12 @@ public class BooleanScalarComboEditor extends JComboBox
 
 
   private IBooleanScalar   attModel=null;
-  private String           trueLabel="True";
-  private String           falseLabel="False";
+  private String           trueLabel=null;
+  private String           falseLabel=null;
     
   private DefaultComboBoxModel     comboModel=null;
-  protected String                 defActionCmd="setAttActionCmd";
-  private String[]                 optionList={trueLabel, falseLabel};
+  private String                   defActionCmd="setAttActionCmd";
+  private String[]                 optionList={"True", "False"};
   static final int                 trueIndex=0;
   static final int                 falseIndex=1;
   
@@ -87,24 +65,21 @@ public class BooleanScalarComboEditor extends JComboBox
   {
       if (attModel != null)
       {
-          attModel.removeBooleanScalarListener(this);
-    	  attModel.removeSetErrorListener(this);
-    	  attModel = null;
+	  attModel.removeBooleanScalarListener(this);
+	  attModel.removeSetErrorListener(this);
+	  attModel = null;
+          comboModel = new DefaultComboBoxModel(optionList);
       }
 
       if( boolModel==null ) return;
 
       if (!boolModel.isWritable())
 	throw new IllegalArgumentException("BooleanScalarComboEditor: Only accept writeable attribute.");
-      
-      optionList = new String[]{trueLabel,falseLabel};
-      comboModel = new DefaultComboBoxModel(optionList);
-      this.setModel(comboModel);
+
       attModel = boolModel;
       attModel.addBooleanScalarListener(this);
       attModel.addSetErrorListener(this);
       attModel.refresh();
-      repaint();
   }
 
 
@@ -134,6 +109,7 @@ public class BooleanScalarComboEditor extends JComboBox
       if (cb.getSelectedIndex() < 0) return;
       
       selectedOption = (cb.getSelectedIndex() == trueIndex);
+
       if (selectedOption == true)
       {
          attModel.setValue(true);
@@ -159,8 +135,8 @@ public class BooleanScalarComboEditor extends JComboBox
 	    setpoint = attModel.getDeviceSetPoint();
 	else
 	    setpoint = attModel.getSetPoint();
-    
-    changeCurrentSelection(setpoint);
+
+	changeCurrentSelection(setpoint);
   }
 
   public void stateChange(AttributeStateEvent e)
@@ -252,25 +228,5 @@ public class BooleanScalarComboEditor extends JComboBox
        f.pack();
        f.setVisible(true);
   }
-
-
-public String getFalseLabel() {
-    return falseLabel;
-}
-
-
-public void setFalseLabel(String falseLabel) {
-    this.falseLabel = falseLabel;
-}
-
-
-public String getTrueLabel() {
-    return trueLabel;
-}
-
-
-public void setTrueLabel(String trueLabel) {
-    this.trueLabel = trueLabel;
-}
 
 }

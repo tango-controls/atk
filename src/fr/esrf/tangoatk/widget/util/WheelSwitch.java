@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * WheelSwitch.java
  * Author: JL Pons 2002 E.S.R.F.
  */
@@ -392,8 +370,6 @@ public class WheelSwitch extends JComponent {
 
     public void setEnabled(boolean arg0) {
         super.setEnabled(arg0);
-        if(buttons_up == null || buttons_down == null)
-            return;
         for (int i = 0; i < buttons_up.length; i++)
             buttons_up[i].setEnabled(arg0);
         for (int i = 0; i < buttons_down.length; i++)
@@ -1123,40 +1099,32 @@ public class WheelSwitch extends JComponent {
             repaint();
         }
 
-        if (code == KeyEvent.VK_ENTER) {
-            if (editMode) {
-                try {
-                    double newValue = Double.parseDouble(editValue);
-                    if ((newValue <= maxValue) && (newValue >= minValue)) {
-                        value = newValue; // For a value entered manually, we don't want to round it
-                        updateButtonVisibility();
-                        fireValueChange();
+        if (editMode && code == KeyEvent.VK_ENTER) {
+            try {
+                double newValue = Double.parseDouble(editValue);
+                if ((newValue <= maxValue) && (newValue >= minValue)) {
+                    value = newValue; // For a value entered manually, we don't want to round it
+                    updateButtonVisibility();
+                    fireValueChange();
+                    editValue = "";
+                    editMode = false;
+                    repaint();
+                }
+                else {
+                  String mesg = "Warning, value is out of the range ["+minValue+","+maxValue+"]\nCancel editing ?";
+                    int r = JOptionPane
+                            .showConfirmDialog(
+                                    this,mesg,
+                                    "[WheelSwitch error]",
+                                    JOptionPane.YES_NO_OPTION);
+                    if (r == JOptionPane.YES_OPTION) {
                         editValue = "";
                         editMode = false;
                         repaint();
                     }
-                    else {
-                      String mesg = "Warning, value is out of the range ["+minValue+","+maxValue+"]\nCancel editing ?";
-                        int r = JOptionPane
-                                .showConfirmDialog(
-                                        this,mesg,
-                                        "[WheelSwitch error]",
-                                        JOptionPane.YES_NO_OPTION);
-                        if (r == JOptionPane.YES_OPTION) {
-                            editValue = "";
-                            editMode = false;
-                            repaint();
-                        }
-                    }
-                }
-                catch (NumberFormatException n) {
-                    // nothing to do
                 }
             }
-            else {
-                // allowing to quickly enter the same value
-                fireValueChange();
-                repaint();
+            catch (NumberFormatException n) {
             }
         }
 

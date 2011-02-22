@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * SimpleSynopticAppli.java
  *
  * Created on May 25, 2005
@@ -30,7 +8,7 @@ package fr.esrf.tangoatk.widget.jdraw;
 
 import java.io.*;
 import java.util.*;
-import fr.esrf.tangoatk.widget.util.Splash;
+import fr.esrf.tangoatk.widget.jdraw.*;
 import fr.esrf.tangoatk.widget.util.ErrorHistory;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.jdraw.JDFileFilter;
@@ -43,7 +21,6 @@ import javax.swing.*;
  */
 public class SimpleSynopticAppli extends javax.swing.JFrame {
 
-    private  final Splash        splash = new Splash();
     private  ErrorHistory        errorHistory;
     private  boolean	         standAlone = false;
     private  boolean             fileLoaded = false;
@@ -54,11 +31,6 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
 	fileLoaded = false;
 	standAlone = false;
         errorHistory = new ErrorHistory();
-	splash.setTitle("SimpleSynopticAppli  ");
-	splash.setCopyright("(c) ESRF 2003-2009");
-	splash.setMessage("Loading synoptic ...");
-	splash.initProgress();
-        splash.setMaxProgress(5);
         initComponents();
     }
     
@@ -68,8 +40,6 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
         try
         {
             tangoSynopHandler.setSynopticFileName(jdrawFullFileName);
-            splash.progress(4);
-            splash.setMessage("Synoptic file loaded ...");
             tangoSynopHandler.setToolTipMode(TangoSynopticHandler.TOOL_TIP_NAME);
 	    tangoSynopHandler.setAutoZoom(true);
         }
@@ -83,7 +53,6 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
                   "No such file",
                   javax.swing.JOptionPane.ERROR_MESSAGE);
             //System.exit(-1); don't exit if not standalone
-            splash.setVisible(false);
 	    return;
         }
         catch (IllegalArgumentException  illEx)
@@ -96,7 +65,6 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
                   "Cannot parse the file",
                   javax.swing.JOptionPane.ERROR_MESSAGE);
             //System.exit(-1); don't exit if not standalone
-            splash.setVisible(false);
 	    return;
         }
         catch (MissingResourceException  mrEx)
@@ -108,10 +76,8 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
                   "Cannot parse the file",
                   javax.swing.JOptionPane.ERROR_MESSAGE);
             //System.exit(-1); don't exit if not standalone
-            splash.setVisible(false);
 	    return;
         }
-        splash.setVisible(false);
 	
 	fileLoaded = true;
 	setTitle(jdrawFullFileName);
@@ -233,7 +199,7 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
         stopSimpleSynopticAppli();
     }//GEN-LAST:event_exitForm
 
-    public void stopSimpleSynopticAppli()
+    private void stopSimpleSynopticAppli()
     {
         if (standAlone == true)
 	   System.exit(0);
@@ -296,7 +262,7 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
 	if (!syApp.fileLoaded) // failed to load the synoptic file : constructor failure
            System.exit(-1);
 	   
-	//syApp.setTitle("Simple Synoptic Application");
+	syApp.setTitle("Simple Synoptic Application");
 	ATKGraphicsUtils.centerFrameOnScreen(syApp);
 	//syApp.setVisible(true);
     }

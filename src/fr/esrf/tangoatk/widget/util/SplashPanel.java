@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * SplashPanel.java
  *
  * Created on February 28, 2002, 10:37 AM
@@ -35,11 +13,8 @@ import java.awt.image.BufferedImage;
 class SplashPanel extends JComponent {
 
   // Default image
-  protected final static String defaultImgLocation = "/fr/esrf/tangoatk/widget/util/splash.jpg";
-  protected final static int foregroundDefault = ( (255 & 0xFF) << 24 )// Alpha
-                                                 | ( (204 & 0xFF) << 16 )// Red
-                                                 | ( (204 & 0xFF) << 8 )// Green
-                                                 | ( (204 & 0xFF) << 0 );// Blue
+  static ImageIcon imgDefault = new ImageIcon(SplashPanel.class.getResource("/fr/esrf/tangoatk/widget/util/splash.jpg"));
+  static Color foregroundDefault = new Color(204, 204, 204);
 
   // Panel components
   private JSmoothLabel title;
@@ -49,30 +24,19 @@ class SplashPanel extends JComponent {
   private BufferedImage ddBuffer; // To avoid flickering paint
   private boolean firstUpdate=true;
   private Dimension imgSize;
-  private ImageIcon img;
-  private Color textForeground;
+  private ImageIcon img = imgDefault;
+  private Color textForeground = foregroundDefault;
 
   // Splah panel constructor
+
   public SplashPanel() {
-    this(null,null,null);
+    initComponents();
   }
 
   public SplashPanel(ImageIcon icon,Color textForeground,JSmoothProgressBar bar) {
 
-    if( icon == null ) {
-      img = new ImageIcon(
-              SplashPanel.class.getResource(defaultImgLocation)
-      );
-    }
-    else {
-      img = icon;
-    }
-    if ( textForeground == null ) {
-      this.textForeground = new Color(foregroundDefault);
-    }
-    else {
-      this.textForeground = textForeground;
-    }
+    if(icon!=null) img = icon;
+    if(textForeground!=null) this.textForeground = textForeground;
     if(bar!=null) progress = bar;
     initComponents();
 

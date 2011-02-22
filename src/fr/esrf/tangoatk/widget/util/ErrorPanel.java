@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * ErrorPanel.java
  */
 
@@ -77,7 +55,6 @@ class ErrorPanel extends JPanel implements IErrorListener,ISetErrorListener {
     selectedRow = -1;
     stopped = false;
     initComponents();
-    errorAdapter.setTimeFormat(new java.text.SimpleDateFormat("dd/MMM HH:mm:ss"));
     errorAdapter.setErrorPanel(this);
 
   }
@@ -224,7 +201,7 @@ class ErrorPanel extends JPanel implements IErrorListener,ISetErrorListener {
     // ----------------- Error panel -----------------------------
 
     errorTable = new JTable(errorAdapter);
-    errorTable.setPreferredScrollableViewportSize(new java.awt.Dimension(700, 300));
+    errorTable.setPreferredScrollableViewportSize(new java.awt.Dimension(600, 300));
     errorTable.addMouseListener(new java.awt.event.MouseAdapter() {
       public void mousePressed(java.awt.event.MouseEvent evt) {
         errorTableMousePressed(evt);
@@ -388,11 +365,6 @@ class ErrorPanel extends JPanel implements IErrorListener,ISetErrorListener {
     if (stopped) return;
     errorAdapter.addError(errorEvent);
   }
-  
-  public void setErrorBufferSize (int nbErrors)
-  {
-      errorAdapter.setErrorBufferSize(nbErrors);
-  }
 
   // Tiggered by the ErrorAdapter when the source list change.
   public void sourceChange() {
@@ -426,11 +398,10 @@ class ErrorPanel extends JPanel implements IErrorListener,ISetErrorListener {
   }
 
   private void sizeColumns() {
-    errorTable.getColumnModel().getColumn(ErrorAdapter.TIME).setMaxWidth(140);
-    errorTable.getColumnModel().getColumn(ErrorAdapter.TIME).setMinWidth(110);
+    errorTable.getColumnModel().getColumn(ErrorAdapter.TIME).setMaxWidth(70);
     errorTable.getColumnModel().getColumn(ErrorAdapter.SEVERITY).setMaxWidth(60);
     errorTable.getColumnModel().getColumn(ErrorAdapter.SOURCE).setMinWidth(150);
-    errorTable.getColumnModel().getColumn(ErrorAdapter.DESCRIPTION).setMinWidth(200);
+    errorTable.getColumnModel().getColumn(ErrorAdapter.DESCRIPTION).setMinWidth(300);
   }
 
 }
