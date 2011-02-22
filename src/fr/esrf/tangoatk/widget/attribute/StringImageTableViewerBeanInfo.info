@@ -1,7 +1,7 @@
 name = StringImageTableViewer
 package = fr.esrf.tangoatk.widget.attribute
 
-properties = qualityEnabled
+properties = qualityEnabled, columnIdents
 
 ICON_MONO_16x16 = StringImageTableViewer.gif
 ICON_MONO_32x32 = StringImageTableViewer.gif

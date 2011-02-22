@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /**
  * A set of class to handle a graphical synoptic viewer (vector drawing) and its editor.
  */
@@ -27,9 +5,6 @@ package fr.esrf.tangoatk.widget.util.jdraw;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.*;
 import java.awt.geom.*;
 import java.awt.event.*;
 import java.util.Vector;
@@ -41,8 +16,7 @@ import java.io.InputStreamReader;
 
 /** The graph editor/viewer component. */
 public class JDrawEditor extends JComponent implements MouseMotionListener, MouseListener,
-                                                       ActionListener, KeyListener, ComponentListener,
-                                                       DropTargetListener {
+                                                       ActionListener, KeyListener, ComponentListener {
 
   // Mode of the editor
   /** Editor is in classic edition mode */
@@ -136,7 +110,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   private JDPolyline connectPolyline;
   private JLabel statusLabel = null;
   private String currentStatus = "";
-  private DropTarget dropTarget;
 
   // ------- Object Contextual menu ----------------
   private JSeparator sep1;
@@ -268,7 +241,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     addKeyListener(this);
     addMouseListener(this);
     addMouseMotionListener(this);
-    if(mode==MODE_EDIT) dropTarget = new DropTarget(this,this);
 
   }
 
@@ -801,11 +773,11 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   
   /** Load a jdraw grpahics input stream reader into the editor. Available only for play mode. The .jlx and .g files are not supported.
    *  This method is only called by TangoSynopticHandler which is in fact in Play mode.
-   * @param inp opened for the synoptic resource
+   * @param InputStreamReader inp opened for the synoptic resource
    * @throws IOException Exception containing error message when failed.
    * @see JDrawEditorListener#valueChanged
    */
-  
+
   protected void loadFromStream(InputStreamReader inp) throws IOException
   {
 
@@ -1601,10 +1573,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
         }
         e.consume();
         break;
-      case KeyEvent.VK_DELETE:
-        deleteSelection();
-        e.consume();
-        break;
     }
 
   }
@@ -2215,67 +2183,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   public void componentMoved(ComponentEvent e) {}
   public void componentShown(ComponentEvent e) {}
   public void componentHidden(ComponentEvent e) {}
-
-// -----------------------------------------------------
-// DropTargetListener listener
-// -----------------------------------------------------
-  public void dragEnter(DropTargetDragEvent dtde) {
-  }
-
-  public void dragOver(DropTargetDragEvent dtde) {
-  }
-
-  public void dropActionChanged(DropTargetDragEvent dtde) {
-  }
-
-  public void dragExit(DropTargetEvent dte) {
-  }
-
-  public void drop(DropTargetDropEvent dtde) {
-
-    if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
-
-    Transferable trans = dtde.getTransferable();
-    if (trans.isDataFlavorSupported(JDEntityNode.JDENTITY_NODE_FLAVOR)) {
-        dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-        try {
-          JDEntityNode jde = (JDEntityNode)trans.getTransferData(JDEntityNode.JDENTITY_NODE_FLAVOR);
-          Point location = dtde.getLocation();
-
-          int ex = zconvert(location.x,transx);
-          int ey = zconvert(location.y,transy);
-
-          boolean found = false;
-          int i = objects.size() - 1;
-          while (!found && i >= 0) {
-            found = ((JDObject) objects.get(i)).isInsideObject(ex, ey);
-            if (!found) i--;
-          }
-
-          if (found) {
-            JDObject p = (JDObject) objects.get(i);
-            p.setName(jde.getName());
-            setNeedToSave(true,"Change name");
-            unselectAll(false);
-            selObjects.add(p);
-            repaint(p.getRepaintRect());
-            fireSelectionChange();
-            //JDUtils.updatePropertyDialog(selObjects);
-          } else {
-            JOptionPane.showMessageDialog(this,"No object found here");
-          }
-
-        } catch(IOException e1) {
-          JOptionPane.showMessageDialog(this,"Drag operation not allowed");
-        } catch (UnsupportedFlavorException e2) {
-          JOptionPane.showMessageDialog(this,"Drag operation not allowed");
-        }
-        dtde.dropComplete(true);
-    } else {
-      JOptionPane.showMessageDialog(this,"Drag operation not allowed");
-    }
-  }
 
 // -----------------------------------------------------
 // Action listener
@@ -2975,7 +2882,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
         setStatus("Left click to create a new point and right click to create the last point");
         break;
       case CREATE_IMAGE:
-        setStatus("Left click to insert an image");
+        setStatus("Left click to create an image");
         break;
       case CREATE_AXIS:
         setStatus("Left click to create an axis");

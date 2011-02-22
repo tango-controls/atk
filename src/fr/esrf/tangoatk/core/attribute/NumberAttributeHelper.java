@@ -1,50 +1,33 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
+// File:          NumberAttributeHelper.java
+// Created:       2001-12-04 13:31:09, assum
+// By:            <erik@assum.net>
+// Time-stamp:    <2002-07-10 17:33:45, assum>
+//
 // $Id$
 //
 // Description:
 
 package fr.esrf.tangoatk.core.attribute;
 
+import fr.esrf.tangoatk.core.*;
 
 import fr.esrf.TangoApi.DeviceAttribute;
-import fr.esrf.tangoatk.core.EventSupport;
 
 abstract class NumberAttributeHelper implements java.io.Serializable {
-  AAttribute attribute;
+  IAttribute attribute;
   transient DeviceAttribute deviceAttribute;
   EventSupport propChanges;
 
-  public void setAttribute(AAttribute attribute) {
+  public void setAttribute(IAttribute attribute) {
     this.attribute = attribute;
   }
 
-  void init(AAttribute attribute) {
+  void init(IAttribute attribute) {
     setAttribute(attribute);
-    propChanges = attribute.getPropChanges();
+    propChanges = ((AAttribute) attribute).getPropChanges();
   }
 
-  public AAttribute getAttribute() {
+  public IAttribute getAttribute() {
     return attribute;
   }
 
@@ -58,12 +41,11 @@ abstract class NumberAttributeHelper implements java.io.Serializable {
   }
 
   public static double[] flatten(double[][] src) {
-    int lineSize = src[0].length;
     int size = src.length * src[0].length;
     double[] dst = new double[size];
 
     for (int i = 0; i < src.length; i++)
-    	System.arraycopy(src[i], 0, dst, i * lineSize, lineSize);
+      System.arraycopy(src[i], 0, dst, i * src.length, src.length);
     return dst;
   }
 
