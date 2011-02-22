@@ -1,132 +1,151 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
+ * NumberScalarViewer.java
+ *
+ * Created on November 21, 2001, 3:35 PM
  */
- 
+
 package fr.esrf.tangoatk.widget.attribute;
-
-import fr.esrf.tangoatk.widget.util.WheelSwitch;
-import fr.esrf.tangoatk.widget.util.ErrorPane;
-import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.core.*;
-
-import javax.swing.*;
+import fr.esrf.tangoatk.widget.properties.*;
+import fr.esrf.tangoatk.widget.util.*;
+import java.beans.*;
 import java.awt.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
+import javax.swing.*;
 /**
- * A class to display a scalar aligned verticaly to the NumberScalarWheelEditor
+ *
+ * @author  root
  */
-public class NumberScalarViewer extends WheelSwitch implements INumberScalarListener, PropertyChangeListener {
+public class NumberScalarViewer extends AScalarViewer implements
+INumberScalarListener {
+    INumberScalar model;
+    /** Creates new form NumberScalarViewer */
+    public NumberScalarViewer() {
+	setValueField(new ATKNumberField());
+	setValueBorder(javax.swing.BorderFactory.createLoweredBevelBorder());
+	UIManagerHelper.setAll("NumberScalarViewer.Label", getLabel());
+	UIManagerHelper.setAll("NumberScalarViewer.Value", getValue());
+	UIManagerHelper.setAll("NumberScalarViewer.Unit", getUnit());
+    }
+    
 
-  private INumberScalar model = null;
-
-  public NumberScalarViewer() {
-    super(false);
-  }
-
-  public INumberScalar getModel() {
-    return model;
-  }
-
-  public void setModel(INumberScalar m) {
-
-    // Remove old registered listener
-    if (model != null) {
-      model.removeNumberScalarListener(this);
-      model.getProperty("format").removePresentationListener(this);
-      model = null;
+    public NumberScalarViewer(INumberScalar numberScalar) {
+	this();
+	setModel(numberScalar);
     }
 
-    if( m==null ) return;
-
-    model = m;
-
-    // Register new listener
-    model.addNumberScalarListener(this);
-    model.getProperty("format").addPresentationListener(this);
-
-    setFormat(model.getProperty("format").getPresentation());
-    model.refresh();
-    double d = model.getNumberScalarValue();
-    setValue(d);
-
-  }
-
-  public void numberScalarChange(NumberScalarEvent evt)
-  {
-      double val = evt.getValue();
-      if (getValue() != val) setValue(val);
-  }
-
-  public void errorChange(ErrorEvent e) {
-    setValue(Double.NaN);
-  }
-
-  public void stateChange(AttributeStateEvent e) {
-  }
-
-  public void propertyChange(PropertyChangeEvent evt) {
-
-    Property src = (Property) evt.getSource();
-    if (model != null) {
-      if (src.getName().equalsIgnoreCase("format")) {
-        setFormat(src.getValue().toString());
-        model.refresh();
-      }
+    public void numberScalarChange(NumberScalarEvent evt) {
+	((ATKNumberField)getValue()).setValue(new Double(evt.getValue()));
     }
 
-  }
-
-  public static void main(String[] args) {
-
-    INumberScalar attr=null;
-
-    fr.esrf.tangoatk.core.AttributeList attributeList = new
-        fr.esrf.tangoatk.core.AttributeList();
-
-    try {
-      attr = (INumberScalar) attributeList.add("jlp/test/1/att_trois");
-    } catch(Exception e) {
-      ErrorPane.showErrorMessage(null,"jlp/test/1",e);
-      System.exit(0);
+    public void setModel(IAttribute model) {
+	if (!(model instanceof INumberScalar)) {
+	    throw new IllegalArgumentException("Only accept INumberScalars");
+	}
+	setModel((IStringScalar)model);
     }
-    attributeList.startRefresher();
+	
 
-    JFrame f = new JFrame();
-    JPanel innerPanel = new JPanel(new GridLayout(2,1));
-    NumberScalarWheelEditor we = new NumberScalarWheelEditor();
-    NumberScalarViewer      wv = new NumberScalarViewer();
-    //javax.swing.border.Border   loweredBevel = BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.LOWERED);
-    //wv.setBorder(loweredBevel);
+    public void setModel(INumberScalar numberScalar) {
 
-    we.setModel(attr);
-    wv.setModel(attr);
-    innerPanel.add(we);
-    innerPanel.add(wv);
-    f.setContentPane(innerPanel);
-    ATKGraphicsUtils.centerFrameOnScreen(f);
-    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    f.setVisible(true);
+	if (model != null) {
+	    model.removeNumberScalarListener(this);
+	}
 
-  }
 
+        model = numberScalar;
+	getValue().setFormat(model.getProperty("format").getPresentation());
+	((ATKNumberField)getValue()).setModel(model);        
+	init(model);
+
+	model.addNumberScalarListener(this);
+    }
+
+
+    public static void main(String [] args) {
+	fr.esrf.tangoatk.core.AttributeList attributeList = new
+	    fr.esrf.tangoatk.core.AttributeList();
+	long start = System.currentTimeMillis();
+	long time;
+	final NumberScalarViewer nsv = new NumberScalarViewer();
+	time = System.currentTimeMillis();
+	System.out.println("nsv creation time = " + (time - start));
+	NumberScalarViewer nsv2 = new NumberScalarViewer();
+	nsv.setLabelVisible(true);
+	nsv.setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());
+	nsv.setValueBorder(null);
+	nsv2.setLabelVisible(true);
+	//	nsv2.setOpaque(true);
+
+	//	nsv.setLabelMaximumLength(20);
+	try {
+	    final INumberScalar attr = (INumberScalar)attributeList.add("eas/test-api/1/Short_attr_rw");
+	    //	    nsv.setValueEditable(false);
+	    //	    nsv.setValueMaximumLength(1);
+	    start = System.currentTimeMillis();
+
+	    nsv.setModel(attr);
+	    nsv.setBackground(java.awt.Color.blue);
+	    time = System.currentTimeMillis();
+	    System.out.println("nsv setModel time = " + (time - start));
+
+	    nsv2.setModel(attr);
+	    nsv2.setBorder(null);
+	    //	    nsv2.setBackground(java.awt.Color.red);
+	    nsv.setBackground(java.awt.Color.blue);
+	    nsv.setBorder(null);
+	    //	    nsv.setValueBorder(null);
+	    //	    nsv.setFont(new java.awt.Font("Times", 1, 60));
+ 	    nsv.setUserFormat(new ATKFormat() {
+ 		    public String format(Number d) {
+ 			return "urk  " + d.toString();
+ 		    }
+		}
+			      );
+	    final INumberScalar attr1 = (INumberScalar)attributeList.add("eas/test-api/1/Short_attr_w");
+	    nsv.setPropertyListEditable(true);
+	    nsv2.setPropertyListEditable(true);
+	    attributeList.startRefresher();
+	    int i = 0;
+// 	    new Thread() {
+// 		public void run() {
+// 		    while (true) {
+// 			nsv.setModel(attr1);
+// 			try {
+// 			    Thread.sleep(3000);			     
+// 			} catch (Exception e) {
+// 			    ;
+// 			} // end of try-catch
+			
+
+// 			nsv.setModel(attr);
+// 		    }
+// 		}
+// 	    }.start();
+	    
+
+	} catch (Exception e) {
+	    System.out.println(e);
+	} // end of try-catch
+	
+
+        javax.swing.JFrame f = new javax.swing.JFrame();
+	f.getContentPane().setLayout(new java.awt.GridBagLayout());
+	java.awt.GridBagConstraints                 gbc;
+	gbc = new java.awt.GridBagConstraints();
+	gbc.gridx = 0; gbc.gridy = 0;
+	gbc.fill = java.awt.GridBagConstraints.BOTH;
+	gbc.insets = new java.awt.Insets(0, 0, 0, 5);
+	f.getContentPane().add(nsv, gbc);
+	gbc.gridx = 0; gbc.gridy = 1;
+	f.getContentPane().add(nsv2, gbc);
+	f.setBackground(java.awt.Color.green);
+        f.pack();
+        f.show();
+    }
+
+
+    public String toString() {
+	return "{numberscalarviewer}";
+    }
 }
+	    

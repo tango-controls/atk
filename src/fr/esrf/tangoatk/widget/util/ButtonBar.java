@@ -1,33 +1,10 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * ButtonBar.java
  *
  * Created on June 19, 2002, 11:22 AM
  */
 
 package fr.esrf.tangoatk.widget.util;
-import java.net.URL;
 
 /**
  *
@@ -37,12 +14,9 @@ public class ButtonBar extends javax.swing.JPanel {
 
     /** Creates new form ButtonBar */
 
+
     public ButtonBar() {
         initComponents();
-        cancel.setMnemonic(java.awt.event.KeyEvent.VK_C);
-        apply.setMnemonic(java.awt.event.KeyEvent.VK_A);
-        help.setMnemonic(java.awt.event.KeyEvent.VK_H);
-	ok.setMnemonic(java.awt.event.KeyEvent.VK_O);
     }
 
     /** This method is called from within the constructor to
@@ -55,13 +29,12 @@ public class ButtonBar extends javax.swing.JPanel {
         ok = new javax.swing.JButton();
         cancel = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
-        apply = new javax.swing.JButton();
         
         setLayout(new java.awt.GridBagLayout());
         java.awt.GridBagConstraints gridBagConstraints1;
         
+        help.setFont(new java.awt.Font("Dialog", 0, 12));
         help.setText("Help");
-        help.setEnabled(false);
         help.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 helpActionPerformed(evt);
@@ -70,10 +43,11 @@ public class ButtonBar extends javax.swing.JPanel {
         
         gridBagConstraints1 = new java.awt.GridBagConstraints();
         gridBagConstraints1.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints1.insets = new java.awt.Insets(5, 10, 10, 10);
+        gridBagConstraints1.insets = new java.awt.Insets(10, 10, 10, 10);
         gridBagConstraints1.anchor = java.awt.GridBagConstraints.SOUTHWEST;
         add(help, gridBagConstraints1);
         
+        ok.setFont(new java.awt.Font("Dialog", 0, 12));
         ok.setText("OK");
         ok.setSelected(true);
         ok.addActionListener(new java.awt.event.ActionListener() {
@@ -83,13 +57,14 @@ public class ButtonBar extends javax.swing.JPanel {
         });
         
         gridBagConstraints1 = new java.awt.GridBagConstraints();
-        gridBagConstraints1.gridx = 4;
+        gridBagConstraints1.gridx = 3;
         gridBagConstraints1.gridy = 0;
         gridBagConstraints1.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints1.insets = new java.awt.Insets(5, 2, 10, 10);
+        gridBagConstraints1.insets = new java.awt.Insets(10, 2, 10, 10);
         gridBagConstraints1.anchor = java.awt.GridBagConstraints.SOUTHEAST;
         add(ok, gridBagConstraints1);
         
+        cancel.setFont(new java.awt.Font("Dialog", 0, 12));
         cancel.setText("Cancel");
         cancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -98,92 +73,73 @@ public class ButtonBar extends javax.swing.JPanel {
         });
         
         gridBagConstraints1 = new java.awt.GridBagConstraints();
-        gridBagConstraints1.gridx = 3;
+        gridBagConstraints1.gridx = 2;
         gridBagConstraints1.gridy = 0;
         gridBagConstraints1.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints1.insets = new java.awt.Insets(5, 2, 10, 2);
+        gridBagConstraints1.insets = new java.awt.Insets(10, 0, 10, 2);
         gridBagConstraints1.anchor = java.awt.GridBagConstraints.SOUTH;
         add(cancel, gridBagConstraints1);
         
-        jLabel1.setMinimumSize(new java.awt.Dimension(0, 10));
         gridBagConstraints1 = new java.awt.GridBagConstraints();
         gridBagConstraints1.gridx = 1;
         gridBagConstraints1.gridy = 0;
         gridBagConstraints1.fill = java.awt.GridBagConstraints.HORIZONTAL;
-        gridBagConstraints1.insets = new java.awt.Insets(0, 10, 0, 10);
         gridBagConstraints1.weightx = 0.1;
         add(jLabel1, gridBagConstraints1);
         
-        apply.setText("Apply");
-        apply.setEnabled(false);
-        apply.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                applyActionPerformed(evt);
-            }
-        });
-        
-        gridBagConstraints1 = new java.awt.GridBagConstraints();
-        gridBagConstraints1.gridx = 2;
-        gridBagConstraints1.gridy = 0;
-        gridBagConstraints1.insets = new java.awt.Insets(5, 2, 10, 2);
-        add(apply, gridBagConstraints1);
-        
     }//GEN-END:initComponents
-
-    private void applyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_applyActionPerformed
-        // Add your handling code here:
-        ((IApplicable)controlee).apply();
-    }//GEN-LAST:event_applyActionPerformed
 
     private void helpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_helpActionPerformed
         // Add your handling code here:
-
-	if (helpUrl != null) {
-	    HelpWindow.getInstance().showUrl(helpUrl);
-	} 
     }//GEN-LAST:event_helpActionPerformed
 
     private void okActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okActionPerformed
         // Add your handling code here:
-        controlee.ok();
     }//GEN-LAST:event_okActionPerformed
 
     private void cancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelActionPerformed
         // Add your handling code here:
-        ((IApplicable)controlee).cancel();
     }//GEN-LAST:event_cancelActionPerformed
 
 
-    public void setHelpUrl(URL url) {
-	helpUrl = url;
-	help.setEnabled(true);
-	
+    boolean cancelVisible = true;
+    
+    boolean helpVisible = true;
+    
+    /**
+     * Get the value of helpVisible.
+     * @return value of helpVisible.
+     */
+    public boolean isHelpVisible() {
+	return helpVisible;
     }
     
-    public void setControlee(IControlee controlee) {
-        this.controlee = controlee;
-        help.setEnabled(false);
-	help.setToolTipText("Brings up the helpwindow");
-        apply.setEnabled(false);
-	apply.setToolTipText("Sets the values");
-        cancel.setEnabled(false);
-	cancel.setToolTipText("Closes this window without setting values");
-
-
-	if (controlee instanceof IHelpful) {
-	    setHelpUrl(((IHelpful)controlee).getHelpUrl());
-	}
-	
-        if (controlee instanceof IApplicable) {
-            apply.setEnabled(true);
-            cancel.setEnabled(true);
-	    ok.setToolTipText("Sets the values and closes this window");
-	    ok.setText("OK");
-	    return;
-        }
-
-	ok.setToolTipText("Closes this window");
-	ok.setText("Close");
+    /**
+     * Set the value of helpVisible.
+     * @param v  Value to assign to helpVisible.
+     */
+    public void setHelpVisible(boolean  v) {
+	if (help == null) return;
+	this.helpVisible = v;
+	help.setVisible(v);
+    }
+    
+    /**
+     * Get the value of cancelVisible.
+     * @return value of cancelVisible.
+     */
+    public boolean isCancelVisible() {
+	return cancelVisible;
+    }
+    
+    /**
+     * Set the value of cancelVisible.
+     * @param v  Value to assign to cancelVisible.
+     */
+    public void setCancelVisible(boolean  v) {
+	if (cancel == null) return;
+	this.cancelVisible = v;
+	cancel.setVisible(v);
     }
 
     public javax.swing.JButton getOKButton() {
@@ -198,19 +154,11 @@ public class ButtonBar extends javax.swing.JPanel {
 	return cancel;
     }
 
-    public javax.swing.JButton getApplyButton() {
-        return apply;
-    }
-
-    IControlee controlee;
-    URL helpUrl;
-    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton help;
     private javax.swing.JButton ok;
     private javax.swing.JButton cancel;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JButton apply;
     // End of variables declaration//GEN-END:variables
 
 }
