@@ -1,45 +1,14 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.command;
 
 
 
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-
-import fr.esrf.tangoatk.core.ErrorEvent;
-import fr.esrf.tangoatk.core.ICommand;
-import fr.esrf.tangoatk.core.IErrorListener;
-import fr.esrf.tangoatk.core.command.ScalarVoidCommand;
-import fr.esrf.tangoatk.core.command.StringVoidCommand;
+import fr.esrf.tangoatk.core.*;
+import fr.esrf.tangoatk.core.command.*;
 
 
 /** An OptionComboCommandViewer is a StringVoidCommand viewer. This means that
@@ -70,7 +39,6 @@ public class OptionComboCommandViewer extends JPanel
     /* The bean properties */
    private java.awt.Font    theFont;
    private ICommand         model=null;
-   private String[]         valueList = null;
    private String[]         optionList = {"None"};
    private String           title=null;
 
@@ -183,13 +151,12 @@ public class OptionComboCommandViewer extends JPanel
 
       if (optionCmdModel != null)
       {
-          //Command String and Numerical works.
-          if (optionCmdModel instanceof ScalarVoidCommand)
-          {
-              //System.out.println("The command is a ScalarVoidCommand");
-              model = optionCmdModel;
-              model.addErrorListener(this);
-          }
+	  if (optionCmdModel instanceof StringVoidCommand)
+	  {
+//System.out.println("The command is a StringVoidCommand");
+	     model = optionCmdModel;
+	     model.addErrorListener(this);
+	  }
       }
   }
   
@@ -225,25 +192,7 @@ public class OptionComboCommandViewer extends JPanel
       
   }
 
-  public String[] getValueList() {
-    return valueList;
-  }
 
-  public void setValueList(String[] valueList) {
-    this.valueList = valueList;
-  }
-  
-  public String getCmdOption(JComboBox source){
-      String cmdOption = ((String)source.getSelectedItem());
-      if(valueList == null || valueList.length == 0){
-          return cmdOption;
-      }
-      int index = source.getSelectedIndex();
-      if(index < valueList.length){
-          cmdOption = valueList[index];
-      }
-      return cmdOption;
-  }
 
 
   public String getTitle( )
@@ -282,13 +231,14 @@ public class OptionComboCommandViewer extends JPanel
   public void actionPerformed(ActionEvent e)
   {
       
-      JComboBox                cb=null;
-      String                   cmdOption = null;
-      java.util.List<String>   inarg = new java.util.Vector<String> ();
+      JComboBox        cb=null;
+      String           cmdOption = null;
+      java.util.List   inarg = new java.util.Vector();
+      String           boolStr;
 
 
       cb = (JComboBox) e.getSource();
-      cmdOption = getCmdOption(cb);
+      cmdOption = (String) cb.getSelectedItem();
       
       if ( !(e.getActionCommand().equals(defActionCmd)) )
       {

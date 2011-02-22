@@ -31,10 +31,8 @@ ifdef ATK-VERSION
                                 .make-include.in	\
                                configure.in	\
                                Makefile &&		\
-	 (cd lib &&                                     \
-	 $(CVSSF) tag $(ATK-RELEASE) printf.jar jep.jar jepext.jar ij.jar jogl.jar gluegen-rt.jar ) && \
 	 (cd src/fr/esrf/tangoatk/ &&			\
-         $(CVSSF) tag -R $(ATK-RELEASE) core) &&        \
+         $(CVSSF) tag -R $(ATK-RELEASE) core) &&		\
          (cd src/fr/esrf/tangoatk/ &&			\
          $(CVSSF) tag $(ATK-RELEASE) util)) &&		\
 	 (cd src/fr/esrf/tangoatk/ &&			\
@@ -74,8 +72,9 @@ clean:
 install: 
 	install -g dserver lib/ATKCore-$(ATK-VERSION).jar              \
                            lib/ATKWidget-$(ATK-VERSION).jar          \
-                           /segfs/tango/release/java/lib              \
-	&& (cd /segfs/tango/release/java/lib                        \
+                           lib/jscrollpane.jar                          \
+                           /segfs/tango/lib/java/                       \
+	&& (cd /segfs/tango/lib/java/                                   \
             && ln -sf ATKCore-$(ATK-VERSION).jar ATKCore.jar           \
             && ln -sf ATKWidget-$(ATK-VERSION).jar ATKWidget.jar)    \
 
@@ -91,16 +90,11 @@ jar: core-jar  widget-jar
 
 core-jar: core-manifest
 	@(cd lib &&                             \
-	 $(JAR) xf printf.jar &&      \
-	 $(JAR) xf jep.jar &&   \
-	 $(JAR) xf jepext.jar &&   \
-	 $(JAR) xf ij.jar &&   \
-	 $(JAR) xf jogl.jar &&   \
-	 $(JAR) xf gluegen-rt.jar &&   \
+	 $(JAR) xf printf.jar && \
          if [ -e $(COREMANIFEST) ]; then       \
-            $(JAR) cmf $(COREMANIFEST) ATKCore-$(ATK-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util com/braju org/lsmp org/nfunk ij com/sun; \
+            $(JAR) cmf $(COREMANIFEST) ATKCore-$(ATK-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util com/braju; \
          else                                           \
-            $(JAR) cf ATKCore-$(ATK-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util com/braju org/lsmp org/nfunk ij com/sun;                   \
+            $(JAR) cf ATKCore-$(ATK-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util com/braju;                   \
          fi)
 	$(call verifyjar,/tmp/core/jar,ATKCore-$(ATK-VERSION))
 	@(rm -rf /tmp/core)

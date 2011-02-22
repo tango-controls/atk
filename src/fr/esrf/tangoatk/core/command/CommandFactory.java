@@ -1,25 +1,8 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
+// File:          CommandFactory.java
+// Created:       2001-09-28 09:18:50, assum
+// By:            <erik@assum.net>
+// Time-stamp:    <2002-07-10 15:6:25, assum>
+//
 // $Id$
 //
 // Description:
@@ -40,7 +23,7 @@ import fr.esrf.TangoApi.CommandInfo;
  */
 public class CommandFactory extends AEntityFactory {
 
-  private Vector<ACommand> commands = new Vector<ACommand> ();
+  private Vector commands = new Vector();
   private String[] cmdNames = new String[0];  // For fast string search
 
   private static CommandFactory instance;
@@ -69,11 +52,29 @@ public class CommandFactory extends AEntityFactory {
     return Arrays.binarySearch(cmdNames,fqname.toLowerCase());
   }
 
-  protected synchronized List<IEntity> getWildCardEntities(String name, Device device)
+  protected synchronized List getWildCardEntities(String name, Device device)
           throws DevFailed {
 
-    List<IEntity> list = new Vector<IEntity> ();
+    List list = new Vector();
     CommandInfo[] info = device.getCommandList();
+
+/* Replaced the following code block on 11/june/2004 (F. Poncet)
+   The old code did not make use of "commandInfo" already returned
+   by getCommandList. The old call to Entity(fqName, device)
+   recalled in TangORB "command_query" where all the necessay info was
+   already returned by getCommandList().
+   The new code make use of CommandInfos already returned!
+
+	for (int i = 0; i < info.length; i++) {
+	    IEntity entity = getSingleEntity(getFQName(device,
+						       info[i].cmd_name),
+					     device);
+	    if (entity == null) continue;
+	    list.add(entity);
+	}
+
+	End of replaced code ****/
+
     for (int i = 0; i < info.length; i++) {
       String fqname = getFQName(device, info[i].cmd_name);
       IEntity entity = getSingleCommand(fqname, info[i], device);
@@ -90,7 +91,7 @@ public class CommandFactory extends AEntityFactory {
     // Check if the command already exists
     int pos = getCommandPos(fqname);
     if(pos>=0)
-      return commands.get(pos);
+      return (ACommand) commands.get(pos);
 
     // Create it
     return initCommand(device,info,-(pos+1),fqname);
@@ -124,7 +125,7 @@ public class CommandFactory extends AEntityFactory {
     synchronized(this) {
       // Check if the command already exists
       int pos = getCommandPos(fqname);
-      if(pos>=0) ie = commands.get(pos);
+      if(pos>=0) ie = (IEntity) commands.get(pos);
     }
 
     if( ie==null ) {
@@ -140,19 +141,6 @@ public class CommandFactory extends AEntityFactory {
 
   }
 
-  /**
-   * Returns an array containing all commands.
-   */
-  public ACommand[] getCommands() {
-
-    ACommand[] ret = new ACommand[commands.size()];
-    synchronized(this) {
-      for(int i=0;i<commands.size();i++)
-        ret[i] = commands.get(i);
-    }
-    return ret;
-
-  }
 
   public boolean isCommand(String fqname) {
 

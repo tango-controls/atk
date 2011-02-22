@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          ArrayCommandHelper.java
 // Created:       2002-01-22 13:02:18, assum
 // By:            <assum@esrf.fr>
@@ -78,23 +56,23 @@ class ArrayCommandHelper extends ACommandHelper {
         break;
       case Tango_DEVVAR_USHORTARRAY:
         {
-          int[] tmp = new int[size];
+          short[] tmp = new short[size];
           for (i = 0; i < size; i++) {
-            tmp[i] = Integer.parseInt((String) l.get(i));
+            tmp[i] = Short.parseShort((String) l.get(i));
           } // end of for ()
 
-          data.insert_us(tmp);
+          data.insert_u(tmp);
         }
 
         break;
       case Tango_DEVVAR_ULONGARRAY:
         {
-          long[] tmp = new long[size];
+          int[] tmp = new int[size];
           for (i = 0; i < size; i++) {
-            tmp[i] = Long.parseLong((String) l.get(i));
+            tmp[i] = Integer.parseInt((String) l.get(i));
           } // end of for ()
 
-          data.insert_ul(tmp);
+          data.insert_u(tmp);
         }
 
         break;
@@ -118,23 +96,12 @@ class ArrayCommandHelper extends ACommandHelper {
           data.insert(tmp);
         }
         break;
-      case Tango_DEVVAR_CHARARRAY:
-        {
-          byte[] tmp = new byte[size];
-          for (i = 0; i < size; i++)
-          {
-              tmp[i] = Byte.parseByte((String) l.get(i));
-          } // end of for ()
-
-          data.insert(tmp);
-        }
-        break;
     }
     return data;
   }
 
-  protected List<String> extractOutput(DeviceData d) {
-    List<String> val = new Vector<String> ();
+  protected List extractOutput(DeviceData d) {
+    List val = new Vector();
     int i;
     switch (getOutType()) {
       case Tango_DEVVAR_SHORTARRAY:
@@ -191,15 +158,6 @@ class ArrayCommandHelper extends ACommandHelper {
           for (i = 0; i < tmp.length; i++) {
             val.add(tmp[i]);
           }
-        }
-        break;
-      case Tango_DEVVAR_CHARARRAY:
-        {
-          byte[] tmp = d.extractByteArray();
-          for (i = 0; i < tmp.length; i++)
-          {
-              val.add(Byte.toString(tmp[i]));
-          } // end of for ()
         }
         break;
     }
