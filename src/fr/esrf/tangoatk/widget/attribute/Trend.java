@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * Trend.java
  *
  * Created on May 13, 2002, 4:28 PM
@@ -28,22 +6,19 @@
 
 package fr.esrf.tangoatk.widget.attribute;
 
+import fr.esrf.tangoatk.widget.util.IControlee;
+import fr.esrf.tangoatk.core.IRefresherListener;
+import fr.esrf.tangoatk.widget.util.chart.*;
+import fr.esrf.tangoatk.core.INumberScalar;
+import fr.esrf.tangoatk.widget.attribute.TrendSelectionNode;
+import fr.esrf.tangoatk.core.ConnectionException;
+
+import javax.swing.*;
+import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
-import java.io.FileWriter;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
-import javax.swing.*;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
-
-import fr.esrf.tangoatk.core.*;
-import fr.esrf.tangoatk.widget.util.*;
-import fr.esrf.tangoatk.widget.util.chart.*;
+import java.io.*;
+import java.util.*;
 
 /**
  *
@@ -55,24 +30,14 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
 
   // Constant
 
-  /** Not selected */
+  // Selection type
   public static final int SEL_NONE = 0;
-  /** Selected on X */
   public static final int SEL_X = 1;
-  /** Selected on Y1 */
   public static final int SEL_Y1 = 2;
-  /** Selected on Y2 */
   public static final int SEL_Y2 = 3;
 
-  /** Device name are displayed whithin chart label when needed */
-  public final static int DEVICE_LABEL_AUTO=0;
-  /** Device name are never displayed whithin chart label */
-  public final static int DEVICE_LABEL_NEVER=1;
-  /** Device name are always displayed whithin chart label */
-  public final static int DEVICE_LABEL_ALWAYS=2;
-
   //Default Color
-  protected static Color[] defaultColor = {
+  public static final Color[] defaultColor = {
     Color.red,
     Color.blue,
     Color.cyan,
@@ -84,152 +49,54 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     Color.black};
 
   // Local declaration
-  protected JFrame parent = null;
+  JFrame parent = null;
 
   // Toolbar stuff
-  protected JToolBar theToolBar;
-  protected JPopupMenu toolMenu;
+  JToolBar theToolBar;
+  JPopupMenu toolMenu;
 
-  protected JButton optionButton;
-  protected JMenuItem optionMenuI;
-  protected JButton stopButton;
-  protected JMenuItem stopMenuI;
-  protected JButton startButton;
-  protected JMenuItem startMenuI;
-  protected JButton loadButton;
-  protected JMenuItem loadMenuI;
-  protected JButton saveButton;
-  protected JMenuItem saveMenuI;
-  protected JButton zoomButton;
-  protected JMenuItem zoomMenuI;
-  protected JButton timeButton;
-  protected JMenuItem timeMenuI;
-  protected JButton cfgButton;
-  protected JMenuItem cfgMenuI;
-  protected JButton resetButton;
-  protected JMenuItem resetMenuI;
-  protected JCheckBoxMenuItem offLineButton;
-  protected JMenuItem showErrorMenuI;
-  protected JMenuItem showDiagMenuI;
+  JButton optionButton;
+  JMenuItem optionMenuI;
+  JButton stopButton;
+  JMenuItem stopMenuI;
+  JButton startButton;
+  JMenuItem startMenuI;
+  JButton loadButton;
+  JMenuItem loadMenuI;
+  JButton saveButton;
+  JMenuItem saveMenuI;
+  JButton zoomButton;
+  JMenuItem zoomMenuI;
+  JButton timeButton;
+  JMenuItem timeMenuI;
 
-  protected JMenuItem showtoolMenuI;
+  JMenuItem showtoolMenuI;
 
-  protected JPanel innerPanel;
+  JPanel innerPanel;
 
-  protected JLabel dateLabel;
 
   // Selection tree stuff
-  protected JScrollPane treeView = null;
-  protected JTree mainTree = null;
-  protected DefaultTreeModel mainTreeModel = null;
-  protected TrendSelectionNode rootNode = null;
-  protected JPopupMenu treeMenu;
-  protected JMenuItem addXMenuItem;
-  protected JMenuItem addY1MenuItem;
-  protected JMenuItem addY2MenuItem;
-  protected JCheckBoxMenuItem showMinAlarmMenuItem;
-  protected JCheckBoxMenuItem showMaxAlarmMenuItem;
-  protected JMenuItem removeMenuItem;
-  protected JMenuItem optionMenuItem;
-  protected JMenuItem attOptionMenuItem;
-
+  JScrollPane treeView = null;
+  JTree mainTree = null;
+  DefaultTreeModel mainTreeModel = null;
+  TrendSelectionNode rootNode = null;
+  JPopupMenu treeMenu;
+  JMenuItem addXMenuItem;
+  JMenuItem addY1MenuItem;
+  JMenuItem addY2MenuItem;
+  JMenuItem removeMenuItem;
+  JMenuItem optionMenuItem;
 
   // Chart stuff
-  protected JLChart theGraph;
+  JLChart theGraph;
   private String graphTitle="";
-  private ConfigPanel cfgPanel = null;
   static private Point framePos=new Point(0,0);
   static private Point frameDimension=new Point(640,480);
 
-
   // The models
-  protected AttributePolledList attList = null;
+  fr.esrf.tangoatk.core.AttributePolledList attList = null;
   private TrendSelectionNode lastAdded = null;
-  private AttributePolledList lastCreatedList = null;
-
-  private SimplePropertyFrame propFrame=null;
-
-  private String lastConfig = "";
-  private boolean singleDevice=true;
-  private int isShowingDeviceName=DEVICE_LABEL_AUTO;
-
-  static final java.util.GregorianCalendar calendar = new java.util.GregorianCalendar();
-  static final java.text.SimpleDateFormat genFormat = new java.text.SimpleDateFormat("EEE dd/MM/yy HH:mm:ss");
-
-  protected Map buttonMap;
-  
-  /**
-   * Corresponds to the button "start monitoring"
-   */
-  public static final String start  = "START";
-  
-  /**
-   * Corresponds to the button "stop monitoring"
-   */
-  public static final String stop   = "STOP";
-  
-  /**
-   * Corresponds to the button "Save configuration"
-   */
-  public static final String save   = "SAVE";
-  
-  
-  /**
-   * Corresponds to the button "Load configuration"
-   */
-  public static final String load   = "LOAD";
-  
-  
-  /**
-   * Corresponds to the button "Zoom"
-   */
-  public static final String zoom   = "ZOOM";
-  
-  
-  /**
-   * Corresponds to the button "Set rfresh interval"
-   */
-  public static final String time   = "TIME";
-  
-  
-  /**
-   * Corresponds to the button "Global settings"
-   */
-  public static final String option = "OPTION";
-
-  /**
-   * Corresponds to the button "Add new attribute"
-   */
-  public static final String config = "CONFIG";
-
-  /**
-   * Corresponds to the button "Reset trend"
-   */
-  public static final String reset = "RESET";
-  
-  private int timePrecision = 0;
-
-  protected int minRefreshInterval = 0;
-  
-  //Seperate Trend management   
-  private boolean manageIntervalTrend = false;
-  
-  private long currentTime = 0;
-  private long oldCurrentTime = 0; 
- 
-  protected JToolBar panelToolBarTrend;
-  protected JToolBar panelToolBar;    
-  protected JButton timeButtonTrend;
-  protected JButton refreshButton;
-  protected JMenuItem timeMenuTrendI; 
-  protected JMenuItem refreshMenuI;
-  
-  protected int minRefreshTrendInterval = 0;  
-  private int refreshIntervalTrend = 1000;
-
-  protected boolean offLineMode = false;
-
-  protected ErrorHistory errWin;
+  private fr.esrf.tangoatk.core.AttributePolledList lastCreatedList = null;
 
 
   /**
@@ -239,7 +106,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
   public Trend(JFrame parent) {
     this();
     this.parent = parent;
-    theGraph.setFrameParent(parent);
   }
 
   /**
@@ -247,8 +113,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
    */
   public Trend() {
 
-    buttonMap = new HashMap();
-      
     theToolBar = new JToolBar();
     toolMenu = new JPopupMenu();
 
@@ -280,20 +144,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     timeButton.setToolTipText("Set refresh interval");
     timeMenuI = new JMenuItem("Set refresh interval");
 
-    cfgButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_config.gif")));
-    cfgButton.setToolTipText("Add new attribute");
-    cfgMenuI = new JMenuItem("Add new attribute");
-
-    resetButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_reset.gif")));
-    resetButton.setToolTipText("Reset trend");
-    resetMenuI = new JMenuItem("Reset trend");
-
     showtoolMenuI = new JMenuItem("Hide toolbar");
-
-    offLineButton = new JCheckBoxMenuItem("Off line mode");
-
-    showErrorMenuI = new JMenuItem("View errors");
-    showDiagMenuI = new JMenuItem("Diagnostic");
 
     theToolBar.setFloatable(true);
 
@@ -311,14 +162,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     startMenuI.addActionListener(this);
     timeButton.addActionListener(this);
     timeMenuI.addActionListener(this);
-    cfgButton.addActionListener(this);
-    cfgMenuI.addActionListener(this);
-    resetButton.addActionListener(this);
-    resetMenuI.addActionListener(this);
     showtoolMenuI.addActionListener(this);
-    offLineButton.addActionListener(this);
-    showErrorMenuI.addActionListener(this);
-    showDiagMenuI.addActionListener(this);
 
     theToolBar.add(loadButton);
     theToolBar.add(saveButton);
@@ -327,18 +171,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     theToolBar.add(startButton);
     theToolBar.add(stopButton);
     theToolBar.add(timeButton);
-    theToolBar.add(cfgButton);
-    theToolBar.add(resetButton);
-
-    buttonMap.put(load,loadButton);
-    buttonMap.put(save,saveButton);
-    buttonMap.put(option,optionButton);
-    buttonMap.put(zoom,zoomButton);
-    buttonMap.put(start,startButton);
-    buttonMap.put(stop,stopButton);
-    buttonMap.put(time,timeButton);
-    buttonMap.put(config,cfgButton);
-    buttonMap.put(reset,resetButton);
 
     toolMenu.add(loadMenuI);
     toolMenu.add(saveMenuI);
@@ -347,12 +179,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     toolMenu.add(startMenuI);
     toolMenu.add(stopMenuI);
     toolMenu.add(timeMenuI);
-    toolMenu.add(cfgMenuI);
-    toolMenu.add(resetMenuI);
     toolMenu.add(showtoolMenuI);
-    toolMenu.add(offLineButton);
-    toolMenu.add(showErrorMenuI);
-    toolMenu.add(showDiagMenuI);
 
     // Create the graph
     theGraph = new JLChart();
@@ -364,15 +191,9 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     theGraph.setDisplayDuration(300000.0); // 5min
     theGraph.addUserAction("chkShow toolbar");
     theGraph.addUserAction("chkShow selection tree");
-    theGraph.addUserAction("chkShow date");
     theGraph.addUserAction("Load configuration");
     theGraph.addUserAction("Save configuration");
-    theGraph.addUserAction("View errors");
-    theGraph.addUserAction("Diagnostic");
     theGraph.addJLChartActionListener(this);
-    // Commented revision 1.43 modifications :
-    // refuse displayDuration greater than 1 day, in order to limit memory use
-    //theGraph.setMaxDisplayDuration(24 * 60 * 60 * 1000);
 
     innerPanel = new JPanel();
     innerPanel.setLayout(new BorderLayout());
@@ -388,22 +209,12 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     addY1MenuItem = new JMenuItem("Add to Y1");
     addY2MenuItem = new JMenuItem("Add to Y2");
     removeMenuItem = new JMenuItem("Remove");
-    showMinAlarmMenuItem = new JCheckBoxMenuItem("Show min alarm");
-    showMaxAlarmMenuItem = new JCheckBoxMenuItem("Show max alarm");
-    optionMenuItem = new JMenuItem("Graphic properties");
-    attOptionMenuItem = new JMenuItem("Attribute properties");
+    optionMenuItem = new JMenuItem("Options");
     treeMenu.add(addXMenuItem);
     treeMenu.add(addY1MenuItem);
     treeMenu.add(addY2MenuItem);
     treeMenu.add(removeMenuItem);
-    treeMenu.add(showMinAlarmMenuItem);
-    treeMenu.add(showMaxAlarmMenuItem);
     treeMenu.add(optionMenuItem);
-    treeMenu.add(attOptionMenuItem);
-    
-    setManageIntervalTrend();
-    if(manageIntervalTrend)
-        initTrendRefresher();
 
     addXMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -434,77 +245,37 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
 
     addY1MenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
-        TreePath[] selPaths = mainTree.getSelectionPaths();
-        for (int i = 0; i < selPaths.length; i++) {
-          TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
-          if (selNode.getModel() != null && selNode.getSelected() != SEL_Y1) {
-            selNode.setSelected(SEL_Y1);
-          }
+        TrendSelectionNode selNode = (TrendSelectionNode) mainTree.getSelectionPath().getLastPathComponent();
+        INumberScalar m = selNode.getModel();
+        if (m != null) {
+          selNode.setSelected(SEL_Y1);
+          mainTree.repaint();
+          theGraph.repaint();
         }
-        mainTree.repaint();
-        theGraph.repaint();
       }
     });
 
     addY2MenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
-        TreePath[] selPaths = mainTree.getSelectionPaths();
-        for (int i = 0; i < selPaths.length; i++) {
-          TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
-          if (selNode.getModel() != null && selNode.getSelected() != SEL_Y2) {
-            selNode.setSelected(SEL_Y2);
-          }
+        TrendSelectionNode selNode = (TrendSelectionNode) mainTree.getSelectionPath().getLastPathComponent();
+        INumberScalar m = selNode.getModel();
+        if (m != null) {
+          selNode.setSelected(SEL_Y2);
+          mainTree.repaint();
+          theGraph.repaint();
         }
-        mainTree.repaint();
-        theGraph.repaint();
       }
     });
 
     removeMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
-        TreePath[] selPaths = mainTree.getSelectionPaths();
-        for (int i = 0; i < selPaths.length; i++) {
-          TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
-          if (selNode.getModel() != null && selNode.getSelected() != SEL_NONE) {
-            selNode.setSelected(SEL_NONE);
-          }
+        TrendSelectionNode selNode = (TrendSelectionNode) mainTree.getSelectionPath().getLastPathComponent();
+        INumberScalar m = selNode.getModel();
+        if (m != null) {
+          selNode.setSelected(SEL_NONE);
+          mainTree.repaint();
+          theGraph.repaint();
         }
-        mainTree.repaint();
-        theGraph.repaint();
-      }
-    });
-
-    showMinAlarmMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        TreePath[] selPaths = mainTree.getSelectionPaths();
-        for (int i = 0; i < selPaths.length; i++) {
-          TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
-          if (selNode.getModel() != null) {
-            if(showMinAlarmMenuItem.isSelected())
-              selNode.showMinAlarm();
-            else
-              selNode.hideMinAlarm();
-          }
-        }
-        mainTree.repaint();
-        theGraph.repaint();
-      }
-    });
-
-    showMaxAlarmMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        TreePath[] selPaths = mainTree.getSelectionPaths();
-        for (int i = 0; i < selPaths.length; i++) {
-          TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
-          if (selNode.getModel() != null) {
-            if(showMaxAlarmMenuItem.isSelected())
-              selNode.showMaxAlarm();
-            else
-              selNode.hideMaxAlarm();
-          }
-        }
-        mainTree.repaint();
-        theGraph.repaint();
       }
     });
 
@@ -518,78 +289,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
       }
     });
 
-    attOptionMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        TrendSelectionNode selNode = (TrendSelectionNode) mainTree.getSelectionPath().getLastPathComponent();
-        INumberScalar m = selNode.getModel();
-        if (m != null) {
-          if(propFrame==null)
-            propFrame = new SimplePropertyFrame();
-          propFrame.setModel(m);
-          propFrame.setVisible(true);
-        }
-      }
-    });
-
-    calendar.setTimeInMillis(System.currentTimeMillis());
-    dateLabel = new JLabel();
-    dateLabel.setText(genFormat.format(calendar.getTime()));
-    dateLabel.setHorizontalAlignment(JLabel.CENTER);
-    dateLabel.setVisible(false);
-    add(dateLabel,BorderLayout.SOUTH);
-
-    errWin = new ErrorHistory();
-
-  }
-
-  void refreshNode(TrendSelectionNode n) {
-    theGraph.repaint();
-    mainTreeModel.nodeChanged(n);
-  }
-  
-  private void initTrendRefresher()
-  {
-  	panelToolBar = new JToolBar();
-    panelToolBarTrend = new JToolBar();
-    
-    timeButtonTrend = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_refresh_time.png")));
-    timeButtonTrend.setToolTipText("Set refresh interval Trend");
-    timeMenuTrendI = new JMenuItem("Set refresh interval Trend");
-    	
-    refreshButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_refresh.png")));
-    refreshButton.setToolTipText("Refresh trend");
-    refreshMenuI = new JMenuItem("Refresh trend");
-    	
-    timeButtonTrend.addActionListener(this);
-    timeMenuTrendI.addActionListener(this);    	
-    refreshButton.addActionListener(this);
-    	
-    panelToolBar.setFloatable(false);
-    panelToolBarTrend.setFloatable(false);
-    
-    panelToolBar.add(loadButton);
-    panelToolBar.add(saveButton);
-    panelToolBar.add(optionButton);
-    panelToolBar.add(zoomButton);
-    panelToolBar.add(startButton);
-    panelToolBar.add(stopButton);
-    panelToolBar.add(timeButton);
-    panelToolBar.add(cfgButton);
-    panelToolBar.add(resetButton);
-    panelToolBarTrend.add(timeButtonTrend);
-    panelToolBarTrend.add(refreshButton);
-          
-    theToolBar.setLayout(new BorderLayout());
-    theToolBar.add(panelToolBar,BorderLayout.WEST);
-    
-    JPanel jPanel = new JPanel();
-    jPanel.setLayout(new BorderLayout());
-    jPanel.add(panelToolBarTrend,BorderLayout.CENTER);
-    theToolBar.add(jPanel,BorderLayout.EAST);
-    
-    buttonMap.put(reset,refreshButton);
-    toolMenu.add(timeMenuTrendI);
-    
   }
 
   // -------------------------------------------------------------
@@ -615,34 +314,10 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
         theGraph.exitZoom();
     } else if (o == timeButton || o == timeMenuI) {
       setRefreshInterval();
-    } else if (o == cfgButton || o == cfgMenuI) {
-      if(cfgPanel == null) {
-        Window w = ATKGraphicsUtils.getWindowForComponent(this);
-        if(w instanceof Frame)
-          cfgPanel = new ConfigPanel((Frame)w,this);
-        else if (w instanceof Dialog)
-          cfgPanel = new ConfigPanel((Dialog)w,this);
-        else
-          cfgPanel = new ConfigPanel((Frame)null,this);
-      }
-      cfgPanel.showPanel();
     } else if (o == showtoolMenuI) {
       boolean b = isButtonBarVisible();
       b = !b;
       setButtonBarVisible(b);
-    } else if (o == resetButton || o == resetMenuI) {
-      resetTrend();
-    } else if (o == refreshButton || o == refreshButton) {
-      refreshTrend();
-    } else if (o == timeButtonTrend || o == timeMenuTrendI) {
-      setRefreshIntervalTrend();
-    } else if (o == offLineButton) {
-      setOffLineMode(offLineButton.isSelected());
-    } else if (o == showErrorMenuI) {
-      ATKGraphicsUtils.centerFrameOnScreen(errWin);
-      errWin.setVisible(true);      
-    } else if (o == showDiagMenuI) {
-      fr.esrf.tangoatk.widget.util.ATKDiagnostic.showDiagnostic();
     }
 
   }
@@ -656,17 +331,10 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
       setButtonBarVisible(evt.getState());
     } else if (evt.getName().equals("Show selection tree")) {
       setSelectionTreeVisible(evt.getState());
-    } else if (evt.getName().equals("Show date")) {
-      setDateVisible(evt.getState());
     } else if (evt.getName().equalsIgnoreCase("Load configuration")) {
       loadButtonActionPerformed();
     } else if (evt.getName().equalsIgnoreCase("Save configuration")) {
       saveButtonActionPerformed();
-    } else if (evt.getName().equalsIgnoreCase("View errors")) {
-      ATKGraphicsUtils.centerFrameOnScreen(errWin);
-      errWin.setVisible(true);
-    } else if (evt.getName().equalsIgnoreCase("Diagnostic")) {
-      fr.esrf.tangoatk.widget.util.ATKDiagnostic.showDiagnostic();
     }
 
   }
@@ -677,57 +345,17 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
       return isButtonBarVisible();
     } else if (evt.getName().equals("Show selection tree")) {
       return isSelectionTreeVisible();
-    } else if (evt.getName().equals("Show date")) {
-      return isDateVisible();
     }
 
     return false;
   }
 
-public int getTimePrecision() {
-    return timePrecision;
-}
-public void setTimePrecision(int timePrecision) {
-    this.timePrecision = timePrecision;
-    if(theGraph != null)
-        theGraph.setTimePrecision(timePrecision);
-}
   // -------------------------------------------------------------
   // Refresher listener
   // -------------------------------------------------------------
   public void refreshStep() {
-
-    if (isDateVisible()) {
-      calendar.setTimeInMillis(System.currentTimeMillis());
-      dateLabel.setText(genFormat.format(calendar.getTime()));
-    }
-
-    if (theGraph.getXAxis().getPercentScrollback() == 0.0) {
-
-      if (!offLineMode) {
-        // All attribute has been read, we can repaint the graph
-        if (!manageIntervalTrend)
-          theGraph.repaint();
-        else {
-          // repaint Trend after IntervalTrend time
-          currentTime = System.currentTimeMillis();
-          if (currentTime - oldCurrentTime > getRefreshIntervalTrend()) {
-            theGraph.repaint();
-            oldCurrentTime = currentTime;
-          }
-        }
-      }
-
-    }
-
-  }
-
-  /**
-   * Sets or unset the offline mode (data are updated but not painted)
-   * @param mode Offline mode
-   */
-  public void setOffLineMode(boolean mode) {
-    offLineMode = mode;
+    // All attribute has been read, we can repaint the graph
+    theGraph.repaint();
   }
 
   private void setRefreshInterval() {
@@ -737,16 +365,6 @@ public void setTimePrecision(int timePrecision) {
     if (i != null) {
       try {
         int it = Integer.parseInt(i);
-        if (it < getMinRefreshInterval()) {
-          JOptionPane.showMessageDialog(
-                  parent,
-                  "Invalid number ! Can not be less than "
-                    + getMinRefreshInterval(),
-                  "Error",
-                  JOptionPane.ERROR_MESSAGE
-          );
-          return;
-        }
         attList.setRefreshInterval(it);
       } catch (NumberFormatException e) {
         JOptionPane.showMessageDialog(parent, "Invalid number !", "Error", JOptionPane.ERROR_MESSAGE);
@@ -754,87 +372,24 @@ public void setTimePrecision(int timePrecision) {
     }
 
   }
-  
-  private void setRefreshIntervalTrend() {
-        int old_it = getRefreshIntervalTrend();
-        String i = JOptionPane.showInputDialog(this, "Enter refresh interval Trend (ms)", new Integer(old_it));
-        if (i != null) {
-          try {
-            int it = Integer.parseInt(i);
-            if (it < getMinRefreshInterval()) {
-              JOptionPane.showMessageDialog(
-                      parent,
-                      "Invalid number ! Can not be less than " + getMinRefreshInterval(),
-                      "Error",
-                      JOptionPane.ERROR_MESSAGE
-              );
-              return;
-            }
-            if (it < attList.getRefreshInterval() || it % attList.getRefreshInterval() != 0) {
-                JOptionPane.showMessageDialog(parent, "Invalid values !" +
-                        "\nThe value must be greater and multiple than the refresh interval Values " +
-                        attList.getRefreshInterval(), "Error", JOptionPane.ERROR_MESSAGE);
-            }else{
-                setRefreshIntervalTrend(it);               
-            }
-          } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(parent, "Invalid number !", "Error", JOptionPane.ERROR_MESSAGE);
-          }
-        }
-      }
-
-  private void updateModel() {
-    singleDevice = true;
-    if( attList!=null ) {
-      int i;
-
-      // Check if we have a single device
-      int sz = attList.size();
-      if( sz>1 ) {
-        INumberScalar s = (INumberScalar)attList.get(0);
-        String dName = s.getDevice().getName();
-        for(i=1;i<sz && singleDevice;i++) {
-          s = (INumberScalar)attList.get(i);
-          singleDevice=dName.equalsIgnoreCase(s.getDevice().getName());
-        }
-      }
-
-      // Update nodes
-      Vector v = rootNode.getSelectableItems();
-      for(i=0;i<v.size();i++) ((TrendSelectionNode)v.get(i)).refreshNode();
-
-    }
-  }
-
-  /**
-   * Free any allocated resource and stop refreshing.
-   * The internal attribute list is released if it has
-   * been created using addAttribute() or setSettings().
-   */
-  public void clearModel() {
-    setModel((AttributePolledList)null);
-  }
 
   /**
    * This <code>setModel</code> which takes an AttributePolledList as a
    * parameter, will just add the attributes in the list to the list
    * viewer in the Trend. It will not add any of the attributes to the
    * Trend
-   * @param list a <code>AttributePolledList</code> value
+   * @param list a <code>fr.esrf.tangoatk.core.AttributePolledList</code> value
    */
-  public void setModel(AttributePolledList list) {
+  public void setModel(fr.esrf.tangoatk.core.AttributePolledList list) {
     int i;
 
     // Free old allocated resource ----------------------------------------------------
 
     theGraph.unselectAll();
 
-    // Remove old listeners and clean former list
+    // Remove old listeners
     if (attList != null)
-    {
-        attList.removeErrorListener(errWin);
-        attList.removeRefresherListener(this);
-    }
+      attList.removeRefresherListener(this);
 
     if( rootNode!=null ) {
       Vector dv = rootNode.getSelectableItems();
@@ -845,28 +400,17 @@ public void setTimePrecision(int timePrecision) {
       }
     }
 
-    // Stop refresher on list created by the Trend and clean this list
+    // Stop refresher on list created by the Trend
     if (lastCreatedList != null) {
       lastCreatedList.stopRefresher();
-      lastCreatedList.clear();
       lastCreatedList=null;
-    }
-    
-    if( treeView != null ) {
-      innerPanel.remove(treeView);
-      treeView=null;
     }
 
     // Create the selection tree -------------------------------------------------------
-    rootNode = new TrendSelectionNode(this);
-    int j;
-    if (list != null) {
-      for (i = 0; i < list.size(); i++) {
-        if ( list.get(i) instanceof INumberScalar ) {
-          j = i;
-          lastAdded = rootNode.addItem( this, (INumberScalar) list.get(j), defaultColor[j % defaultColor.length] );
-        }
-      }
+    rootNode = new TrendSelectionNode(theGraph);
+
+    for (i = 0; i < list.size(); i++) {
+      lastAdded = rootNode.addItem(theGraph, (INumberScalar) list.get(i), defaultColor[i % defaultColor.length]);
     }
 
     TrendRenderer renderer = new TrendRenderer();
@@ -875,7 +419,7 @@ public void setTimePrecision(int timePrecision) {
     mainTree = new JTree(mainTreeModel);
     mainTree.setCellRenderer(renderer);
     mainTree.setEditable(false);
-    mainTree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+    mainTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     mainTree.setShowsRootHandles(true);
     mainTree.setRootVisible(true);
     mainTree.setBorder(BorderFactory.createLoweredBevelBorder());
@@ -884,71 +428,26 @@ public void setTimePrecision(int timePrecision) {
       public void mousePressed(MouseEvent e) {
         revalidate();
         int selRow = mainTree.getRowForLocation(e.getX(), e.getY());
-        TreePath[] selPaths = mainTree.getSelectionPaths();
+        TreePath selPath = mainTree.getPathForLocation(e.getX(), e.getY());
         if (selRow != -1) {
           if (e.getClickCount() == 1 && e.getButton() == MouseEvent.BUTTON3) {
-            if (selPaths != null && selPaths.length > 0) {
-              if (selPaths.length == 1) {
-                TrendSelectionNode selNode = (TrendSelectionNode) selPaths[0].getLastPathComponent();
-                if (selNode.getModel() != null) {
-                  addXMenuItem.setEnabled(selNode.getSelected() != SEL_X);
-                  addY1MenuItem.setEnabled(selNode.getSelected() != SEL_Y1);
-                  addY2MenuItem.setEnabled(selNode.getSelected() != SEL_Y2);
-                  removeMenuItem.setEnabled(selNode.getSelected() != SEL_NONE);
-                  showMinAlarmMenuItem.setSelected(selNode.isShowingMinAlarm());
-                  showMaxAlarmMenuItem.setSelected(selNode.isShowingMaxAlarm());
-                  treeMenu.show(mainTree, e.getX(), e.getY());
-                } else if (selNode == rootNode) {
+            if (selPath != null) {
+              mainTree.setSelectionPath(selPath);
+              TrendSelectionNode selNode = (TrendSelectionNode) selPath.getLastPathComponent();
+              if (selNode.getModel() != null) {
+                addXMenuItem.setEnabled(selNode.getSelected() != SEL_X);
+                addY1MenuItem.setEnabled(selNode.getSelected() != SEL_Y1);
+                addY2MenuItem.setEnabled(selNode.getSelected() != SEL_Y2);
+                removeMenuItem.setEnabled(selNode.getSelected() != SEL_NONE);
+                treeMenu.show(mainTree, e.getX(), e.getY());
+              } else if (selNode == rootNode) {
 
-                  if (isButtonBarVisible())
-                    showtoolMenuI.setText("Hide toolbar");
-                  else
-                    showtoolMenuI.setText("Show toolbar");
+                if (isButtonBarVisible())
+                  showtoolMenuI.setText("Hide toolbar");
+                else
+                  showtoolMenuI.setText("Show toolbar");
 
-                  toolMenu.show(mainTree, e.getX(), e.getY());
-                }
-              }
-              else {
-                TrendSelectionNode lastAttributeNode = null;
-                int attributeCount = 0;
-                boolean containsRootNode = false;
-                for (int i = 0; i < selPaths.length; i++) {
-                  TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
-                  if (selNode.getModel() != null) {
-                    attributeCount++;
-                    lastAttributeNode = selNode;
-                  }
-                  else if (selNode == rootNode) {
-                      containsRootNode = true;
-                  }
-                }
-                if (attributeCount > 0) {
-                  if (attributeCount == 1) {
-                    addXMenuItem.setEnabled(lastAttributeNode.getSelected() != SEL_X);
-                    addY1MenuItem.setEnabled(lastAttributeNode.getSelected() != SEL_Y1);
-                    addY2MenuItem.setEnabled(lastAttributeNode.getSelected() != SEL_Y2);
-                    removeMenuItem.setEnabled(lastAttributeNode.getSelected() != SEL_NONE);
-                    showMinAlarmMenuItem.setSelected(lastAttributeNode.isShowingMinAlarm());
-                    showMaxAlarmMenuItem.setSelected(lastAttributeNode.isShowingMaxAlarm());
-                  } else {
-                    addXMenuItem.setEnabled(false);
-                    addY1MenuItem.setEnabled(true);
-                    addY2MenuItem.setEnabled(true);
-                    removeMenuItem.setEnabled(true);
-                    showMinAlarmMenuItem.setSelected(false);
-                    showMaxAlarmMenuItem.setSelected(false);
-                  }
-                  treeMenu.show(mainTree, e.getX(), e.getY());
-                  lastAttributeNode = null;
-                }
-                else if (containsRootNode){
-                  if (isButtonBarVisible())
-                    showtoolMenuI.setText("Hide toolbar");
-                  else
-                    showtoolMenuI.setText("Show toolbar");
-
-                  toolMenu.show(mainTree, e.getX(), e.getY());
-                }
+                toolMenu.show(mainTree, e.getX(), e.getY());
               }
             }
           }
@@ -958,15 +457,10 @@ public void setTimePrecision(int timePrecision) {
 
     //mainTree.addTreeSelectionListener(treeSelectionlistemner);
     innerPanel.add(treeView, BorderLayout.WEST);
-    innerPanel.revalidate();
+
 
     attList = list;
-    if(attList!=null) {
-      attList.addRefresherListener(this);
-      attList.addErrorListener(errWin);
-    }
-
-    updateModel();
+    attList.addRefresherListener(this);
   }
 
   /**
@@ -977,26 +471,24 @@ public void setTimePrecision(int timePrecision) {
    */
   public void addAttribute(String name) {
     INumberScalar scalar;
-    AttributePolledList alist;
+    fr.esrf.tangoatk.core.AttributePolledList alist;
 
     // Add the attribute in the list
     try {
 
       if (attList == null) {
-        alist = new AttributePolledList();
+        alist = new fr.esrf.tangoatk.core.AttributePolledList();
         alist.add(name);
         setModel(alist);
         lastCreatedList = alist;
         alist.setRefreshInterval(1000);
         alist.startRefresher();
       } else {
-        if (attList.get(name)==null) {
-	        scalar = (INumberScalar) attList.add(name);
-	        int i = attList.size();
-	        lastAdded = rootNode.addItem(this, scalar, defaultColor[i % defaultColor.length]);
-	        mainTreeModel = new DefaultTreeModel(rootNode);
-	        mainTree.setModel(mainTreeModel);
-        }
+        int i = attList.size();
+        scalar = (INumberScalar) attList.add(name);
+        lastAdded = rootNode.addItem(theGraph, scalar, defaultColor[i % defaultColor.length]);
+        mainTreeModel = new DefaultTreeModel(rootNode);
+        mainTree.setModel(mainTreeModel);
       }
 
       TreePath np = new TreePath(lastAdded.getPath());
@@ -1008,7 +500,6 @@ public void setTimePrecision(int timePrecision) {
       ;
     }
 
-    updateModel();
     theGraph.repaint();
     innerPanel.revalidate();
 
@@ -1016,11 +507,11 @@ public void setTimePrecision(int timePrecision) {
 
   public void addAttribute(INumberScalar scalar) {
 
-    AttributePolledList alist;
+    fr.esrf.tangoatk.core.AttributePolledList alist;
 
     // Add the attribute in the list
     if (attList == null) {
-      alist = new AttributePolledList();
+      alist = new fr.esrf.tangoatk.core.AttributePolledList();
       alist.add(scalar);
       setModel(alist);
       lastCreatedList = alist;
@@ -1030,7 +521,7 @@ public void setTimePrecision(int timePrecision) {
       if (!attList.contains(scalar)) {
         attList.add(scalar);
         int i = attList.size();
-        lastAdded = rootNode.addItem(this, scalar, defaultColor[i % defaultColor.length]);
+        lastAdded = rootNode.addItem(theGraph, scalar, defaultColor[i % defaultColor.length]);
         mainTreeModel = new DefaultTreeModel(rootNode);
         mainTree.setModel(mainTreeModel);
       }
@@ -1040,7 +531,6 @@ public void setTimePrecision(int timePrecision) {
     mainTree.setSelectionPath(np);
     mainTree.expandPath(np);
     mainTree.makeVisible(np);
-    updateModel();// RG comment : I made this addition to correct the Mantis bug 495
     theGraph.repaint();
     innerPanel.revalidate();
 
@@ -1052,11 +542,10 @@ public void setTimePrecision(int timePrecision) {
     if (attList.contains(scalar)) {
       System.out.println("Removing " + scalar.getName());
       rootNode.delItem(scalar);
-      attList.remove(scalar.getName());
+      attList.removeElement(scalar);
       mainTreeModel = new DefaultTreeModel(rootNode);
       mainTree.setModel(mainTreeModel);
       innerPanel.revalidate();
-      updateModel();
     }
 
   }
@@ -1073,7 +562,7 @@ public void setTimePrecision(int timePrecision) {
             ("Please use addAttribute() instead of setModel() ");
   }
 
-  public AttributePolledList getModel() {
+  public fr.esrf.tangoatk.core.AttributePolledList getModel() {
     return attList;
   }
 
@@ -1085,17 +574,11 @@ public void setTimePrecision(int timePrecision) {
 
     int ok = JOptionPane.YES_OPTION;
     JFileChooser chooser = new JFileChooser(".");
-    chooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
-    if(lastConfig.length()>0)
-      chooser.setSelectedFile(new File(lastConfig));
     int returnVal = chooser.showSaveDialog(parent);
 
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       File f = chooser.getSelectedFile();
       if (f != null) {
-        if (MultiExtFileFilter.getExtension(f) == null) {
-  		  f = new File(f.getAbsolutePath() + ".txt");
-        }
         if (f.exists())
           ok = JOptionPane.showConfirmDialog(parent, "Do you want to overwrite " + f.getName() + " ?",
                   "Confirm overwrite", JOptionPane.YES_NO_OPTION);
@@ -1110,10 +593,7 @@ public void setTimePrecision(int timePrecision) {
   private void loadButtonActionPerformed() {
 
     int ok = JOptionPane.YES_OPTION;
-    JFileChooser chooser = new JFileChooser(".");
-    chooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
-    if(lastConfig.length()>0)
-      chooser.setSelectedFile(new File(lastConfig));
+    JFileChooser chooser = new JFileChooser();
     int returnVal = chooser.showOpenDialog(parent);
 
     if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -1142,14 +622,11 @@ public void setTimePrecision(int timePrecision) {
     to_write += theGraph.getConfiguration();
     to_write += "toolbar_visible:" + isButtonBarVisible() + "\n";
     to_write += "tree_visible:" + isSelectionTreeVisible() + "\n";
-    to_write += "date_visible:" + isDateVisible() + "\n";
     if (graphTitle.length()>0) to_write += "frame_title:'" + graphTitle + "'\n";
     to_write += "window_pos:" + getLocationOnScreen().x + "," + getLocationOnScreen().y + "\n";
     to_write += "window_size:" + getSize().width + "," + getSize().height + "\n";
-    to_write += "show_device_name:" + isShowingDeviceNames() + "\n";
 
     if (attList != null) to_write += "refresh_time:" + attList.getRefreshInterval() + "\n";
-    to_write += "min_refresh_time:" + getMinRefreshInterval() + "\n";
 
     // Axis
     to_write += theGraph.getXAxis().getConfiguration("x");
@@ -1168,11 +645,7 @@ public void setTimePrecision(int timePrecision) {
       n = (TrendSelectionNode) dv.get(i);
       to_write += "dv" + i + "_name:\'" + n.getModelName() + "\'\n";
       to_write += "dv" + i + "_selected:" + n.getSelected() + "\n";
-      to_write += "dv" + i + "_showminalarm:" + n.isShowingMinAlarm() + "\n";
-      to_write += "dv" + i + "_showmaxalarm:" + n.isShowingMaxAlarm() + "\n";
       to_write += n.getData().getConfiguration("dv" + i);
-      if( n.isShowingMinAlarm() ) to_write += n.getMinAlarmData().getConfiguration("dv_min_alarm" + i);
-      if( n.isShowingMaxAlarm() ) to_write += n.getMaxAlarmData().getConfiguration("dv_max_alarm" + i);
     }
 
     return to_write;
@@ -1183,18 +656,12 @@ public void setTimePrecision(int timePrecision) {
     String errBuff = "";
     Vector p;
     int i,nbDv;
-    // Commented revision 1.46 modifications :
-    //theGraph.setMaxDisplayDuration(Double.POSITIVE_INFINITY);
 
     // Reset display duration (to avoid history reading side FX)
     theGraph.setDisplayDuration(Double.POSITIVE_INFINITY);
 
-    // Load isShowingDeviceName parameter before creating dataview
-    p = f.getParam("show_device_name");
-    if (p != null) setShowingDeviceNames(OFormat.getInt(p.get(0).toString()));
-
     //Create a new Attribute List
-    AttributePolledList alist = new AttributePolledList();
+    fr.esrf.tangoatk.core.AttributePolledList alist = new fr.esrf.tangoatk.core.AttributePolledList();
     alist.setFilter(new fr.esrf.tangoatk.core.IEntityFilter() {
       public boolean keep(fr.esrf.tangoatk.core.IEntity entity) {
         if (entity instanceof fr.esrf.tangoatk.core.INumberScalar) {
@@ -1204,7 +671,6 @@ public void setTimePrecision(int timePrecision) {
         return false;
       }
     });
-    alist.addErrorListener(errWin);
 
     // Get all dataviews
     p = f.getParam("dv_number");
@@ -1234,15 +700,8 @@ public void setTimePrecision(int timePrecision) {
 
       }
 
-      p = f.getParam("min_refresh_time");
-      if (p != null) {
-        setMinRefreshInterval( OFormat.getInt(p.get(0).toString()) );
-      }
-      if (alist.getRefreshInterval() < getMinRefreshInterval()) {
-        alist.setRefreshInterval( getMinRefreshInterval() );
-      }
       //We have the attList
-      //Set the devicePropertyModel
+      //Set the model
       if (nbDv > 0) {
         if (attList != null) {
           innerPanel.remove(treeView);
@@ -1251,14 +710,10 @@ public void setTimePrecision(int timePrecision) {
         }
 
         p = f.getParam("refresh_time");
-        int refreshInterval = 1000;
-        if (p != null) {
-          refreshInterval = OFormat.getInt(p.get(0).toString());
-        }
-        if (refreshInterval < getMinRefreshInterval()) {
-          refreshInterval = getMinRefreshInterval();
-        }
-        alist.setRefreshInterval(refreshInterval);
+        if (p != null)
+          alist.setRefreshInterval(OFormat.getInt(p.get(0).toString()));
+        else
+          alist.setRefreshInterval(1000);
 
         alist.startRefresher();
         setModel(alist);
@@ -1275,19 +730,12 @@ public void setTimePrecision(int timePrecision) {
     // Now we can set up the graph
     // General settings
     theGraph.applyConfiguration(f);
-    // Commented revision 1.46 modifications :
-    //theGraph.setMaxDisplayDuration(24 * 60 * 60 * 1000);
     p = f.getParam("toolbar_visible");
     if (p != null) setButtonBarVisible(OFormat.getBoolean(p.get(0).toString()));
     p = f.getParam("tree_visible");
     if (p != null) setSelectionTreeVisible(OFormat.getBoolean(p.get(0).toString()));
-    p = f.getParam("date_visible");
-    if (p != null) setDateVisible(OFormat.getBoolean(p.get(0).toString()));
     p = f.getParam("frame_title");
-    if (p != null) {
-      graphTitle = p.get(0).toString();
-      if(parent!=null) parent.setTitle(graphTitle);
-    }
+    if (p != null) graphTitle = p.get(0).toString();
     p = f.getParam("window_pos");
     if( p != null ) framePos=OFormat.getPoint(p);
     p = f.getParam("window_size");
@@ -1317,9 +765,9 @@ public void setTimePrecision(int timePrecision) {
         int j = 0;
         boolean found = false;
         while (!found && j < dv.size()) {
-          n = (TrendSelectionNode) dv.get(j);
+          n = (TrendSelectionNode) dv.get(i);
           found = n.getModelName().equals(attName);
-          if (!found) j++;
+          if (!found) i++;
         }
         if (found) {
 
@@ -1328,33 +776,6 @@ public void setTimePrecision(int timePrecision) {
 
           // Dataview options
           d.applyConfiguration(pref,f);
-
-          // Min alarm
-          p=f.getParam(pref + "_showminalarm");
-          if(p!=null) {
-            boolean showMinAlarm = OFormat.getBoolean(p.get(0).toString());
-            if( showMinAlarm ) {
-              n.showMinAlarm();
-              String prefMinAlarm = "dv_min_alarm" + i;
-              n.getMinAlarmData().applyConfiguration(prefMinAlarm,f);
-            } else {
-              n.hideMinAlarm();
-            }
-          }
-
-          // Max alarm
-          p=f.getParam(pref + "_showmaxalarm");
-          if(p!=null) {
-            boolean showMaxAlarm = OFormat.getBoolean(p.get(0).toString());
-            if( showMaxAlarm ) {
-              n.showMaxAlarm();
-              String prefMaxAlarm = "dv_max_alarm" + i;
-              n.getMaxAlarmData().applyConfiguration(prefMaxAlarm,f);
-            } else {
-              n.hideMaxAlarm();
-            }
-          }
-
         }
       }
     }
@@ -1391,7 +812,6 @@ public void setTimePrecision(int timePrecision) {
       String s = getSettings();
       f.write(s, 0, s.length());
       f.close();
-      lastConfig = filename;
     } catch (Exception e) {
       JOptionPane.showMessageDialog(parent, "Failed to write " + filename, "Error", JOptionPane.ERROR_MESSAGE);
     }
@@ -1411,7 +831,6 @@ public void setTimePrecision(int timePrecision) {
     if (!f.readFile(filename)) {
       return "Failed to read " + filename;
     }
-    lastConfig = filename;
 
     return applySettings(f);
   }
@@ -1419,6 +838,13 @@ public void setTimePrecision(int timePrecision) {
   /** Returns the frame_title field read in the config file. */
   public String getTitle() {
     return graphTitle;
+  }
+
+
+  public Dimension getPreferredSize() {
+    Dimension d = super.getPreferredSize();
+    d.height = 0;
+    return d;
   }
 
   // ************************************************
@@ -1492,6 +918,19 @@ public void setTimePrecision(int timePrecision) {
   /**
    * @deprecated no longer used (has no FX)
    */
+  public void setShowingDeviceNames(boolean b) {
+  }
+
+  /**
+   * @deprecated no longer used (has no FX)
+   */
+  public boolean isShowingDeviceNames() {
+    return false;
+  }
+
+  /**
+   * @deprecated no longer used (has no FX)
+   */
   public void setShowingNames(boolean b) {
   }
 
@@ -1500,36 +939,6 @@ public void setTimePrecision(int timePrecision) {
    */
   public boolean isShowingNames() {
     return false;
-  }
-
-  /**
-   * Determines whether or not device names (within chart labels) are visible.
-   * @param mode Device name display mode
-   * @see #DEVICE_LABEL_AUTO
-   * @see #DEVICE_LABEL_NEVER
-   * @see #DEVICE_LABEL_ALWAYS
-   * @see #isShowingDeviceNames
-   */
-  public void setShowingDeviceNames(int mode) {
-    isShowingDeviceName = mode;
-  }
-
-  /**
-   * Determines whether or not device names (within chart labels) are visible.
-   * @see #setShowingDeviceNames
-   */
-  public int isShowingDeviceNames() {
-    return isShowingDeviceName;
-  }
-
-  boolean displayDeviceNames() {
-    switch(isShowingDeviceName) {
-      case DEVICE_LABEL_ALWAYS:
-        return true;
-      case DEVICE_LABEL_NEVER:
-        return false;
-    }
-    return !singleDevice;
   }
 
   /**
@@ -1547,25 +956,6 @@ public void setTimePrecision(int timePrecision) {
   public boolean isButtonBarVisible() {
     if (theToolBar != null)
       return theToolBar.isVisible();
-    else
-      return false;
-  }
-
-  /**
-   * Displays or hides the date label
-   * @param b Visible flag
-   */
-  public void setDateVisible(boolean b) {
-    if (dateLabel != null) dateLabel.setVisible(b);
-  }
-
-  /**
-   * Returns true only if datelabel is visible
-   * @return Visible flag
-   */
-  public boolean isDateVisible() {
-    if (dateLabel != null)
-      return dateLabel.isVisible();
     else
       return false;
   }
@@ -1603,339 +993,13 @@ public void setTimePrecision(int timePrecision) {
   public void ok() {
     getRootPane().getParent().setVisible(false);
   }
-  
-  /**
-   * Disables the button corresponding to the string
-   */
-  public void disableButton(String buttonName){
-      JButton b = (JButton)buttonMap.get(buttonName);
-      if (b!=null) b.setEnabled(false);
-  }
-  
-  /**
-   * Enables the button corresponding to the string
-   */
-  public void enableButton(String buttonName){
-      JButton b = (JButton)buttonMap.get(buttonName);
-      if (b!=null) b.setEnabled(true);
-  }
-
-  /**
-   * Adds an attribute to an axis of this trend (or removes the attribute from
-   * axis).
-   * 
-   * @param attributeName
-   *            The name of the attribute
-   * @param axisSelection
-   *            The axis. Can be SEL_X (x axis), SEL_Y1 (y1 axis), SEL_Y2 (y2
-   *            axis) or SEL_NONE (removes attribute from axis)
-   * @param addToModel
-   *            A boolean to say wheather the attribute has to be added in
-   *            model or not. If <code>true</code> and the attribute is not
-   *            in model, the attribute is added in the trend model.
-   * @see #SEL_X
-   * @see #SEL_Y1
-   * @see #SEL_Y2
-   * @see #SEL_NONE
-   */
-  public void addToAxis(String attributeName, int axisSelection, boolean addToModel)
-  {
-      if (addToModel)
-      {
-          try
-          {
-              if (getModel() == null)
-              {
-                 addAttribute(attributeName); 
-              }
-              else if (getModel().get(attributeName) == null)
-              {
-                  addAttribute(attributeName); 
-              }
-          }
-          catch(ClassCastException e)
-          {
-              return;
-          }
-      }
-      if (rootNode == null) return;
-      int i = 0;
-      Vector dv = rootNode.getSelectableItems();
-      TrendSelectionNode attributeNode = null;
-      boolean present = false;
-      while (!present && i < dv.size())
-      {
-          attributeNode = (TrendSelectionNode) dv.get( i );
-          present = ( (attributeNode != null) 
-                      && (attributeNode.getModel() != null)
-                      && (attributeNode.getModel().getName().equals(attributeName))
-                );
-          if (!present) i++;
-      }
-      if (present)
-      {
-          switch(axisSelection)
-          {
-              case SEL_X:
-                  int j = 0;
-                  boolean found = false;
-                  TrendSelectionNode nodeSetToX = null;
-                  while (!found && j < dv.size())
-                    {
-                        nodeSetToX = (TrendSelectionNode) dv.get( j );
-                        found = ( (nodeSetToX != null) 
-                                  && (nodeSetToX.getSelected() == SEL_X)
-                                );
-                        if (!found) j++;
-                    }
-                  if (found) nodeSetToX.setSelected(SEL_NONE);
-              case SEL_Y1:
-              case SEL_Y2:
-              case SEL_NONE:
-                  attributeNode.setSelected(axisSelection);
-                  mainTree.repaint();
-                  theGraph.repaint();
-              default:
-                  return;
-          }
-      }
-  }
-
-  /**
-   * Adds an attribute to an axis of this trend (or removes the attribute from
-   * axis).
-   * 
-   * @param attribute
-   *            The attribute
-   * @param axisSelection
-   *            The axis. Can be SEL_X (x axis), SEL_Y1 (y1 axis), SEL_Y2 (y2
-   *            axis) or SEL_NONE (removes attribute from axis)
-   * @param addToModel
-   *            A boolean to say wheather the attribute has to be added in
-   *            model or not. If <code>true</code> and the attribute is not
-   *            in model, the attribute is added in the trend model.
-   * @see #SEL_X
-   * @see #SEL_Y1
-   * @see #SEL_Y2
-   * @see #SEL_NONE
-   */
-  public void addToAxis(INumberScalar attribute, int axisSelection, boolean addToModel)
-  {
-      if (addToModel)
-      {
-          if (getModel() == null)
-          {
-              addAttribute(attribute);
-          }
-          else if (getModel().get(attribute.getName()) == null)
-          {
-              addAttribute(attribute);
-          }
-      }
-      if (rootNode == null) return;
-      int i = 0;
-      Vector dv = rootNode.getSelectableItems();
-      TrendSelectionNode attributeNode = null;
-      boolean present = false;
-      while (!present && i < dv.size())
-      {
-          attributeNode = (TrendSelectionNode) dv.get( i );
-          present = ( (attributeNode != null) 
-                      && (attributeNode.getModel() != null)
-                      && (attributeNode.getModel().getName().equals(attribute.getName()))
-                );
-          if (!present) i++;
-      }
-      if (present)
-      {
-          switch(axisSelection)
-          {
-              case SEL_X:
-                  int j = 0;
-                  boolean found = false;
-                  TrendSelectionNode nodeSetToX = null;
-                  while (!found && j < dv.size())
-                    {
-                        nodeSetToX = (TrendSelectionNode) dv.get( j );
-                        found = ( (nodeSetToX != null) 
-                                  && (nodeSetToX.getSelected() == SEL_X)
-                                );
-                        if (!found) j++;
-                    }
-                  if (found) nodeSetToX.setSelected(SEL_NONE);
-              case SEL_Y1:
-              case SEL_Y2:
-              case SEL_NONE:
-                  attributeNode.setSelected(axisSelection);
-                  mainTree.repaint();
-                  theGraph.repaint();
-              default:
-                  return;
-          }
-      }
-  }
-
-  /**
-   * Returns the axis associated with an attribute
-   * @param attributeName The name of the attribute
-   * @return The axis associated with the attribute
-   * the value can be:<br>
-   * <ul>
-   *   <li>SEL_X (x axis)</li>
-   *   <li>SEL_Y1 (y1 axis)</li>
-   *   <li>SEL_Y2 (y2 axis)</li>
-   *   <li>SEL_NONE (no axis, default value)</li>
-   * </ul>
-   * @see #SEL_X
-   * @see #SEL_Y1
-   * @see #SEL_Y2
-   * @see #SEL_NONE
-   */
-  public int getAxisForAttribute(String attributeName)
-  {
-      int selectedAxis = SEL_NONE;
-      if (rootNode == null) return selectedAxis;
-      int i = 0;
-      Vector dv = rootNode.getSelectableItems();
-      TrendSelectionNode attributeNode = null;
-      boolean present = false;
-      while (!present && i < dv.size())
-      {
-          attributeNode = (TrendSelectionNode) dv.get( i );
-          present = ( (attributeNode != null) 
-                      && (attributeNode.getModel() != null)
-                      && (attributeNode.getModel().getName().equals(attributeName))
-                    );
-          if (!present) i++;
-      }
-      if (present)
-      {
-          selectedAxis = attributeNode.getSelected();
-      }
-      return selectedAxis;
-  }
-
-  /**
-   * Returns the dataview associated with an attribute (null if no dataview is associated with the attribute)
-   * @param attributeName The name of the attribute
-   * @return The dataview associated with the attribute (null if no dataview is associated with the attribute)
-   */
-  public JLDataView getDataViewForAttribute(String attributeName)
-  {
-      JLDataView selectedData = null;
-      if (rootNode == null) return selectedData;
-      int i = 0;
-      Vector dv = rootNode.getSelectableItems();
-      TrendSelectionNode attributeNode = null;
-      boolean present = false;
-      while (!present && i < dv.size())
-      {
-          attributeNode = (TrendSelectionNode) dv.get( i );
-          present = ( (attributeNode != null) 
-                      && (attributeNode.getModel() != null)
-                      && (attributeNode.getModel().getName().equals(attributeName))
-                    );
-          if (!present) i++;
-      }
-      if (present)
-      {
-          selectedData = attributeNode.getData();
-      }
-      return selectedData;
-  }
-
-  public void setMaxDisplayDuration (double maxDisplay)
-  {
-      theGraph.setMaxDisplayDuration(maxDisplay);
-  }
-
-  public double getMaxDisplayDuration ()
-  {
-      return theGraph.getMaxDisplayDuration();
-  }
-
-  protected int getMinRefreshInterval () {
-    return minRefreshInterval;
-  }
-
-  protected void setMinRefreshInterval (int minRefreshInterval) {
-    this.minRefreshInterval = minRefreshInterval;
-    if (attList != null && attList.getRefreshInterval() < minRefreshInterval) {
-      attList.setRefreshInterval( minRefreshInterval );
-    }
-  }
-
-  public void resetTrend() {
-
-    if( rootNode!=null ) {
-      Vector dv = rootNode.getSelectableItems();
-      TrendSelectionNode n;
-      for(int i = 0;i < dv.size(); i++) {
-        n = (TrendSelectionNode)dv.get(i);
-        if (n != null && n.getData() != null) {
-          n.getData().reset();
-        }
-      }
-      theGraph.repaint();
-    }
-
-  }
-  
-    protected int getMinRefreshTrendInterval() {
-        return minRefreshTrendInterval;
-      }
-
-      protected void setMinRefreshTrendInterval (int minRefreshTrendInterval) {
-        this.minRefreshTrendInterval = minRefreshTrendInterval;
-        if (attList != null && getRefreshIntervalTrend() < minRefreshTrendInterval) {
-          setRefreshIntervalTrend(minRefreshTrendInterval);
-        }
-      }     
-     
-  	public int getRefreshIntervalTrend() {
-        return refreshIntervalTrend;
-    }
-
-    public void setRefreshIntervalTrend(int refreshIntervalTrend) {
-        this.refreshIntervalTrend = refreshIntervalTrend;
-    }
-
-	public boolean isManageIntervalTrend() {
-        return manageIntervalTrend;
-    }
-
-    public void setManageIntervalTrend() {
-            URL tmpUrl = getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend.properties");
-            if(tmpUrl != null)
-                manageIntervalTrend = true;
-    }
-    
-  	public void refreshTrend() {
-          theGraph.repaint();
-    }
 
   // End of variables declaration//GEN-END:variables
 
   public static void main(String[] args) throws Exception {
 
     final JFrame f = new JFrame();
-    final Trend t = new Trend(f);
-
-    //DeviceFactory.getInstance().setTraceMode(DeviceFactory.TRACE_ALL);
-    /*
-    t.setSetting("toolbar_visible:false "+
-                 "tree_visible:false "+
-                 "dv_number:2 "+
-                 "dv0_name:'jlp/test/1/att_un' "+
-                 "dv0_selected:2 "+
-                 "dv0_linecolor:255,0,0 "+
-                 "dv1_name:'jlp/test/1/att_deux' "+
-                 "dv1_selected:3 "+
-                 "dv1_linecolor:0,0,255 ");
-     */
-
-    // Default title
-    f.setTitle("Trends");
+    final Trend t = new Trend();
 
     if (args.length > 0) {
       String err = t.loadSetting(args[0]);
@@ -1944,7 +1008,8 @@ public void setTimePrecision(int timePrecision) {
       }
     } else {
       // Create an empty tree
-      AttributePolledList lst = new AttributePolledList();
+      fr.esrf.tangoatk.core.AttributePolledList lst =
+              new fr.esrf.tangoatk.core.AttributePolledList();
       t.setModel(lst);
     }
 
@@ -1952,76 +1017,16 @@ public void setTimePrecision(int timePrecision) {
 
     if( t.getTitle().length()>0 )
       f.setTitle(t.getTitle());
+    else
+      f.setTitle("Trends");
 
     f.setContentPane(t);
     Image image = Toolkit.getDefaultToolkit().getImage(t.getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_icon.gif"));
     if (image != null) f.setIconImage(image);
     f.pack();
     f.setBounds(framePos.x, framePos.y, frameDimension.x, frameDimension.y);
-    f.setVisible(true);
+    f.show();
 
   } // end of main ()
 
-}
-
-class ConfigPanel extends JDialog implements ActionListener {
-
-  private JButton      addBtn;
-  private JButton      closeBtn;
-  private Trend        trend;
-  private DeviceFinder finder;
-
-  ConfigPanel(Frame parent,Trend trend) {
-    super(parent,true);
-    initComponents();
-    this.trend = trend;
-  }
-
-  ConfigPanel(Dialog parent,Trend trend) {
-    super(parent,true);
-    initComponents();
-    this.trend = trend;
-  }
-
-  private void initComponents() {
-
-    setTitle("Add new attribute");
-    JPanel innerPanel = new JPanel();
-    innerPanel.setLayout(new BorderLayout());
-    finder = new DeviceFinder(DeviceFinder.MODE_ATTRIBUTE_NUMBER_SCALAR);
-    innerPanel.add(finder,BorderLayout.CENTER);
-
-    addBtn = new JButton("Add selected attribute(s)");
-    addBtn.setFont(ATKConstant.labelFont);
-    addBtn.addActionListener(this);
-    closeBtn = new JButton("Dismiss");
-    closeBtn.setFont(ATKConstant.labelFont);
-    closeBtn.addActionListener(this);
-    JPanel btnPanel = new JPanel(new FlowLayout());
-    btnPanel.add(addBtn);
-    btnPanel.add(closeBtn);
-    innerPanel.add(btnPanel,BorderLayout.SOUTH);
-    setContentPane(innerPanel);
-
-  }
-
-  public void actionPerformed(ActionEvent e) {
-
-    Object src = e.getSource();
-
-    if(src == addBtn) {
-      String[] list = finder.getSelectedNames();
-      for(int i=0;i<list.length;i++)
-        trend.addAttribute(list[i]);
-    } else if (src == closeBtn ) {
-      setVisible(false);
-    }
-
-  }
-
-  void showPanel() {
-    ATKGraphicsUtils.centerDialog(this);
-    setVisible(true);
-  }
-  
 }

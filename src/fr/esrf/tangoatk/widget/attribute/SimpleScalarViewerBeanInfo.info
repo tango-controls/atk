@@ -1,7 +1,7 @@
 name = SimpleScalarViewer
 package fr.esrf.tangoatk.widget.attribute
 
-properties = unitVisible, hasToolTip, qualityInTooltip
+properties = unitVisible
 
 ICON_COLOR_16x16 = StringScalarViewer.gif
 ICON_MONO_16x16 = StringScalarViewer.gif

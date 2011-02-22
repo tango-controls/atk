@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * NumberScalarListViewer.java
  *
  * Created on July 21, 2003, 4:45 PM
@@ -34,44 +12,33 @@ package fr.esrf.tangoatk.widget.attribute;
  
 import javax.swing.*;
 import java.util.Vector;
-import java.awt.Color;
 
 import fr.esrf.tangoatk.core.*;
+import fr.esrf.tangoatk.widget.attribute.NumberScalarWheelEditor;
+import fr.esrf.tangoatk.widget.attribute.SimpleScalarViewer;
 import fr.esrf.tangoatk.widget.util.JSmoothLabel;
 import fr.esrf.tangoatk.widget.util.JAutoScrolledText;
-import fr.esrf.tangoatk.widget.util.JAutoScrolledTextListener;
 import fr.esrf.tangoatk.widget.properties.LabelViewer;
+import fr.esrf.tangoatk.widget.attribute.SimplePropertyFrame;
 
 public class NumberScalarListViewer extends javax.swing.JPanel
-             implements JAutoScrolledTextListener
 {
     public static final String      DEFAULT_SETTER = "WheelEditor";
     public static final String      COMBO_SETTER = "ComboEditor";
 
-    protected Vector<IAttribute>    listModel;
-    protected Vector<LabelViewer>   nsLabels;
-    protected Vector<JComponent>    nsViewers;
-    protected Vector<JComponent>    nsSetters;
-    protected Vector<JButton>       nsPropButtons;
-
-    protected SimplePropertyFrame   propFrame=null;
+    private Vector                listModel;
+    private Vector                nsLabels, nsViewers, nsSetters, nsPropButtons;
+    private SimplePropertyFrame   propFrame=null;
         
 
     /* The bean properties */
-    protected java.awt.Font    theFont;
+    private java.awt.Font    theFont;
     private boolean          labelVisible;
     private boolean          setterVisible;
     private boolean          propertyButtonVisible;
     private boolean          propertyListEditable;
     private boolean          unitVisible;
     private String           setterType;
-    private Color            arrowColor;
-    private String           toolTipDisplay;
-    
-    
-    public static final String      TOOLTIP_DISPLAY_NONE = "None";
-    public static final String      TOOLTIP_DISPLAY_NAME_ONLY = "Name";
-    public static final String      TOOLTIP_DISPLAY_ALL = "All";
     
 
     /** Creates new form NumberScalarListViewer */
@@ -82,7 +49,6 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	nsViewers = null;
 	nsSetters = null;
 	nsPropButtons = null;
-	arrowColor = null;
 	propFrame = new SimplePropertyFrame();
 	
 	//theFont = new java.awt.Font("Lucida Bright", java.awt.Font.BOLD, 22);
@@ -97,7 +63,6 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	propertyListEditable = true;
 	unitVisible = true;
 	setterType = DEFAULT_SETTER;
-	toolTipDisplay = TOOLTIP_DISPLAY_NONE;
         setLayout(new java.awt.GridBagLayout());
 	
 	setVisible(false);
@@ -110,17 +75,17 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	boolean                      containsNumberScalar;
 	Object                       elem;
 	
-
-        if (listModel != null)
-        {
-            removeComponents();
-            listModel = null;
-        }
-               
-        if (scalarList == null)
+	if (scalarList == null)
 	{
+	   if (listModel != null)
+	   {
+	      removeComponents();
+	   }
 	   return;
 	}
+	   
+	if (listModel != null) // Not yet implemented
+	   return;
 	   
 	nbAtts = scalarList.getSize();
 	
@@ -149,16 +114,16 @@ public class NumberScalarListViewer extends javax.swing.JPanel
     }
     
     
-    protected void removeComponents()
+    private void removeComponents()
     {
        int                             indRow, nbRows;
-       IAttribute                      iatt = null;
+       Object                          elem = null;
        INumberScalar                   ins = null;
        LabelViewer                     nsLabel=null;
-       JComponent                      jcomp = null;
        SimpleScalarViewer              viewer=null;
        NumberScalarWheelEditor         setter=null;
        NumberScalarComboEditor         comboSetter=null;
+       JButton                         propertyButton=null;
 
 
        propFrame = null;
@@ -169,36 +134,64 @@ public class NumberScalarListViewer extends javax.swing.JPanel
        {
 	  try
 	  {
-	     iatt = listModel.get(indRow);
-	     if (iatt instanceof INumberScalar)
+	     elem = listModel.get(indRow);
+	     if (elem instanceof INumberScalar)
 	     {
-		ins = (INumberScalar) iatt;
+		ins = (INumberScalar) elem;
+	     }
+	     else
+	        ins = null;
 		
-	        // remove this model from all viewers
-	        nsLabel = nsLabels.get(indRow);
-		nsLabel.setModel(null);
-		
-		jcomp = nsViewers.get(indRow);
-		if (jcomp instanceof SimpleScalarViewer)
+	     if (ins != null) // remove this model from all viewers
+	     {
+	        elem = nsLabels.get(indRow);
+		if (elem instanceof LabelViewer)
 		{
-		   viewer = (SimpleScalarViewer) jcomp;
+		   nsLabel = (LabelViewer) elem;
+		   nsLabel.setModel(null);
+		}
+		elem = nsViewers.get(indRow);
+		if (elem instanceof SimpleScalarViewer)
+		{
+		   viewer = (SimpleScalarViewer) elem;
 		   viewer.clearModel();
 		}
 		
-		jcomp = nsSetters.get(indRow);
-		if (jcomp instanceof NumberScalarWheelEditor)
+		elem = nsSetters.get(indRow);
+		if (elem instanceof NumberScalarWheelEditor)
 		{
-		   setter = (NumberScalarWheelEditor) jcomp;
+		   setter = (NumberScalarWheelEditor) elem;
 	           if (ins.isWritable())
 		      setter.setModel(null);
 		}
 		else
-		   if (jcomp instanceof NumberScalarComboEditor)
+		   if (elem instanceof NumberScalarComboEditor)
 		   {
-		      comboSetter = (NumberScalarComboEditor) jcomp;
+		      comboSetter = (NumberScalarComboEditor) elem;
 	              if (ins.isWritable())
 			 comboSetter.setNumberModel(null);
 		   }
+	     
+	        /*elem = nsLabels.get(indRow);
+		if (elem instanceof LabelViewer)
+		{
+		   nsLabel = (LabelViewer) elem;
+                   ins.getProperty("label").removePresentationListener(nsLabel);
+		}
+		elem = nsViewers.get(indRow);
+		if (elem instanceof SimpleScalarViewer)
+		{
+		   viewer = (SimpleScalarViewer) elem;
+		   ins.removeNumberScalarListener(viewer);
+		}
+		
+		elem = nsSetters.get(indRow);
+		if (elem instanceof NumberScalarWheelEditor)
+		{
+		   setter = (NumberScalarWheelEditor) elem;
+	           if (ins.isWritable())
+		      ins.removeNumberScalarListener(setter);
+		}*/
 	     }
 	  }
 	  catch (Exception e)
@@ -231,10 +224,12 @@ public class NumberScalarListViewer extends javax.swing.JPanel
     public void setTheFont(java.awt.Font  ft)
     {
        int                             indRow, nbRows;
+       Object                          elem = null;
        LabelViewer                     nsLabel=null;
+       SimpleScalarViewer              viewer=null;
+       NumberScalarWheelEditor         setter=null;
+       NumberScalarComboEditor         comboSetter=null;
        JButton                         propertyButton=null;
-       JComponent                      viewer = null;
-       JComponent                      setter = null;
 
 
        if (ft != null)
@@ -249,30 +244,39 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	     {
 		try
 		{
-	           nsLabel = nsLabels.get(indRow);
-		   nsLabel.setFont(theFont);
-		   
-	           viewer = nsViewers.get(indRow);
-		   if (viewer != null)
+	           elem = nsLabels.get(indRow);
+		   if (elem instanceof LabelViewer)
 		   {
-		      if (viewer instanceof SimpleScalarViewer)
-		      {
-			  viewer.setFont(theFont);
-		      }
+		      nsLabel = (LabelViewer) elem;
+		      nsLabel.setFont(theFont);
 		   }
 
-	           setter = nsSetters.get(indRow);
-		   if (setter != null)
+	           elem = nsViewers.get(indRow);
+		   if (elem instanceof SimpleScalarViewer)
 		   {
-		      if (   (setter instanceof NumberScalarWheelEditor)
-			  || (setter instanceof NumberScalarComboEditor) )
-		      {
-			  setter.setFont(theFont);
-		      }
+		      viewer = (SimpleScalarViewer) elem;
+		      viewer.setFont(theFont);
 		   }
-		   
-	           propertyButton = nsPropButtons.get(indRow);
-		   propertyButton.setFont(theFont);
+
+	           elem = nsSetters.get(indRow);
+		   if (elem instanceof NumberScalarWheelEditor)
+		   {
+		      setter = (NumberScalarWheelEditor) elem;
+		      setter.setFont(theFont);
+		   }
+		   else
+		      if (elem instanceof NumberScalarComboEditor)
+		      {
+			 comboSetter = (NumberScalarComboEditor) elem;
+			 comboSetter.setFont(theFont);
+		      }
+
+	           elem = nsPropButtons.get(indRow);
+		   if (elem instanceof JButton)
+		   {
+		      propertyButton = (JButton) elem;
+		      propertyButton.setFont(theFont);
+		   }
 		}
 		catch (Exception e)
 		{
@@ -305,6 +309,7 @@ public class NumberScalarListViewer extends javax.swing.JPanel
     private void changeLabelVisibility()
     {
        int                             indRow, nbRows;
+       Object                          elem = null;
        LabelViewer                     nsLabel=null;
 
 
@@ -315,8 +320,12 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	  {
 	     try
 	     {
-	        nsLabel = nsLabels.get(indRow);
-		nsLabel.setVisible(labelVisible);
+	        elem = nsLabels.get(indRow);
+		if (elem instanceof LabelViewer)
+		{
+		   nsLabel = (LabelViewer) elem;
+		   nsLabel.setVisible(labelVisible);
+		}
 	     }
 	     catch (Exception e)
 	     {
@@ -348,7 +357,9 @@ public class NumberScalarListViewer extends javax.swing.JPanel
     private void changeSetterVisibility()
     {
        int                             indRow, nbRows;
-       JComponent                      setter = null;
+       Object                          elem = null;
+       NumberScalarWheelEditor         setter=null;
+       NumberScalarComboEditor         comboSetter=null;
 
 
        if (nsSetters != null)
@@ -358,12 +369,17 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	  {
 	     try
 	     {
-	        setter = nsSetters.get(indRow);
-		if (setter != null)
-		   if (   (setter instanceof NumberScalarWheelEditor)
-		       || (setter instanceof NumberScalarComboEditor) )
+	        elem = nsSetters.get(indRow);
+		if (elem instanceof NumberScalarWheelEditor)
+		{
+		   setter = (NumberScalarWheelEditor) elem;
+		   setter.setVisible(setterVisible);
+		}
+		else
+		   if (elem instanceof NumberScalarComboEditor)
 		   {
-		       setter.setVisible(setterVisible);
+		      comboSetter = (NumberScalarComboEditor) elem;
+		      comboSetter.setVisible(setterVisible);
 		   }
 	     }
 	     catch (Exception e)
@@ -371,7 +387,7 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	       System.out.println("NumberScalarListViewer : changeSetterVisibility : Caught exception  "+e.getMessage());
 	     }
 	  }
-       } // if scalarSetters != null
+       } // if nsSetters != null
 
     }
     
@@ -394,6 +410,7 @@ public class NumberScalarListViewer extends javax.swing.JPanel
     private void changePropButtonVisibility()
     {
        int                             indRow, nbRows;
+       Object                          elem = null;
        JButton                         propertyButton=null;
 
 
@@ -404,8 +421,12 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	  {
 	     try
 	     {
-		propertyButton = nsPropButtons.get(indRow);
-		propertyButton.setVisible(propertyButtonVisible);
+	        elem = nsPropButtons.get(indRow);
+		if (elem instanceof JButton)
+		{
+		   propertyButton = (JButton) elem;
+		   propertyButton.setVisible(propertyButtonVisible);
+		}
 	     }
 	     catch (Exception e)
 	     {
@@ -452,9 +473,8 @@ public class NumberScalarListViewer extends javax.swing.JPanel
     private void changeUnitVisibility()
     {
        int                             indRow, nbRows;
-       JComponent                      jcomp = null;
+       Object                          elem = null;
        SimpleScalarViewer              viewer=null;
-       NumberScalarComboEditor         setter=null;
 
 
        if (nsViewers != null)
@@ -464,20 +484,12 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	  {
 	     try
 	     {
-		jcomp = nsViewers.get(indRow);
-		if (jcomp instanceof SimpleScalarViewer)
+	        elem = nsViewers.get(indRow);
+		if (elem instanceof SimpleScalarViewer)
 		{
-		   viewer = (SimpleScalarViewer) jcomp;
+		   viewer = (SimpleScalarViewer) elem;
 		   viewer.setUnitVisible(unitVisible);
 		}
-		jcomp = nsSetters.get(indRow);
-		if (jcomp != null)
-		   if (jcomp instanceof NumberScalarComboEditor)
-		   {
-		      setter = (NumberScalarComboEditor) jcomp;
-		      setter.setUnitVisible(unitVisible);
-		   }
-		
 	     }
 	     catch (Exception e)
 	     {
@@ -490,51 +502,11 @@ public class NumberScalarListViewer extends javax.swing.JPanel
      
      
      
-   /**
-    * Returns the current toolTipDisplay
-    * @see #setToolTipDisplay
-    */
-    public String getToolTipDisplay()
-    {
-         return toolTipDisplay;
-    }
-    
-   /**
-    * Sets the current toolTipDisplay. This property should be set before the call to setModel()
-    * @see #getToolTipDisplay
-    */
-    public void setToolTipDisplay(String  ttType)
-    {
-	if (listModel != null)
-	   return;
-	   
-        if (ttType.equalsIgnoreCase(TOOLTIP_DISPLAY_ALL))
-	   toolTipDisplay = TOOLTIP_DISPLAY_ALL;
-	else
-	   if (ttType.equalsIgnoreCase(TOOLTIP_DISPLAY_NAME_ONLY))
-	       toolTipDisplay = TOOLTIP_DISPLAY_NAME_ONLY;
-	   else
-	       toolTipDisplay = TOOLTIP_DISPLAY_NONE;
-    }
-
-     
-    /**
-     * @deprecated As of ATKWidget-2.5.8 and higher
-     * The method getSetterType should not be used.
-     * The setterType for each NumberScalar attribute is selected automatically by
-     * the NumberScalarListViewer.
-     */
     public String getSetterType()
     {
          return setterType;
     }
     
-    
-    /**
-     * @deprecated As of ATKWidget-2.5.8 and higher this method has no effect.
-     * The setterType for each NumberScalar attribute is selected automatically by
-     * the NumberScalarListViewer.
-     */
     public void setSetterType(String  setType)
     {
         if (listModel != null)
@@ -548,77 +520,6 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	   else
 	       setterType = DEFAULT_SETTER;
     }
-
-
-
-
-/**
- * Returns the current arrowButton colour for the WheelEditor used as number setter
- * @see #setArrowColor
- */
-   public Color getArrowColor()
-   {
-     if (arrowColor == null)
-        return (getBackground());
-     else
-        return(arrowColor);
-   }
-
-
-/**
- * Sets the current arrowButton colour for the WheelEditor used as number setter
- * @param java.awt.Color  ac
- */
-   public void setArrowColor( Color  ac)
-   {
-        if (ac == arrowColor)
-	   return;
-	
-	changeArrowColors(ac);
-	
-	arrowColor = ac;   
-   }
-
-
-    
-    private void changeArrowColors(Color  ac)
-    {
-       int                             indRow, nbRows;
-       JComponent                      jcomp = null;
-       NumberScalarWheelEditor         setter=null;
-
-
-       if (nsSetters != null)
-       {
-	  nbRows = nsSetters.size();
-	  for (indRow=0; indRow<nbRows; indRow++)
-	  {
-	     try
-	     {
-	        jcomp = nsSetters.get(indRow);
-		if (jcomp instanceof NumberScalarWheelEditor)
-		{
-		   setter = (NumberScalarWheelEditor) jcomp;
-		   if (ac == null)
-		      setter.setButtonColor(setter.getBackground());
-		   else
-		      setter.setButtonColor(ac);
-		}
-	     }
-	     catch (Exception e)
-	     {
-	       System.out.println("NumberScalarListViewer : changeArrowColors : Caught exception  "+e.getMessage());
-	     }
-	  }
-       } // if nsSetters != null
-    }
-
-    
-    /* Method for JAutoScrolledTextListener interface */
-    public void textExceedBounds(JAutoScrolledText source)
-    {
-       this.revalidate();
-    }
    
     
     /** This method is called from within the constructor to
@@ -626,7 +527,7 @@ public class NumberScalarListViewer extends javax.swing.JPanel
      * WARNING: Do NOT modify this code. The content of this method is
      * always regenerated by the Form Editor.
      */
-    protected void initComponents(fr.esrf.tangoatk.core.AttributeList scalarList)
+    private void initComponents(fr.esrf.tangoatk.core.AttributeList scalarList)
     {
 	int                             nbAtts, idx, viewerRow;
 	boolean                         containsNumberScalar;
@@ -642,14 +543,13 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	JButton                         propertyButton=null;
 	
 	int                             arrowHeight=0;
-	boolean                         insHasValueList;
 
 
-	listModel = new Vector<IAttribute> ();
-	nsLabels = new Vector<LabelViewer> ();
-	nsViewers = new Vector<JComponent> ();
-	nsSetters = new Vector<JComponent> ();
-	nsPropButtons = new Vector<JButton> ();
+	listModel = new Vector();
+	nsLabels = new Vector();
+	nsViewers = new Vector();
+	nsSetters = new Vector();
+	nsPropButtons = new Vector();
 	
 	
 	viewerRow = 0;
@@ -661,10 +561,6 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	   if (elem instanceof INumberScalar)
 	   {
 	      ins = (INumberScalar) elem;
-	      insHasValueList = false;
-	      if (ins.getPossibleValues() != null)
-		 if (ins.getPossibleValues().length > 0)
-		     insHasValueList = true;
 	      
               nsLabel = new LabelViewer();
               viewer = new SimpleScalarViewer();
@@ -673,7 +569,7 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	      nsLabel.setFont(theFont);
 	      nsLabel.setHorizontalAlignment(JSmoothLabel.RIGHT_ALIGNMENT);
 	      nsLabel.setBackground(getBackground());
-	      //nsLabel.setValueOffsets(0, -5);
+	      nsLabel.setValueOffsets(0, -5);
 	      nsLabel.setText(ins.getLabel());
 	      if (labelVisible)
 		 nsLabel.setVisible(true);
@@ -681,12 +577,11 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 		 nsLabel.setVisible(false);
 	      nsLabel.setModel(ins);
 		      
-	      if (insHasValueList)
+	      if (setterType.equalsIgnoreCase(COMBO_SETTER))
 	      {
         	   comboSetter = new NumberScalarComboEditor();
         	   comboSetter.setFont(theFont);
         	   comboSetter.setBackground(getBackground());
-	           comboSetter.setUnitVisible(unitVisible);
 		   if (ins.isWritable())
 		   {
 		      comboSetter.setNumberModel(ins);
@@ -700,7 +595,7 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	           nsSetters.add(comboSetter);
 		   setter = comboSetter;
 	      }
-	      else // NumberScalar has no possibleValues list
+	      else // setterType = DEFAULT_SETTER
 	      {
         	   wheelSetter = new NumberScalarWheelEditor();
         	   wheelSetter.setFont(theFont);
@@ -719,29 +614,13 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 		   setter = wheelSetter;
 	      }
 	 
-              if (toolTipDisplay.equalsIgnoreCase(TOOLTIP_DISPLAY_ALL))
-              {
-                 viewer.setHasToolTip(true);
-                 viewer.setQualityInTooltip(true);
-              }
-              else
-                 if (toolTipDisplay.equalsIgnoreCase(TOOLTIP_DISPLAY_NAME_ONLY))
-                 {
-                    viewer.setHasToolTip(true);
-                    viewer.setQualityInTooltip(false);
-                 }
-                 else
-                 {
-                    viewer.setHasToolTip(false);
-                    viewer.setQualityInTooltip(false);
-                 }
 
               viewer.setFont(theFont);
 	      viewer.setUnitVisible(unitVisible);
               viewer.setBackgroundColor(getBackground());
               viewer.setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());
 	      viewer.setAlarmEnabled(true);
-	      //viewer.setValueOffsets(0, -5);
+	      viewer.setValueOffsets(0, -5);
 	      viewer.setModel(ins);
 	      
 
@@ -749,7 +628,6 @@ public class NumberScalarListViewer extends javax.swing.JPanel
               propertyButton.setBackground(getBackground());
               propertyButton.setText(" ... ");
               propertyButton.setMargin(new java.awt.Insets(-3, 0, 3, 0));
-              propertyButton.setToolTipText("Attribute Properties");	      
 	      if (!propertyButtonVisible)
 		 if (propertyButton != null)
 		    propertyButton.setVisible(false);
@@ -763,14 +641,12 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	               });
 		    
 	      ins.refresh(); // to enable the viewers to be correctly sized!
-	      
-	      viewer.addTextListener(this);
 
               // Increase the height of viewers to the height of setters
 	      arrowHeight = (setter.getPreferredSize().height - viewer.getPreferredSize().height)/2;
 	      if (arrowHeight > 0)
 	         viewer.setMargin(
-		    new java.awt.Insets(arrowHeight+2, 5, arrowHeight+2, 5));
+		    new java.awt.Insets(arrowHeight+2, 3, arrowHeight+2, 3));
 
 	      
 	      // Add all these viewers to the panel	      
@@ -818,8 +694,9 @@ public class NumberScalarListViewer extends javax.swing.JPanel
     {
         int              buttonIndex=-1;
 	int              ind, nbButtons;
-	IAttribute       iatt;
+	Object           elem;
 	JButton          propertyButton;
+	PropertyFrame    pf;
 	INumberScalar    ins;
 	
 	
@@ -836,11 +713,15 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	{
 	   try
 	   {
-	      propertyButton = nsPropButtons.get(ind);
-	      if (propertyButton.equals(evt.getSource()))
+	      elem = nsPropButtons.get(ind);
+	      if (elem instanceof JButton)
 	      {
-		 buttonIndex = ind;
-		 break;
+		 propertyButton = (JButton) elem;
+		 if (propertyButton.equals(evt.getSource()))
+		 {
+		    buttonIndex = ind;
+		    break;
+		 }
 	      }
 	   }
 	   catch (Exception e)
@@ -859,9 +740,9 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	
 	try
 	{
-	   iatt = listModel.get(buttonIndex);
-	   if (iatt instanceof INumberScalar)
-	      ins = (INumberScalar) iatt;
+	   elem = listModel.get(buttonIndex);
+	   if (elem instanceof INumberScalar)
+	      ins = (INumberScalar) elem;
 	}
 	catch (Exception e)
 	{
@@ -876,6 +757,17 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	   propFrame.setModel(ins);
 	   propFrame.setVisible(true);
 	}
+
+	/* 
+	pf = new PropertyFrame();
+	pf.setDefaultCloseOperation(javax.swing.WindowConstants.HIDE_ON_CLOSE);
+	pf.setSize(300, 400);
+	pf.setEditable(propertyListEditable);
+	pf.setModel(ins);
+	pf.pack();
+        pf.show();
+	*/
+	
     }
 
 
@@ -889,8 +781,8 @@ public class NumberScalarListViewer extends javax.swing.JPanel
        double[]                               vals = {0.1, 0.3, 1.0, 3.0, 10.0, 30.0, 100.0, 300.0};
        
 
-       //nslv.setBackground(Color.white);
-       //nslv.setForeground(Color.black);
+       //nslv.setBackground(java.awt.Color.white);
+       //nslv.setForeground(java.awt.Color.black);
 
        // Connect to a list of number scalar attributes
        try
@@ -905,7 +797,7 @@ public class NumberScalarListViewer extends javax.swing.JPanel
           //nslv.setPropertyButtonVisible(false);
           //att = (INumberScalar) attList.add("sr/d-tm/ntm/BandWidth");
 	  //att.setPossibleValues(vals);
-          //nslv.setToolTipDisplay(TOOLTIP_DISPLAY_NAME_ONLY);
+          //nslv.setSetterType(NumberScalarListViewer.COMBO_SETTER);
 	  nslv.setModel(attList);
        }
        catch (Exception ex)
@@ -933,7 +825,39 @@ public class NumberScalarListViewer extends javax.swing.JPanel
        mainFrame.setContentPane(nslv);
        mainFrame.pack();
 
-       mainFrame.setVisible(true);
+       mainFrame.show();
+
+
+/* A temporary solution : start the refresher after a delay to allow the
+   layout manger finish it's work! 
+   But the best solution is to synchronize with a componentListener method
+   as it is done above    
+       try
+       {
+         Thread.sleep(4000);
+       }
+       catch(Exception e)
+       {
+       }
+       attList.startRefresher();
+       */
+
+
+/*
+       try
+       {
+         Thread.sleep(4000);
+       }
+       catch(Exception e)
+       {
+       }
+       */
+       
+       //nslv.setTheFont(new java.awt.Font("Lucida Bright", java.awt.Font.PLAIN, 18));
+       //nslv.setLabelVisible(false);
+       //nslv.setSetterVisible(false);
+       //nslv.setPropertyButtonVisible(true);
+       //mainFrame.pack();
        
     } // end of main ()
         

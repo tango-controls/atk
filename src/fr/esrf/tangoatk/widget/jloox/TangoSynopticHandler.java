@@ -17,6 +17,7 @@ import fr.esrf.Tango.DevFailed;
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.core.attribute.AttributeFactory;
 import fr.esrf.tangoatk.core.command.*;
+import fr.esrf.tangoatk.widget.device.StateViewer;
 import fr.esrf.tangoatk.widget.command.AnyCommandViewer;
 import fr.esrf.tangoatk.widget.util.*;
 
@@ -964,9 +965,9 @@ invoqex.printStackTrace();
 	 if (lxComp instanceof LxElement)
 	 {
 	    if (((LxElement) lxComp).getPaint().getTransparency() == java.awt.Paint.OPAQUE)
-	       ((LxElement) lxComp).setPaint(ATKConstant.getColor4State(event.getState()));
+	       ((LxElement) lxComp).setPaint(StateViewer.getColor4State(event.getState()));
 	    else
-	       ((LxElement) lxComp).setLineColor(ATKConstant.getColor4State(event.getState()));
+	       ((LxElement) lxComp).setLineColor(StateViewer.getColor4State(event.getState()));
 	 }
 	 else
 	 {
@@ -1047,14 +1048,14 @@ invoqex.printStackTrace();
 	 {
 	    if (((LxElement)lxc).getPaint() == null)
 	    {
-	       ((LxElement)lxc).setLineColor(ATKConstant.getColor4State(state));
+	       ((LxElement)lxc).setLineColor(StateViewer.getColor4State(state));
 	    }
 	    else
 	    {
 	       if (((LxElement)lxc).getPaint().getTransparency() == java.awt.Paint.OPAQUE)
-		  ((LxElement)lxc).setPaint(ATKConstant.getColor4State(state));
+		  ((LxElement)lxc).setPaint(StateViewer.getColor4State(state));
 	       else
-		  ((LxElement)lxc).setLineColor(ATKConstant.getColor4State(state));
+		  ((LxElement)lxc).setLineColor(StateViewer.getColor4State(state));
 	    }
 	 }
 	 else

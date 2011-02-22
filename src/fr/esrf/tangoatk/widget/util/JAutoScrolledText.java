@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * JAutoScrolledText.java
  * Author: Jean-Luc PONS
  */
@@ -31,52 +9,45 @@ import java.awt.*;
 import java.awt.font.*;
 import java.awt.geom.*;
 import javax.swing.*;
-import javax.swing.event.EventListenerList;
 
 // Thread to handle auto scrolling
 
 class ScrollRun implements Runnable {
-    JAutoScrolledText p;
 
-    ScrollRun (JAutoScrolledText parent) {
-        this.p = parent;
-    }
+  JAutoScrolledText p;
 
-    public void run () {
-        while (!p.stopDemand) {
-            try {
-                switch (p.getScrollingMode()) {
-                    case JAutoScrolledText.SCROLL_TO_SEE_END:
-                        if ( p.endFlag ) {
-                            // Restart scroll
-                            p.endFlag = false;
-                            Thread.sleep( p.waitTime );
-                        }
-                        else {
-                            Thread.sleep( p.sleepTime );
-                        }
-                        p.scrollText();
-                        break;
-                    case JAutoScrolledText.SCROLL_LOOP:
-                        Thread.sleep( p.sleepTime );
-                        p.scrollText();
-                        break;
-                }
-            }
-            catch (InterruptedException e) {
-                System.out.println( e );
-            }
+  ScrollRun(JAutoScrolledText parent) {
+    this.p = parent;
+  }
+
+  public void run() {
+
+    while (!p.stopDemand) {
+      try {
+        if (p.endFlag) {
+          // Restart scroll
+          p.endFlag = false;
+          Thread.sleep(p.waitTime);
+        } else {
+          Thread.sleep(p.sleepTime);
         }
-        //System.out.println("Stopping scroll");
-        p.currentPos = 0;
-        p.repaint();
+        p.scrollText();
+      } catch (InterruptedException e) {
+        System.out.println(e);
+      }
     }
+    //System.out.println("Stopping scroll");
+    p.currentPos = 0;
+    p.repaint();
+
+  }
+
 }
 
 /** Text component which supports antialiased font and autoscrolling. When autoscroll is enabled and
  * when the text cannot be totaly displayed, JAutoScrolledText automagicaly scrolls the text from right
  * to left.  */
-public class JAutoScrolledText extends JTextField {
+public class JAutoScrolledText extends JComponent {
 
   // Static constant
   /** Specifies alignment to the center of the component.  */
@@ -91,11 +62,6 @@ public class JAutoScrolledText extends JTextField {
   /** Does not compute font size and let the layout manager size the component */
   static public int MATRIX_BEHAVIOR = 1;
 
-  /** Scroll the text until the end of the text is reached and restart */
-  final static public int SCROLL_TO_SEE_END = 0;
-  /** Continuous scrolling */
-  final static public int SCROLL_LOOP = 1;
-
   // Local declarations
   private int maxPos;
   private boolean scrollNeeded = false;
@@ -106,7 +72,6 @@ public class JAutoScrolledText extends JTextField {
   private int align;
   private int sizingBehavior;
   private Insets margin;
-  private int scrollingMode = SCROLL_TO_SEE_END;
 
   // Thread parameters
   int sleepTime;
@@ -114,8 +79,6 @@ public class JAutoScrolledText extends JTextField {
   boolean stopDemand;
   int currentPos = 0;
   int waitTime = 2000;
-
-  EventListenerList listenerList;  // list of text listeners
 
   /**
    * Constructs an empty text.
@@ -135,7 +98,6 @@ public class JAutoScrolledText extends JTextField {
     text = "";
     margin = new Insets(2, 3, 2, 3);
     sizingBehavior = CLASSIC_BEHAVIOR;
-    listenerList = new EventListenerList();
 
   }
 
@@ -211,18 +173,6 @@ public class JAutoScrolledText extends JTextField {
   public void setAutoScroll(int time) {
     sleepTime = time;
   }
-  
-  public int getSleepTime() {
-      return sleepTime;
-  }
-
-  public void setSleepTime(int sleepTime) {
-      this.sleepTime = sleepTime;
-  }
-
-  public int getWaitTime() {
-      return waitTime;
-  }
 
   /**
    * Sets the text of this component.
@@ -242,49 +192,18 @@ public class JAutoScrolledText extends JTextField {
   }
 
   /**
-   * Sets the text vertical offset in pixel.
-   * @param y Offset value
+   * Sets the text offset (in pixel).
+   * @param x X origin offset (in pixel)
+   * @param y Y origin offset (in pixel)
    */
-  public void setVerticalOffset(int y) {
+  public void setValueOffsets(int x, int y) {
+    off_x = x;
     off_y = y;
     repaint();
   }
 
   /**
-   * Returns the current text vertical offset.
-   */
-  public int getVerticalOffset() {
-    return off_y;
-  }
-
-  /**
-   * Sets the text horizontal offset in pixel.
-   * @param y Offset value
-   */
-  public void setHorizontalOffset(int y) {
-    off_x = y;
-    repaint();
-  }
-
-  /**
-   * Returns the current text horizontal offset.
-   */
-  public int getHorizontalOffset() {
-    return off_x;
-  }
-
-  /**
-   * Has no longer effects.
-   * @see #setVerticalOffset
-   * @see #setHorizontalOffset
-   * @deprecated
-   */
-  public void setValueOffsets(int x, int y) {
-    System.out.println("JAutoScrolledText.setValueOffsets() is deprecated and has no effects.");
-  }
-
-  /**
-   * Sets alignment policiy (when no scroll)
+   * Sets aligmenet policiy (when no scroll)
    * @param a Alignment mode
    * @see JAutoScrolledText#CENTER_ALIGNMENT
    * @see JAutoScrolledText#RIGHT_ALIGNMENT
@@ -298,39 +217,28 @@ public class JAutoScrolledText extends JTextField {
     if (scrollNeeded) {
       currentPos++;
       if (currentPos > maxPos) {
-        // Repaint here to avoid a strange font drawing bug
-        repaint();
         // Wait a bit before restarting the scroll
         Thread.sleep(waitTime);
-        if (scrollingMode == SCROLL_TO_SEE_END)
-        {
-            currentPos = 0;
-        }
-        else
-        {
-            currentPos = -getWidth();
-        }
+        currentPos = 0;
         endFlag = true;
       }
       repaint();
     }
   }
 
-  /** Paint the component. */
-  public void paint(Graphics g) {
+  // Paint the component
+  protected void paintComponent(Graphics g) {
+    super.paintComponent(g);
 
     // Prepare rendering environement
 
     int w = getWidth();
     int h = getHeight();
 
-    if(isOpaque()) {
-      g.setColor(getBackground());
-      g.fillRect(0, 0, w, h);
-    }
-
+    g.setColor(getBackground());
+    g.fillRect(0, 0, w, h);
+    Insets insets = getInsets();
     g.setColor(getForeground());
-    g.setFont(getFont());
     Graphics2D g2 = (Graphics2D) g;
     g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
             RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -338,21 +246,9 @@ public class JAutoScrolledText extends JTextField {
             RenderingHints.VALUE_FRACTIONALMETRICS_ON);
     FontRenderContext frc = g2.getFontRenderContext();
     Rectangle2D bounds = g.getFont().getStringBounds(text, frc);
-    int tempMax = (int) (bounds.getWidth() - (w - (margin.left + margin.right)));
-    if (scrollingMode == SCROLL_TO_SEE_END)
-    {
-        maxPos = tempMax;
-    }
-    else
-    {
-        maxPos = (int) bounds.getWidth();
-    }
-    //int y = (int) ((bounds.getHeight() + h) / 2);
-    double a = getFont().getLineMetrics(text,frc).getAscent();
-    int y = (int) ( (h-bounds.getHeight())/ 2.0 + a );
-    scrollNeeded = tempMax > 0;
-
-    if(scrollNeeded) fireExceedBounds();
+    maxPos = (int) (bounds.getWidth() - (w - (insets.left + insets.right)));
+    int y = (int) ((bounds.getHeight() + h) / 2);
+    scrollNeeded = maxPos > 0;
 
     // Trigger the scrolling ON/OFF
     if (lastScroll != scrollNeeded) {
@@ -373,7 +269,7 @@ public class JAutoScrolledText extends JTextField {
 
     if (scrollNeeded) {
 
-      g.drawString(text, margin.left + off_x - currentPos, off_y + y);
+      g.drawString(text, off_x - currentPos, off_y + y);
 
     } else {
 
@@ -392,59 +288,21 @@ public class JAutoScrolledText extends JTextField {
       g.drawString(text, xpos, off_y + y);
 
     }
-    
-    paintBorder(g);
 
-  }
-
-  /** Add the specified JAutoScrolledTextListener Listeners */
-  public void addTextListener(JAutoScrolledTextListener l) {
-    listenerList.add(JAutoScrolledTextListener.class, l);
-  }
-
-  /** Remove the specified JAutoScrolledTextListener Listeners */
-  public void removeTextListener(JAutoScrolledTextListener l) {
-    listenerList.remove(JAutoScrolledTextListener.class, l);
-  }
-
-  private void fireExceedBounds() {
-    if (listenerList.getListenerCount() > 0) {
-      JAutoScrolledTextListener[] list = (JAutoScrolledTextListener[]) (listenerList.getListeners(JAutoScrolledTextListener.class));
-      //System.out.println("JAutoScrolledText.fireExceedBounds() called.");
-      for (int i = 0; i < list.length; i++) list[i].textExceedBounds(this);
-    }
-  }
-
-  /**
-   * Returns the scrolling mode.
-   * @see #setScrollingMode
-   */
-  public int getScrollingMode () {
-    return scrollingMode;
-  }
-
-  /**
-   * Set the scrolling mode.
-   * @param scrollingMode Scrolling mode
-   * @see #SCROLL_TO_SEE_END
-   * @see #SCROLL_LOOP
-   */
-  public void setScrollingMode (int scrollingMode) {
-    this.scrollingMode = scrollingMode;
   }
 
   /**
    * Test function.
    * @param args Not used
    */
-
+  /*
   public static void main(String args[]) throws Exception {
 
     final JFrame f = new JFrame();
     final JAutoScrolledText txt = new JAutoScrolledText();
     txt.setText("Test JAutoScrolledText , with autoscrolling....");
     txt.setAutoScroll(30);
-    //txt.setScrollingMode(SCROLL_LOOP);
+    txt.setValueOffsets(0,-5);
     txt.setFont(new Font("Dialog",Font.BOLD,30));
     f.setContentPane(txt);
     f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -452,5 +310,6 @@ public class JAutoScrolledText extends JTextField {
     f.setVisible(true);
 
   }
+  */
 
 }

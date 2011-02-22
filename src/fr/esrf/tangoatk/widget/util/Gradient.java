@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util;
 
 import java.awt.*;
@@ -47,27 +25,9 @@ public class Gradient {
   }
 
   /**
-   * Construct a gradient from a set of color and position
-   * @param pos Color positions
-   * @param colors Colors
-   */
-  public Gradient(double[] pos,Color[] colors) {
-    colorVal = colors;
-    colorPos = pos;
-  }
-
-  /**
-   * Please use buildRainbowGradient() instead.
-   * @deprecated
-   */
-  public void buidColorGradient() {
-    buildRainbowGradient();
-  }
-
-  /**
    * Construct a rainbow gradient.
    */
-  public void buildRainbowGradient() {
+  public void buidColorGradient() {
 
     colorVal = new Color[5];
     colorPos = new double[5];
@@ -84,18 +44,6 @@ public class Gradient {
     colorPos[3] = 0.75;
     colorPos[4] = 1.0;
 
-  }
-
-  /**
-   * Invert color entries.
-   */
-  public void invertGradient() {
-
-    Color[] nColorVal = new Color[colorVal.length];
-    for(int i=0;i<colorVal.length;i++)
-      nColorVal[i] = colorVal[colorVal.length-i-1];
-    System.arraycopy(nColorVal, 0, colorVal, 0, colorVal.length);
-    
   }
 
 /**
@@ -251,6 +199,8 @@ public class Gradient {
     }
 
     if( found ) {
+      int k=0;
+
       //Check validity
       if( Math.abs(colorPos[i]-pos)<1e-2 )
         return -1;
@@ -262,12 +212,21 @@ public class Gradient {
       colorVal = new Color[colorPos.length+1];
       colorPos = new double[colorVal.length];
 
-      System.arraycopy(oldColor, 0, colorVal, 0, i);
-      System.arraycopy(oldPos, 0, colorPos, 0, i);
-      colorVal[i] = c;
-      colorPos[i] = pos;
-      System.arraycopy(oldColor, i, colorVal, i+1, oldColor.length-i);
-      System.arraycopy(oldPos, i, colorPos, i+1, oldColor.length-i);
+      for(int j=0;j<i;j++) {
+        colorVal[k] = oldColor[j];
+        colorPos[k] = oldPos[j];
+        k++;
+      }
+
+      colorVal[k] = c;
+      colorPos[k] = pos;
+      k++;
+
+      for(int j=i;j<oldColor.length;j++) {
+        colorVal[k] = oldColor[j];
+        colorPos[k] = oldPos[j];
+        k++;
+      }
 
       return i;
 
@@ -286,17 +245,20 @@ public class Gradient {
 
     if( id>0 && id<(colorVal.length-1)) {
 
+      int k=0;
       Color[] oldColor = colorVal;
       double[] oldPos  = colorPos;
 
       colorVal = new Color[colorPos.length-1];
       colorPos = new double[colorVal.length];
 
-      System.arraycopy(oldColor, 0, colorVal, 0, id);
-      System.arraycopy(oldColor, id+1, colorVal, id, oldColor.length-id-1);
-
-      System.arraycopy(oldPos, 0, colorPos, 0, id);
-      System.arraycopy(oldPos, id+1, colorPos, id, oldPos.length-id-1);
+      for(int i=0;i<oldColor.length;i++) {
+        if( i!= id) {
+          colorVal[k] = oldColor[i];
+          colorPos[k] = oldPos[i];
+          k++;
+        }
+      }
     }
 
   }
