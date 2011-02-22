@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /*	Synchrotron Soleil 
  *  
  *   File          :  AttributeMultiChart.java
@@ -45,16 +23,10 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileWriter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -73,27 +45,23 @@ import fr.esrf.tangoatk.core.AttributeList;
 import fr.esrf.tangoatk.core.AttributeStateEvent;
 import fr.esrf.tangoatk.core.ConnectionException;
 import fr.esrf.tangoatk.core.ErrorEvent;
-import fr.esrf.tangoatk.core.IAttribute;
-import fr.esrf.tangoatk.core.IDevice;
 import fr.esrf.tangoatk.core.INumberScalar;
 import fr.esrf.tangoatk.core.INumberScalarListener;
 import fr.esrf.tangoatk.core.NumberScalarEvent;
 import fr.esrf.tangoatk.widget.util.ATKConstant;
-import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
 import fr.esrf.tangoatk.widget.util.chart.CfFileReader;
 import fr.esrf.tangoatk.widget.util.chart.DataList;
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
 import fr.esrf.tangoatk.widget.util.chart.JLChart;
 import fr.esrf.tangoatk.widget.util.chart.JLDataView;
-import fr.esrf.tangoatk.widget.util.chart.JLTable;
 import fr.esrf.tangoatk.widget.util.chart.OFormat;
-import fr.esrf.tangoatk.widget.util.chart.SearchInfo;
 
 /**
  * 
  * @author SOLEIL
  */
-public class AttributeMultiChart extends JLChart implements INumberScalarListener {
+public class AttributeMultiChart extends JLChart 
+                                 implements INumberScalarListener {
 
     protected String header = "Barchart";
     protected String xaxisName = "X";
@@ -105,15 +73,10 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
     protected JLDataView lineView;
     protected String lastConfig = "";
     protected int refreshingPeriod = 1000;
-    protected Map<INumberScalar, List<Object>> dataViewHash = null;
+    protected Map dataViewHash = null;
     protected AttributeList model = null;
     protected int chartStyle;
     protected int markerStyle;
-    protected Color chartColor = ATKConstant.getColor4Quality(IAttribute.VALID);
-    protected boolean alarmEnable = true;
-    protected boolean chartOnXAxis = true;
-    protected boolean highAlarm = true;
-    protected boolean highFault = true;
 
     protected JMenu multiChartMenu;
     protected JMenuItem barChartItem;
@@ -141,27 +104,10 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
     protected JMenuItem crossItem2;
     protected JMenuItem circleItem2;
     protected JMenuItem squareItem2;
-
-    protected JMenu tooltipMenu;
-    protected JMenuItem fullNameItem;
-    protected JMenuItem noDeviceNameItem;
-    protected JMenuItem labelItem;
-    protected JMenuItem aliasItem;
-    protected JMenuItem deviceNameItem;
-
-    protected JMenu axisInfoMenu;
-    protected JMenuItem axisInfoFullNameItem;
-    protected JMenuItem axisInfoNoDeviceNameItem;
-    protected JMenuItem axisInfoLabelItem;
-    protected JMenuItem axisInfoAliasItem;
-    protected JMenuItem axisInfoDeviceNameItem;
-    protected JMenuItem axisInfoIndexItem;
-
+    
     protected JMenu YScale;
     protected JMenuItem logarithmic;
     protected JMenuItem linear;
-    protected int displayMode = -1;
-    protected int axisDisplayMode = -1;
 
     /**
      * int value representing the kind of chart "BarChart"
@@ -178,58 +124,17 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
      */
     public final static int lineChart = 2;
 
-    /**
-     * int value representing the fact that you want to see the attribute's
-     * complete name in tooltip (default option)/X Axis
-     */
-    public final static int DISPLAY_FULL_NAME = 0;
-
-    /**
-     * int value representing the fact that you want to see the attribute's name
-     * without its device name in tooltip/X Axis
-     */
-    public final static int DISPLAY_NAME_NO_DEVICE = 1;
-
-    /**
-     * int value representing the fact that you want to see the attribute's
-     * label in tooltip/X Axis
-     */
-    public final static int DISPLAY_LABEL = 2;
-
-    /**
-     * int value representing the fact that you want to see the attribute's
-     * alias in tooltip/X Axis
-     */
-    public final static int DISPLAY_ALIAS = 3;
-
-    /**
-     * int value representing the fact that you want to see the name of the
-     * device to which the attribute belongs in tooltip/X Axis
-     */
-    public final static int DISPLAY_DEVICE_NAME = 4;
-
-    /**
-     * int value representing the fact that you want to see the index of the
-     * attribute in X Axis (default option)
-     */
-    public final static int DISPLAY_INDEX = 5;
-
-    /**
+     /**
      * Default Constructor
      */
     public AttributeMultiChart()
     {
         super();
         getXAxis().setDrawOpposite(false);
-        getXAxis().setLabelFormat(JLAxis.AUTO_FORMAT);    
-        getXAxis().setGridVisible(true);
-        getXAxis().setAutoScale(true);
-        getY1Axis().setZeroAlwaysVisible(true);
-
-        dataViewHash = new HashMap<INumberScalar, List<Object>>();
+        dataViewHash = new HashMap();
         setMarkerStyle(JLDataView.MARKER_STAR);
         initComponents();
-
+        
         //Menu initialization
         addUserAction("Load configuration");
         addUserAction("Save configuration");
@@ -239,21 +144,6 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
         barChartItem = new JMenuItem("Bar Chart");
         dotChartMenu = new JMenu("Dot Chart (choose marker)");
         lineChartMenu = new JMenu("Line Chart (choose marker)");
-
-        tooltipMenu = new JMenu("Tooltip Information:");
-        fullNameItem = new JMenuItem("Attribute's full name");
-        noDeviceNameItem = new JMenuItem("Attribute's name wihout device");
-        labelItem = new JMenuItem("Attribute's label");
-        aliasItem = new JMenuItem("Attribute's alias");
-        deviceNameItem = new JMenuItem("Attribute's parent device name");
-
-        axisInfoMenu = new JMenu("X Axis Information:");
-        axisInfoFullNameItem = new JMenuItem("Attribute's full name");
-        axisInfoNoDeviceNameItem = new JMenuItem("Attribute's name wihout device");
-        axisInfoLabelItem = new JMenuItem("Attribute's label");
-        axisInfoAliasItem = new JMenuItem("Attribute's alias");
-        axisInfoDeviceNameItem = new JMenuItem("Attribute's parent device name");
-        axisInfoIndexItem = new JMenuItem("Attribute's index");
 
         dotItem = new JMenuItem("dot");
         boxItem = new JMenuItem("box");
@@ -282,7 +172,7 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
                 setChartStyle(barChart);
             }
         });
-
+        
         dotItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 setChartStyle(dotChart);
@@ -343,7 +233,7 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
                 setMarkerStyle(JLDataView.MARKER_SQUARE);
             }
         });
-
+        
         dotItem2.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 setChartStyle(lineChart);
@@ -404,11 +294,11 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
                 setMarkerStyle(JLDataView.MARKER_SQUARE);
             }
         });
-
+        
         YScale = new JMenu("Y Axis Scale");
         logarithmic = new JMenuItem("logarithmic");
         linear = new JMenuItem("linear");
-
+        
         logarithmic.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 getY1Axis().setScale(JLAxis.LOG_SCALE);
@@ -418,74 +308,6 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
         linear.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 getY1Axis().setScale(JLAxis.LINEAR_SCALE);
-                repaint();
-            }
-        });
-
-        fullNameItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                setDisplayMode(DISPLAY_FULL_NAME);
-                repaint();
-            }
-        });
-        noDeviceNameItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                setDisplayMode(DISPLAY_NAME_NO_DEVICE);
-                repaint();
-            }
-        });
-        labelItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                setDisplayMode(DISPLAY_LABEL);
-                repaint();
-            }
-        });
-        aliasItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                setDisplayMode(DISPLAY_ALIAS);
-                repaint();
-            }
-        });
-        deviceNameItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                setDisplayMode(DISPLAY_DEVICE_NAME);
-                repaint();
-            }
-        });
-
-        axisInfoFullNameItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                setAxisDisplayMode(DISPLAY_FULL_NAME);
-                repaint();
-            }
-        });
-        axisInfoNoDeviceNameItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                setAxisDisplayMode(DISPLAY_NAME_NO_DEVICE);
-                repaint();
-            }
-        });
-        axisInfoLabelItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                setAxisDisplayMode(DISPLAY_LABEL);
-                repaint();
-            }
-        });
-        axisInfoAliasItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                setAxisDisplayMode(DISPLAY_ALIAS);
-                repaint();
-            }
-        });
-        axisInfoDeviceNameItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                setAxisDisplayMode(DISPLAY_DEVICE_NAME);
-                repaint();
-            }
-        });
-        axisInfoIndexItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                setAxisDisplayMode(DISPLAY_INDEX);
                 repaint();
             }
         });
@@ -511,75 +333,37 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
         lineChartMenu.add(crossItem2);
         lineChartMenu.add(circleItem2);
         lineChartMenu.add(squareItem2);
-
+        
         multiChartMenu.add(barChartItem);
         multiChartMenu.add(dotChartMenu);
         multiChartMenu.add(lineChartMenu);
-
-        tooltipMenu.add(fullNameItem);
-        tooltipMenu.add(noDeviceNameItem);
-        tooltipMenu.add(labelItem);
-        tooltipMenu.add(aliasItem);
-        tooltipMenu.add(deviceNameItem);
-
-        axisInfoMenu.add(axisInfoFullNameItem);
-        axisInfoMenu.add(axisInfoNoDeviceNameItem);
-        axisInfoMenu.add(axisInfoLabelItem);
-        axisInfoMenu.add(axisInfoAliasItem);
-        axisInfoMenu.add(axisInfoDeviceNameItem);
-        axisInfoMenu.add(axisInfoIndexItem);
-
+        
         YScale.add(linear);
         YScale.add(logarithmic);
         
         addSeparator();
         addMenuItem(multiChartMenu);
-        addMenuItem(tooltipMenu);
-        addMenuItem(axisInfoMenu);
+        
         addMenuItem(YScale);
-
+        
         // avoids user to change axis properties
         //removeMenuItem(JLChart.MENU_CHARTPROP);
         // avoids user to change dataViews colors
         removeMenuItem(JLChart.MENU_DVPROP);
-
-        setDisplayMode(DISPLAY_FULL_NAME);
-        setAxisDisplayMode(DISPLAY_INDEX);
     }
+    
 
      /**
      * Constructor
      * @param chartStyle the kind of chart chosen
-     * @see #barChart
-     * @see #dotChart
-     * @see #lineChart
+     * @see barChart
+     * @see dotChart
+     * @see lineChart
      */
     public AttributeMultiChart(int chartStyle) {
         this();
         setChartStyle(chartStyle);
     }
-
-    /**
-     * Constructor
-     * 
-     * @param chartStyle
-     *            the kind of chart chosen
-     * @param displayMode
-     *            the kind of information you want to display in tooltip
-     * @see #barChart
-     * @see #dotChart
-     * @see #lineChart
-     * @see #DISPLAY_FULL_NAME
-     * @see #DISPLAY_NAME_NO_DEVICE
-     * @see #DISPLAY_LABEL
-     * @see #DISPLAY_ALIAS
-     * @see #DISPLAY_DEVICE_NAME
-     */
-   public AttributeMultiChart(int chartStyle, int displayMode) {
-       this();
-       setChartStyle(chartStyle);
-       setDisplayMode(displayMode);
-   }
 
     /**
      * Returns the marker style style for line chart and dot chart
@@ -604,11 +388,11 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
      */
     public void setMarkerStyle(int style) {
         markerStyle = style;
-        Set<INumberScalar> keySet = dataViewHash.keySet();
-        Iterator<INumberScalar> it = keySet.iterator();
+        Set keySet = dataViewHash.keySet();
+        Iterator it = keySet.iterator();
         while (it.hasNext()) {
-            INumberScalar ns = it.next();
-            List<Object> tempList = dataViewHash.get(ns);
+            INumberScalar ns = (INumberScalar) it.next();
+            List tempList = (List) dataViewHash.get(ns);
             JLDataView tempView = (JLDataView) tempList.get(0);
             switch (chartStyle) {
             case barChart:
@@ -632,7 +416,7 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
     // called by constructor
     // initializes every component, including axis
     protected void initComponents() {
-       
+
         // Initialise chart properties
         setHeaderFont(new Font("Times", Font.BOLD, 18));
         switch (chartStyle) {
@@ -653,6 +437,7 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
         }
         setLabelVisible(false);
         setSize(640, 480);
+        setXAxisOnBottom(false);
 
         // Initialise axis properties
         getY1Axis().setAutoScale(true);
@@ -661,74 +446,47 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
         getXAxis().setAutoScale(false);
         getXAxis().setMinimum(0.0);
         getXAxis().setMaximum(0);
-
+        getXAxis().setAnnotation(JLAxis.VALUE_ANNO);
         getXAxis().setGridVisible(false);
         getXAxis().setSubGridVisible(false);
-        getXAxis().setPosition(JLAxis.HORIZONTAL_ORG1);
 
         initLevels();
 
         setPaintAxisFirst(false);
     }
 
-    protected String[] buildPanelString(SearchInfo si) {
-       // System.out.println("buildPanelString");
-        if(!isChartOnXAxis())
-        {
-            String[] str = new String[3];
-            str[0] = si.dataView.getExtendedName() + " " + si.axis.getAxeName();
-            str[1] = "Index = " + new Double(si.value.y).intValue();
-            str[2] = "X = " + si.dataView.formatValue(si.dataView.getTransformedValue(si.value.x)) + " " + si.dataView.getUnit();;
-            return str;
-        }
-        
-        String[] str = new String[3];
-        str[0] = si.dataView.getExtendedName() + " " + si.axis.getAxeName();
-        str[1] = "Index = " + new Double(si.value.x).intValue();
-        str[2] = "Y = " + si.dataView.formatValue(si.dataView.getTransformedValue(si.value.y)) + " " + si.dataView.getUnit();
-        return str;
-    }
-    
     // initializes the fault and alarm levels
     // also initializes the line that joins the points for line Chart
     protected void initLevels() {
         // Alarm and Fault level line
         alarm = new JLDataView();
         alarm.setName("Alarm level");
-        alarm.setColor(ATKConstant.getColor4State(IDevice.ALARM));
-        alarm.setLineWidth(2);      
-        getY1Axis().addDataView(alarm);      
+        //        alarm.setStyle(JLDataView.STYLE_DASH);
+        alarm.setColor(ATKConstant.getColor4State("ALARM"));
+        alarm.setLineWidth(2);
+        getY1Axis().addDataView(alarm);
         fault = new JLDataView();
         fault.setName("Fault level");
-        fault.setColor(ATKConstant.getColor4State(IDevice.FAULT));
+        //        fault.setStyle(JLDataView.STYLE_DASH);
+        fault.setColor(ATKConstant.getColor4State("FAULT"));
         fault.setLineWidth(2);
-        getY1Axis().addDataView(fault);    
+        getY1Axis().addDataView(fault);
         lineView = new JLDataView();
-        lineView.setColor( Color.black );
-        lineView.setLineWidth( 1 );
-        if ( chartStyle == lineChart ) {
-            getY1Axis().addDataView( lineView );
+        lineView.setColor(Color.black);
+        lineView.setLineWidth(1);
+        if (chartStyle == lineChart) {
+            getY1Axis().addDataView(lineView);
+        } else {
+            getY1Axis().removeDataView(lineView);
         }
-        else {
-            getY1Axis().removeDataView( lineView );
-        }
     }
-    
-    public boolean isChartOnXAxis() {
-        return chartOnXAxis;
-    }
-    
-    public void setChartOnXAxis(boolean chartOnXAxis) {
-        this.chartOnXAxis = chartOnXAxis;
-    }
-    
+
     /**
      * Sets the attributes this chart will display.
      * It calls to clearmodel() first
      * @param attl the list of Attribute as an <code>AttributeList</code>
      */
     public void setModel(AttributeList attl) {
-        setChartOnXAxis(chartOnXAxis);
         int nbAtts, idx;
         boolean containsNumberScalar;
         Object elem;
@@ -750,11 +508,9 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
 
         containsNumberScalar = false;
 
-        for (idx = 0; idx < nbAtts; idx++)
-        {
+        for (idx = 0; idx < nbAtts; idx++) {
             elem = attl.getElementAt(idx);
-            if (elem instanceof INumberScalar)
-            {
+            if (elem instanceof INumberScalar) {
                 containsNumberScalar = true;
                 break;
             }
@@ -766,40 +522,23 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
         model = attl;
         refreshingPeriod = model.getRefreshInterval();
         nbNs = 0;
-        getXAxis().setLabels(null, null);
-        for (idx = 0; idx < nbAtts; idx++)
-        {
+        for (idx = 0; idx < nbAtts; idx++) {
             elem = attl.getElementAt(idx);
-            if (elem instanceof INumberScalar)
-            {
+            if (elem instanceof INumberScalar) {
                 INumberScalar ins = (INumberScalar) elem;
                 if (!dataViewHash.containsKey(ins)) // add only once each
                 // NumberScalar
                 {
                     JLDataView dvy_new = new JLDataView();
                     dvy_new.setUnit(ins.getUnit());
-                    prepareName(dvy_new, ins);
+                    dvy_new.setName(ins.getName());
                     dvy_new.setColor(Color.black);
                     dvy_new.setLineWidth(1);
                     dvy_new.setBarWidth(bar_width);
                     dvy_new.setFillStyle(JLDataView.FILL_STYLE_SOLID);
-                    dvy_new.setFillMethod(JLDataView.METHOD_FILL_FROM_ZERO);
                     if (chartStyle == barChart) {
-                        if(chartOnXAxis)
-                        {
-                            dvy_new.setMarker(JLDataView.MARKER_NONE);
-                            dvy_new.setViewType(JLDataView.TYPE_BAR);
-                        }
-                        else
-                        {
-                            
-                            dvy_new.setLineWidth(bar_width);
-                            dvy_new.setMarker(JLDataView.MARKER_NONE);
-                            dvy_new.setViewType(JLDataView.TYPE_LINE);
-                            dvy_new.setColor(chartColor);
-                            //dvy_new.setMarker(JLDataView.MARKER_NONE);
-                            //dvy_new.setViewType(JLDataView.TYPE_BAR);
-                        }
+                        dvy_new.setMarker(JLDataView.MARKER_NONE);
+                        dvy_new.setViewType(JLDataView.TYPE_BAR);
                     } else {
                         dvy_new.setMarker(JLDataView.MARKER_STAR);
                         dvy_new.setViewType(JLDataView.TYPE_LINE);
@@ -807,7 +546,7 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
                     getY1Axis().addDataView(dvy_new);
                     ins.addNumberScalarListener(this);
 
-                    List<Object> list = new Vector<Object>();
+                    List list = new Vector();
                     Integer XaxisValue = new Integer(nbNs);
                     list.add(0, dvy_new);
                     list.add(1, XaxisValue);
@@ -817,33 +556,9 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
             }
         }
 
-        if(isChartOnXAxis())
-        {
-            getXAxis().setMaximum(nbNs + 1);
-            getXAxis().setMinimum(0);
-        }
-        else
-        {
-            getY1Axis().setMaximum(nbNs + 1);
-            getY1Axis().setMinimum(0);
-        }
-        
-        if(chartOnXAxis)
-        {
-            //getXAxis().setTickSpacing(nbNs);
-            getXAxis().setLabelFormat(JLAxis.DECINT_FORMAT);
-        }
-        else
-        {
-            //getY1Axis().setTickSpacing(nbNs);
-            getY1Axis().setLabelFormat(JLAxis.DECINT_FORMAT);
-        }
-        setFaultLevel(getFaultLevel());
-        setAlarmLevel(getAlarmLevel());        
-        //if(!chartOnXAxis)
-        getXAxis().setAnnotation(JLAxis.VALUE_ANNO);   
-
-        manageLabels();
+        getXAxis().setMaximum(nbNs + 1);
+        getXAxis().setTickSpacing(nbNs);
+        //  	    System.out.println("bar_width :" + bar_width);
     }
 
     /**
@@ -898,7 +613,8 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
             if (elem instanceof INumberScalar) {
                 INumberScalar ins = (INumberScalar) elem;
                 if (dataViewHash.containsKey(ins)) {
-                    List<Object> dvyAndIndex = dataViewHash.get(ins);
+                    java.util.List dvyAndIndex = (java.util.List) dataViewHash
+                            .get(ins);
                     if (dvyAndIndex == null)
                         continue;
                     int nbObjs = dvyAndIndex.size();
@@ -910,30 +626,11 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
                     if (!(obj instanceof JLDataView))
                         continue;
                     JLDataView dvy = (JLDataView) obj;
-                    if(chartOnXAxis)
-                        dvy.setBarWidth(bar_width);
-                    else
-                        dvy.setLineWidth(bar_width);
+                    dvy.setBarWidth(bar_width);
                 }
             }
         }
 
-    }
-    
-    public boolean isHighAlarm() {
-        return highAlarm;
-    }
-    
-    public void setHighAlarm(boolean highAlarm) {
-        this.highAlarm = highAlarm;
-    }
-    
-    public boolean isHighFault() {
-        return highFault;
-    }
-    
-    public void setHighFault(boolean highFault) {
-        this.highFault = highFault;
     }
 
     /*
@@ -944,9 +641,8 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
     public void numberScalarChange(NumberScalarEvent numberScalarEvent) {
         INumberScalar source = (INumberScalar) numberScalarEvent.getSource();
 
-        if (dataViewHash.containsKey(source))
-        {
-            List<Object> dvyAndIndex = dataViewHash.get(source);
+        if (dataViewHash.containsKey(source)) {
+            List dvyAndIndex = (List) dataViewHash.get(source);
             if (dvyAndIndex == null)
                 return;
 
@@ -977,76 +673,38 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
 
             double yvalue = numberScalarEvent.getValue();
             dvy.reset();
-            dvy.setUnit(source.getUnit());
-            if(chartOnXAxis)
-                dvy.add((double) (dvyIndex + 1), yvalue);
-            else
-            {
-                if(chartStyle == barChart)
-                {
-                    dvy.add(0,(double)(dvyIndex + 1));
-                    dvy.add(yvalue,(double)(dvyIndex + 1));
-                }
-                else
-                    dvy.add(yvalue,(double) (dvyIndex + 1));
-            }
-            if(!chartOnXAxis)
-                dvy.setFillStyle(JLDataView.FILL_STYLE_NONE);
-            
-            if(alarmEnable)
-            {
-	            if ((isHighFault() && (yvalue > faultLevel)) || (!isHighFault() && (yvalue <= faultLevel)))
-	            {
-	            	      dvy.setFillColor(ATKConstant.getColor4State(IDevice.FAULT));
-	            	     dvy.setMarkerColor(ATKConstant.getColor4State(IDevice.FAULT));
-	            	     dvy.setColor(ATKConstant.getColor4Quality(IDevice.FAULT));
-	            }
-	            else if ((isHighAlarm() && (yvalue > alarmLevel)) || (!isHighAlarm() && (yvalue <= alarmLevel)))
-	            {
-	            	 dvy.setFillColor(ATKConstant.getColor4Quality(IAttribute.ALARM));	                
-	                 dvy.setMarkerColor(ATKConstant.getColor4Quality(IAttribute.ALARM));
-	                 dvy.setColor(ATKConstant.getColor4Quality(IAttribute.ALARM));	                 
-	            }
-	            else
-	            {
-	            	dvy.setFillColor(chartColor);
-	                dvy.setMarkerColor(chartColor);	               
-	                dvy.setColor(chartColor);
-	            }
-            }
-            else
-            {
-            	dvy.setFillColor(chartColor);
-                dvy.setMarkerColor(chartColor);
-                dvy.setColor(chartColor);
+            dvy.add((double) (dvyIndex + 1), yvalue);
+
+            if (yvalue > faultLevel) {
+                dvy.setFillColor(ATKConstant.getColor4State("FAULT"));
+                dvy.setMarkerColor(ATKConstant.getColor4State("FAULT"));
+            } else if (yvalue > alarmLevel) {
+                dvy.setFillColor(ATKConstant.getColor4State("ALARM"));
+                dvy.setMarkerColor(ATKConstant.getColor4State("ALARM"));
+            } else {
+                dvy.setFillColor(Color.green);
+                dvy.setMarkerColor(Color.green);
             }
 
             //update line
-            synchronized(lineView) {
-                lineView.reset();
-                Set<INumberScalar> keySet = dataViewHash.keySet();
-                Iterator<INumberScalar> it = keySet.iterator();
-                DataList[] position = new DataList[keySet.size()];
-                for (int i = 0; i < position.length; i++)
-                    position[i] = null;
-                while (it.hasNext())
-                {
-                    INumberScalar ns = it.next();
-                    List<Object> tempList = dataViewHash.get(ns);
-                    JLDataView tempView = (JLDataView) tempList.get(0);
-                    Integer tempInteger = (Integer) tempList.get(1);
-                    DataList tempData = tempView.getData();
-                    position[tempInteger.intValue()] = tempData;
-                }
-                for (int i = 0; i < position.length; i++)
-                {
-                    if (position[i] != null)
-                    {
-                        if(chartOnXAxis)
-                            lineView.add(i + 1, position[i].y);
-                        else
-                            lineView.add(position[i].x,i + 1 );
-                    }
+            lineView.reset();
+            Set keySet = dataViewHash.keySet();
+            Iterator it = keySet.iterator();
+            DataList[] position = new DataList[keySet.size()];
+            for (int i = 0; i < position.length; i++) {
+                position[i] = null;
+            }
+            while (it.hasNext()) {
+                INumberScalar ns = (INumberScalar) it.next();
+                List tempList = (List) dataViewHash.get(ns);
+                JLDataView tempView = (JLDataView) tempList.get(0);
+                Integer tempInteger = (Integer) tempList.get(1);
+                DataList tempData = tempView.getData();
+                position[tempInteger.intValue()] = tempData;
+            }
+            for (int i = 0; i < position.length; i++) {
+                if (position[i] != null) {
+                    lineView.add(i + 1, position[i].y);
                 }
             }
 
@@ -1075,38 +733,29 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
      */
     public void setChartStyle(int style) {
         chartStyle = style;
-        Set<INumberScalar> keySet = dataViewHash.keySet();
-        Iterator<INumberScalar> it = keySet.iterator();
+        Set keySet = dataViewHash.keySet();
+        Iterator it = keySet.iterator();
         while (it.hasNext()) {
-            INumberScalar ns = it.next();
-            List<Object> tempList = dataViewHash.get(ns);
+            INumberScalar ns = (INumberScalar) it.next();
+            List tempList = (List) dataViewHash.get(ns);
             JLDataView tempView = (JLDataView) tempList.get(0);
             switch (chartStyle) {
             case barChart:
-                tempView.setMarker(JLDataView.MARKER_NONE);                
-                if(chartOnXAxis)
-                    tempView.setViewType(JLDataView.TYPE_BAR);
-                else
-                    tempView.setViewType(JLDataView.TYPE_LINE);
-                synchronized(lineView) {
-                    getY1Axis().removeDataView(lineView);
-                }
+                tempView.setMarker(JLDataView.MARKER_NONE);
+                tempView.setViewType(JLDataView.TYPE_BAR);
+                getY1Axis().removeDataView(lineView);
                 break;
 
             case dotChart:
                 tempView.setMarker(markerStyle);
                 tempView.setViewType(JLDataView.TYPE_LINE);
-                synchronized(lineView) {
-                    getY1Axis().removeDataView(lineView);
-                }
+                getY1Axis().removeDataView(lineView);
                 break;
 
             case lineChart:
                 tempView.setMarker(markerStyle);
                 tempView.setViewType(JLDataView.TYPE_LINE);
-                synchronized(lineView) {
-                    getY1Axis().addDataView(lineView);
-                }
+                getY1Axis().addDataView(lineView);
                 break;
 
             default:
@@ -1148,31 +797,13 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
 
     /**
      * @param alarm_level
-     *            The alarm_level to set. Set Double.MAX_VALUE to remove it.
+     *            The alarm_level to set.
      */
     public void setAlarmLevel(double alarm_level) {
-        this.alarmLevel = alarm_level;       
-        this.getY1Axis().removeDataView(alarm);   
-        alarm.reset();
-        
-        if(chartOnXAxis)
-        {       
-            alarm.add(0, alarm_level);
-            int Max = 1;
-            if(model != null)
-                Max = model.size()+1;
-            alarm.add(Max, alarm_level);
-        }
-        else
-        {
-            alarm.add(alarm_level,0 );
-            int Max = 1;
-            if(model != null)
-                Max = model.size()+1;
-            alarm.add(alarm_level,Max);
-        }
-        if (alarm_level != Double.MAX_VALUE)
-                this.getY1Axis().addDataView(alarm);                  
+        this.alarmLevel = alarm_level;
+        alarm.add(Integer.MIN_VALUE, alarm_level);
+        alarm.add(Integer.MAX_VALUE, alarm_level);
+        //	    alarm.add(current_model_number,alarm_level);
     }
 
     /**
@@ -1184,32 +815,13 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
 
     /**
      * @param fault_level
-     *            The fault_level to set. Set Double.MAX_VALUE to remove it.
+     *            The fault_level to set.
      */
     public void setFaultLevel(double fault_level) {
-        this.faultLevel = fault_level;       
-            this.getY1Axis().removeDataView(fault);       
-        
-        fault.reset();
-        if(chartOnXAxis)
-        {
-	        fault.add(0, fault_level);
-	        int Max = 1;
-	        if(model != null)
-	            Max = model.size()+1;
-	        fault.add(Max,fault_level);
-        }
-        else
-        {
-	        fault.add(fault_level,0);
-	        int Max = 1;
-	        if(model != null)
-	            Max = model.size()+1;
-	        fault.add(fault_level,Max);
-        }   
-        if (fault_level != Double.MAX_VALUE)
-            this.getY1Axis().addDataView(fault);
-              
+        this.faultLevel = fault_level;
+        fault.add(Integer.MIN_VALUE, fault_level);
+        fault.add(Integer.MAX_VALUE, fault_level);
+        //	    fault.add(current_model_number,fault_level);
     }
 
     /**
@@ -1241,14 +853,7 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
      */
     public void setUnit(String unit) {
         this.unit = unit;
-        if(!chartOnXAxis)
-        { 
-            getY1Axis().setName(unit);
-            alarm.setUnit(unit);
-            fault.setUnit(unit);
-            return;
-        }
-        getXAxis().setName(unit);
+        getY1Axis().setName(unit);
         alarm.setUnit(unit);
         fault.setUnit(unit);
     }
@@ -1266,10 +871,7 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
      */
     public void setXaxisName(String xaxis_name) {
         this.xaxisName = xaxis_name;
-        if(chartOnXAxis)
-            getXAxis().setName(xaxis_name);
-        else
-            getY1Axis().setName(xaxis_name);
+        getXAxis().setName(xaxis_name);
     }
 
     /**
@@ -1312,7 +914,8 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
             if (elem instanceof INumberScalar) {
                 INumberScalar ins = (INumberScalar) elem;
                 if (dataViewHash.containsKey(ins)) {
-                    List<Object> dvyAndIndex = dataViewHash.get(ins);
+                    java.util.List dvyAndIndex = (java.util.List) dataViewHash
+                            .get(ins);
                     if (dvyAndIndex == null)
                         continue;
 
@@ -1533,16 +1136,14 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
      * @see fr.esrf.tangoatk.widge.util.chart.JLChart#actionPerformed(ActionEvent)
      */
     public void actionPerformed(ActionEvent evt) {
-        if (evt.getActionCommand().trim().equalsIgnoreCase("Load configuration"))
-        {
+        if (evt.getActionCommand().trim()
+                .equalsIgnoreCase("Load configuration")) {
             loadPerformed();
-        }
-        else if (evt.getActionCommand().trim().equalsIgnoreCase("Save configuration"))
-        {
+        } else if (evt.getActionCommand().trim().equalsIgnoreCase(
+                "Save configuration")) {
             savePerformed();
-        }
-        else if (evt.getActionCommand().trim().equalsIgnoreCase("Set Refresh Interval..."))
-        {
+        } else if (evt.getActionCommand().trim().equalsIgnoreCase(
+                "Set Refresh Interval...")) {
             int ref_period = -1;
             ref_period = getRefreshingPeriod();
             String refp_str = JOptionPane.showInputDialog(this,
@@ -1561,62 +1162,11 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
                     }
                 }
             }
-        }
-        else
-        {
+        } else {
             super.actionPerformed(evt);
         }
     }
-    
 
-    protected void showTableAll()
-    {
-      if(model == null)
-            return;
-        
-      JLTable  theTable = new JLTable();
-      String[] cols = new String[]{"Attribute","Value (" + new SimpleDateFormat("yyyy.MM.dd 'at' HH:mm:ss ").format(new Date())+")"};
-      
-      Vector<Object> data = new Vector<Object>();
-     
-      int nbViews = model.size();
-      for(int i = 0; i < nbViews; i++)
-      {
-          IAttribute attr = (IAttribute)model.getElementAt(i);
-          data.add(attr.getName());
-         
-          if(attr instanceof INumberScalar)
-                 data.add(new Double(((INumberScalar)attr).getNumberScalarValue()));
-          else
-                 data.add("NaN");
-          
-      }
-      
-      int y = nbViews;
-      int x = cols.length;
-      Object[][] dv = new Object[y][x];
-      int count = 0;
-      
-      for (int j = 0; j < y; j++)
-      {
-          for (int i = 0; i < x; i++)
-          {
-              
-              Object ln = (Object) data.get(count);  
-              dv[j][i] = ln;
-              count++;
-          }
-	      
-      }
-
-      theTable.setData(dv, cols);
-      if (!theTable.isVisible())
-        theTable.centerWindow();
-      theTable.setVisible(true);
-
-    }
-    
-   
     // manages the click on the option "load configuration"
     protected void loadPerformed() {
 
@@ -1633,7 +1183,21 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
         boolean flag = false;
         JFileChooser jfilechooser = new JFileChooser();
         jfilechooser.setSelectedFile(new File(lastConfig));
-        jfilechooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
+        jfilechooser.addChoosableFileFilter(new FileFilter() {
+            public boolean accept(File f) {
+                if (f.isDirectory()) {
+                    return true;
+                }
+                String extension = getExtension(f);
+                if (extension != null && extension.equals("txt"))
+                    return true;
+                return false;
+            }
+
+            public String getDescription() {
+                return "text files ";
+            }
+        });
         int i = jfilechooser.showOpenDialog(this.getParent());
         if (i == JFileChooser.APPROVE_OPTION) {
             File file = jfilechooser.getSelectedFile();
@@ -1651,12 +1215,26 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
     protected void savePerformed() {
         int i = 0;
         JFileChooser jfilechooser = new JFileChooser(".");
-        jfilechooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
+        jfilechooser.addChoosableFileFilter(new FileFilter() {
+            public boolean accept(File f) {
+                if (f.isDirectory()) {
+                    return true;
+                }
+                String extension = getExtension(f);
+                if (extension != null && extension.equals("txt"))
+                    return true;
+                return false;
+            }
+
+            public String getDescription() {
+                return "text files ";
+            }
+        });
         jfilechooser.setSelectedFile(new File(lastConfig));
         int j = jfilechooser.showSaveDialog(this.getParent());
         if (j == JFileChooser.APPROVE_OPTION) {
             File file = jfilechooser.getSelectedFile();
-            if (MultiExtFileFilter.getExtension(file) == null) {
+            if (getExtension(file) == null) {
                 file = new File(file.getAbsolutePath() + ".txt");
             }
             if (file != null) {
@@ -1674,235 +1252,22 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
     }
 
     /**
-     * Returns an int representing what kind of information about your attribute
-     * you can see in tooltip.
+     * <code>getExtension</code> returns the extension of a given file, that
+     * is the part after the last `.' in the filename.
      * 
-     * @return An int representing what kind of information about your attribute
-     *         you can see in tooltip.
-     * @see #DISPLAY_FULL_NAME
-     * @see #DISPLAY_NAME_NO_DEVICE
-     * @see #DISPLAY_LABEL
-     * @see #DISPLAY_ALIAS
-     * @see #DISPLAY_DEVICE_NAME
+     * @param f
+     *            a <code>File</code> value
+     * @return a <code>String</code> value
      */
-    public int getDisplayMode ()
-    {
-        return displayMode;
-    }
-
-
-    /**
-     * Set what kind of information about your attribute you can see in tooltip.
-     * 
-     * @param displayMode
-     *            an int representing the kind of information about your
-     *            attribute you can see in tooltip.
-     * @see #DISPLAY_FULL_NAME
-     * @see #DISPLAY_NAME_NO_DEVICE
-     * @see #DISPLAY_LABEL
-     * @see #DISPLAY_ALIAS
-     * @see #DISPLAY_DEVICE_NAME
-     */
-    public void setDisplayMode (int displayMode) {
-        if (this.displayMode != displayMode) {
-            this.displayMode = displayMode;
-            updateToolTips();
+    public String getExtension(File f) {
+        String ext = null;
+        String s = f.getName();
+        int i = s.lastIndexOf('.');
+        if (i > 0 && i < s.length() - 1) {
+            ext = s.substring(i + 1).toLowerCase();
         }
+        return ext;
     }
-
-    /**
-     * Returns an int representing what kind of information about your attribute
-     * you can see in X axis.
-     * 
-     * @return An int representing what kind of information about your attribute
-     *         you can see in X axis.
-     * @see #DISPLAY_FULL_NAME
-     * @see #DISPLAY_NAME_NO_DEVICE
-     * @see #DISPLAY_LABEL
-     * @see #DISPLAY_ALIAS
-     * @see #DISPLAY_DEVICE_NAME
-     * @see #DISPLAY_INDEX
-     */
-    public int getAxisDisplayMode () {
-        return axisDisplayMode;
-    }
-
-    /**
-     * Set what kind of information about your attribute you can see in X axis.
-     * 
-     * @param axisDisplayMode
-     *            an int representing the kind of information about your
-     *            attribute you can see in X axis.
-     * @see #DISPLAY_FULL_NAME
-     * @see #DISPLAY_NAME_NO_DEVICE
-     * @see #DISPLAY_LABEL
-     * @see #DISPLAY_ALIAS
-     * @see #DISPLAY_DEVICE_NAME
-     * @see #DISPLAY_INDEX
-     */
-    public void setAxisDisplayMode (int axisDisplayMode) {
-        if (this.axisDisplayMode != axisDisplayMode) {
-            this.axisDisplayMode = axisDisplayMode;
-            manageLabels();
-        }
-    }
-
-    protected void updateToolTips()
-    {
-        if (model != null)
-        {
-            int nbAtts = model.getSize();
-            boolean containsNumberScalar = false;
-
-            for (int idx = 0; idx < nbAtts; idx++)
-            {
-                Object elem = model.getElementAt(idx);
-                if (elem instanceof INumberScalar)
-                {
-                    containsNumberScalar = true;
-                    break;
-                }
-            }
-
-            if (containsNumberScalar == false)
-                return;
-
-            refreshingPeriod = model.getRefreshInterval();
-            for (int idx = 0; idx < nbAtts; idx++)
-            {
-                Object elem = model.getElementAt(idx);
-                if (elem instanceof INumberScalar)
-                {
-                    INumberScalar source = (INumberScalar) elem;
-                    List<Object> dvyAndIndex = dataViewHash.get(source);
-                    if (dvyAndIndex == null)
-                        return;
-                    int nbObjs = dvyAndIndex.size();
-                    if (nbObjs < 2)
-                        return;
-                    Object obj = dvyAndIndex.get(0);
-                    if (obj == null)
-                        return;
-                    if (!(obj instanceof JLDataView))
-                        return;
-                    JLDataView dvy = (JLDataView) obj;
-                    prepareName(dvy, source);
-                }
-            }
-        } // end if (model != null)
-    } // end updateToolTips()
-
-    protected void prepareName(JLDataView view, INumberScalar scalar)
-    {
-        switch (this.getDisplayMode ())
-        {
-            case DISPLAY_NAME_NO_DEVICE:
-                view.setName(scalar.getNameSansDevice());
-                return;
-            case DISPLAY_LABEL:
-                view.setName(scalar.getLabel());
-                return;
-            case DISPLAY_ALIAS:
-                view.setName(scalar.getAlias());
-                return;
-            case DISPLAY_DEVICE_NAME:
-                view.setName(scalar.getDevice().getName());
-                return;
-            case DISPLAY_FULL_NAME:
-            default:
-                view.setName(scalar.getName());
-                return;
-        }
-    }
-
-    protected void manageLabels() {
-        if (dataViewHash.size() > 0) {
-            String[] labels = new String[dataViewHash.size()];
-            double[] labelPositions = new double[dataViewHash.size()];
-            Set<INumberScalar> keySet = dataViewHash.keySet();
-            Iterator<INumberScalar> keyIterator = keySet.iterator();
-            int i = 0;
-            switch ( this.getAxisDisplayMode () ) {
-                case DISPLAY_NAME_NO_DEVICE:
-                    while ( keyIterator.hasNext() ) {
-                        INumberScalar scalar = keyIterator.next();
-                        List<Object> list = dataViewHash.get(scalar);
-                        Integer xPosition = (Integer)list.get(1);
-                        labels[i] = scalar.getNameSansDevice();
-                        labelPositions[i++] = xPosition.doubleValue() + 1;
-                    }
-                    break;
-                case DISPLAY_LABEL:
-                    while ( keyIterator.hasNext() ) {
-                        INumberScalar scalar = keyIterator.next();
-                        List<Object> list = dataViewHash.get(scalar);
-                        Integer xPosition = (Integer)list.get(1);
-                        labels[i] = scalar.getLabel();
-                        labelPositions[i++] = xPosition.doubleValue() + 1;
-                    }
-                    break;
-                case DISPLAY_ALIAS:
-                    while ( keyIterator.hasNext() ) {
-                        INumberScalar scalar = keyIterator.next();
-                        List<Object> list = dataViewHash.get(scalar);
-                        Integer xPosition = (Integer)list.get(1);
-                        labels[i] = scalar.getAlias();
-                        labelPositions[i++] = xPosition.doubleValue() + 1;
-                    }
-                    break;
-                case DISPLAY_DEVICE_NAME:
-                    while ( keyIterator.hasNext() ) {
-                        INumberScalar scalar = keyIterator.next();
-                        List<Object> list = dataViewHash.get(scalar);
-                        Integer xPosition = (Integer)list.get(1);
-                        labels[i] = scalar.getDevice().getName();
-                        labelPositions[i++] = xPosition.doubleValue() + 1;
-                    }
-                    break;
-                case DISPLAY_FULL_NAME:
-                    while ( keyIterator.hasNext() ) {
-                        INumberScalar scalar = keyIterator.next();
-                        List<Object> list = dataViewHash.get(scalar);
-                        Integer xPosition = (Integer)list.get(1);
-                        labels[i] = scalar.getName();
-                        labelPositions[i++] = xPosition.doubleValue() + 1;
-                    }
-                    break;
-                case DISPLAY_INDEX:
-                default:
-                    labels = null;
-                    labelPositions = null;
-                    break;
-            }
-            getXAxis().setLabels(labels, labelPositions);
-        }
-    }
-
-    /**
-	 * @return Returns the chartColor.
-	 */
-	public Color getChartColor() {
-		return chartColor;
-	}
-	/**
-	 * @param chartColor The chartColor to set.
-	 */
-	public void setChartColor(Color chartColor) {
-		this.chartColor = chartColor;
-	}
-	
-	/**
-	 * @return Returns the alarmEnable.
-	 */
-	public boolean isAlarmEnable() {
-		return alarmEnable;
-	}
-	/**
-	 * @param alarmEnable The alarmEnable to set.
-	 */
-	public void setAlarmEnable(boolean alarmEnable) {
-		this.alarmEnable = alarmEnable;
-	}
 
     /**
      * Main class, so you can have an example.
@@ -1910,10 +1275,10 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
      */
     public static void main(String[] args) {
         JFrame frame = new JFrame();
-        final AttributeMultiChart f = new AttributeMultiChart(
+        AttributeMultiChart f = new AttributeMultiChart(
                 AttributeMultiChart.barChart);
-        f.getXAxis().setTickSpacing(0.0);
-        final AttributeList attributeList = new AttributeList();
+        AttributeList attributeList = new AttributeList();
+        f.setXAxisOnBottom(false);
         try {
             if (args.length > 0) {
                 for (int i = 0; i < args.length; i++) {
@@ -1930,42 +1295,14 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
             e.printStackTrace();
             System.exit(1);//RG comment : I added this code to avoid freeze
         }
-        f.addKeyListener( new KeyListener() {
-
-            public void keyPressed (KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                    if ( attributeList.isRefresherStarted() ) {
-                        attributeList.stopRefresher();
-                    }
-                    else {
-                        attributeList.startRefresher();
-                    }
-                }
-            }
-
-            public void keyReleased (KeyEvent e) {
-                // TODO Auto-generated method stub
-                
-            }
-
-            public void keyTyped (KeyEvent e) {
-                // TODO Auto-generated method stub
-                
-            }
-            
-        });
-        f.addMouseListener( new MouseAdapter() {
-            @Override
-            public void mousePressed (MouseEvent e) {
-                f.grabFocus();
-            }
-        });
         f.setModel(attributeList);
         attributeList.startRefresher();
         f.setWidth(10);
-        f.setHeader("AttributeMultiChart");
-        f.setFaultLevel(200.0);
-        f.setAlarmLevel(100.0);
+        f.setXaxisName("Pressures");
+        f.setUnit("mbar");
+        f.setHeader("LT1");
+        f.setFaultLevel(2.0);
+        f.setAlarmLevel(1.0);
         frame.getContentPane().add(f, BorderLayout.CENTER);
         frame.setSize(640, 480);
         frame.setTitle(f.getHeader() + " Example 1");
@@ -1976,5 +1313,4 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
         });
         frame.setVisible(true);
     }
-
 }

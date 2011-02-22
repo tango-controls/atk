@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * NumberScalarWheelEditor.java
  *
  */
@@ -28,7 +6,6 @@
 package fr.esrf.tangoatk.widget.attribute;
 
 import fr.esrf.tangoatk.core.*;
-import fr.esrf.tangoatk.core.attribute.ANumber;
 import fr.esrf.tangoatk.widget.util.*;
 import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
 
@@ -45,7 +22,7 @@ public class NumberScalarWheelEditor extends WheelSwitch
 
   static String[] exts = {"arrowColor","arrowSelColor"};
 
-  private INumberScalar model;
+  INumberScalar model;
 
   // General constructor
   public NumberScalarWheelEditor() {
@@ -53,46 +30,8 @@ public class NumberScalarWheelEditor extends WheelSwitch
     addWheelSwitchListener(this);
   }
 
-  public INumberScalar getModel() {
+  public IAttribute getModel() {
     return model;
-  }
-
-  public void setModel(INumberScalar m) {
-
-    // Remove old registered listener
-    if (model != null) {
-      model.removeNumberScalarListener(this);
-      model.getProperty("format").removePresentationListener(this);
-      model = null;
-    }
-
-    if( m==null ) return;
-
-    if (!m.isWritable())
-      throw new IllegalArgumentException("NumberScalarWheelEditor: Only accept writeable attribute.");
-
-
-    model = m;
-
-    // Register new listener
-    model.addNumberScalarListener(this);
-    model.getProperty("format").addPresentationListener(this);
-
-    setFormat(model.getProperty("format").getPresentation());
-    
-    ANumber   an=null;
-    if (model instanceof ANumber)
-        an = (ANumber) model;
-
-    // Set max and min
-    double max = model.getMaxValue();
-    if (an != null) max = an.getValueInDisplayUnit(max);
-    if (!Double.isNaN(max)) setMaxValue(max);
-    double min = model.getMinValue();
-    if (an != null) min = an.getValueInDisplayUnit(min);
-    if (!Double.isNaN(min)) setMinValue(min);
-
-    model.refresh();
   }
 
   // ------------------------------------------------------
@@ -205,7 +144,7 @@ public class NumberScalarWheelEditor extends WheelSwitch
       double set = Double.NaN;
 
       if(hasFocus())
-	  set = model.getNumberScalarSetPointFromDevice();
+	  set = model.getNumberScalarDeviceSetPoint();
       else
 	  set = model.getNumberScalarSetPoint();
 
@@ -222,6 +161,33 @@ public class NumberScalarWheelEditor extends WheelSwitch
   // Listen change on the WheelSwitch
   public void valueChange(WheelSwitchEvent e) {
     if (model != null) model.setValue(e.getValue());
+  }
+
+  public void setModel(INumberScalar m) {
+
+    // Remove old registered listener
+    if (model != null) {
+      model.removeNumberScalarListener(this);
+      model.getProperty("format").removePresentationListener(this);
+      model = null;
+    }
+
+    if( m==null ) return;
+
+    if (!m.isWritable())
+      throw new IllegalArgumentException("NumberScalarWheelEditor: Only accept writeable attribute.");
+
+
+    model = m;
+
+    // Register new listener
+    model.addNumberScalarListener(this);
+    model.getProperty("format").addPresentationListener(this);
+
+    setFormat(model.getProperty("format").getPresentation());
+    model.refresh();
+    double d = model.getNumberScalarSetPoint();
+    if (!Double.isNaN(d)) setValue(d);
   }
 
   public void propertyChange(PropertyChangeEvent evt) {
@@ -281,7 +247,7 @@ public class NumberScalarWheelEditor extends WheelSwitch
 
     f.pack();
     f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    f.setVisible(true);
+    f.show();
   }
 
 

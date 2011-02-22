@@ -1,25 +1,8 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
+// File:          AttributeFactory.java
+// Created:       2001-09-24 12:51:53, assum
+// By:            <erik@assum.net>
+// Time-stamp:    <2002-07-09 16:32:41, assum>
+//
 // $Id$
 //
 // Description:
@@ -31,9 +14,8 @@ import fr.esrf.tangoatk.core.*;
 import java.util.*;
 
 import fr.esrf.Tango.DevFailed;
+import fr.esrf.TangoApi.AttributeInfo;
 import fr.esrf.Tango.AttrDataFormat;
-import fr.esrf.TangoApi.DbAttribute;
-import fr.esrf.TangoApi.AttributeInfoEx;
 
 /**
  * <code>AttributeFactory</code> is an extension of {@link AEntityFactory}
@@ -44,7 +26,7 @@ import fr.esrf.TangoApi.AttributeInfoEx;
 public class AttributeFactory extends AEntityFactory {
 
   private static AttributeFactory instance;
-  protected Vector<AAttribute>   attributes = new Vector<AAttribute> ();
+  protected Vector   attributes = new Vector();
   protected String[] attNames   = new String[0]; // For fast string search
 
   /**
@@ -77,7 +59,7 @@ public class AttributeFactory extends AEntityFactory {
         ret[i] = (AAttribute)attributes.get(i);
     }
     return ret;
-
+    
   }
 
   public int getSize() {
@@ -95,21 +77,28 @@ public class AttributeFactory extends AEntityFactory {
    * attributes to be instantiated.
    * @param device a <code>Device</code> value containging the device
    * that the attribute belongs to
-   * @return a <code>List<IEntity></code> value containing the corresponding
+   * @return a <code>List</code> value containing the corresponding
    * IAttributes
    * @exception DevFailed if an error occurs
    * @see IAttribute
    */
-  protected synchronized List<IEntity> getWildCardEntities(String name, Device device)
+  protected synchronized List getWildCardEntities(String name, Device device)
           throws DevFailed {
 
-    List<IEntity> list = new Vector<IEntity> ();
+    List list = new Vector();
 
     /*
-     * Get the array of configs from the device.
-     * Pass null to get all attributes.
+     * Tango_AllAttr is the magic name which signifies that we want
+     * all the attributes from a device. It's defined in the
+     * interface fr.esrf.TangoDs.TangoConst
      */
-    AttributeInfoEx[] config = device.getAttributeInfo((String[])null);
+    name = Tango_AllAttr;
+    String[] attributeNames = {name};
+
+    /*
+     * Get the array of configs from the device
+     */
+    AttributeInfo[] config = device.getAttributeInfo(attributeNames);
 
     /*
      * loop through all these configs and see if we havn't already
@@ -123,7 +112,7 @@ public class AttributeFactory extends AEntityFactory {
       int pos = getAttributePos(fqname);
 
       if( pos>=0 ) {
-        attribute = attributes.get(pos);
+        attribute = (AAttribute) attributes.get(pos);
       } else {
         attribute = initAttribute(device, config[i],-(pos+1),fqname);
       }
@@ -133,72 +122,6 @@ public class AttributeFactory extends AEntityFactory {
 
     return list;
   }
-
-    /**
-     * <code>getStatelessDevice</code>
-     *
-     * @param deviceName a <code>String</code> value containing the
-     * name of the device to get.
-     * @return a <code>Device</code> if this device is already known.
-     * @see DeviceFactory#getDevice
-     */
-    Device getConnectionlessDevice(String deviceName) throws ConnectionException
-    {
-        return DeviceFactory.getInstance().getConnectionlessDevice(deviceName);
-    }
-
-  /**
-   * <code>getConnectionlessSingleAttribute</code>
-   *
-   * @param name a <code>String</code> value containing the name of the
-   * state attribute to be instantiated.
-   * @return a <code>List<IEntity></code> value containing the corresponding
-   * IAttributes
-* @see IAttribute
-   */
-    @Override
-    protected synchronized List<IEntity> getConnectionlessSingleAttribute(String name) throws ConnectionException
-    {
-        List<IEntity> list = new Vector<IEntity>();
-        Device d = getConnectionlessDevice(extractDeviceName(name));
-        list.add(getConnectionlessStateAttribute(name, d));
-        return list;
-    }
-
-
-  /**
-   * <code>getConnectionlessStateAttribute</code> returns an attribute corresponding
-   * to the name given in the first parameter. If such an attribute already
-   * exists, the existing attribute is returned. Otherwise it is created.
-   * @param fqname a <code>String</code> value containing the state attribute name
-   * fully qualified with device name.
-   * @param device a <code>Device</code> value the device
-   * @return an <code>IEntity</code> value
-   */
-    protected synchronized IEntity getConnectionlessStateAttribute(String fqname, Device device)  throws ConnectionException
-    {
-        /*
-         * Check if the attribute has already been imported
-         */
-        int pos = getAttributePos(fqname);
-
-        /*
-         * if so we return the old attribute and exit.
-         */
-        if (pos >= 0)
-        {
-            return attributes.get(pos);
-        }
-
-        /*
-         * To obtain a new attribute we must find its name.
-         * The name is passed fully-qualified, that is with the
-         * device-name prefixed, like eas/test-api/1/Attr_name.
-         */
-        String name = extractEntityName(fqname);
-
-        return initConnectionlessStateAttribute(device, -(pos + 1), fqname);
-    }
 
   /**
    * <code>getSingleEntity</code> returns an attribute corresponding
@@ -221,7 +144,7 @@ public class AttributeFactory extends AEntityFactory {
     /*
      * if so we return the old attribute and exit.
      */
-    if (pos>=0) return attributes.get(pos);
+    if (pos>=0) return (AAttribute) attributes.get(pos);
 
     /*
      * To obtain a new attribute we must find its name.
@@ -234,7 +157,7 @@ public class AttributeFactory extends AEntityFactory {
      * We obtain the config for our attribute from the device and
      * return an initialized attribute.
      */
-    AttributeInfoEx config = device.getAttributeInfo(name);
+    AttributeInfo config = device.getAttributeInfo(name);
     return initAttribute(device, config,-(pos+1),fqname);
   }
 
@@ -258,7 +181,7 @@ public class AttributeFactory extends AEntityFactory {
     // Check wether the attribute has alrerady been imported.
     synchronized(this) {
       int pos = getAttributePos(fqname);
-      if (pos>=0) ie = attributes.get(pos);
+      if (pos>=0) ie = (IEntity) attributes.get(pos);
     }
 
     if (ie == null) {
@@ -305,31 +228,6 @@ public class AttributeFactory extends AEntityFactory {
   }
 
   /**
-   * Check whether the given name corresponds to a state attribute whose device is not reachable.
-   * @param fqname Full entity name
-   * @return True if the state attribute exists.
-   */
-    public boolean isConnectionLessAttribute(String fqname)
-    {
-        try
-        {
-            return (getConnectionlessSingleAttribute(fqname) != null);
-        }
-        catch (ConnectionException de)
-        {
-            System.out.println("AttributeFactory.isConnectionLessAttribute(" + fqname + ") : " + de.getErrors()[0].desc);
-            return false;
-        }
-        catch (Exception e)
-        {
-            // Unexpected exception
-            System.out.println("AttributeFactory.isConnectionLessAttribute(" + fqname + ") : Unexpected exception caught...");
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-  /**
    * <code>initAttribute</code> ask getAttributeOfType for an
    * AAttribute of the type given in the AttributeInfo passed as
    * parameter, and then calls <code>init()</code> on the attribute
@@ -341,11 +239,11 @@ public class AttributeFactory extends AEntityFactory {
    * @return an <code>AAttribute</code> value
    */
   protected AAttribute initAttribute(Device device,
-                                     AttributeInfoEx config,
+                                     AttributeInfo config,
                                      int insertionPos,
                                      String fqname) {
 
-    AAttribute attribute = getAttributeOfType(device,config);
+    AAttribute attribute = getAttributeOfType(device.getName(),config);
     long t0 = System.currentTimeMillis();
     attribute.init(device, config.name, config, true);
     DeviceFactory.getInstance().trace(DeviceFactory.TRACE_SUCCESS,"AttributeFactory.init(" + fqname + ")",t0);
@@ -359,36 +257,6 @@ public class AttributeFactory extends AEntityFactory {
 
     return attribute;
   }
-
-  /**
-   * <code>initConnectionlessStateAttribute</code> ask getConnectionlessDevStateScalar for an
-   * AAttribute of the type given in the AttributeInfo passed as
-   * parameter, and then calls <code>init()</code> on the attribute
-   *
-   * @param device a <code>Device</code> value
-   * @param insertionPos Insertion postion of this new attribute in the global list
-   * @param fqname Full entity name (can include host and port)
-   * @return an <code>AAttribute</code> value
-   */
-    protected AAttribute initConnectionlessStateAttribute(Device device,
-            int insertionPos,
-            String fqname)  throws ConnectionException
-    {
-
-        AAttribute attribute = getConnectionlessDevStateScalar(device, fqname);
-        long t0 = System.currentTimeMillis();
-        attribute.connectionlessInit(device, extractEntityName(fqname), true);
-        DeviceFactory.getInstance().trace(DeviceFactory.TRACE_SUCCESS, "AttributeFactory.initConnectionlessStateAttribute(" + fqname + ")", t0);
-
-        // Build the new attNames array
-        buildNames(fqname, insertionPos);
-
-        attributes.add(insertionPos, attribute);
-
-        dumpFactory("Adding " + fqname);
-
-        return attribute;
-    }
 
   protected void buildNames(String fqname,int insertionPos) {
 
@@ -406,15 +274,14 @@ public class AttributeFactory extends AEntityFactory {
    * attribute is demanded, and deletates the work of instantiating the
    * attribute to getScalar, getSpectrum, or getImage. The typeinference
    * is based on the value of AttributeConfig.data_format.
-   * @param device a <code>Device</code> value
    * @param config an <code>AttributeInfo</code> value
    * @return an <code>AAttribute</code> value
    * @throws IllegalArgumentException if the format is unknown.
    */
-  protected AAttribute getAttributeOfType(Device device,AttributeInfoEx config) {
+  protected AAttribute getAttributeOfType(String devName,AttributeInfo config) {
 
     if (config == null) {
-      System.out.println("Warning, AttributeFactory.getAttributeOfType(): Warning, null AttributeInfo pointer got from " + device.getName());
+      System.out.println("Warning, AttributeFactory.getAttributeOfType(): Warning, null AttributeInfo pointer got from " + devName);
       return new InvalidAttribute();
     }
 
@@ -423,13 +290,13 @@ public class AttributeFactory extends AEntityFactory {
 
     switch (format.value()) {
       case AttrDataFormat._SCALAR:
-        return getScalar(device,config);
+        return getScalar(devName,config);
       case AttrDataFormat._SPECTRUM:
-        return getSpectrum(device,config);
+        return getSpectrum(devName,config);
       case AttrDataFormat._IMAGE:
-        return getImage(device,config);
+        return getImage(devName,config);
       default:
-        System.out.println("Warning, AttributeFactory.getAttributeOfType(" + device.getName() + "/" + name +
+        System.out.println("Warning, AttributeFactory.getAttributeOfType(" + devName + "/" + name +
                            ") : Unsupported attribute format [" + format.value() +"]");
         return new InvalidAttribute();
     }
@@ -437,109 +304,19 @@ public class AttributeFactory extends AEntityFactory {
   }
 
   /**
-   * <code>getConnectionlessDevStateScalar</code> does the work of instantiating the
-   * DevState scalar attribute even if the device is not responding.
-   * @param device a <code>Device</code> value
-   * @return an <code>AAttribute</code> value
-   * @throws IllegalArgumentException if the attribute name is not state.
-   */
-    protected AAttribute getConnectionlessDevStateScalar(Device device, String fqname) throws ConnectionException
-    {
-        String attName = extractEntityName(fqname);
-        if (!attName.equalsIgnoreCase("state"))
-            throw new ConnectionException("Only state attribute can be created without connection to the device.");
-        
-        DevStateScalar dss = new DevStateScalar();
-        return dss;
-    }
-
-
-  private EnumScalar getEnumScalar(Device device,AttributeInfoEx config)
-  {
-     String         name = config.name;
-     DbAttribute    dbAtt=null;
-     String[]       propVal=null;
-
-     String[]       enumLabs =null;
-     String[]       enumSetExcludeLabs = null;
-     EnumScalar     ens = null;
-
-     try
-     {
-         dbAtt = device.get_attribute_property(name);
-         if (dbAtt != null)
-         {
-             if (!dbAtt.is_empty("EnumLabels"))
-             {
-                 //System.out.println("Found EnumLabels property for "+name);
-                 propVal = dbAtt.get_value("EnumLabels");
-                 //System.out.println("EnumLabels = "+propVal);
-                 if (propVal != null)
-                    enumLabs = EnumScalar.getNonEmptyLabels(propVal);
-             }
-         }
-     }
-     catch (Exception ex)
-     {
-         System.out.println("get_attribute_property("+name+") thrown exception");
-         ex.printStackTrace();
-     }
-
-     if (enumLabs == null)
-         return null;
-
-     if (enumLabs.length <= 1)
-         return null;
-
-     try
-     {
-         dbAtt = device.get_attribute_property(name);
-         if (dbAtt != null)
-         {
-             if (!dbAtt.is_empty("EnumSetExclusion"))
-             {
-                 //System.out.println("Found EnumSetExclusion property for "+name);
-                 propVal = dbAtt.get_value("EnumSetExclusion");
-                 //System.out.println("EnumSetExclusion = "+propVal);
-                 if (propVal != null)
-                 {
-                     enumSetExcludeLabs = EnumScalar.getNonEmptyLabels(propVal);
-                 }
-             }
-         }
-     }
-     catch (Exception ex)
-     {
-         System.out.println("get_attribute_property("+name+") thrown exception");
-         ex.printStackTrace();
-     }
-
-     if (enumSetExcludeLabs != null)
-        if (enumSetExcludeLabs.length < 1)
-           enumSetExcludeLabs=null;
-
-     ens = new EnumScalar(enumLabs, enumSetExcludeLabs);
-     return ens;
-  }
-
-
-  /**
    * <code>getScalar</code> figures out what kind of scalar is to be
    * created. This is done by looking at AttributeInfo.data_type
    *
-   * @param device a <code>Device</code> value
    * @param config an <code>AttributeInfo</code> value
    * @return an <code>AAttribute</code> value being instanceof either
    * ShortScalar, DoubleScalar, LongScalar, StringScalar, BooleanScalar or DevStateScalar.
    * @throws IllegalArgumentException if the type is unknown.
    */
-  private AAttribute getScalar(Device device,AttributeInfoEx config) {
+  private AAttribute getScalar(String devName,AttributeInfo config) {
     String name = config.name;
     int dataType = config.data_type;
     BooleanScalar   bs=null;
     DevStateScalar  dss=null;
-    EnumScalar      ens=null;
-    RawImage        ri = null;
 
     if (dataType == Tango_DEV_STRING) {
       return new StringScalar();
@@ -549,56 +326,33 @@ public class AttributeFactory extends AEntityFactory {
 
     switch (dataType) {
       case Tango_DEV_UCHAR:
-            ns.setNumberHelper(new UCharScalarHelper(ns));
-            return ns;
+        ns.setNumberHelper(new UCharScalarHelper(ns));
+        return ns;
       case Tango_DEV_SHORT:
-            ens = getEnumScalar(device, config);
-            if (ens != null)
-            {
-               ens.setEnumHelper(new EnumScalarHelper(ens));
-               return ens;
-            }
-            else
-               ns.setNumberHelper(new ShortScalarHelper(ns));
-            break;
+        ns.setNumberHelper(new ShortScalarHelper(ns));
+        break;
       case Tango_DEV_USHORT:
-            ns.setNumberHelper(new UShortScalarHelper(ns));
-            break;
+        ns.setNumberHelper(new UShortScalarHelper(ns));
+        break;
       case Tango_DEV_DOUBLE:
-            ns.setNumberHelper(new DoubleScalarHelper(ns));
-            break;
+        ns.setNumberHelper(new DoubleScalarHelper(ns));
+        break;
       case Tango_DEV_FLOAT:
-            ns.setNumberHelper(new FloatScalarHelper(ns));
-            break;
+        ns.setNumberHelper(new FloatScalarHelper(ns));
+        break;
       case Tango_DEV_LONG:
-            ns.setNumberHelper(new LongScalarHelper(ns));
-            break;
-      case Tango_DEV_ULONG:
-            ns.setNumberHelper(new ULongScalarHelper(ns));
-            break;
+        ns.setNumberHelper(new LongScalarHelper(ns));
+        break;
       case Tango_DEV_BOOLEAN:
-            bs = new BooleanScalar();
-            return bs;
+        bs = new BooleanScalar();
+        return bs;
       case Tango_DEV_STATE:
-            dss = new DevStateScalar();
-            return dss;
-      case Tango_DEV_ENCODED:
-           if (config.format.equalsIgnoreCase(AAttribute.RAW_IMAGE_FORMAT))
-           {
-               ri = new RawImage();
-               return ri;
-           }
-           else
-           {
-              System.out.println("Warning, AttributeFactory.getScalar(" + device.getName() + "/" + name +
-                               ") : Unsupported DevEncoded attribute. Try to set the format attribute property to 'RawImage'.");
-               return new InvalidAttribute();               
-           }
-
+        dss = new DevStateScalar();
+        return dss;
       default:
-            System.out.println("Warning, AttributeFactory.getScalar(" + device.getName() + "/" + name +
-                               ") : Unsupported data type [" + dataType +"]");
-            return new InvalidAttribute();
+        System.out.println("Warning, AttributeFactory.getScalar(" + devName + "/" + name +
+                           ") : Unsupported data type [" + dataType +"]");
+        return new InvalidAttribute();
     }
     return ns;
   }
@@ -612,13 +366,12 @@ public class AttributeFactory extends AEntityFactory {
    * ShortSpectrum, DoubleSpectrum, LongSpectrum or BooleanSpectrum
    * @throws IllegalArgumentException if the type is unknown.
    */
-  private AAttribute getSpectrum(Device device,AttributeInfoEx config) {
+  private AAttribute getSpectrum(String devName,AttributeInfo config) {
     String name = config.name;
     int dataType = config.data_type;
     NumberSpectrum ns = new NumberSpectrum();
     StringSpectrum ss = null;
     BooleanSpectrum bs = null;
-    DevStateSpectrum dss = null;
 
     switch (dataType) {
       case Tango_DEV_UCHAR:
@@ -639,20 +392,14 @@ public class AttributeFactory extends AEntityFactory {
       case Tango_DEV_LONG:
         ns.setNumberHelper(new LongSpectrumHelper(ns));
         return ns;
-      case Tango_DEV_ULONG:
-        ns.setNumberHelper(new ULongSpectrumHelper(ns));
-        return ns;
       case Tango_DEV_STRING:
         ss = new StringSpectrum();
         return ss;
       case Tango_DEV_BOOLEAN:
         bs = new BooleanSpectrum();
         return bs;
-      case Tango_DEV_STATE:
-        dss = new DevStateSpectrum();
-        return dss;
       default:
-        System.out.println("Warning, AttributeFactory.getSpectrum(" + device.getName() + "/" + name +
+        System.out.println("Warning, AttributeFactory.getSpectrum(" + devName + "/" + name +
                            ") : Unsupported data type [" + dataType +"]");
         return new InvalidAttribute();
 
@@ -668,44 +415,37 @@ public class AttributeFactory extends AEntityFactory {
    * ShortSpectrum, DoubleSpectrum, or LongSpectrum
    * @throws IllegalArgumentException if the type is unknown.
    */
-  private AAttribute getImage(Device device,AttributeInfoEx config) {
+  private AAttribute getImage(String devName,AttributeInfo config) {
     String name = config.name;
     int dataType = config.data_type;
-    NumberImage nimg = new NumberImage();
-
+    NumberImage ns = new NumberImage();
+    
     BooleanImage bi = null;
-    StringImage si = null;
-
+    
     switch (dataType) {
       case Tango_DEV_UCHAR:
-        nimg.setNumberHelper(new UCharImageHelper(nimg));
-        return nimg;
+        ns.setNumberHelper(new UCharImageHelper(ns));
+        return ns;
       case Tango_DEV_SHORT:
-        nimg.setNumberHelper(new ShortImageHelper(nimg));
-        return nimg;
+        ns.setNumberHelper(new ShortImageHelper(ns));
+        return ns;
       case Tango_DEV_USHORT:
-        nimg.setNumberHelper(new UShortImageHelper(nimg));
-        return nimg;
+        ns.setNumberHelper(new UShortImageHelper(ns));
+        return ns;
       case Tango_DEV_DOUBLE:
-        nimg.setNumberHelper(new DoubleImageHelper(nimg));
-        return nimg;
+        ns.setNumberHelper(new DoubleImageHelper(ns));
+        return ns;
       case Tango_DEV_FLOAT:
-        nimg.setNumberHelper(new FloatImageHelper(nimg));
-        return nimg;
+        ns.setNumberHelper(new FloatImageHelper(ns));
+        return ns;
       case Tango_DEV_LONG:
-        nimg.setNumberHelper(new LongImageHelper(nimg));
-        return nimg;
-      case Tango_DEV_ULONG:
-        nimg.setNumberHelper(new ULongImageHelper(nimg));
-        return nimg;
+        ns.setNumberHelper(new LongImageHelper(ns));
+        return ns;
       case Tango_DEV_BOOLEAN:
         bi = new BooleanImage();
         return bi;
-      case Tango_DEV_STRING:
-        si = new StringImage();
-        return si;
       default:
-        System.out.println("Warning, AttributeFactory.getSpectrum(" + device.getName() + "/" + name +
+        System.out.println("Warning, AttributeFactory.getSpectrum(" + devName + "/" + name +
                            ") : Unsupported data type [" + dataType +"]");
         return new InvalidAttribute();
     }

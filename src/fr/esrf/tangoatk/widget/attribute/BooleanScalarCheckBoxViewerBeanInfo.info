@@ -1,7 +1,7 @@
 name = BooleanScalarCheckBoxViewer
 package = fr.esrf.tangoatk.widget.attribute
 
-properties = attModel, trueLabel, falseLabel, hasToolTip, qualityEnabled
+properties = attModel, trueLabel, falseLabel
 
 ICON_COLOR_16x16 = AttCheckBox.gif
 ICON_MONO_16x16 = AttCheckBox.gif

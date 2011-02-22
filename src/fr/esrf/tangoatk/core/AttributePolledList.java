@@ -1,32 +1,9 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.core;
 
 import java.util.*;
 
 import fr.esrf.TangoApi.DeviceAttribute;
 import fr.esrf.Tango.DevFailed;
-import fr.esrf.tangoatk.core.attribute.AAttribute;
 import fr.esrf.tangoatk.core.attribute.PolledAttributeFactory;
 
 /**
@@ -35,15 +12,7 @@ import fr.esrf.tangoatk.core.attribute.PolledAttributeFactory;
   */
 public class AttributePolledList extends AttributeList {
 
-  //private Vector deviceList = new Vector();
-  private Vector<DeviceItem> deviceList = new Vector<DeviceItem> ();
-  private boolean forceRefresh = false;
-
-  // Centralizing variables to reduce memory consumption.
-  private DeviceAttribute[] att = null;
-  private DeviceItem devItem = null;
-  private Device dev = null;
-  private long currentTime;
+  private Vector deviceList = new Vector();
 
   public AttributePolledList() {
     factory = PolledAttributeFactory.getPolledInstance();
@@ -52,34 +21,32 @@ public class AttributePolledList extends AttributeList {
   // --------------------------------------------------------------
   // Overrides addElement to build the optimized internal structure
   // --------------------------------------------------------------
-    @Override
   public void addElement(Object entity) {
 
-    if(!(entity instanceof AAttribute)) {
+    if(!(entity instanceof IAttribute)) {
       System.out.println("Warning, AttributePolledList supports only IAttribute.");
       return;
     }
 
-    AAttribute attToAdd = (AAttribute)entity;
-    super.addElement(attToAdd);
+    IAttribute att = (IAttribute)entity;
+    super.addElement(att);
 
     // Add this entity within the private device list
-    addEntity(attToAdd);
+    addEntity(att);
 
   }
 
   // --------------------------------------------------------------
   // Remove an entity from the internal structure
   // --------------------------------------------------------------
-    @Override
   public Object remove(int index) {
 
     Object removed = super.remove(index);
 
     // look for this entity within the internal structre
     // and remove it
-    if(removed!=null && removed instanceof AAttribute)
-      removeEntity((AAttribute)removed);
+    if(removed!=null && removed instanceof IAttribute)
+      removeEntity((IAttribute)removed);
 
     return removed;
 
@@ -88,107 +55,89 @@ public class AttributePolledList extends AttributeList {
   // --------------------------------------------------------------
   // Refresh implementation
   // --------------------------------------------------------------
-    @Override
-  public void refresh()
-  {
+  public void refresh() {
+ 
+    for(int i=0;i<deviceList.size();i++) {
 
-    for(int i=0;i<deviceList.size();i++)
-    {
-      synchronized(this)
+      DeviceItem devItem = (DeviceItem)deviceList.get(i);
+      Device dev = devItem.getDevice();
+      long t0 = System.currentTimeMillis();
+      
+      try
       {
-        //devItem = (DeviceItem)deviceList.get(i);
-        devItem = deviceList.get(i);
-        dev = devItem.getDevice();
-        currentTime = System.currentTimeMillis();
-        if ( isForceRefresh () )
-        {
+
+        synchronized(this) {
+
+          // Read all attributes from the device
+          DeviceAttribute[] att = dev.read_attribute(devItem.getNames());
+          trace(DeviceFactory.TRACE_REFRESHER, "Device.read_attribute(" +
+	            dev.getName() + ") " + devItem.getEntityNumber() + " attributes read : OK" , t0);
+
+  	      // Refresh
           for (int j = 0; j < devItem.getEntityNumber(); j++)
-            devItem.getEntity(j).refresh();
+            devItem.getEntity(j).dispatch(att[j]);
+
         }
-        else
-        {
-          try
-          {
-            // Read all attributes from the device
-            att = dev.read_attribute(devItem.getNames());
-            trace(DeviceFactory.TRACE_REFRESHER, "Device.read_attribute("
-                  + dev.getName() + ") " + devItem.getEntityNumber() 
-                  + " attributes read : OK" , currentTime);
 
-            // Refresh
-            for (int j = 0; j < devItem.getEntityNumber(); j++)
-              devItem.getEntity(j).dispatch(att[j]);
+      } catch (DevFailed e) {
+      
+         trace(DeviceFactory.TRACE_REFRESHER, "Device.read_attribute(" +
+	       dev.getName() + ") " + devItem.getEntityNumber() + " attributes read : Failed" , t0);
 
-            att = null;
-          }
-          catch (DevFailed e)
-          {
-            att = null;
-            trace(DeviceFactory.TRACE_REFRESHER, "Device.read_attribute("
-                  + dev.getName() + ") " + devItem.getEntityNumber() 
-                  + " attributes read : Failed" , currentTime);
+  	     // Major failure , dispatch the error
+         synchronized(this) {
 
-            // Major failure , dispatch the error
-            synchronized(this)
-            {
-              for (int j = 0; j < devItem.getEntityNumber(); j++)
-                devItem.getEntity(j).dispatchError(e);
-            }
-          } // end catch (DevFailed e)
-        } // end if ( isForceRefresh () ) ... else
-        devItem = null;
-        dev = null;
-      } // end synchronized(this)
-    } // end for(int i=0;i<deviceList.size();i++)
+          for (int j = 0; j < devItem.getEntityNumber(); j++)
+            devItem.getEntity(j).dispatchError(e);
+
+         }
+
+      }
+
+    }
 
     fireRefresherStepEvent();
 
-  } // end refresh()
+  }
 
   
   // --------------------------------------------------------------
   // private stuff
   // --------------------------------------------------------------
-  synchronized private void addEntity(AAttribute att) {
+  synchronized private void addEntity(IAttribute att) {
   
     int i = 0;
     boolean found = false;
-    Device attDev = att.getDevice();
+    Device dev = att.getDevice();
     
     while(i<deviceList.size() && !found) {
-      //found = ((DeviceItem)deviceList.get(i)).getDevice() == dev;
-      found = (deviceList.get(i).getDevice() == attDev);
+      found = ((DeviceItem)deviceList.get(i)).getDevice() == dev;
       if(!found) i++;
     }
     if( found ) {
-      //((DeviceItem)deviceList.get(i)).add(att);
-      deviceList.get(i).add(att);
+      ((DeviceItem)deviceList.get(i)).add(att);
     } else {
       // Create a new entry
-      DeviceItem item = new DeviceItem(attDev);
+      DeviceItem item = new DeviceItem(dev);
       item.add(att);
       deviceList.add(item);
     }
     
   }
 
-  synchronized private void removeEntity(AAttribute att) {
+  synchronized private void removeEntity(IAttribute att) {
 
     int i = 0;
     boolean found = false;
-    Device attDev = att.getDevice();
+    Device dev = att.getDevice();
 
     while(i<deviceList.size() && !found) {
-      //found = ((DeviceItem)deviceList.get(i)).getDevice() == dev;
-      found = (deviceList.get(i).getDevice() == attDev);
+      found = ((DeviceItem)deviceList.get(i)).getDevice() == dev;
       if(!found) i++;
     }
     if( found ) {
-      //((DeviceItem)deviceList.get(i)).remove(att);
-      deviceList.get(i).remove(att);
-      //if(((DeviceItem)deviceList.get(i)).getEntityNumber()==0)
-      if(deviceList.get(i).getEntityNumber()==0)
-      {
+      ((DeviceItem)deviceList.get(i)).remove(att);
+      if(((DeviceItem)deviceList.get(i)).getEntityNumber()==0) {
         deviceList.remove(i);
       }
     }
@@ -204,44 +153,47 @@ public class AttributePolledList extends AttributeList {
     return "$Id$";
   }
 
-  public boolean isForceRefresh ()
-  {
-    return forceRefresh;
+}
+
+// --------------------------------------------------------------
+// A class to handle the relationship betwwen device and entities
+// --------------------------------------------------------------
+
+class DeviceItem {
+
+  private Vector entities;
+  private Device device;
+
+  DeviceItem(Device dev) {
+    device   = dev;
+    entities = new Vector();
   }
 
-  public void setForceRefresh (boolean forceRefresh)
-  {
-    this.forceRefresh = forceRefresh;
+  Device getDevice() {
+    return device;
+  }
+  
+  int getEntityNumber() {
+    return entities.size();
+  }
+  
+  IAttribute getEntity(int idx) {
+    return (IAttribute)entities.get(idx);
+  }
+  
+  String[] getNames() {
+    String[] ret = new String[entities.size()];
+    for(int i=0;i<entities.size();i++)
+      ret[i] = getEntity(i).getNameSansDevice();
+    return ret;
   }
 
-  public void removeAllElements()
-  {
-      for (int i = 0; i < this.size(); i++)
-      {
-          remove(i);
-      }
+  void add(IAttribute entity) {
+    entities.add(entity);
   }
 
-  public void clear()
-  {
-      removeAllElements();
-  }
-
-  public void startRefresher() {
-
-    // Check that all items in this list are device IDL > 3
-    for(int i=0;i<size();i++) {
-      IAttribute att = (IAttribute)get(i);
-      int idl = att.getDevice().getIdlVersion();
-      if(idl<3) {
-        System.out.println("Warning, " + att.getName() + " has an IDL<=2 and does not support multiple DevFailed, switching to classic refresh.");
-        forceRefresh = true;
-      }
-    }
-
-    super.startRefresher();
-
+  void remove(IAttribute entity) {
+    entities.remove(entity);
   }
 
 }
-

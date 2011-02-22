@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /**
  * A set of class to handle a graphical synoptic viewer (vector drawing) and its editor.
  */
@@ -27,9 +5,6 @@ package fr.esrf.tangoatk.widget.util.jdraw;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.*;
 import java.awt.geom.*;
 import java.awt.event.*;
 import java.util.Vector;
@@ -37,12 +12,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 /** The graph editor/viewer component. */
 public class JDrawEditor extends JComponent implements MouseMotionListener, MouseListener,
-                                                       ActionListener, KeyListener, ComponentListener,
-                                                       DropTargetListener {
+                                                       ActionListener, KeyListener, ComponentListener {
 
   // Mode of the editor
   /** Editor is in classic edition mode */
@@ -136,7 +109,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   private JDPolyline connectPolyline;
   private JLabel statusLabel = null;
   private String currentStatus = "";
-  private DropTarget dropTarget;
 
   // ------- Object Contextual menu ----------------
   private JSeparator sep1;
@@ -268,7 +240,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     addKeyListener(this);
     addMouseListener(this);
     addMouseMotionListener(this);
-    if(mode==MODE_EDIT) dropTarget = new DropTarget(this,this);
 
   }
 
@@ -428,20 +399,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   /** Select all object */
   public void selectAll() {
     selectAll(true);
-  }
-
-  /** Select non visible items */
-  public void selectNotVisible() {
-    if(mode==MODE_PLAY) return;
-    selObjects.clear();
-    int nbObj = objects.size();
-    for(int i=0;i<nbObj;i++) {
-      JDObject obj = (JDObject)objects.get(i);
-      if(!obj.isVisible()) selObjects.add(obj);
-    }
-    editedPolyline = null;
-    repaint();
-    fireSelectionChange();
   }
 
   private void selectAll(boolean fireSelChanged) {
@@ -796,46 +753,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     } else {
       showSaveDialog(defaultDir);
     }
-
-  }
-  
-  /** Load a jdraw grpahics input stream reader into the editor. Available only for play mode. The .jlx and .g files are not supported.
-   *  This method is only called by TangoSynopticHandler which is in fact in Play mode.
-   * @param inp opened for the synoptic resource
-   * @throws IOException Exception containing error message when failed.
-   * @see JDrawEditorListener#valueChanged
-   */
-  
-  protected void loadFromStream(InputStreamReader inp) throws IOException
-  {
-
-      Vector         objs;
-      File           jdFile=null;
-
-      if (mode!=MODE_PLAY) return;
-      
-      JDFileLoader fl = new JDFileLoader(inp);
-      try {
-        objs = fl.parseFile();
-        inp.close();
-      } catch (IOException e) {
-        inp.close();
-        throw e;
-      }
-
-      applyGlobalOption(fl);
-
-      // Load success
-      clearObjects();
-      editedPolyline = null;
-      objects = objs;
-      for(int i=0;i<objects.size();i++)
-	((JDObject)objects.get(i)).setParent(this);
-
-      initPlayer();
-
-      computePreferredSize();
-      repaintLater();
 
   }
 
@@ -1396,12 +1313,8 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     sizeY = d.height;
   }
 
-
   public Dimension getPreferredSize() {
-    Insets insets = getInsets();
-    int bW = (insets.right+insets.left);
-    int bH = (insets.bottom+insets.top);
-    return new Dimension(zbconvert(sizeX,0)+bW, zbconvert(sizeY,0)+bH);
+    return new Dimension(zbconvert(sizeX,0), zbconvert(sizeY,0));
   }
 
   public Dimension getMinimumSize() {
@@ -1599,10 +1512,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
           translateSelection(t, 0);
           setNeedToSave(true, "Translate");
         }
-        e.consume();
-        break;
-      case KeyEvent.VK_DELETE:
-        deleteSelection();
         e.consume();
         break;
     }
@@ -2006,13 +1915,11 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   }
 
   public void mousePressedEditorB3(MouseEvent e) {
-    //if (mode == MODE_LIB) return;
-    if (creationMode == 0) showMenu(e);
+    if (mode == MODE_LIB) return;
 
     int i;
-    
+
     // --------------------------------------- Creation mode
-    
     if (creationMode == CREATE_POLYLINE) {
 
       if (tmpPoints.size() != 0) {
@@ -2215,67 +2122,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   public void componentMoved(ComponentEvent e) {}
   public void componentShown(ComponentEvent e) {}
   public void componentHidden(ComponentEvent e) {}
-
-// -----------------------------------------------------
-// DropTargetListener listener
-// -----------------------------------------------------
-  public void dragEnter(DropTargetDragEvent dtde) {
-  }
-
-  public void dragOver(DropTargetDragEvent dtde) {
-  }
-
-  public void dropActionChanged(DropTargetDragEvent dtde) {
-  }
-
-  public void dragExit(DropTargetEvent dte) {
-  }
-
-  public void drop(DropTargetDropEvent dtde) {
-
-    if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
-
-    Transferable trans = dtde.getTransferable();
-    if (trans.isDataFlavorSupported(JDEntityNode.JDENTITY_NODE_FLAVOR)) {
-        dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-        try {
-          JDEntityNode jde = (JDEntityNode)trans.getTransferData(JDEntityNode.JDENTITY_NODE_FLAVOR);
-          Point location = dtde.getLocation();
-
-          int ex = zconvert(location.x,transx);
-          int ey = zconvert(location.y,transy);
-
-          boolean found = false;
-          int i = objects.size() - 1;
-          while (!found && i >= 0) {
-            found = ((JDObject) objects.get(i)).isInsideObject(ex, ey);
-            if (!found) i--;
-          }
-
-          if (found) {
-            JDObject p = (JDObject) objects.get(i);
-            p.setName(jde.getName());
-            setNeedToSave(true,"Change name");
-            unselectAll(false);
-            selObjects.add(p);
-            repaint(p.getRepaintRect());
-            fireSelectionChange();
-            //JDUtils.updatePropertyDialog(selObjects);
-          } else {
-            JOptionPane.showMessageDialog(this,"No object found here");
-          }
-
-        } catch(IOException e1) {
-          JOptionPane.showMessageDialog(this,"Drag operation not allowed");
-        } catch (UnsupportedFlavorException e2) {
-          JOptionPane.showMessageDialog(this,"Drag operation not allowed");
-        }
-        dtde.dropComplete(true);
-    } else {
-      JOptionPane.showMessageDialog(this,"Drag operation not allowed");
-    }
-  }
 
 // -----------------------------------------------------
 // Action listener
@@ -2624,26 +2470,13 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
   }
 
-  public void addToMenu(JMenuItem newItem) {
-	  if (objMenu == null) {
-		  objMenu = new JPopupMenu();
-		  infoMenuItem = new JMenuItem();
-		  infoMenuItem.setEnabled(false);
-		  objMenu.add(infoMenuItem);
-		  sep1 = new JSeparator();
-		  objMenu.add(sep1);
-	  }		  
-	  if (newItem != null)
-		  objMenu.add(newItem);
-  }
-  
   private void showMenu(MouseEvent e) {
 
     int ex = zconvert(e.getX(),transx);
     int ey = zconvert(e.getY(),transy);
     findSummit(ex, ey);
 
-    if (editedPolyline!=null && mode != MODE_LIB) {
+    if (editedPolyline!=null) {
 
       // Polyline edition mode
       infoPolyMenuItem.setText("Polyline edition");
@@ -2682,66 +2515,52 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
         }
       }
 
+      editShapeMenuItem.setVisible(false);
       int sz = selObjects.size();
       p = null;
+
       if (sz > 0) p = (JDObject) selObjects.get(0);
-      
-      if (mode == MODE_LIB && objMenu == null) {
-	      addToMenu(null); //Creates a void Library Context Menu
-      }
 
       infoMenuItem.setVisible(sz >= 1);
+
       if (sz == 1) {
         String sId = (selSummit!=-1) ? " Summit:" + Integer.toString(selSummit) : "";
         infoMenuItem.setText(p.getName() + " [" + p.toString() + "]" + sId);
       } else
         infoMenuItem.setText("Multiple selection");
-	
-      if (mode == MODE_LIB) {
-	      Component[] menuComps = objMenu.getComponents();
-	      for (int k=0;k<menuComps.length;k++) {
-		      if (k<menuComps.length-1) {
-			      menuComps[k].setEnabled(k>1 && sz>0);
-			      menuComps[k].setVisible(sz>0);
-		      } else { //Exit Command
-		      	      menuComps[k].setEnabled(k>1);
-			      menuComps[k].setVisible(true);
-		      }
-	      }
+
+      cutMenuItem.setEnabled((sz > 0));
+      copyMenuItem.setEnabled((sz > 0));
+      pasteMenuItem.setEnabled((clipboard.size() > 0));
+      deleteMenuItem.setEnabled((sz > 0));
+
+      groupMenuItem.setVisible((sz > 0));
+      if (sz == 1) {
+        ungroupMenuItem.setVisible(p instanceof JDGroup);
       } else {
-	      cutMenuItem.setEnabled((sz > 0));
-	      copyMenuItem.setEnabled((sz > 0));
-	      pasteMenuItem.setEnabled((clipboard.size() > 0));
-	      deleteMenuItem.setEnabled((sz > 0));
-	
-	      groupMenuItem.setVisible((sz > 0));
-	      if (sz == 1) {
-		ungroupMenuItem.setVisible(p instanceof JDGroup);
-	      } else {
-		ungroupMenuItem.setVisible(false);
-	      }
-	
-	      raiseMenuItem.setVisible((sz == 1));
-	      lowerMenuItem.setVisible((sz == 1));
-	      frontMenuItem.setVisible((sz >= 1));
-	      backMenuItem.setVisible((sz >= 1));
-	
-	      if (p != null) {
-		int pos = objects.indexOf(p);
-		raiseMenuItem.setEnabled(pos < objects.size() - 1);
-		lowerMenuItem.setEnabled(pos > 0);
-	      }
-	
-	      boolean isPoly = (p instanceof JDPolyline) && (sz==1);
-	      editShapeMenuItem.setVisible(isPoly);
-	      connectShapeMenuItem.setVisible(isPoly);
-	      
-	      //Separator
-	      sep1.setVisible(infoMenuItem.isVisible());
-	      sep2.setVisible(editShapeMenuItem.isVisible());
-	      sep3.setVisible(groupMenuItem.isVisible() || ungroupMenuItem.isVisible());
-	      sep5.setVisible(raiseMenuItem.isVisible() || frontMenuItem.isVisible());	      
+        ungroupMenuItem.setVisible(false);
       }
+
+      raiseMenuItem.setVisible((sz == 1));
+      lowerMenuItem.setVisible((sz == 1));
+      frontMenuItem.setVisible((sz >= 1));
+      backMenuItem.setVisible((sz >= 1));
+
+      if (p != null) {
+        int pos = objects.indexOf(p);
+        raiseMenuItem.setEnabled(pos < objects.size() - 1);
+        lowerMenuItem.setEnabled(pos > 0);
+      }
+
+      boolean isPoly = (p instanceof JDPolyline) && (sz==1);
+      editShapeMenuItem.setVisible(isPoly);
+      connectShapeMenuItem.setVisible(isPoly);
+
+      //Separator
+      sep1.setVisible(infoMenuItem.isVisible());
+      sep2.setVisible(editShapeMenuItem.isVisible());
+      sep3.setVisible(groupMenuItem.isVisible() || ungroupMenuItem.isVisible());
+      sep5.setVisible(raiseMenuItem.isVisible() || frontMenuItem.isVisible());
 
       // Popup the menu
       lastX = ex;
@@ -2975,7 +2794,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
         setStatus("Left click to create a new point and right click to create the last point");
         break;
       case CREATE_IMAGE:
-        setStatus("Left click to insert an image");
+        setStatus("Left click to create an image");
         break;
       case CREATE_AXIS:
         setStatus("Left click to create an axis");

@@ -1,25 +1,8 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
+// File:          IAttribute.java
+// Created:       2001-10-30 14:15:34, assum
+// By:            <assum@esrf.fr>
+// Time-stamp:    <2002-07-17 14:37:9, assum>
+// 
 // $Id$
 // 
 // Description:       
@@ -61,7 +44,6 @@ public interface IAttribute extends IEntity
      */
     public String getUnit();
 
-    
     /**
      * <code>getDisplayUnit</code> returns the display unit of this attribute
      *
@@ -70,44 +52,20 @@ public interface IAttribute extends IEntity
     public String  getDisplayUnit();
 
     /**
-     * <code>getDisplayUnitFactor</code> returns the DisplayUnit Multiplication factor of this attribute.
-     * The display unit factor is the value which must be multiplied with the 
-     * value of the attribute (returned by the device server) to obtain the value
-     * which should be displayed (the value converted into display unit).
-     * All the Number Change Events inside ATK and the Viewers use the value converted into
-     * the display unit.
-     * @return a <code>double</code> value
-     *   returns 1.0 if the attribute property "display_unit" is not defined or has an invalid value
-     *   returns the value defined by the attribute property "display_unit".
-     */
-    public double getDisplayUnitFactor();
-
-    
-    
-    /**
-     * <code>getStandardUnit</code> returns the standard unit of this attribute
-     *
-     * @return a <code>String</code> value
-     */
-    public String getStandardUnit();
-
-    /**
-     * <code>getStandardUnitFactor</code> returns the standard unit of this attribute.
+     * <code>getStandardUnit</code> returns the standardunit of this code.
      * The standard unit is the value which must be multiplied with the 
      * value of the attribute to obtain the value in a unit conforming to
      * the standard metric system.
      * @return a <code>double</code> value
      */
-
-    public double getStandardUnitFactor();
-
+    public double getStandardUnit();
 
     /**
      * <code>getAttribute</code> returns the lowlevel attribute of this
      * attribute.
      * @return a <code>DeviceAttribute</code> value
      */
-    //public DeviceAttribute getAttribute();
+    public DeviceAttribute getAttribute();
     
     /**
      * <code>getLabel</code> returns the label of this attribute.
@@ -136,12 +94,6 @@ public interface IAttribute extends IEntity
      * @return a <code>String</code> value
      */
     public String getType();
-
-    /**
-     * <code>getTangoDataType</code> returns the type of this attribute.
-     * @return an <code>int</code> value
-     */
-    //public int getTangoDataType();
 
     /**
      * <code>getDescription</code> returns the description of this attribute.
@@ -224,6 +176,20 @@ public interface IAttribute extends IEntity
     void setProperty(String name, Number n, boolean editable);
 
     /**
+     * <code>addImageListener</code> adds a listener to image-changes
+     * for this attribute.
+     * @param l an <code>IImageListener</code> value
+     */
+    public void addImageListener(IImageListener l);
+
+    /**
+     * <code>removeImageListener</code> removes a listener to image-changes
+     *
+     * @param l an <code>IImageListener</code> value
+     */
+    public void removeImageListener(IImageListener l);
+
+    /**
      * <code>getMaxXDimension</code> returns the max x-dimension of the
      * attribute
      * @return an <code>int</code> value
@@ -282,22 +248,17 @@ public interface IAttribute extends IEntity
     public void setSkippingRefresh(boolean b);
 
     public boolean isSkippingRefresh();
-    
+
     /**
-     * <code>areAttPropertiesLoaded</code> returns true if the some ATK specific attribute properties have already
-     * been loaded from the Tango DB. One example for these ATK specific attribute properties is : OpenCloseInverted for a DevStateScalar
-     * attribute
-     *
-     * @return true if all the attribute properties have been read from the Tango DB and initialized
-     *         false the ATK specific attribute properties have not been initialized yet
+     * Method used by optimized AttributePolledList (one read per device)
+     * @param attValue Attribute value
      */
-    public boolean areAttPropertiesLoaded();
-    
+    public void dispatch(DeviceAttribute attValue);
+
     /**
-     * Method used by some attribute viewers to force the reading of some specific at setModel(). The viewer first
-     * tests if the ATK specific attribute properties have not been initialized yet (call to areAttPropertiesLoaded())
-     * 
+     * Method used by optimized AttributePolledList (one read per device)
+     * @param e Attribute arror
      */
-    public void loadAttProperties();
+    public void dispatchError(DevFailed e);
 
 }

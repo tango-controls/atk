@@ -9,7 +9,6 @@ package fr.esrf.tangoatk.core.attribute;
 
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.TangoApi.*;
-import fr.esrf.TangoDs.TangoConst;
 import fr.esrf.Tango.DevFailed;
 
 /**
@@ -43,150 +42,27 @@ public class AttrDualSpectrum  extends AttrFunctionSpectrum {
         } 
     }
     
-    public double[] updateX ()
-    {
-        dev_attr_x = new DeviceAttribute( attr_x );
-        double[] xvalue = null;
-        try
-        {
-            dev_attr_x = device_x.read_attribute( attr_x );
-
-            //managing the different number types
-            int data_type = dev_attr_x.getType();
-            switch(data_type)
-            {
- 
-                case TangoConst.Tango_DEV_UCHAR:
-                case TangoConst.Tango_DEV_CHAR:
-                    byte[] cval = dev_attr_x.extractCharArray();
-                    if (cval == null)
-                        cval = new byte[0];
-                    xvalue = new double[cval.length];
-                    for (int i = 0; i < cval.length; i++)
-                    {
-                        xvalue[i] = (double)cval[i];
-                    }
-                    break;
-
-                case TangoConst.Tango_DEV_USHORT:
-                case TangoConst.Tango_DEV_SHORT:
-                    short[] sval = dev_attr_x.extractShortArray();
-                    if (sval == null)
-                        sval = new short[0];
-                    xvalue = new double[sval.length];
-                    for (int i = 0; i < sval.length; i++)
-                    {
-                        xvalue[i] = (double)sval[i];
-                    }
-                    break;
-
-                case TangoConst.Tango_DEV_ULONG:
-                case TangoConst.Tango_DEV_LONG:
-                    int[] lval = dev_attr_x.extractLongArray();
-                    if (lval == null)
-                        lval = new int[0];
-                    xvalue = new double[lval.length];
-                    for (int i = 0; i < lval.length; i++)
-                    {
-                        xvalue[i] = (double)lval[i];
-                    }
-                    break;
-
-                case TangoConst.Tango_DEV_FLOAT:
-                    float[] fval = dev_attr_x.extractFloatArray();
-                    if (fval == null)
-                        fval = new float[0];
-                    xvalue = new double[fval.length];
-                    for (int i = 0; i < fval.length; i++)
-                    {
-                        xvalue[i] = (double)fval[i];
-                    }
-                    break;
-
-                case TangoConst.Tango_DEV_DOUBLE:
-                default:
-                    xvalue = dev_attr_x.extractDoubleArray();
-
-           }
-        }
-        catch (DevFailed e)
-        {
-        }
-        return xvalue;
+    public double[] updateX() {
+        dev_attr_x = new DeviceAttribute(attr_x);
+        double [] xvalue = null;
+        try {
+                xvalue = new double[dev_attr_x.getDimX()];
+                dev_attr_x = device_x.read_attribute(attr_x);
+                xvalue = dev_attr_x.extractDoubleArray();
+         } catch ( DevFailed e) {
+         }
+         return xvalue;
     }
-
-    public double[] updateY ()
-    {
-        dev_attr_y = new DeviceAttribute( attr_y );
-        double[] yvalue = null;
-        try
-        {
-            int min = dev_attr_y.getDimX();
-            yvalue = new double[min];
-            dev_attr_y = device_y.read_attribute( attr_y );
-
-            //managing the different number types
-            int data_type = dev_attr_y.getType();
-            switch(data_type)
-            {
- 
-                case TangoConst.Tango_DEV_UCHAR:
-                case TangoConst.Tango_DEV_CHAR:
-                    byte[] cval = dev_attr_y.extractCharArray();
-                    if (cval == null)
-                        cval = new byte[0];
-                    yvalue = new double[cval.length];
-                    for (int i = 0; i < cval.length; i++)
-                    {
-                        yvalue[i] = (double)cval[i];
-                    }
-                    break;
-
-                case TangoConst.Tango_DEV_USHORT:
-                case TangoConst.Tango_DEV_SHORT:
-                    short[] sval = dev_attr_y.extractShortArray();
-                    if (sval == null)
-                        sval = new short[0];
-                    yvalue = new double[sval.length];
-                    for (int i = 0; i < sval.length; i++)
-                    {
-                        yvalue[i] = (double)sval[i];
-                    }
-                    break;
-
-                case TangoConst.Tango_DEV_ULONG:
-                case TangoConst.Tango_DEV_LONG:
-                    int[] lval = dev_attr_y.extractLongArray();
-                    if (lval == null)
-                        lval = new int[0];
-                    yvalue = new double[lval.length];
-                    for (int i = 0; i < lval.length; i++)
-                    {
-                        yvalue[i] = (double)lval[i];
-                    }
-                    break;
-
-                case TangoConst.Tango_DEV_FLOAT:
-                    float[] fval = dev_attr_y.extractFloatArray();
-                    if (fval == null)
-                        fval = new float[0];
-                    yvalue = new double[fval.length];
-                    for (int i = 0; i < fval.length; i++)
-                    {
-                        yvalue[i] = (double)fval[i];
-                    }
-                    break;
-
-                case TangoConst.Tango_DEV_DOUBLE:
-                default:
-                    yvalue = dev_attr_y.extractDoubleArray();
-
-           }
-        }
-        catch (DevFailed e)
-        {
-        }
-        return yvalue;
+    public double[] updateY() {
+        dev_attr_y = new DeviceAttribute(attr_y);
+        double [] yvalue = null;
+        try {
+                yvalue = new double[dev_attr_x.getDimX()];
+                dev_attr_y = device_y.read_attribute(attr_y);
+                yvalue = dev_attr_y.extractDoubleArray();
+         } catch ( DevFailed e) {
+         }
+         return yvalue;
     }
     
     private DeviceAttribute dev_attr_x;
