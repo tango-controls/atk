@@ -1,30 +1,12 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
+ * Status.java
+ *
+ * Created on December 14, 2001, 4:22 PM
  */
- 
 
 package fr.esrf.tangoatk.widget.device;
 
 import fr.esrf.tangoatk.core.Device;
-import fr.esrf.tangoatk.core.IDevice;
 import fr.esrf.tangoatk.core.IDeviceApplication;
 import fr.esrf.tangoatk.core.StateEvent;
 import fr.esrf.tangoatk.core.ErrorEvent;
@@ -48,13 +30,11 @@ import fr.esrf.tangoatk.widget.util.*;
 public class StateViewer extends javax.swing.JPanel
         implements fr.esrf.tangoatk.core.IStateListener {
 
-  IDevice device;
-  String state = IDevice.UNKNOWN;
+  Device device;
+  String state = "UNKNOWN";
   boolean externalSetText = false;
   boolean stateClickable = true;
   IDeviceApplication application;
-  
-  private boolean          stateInTooltip = false;
 
   public StateViewer() {
     initComponents();
@@ -107,7 +87,7 @@ public class StateViewer extends javax.swing.JPanel
 
   }//GEN-END:initComponents
 
-  protected void valueLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_valueLabelMouseClicked
+  private void valueLabelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_valueLabelMouseClicked
     // Add your handling code here:
     if ((evt.getModifiers() &
             java.awt.event.InputEvent.BUTTON3_MASK) != 0) {
@@ -148,53 +128,22 @@ public class StateViewer extends javax.swing.JPanel
    * shown on the textLabel.
    * @param device a <code>Device</code> to surveil
    */
-  public void setModel(IDevice devModel) {
-    clearModel();
-    
-    if (devModel == null)
-       return;
-       
-    this.device = devModel;
-    if (this.device instanceof Device)
-    {
-          Device dev = (Device) this.device;
-          if (!dev.areDevPropertiesLoaded())
-          {
-              dev.loadDevProperties();
-          }
-    }
+  public void setModel(Device device) {
+    this.device = device;
+    device.addStateListener(this);
     setState(device.getState());
     if (!externalSetText)
       textLabel.setText(device.getName());
 
     valueLabel.setToolTipText(device.getName());
   }
-  
-  /**
-   * <code>clearModel</code> clear the model of this viewer.  
-   */
-  public void clearModel() {
-     if(device != null)
-     {
-         device.removeStateListener(this);
-         textLabel.setText("Not Connected");
-         state = IDevice.UNKNOWN;
-         device = null;
-     }
-  }
 
-public javax.swing.JLabel getTextLabel() {
-    return textLabel;
-}
-public javax.swing.JLabel getValueLabel() {
-    return valueLabel;
-}
   /**
    * <code>getModel</code> gets the model of this stateviewer.
    *
    * @return a <code>Device</code> value
    */
-  public IDevice getModel() {
+  public Device getModel() {
     return device;
   }
 
@@ -203,12 +152,9 @@ public javax.swing.JLabel getValueLabel() {
    *
    * @param state a <code>String</code> value
    */
-  private void setState(String state) {
+  public void setState(String state) {
     this.state = state;
-    valueLabel.setBackground(ATKConstant.getColor4State(state, device.getInvertedOpenClose(), device.getInvertedInsertExtract()));
-    if (stateInTooltip)
-       if (device != null)
-	  valueLabel.setToolTipText(device.getName() + " : " + state);
+    valueLabel.setBackground(ATKConstant.getColor4State(state));
   }
 
   /**
@@ -375,30 +321,6 @@ public javax.swing.JLabel getValueLabel() {
     if (valueLabel == null) return null;
 
     return valueLabel.getBorder();
-  }
-  
-  /**
-   * <code>getStateInTooltip</code> returns true if the device state is displayed inside the viewer's tooltip
-   *
-   * @return a <code>boolean</code> value
-   */
-  public boolean getStateInTooltip() {
-    return stateInTooltip;
-  }
-
-  /**
-   * <code>setStateInTooltip</code> display or not the device state inside the tooltip
-   *
-   * @param b If True the device state will be displayed inside the tooltip.
-   */
-  public void setStateInTooltip(boolean b) {
-    if (stateInTooltip != b)
-    {
-       if (b == false)
-          if (device != null)
-              valueLabel.setToolTipText(device.getName());
-       stateInTooltip=b;
-    }
   }
 
   /**

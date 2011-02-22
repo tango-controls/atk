@@ -1,59 +1,44 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
+// File:          ShortSpectrum.java
+// Created:       2001-10-10 13:50:57, assum
+// By:            <assum@esrf.fr>
+// Time-stamp:    <2002-07-16 10:31:19, assum>
+//
 // $Id$
 //
 // Description:
 
 package fr.esrf.tangoatk.core.attribute;
 
-import fr.esrf.Tango.DevFailed;
-import fr.esrf.TangoApi.DeviceAttribute;
-import fr.esrf.TangoApi.events.TangoPeriodicEvent;
-import fr.esrf.TangoApi.events.TangoChangeEvent;
-
 import fr.esrf.tangoatk.core.*;
+import fr.esrf.Tango.*;
+import fr.esrf.TangoApi.*;
+import fr.esrf.TangoApi.events.*;
 
-public class NumberImage extends ANumber implements INumberImage
-{
-  double[][]                       imageValue;
+public class NumberImage extends AAttribute
+  implements INumberImage {
+  protected NumberAttributeHelper numberHelper;
+  double[][] imageValue;
 
-  public ANumberImageHelper getNumberImageHelper()
-  {
-	  return (ANumberImageHelper)getNumberHelper();
+  public void init(fr.esrf.tangoatk.core.Device d, String name,
+                   AttributeInfo config) {
+    super.init(d, name, config);
+  }
+
+  public void setNumberHelper(ANumberImageHelper helper) {
+    numberHelper = helper;
   }
 
   public void addNumberImageListener(IImageListener l) {
-	  
-	  getNumberImageHelper().addImageListener(l);
+    numberHelper.addImageListener(l);
   }
 
   public void removeNumberImageListener(IImageListener l) {
-	  getNumberImageHelper().removeImageListener(l);
+    numberHelper.removeImageListener(l);
   }
 
   protected void insert(String[][] s) {
     checkDimensions(s);
-    insert(NumberAttributeHelper.str2double(s));
+    insert(NumberAttributeHelper.flatten2double(s));
   }
 
   public void refresh() {
@@ -65,11 +50,11 @@ public class NumberImage extends ANumber implements INumberImage
       try {
 
         // Retreive the value from the device
-        // imageValue = numberHelper.getNumberImageValue(readValueFromNetwork());
-        imageValue = getNumberImageHelper().getNumberImageDisplayValue(readValueFromNetwork()); //convert to display unit
+        imageValue = numberHelper.
+          getNumberImageValue(readValueFromNetwork());
 
         // Fire valueChanged
-        getNumberImageHelper().fireImageValueChanged(imageValue, timeStamp);
+        numberHelper.fireImageValueChanged(imageValue, timeStamp);
 
       } catch (DevFailed e) {
 
@@ -95,79 +80,147 @@ public class NumberImage extends ANumber implements INumberImage
   }
 
 
-  public void addImageListener(IImageListener l) {
-    propChanges.addImageListener(l);
-  }
 
-  public void removeImageListener(IImageListener l) {
-    propChanges.removeImageListener(l);
-  }  
-  
-  public void dispatch(DeviceAttribute attValue) {
-
-    if (skippingRefresh) return;
-    refreshCount++;
-    try {
-
-      try {
-        // symetric with refresh
-        if (attValue == null) return;
-        attribute = attValue;
-
-        setState(attValue);
-        timeStamp = attValue.getTimeValMillisSec();
-
-        // Retreive the value from the device
-        // imageValue = numberHelper.getNumberImageValue(attValue);
-        imageValue = getNumberImageHelper().getNumberImageDisplayValue(attValue); //convert to display unit
-
-        // Fire valueChanged
-        getNumberImageHelper().fireImageValueChanged(imageValue, timeStamp);
-
-      } catch (DevFailed e) {
-
-        dispatchError(e);
-
-      }
-
-    } catch (Exception e) {
-
-      // Code failure
-      imageValue = null;
-
-      System.out.println("NumberImage.dispatch() Exception caught ------------------------------");
-      e.printStackTrace();
-      System.out.println("NumberImage.dispatch()------------------------------------------------");
-
+/* Replaced by F. Poncet on 06/jan/2003
+    public void setValue(double[][] d) throws AttributeSetException {
+	try {
+	    checkDimensions(d);
+	    insert(NumberAttributeHelper.flatten(d));
+	    writeAtt();
+	    numberHelper.fireImageValueChanged(d, System.currentTimeMillis());
+	} catch (DevFailed df) {
+	    throw new AttributeSetException(df);
+	}
     }
-
-  }
-
-  public void dispatchError(DevFailed e) {
-    // Tango error
-    imageValue = null;
-    // Fire error event
-    readAttError(e.getMessage(), new AttributeReadException(e));
-  }
+*/
 
   public void setValue(double[][] d) {
     try {
       checkDimensions(d);
-      insert(d);
+      insert(NumberAttributeHelper.flatten(d));
       writeAtt();
-      getNumberImageHelper().fireImageValueChanged(d, System.currentTimeMillis());
+      numberHelper.fireImageValueChanged(d, System.currentTimeMillis());
     } catch (DevFailed df) {
       setAttError("Couldn't set value", new AttributeSetException(df));
     }
   }
 
 
-  void insert(double[][] d) {
-    getNumberImageHelper().insert(d);
+  protected double getNumberProperty(String s) {
+    NumberProperty p =
+      (NumberProperty) getProperty(s);
+    if (p != null && p.isSpecified())
+      return ((Number) p.getValue()).doubleValue();
+
+    return Double.NaN;
+  }
+
+  public double getMinValue() {
+    return getNumberProperty("min_value");
+  }
+
+  public double getMaxValue() {
+    return getNumberProperty("max_value");
+  }
+
+  public double getMinAlarm() {
+    return getNumberProperty("min_alarm");
+  }
+
+  public double getMaxAlarm() {
+    return getNumberProperty("max_alarm");
+  }
+
+  public void setConfiguration(AttributeInfo c) {
+    super.setConfiguration(c);
+
+    try {
+      setMinValue(new Double(config.min_value).doubleValue(), true);
+    } catch (NumberFormatException e) {
+      setMinValue(Double.NaN, true);
+      getProperty("min_value").setSpecified(false);
+    } // end of try-catch
+
+    try {
+      setMaxValue(new Double(config.max_value).doubleValue(), true);
+    } catch (NumberFormatException e) {
+      setMaxValue(Double.NaN, true);
+      getProperty("max_value").setSpecified(false);
+    } // end of try-catch
+
+    try {
+      setMinAlarm(new Double(config.min_alarm).doubleValue(), true);
+    } catch (NumberFormatException e) {
+      setMinAlarm(Double.NaN, true);
+      getProperty("min_alarm").setSpecified(false);
+    } // end of try-catch
+
+    try {
+      setMaxAlarm(new Double(config.max_alarm).doubleValue(), true);
+    } catch (NumberFormatException e) {
+      setMaxAlarm(Double.NaN, true);
+      getProperty("max_alarm").setSpecified(false);
+    } // end of try-catch
+
+  }
+
+  public void setMinValue(double d) {
+    numberHelper.setMinValue(d);
+  }
+
+  public void setMaxValue(double d) {
+    numberHelper.setMaxValue(d);
+  }
+
+  public void setMinAlarm(double d) {
+    numberHelper.setMinAlarm(d);
+  }
+
+  public void setMaxAlarm(double d) {
+    numberHelper.setMaxAlarm(d);
+  }
+
+  public void setMinValue(double d, boolean writable) {
+    numberHelper.setMinValue(d, writable);
+  }
+
+  public void setMaxValue(double d, boolean writable) {
+    numberHelper.setMaxValue(d, writable);
+  }
+
+  public void setMinAlarm(double d, boolean writable) {
+    numberHelper.setMinAlarm(d, writable);
+  }
+
+  public void setMaxAlarm(double d, boolean writable) {
+    numberHelper.setMaxAlarm(d, writable);
+  }
+
+
+  public double getStandardUnit() {
+    NumberProperty p =
+      (NumberProperty) getProperty("standard_unit");
+    if (p.isSpecified())
+      return ((Number) p.getValue()).doubleValue();
+
+    return Double.NaN;
+  }
+
+  public double[][] getStandardValue() throws DevFailed {
+    double[][] retval = getValue();
+    for (int i = 0; i < retval.length; i++)
+      for (int j = 0; j < retval.length; j++)
+        retval[i][j] *= getStandardUnit();
+
+    return retval;
+  }
+
+  void insert(double[] d) {
+    numberHelper.insert(d);
   }
 
   public String[][] extract() throws DevFailed {
-    return getNumberImageHelper().getImageValueAsString(readValueFromNetwork());
+    return numberHelper.getImageValue(readValueFromNetwork());
 
   }
 
@@ -236,11 +289,10 @@ public class NumberImage extends ANumber implements INumberImage
             attribute = da;
             timeStamp = da.getTimeValMillisSec();
             // Retreive the value from the device
-            // imageValue = numberHelper.getNumberImageValue(da);
-            imageValue = getNumberImageHelper().getNumberImageDisplayValue(da); //convert to display unit
+            imageValue = numberHelper.getNumberImageValue(da);
 
             // Fire valueChanged
-            getNumberImageHelper().fireImageValueChanged(imageValue, timeStamp);
+            numberHelper.fireImageValueChanged(imageValue, timeStamp);
          }
 	 catch (DevFailed dfe)
 	 {
@@ -252,9 +304,9 @@ public class NumberImage extends ANumber implements INumberImage
          {
             imageValue = null;
 
-            System.out.println("NumberImage.periodic.getNumberImageDisplayValue() Exception caught ------------------------------");
+            System.out.println("NumberImage.periodic.getNumberImageValue() Exception caught ------------------------------");
             e.printStackTrace();
-            System.out.println("NumberImage.periodic.getNumberImageDisplayValue()------------------------------------------------");
+            System.out.println("NumberImage.periodic.getNumberImageValue()------------------------------------------------");
          } // end of catch
       }
       
@@ -321,11 +373,10 @@ public class NumberImage extends ANumber implements INumberImage
             attribute = da;
             timeStamp = da.getTimeValMillisSec();
             // Retreive the value from the device
-            // imageValue = numberHelper.getNumberImageValue(da);
-            imageValue = getNumberImageHelper().getNumberImageDisplayValue(da); //convert to display unit
+            imageValue = numberHelper.getNumberImageValue(da);
 
             // Fire valueChanged
-            getNumberImageHelper().fireImageValueChanged(imageValue, timeStamp);
+            numberHelper.fireImageValueChanged(imageValue, timeStamp);
          }
 	 catch (DevFailed dfe)
 	 {
@@ -337,18 +388,12 @@ public class NumberImage extends ANumber implements INumberImage
          {
             imageValue = null;
 
-            System.out.println("NumberImage.change.getNumberImageDisplayValue() Exception caught ------------------------------");
+            System.out.println("NumberImage.change.getNumberImageValue() Exception caught ------------------------------");
             e.printStackTrace();
-            System.out.println("NumberImage.change.getNumberImageDisplayValue()------------------------------------------------");
+            System.out.println("NumberImage.change.getNumberImageValue()------------------------------------------------");
          } // end of catch
       }
       
-  }
-  
-  public void freeInternalData()
-  {
-     super.freeInternalData();
-     imageValue = null;
   }
 
 

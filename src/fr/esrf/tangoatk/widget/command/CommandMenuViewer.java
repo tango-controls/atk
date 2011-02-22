@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * CommandMenuViewer.java
  *
  * Created on March 20, 2002, 4:13 PM
@@ -28,17 +6,9 @@
 
 package fr.esrf.tangoatk.widget.command;
 
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-
-import fr.esrf.tangoatk.core.ICommand;
-import fr.esrf.tangoatk.core.command.InvalidCommand;
-import fr.esrf.tangoatk.core.command.VoidVoidCommand;
+import javax.swing.*;
+import fr.esrf.tangoatk.core.*;
+import fr.esrf.tangoatk.core.command.*;
 
 /*
  * @author  pons
@@ -128,7 +98,7 @@ public class CommandMenuViewer extends JPanel {
       
     }
 
-    protected void commandsActionPerformed(java.awt.event.ActionEvent evt) {
+    private void commandsActionPerformed(java.awt.event.ActionEvent evt) {
     
         // Add your handling code here:
 	JMenuItem menu = (JMenuItem)evt.getSource();
@@ -174,7 +144,7 @@ public class CommandMenuViewer extends JPanel {
 	
 	argFrame.setTitle(command.getName());
 	argFrame.pack();
-	argFrame.setVisible(true);
+	argFrame.show();
 	
     }
     
@@ -295,7 +265,7 @@ public class CommandMenuViewer extends JPanel {
 	JFrame f = new JFrame();
 	f.getContentPane().add(cmv);
 	f.pack();
-	f.setVisible(true);
+	f.show();
 	
     } // end of main ()
     

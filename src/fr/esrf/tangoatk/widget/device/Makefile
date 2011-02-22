@@ -9,10 +9,9 @@ ALL =   $(TARGET)/IDevicePopUp.class \
 	  $(TARGET)/StatusViewer.class      \
 	  $(TARGET)/StateViewer.class       \
 	  $(TARGET)/SimpleStateViewer.class       \
-	  $(TARGET)/DeviceStateButtonViewer.class       \
-      $(TARGET)/DeviceViewer.class \
-      $(TARGET)/SingletonStatusViewer.class \
-      $(TARGET)/Tree.class \
+        $(TARGET)/DeviceViewer.class \
+        $(TARGET)/SingletonStatusViewer.class \
+        $(TARGET)/Tree.class \
 	$(TARGET)/DeviceStateLightViewer.class \
 
 all: tree-stuff devices beaninfo icons

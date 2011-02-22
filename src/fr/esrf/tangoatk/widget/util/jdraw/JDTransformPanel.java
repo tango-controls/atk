@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util.jdraw;
 
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
@@ -129,7 +107,6 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
     translationPanel.add(transXLabel);
 
     transXText = new JTextField();
-    transXText.setMargin(JDUtils.zMargin);
     transXText.setEditable(true);
     transXText.setFont(JDUtils.labelFont);
     transXText.setBounds(220, 20, 40, 24);
@@ -144,7 +121,6 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
     translationPanel.add(transYLabel);
 
     transYText = new JTextField();
-    transYText.setMargin(JDUtils.zMargin);
     transYText.setEditable(true);
     transYText.setFont(JDUtils.labelFont);
     transYText.setBounds(220, 50, 40, 24);
@@ -190,7 +166,6 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
     scalePanel.add(scaleXLabel);
 
     scaleXText = new JTextField();
-    scaleXText.setMargin(JDUtils.zMargin);
     scaleXText.setEditable(true);
     scaleXText.setFont(JDUtils.labelFont);
     scaleXText.setBounds(220, 30, 40, 24);
@@ -205,7 +180,6 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
     scalePanel.add(scaleYLabel);
 
     scaleYText = new JTextField();
-    scaleYText.setMargin(JDUtils.zMargin);
     scaleYText.setEditable(true);
     scaleYText.setFont(JDUtils.labelFont);
     scaleYText.setBounds(220, 80, 40, 24);
@@ -265,7 +239,6 @@ class JDTransformPanel extends JPanel implements ActionListener, ChangeListener 
     rotatePanel.add(scaleRLabel);
 
     scaleRText = new JTextField();
-    scaleRText.setMargin(JDUtils.zMargin);
     scaleRText.setEditable(true);
     scaleRText.setFont(JDUtils.labelFont);
     scaleRText.setBounds(220, 50, 40, 24);

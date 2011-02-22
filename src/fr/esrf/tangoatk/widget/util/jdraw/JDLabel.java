@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /**
  * JDraw Label graphic object
  */
@@ -141,33 +119,6 @@ public class JDLabel extends JDRectangular {
 
 
     updateShape();
-  }
-
-  JDLabel(LXObject lxObj,String text) {
-
-    initDefault();
-    loadObject(lxObj);
-
-    summit = new Point2D.Double[8];
-    createSummit();
-
-    theFont = lxObj.font;
-    theText = text;
-    hAlignment = LEFT_ALIGNMENT;
-    vAlignment = UP_ALIGNMENT;
-    lineWidth = 0;
-
-    Dimension d = getMinSize();
-    computeSummitCoordinates((int)lxObj.px,(int)lxObj.py,d.width,d.height);
-
-    updateShape();
-
-    double bx = boundRect.getX();
-    double by = boundRect.getY();
-    double bw = boundRect.getWidth();
-    double bh = boundRect.getHeight();
-    setOrigin(new Point2D.Double(bx+bw/2.0, by+bh/2.0));
-
   }
 
   // -----------------------------------------------------------
@@ -473,7 +424,7 @@ public class JDLabel extends JDRectangular {
    * @param f Font
    * @param resize true to resize label when text is out of bounds.
    */
-  public void setFont(Font f,boolean resize) {
+  void setFont(Font f,boolean resize) {
     theFont = f;
     updateLabel(resize);
   }
@@ -557,7 +508,7 @@ public class JDLabel extends JDRectangular {
    * @param s Text value
    * @param resize true to resize label when text is out of bounds.
    */
-  public void setText(String s,boolean resize) {
+  void setText(String s,boolean resize) {
     theText = s;
     updateLabel(resize);
   }

@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.device;
 
 import javax.swing.JButton;
@@ -28,7 +6,6 @@ import javax.swing.JFrame;
 import fr.esrf.tangoatk.core.Device;
 import fr.esrf.tangoatk.core.DeviceFactory;
 import fr.esrf.tangoatk.core.ErrorEvent;
-import fr.esrf.tangoatk.core.IDevice;
 import fr.esrf.tangoatk.core.IErrorListener;
 import fr.esrf.tangoatk.core.IStateListener;
 import fr.esrf.tangoatk.core.StateEvent;
@@ -62,11 +39,6 @@ public class DeviceStateLightViewer extends JButton implements IStateListener,
      * int representing the option to see device's name and state as label
      */
     public final static int nameAndState = 2;
-    
-    /**
-     * int representing the option to see a custom as label
-     */
-    public final static int customLabel = 3;
 
     /**
      * Contructs a DeviceStateLightViewer with no label (ie you won't see the
@@ -204,13 +176,11 @@ public class DeviceStateLightViewer extends JButton implements IStateListener,
     public void stateChange(StateEvent evt) {
         manageLabel(evt.getState());
         setIcon(ATKConstant.getIcon4State(evt.getState()));
-        repaint();
     }
 
     public void errorChange(ErrorEvent evt) {
         manageLabel("Error occured");
-        setIcon(ATKConstant.getIcon4State(IDevice.UNKNOWN));
-        repaint();
+        setIcon(ATKConstant.getIcon4State("UNKNOWN"));
     }
 
     /**
@@ -230,7 +200,7 @@ public class DeviceStateLightViewer extends JButton implements IStateListener,
             JFrame f = new JFrame(dslv.getDeviceModel().getName());
             f.getContentPane().add(dslv);
             f.setSize(300, 50);
-            f.setVisible(true);
+            f.show();
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);

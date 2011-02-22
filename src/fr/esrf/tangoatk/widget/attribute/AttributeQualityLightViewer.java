@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /*	Synchrotron Soleil 
  *  
  *   File          :  AttributeQualityLightViewer.java
@@ -30,7 +8,7 @@
  *  
  *   Author        :  SOLEIL
  *  
- *   Original      :  18 august 2005 
+ *   Original      :  18 août 2005 
  *  
  *   Revision:  					Author:  
  *   Date: 							State:  
@@ -59,17 +37,6 @@ public class AttributeQualityLightViewer extends JButton implements
 
     private boolean viewLabel;
     private IAttribute attributeModel;
-    
-    /**
-     * possibles values :
-     * AttributeQualityLightViewer.label
-     * AttributeQualityLightViewer.name
-     * AttributeQualityLightViewer.completeName
-     * AttributeQualityLightViewer.quality
-     * AttributeQualityLightViewer.labelAndQuality
-     * AttributeQualityLightViewer.nameAndQuality
-     * AttributeQualityLightViewer.customLabel
-     */
     private int chosenLabel;
     private final static String defaultName = "No attribute defined";
 
@@ -97,16 +64,6 @@ public class AttributeQualityLightViewer extends JButton implements
      * int representing the option to see attribute's name and quality as label
      */
     public final static int nameAndQuality = 4;
-    
-    /**
-     * int representing the option to see attribute's name and quality as label
-     */
-    public final static int customLabel = 5;
-    
-    /**
-     * int representing the option to see attribute's complete name as label
-     */
-    public final static int completeName = 6;
 
     /**
      * Constructs a AttributeQualityLightViewer with a devicePropertyModel = null
@@ -167,7 +124,7 @@ public class AttributeQualityLightViewer extends JButton implements
         }
         else{
             manageLabel("Unknown quality");
-            setIcon(ATKConstant.getIcon4Quality(IAttribute.UNKNOWN));
+            setIcon(ATKConstant.getIcon4Quality("UNKNOWN"));
         }
     }
 
@@ -186,7 +143,6 @@ public class AttributeQualityLightViewer extends JButton implements
     public void stateChange(AttributeStateEvent arg0) {
         manageLabel(arg0.getState());
         setIcon(ATKConstant.getIcon4Quality(arg0.getState()));
-        repaint();
     }
 
     /*
@@ -196,8 +152,7 @@ public class AttributeQualityLightViewer extends JButton implements
      */
     public void errorChange(ErrorEvent arg0) {
         manageLabel("Error occured");
-        setIcon(ATKConstant.getIcon4Quality(IAttribute.UNKNOWN));
-        repaint();
+        setIcon(ATKConstant.getIcon4Quality("UNKNOWN"));
     }
 
     /**
@@ -259,7 +214,7 @@ public class AttributeQualityLightViewer extends JButton implements
                 if (attributeModel == null) {
                     setText(defaultName);
                 } else {
-                    setText(attributeModel.getNameSansDevice());
+                    setText(attributeModel.getName());
                 }
                 break;
             case quality:
@@ -276,13 +231,6 @@ public class AttributeQualityLightViewer extends JButton implements
                     setText(defaultName + " : " + myQuality);
                 } else {
                     setText(attributeModel.getLabel() + " : " + myQuality);
-                }
-                break;
-            case completeName :
-                if (attributeModel == null) {
-                    setText(defaultName);
-                } else {
-                    setText(attributeModel.getName());
                 }
                 break;
             default:
@@ -314,7 +262,7 @@ public class AttributeQualityLightViewer extends JButton implements
                     aqlv.getAttributeModel().getName().lastIndexOf("/")));
             f.getContentPane().add(aqlv);
             f.setSize(300, 50);
-            f.setVisible(true);
+            f.show();
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);

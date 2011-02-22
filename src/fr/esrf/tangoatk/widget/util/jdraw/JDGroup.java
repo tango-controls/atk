@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /**
  * JDraw Group graphic object
  */
@@ -85,16 +63,6 @@ public class JDGroup extends JDRectangular {
   JDGroup(JLXObject jlxObj, Vector o) {
     initDefault();
     loadObject(jlxObj);
-    children = o;
-    summit = new Point.Double[8];
-    createSummit();
-    computeSummitCoordinates();
-    updateShape();
-  }
-
-  JDGroup(LXObject lxObj, Vector o) {
-    initDefault();
-    loadObject(lxObj);
     children = o;
     summit = new Point.Double[8];
     createSummit();
@@ -427,16 +395,6 @@ public class JDGroup extends JDRectangular {
     isShadowed = b;
     for (int i = 0; i < children.size(); i++)
       ((JDObject) children.get(i)).setShadow(b);
-  }
-
-  /**
-   * Shows or hides this object, Apply it on all children.
-   * @param b True to show, false otherwise.
-   */
-  public void setVisible(boolean b) {
-    visible = b;
-    for (int i = 0; i < children.size(); i++)
-      ((JDObject) children.get(i)).setVisible(b);
   }
 
   /**

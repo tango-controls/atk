@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          TangoSynopticHandler.java
 // Created:       2004-10-13 16:45:29, poncet
 // By:            <poncet@esrf.fr>
@@ -39,7 +17,6 @@ import fr.esrf.tangoatk.core.AttributeList;
 import fr.esrf.tangoatk.core.attribute.AttributeFactory;
 import fr.esrf.tangoatk.core.attribute.AAttribute;
 import fr.esrf.tangoatk.core.attribute.BooleanScalar;
-import fr.esrf.tangoatk.core.attribute.DevStateScalar;
 import fr.esrf.tangoatk.core.command.*;
 import fr.esrf.tangoatk.widget.command.AnyCommandViewer;
 import fr.esrf.tangoatk.widget.command.VoidVoidCommandViewer;
@@ -82,11 +59,10 @@ import fr.esrf.tangoatk.widget.util.ErrorPopup;
  *
  * Here are the default (state) animations provided :
  * <ul>
- * <li>Tango device or Tango state attribute - simple graphical component : the colour of the graphical
+ * <li>Tango device - simple graphical component : the colour of the graphical
  *  component represents the state of the tango device (on, off, alarm, fault...)
- * <li>Tango device or Tango state attribute - Dynamic JDraw object (Dyno) : the Dyno is a group of JDobject where
- * each of them represents the drawing which should be visible for one or more tango state. This way
- * to each state (on, off, alarm, fault, ...) is associated a different form.
+ * <li>Tango device - multi-state JDraw object : the form of the JDraw Object represents the
+ * tango device state (on, off, alarm, fault, ...)
  * <li>Tango device command - interactive JDraw object : no state animation
  * <li>Tool Tip : A tooltip can be associated to any tango device. The tooltip can
  * display either the name of the device or it's state according to the tooltip mode used.
@@ -96,38 +72,16 @@ import fr.esrf.tangoatk.widget.util.ErrorPopup;
  * provided (reaction to mouse clicks). Here are the default interactions :
  *
  * <ul>
- * <li>Tango device or Tango state attribute - simple graphical component : Click on the graphical component
+ * <li>Tango device - simple graphical component : Click on the graphical component
  * will launch a java class whose name has been specified during the drawing phase.
- * If this class name is missing, the generic tool atkpanel is launched. If the class name is set
- * to the predefined string "noPanel" the atkpanel is not launched.
+ * If this class name is missing, the generic tool atkpanel is launched.
  * <li>Tango device - multi-state JDraw object : the same interaction model
  * <li>Tango device command - interactive JDraw object : Click on the JDraw object will display
  * an "input / output argument window" if the input is required or execute the
  * associated command on the tango device if no input is required.
  * </ul>
  *
- * There are 4 extensions parsed by default :
- * <ul>
- * <li>className: If the Jdraw component is asscoiated to a Tango device or to a
- * Tango state attribute this extension (className) represents the name of the java class
- * to instantiate when the Jdraw object is clicked. This allows to give the name
- * of the panel to be launched when the object is clicked.
- * If the className is not specified the default panel (atkpanel read-only) is launched.
- * If the className is set to "noPanel" nothing is launched.
- * <li>classParam: first argument (always a string) to be passed to the java panel.
- * If classParam is not specified the name associated to the JD component (device name or
- * state attribute name is passed as the String argument to the constructor.
- * <li>valueList: used by NumberScalarComboEditor and StringScalarComboEditor swing objects to acquire the values list
- * <li>shellCommand(*):It allows to launch any shell command or application (dir, xterm, jive, firefox, etc ...) from the synoptic.
- * If a JDObject is interactive and has the shellCommand extension its content will be executed at each valueExceedBounds event
- * The command is always executed in background. Streams redirection is not allowed (should be done inside an script).
- * Arguments can be passed to the shell command.
- * <li>qualityFactor: If the Jdraw component is asscoiated to a NumberScalarAttribute
- * and if this extension (qualityFactor) is set to "true" then the qualityFactor of the attribute
- * will be used to change the background color.
- * </ul>
- *
-  * @author      Faranguiss  PONCET
+ * @author      Faranguiss  PONCET
   * @since       ATKWidget-1.9.7
   */
 
@@ -135,27 +89,24 @@ import fr.esrf.tangoatk.widget.util.ErrorPopup;
 public class TangoSynopticHandler extends JDrawEditor
                                   implements IStateListener, IStatusListener,
                                              INumberScalarListener, IDevStateScalarListener,
-                                             IBooleanScalarListener, IDevStateSpectrumListener,
                                              WindowListener
 {
 
    /** Does not display tooltip */
    public static final int          TOOL_TIP_NONE = 0;
-   /** Displays device state within tooltip only for Device objects */
+   /** Displays device state within tooltip */
    public static final int          TOOL_TIP_STATE = 1;
-  /** Displays device status within tooltip only for Device objects */
+  /** Displays device status within tooltip */
    public static final int          TOOL_TIP_STATUS = 2;
-  /** Displays the attribute name within tooltip */
+  /** Displays device name within tooltip */
    public static final int          TOOL_TIP_NAME = 3;
 
 
    private static final int         STATE_INDEX = 0;
    private static final int         STATUS_INDEX = 1;
-   
-   private static final String      STATE_NONE = "no status";
 
 
-   private static Map<String, Integer>    dynoState;
+   private static Map               dynoState;
 
    private    int                   toolTipMode;
    private    String                jdrawFileFullName = null;
@@ -167,46 +118,35 @@ public class TangoSynopticHandler extends JDrawEditor
    private    AttributeList         allAttributes = null;
 
 
-   private    Map<String, List<JDObject>>     jdHash;
-   private    Map <String, List<String>>      stateCashHash;
+   private    Map                   jdHash;
+   private    Map                   stateCashHash;
 
-   private    AnyCommandViewer                acv = null;
-   private    JFrame                          argFrame = null;
+   private    AnyCommandViewer      acv = null;
+   private    JFrame                argFrame = null;
 
-   private    ErrorHistory                    errorHistWind = null;
-   private    ErrorPopup                      errPopup = null;
+   private    ErrorHistory          errorHistWind = null;
+   private    ErrorPopup            errPopup = null;
 
-   private    Vector<PanelItem>               panelList = new Vector<PanelItem> ();
+   private    Vector                panelList = new Vector();
 
 
-
-   // The HashMap for Dynamic Objects in  Jdraw (isProgrammed() = true)
-   // This hashmap allows to convert an Atk State to the "numeric" value to be
-   // sent to the Dynamic Object.
-   static 
+   static
    {
-       /*
-       The HashMap has been modified such that each single Tango state is
-       handled. When an ATK state is received it is converted to a numeric
-       value. This numeric values used here are the same as the Tango definition different
-       tango device state. The numeric value is used in the drawing phase to associate
-       a drawing to a state.
-       */
-       dynoState = new HashMap<String, Integer> ();
-       dynoState.put("ON",      new Integer(fr.esrf.Tango.DevState._ON));       //Jdraw value = 0
-       dynoState.put("OFF",     new Integer(fr.esrf.Tango.DevState._OFF));      //Jdraw value = 1
-       dynoState.put("CLOSE",   new Integer(fr.esrf.Tango.DevState._CLOSE));    //Jdraw value = 2
-       dynoState.put("OPEN",    new Integer(fr.esrf.Tango.DevState._OPEN));     //Jdraw value = 3
-       dynoState.put("INSERT",  new Integer(fr.esrf.Tango.DevState._INSERT));   //Jdraw value = 4
-       dynoState.put("EXTRACT", new Integer(fr.esrf.Tango.DevState._EXTRACT));  //Jdraw value = 5
-       dynoState.put("MOVING",  new Integer(fr.esrf.Tango.DevState._MOVING));   //Jdraw value = 6
-       dynoState.put("STANDBY", new Integer(fr.esrf.Tango.DevState._STANDBY));  //Jdraw value = 7
-       dynoState.put("FAULT",   new Integer(fr.esrf.Tango.DevState._FAULT));    //Jdraw value = 8
-       dynoState.put("INIT",    new Integer(fr.esrf.Tango.DevState._INIT));     //Jdraw value = 9
-       dynoState.put("RUNNING", new Integer(fr.esrf.Tango.DevState._RUNNING));  //Jdraw value = 10
-       dynoState.put("ALARM",   new Integer(fr.esrf.Tango.DevState._ALARM));    //Jdraw value = 11
-       dynoState.put("DISABLE", new Integer(fr.esrf.Tango.DevState._DISABLE));  //Jdraw value = 12
-       dynoState.put("UNKNOWN", new Integer(fr.esrf.Tango.DevState._UNKNOWN));  //Jdraw value = 13 or default
+       dynoState = new HashMap();
+       dynoState.put("UNKNOWN", new Integer(0));
+       dynoState.put("OFF",     new Integer(1));
+       dynoState.put("CLOSE",   new Integer(1));
+       dynoState.put("EXTRACT", new Integer(1));
+       dynoState.put("INIT",    new Integer(1));
+       dynoState.put("DISABLE", new Integer(1));
+       dynoState.put("ON",      new Integer(2));
+       dynoState.put("OPEN",    new Integer(2));
+       dynoState.put("INSERT",  new Integer(2));
+       dynoState.put("ALARM",   new Integer(3));
+       dynoState.put("FAULT",   new Integer(4));
+       dynoState.put("MOVING",  new Integer(5));
+       dynoState.put("RUNNING", new Integer(5));
+       dynoState.put("STANDBY", new Integer(6));
    }
 
 
@@ -218,7 +158,7 @@ public class TangoSynopticHandler extends JDrawEditor
    {
 
       super(JDrawEditor.MODE_PLAY);
-      toolTipMode = TOOL_TIP_NAME;
+      toolTipMode = TOOL_TIP_NONE;
       jdrawFileFullName = null;
 
       aFac = AttributeFactory.getInstance();
@@ -411,46 +351,6 @@ public class TangoSynopticHandler extends JDrawEditor
       return allAttributes;
    }
 
-     
-  /** Load a jdraw grpahics input stream into the drawing area.The JLoox and Loox files formats are not supported. This
-   *  method allows to load a synoptic which is not necessarily a file on disk. This
-   *  method is particularly used when the synoptic jdraw file is pakaged into the
-   *  application jarfile and cannot be accessed as a separate file on the disk.
-   * @param InputStreamReader inp An InputStreamReader should be created by the application and passed to this method
-   * @throws IOException Exception when the inputStream cannot be accessed.
-   * @throws MissingResourceException when the "jdraw" inputStream cannot be parsed.
-   */    
-    public void loadSynopticFromStream(InputStreamReader inp) throws IOException, MissingResourceException
-    {
-      jdHash = new HashMap<String, List<JDObject>> ();
-      stateCashHash = new HashMap<String, List<String>> ();
-      // Here should disconnect from all attributes and devices in the previous
-      // Jdraw file.
-
-      loadFromStream(inp);
-      jdrawFileFullName = "InputStreamReader";
-      if (getObjectNumber() == 0)
-	throw new MissingResourceException(
-            "The Jdraw file has no component inside. First draw a Jdraw File.",
-            "JDrawEditor", null);
-
-      parseJdrawComponents();
-      computePreferredSize();
-
-      // We need to refresh all attributes because if several JDObject
-      // has the same model , only the first one get the event. (API
-      // specification )
-
-      if (allAttributes.size()>0) {
-        for(int i=0;i<allAttributes.size();i++)
-          ((AAttribute)allAttributes.elementAt(i)).refresh();
-        allAttributes.startRefresher();
-      }
-
-    }  
-
-
-
 
 /**
  * Reads the Jdraw file, browses and parses the synoptic components.
@@ -461,11 +361,8 @@ public class TangoSynopticHandler extends JDrawEditor
    public void setSynopticFileName( String  jdFileName)
                throws MissingResourceException, FileNotFoundException, IllegalArgumentException
    {
-      if (jdrawFileFullName != null)
-          clearSynopticFileModel();
-
-      jdHash = new HashMap<String, List<JDObject>> ();
-      stateCashHash = new HashMap<String, List<String>> ();
+      jdHash = new HashMap();
+      stateCashHash = new HashMap();
       // Here should disconnect from all attributes and devices in the previous
       // Jdraw file.
 
@@ -501,32 +398,6 @@ public class TangoSynopticHandler extends JDrawEditor
 // not needed : automatically started in dFac class      dFac.startRefresher();
    }
 
-   public void clearSynopticFileModel()
-   {
-       if (allAttributes != null)
-       {
-           allAttributes.stopRefresher();
-           if (allAttributes.size() > 0)
-               allAttributes.clear();
-           allAttributes = new AttributeList();
-       }
-
-       if (jdHash != null)
-       {
-           if (!jdHash.isEmpty())
-               jdHash.clear();
-           jdHash = null;
-       }
-
-       if (stateCashHash != null)
-       {
-           if (!stateCashHash.isEmpty())
-               stateCashHash.clear();
-           stateCashHash = null;
-       }
-       jdrawFileFullName = null;
-  }
-
    /**
     * Parses JDraw components , detects tango entity name and attatch a model.
     * This method does not recurse group and use isDevice() , isAttribute()
@@ -537,86 +408,32 @@ public class TangoSynopticHandler extends JDrawEditor
     */
    protected void parseJdrawComponents()
    {
-      for (int i = 0; i < getObjectNumber(); i++)
-      {
-	 JDObject jdObj = getObjectAt(i);
-	 String s = jdObj.getName();
 
-	 if (isDevice(s))
-	 {
-	    addDevice(jdObj, s);
-	 }
-	 else
-	 {
-	    // Add attribute before command to avoid that the State attribute
-	    // is taken as a command.
-	    // But there is still a potential problem for attributes and commands
-	    // which have the same name...
-	    if (isAttribute(s))
-	    {
-               addAttribute(jdObj, s);
-	    }
-            else
-            {
-               if (isSpectrumAttElement(s))
-               {
-                  addSpectrumAttElement(jdObj, s);
-               }
-               else
-               {
-                  if (isCommand(s))
-                  {
-                    addCommand(jdObj, s);
-                  }
-                  else //System.out.println(s+" is not an attribute, nor a command, nor a device; ignored.");
-                  {
-                     // Check if it's an interactiveButton for shellCommands
-                     if (jdObj.isInteractive() && jdObj.hasExtendedParam("shellCommand"))
-                     {
-                        addShellCmdButton(jdObj);
-                     }
-                  }
-               }
-            }
-	 }
-      } /* for */
-   }
-   
-   
-   private void addShellCmdButton(JDObject  jdo)
-   {
-      String shellCmd = jdo.getExtendedParam("shellCommand");
-      if (shellCmd == null) return;
-      if (shellCmd.length() == 0) return;
-      
-      jdo.addValueListener(
-          new JDValueListener()
-	   {
-	      public void valueChanged(JDObject src) {}
-	      public void valueExceedBounds(JDObject src)
-	      {
-		   String compName=src.getName();
-		   String command = src.getExtendedParam("shellCommand");
-		   System.out.println("Interactive Object "+compName+" value Exceed Bounds");
-		   if (JOptionPane.showConfirmDialog(null,"This Shell Command is going to be executed, Are you sure?\n>"+command,
-		       compName+": Shell Command",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION) {
-			   try {
-			     System.out.println("The osName is "+System.getProperty("os.name" ));
-			     //Runtime.exec(comm) does not accept any command line parameters,
-			     //it also includes the run-in-background param (&)
-			     //also redirection is not allowed, code-management of the streams will be necessary
-			     //The Execution is already done in background by default
-			     //Normal arguments can be used
-			     if(command.endsWith("&")) command = command.substring(0,command.length()-1);		      
-			     System.out.println("ExecutionAccepted:"+command);
-			     Runtime rt = Runtime.getRuntime();
-			     rt.exec(command);//.waitFor();
-			   } catch(Exception ex) {
-			     JOptionPane.showMessageDialog(null,ex.getMessage());
-			   }
-		   } else System.out.println("ExecutionRejected");
-	      }
-           });
+
+     for (int i = 0; i < getObjectNumber(); i++) {
+       JDObject jdObj = getObjectAt(i);
+       String s = jdObj.getName();
+
+       if (isDevice(s)) {
+         addDevice(jdObj, s);
+       } else {
+         // Add attribute before command to avoid that the State attribute
+         // is taken as a command.
+         // But there is still a potential problem for attributes and commands
+         // which have the same name...
+         if (isAttribute(s)) {
+           addAttribute(jdObj, s);
+         } else {
+           if (isCommand(s)) {
+             addCommand(jdObj, s);
+           } else {
+             //System.out.println(s+" is not an attribute, nor a command, nor a device; ignored.");
+           }
+         }
+       }
+
+     } /* for */
+
    }
 
   /**
@@ -642,59 +459,6 @@ public class TangoSynopticHandler extends JDrawEditor
 
        try
        {
-           attDevName = s.substring(0, lastSlash);
-           isdev = isDevice(attDevName);
-           if (isdev == false)
-           {
-               if (s.toLowerCase().endsWith("/state"))
-                   return aFac.isConnectionLessAttribute(s);
-               else
-                   return false;
-           }
-           
-           attName = s.substring(lastSlash, s.length());
-
-           boolean attPattern;
-
-           attPattern = Pattern.matches("/[a-zA-Z_0-9[-]]+", attName);
-           if (attPattern == false)
-           {
-               return false;
-           }
-           else
-           {
-               return aFac.isAttribute(s);
-           }
-       }
-       catch (IndexOutOfBoundsException ex)
-       {
-           return false;
-       }
-   }
-
-  /**
-   * Return true only if the given name matches a Tango attribute name followed by [index].
-    * <p>Spectrum Attribute element allowed syntax ( Can be preceded by tango: ):<p>
-    * <pre>
-    *   Full syntax: //hostName:portNumber/domain/family/member/attName[xx]
-    *   Full syntax: //ipAddress:portNumber/domain/family/member/attName[xx]
-    *   Short syntax: domain/family/member/attName[xx]
-    * </pre>
-    * @param s Spectrum Attribute element
-    */
-   protected boolean isSpectrumAttElement(String s)
-   {
-       String     attDevName, attName;
-       int        lastSlash;
-       boolean    isdev;
-
-       lastSlash = s.lastIndexOf("/");
-
-       if ( (lastSlash <= 0) || (lastSlash >= s.length()) )
-          return false;
-
-       try
-       {
 	  attDevName = s.substring(0, lastSlash);
 
 	  isdev = isDevice(attDevName);
@@ -706,19 +470,11 @@ public class TangoSynopticHandler extends JDrawEditor
 
 	  boolean   attPattern;
 
-          attPattern = Pattern.matches("/[a-zA-Z_0-9[-]]+\\[[0-9]+\\]", attName);
-          
-          if (attPattern == true) //Is an element of a spectrum attribute
-          {
-              int    leftBracket = s.lastIndexOf("[");
-              if ( (leftBracket > 0) || (leftBracket < s.length()) )
-              {
-                  String spectrumAttName = s.substring(0, leftBracket);
-                  return aFac.isAttribute(spectrumAttName);
-              }
-          }
-          
-	  return false;
+	  attPattern = Pattern.matches("/[a-zA-Z_0-9[-]]+", attName);
+	  if (attPattern == false)
+	     return false;
+	  else
+             return aFac.isAttribute(s);
        }
        catch (IndexOutOfBoundsException ex)
        {
@@ -784,6 +540,7 @@ public class TangoSynopticHandler extends JDrawEditor
    */
    protected boolean isDevice(String devName)
    {
+
        // Check syntax
        if(!isDeviceName(devName))
          return false;
@@ -818,10 +575,6 @@ public class TangoSynopticHandler extends JDrawEditor
     if (devNamePattern == false)
        devNamePattern = Pattern.matches("taco:[a-zA-Z_0-9[-]]+/[a-zA-Z_0-9[-]]+/[a-zA-Z_0-9[-]]+", s);
 
-    // Check taco syntax: taco://nethost/domain/family/member
-    if (devNamePattern == false)
-       devNamePattern = Pattern.matches("taco://[a-zA-Z_0-9]+/[a-zA-Z_0-9[-]]+/[a-zA-Z_0-9[-]]+/[a-zA-Z_0-9[-]]+", s);
-
     // Change added to support device names beginning with TANGO_HOST ip adress
     // Check full syntax: //ipAddress:portNumber/domain/family/member
     // Modification sent by  "Alan David Zoldan" <alan@dataeco.com.br>
@@ -837,64 +590,20 @@ public class TangoSynopticHandler extends JDrawEditor
 // Adding a device
 // ---------------
 
-  private void addDevice(JDObject jdObj, String s)
-  {
+   private void addDevice(JDObject jdObj, String s)
+   {
       try
       {
-	 Device     dev = dFac.getDevice(s);
-         if (dev == null) return;
-         if (!dev.areDevPropertiesLoaded())
-              dev.loadDevProperties();
-
-         addDeviceListener(dev);
+	 addDeviceListener(dFac.getDevice(s));
 	 mouseifyDevice(jdObj);
 	 stashComponent(s, jdObj);
 	 addDevToStateCashHashMap(s);
-         refreshStateJDObj(jdObj, dev);
       } catch (ConnectionException connectionexception)
       {
 	 System.out.println("Couldn't load device " + s + " " +
 			    connectionexception);
       }
-  }
-  
-  private void refreshStateJDObj(JDObject jdo, Device dev)
-  {
-
-     List<String> stateStatusCash = null;
-     String       stateCash = null;
-
-     // Find the "cashed" state
-     stateStatusCash = stateCashHash.get(dev.getName());
-     if (stateStatusCash != null)
-     {     
-         try 
-         {
-            stateCash = stateStatusCash.get(STATE_INDEX);        
-         }
-         catch (IndexOutOfBoundsException iob)
-         {
-         }
-     }
-     
-     // If the state is not cashed already, this would mean that the state has not been
-     // read yet (either by tango event or by refresher polling). In this case the function
-     // will return because it is useless to update the JdObject state. This will be done when 
-     // the tango event arrives and next time the devStateScalarChange() is called.
-     if ((stateCash == null) || (stateCash.equalsIgnoreCase(STATE_NONE)) )
-        return;
-
-     if (jdo.isProgrammed())
-     {
-        jdo.setValue(getDynoState(stateCash));
-        jdo.refresh();
-     }
-     else // not a Dyno
-     {
-        changeJDobjColor(jdo, ATKConstant.getColor4State(stateCash, dev.getInvertedOpenClose(), dev.getInvertedInsertExtract()));
-     }
-  
-  }
+   }
 
    private void addDeviceListener(Device device)
    {
@@ -951,8 +660,7 @@ public class TangoSynopticHandler extends JDrawEditor
 
     /* Attach a JDMouse listener to the state attribute component. */
     jdObj.addMouseListener(
-            new JDMouseAdapter()
-            {
+            new JDMouseAdapter() {
               public void mousePressed(JDMouseEvent e) {
                 stateAttributeClicked(e);
               }
@@ -962,30 +670,6 @@ public class TangoSynopticHandler extends JDrawEditor
               public void mouseExited(JDMouseEvent e) {
                 devRemoveToolTip();
               }
-            });
-
-  }
-
-  private void mouseifyStateSpectrumElement(JDObject jdObj, IDevStateSpectrum stateSpecAtt)
-  {
-    final IDevStateSpectrum  att = stateSpecAtt;
-    final int   elemIndex = getIndexFromName(jdObj.getName());
-    /* Attach a JDMouse listener to the state attribute component. */
-    jdObj.addMouseListener(
-            new JDMouseAdapter()
-            {
-               public void mousePressed(JDMouseEvent e)
-               {
-                 stateSpectrumElementClicked(e);
-               }
-               public void mouseEntered(JDMouseEvent e)
-               {
-                 stateSpectrumElementDisplayToolTip(e, att, elemIndex);
-               }
-               public void mouseExited(JDMouseEvent e)
-               {
-                 stateSpectrumElementRemoveToolTip();
-               }
             });
 
   }
@@ -1018,45 +702,21 @@ public class TangoSynopticHandler extends JDrawEditor
     }
 
   }
-  
-  private boolean isNoPanel(String panelName)
-  {
-      if ( panelName.equalsIgnoreCase("noPanel") )
-         return true;
-      else
-         if ( panelName.equalsIgnoreCase("no panel") )
-	    return true;
-
-      return false;
-  }
 
   private void launchPanel(JDObject comp,String compName, boolean isAdevice)
   {
 
-    // Added 27/november/2006 : if className extension IS DEFINED and equals to
-    // noPanel then the default panel (atkpanel) IS NOT launched when the JDobject is clicked
-    if (comp.hasExtendedParam("className"))
-    {
-        String   pname = comp.getExtendedParam("className");
-	if (isNoPanel(pname))
-	   return;
-    }
-    
     if (!comp.hasExtendedParam("className"))
     {
-       if (isAdevice)
-       {
-	  Window w = getPanel("atkpanel.MainPanel",compName);
-	  if (w==null)
-	  {
-	     showDefaultPanel(compName);
-	  }
-	  else
-	  {
-	     showPanelWindow(w);
-	  }
-       }
-       return;
+      if (isAdevice) {
+        Window w = getPanel("atkpanel.MainPanel",compName);
+        if(w==null) {
+          showDefaultPanel(compName);
+        } else {
+          w.setVisible(true);
+        }
+      }
+      return;
     }
 
     String clName = comp.getExtendedParam("className");
@@ -1083,95 +743,48 @@ public class TangoSynopticHandler extends JDrawEditor
     }
     System.out.println("params[0]= " + params[0]);
 
-    // Check whether this panel has already been started
+    // Check wether this panel has already been started
     Window w = getPanel(clName,(String)params[0]);
-    if (w!=null)
-    {
-	showPanelWindow(w);
-        return;
+    if(w!=null) {
+      w.setVisible(true);
+      return;
     }
 
     try // Load the class and the constructor (one String argument) of the device panel
     {
-       panelCl = Class.forName(clName);
-       paramCls[0] = compName.getClass();
-       panelClNew = panelCl.getConstructor(paramCls);
-    } 
-    catch (ClassNotFoundException clex)
-    {
-       showErrorMsg("The panel class : " + clName + " not found; ignored.\n");
-       return;
-    }
-    catch (Exception e)
-    {
-       showErrorMsg("Failed to load the constructor " + clName + "( String ) for the panel class.\n");
-       return;
+      panelCl = Class.forName(clName);
+      paramCls[0] = compName.getClass();
+      panelClNew = panelCl.getConstructor(paramCls);
+    } catch (ClassNotFoundException clex) {
+      JOptionPane.showMessageDialog(null, "The panel class : " + clName + " not found; ignored.\n");
+      return;
+    } catch (Exception e) {
+      JOptionPane.showMessageDialog(null, "Failed to load the constructor " + clName + "( String ) for the panel class.\n");
+      return;
     }
 
 
     try // Instantiate the device panel class
     {
-	Object obj = panelClNew.newInstance(params);
-	PanelItem newPanel = addNewPanel(obj,clName,(String)params[0]);
-	if (newPanel != null) // Workaround : to avoid the panel window go behind when excuting throught JVM in Linux
-	   showPanelWindow (newPanel.parent);
-    } 
-    catch (InstantiationException instex)
-    {
-	showErrorMsg("Failed to instantiate 1 the panel class : " + clName + ".\n");
-    } 
-    catch (IllegalAccessException accesex)
-    {
-	showErrorMsg("Failed to instantiate 2 the panel class : " + clName + ".\n");
-    }
-    catch (IllegalArgumentException argex)
-    {
-	showErrorMsg("Failed to instantiate 3 the panel class : " + clName + ".\n");
-    }
-    catch (InvocationTargetException invoqex)
-    {
-	showErrorMsg("Failed to instantiate 4 the panel class : " + clName + ".\n");
-	System.out.println(invoqex);
-	System.out.println(invoqex.getMessage());
-	invoqex.printStackTrace();
-    }
-    catch (Exception e)
-    {
-	showErrorMsg("Got an exception when instantiate the panel class : " + clName + ".\n");
+      Object obj = panelClNew.newInstance(params);
+      addNewPanel(obj,clName,(String)params[0]);
+      // Added a sleep to allow some applications long to start
+      Thread.sleep(500);
+    } catch (InstantiationException instex) {
+      JOptionPane.showMessageDialog(null, "Failed to instantiate 1 the panel class : " + clName + ".\n");
+    } catch (IllegalAccessException accesex) {
+      JOptionPane.showMessageDialog(null, "Failed to instantiate 2 the panel class : " + clName + ".\n");
+    } catch (IllegalArgumentException argex) {
+      JOptionPane.showMessageDialog(null, "Failed to instantiate 3 the panel class : " + clName + ".\n");
+    } catch (InvocationTargetException invoqex) {
+      JOptionPane.showMessageDialog(null, "Failed to instantiate 4 the panel class : " + clName + ".\n");
+      System.out.println(invoqex);
+      System.out.println(invoqex.getMessage());
+      invoqex.printStackTrace();
+    } catch (Exception e) {
+      JOptionPane.showMessageDialog(null, "Got an exception when instantiate the panel class : " + clName + ".\n");
     }
 
-  }
-  
-  private void showErrorMsg(String  msg)
-  {
-      try // Workaround : to avoid the JOptionPane window go behind when excuting throught JVM in Linux
-      {
-	   Thread.sleep(100);
-      }
-      catch (InterruptedException intExcept) { }
-      JOptionPane.showMessageDialog(null, msg);  
-  }
-  
-  private void showPanelWindow(Window  pw)
-  {
-      if (pw == null) return;
-      if (pw instanceof JFrame)
-          ATKGraphicsUtils.centerFrame(this, (JFrame) pw);
-      
-      // Workaround : to avoid the panel window go behind when excuting throught JVM in Linux
-      try
-      {
-           Thread.sleep(100);
-      }
-      catch (InterruptedException intExcept) { }
-      if (pw.isVisible())
-      { 
-      //System.out.println("Call pw.toFront()"); 
-	 pw.toFront();
-	 /*
-	 pw.setVisible(true);
-	 */
-      }
   }
 
   // Return a handle to the panel launched with className and param, null otherwise
@@ -1181,7 +794,7 @@ public class TangoSynopticHandler extends JDrawEditor
     int i=0;
     PanelItem panel = null;
     while(i<panelList.size() && !found) {
-      panel = panelList.get(i);
+      panel = (PanelItem)panelList.get(i);
       found = (panel.className.equals(className)) && (panel.param.equals(param));
       if(!found) i++;
     }
@@ -1191,16 +804,14 @@ public class TangoSynopticHandler extends JDrawEditor
 
   }
 
-  private PanelItem addNewPanel(Object obj,String className,String param) {
+  private void addNewPanel(Object obj,String className,String param) {
 
     PanelItem panel =  new PanelItem(obj,className,param);
     if(panel.parent!=null) {
       panelList.add(panel);
       panel.parent.addWindowListener(this);
-      return panel;
     }
-    else
-        return null;
+
   }
 
   public void windowClosed(WindowEvent e) {
@@ -1209,7 +820,7 @@ public class TangoSynopticHandler extends JDrawEditor
     int i=0;
     PanelItem panel = null;
     while(i<panelList.size() && !found) {
-      panel = panelList.get(i);
+      panel = (PanelItem)panelList.get(i);
       found =  (panel.parent== e.getSource());
       if(!found) i++;
     }
@@ -1249,7 +860,7 @@ System.out.println("showDefaultPanel called");
       }
       catch (ClassNotFoundException clex)
       {
-	 showErrorMsg("showDefaultPanel : atkpanel.MainPanel not found; ignored.\n");
+	 JOptionPane.showMessageDialog(null, "showDefaultPanel : atkpanel.MainPanel not found; ignored.\n");
 	 return;
       }
 
@@ -1264,12 +875,12 @@ System.out.println("showDefaultPanel called");
       }
       catch (ClassNotFoundException clex)
       {
-	 showErrorMsg("showDefaultPanel :java.lang.Boolean not found; ignored.\n");
+	 JOptionPane.showMessageDialog(null, "showDefaultPanel :java.lang.Boolean not found; ignored.\n");
 	 return;
       }
       catch (Exception e)
       {
-	 showErrorMsg("showDefaultPanel : Failed to load the constructor (five arguments) for atkpanel read-only.\n");
+	 JOptionPane.showMessageDialog(null, "showDefaultPanel : Failed to load the constructor (five arguments) for atkpanel read-only.\n");
 	 return;
       }
 
@@ -1283,32 +894,32 @@ System.out.println("showDefaultPanel called");
       try // Instantiate the read-only atkpanel for the device
       {
          Object obj = atkpanelClNew.newInstance(params);
-         PanelItem newPanel = addNewPanel(obj,"atkpanel.MainPanel",devName);
-	 if (newPanel != null) // Workaround : to avoid the atkpanel window go behind when excuting throught JVM in Linux
-	    showPanelWindow (newPanel.parent);
+         addNewPanel(obj,"atkpanel.MainPanel",devName);
+	 // Added a sleep to allow some applications long to start
+	 Thread.sleep(500);
       }
       catch (InstantiationException  instex)
       {
-	 showErrorMsg("Failed to instantiate 1 the atkpanel read-only.\n");
+	 JOptionPane.showMessageDialog(null, "Failed to instantiate 1 the atkpanel read-only.\n");
       }
       catch (IllegalAccessException  accesex)
       {
-	 showErrorMsg("Failed to instantiate 2 the atkpanel read-only.\n");
+	 JOptionPane.showMessageDialog(null, "Failed to instantiate 2 the atkpanel read-only.\n");
       }
       catch (IllegalArgumentException argex)
       {
-	 showErrorMsg("Failed to instantiate 3 the atkpanel read-only.\n");
+	 JOptionPane.showMessageDialog(null, "Failed to instantiate 3 the atkpanel read-only.\n");
       }
       catch (InvocationTargetException invoqex)
       {
-	 showErrorMsg("Failed to instantiate 4 the atkpanel read-only.\n");
+	 JOptionPane.showMessageDialog(null, "Failed to instantiate 4 the atkpanel read-only.\n");
 System.out.println(invoqex);
 System.out.println(invoqex.getMessage());
 invoqex.printStackTrace();
       }
       catch (Exception e)
       {
-	 showErrorMsg("Got an exception when instantiate the default panel : atkpanel readonly.\n");
+	 JOptionPane.showMessageDialog(null, "Got an exception when instantiate the default panel : atkpanel readonly.\n");
       }
 
    }
@@ -1316,9 +927,9 @@ invoqex.printStackTrace();
 
    private void stashComponent(String s, JDObject jdObj)
    {
-      List<JDObject> list = jdHash.get(s);
+      List list = (List)jdHash.get(s);
       if (list == null)
-	  list = new Vector<JDObject> ();
+	  list = new Vector();
       list.add(jdObj);
       jdHash.put(s, list);
    }
@@ -1326,15 +937,15 @@ invoqex.printStackTrace();
 
    private void addDevToStateCashHashMap(String s)
    {
-      List<String>       list;
-      String             str;
+      List        list;
+      String      str;
 
-      list = stateCashHash.get(s);
+      list = (List)stateCashHash.get(s);
       if (list != null)
          return;
 
-      list = new Vector<String> ();
-      str = new String(STATE_NONE);
+      list = new Vector();
+      str = new String("no status");
       list.add(STATE_INDEX, str);
       list.add(STATUS_INDEX, str);
       stateCashHash.put(s, list);
@@ -1427,7 +1038,7 @@ invoqex.printStackTrace();
 
       argFrame.setTitle(ic.getName());
       argFrame.pack();
-      argFrame.setVisible(true);
+      argFrame.show();
    }
 
 
@@ -1441,85 +1052,31 @@ invoqex.printStackTrace();
     mouseifyStateAttribute(jdObj);
     stashComponent(attName, jdObj);
     addDevToStateCashHashMap(attName);
-    
-    if (!model.areAttPropertiesLoaded())
-            model.loadAttProperties();
-         
     model.addDevStateScalarListener(this);
     allAttributes.add(model);
     if (errorHistWind != null)
        model.addErrorListener(errorHistWind);
-    refreshStateJDObj(jdObj, model);
 
   }
-  
-  private void refreshStateJDObj(JDObject jdo, IDevStateScalar stateAtt)
-  {
 
-     List<String> stateStatusCash = null;
-     String       stateCash = null;
+  private void addBooleanScalarAttribute(JDObject jdObj,IBooleanScalar model) {
 
-     // Find the "cashed" state
-     stateStatusCash = stateCashHash.get(stateAtt.getName());
-     if (stateStatusCash != null)
-     {     
-         try 
-         {
-            stateCash = stateStatusCash.get(STATE_INDEX);        
-         }
-         catch (IndexOutOfBoundsException iob)
-         {
-         }
-     }
-     
-     // If the state is not cashed already, this would mean that the state has not been
-     // read yet (either by tango event or by refresher polling). In this case the function
-     // will return because it is useless to update the JdObject state. This will be done when 
-     // the tango event arrives and next time the devStateScalarChange() is called.
-     if ((stateCash == null) || (stateCash.equalsIgnoreCase(STATE_NONE)) )
-        return;
+    if (jdObj instanceof JDSwingObject) {
 
-     if (jdo.isProgrammed())
-     {
-        jdo.setValue(getDynoState(stateCash));
-        jdo.refresh();
-     }
-     else // not a Dyno
-     {
-        changeJDobjColor(jdo, ATKConstant.getColor4State(stateCash, stateAtt.getInvertedOpenClose(), stateAtt.getInvertedInsertExtract()));
-     }
-  
-  }
- 
-  private void addBooleanScalarAttribute(JDObject jdObj,IBooleanScalar model)
-  {
-     if (jdObj instanceof JDSwingObject)
-     {
-        JComponent atkObj = ((JDSwingObject) jdObj).getComponent();
+      JComponent atkObj = ((JDSwingObject) jdObj).getComponent();
 
-        if (atkObj instanceof BooleanScalarCheckBoxViewer)
-        {
-           ((BooleanScalarCheckBoxViewer) atkObj).setAttModel(model);
-           allAttributes.add(model);
-           model.addSetErrorListener(errPopup);
-           if (errorHistWind != null)
-              model.addErrorListener(errorHistWind);
-        }
-        else
-        {
-           System.out.println(atkObj.getClass().getName() + " does not accept IBooleanScalar model");
-        }
-     }
-     else
-     {
-	// Default behavior for JJDObject value (dyno).
-	mouseifyAttribute(jdObj);
-	String attName = model.getName();
-	System.out.println("connecting to a BooleanScalar attribute : " + attName);
-	allAttributes.add(model);
-	model.addBooleanScalarListener(this);
-	stashComponent(model.getName(), jdObj);
-     }
+      if (atkObj instanceof BooleanScalarCheckBoxViewer) {
+        ((BooleanScalarCheckBoxViewer) atkObj).setAttModel(model);
+        allAttributes.add(model);
+        model.addSetErrorListener(errPopup);
+        if (errorHistWind != null)
+           model.addErrorListener(errorHistWind);
+      } else {
+        System.out.println(atkObj.getClass().getName() + " does not accept IBooleanScalar model");
+      }
+
+    }
+
   }
 
   private void addNumberScalarAttribute(JDObject jdObj,INumberScalar model)
@@ -1531,7 +1088,6 @@ invoqex.printStackTrace();
 	if (atkObj instanceof SimpleScalarViewer)
 	{
 	  ((SimpleScalarViewer) atkObj).setModel(model);
-	  ((SimpleScalarViewer) atkObj).setHasToolTip(true);
 	  allAttributes.add(model);
 	}
 	else 
@@ -1578,29 +1134,6 @@ invoqex.printStackTrace();
      if (errorHistWind != null)
 	model.addErrorListener(errorHistWind);
   }
-
-
-  // Adding a spectrum attribute element
-  // -----------------------------------
-
-  private void addStateSpectrumAttributeElement(JDObject jdObj,IDevStateSpectrum model) {
-
-    //String attName = model.getName();
-    System.out.println("Connecting to a DevStateSpectrum element : " + jdObj.getName());
-    
-    if (!model.areAttPropertiesLoaded())
-        model.loadAttProperties();
-    
-    mouseifyStateSpectrumElement(jdObj, model);
-    stashComponent(jdObj.getName().toLowerCase(), jdObj);
-    model.addDevStateSpectrumListener(this);
-    allAttributes.add(model);
-    if (errorHistWind != null)
-       model.addErrorListener(errorHistWind);
-    model.refresh();
-  }
-
-
   
   private double[]  parsePossNumberValues(String vals)
   {
@@ -1644,73 +1177,22 @@ invoqex.printStackTrace();
      }
   }
 
-  private void addNumberSpectrumAttribute(JDObject jdObj,INumberSpectrum model)
-  {
-     if (jdObj instanceof JDSwingObject)
-     {
-        JComponent atkObj = ((JDSwingObject) jdObj).getComponent();
+  private void addNumberSpectrumAttribute(JDObject jdObj,INumberSpectrum model) {
 
-        if (atkObj instanceof NumberSpectrumViewer)
-        {
-           NumberSpectrumViewer nsv = (NumberSpectrumViewer) atkObj;
-           nsv.setModel(model);
-           allAttributes.add(model);
-           if (errorHistWind != null)
-              model.addErrorListener(errorHistWind);
-           if (nsv.getManageXaxis())
-              if (model.hasMinxMaxxAttributes())
-                  addSpectMinxMaxxAttributes(nsv, model);
-        } 
-        else
-        {
-           System.out.println(atkObj.getClass().getName() + " does not accept INumberSpectrum model");
-        }
-     }
+    if (jdObj instanceof JDSwingObject) {
+      JComponent atkObj = ((JDSwingObject) jdObj).getComponent();
+
+      if (atkObj instanceof NumberSpectrumViewer) {
+        ((NumberSpectrumViewer) atkObj).setModel(model);
+        allAttributes.add(model);
+        if (errorHistWind != null)
+           model.addErrorListener(errorHistWind);
+      } else {
+        System.out.println(atkObj.getClass().getName() + " does not accept INumberSpectrum model");
+      }
+    }
+
   }
-  
-  private void addSpectMinxMaxxAttributes(NumberSpectrumViewer nsv, INumberSpectrum ins)
-  {
-      String            attFullName;
-      IAttribute        iatt = null;
-      INumberScalar     minAtt=null, maxAtt=null;
-      if ((nsv == null) || (ins == null)) return;
-      if ((ins.getMinxAttName() == null) || (ins.getMaxxAttName() == null)) return;
-      
-      
-      // get the minAtt from the factory
-      try
-      {
-         attFullName = ins.getDevice()+"/"+ ins.getMinxAttName();
-         iatt = null;
-         iatt = aFac.getAttribute(attFullName);
-      }
-      catch (Exception ex) {}
-      
-      if (iatt != null)
-         if (iatt instanceof INumberScalar)
-            minAtt = (INumberScalar) iatt;
-      if (minAtt == null) return;
-      
-      // get the maxAtt from the factory
-      try
-      {
-         attFullName = ins.getDevice()+"/"+ ins.getMaxxAttName();
-         iatt = null;
-         iatt = aFac.getAttribute(attFullName);
-      }
-      catch (Exception ex) {}
-      
-      if (iatt != null)
-         if (iatt instanceof INumberScalar)
-            maxAtt = (INumberScalar) iatt;
-      if (maxAtt == null) return;
-      
-      if (minAtt == maxAtt) return;
-      
-      allAttributes.add(minAtt);
-      allAttributes.add(maxAtt);      
-      nsv.setXaxisModels(minAtt, maxAtt);
- }
 
   private void addNumberImageAttribute(JDObject jdObj,INumberImage model) {
 
@@ -1757,33 +1239,6 @@ invoqex.printStackTrace();
 		  }
 	       }
                ((StringScalarComboEditor) atkObj).setStringModel(model);
-               allAttributes.add(model);
-               model.addSetErrorListener(errPopup);
-	    }
-	    else
-	    {
-	      System.out.println(atkObj.getClass().getName() + " does not accept IStringScalar model");
-	    }
-     }
-  }
-
-  private void addEnumScalarAttribute(JDObject jdObj,IEnumScalar model)
-  {
-     if (jdObj instanceof JDSwingObject)
-     {
-	 JComponent atkObj = ((JDSwingObject) jdObj).getComponent();
-
-	 if (atkObj instanceof SimpleEnumScalarViewer)
-	 {
-	    ((SimpleEnumScalarViewer) atkObj).setModel(model);
-	    allAttributes.add(model);
-	    if (errorHistWind != null)
-               model.addErrorListener(errorHistWind);
-	 }
-	 else
-	    if (atkObj instanceof EnumScalarComboEditor)
-	    {
-               ((EnumScalarComboEditor) atkObj).setEnumModel(model);
                allAttributes.add(model);
                model.addSetErrorListener(errPopup);
 	    }
@@ -1840,12 +1295,6 @@ invoqex.printStackTrace();
           return;
         }
 
-        // EnumScalar attributes
-        if (att instanceof IEnumScalar) {
-          addEnumScalarAttribute(jddg,(IEnumScalar) att);
-          return;
-        }
-
         // NumberSpectrum attributes
         if (att instanceof INumberSpectrum) {
           addNumberSpectrumAttribute(jddg,(INumberSpectrum) att);
@@ -1867,42 +1316,7 @@ invoqex.printStackTrace();
     }
 
   }
-  
-  private void addSpectrumAttElement(JDObject jdo, String s)
-  {
-      String         spectrumAttName = null;
-      IAttribute     att = null;
 
-      int leftBracket = s.lastIndexOf("[");
-    
-      if ( (leftBracket <= 0) || (leftBracket >= s.length()) )
-         return;
-
-      spectrumAttName = s.substring(0, leftBracket);
-    
-      try
-      {
-         att = aFac.getAttribute(spectrumAttName);
-         if (att == null)
-             return;
-
-         // DevStateSpectrum element
-         if (att instanceof IDevStateSpectrum)
-         {
-            addStateSpectrumAttributeElement(jdo, (IDevStateSpectrum)att);
-            return;
-         }
-      } 
-      catch (ConnectionException connectionexception) 
-      {
-         System.out.println("Couldn't load device for attribute" + spectrumAttName + " " + connectionexception);
-      } 
-      catch (DevFailed dfEx)
-      {
-         System.out.println("Couldn't find the attribute" + spectrumAttName + " " + dfEx);
-      }
-
-  }
 
 
 // Implement the interface methods for synoptic animation
@@ -1923,7 +1337,7 @@ invoqex.printStackTrace();
 
      if (ins != null) {
 
-       List list = jdHash.get(s);
+       List list = (List) jdHash.get(s);
        if (list == null)
          return;
 
@@ -1970,168 +1384,11 @@ invoqex.printStackTrace();
      }
 
    }
-   
-   
-   // Interface IDevStateSpectrumListener
-   public void booleanScalarChange(BooleanScalarEvent evt)
-   {
-       IBooleanScalar   boolAtt = (IBooleanScalar) evt.getSource();
-       boolean          newValue = evt.getValue();
-       String           attName = boolAtt.getName();
-       
-       List<JDObject>   jdobjList = jdHash.get(attName);
-       
-       if (jdobjList == null) return;
-       if (jdobjList.isEmpty()) return;
-       
-       Iterator<JDObject>  jdoIt = jdobjList.iterator();
-       while (jdoIt.hasNext())
-       {
-           JDObject  jdobj = jdoIt.next();
-           if (jdobj.isProgrammed())
-           {
-               if (newValue)
-                  jdobj.setValue(1);
-               else
-                  jdobj.setValue(0);
-               jdobj.refresh();
-           }
-       }
-   }
-
-   
-
-   // Interface IDevStateSpectrumListener
-   public void devStateSpectrumChange(DevStateSpectrumEvent evt) 
-   {
-        String[]    newStates = evt.getValue();
-        IDevStateSpectrum    att = (IDevStateSpectrum) evt.getSource();
-        if (newStates == null)
-            setAllStateElements(att, IDevice.UNKNOWN);
-        else
-            if (newStates.length == 0)
-                setAllStateElements(att, IDevice.UNKNOWN);
-            else
-                updateAllStateElements(att, newStates);
-   }
-   
-   private void setAllStateElements(IDevStateSpectrum att, String newState)
-   {
-       Set <String>  synopticKeySet = jdHash.keySet();;
-       
-       if (synopticKeySet.isEmpty())
-           return;
-       String            attName = att.getName().toLowerCase();
-       Iterator<String>  it = synopticKeySet.iterator();
-       
-       while (it.hasNext())
-       {
-           String  synopticKey = it.next();
-           if (synopticKey.startsWith(attName))
-           {
-               List<JDObject> jdobjList = jdHash.get(synopticKey);
-               int      elemIndex = getIndexFromName(synopticKey);
-               Iterator<JDObject>  jdoIt = jdobjList.iterator();
-               while (jdoIt.hasNext())
-               {
-                   JDObject  jdobj = jdoIt.next();
-                   //changeJDobjColor(jdobj, ATKConstant.getColor4State(newState));
-                   manageStateSpectrumElementChange(jdobj, elemIndex, att, newState);
-               }
-           }
-       }
-   }
-   
-   
-   private void updateAllStateElements(IDevStateSpectrum att, String[] newStates)
-   {
-       Set <String>  synopticKeySet = jdHash.keySet();;
-       
-       if (synopticKeySet.isEmpty())
-           return;
-       String            attName = att.getName().toLowerCase();
-       Iterator<String>  it = synopticKeySet.iterator();
-       
-       while (it.hasNext())
-       {
-           String  synopticKey = it.next();
-           if (synopticKey.startsWith(attName))
-           {
-               int      elemIndex = getIndexFromName(synopticKey);
-               String   newElemState;
-               if ( (elemIndex < 0) || (elemIndex >= newStates.length) )
-                   newElemState = IDevice.UNKNOWN;
-               else
-                   newElemState = newStates[elemIndex];
-              
-               List<JDObject>      jdobjList = jdHash.get(synopticKey);
-               Iterator<JDObject>  jdoIt = jdobjList.iterator();
-               while (jdoIt.hasNext())
-               {
-                   JDObject  jdobj = jdoIt.next();
-                   manageStateSpectrumElementChange(jdobj, elemIndex, att, newElemState);
-               }
-           }
-       }
-   }
 
 
-   private void manageStateSpectrumElementChange(JDObject jdo, int elemIndex, IDevStateSpectrum att, String newState)
-   {
-        if (jdo.isProgrammed())
-        {
-           jdo.setValue(getDynoState(newState));
-           jdo.refresh();
-        } 
-        else // not a Dyno; so perform a color change
-           changeJDobjColor(jdo, ATKConstant.getColor4State(newState, att.getInvertedOpenCloseForElement(elemIndex), att.getInvertedInsertExtractForElement(elemIndex)));
-   }
-
-   // Interface IAttributeStateListener
-   /** change the color of the jdobj (bg or fg) according to the quality factor
-       of the attribute If and Only If the JDobject is not a JDBar, or JDSlider
-       and no color mapper is set for the JDobject
-       and the "extension" QualityFactor is true **/
+   // Interface INumberScalarListener (superclass of IStateListener and INumberScalarListener)
    public void stateChange(AttributeStateEvent evt)
    {
-	JDObject                   jdObj;
-	IAttribute                 iatt;
-	String                     quality = evt.getState();
-
-	iatt = null;
-	iatt = (IAttribute) evt.getSource();
-
-	String s = iatt.getName();
-
-	if (iatt != null)
-	{
-	   List list = jdHash.get(s);
-	   if (list == null)
-             return;
-
-	   int nbJdObjs = list.size();
-	   int i;
-
-	   for (i = 0; i < nbJdObjs; i++)
-	   {
-               jdObj = null;
-               jdObj = (JDObject) list.get(i);
-
-               if ( !(jdObj instanceof JDBar)  && !(jdObj instanceof JDSlider) )
-	       {
-		  if ( (!jdObj.hasBackgroundMapper()) && (!jdObj.hasForegroundMapper()) )
-		      if (jdObj.hasExtendedParam("qualityFactor"))
-		      {
-        		  String   qfString = jdObj.getExtendedParam("qualityFactor");
-			  if (Boolean.valueOf(qfString))
-			  {
-			     changeJDobjColourForQuality(jdObj, quality);
-			     return;
-			  }
-		      }
-               }
-	   }
-	}
    }
 
    // Interface ISetErrorListener
@@ -2151,16 +1408,14 @@ invoqex.printStackTrace();
 
      Object source = event.getSource();
 
-     if( source instanceof IDevStateScalar )
-     {
+     if( source instanceof IDevStateScalar ) {
        IDevStateScalar src = (IDevStateScalar)event.getSource();
        String state = Device.UNKNOWN;
-       manageStateChange(src.getName() , state, source);
+       manageStateChange(src.getName() , state);
        return;
      }
 
-     if( source instanceof INumberScalar )
-     {
+     if( source instanceof INumberScalar ) {
        // What should we do here ?
        // Let's fire NaN
        NumberScalarEvent e = new NumberScalarEvent((INumberScalar)source,Double.NaN,event.getTimeStamp());
@@ -2168,104 +1423,74 @@ invoqex.printStackTrace();
        return;
      }
 
-     if( source instanceof ICommand )
-     {
+     if( source instanceof ICommand ) {
        ICommand src = ((ICommand)source);
        ErrorPane.showErrorMessage(this,src.getName(),(ATKException)event.getError());
      }
 
-     if( source instanceof IBooleanScalar )
-     {
-       IBooleanScalar src = (IBooleanScalar) event.getSource();
-       BooleanScalarEvent e = new BooleanScalarEvent(src, false, event.getTimeStamp());
-       booleanScalarChange(e);
-       return;
-     }
-
-     if( source instanceof IDevStateSpectrum )
-     {
-       IDevStateSpectrum src = (IDevStateSpectrum)event.getSource();
-       setAllStateElements(src, IDevice.UNKNOWN);
-       return;
-     }
-
    }
-   
-   private void manageStateChange(String entityName, String state, Object sourceEntity)
-   {
-     //long before, after, duree;
-     //before = System.currentTimeMillis();
 
-     // Update and test the "cashed" state
-     List<String> stateStatusCash = null;
+  private void manageStateChange(String entityName, String state) {
 
-     stateStatusCash = stateCashHash.get(entityName);
-     if (stateStatusCash != null)
-     {
-	String stateCash = null;
-	try
-	{
-           stateCash = stateStatusCash.get(STATE_INDEX);
-           if (stateCash != null)
-	   {
-             if (stateCash.equals(state))
-               return;
-           }
+    //long before, after, duree;
+    //before = System.currentTimeMillis();
 
-           stateCash = new String(state);
-           stateStatusCash.set(STATE_INDEX, stateCash);
-           stateCashHash.put(entityName, stateStatusCash);
-	} 
-	catch (IndexOutOfBoundsException iob)
-	{
-	}
-     }
+    // Update and test the "cashed" state
+    List stateStatusCash = null;
 
-     // Here we are sure that the new state is different from the "cashed" state
-     // System.out.println("State has changed for " + entityName + " : " + state);
-     JDObject jdObj;
+    stateStatusCash = (List) stateCashHash.get(entityName);
+    if (stateStatusCash != null) {
+      String stateCash = null;
+      try {
+        stateCash = (String) stateStatusCash.get(STATE_INDEX);
 
-     List<JDObject> list = jdHash.get(entityName);
-     if (list == null)
-       return;
-
-     int nbJdObjs = list.size();
-     int i;
-
-     for (i = 0; i < nbJdObjs; i++)
-     {
-	jdObj = list.get(i);
-	if (jdObj.isProgrammed())
-	{
-           jdObj.setValue(getDynoState(state));
-           jdObj.refresh();
-	} 
-	else // not a Dyno
-        {
-           if (sourceEntity instanceof IDevice)
-           {
-               IDevice dev = (IDevice) sourceEntity;
-               changeJDobjColor(jdObj, ATKConstant.getColor4State(state, dev.getInvertedOpenClose(), dev.getInvertedInsertExtract()));
-           }
-           else
-               if (sourceEntity instanceof IDevStateScalar)
-               {
-                   IDevStateScalar  stateAtt = (IDevStateScalar) sourceEntity;
-                   changeJDobjColor(jdObj, ATKConstant.getColor4State(state, stateAtt.getInvertedOpenClose(), stateAtt.getInvertedInsertExtract()));
-               }
-               else
-                  changeJDobjColor(jdObj, ATKConstant.getColor4State(state));
+        if (stateCash != null) {
+          if (stateCash.equals(state))
+            return;
         }
-     }
-   }
 
+        stateCash = new String(state);
+        stateStatusCash.set(STATE_INDEX, stateCash);
+        stateCashHash.put(entityName, stateStatusCash);
+      } catch (IndexOutOfBoundsException iob) {
+      }
+    }
+
+    // Here we are sure that the new state is different from the "cashed" state
+    // System.out.println("State has changed for " + entityName + " : " + state);
+    JDObject jdObj;
+
+    List list = (List) jdHash.get(entityName);
+    if (list == null)
+      return;
+
+    int nbJdObjs = list.size();
+    int i;
+
+    for (i = 0; i < nbJdObjs; i++) {
+      jdObj = (JDObject) list.get(i);
+      if (jdObj.isProgrammed()) {
+        jdObj.setValue(getDynoState(state));
+        jdObj.refresh();
+      } else // not a Dyno
+      {
+        changeJDobjColour(jdObj, state);
+      }
+    }
+
+    //System.out.println("Left state change for "+s);
+    //after = System.currentTimeMillis();
+    //duree = after - before;
+    //System.out.println("TangoSynopticHandler.stateChange took "+  duree + " milli seconds.");
+
+  }
 
    // Interface IDevStateScalarListener (Listen on attribute state change)
    public void devStateScalarChange(DevStateScalarEvent event) {
 
      IDevStateScalar src = (IDevStateScalar)event.getSource();
      String state = event.getValue();
-     manageStateChange(src.getName() , state, src);
+     manageStateChange(src.getName() , state);
 
    }
 
@@ -2275,7 +1500,7 @@ invoqex.printStackTrace();
 
       Device device = (Device)event.getSource();
       String state = event.getState();
-      manageStateChange(device.getName(),state, device);
+      manageStateChange(device.getName(),state);
 
    }
 
@@ -2289,23 +1514,23 @@ invoqex.printStackTrace();
       "IgnoreRepaint" only the background colour is changed if filled, the
       forground colour if not filled and the children are examined recursively if
       the object is a group. */
-   private void changeJDobjColor (JDObject jdo, Color stateColor)
+   private void changeJDobjColour (JDObject jdo, String state)
    {
       if (jdo instanceof JDGroup)
       {
-         changeJDgroupColor(jdo, stateColor);
+         changeJDgroupCoulor(jdo, state);
 	 return;
       }
 
       if (jdo.getFillStyle() == JDObject.FILL_STYLE_NONE)
-	jdo.setForeground(stateColor);
+	jdo.setForeground(ATKConstant.getColor4State(state));
       else
-	jdo.setBackground(stateColor);
+	jdo.setBackground(ATKConstant.getColor4State(state));
       jdo.refresh();
    }
 
 
-   private void changeJDgroupColor (JDObject jdo, Color stateColor)
+   private void changeJDgroupCoulor (JDObject jdo, String state)
    {
       JDGroup    jdg=null;
       int        nbChild=0;
@@ -2332,82 +1557,16 @@ invoqex.printStackTrace();
 
 	 if (currChild instanceof JDGroup)
 	 {
-            changeJDgroupColor(currChild, stateColor);
+            changeJDgroupCoulor(currChild, state);
 	    continue;
          }
 
 
 	 /* Change the colour of the object inside a group */
 	 if (currChild.getFillStyle() == JDObject.FILL_STYLE_NONE)
-	   currChild.setForeground(stateColor);
+	   currChild.setForeground(ATKConstant.getColor4State(state));
 	 else
-	   currChild.setBackground(stateColor);
-	 currChild.refresh();
-      }
-   }
-
-   /* 1- If the JDobject associated with the attribute is not a JDgroup only the background
-      colour will change if the JDobject is filled and if it is not filled the
-      foreground will change instead. The color is changed according to the quality factor of the attribute.
-      2- If the JDobject associated with the attribute is a JDgroup all the children of
-      the group are examined. For each child if the JDobject names equals to the string
-      "IgnoreRepaint" none of the colors is changed. If the name is not
-      "IgnoreRepaint" only the background color is changed if filled, the
-      foreground color if not filled and the children are examined recursively if
-      the object is a group. */
-   private void changeJDobjColourForQuality (JDObject jdo, String quality)
-   {
-      if (jdo instanceof JDGroup)
-      {
-         changeJDgroupForQuality(jdo, quality);
-	 return;
-      }
-
-      if (jdo.getFillStyle() == JDObject.FILL_STYLE_NONE)
-	jdo.setForeground(ATKConstant.getColor4Quality(quality));
-      else
-	jdo.setBackground(ATKConstant.getColor4Quality(quality));
-      jdo.refresh();
-   }
-
-
-   private void changeJDgroupForQuality (JDObject jdo, String quality)
-   {
-      JDGroup    jdg=null;
-      int        nbChild=0;
-      int        idx;
-      JDObject   currChild=null;
-
-      if (!(jdo instanceof JDGroup))
-	 return;
-
-      if (jdo.getName().equalsIgnoreCase("IgnoreRepaint"))
-	 return;
-
-      jdg = (JDGroup) jdo;
-      nbChild = jdg.getChildrenNumber();
-      for (idx=0; idx < nbChild; idx++)
-      {
-	 currChild = jdg.getChildAt(idx);
-
-	 if (currChild == null)
-	    continue;
-
-	 if (currChild.getName().equalsIgnoreCase("IgnoreRepaint"))
-	    continue;
-
-	 if (currChild instanceof JDGroup)
-	 {
-            changeJDgroupForQuality(currChild, quality);
-	    continue;
-         }
-
-
-	 /* Change the colour of the object inside a group */
-	 if (currChild.getFillStyle() == JDObject.FILL_STYLE_NONE)
-	   currChild.setForeground(ATKConstant.getColor4Quality(quality));
-	 else
-	   currChild.setBackground(ATKConstant.getColor4Quality(quality));
+	   currChild.setBackground(ATKConstant.getColor4State(state));
 	 currChild.refresh();
       }
    }
@@ -2420,16 +1579,16 @@ invoqex.printStackTrace();
       Device device = (Device)event.getSource();
       String s = device.getName();
 
-      List<String>  stateStatusCash = null;
+      List  stateStatusCash = null;
 
-      stateStatusCash = stateCashHash.get(s);
+      stateStatusCash = (List) stateCashHash.get(s);
       if (stateStatusCash != null)
       {
          String  statusCash = null;
 
 	 try
 	 {
-	    statusCash = stateStatusCash.get(STATUS_INDEX);
+	    statusCash = (String) stateStatusCash.get(STATUS_INDEX);
 
 	    if (statusCash != null)
 	    {
@@ -2539,85 +1698,14 @@ invoqex.printStackTrace();
        setToolTipText(null);
    }
 
-
-
-   private void stateSpectrumElementClicked(JDMouseEvent evt)
-   {
-      JDObject comp = (JDObject) evt.getSource();
-      String attElemName = comp.getName().toLowerCase();
-      launchPanel(comp, attElemName, false);
-   }
-   
-   private void stateSpectrumElementDisplayToolTip(JDMouseEvent e, IDevStateSpectrum att, int elemIndex)
-   {
-       String[]            stateLabels=null;
-       JDObject            jdObj;
-
-       if ( toolTipMode != TOOL_TIP_NAME )
-       {
-          setToolTipText(null);
-	      return;
-       }
-
-       jdObj = (JDObject)e.getSource();
-       if (elemIndex < 0)
-       {
-           setToolTipText(jdObj.getName());
-           return;
-       }
-                 
-       stateLabels = att.getStateLabels();
-       if ((stateLabels == null) || (elemIndex >= stateLabels.length))
-       {
-           setToolTipText(jdObj.getName());
-           return;
-       }
-       
-       setToolTipText(stateLabels[elemIndex]);
-   }
-
-   private void stateSpectrumElementRemoveToolTip()
-   {
-       setToolTipText(null);
-   }
-   
-   private int getIndexFromName(String elemName)
-   {
-      int     index = -1;
-      
-      int    leftBracket = elemName.lastIndexOf("[");
-      int    rightBracket = elemName.lastIndexOf("]");
-      
-      if ( (leftBracket < 0) || (leftBracket >= elemName.length()) )
-          return -1;
-
-      if ( (rightBracket < 0) || (rightBracket >= elemName.length()) )
-          return -1;
-      
-      if (leftBracket >= rightBracket)
-          return -1;
-
-      String indexNumber = elemName.substring(leftBracket+1, rightBracket);
-      try
-      {
-         index = Integer.parseInt(indexNumber);
-      }
-      catch (NumberFormatException nfe)
-      {          
-      }
-      return index;
-   }
-   
-   public static void main(String args[])
-   {
+   public static void main(String args[]) {
 
      TangoSynopticHandler tsh = null;
 
      try {
        //DeviceFactory.getInstance().setTraceMode(DeviceFactory.TRACE_REFRESHER);
-       //tsh = new TangoSynopticHandler("/segfs/tango/jclient/JRFKlystron/src/rfAppli/klystron/sy_klyst.jdw",TOOL_TIP_NAME);
-       tsh = new TangoSynopticHandler("/users/poncet/JDRAW_FILES/sy_klyst.jdw",TOOL_TIP_NAME);
-       //tsh = new TangoSynopticHandler("Z:/atk_test/jdraw/jlinac-atts.jdw",TOOL_TIP_NAME);
+       //tsh = new TangoSynopticHandler("/segfs/tango/jclient/JLinac/jdraw_file/test_taco.jdw");
+       tsh = new TangoSynopticHandler("Z:/atk_test/jdraw/jlinac-atts.jdw",TOOL_TIP_NAME);
      } catch (Exception e) {
        System.out.println(e);
        System.out.println("Prog Aborted.");
@@ -2634,10 +1722,13 @@ invoqex.printStackTrace();
 
      jf.setContentPane(tsh);
      jf.pack();
-     jf.setVisible(true);
+     jf.show();
 
    }
+
+
 }
+
 /**
  * Class which handle panel unicity.
  */

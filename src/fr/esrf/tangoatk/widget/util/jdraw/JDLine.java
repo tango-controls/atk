@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /**
  * JDraw Line graphic object
  */
@@ -119,31 +97,6 @@ public class JDLine extends JDObject implements JDRotatable {
     }
 
     arrowMode = p.arrow;
-
-    updateShape();
-
-  }
-
-  JDLine(LXObject lxObj,double x1,double y1,double x2,double y2,int arrow) {
-
-    initDefault();
-    loadObject(lxObj);
-
-    double x = lxObj.boundRect.getX();
-    double y = lxObj.boundRect.getY();
-    double w = lxObj.boundRect.getWidth();
-    double h = lxObj.boundRect.getHeight();
-
-    setOrigin(new Point2D.Double(x+w/2.0, y+h/2.0));
-    summit = new Point2D.Double[2];
-    createSummit();
-
-    summit[0].x = x1;
-    summit[0].y = y1;
-    summit[1].x = x2;
-    summit[1].y = y2;
-
-    arrowMode = arrow;
 
     updateShape();
 

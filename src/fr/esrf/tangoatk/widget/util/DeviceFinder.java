@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * DeviceFinder.java
  *
  * Created on June 18, 2002, 10:28 AM
@@ -31,12 +9,9 @@ package fr.esrf.tangoatk.widget.util;
 import javax.swing.*;
 import javax.swing.tree.*;
 import fr.esrf.Tango.DevFailed;
-import fr.esrf.Tango.AttrDataFormat;
 import fr.esrf.TangoApi.Database;
 import fr.esrf.TangoApi.ApiUtil;
 import fr.esrf.TangoApi.CommandInfo;
-import fr.esrf.TangoApi.AttributeInfo;
-import fr.esrf.TangoDs.TangoConst;
 import fr.esrf.tangoatk.core.*;
 
 import java.awt.*;
@@ -52,20 +27,10 @@ public class DeviceFinder extends JPanel {
 
   /** Select device */
   public final static int MODE_DEVICE    = 0;
-  /** Select all attributes */
+  /** Select attribute */
   public final static int MODE_ATTRIBUTE = 1;
   /** Select command */
   public final static int MODE_COMMAND   = 2;
-  /** Select all scalar attributes */
-  public final static int MODE_ATTRIBUTE_SCALAR = 3;
-  /** Select all number scalar attributes */
-  public final static int MODE_ATTRIBUTE_NUMBER_SCALAR = 4;
-  /** Select all boolean scalar attributes */
-  public final static int MODE_ATTRIBUTE_BOOLEAN_SCALAR = 5;
-  /** Select all string scalar attributes */
-  public final static int MODE_ATTRIBUTE_STRING_SCALAR = 6;
-  /** Select all number spectrum attributes */
-  public final static int MODE_ATTRIBUTE_NUMBER_SPECTRUM = 7;
 
   static Database  db;
   JTree            tree;
@@ -96,17 +61,6 @@ public class DeviceFinder extends JPanel {
   }
 
   /**
-   * Sets the selection model for the tree
-   * @see TreeSelectionModel#SINGLE_TREE_SELECTION
-   * @see TreeSelectionModel#CONTIGUOUS_TREE_SELECTION
-   * @see TreeSelectionModel#SINGLE_TREE_SELECTION
-   * @param selectionModel The selection model
-   */
-  public void setSelectionModel(int selectionModel) {
-    tree.getSelectionModel().setSelectionMode(selectionModel);
-  }
-
-  /**
    * Returns the list of selected entities.
    */
   public String[] getSelectedNames() {
@@ -128,12 +82,7 @@ public class DeviceFinder extends JPanel {
             }
             break;
           case MODE_ATTRIBUTE:
-          case MODE_ATTRIBUTE_SCALAR:
-          case MODE_ATTRIBUTE_BOOLEAN_SCALAR:
-          case MODE_ATTRIBUTE_NUMBER_SCALAR:
-          case MODE_ATTRIBUTE_STRING_SCALAR:
           case MODE_COMMAND:
-          case MODE_ATTRIBUTE_NUMBER_SPECTRUM:
             if (pth.length == 5) {
               name = pth[1] + "/" + pth[2] + "/" + pth[3] + "/" + pth[4];
               completePath.add(name);
@@ -165,15 +114,10 @@ public class DeviceFinder extends JPanel {
 
   }
 
-  public JTree getTree() {
-    return tree;
-  }
-
   /** test function */
   public static void main(String[] args) {
 
-    final DeviceFinder df = new DeviceFinder(MODE_ATTRIBUTE_NUMBER_SPECTRUM);
-    df.setSelectionModel(TreeSelectionModel.SINGLE_TREE_SELECTION);
+    final DeviceFinder df = new DeviceFinder(MODE_COMMAND);
 
     JFrame f = new JFrame();
     JPanel p = new JPanel();
@@ -329,70 +273,6 @@ class MemberNode extends Node {
             for(int i=0;i<attList.length;i++)
               add(new EntityNode(mode,attList[i]));
             break;
-          case DeviceFinder.MODE_ATTRIBUTE_SCALAR:
-              AttributeInfo[] ai = ds.get_attribute_info();
-              for(int i=0;i<ai.length;i++) {
-                if(ai[i].data_format.value() == AttrDataFormat._SCALAR)
-                  add(new EntityNode(mode,ai[i].name));
-              }
-              ai = null;
-              break;
-          case DeviceFinder.MODE_ATTRIBUTE_BOOLEAN_SCALAR:
-              AttributeInfo[] aib = ds.get_attribute_info();
-              for(int i=0;i<aib.length;i++) {
-                if(aib[i].data_format.value() == AttrDataFormat._SCALAR && aib[i].data_type == TangoConst.Tango_DEV_BOOLEAN)
-                  add(new EntityNode(mode,aib[i].name));
-              }
-              aib = null;
-              break;
-          case DeviceFinder.MODE_ATTRIBUTE_NUMBER_SCALAR:
-              AttributeInfo[] ain = ds.get_attribute_info();
-              for(int i=0;i<ain.length;i++) {
-                if(ain[i].data_format.value() == AttrDataFormat._SCALAR)
-                  switch(ain[i].data_type)
-                  {
-                      case TangoConst.Tango_DEV_CHAR:
-                      case TangoConst.Tango_DEV_UCHAR:
-                      case TangoConst.Tango_DEV_SHORT:
-                      case TangoConst.Tango_DEV_USHORT:
-                      case TangoConst.Tango_DEV_LONG:
-                      case TangoConst.Tango_DEV_ULONG:
-                      case TangoConst.Tango_DEV_FLOAT:
-                      case TangoConst.Tango_DEV_DOUBLE:
-                          add(new EntityNode(mode,ain[i].name));
-                          break;
-                  }
-              }
-              ain = null;
-              break;
-          case DeviceFinder.MODE_ATTRIBUTE_NUMBER_SPECTRUM:
-              AttributeInfo[] aisp = ds.get_attribute_info();
-              for(int i=0;i<aisp.length;i++) {
-                if(aisp[i].data_format.value() == AttrDataFormat._SPECTRUM)
-                  switch(aisp[i].data_type)
-                  {
-                      case TangoConst.Tango_DEV_CHAR:
-                      case TangoConst.Tango_DEV_UCHAR:
-                      case TangoConst.Tango_DEV_SHORT:
-                      case TangoConst.Tango_DEV_USHORT:
-                      case TangoConst.Tango_DEV_LONG:
-                      case TangoConst.Tango_DEV_ULONG:
-                      case TangoConst.Tango_DEV_FLOAT:
-                      case TangoConst.Tango_DEV_DOUBLE:
-                          add(new EntityNode(mode,aisp[i].name));
-                          break;
-                  }
-              }
-              ain = null;
-              break;
-          case DeviceFinder.MODE_ATTRIBUTE_STRING_SCALAR:
-            AttributeInfo[] ais = ds.get_attribute_info();
-            for(int i=0;i<ais.length;i++) {
-              if(ais[i].data_format.value() == AttrDataFormat._SCALAR && ais[i].data_type == TangoConst.Tango_DEV_STRING)
-                add(new EntityNode(mode,ais[i].name));
-            }
-            ais = null;
-            break;
           case DeviceFinder.MODE_COMMAND:
             CommandInfo[] cmdList = ds.command_list_query();
             for(int i=0;i<cmdList.length;i++)
@@ -479,11 +359,6 @@ class TreeNodeRenderer extends DefaultTreeCellRenderer {
           setIcon(cmdicon);
           break;
         case DeviceFinder.MODE_ATTRIBUTE:
-        case DeviceFinder.MODE_ATTRIBUTE_SCALAR:
-        case DeviceFinder.MODE_ATTRIBUTE_BOOLEAN_SCALAR:
-        case DeviceFinder.MODE_ATTRIBUTE_NUMBER_SCALAR:
-        case DeviceFinder.MODE_ATTRIBUTE_NUMBER_SPECTRUM:
-        case DeviceFinder.MODE_ATTRIBUTE_STRING_SCALAR:
           setIcon(atticon);
           break;
       }

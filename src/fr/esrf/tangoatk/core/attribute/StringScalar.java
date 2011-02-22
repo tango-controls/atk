@@ -1,25 +1,8 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
+// File:          StringAttribute.java
+// Created:       2001-09-24 13:24:05, assum
+// By:            <erik@assum.net>
+// Time-stamp:    <2002-07-10 15:33:21, assum>
+//
 // $Id$
 //
 // Description:
@@ -130,55 +113,8 @@ public class StringScalar extends AAttribute
       }
   }
   
-  public void dispatch(DeviceAttribute attValue)
-  {
-
-      if (skippingRefresh) return;
-      refreshCount++;
-      try
-      {
-	  try
-	  {
-          // symetric with refresh
-          if (attValue == null) return;
-          attribute = attValue;
-
-          setState(attValue);
-          timeStamp = attValue.getTimeValMillisSec();
-
-	      // Retreive the read value for the attribute
-	      stringValue = attValue.extractString();
-
-	      // Retreive the set point for the attribute
-	      setPointValue = stringHelper.getStringScalarSetPoint(attValue);
-
-	      // Fire valueChanged
-	      fireValueChanged(stringValue);
-	  }
-	  catch (DevFailed e)
-	  {
-        dispatchError(e);
-	  }
-      }
-      catch (Exception e)
-      {
-	  // Code failure
-	  stringValue = null;
-	  setPointValue = null;
-
-	  System.out.println("StringScalar.dispatch() Exception caught ------------------------------");
-	  e.printStackTrace();
-	  System.out.println("StringScalar.dispatch()------------------------------------------------");
-      }
-  }
-
-  public void dispatchError(DevFailed e) {
-    // Tango error
-    stringValue = null;
-    setPointValue = null;
-    // Fire error event
-    readAttError(e.getMessage(), new AttributeReadException(e));
-  }
+  
+  
 
   public boolean isWritable() {
     return super.isWritable();

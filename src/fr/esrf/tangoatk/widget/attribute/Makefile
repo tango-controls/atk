@@ -1,5 +1,6 @@
 
-BEANINFO= StringScalarViewerBeanInfo.java            \
+BEANINFO= NumberScalarViewerBeanInfo.java            \
+          StringScalarViewerBeanInfo.java            \
           SimpleScalarViewerBeanInfo.java            \
           IconNumberScalarViewerBeanInfo.java        \
           IconNumberSpectrumViewerBeanInfo.java      \
@@ -7,28 +8,12 @@ BEANINFO= StringScalarViewerBeanInfo.java            \
           ScalarListViewerBeanInfo.java              \
           NumberScalarStateViewerBeanInfo.java       \
           SimpleStringSpectrumViewerBeanInfo.java    \
-          NumberSpectrumViewerBeanInfo.java    \
+          NumberSpectrumPeakViewerBeanInfo.java    \
           NumberScalarProgressBarBeanInfo.java    \
           ScalarListSetterBeanInfo.java              \
           StateViewerBeanInfo.java              \
           BooleanScalarCheckBoxViewerBeanInfo.java	\
           StatusViewerBeanInfo.java              \
-          NumberScalarWheelEditorBeanInfo.java        \
-          NumberScalarViewerBeanInfo.java        \
-	  BooleanScalarComboEditorBeanInfo.java \
-	  TabbedPaneDevStateScalarViewerBeanInfo.java \
-	  StringImageTableViewerBeanInfo.java \
-	  MultiNumberSpectrumViewerBeanInfo.java \
-	  NumberScalarSetPanelBeanInfo.java \
-	  StringScalarSetPanelBeanInfo.java \
-	  EnumScalarSetPanelBeanInfo.java \
-	  BooleanScalarSetPanelBeanInfo.java \
-	  ScalarAttributeSetPanelBeanInfo.java \
-	  MultiScalarTableViewerBeanInfo.java \
-	  NumberSpectrumItemTrendBeanInfo.java \
-	  DevStateSpectrumViewerBeanInfo.java \
-          SimpleStateViewerBeanInfo.java	\
-	  NumberSpectrumStateBarChartViewerBeanInfo.java    \
 
 
 include ../../../../../../.make-include
@@ -39,16 +24,19 @@ ALL =	$(TARGET)/IAttributeViewer.class            \
 	$(TARGET)/AScalarViewer.class               \
 	$(TARGET)/ScalarListViewer.class            \
 	$(TARGET)/ImageControlAdapter.class         \
+	$(TARGET)/PropertyFrame.class               \
 	$(TARGET)/NumberImageJTableAdapter.class    \
 	$(TARGET)/IconNumberScalarViewer.class      \
 	$(TARGET)/IconNumberSpectrumViewer.class    \
 	$(TARGET)/StringScalarViewer.class          \
+	$(TARGET)/NumberScalarViewer.class          \
+	$(TARGET)/AttributeList.class               \
 	$(TARGET)/Trend.class                       \
 	$(TARGET)/TrendSelectionNode.class          \
 	$(TARGET)/TrendRenderer.class               \
+	$(TARGET)/AttributeViewerFactory.class      \
 	$(TARGET)/NumberScalarWheelEditor.class     \
 	$(TARGET)/NumberSpectrumViewer.class        \
-	$(TARGET)/NumberSpectrumTableEditor.class   \
 	$(TARGET)/DualSpectrumImageViewer.class     \
 	$(TARGET)/NumberScalarListViewer.class      \
 	$(TARGET)/StringScalarEditor.class          \
@@ -59,6 +47,7 @@ ALL =	$(TARGET)/IAttributeViewer.class            \
 	$(TARGET)/RoiEvent.class                    \
 	$(TARGET)/SimpleStringSpectrumViewer.class  \
 	$(TARGET)/NonAttrNumberSpectrumViewer.class  \
+	$(TARGET)/NumberSpectrumPeakViewer.class  \
 	$(TARGET)/NumberScalarProgressBar.class  \
 	$(TARGET)/NumberScalarComboEditor.class  \
 	$(TARGET)/StringScalarComboEditor.class  \
@@ -73,36 +62,6 @@ ALL =	$(TARGET)/IAttributeViewer.class            \
 	$(TARGET)/ScalarInput.class \
 	$(TARGET)/SignalScalarLightViewer.class \
 	$(TARGET)/DualNumberScalarChart.class \
-	$(TARGET)/StringScalarNumberComboEditor.class \
-	$(TARGET)/NumberImageTable.class \
-	$(TARGET)/NumberScalarViewer.class \
-	$(TARGET)/NumberSpectrumTrendViewer.class        \
-	$(TARGET)/RawImageViewer.class        \
-	$(TARGET)/BooleanScalarComboEditor.class \
-	$(TARGET)/BooleanTrend.class                       \
-	$(TARGET)/BooleanTrendSelectionNode.class          \
-	$(TARGET)/BooleanTrendRenderer.class               \
-	$(TARGET)/EnumScalarComboEditor.class  \
-	$(TARGET)/SimpleEnumScalarViewer.class  \
-	$(TARGET)/NumberSpectrumRecorder.class \
-	$(TARGET)/TabbedPaneDevStateScalarViewer.class \
-	$(TARGET)/StringImageTableViewer.class \
-	$(TARGET)/MultiNumberSpectrumViewer.class \
-	$(TARGET)/NumberScalarSetPanel.class \
-	$(TARGET)/StringScalarSetPanel.class \
-	$(TARGET)/EnumScalarSetPanel.class \
-	$(TARGET)/BooleanScalarSetPanel.class \
-	$(TARGET)/ScalarAttributeSetPanel.class \
-	$(TARGET)/MultiScalarTableViewer.class \
-	$(TARGET)/NumberSpectrumItemTrend.class        \
-	$(TARGET)/SignalScalarCheckBoxViewer.class \
-	$(TARGET)/SignalScalarComboEditor.class \
-	$(TARGET)/NumberImageJViewer.class           \
-	$(TARGET)/DevStateSpectrumViewer.class       \
-	$(TARGET)/SimpleStateViewer.class           \
-	$(TARGET)/NumberSpectrumTrend3DViewer.class \
-	$(TARGET)/NumberSpectrumStateBarChartViewer.class 
-	
 
 #	$(TARGET)/AttributeBarChart.class
 
@@ -122,6 +81,10 @@ run: all
 
 ssv: all
 	$(JAVA) fr.esrf.tangoatk.widget.attribute.SimpleScalarViewer
+nsv: all
+	$(JAVA) fr.esrf.tangoatk.widget.attribute.NumberScalarViewer
+snsv: all
+	$(JAVA) fr.esrf.tangoatk.widget.attribute.SimpleNumberScalarViewer
 
 nst: all
 	$(JAVA) fr.esrf.tangoatk.widget.attribute.NumberImageJTableAdapter
@@ -149,6 +112,8 @@ sssv: attributes
 	$(JAVA) fr.esrf.tangoatk.widget.attribute.SimpleStringSpectrumViewer	
 nspect: attributes
 	$(JAVA) fr.esrf.tangoatk.widget.attribute.NumberSpectrumViewer	
+nspv: attributes
+	$(JAVA) fr.esrf.tangoatk.widget.attribute.NumberSpectrumPeakViewer	
 nspb: attributes
 	$(JAVA) fr.esrf.tangoatk.widget.attribute.NumberScalarProgressBar	
 ncbe: attributes
@@ -166,7 +131,7 @@ stsv: attributes
 abc: attributes
 	$(JAVA) fr.esrf.tangoatk.widget.attribute.AttributeBarChart	
 amc: attributes
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.AttributeMultiChart fp/test/1/double_scalar fp/test/1/short_scalar_ro
+	$(JAVA) fr.esrf.tangoatk.widget.attribute.AttributeMultiChart jlp/test/1/att_un jlp/test/1/att_deux jlp/test/1/att_trois
 aqlv: attributes
 	$(JAVA) fr.esrf.tangoatk.widget.attribute.AttributeQualityLightViewer jlp/test/1/att_un
 nscbv: attributes
@@ -179,29 +144,3 @@ sigslv: attributes
 	$(JAVA) fr.esrf.tangoatk.widget.attribute.SignalScalarLightViewer jlp/test/1/att_six
 dnsc: attributes
 	$(JAVA) fr.esrf.tangoatk.widget.attribute.DualNumberScalarChart jlp/test/1/att_un jlp/test/1/att_deux
-nsv: attributes
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.NumberScalarViewer
-bscombo: attributes
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.BooleanScalarComboEditor	
-btrend: all
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.BooleanTrend
-esce: attributes
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.EnumScalarComboEditor	
-sesv: attributes
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.SimpleEnumScalarViewer	
-nsr:
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.NumberSpectrumRecorder
-tpsv: attributes
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.TabbedPaneDevStateScalarViewer	
-sitv: attributes
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.StringImageTableViewer	
-mnsv: attributes
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.MultiNumberSpectrumViewer	
-mstv: attributes
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.MultiScalarTableViewer	
-nstv: attributes
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.NumberSpectrumTrendViewer	
-nsit: attributes
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.NumberSpectrumItemTrend	
-dssv: attributes
-	$(JAVA) fr.esrf.tangoatk.widget.attribute.DevStateSpectrumViewer	

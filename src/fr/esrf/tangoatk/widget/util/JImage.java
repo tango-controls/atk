@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util;
 
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
@@ -27,8 +5,6 @@ import fr.esrf.tangoatk.widget.util.chart.JLAxis;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseEvent;
@@ -37,70 +13,40 @@ import java.util.Vector;
 /**
  * A class to handle an image viewer with seleclection , marker and axis capability.
  */
-public class JImage extends JComponent implements MouseMotionListener, MouseListener, KeyListener {
-
-  // Selection modes
-  public final static int MODE_LINE   = 0;
-  public final static int MODE_RECT   = 1;
-  public final static int MODE_CROSS  = 2;
-
-  // Cross selection position (Vertical arrow)
-  public final static int VERTICAL_LEFT     = 0;
-  public final static int VERTICAL_CENTER   = 1;
-  public final static int VERTICAL_RIGHT    = 2;
-
-  // Cross selection position (Horizontal arrow)
-  public final static int HORIZONTAL_TOP    = 0;
-  public final static int HORIZONTAL_CENTER = 1;
-  public final static int HORIZONTAL_BOTTOM = 2;
+public class JImage extends JComponent implements MouseMotionListener, MouseListener {
 
   // Markers
-  protected final static int MARKER_CROSS = 1;
-  protected final static int MARKER_RECT  = 2;
-  protected final static int MARKER_VLINE = 3;
-  protected final static int MARKER_HLINE = 4;
+  final static private int MARKER_CROSS = 1;
+  final static private int MARKER_RECT = 2;
 
-  protected BufferedImage theImage = null;
-  protected Insets margin;
-  protected int xOrg;
-  protected int yOrg;
+  private BufferedImage theImage = null;
+  private Insets margin;
+  private int xOrg;
+  private int yOrg;
 
   // Selection
-  protected boolean selectionEnabled;
-  protected int mode;             // 0=Line 1=Rectangle
-  protected boolean isDragging;
-  protected int dragCorner;       // 0 = Top,Left 1 = Top,Right 3 = Bottom,Right 4 = Bottom,left
-  protected int cornerWidth = 10; // Must be multiple of 2
-  protected int x1 = -1;          // Current Image selection
-  protected int y1 = -1;
-  protected int x2 = -1;
-  protected int y2 = -1;
+  private boolean selectionEnabled;
+  private int mode;             // 0=Line 1=Rectangle
+  private boolean isDragging;
+  private int dragCorner;       // 0 = Top,Left 1 = Top,Right 3 = Bottom,Right 4 = Bottom,left
+  private int cornerWidth = 10; // Must be multiple of 2
+  private int x1 = -1;          // Current Image selection
+  private int y1 = -1;
+  private int x2 = -1;
+  private int y2 = -1;
 
-  protected boolean snapToGrid;
-  protected int grid = 16;
+  private boolean snapToGrid;
+  private int grid = 16;
 
   // Marker
-  protected Vector<Marker> markers = null;
-  protected double markerScaleFactor = 1.0;
+  Vector markers = null;
+  double markerScaleFactor = 1.0;
 
   // Axis
-  protected JLAxis  xAxis;
-  protected int     xAxisHeight;
-  protected int     xAxisUpMargin;
-  protected JLAxis  yAxis;
-  protected int     yAxisWidth;
-  protected int     yAxisRightMargin;
-
-  // Cursor
-  protected boolean crossCursor = false;
-  protected Color cursorColor = Color.WHITE;
-  protected int xCursor = -1;
-  protected int yCursor = -1;
-
-  protected Color selectionColor = Color.RED;
-
-  protected int horizontalPosition;
-  protected int verticalPosition;
+  private JLAxis  xAxis;
+  private int     xAxisHeight;
+  private JLAxis  yAxis;
+  private int     yAxisWidth;
 
   /**
    * Construction
@@ -114,14 +60,11 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
     setMargin(new Insets(5, 5, 5, 5));
     xOrg = 5;
     yOrg = 5;
-    mode = MODE_RECT;
-    verticalPosition   = VERTICAL_CENTER;
-    horizontalPosition = HORIZONTAL_CENTER;
+    mode = 1;
     isDragging = false;
     selectionEnabled = true;
     addMouseMotionListener(this);
     addMouseListener(this);
-    addKeyListener(this);
     snapToGrid = false;
 
     yAxis = new JLAxis(this,JLAxis.VERTICAL_LEFT);
@@ -131,10 +74,8 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
     yAxis.setMinimum(0.0);
     yAxis.setMaximum(100.0);
     yAxis.setVisible(false);
-    // 0 is on top, not on bottom
-    yAxis.setInverted( false );
 
-    xAxis = new JLAxis(this,JLAxis.HORIZONTAL_UP);
+    xAxis = new JLAxis(this,JLAxis.HORIZONTAL_DOWN);
     xAxis.setAxisColor(Color.BLACK);
     xAxis.setFont(ATKConstant.labelFont);
     xAxis.setAutoScale(false);
@@ -142,35 +83,6 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
     xAxis.setMaximum(100.0);
     xAxis.setVisible(false);
 
-  }
-
-  /**
-   * Enable or disable the cross cursor.
-   * @param enable True to enable cross cursor, false otherwise.
-   */
-  public void setCrossCursor(boolean enable) {
-    crossCursor = enable;
-    if(enable) {
-      setCursor(null);
-    } else {
-      setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-    }
-  }
-
-  /**
-   * Set the cross cursor color.
-   * @param c Cursor color
-   * @see #setCrossCursor
-   */
-  public void setCursorColor(Color c) {
-    cursorColor = c;
-  }
-
-  /**
-   * Returns true if cross curosr is enabled.
-   */
-  public boolean isCrossCursor() {
-    return crossCursor;
   }
 
   /**
@@ -204,7 +116,7 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
   }
 
   /**
-   * Returns the current line/rectangle selected.
+   * Returns the current line selected.
    * @return null when no selection or a 2 points array
    */
   public Point[] getSelectionPoint() {
@@ -215,62 +127,6 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
       return ret;
     } else
       return null;
-  }
-
-  /**
-   * Returns the current lines selected (MODE_CROSS).
-   * @return null when no selection or a 4 points array
-   */
-  public Point[] getSelectionCrossPoint() {
-
-    if (hasSelection() && mode==MODE_CROSS) {
-
-      Point[] pts = new Point[4];
-      Point p1=new Point();
-      Point p2=new Point();
-      Point p3=new Point();
-      Point p4=new Point();
-      pts[0] = p1;
-      pts[1] = p2;
-      pts[2] = p3;
-      pts[3] = p4;
-
-      switch(getHorizontalPosition()) {
-        case HORIZONTAL_TOP:
-          p1.x = x1; p2.x = x2;
-          p1.y = y1; p2.y = y1;
-          break;
-        case HORIZONTAL_CENTER:
-          p1.x = x1; p2.x = x2;
-          p1.y = (y1+y2)/2; p2.y = (y1+y2)/2;
-          break;
-        case HORIZONTAL_BOTTOM:
-          p1.x = x1; p2.x = x2;
-          p1.y = y2; p2.y = y2;
-          break;
-      }
-
-      switch(getVerticalPosition()) {
-        case VERTICAL_LEFT:
-          p3.x = x1; p4.x = x1;
-          p3.y = y1; p4.y = y2;
-          break;
-        case VERTICAL_CENTER:
-          p3.x = (x1+x2)/2; p4.x = (x1+x2)/2;
-          p3.y = y1; p4.y = y2;
-          break;
-        case VERTICAL_RIGHT:
-          p3.x = x2; p4.x = x2;
-          p3.y = y1; p4.y = y2;
-          break;
-      }
-
-      return pts;
-
-    } else {
-      return null;
-    }
-
   }
 
   /**
@@ -364,22 +220,17 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
    * @return Y origin in pixel
    */
   public int getYOrigin() {
-    return yOrg + xAxisUpMargin;
+    return yOrg;
   }
 
   /**
-   * Sets the image to be displayed
+   * Stes the image to be displayed
    * @param i Image
    */
   public void setImage(BufferedImage i) {
-    BufferedImage formerImage = theImage;
     theImage = i;
     clearSelection();
     repaint();
-    if(formerImage != null) {
-      formerImage.flush();
-    }
-    formerImage = null;
   }
 
   /**
@@ -459,7 +310,7 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
    * @return Marker id
    */
   public int addCrossMarker(int x, int y, Color c) {
-    if (markers == null) markers = new Vector<Marker>();
+    if (markers == null) markers = new Vector();
     markers.add(new Marker(MARKER_CROSS, x, y, c));
     repaint();
     return markers.size() - 1;
@@ -475,34 +326,8 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
    * @return Marker id
    */
   public int addRectangleMarker(int x, int y, int width, int height, Color c) {
-    if (markers == null) markers = new Vector<Marker>();
+    if (markers == null) markers = new Vector();
     markers.add(new Marker(MARKER_RECT, new Rectangle(x, y, width, height), c));
-    repaint();
-    return markers.size() - 1;
-  }
-
-  /**
-   * Adds a vertical line marker
-   * @param x Horizontal position
-   * @param c Marker color
-   * @return Marker id
-   */
-  public int addVerticalLineMarker(int x,Color c) {
-    if (markers == null) markers = new Vector<Marker>();
-    markers.add(new Marker(MARKER_VLINE, x , 0, c));
-    repaint();
-    return markers.size() - 1;
-  }
-
-  /**
-   * Adds a horizontal line marker
-   * @param y Vertical position
-   * @param c Marker color
-   * @return Marker id
-   */
-  public int addHorizontalLineMarker(int y,Color c) {
-    if (markers == null) markers = new Vector<Marker>();
-    markers.add(new Marker(MARKER_HLINE, 0 , y, c));
     repaint();
     return markers.size() - 1;
   }
@@ -510,10 +335,10 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
   /**
    * Sets the position of a marker
    * @param id Marker index
-   * @param x X coordinate (ignored when HORIZONTAL_LINE Marker)
-   * @param y Y coordinate (ignored when VERTICAL_LINE Marker)
-   * @param nWidth Rectangle width (ignored when CROSS Marker, LINE Marker)
-   * @param nHeight Rectangle height (ignored when CROSS Marker, LINE Marker)
+   * @param x X coordinate
+   * @param y Y coordinate
+   * @param nWidth Rectangle width (ignored when CROSS Marker)
+   * @param nHeight Rectangle height (ignored when CROSS Marker)
    */
   public void setMarkerPos(int id, int x, int y, int nWidth, int nHeight) {
     if (markers != null) {
@@ -554,91 +379,26 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
     markerScaleFactor = s;
   }
 
-  /**
-   * Returns the horizontal selection arrow position (MODE_CROSS selection)
-   */
-  public int getHorizontalPosition () {
-    return horizontalPosition;
-  }
-
-  /**
-   * Sets the horizontal selection arrow position (MODE_CROSS selection)
-   * @param horizontalPosition Horizontal position
-   */
-  public void setHorizontalPosition (int horizontalPosition) {
-    this.horizontalPosition = horizontalPosition;
-    repaint();
-  }
-
-  /**
-   * Returns the vertical selection arrow position (MODE_CROSS selection)
-   */
-  public int getVerticalPosition () {
-    return verticalPosition;
-  }
-
-  /**
-   * Sets the vertical selection arrow position (MODE_CROSS selection)
-   * @param verticalPosition Vertical position
-   */
-  public void setVerticalPosition (int verticalPosition) {
-    this.verticalPosition = verticalPosition;
-    repaint();
-  }
-
-  /**
-   * Returns the color of the selection area.
-   */
-  public Color getSelectionColor () {
-    return selectionColor;
-  }
-
-  /**
-   * Sets the color of the selection area
-   * @param selectionColor Selection color
-   */
-  public void setSelectionColor (Color selectionColor) {
-    this.selectionColor = selectionColor;
-    repaint();
-  }
-
   // -------------------------------------------------------
   // Painting stuff
   // -------------------------------------------------------
-  protected void paintCursor(Graphics g) {
 
-    Dimension d = getImageSize();
-
-    if(crossCursor && xCursor>=0 && yCursor>=0 && xCursor<=d.width && yCursor<=d.height) {
-      g.setColor(cursorColor);
-      g.drawLine(0,yCursor,d.width,yCursor);
-      g.drawLine(xCursor,0,xCursor,d.height);
-    }
-
-  }
-
-  protected void paintSelection(Graphics g) {
+  private void paintSelection(Graphics g) {
 
     if (hasSelection()) {
       Graphics2D g2 = (Graphics2D) g;
 
-      Color oldColor = g2.getColor();
-      if (selectionColor != null) {
-        g2.setColor(selectionColor);
-      }
-      else {
-        g2.setColor(Color.RED); 
-      }
+      g2.setColor(Color.red);
       Stroke old = g2.getStroke();
       BasicStroke bs = new BasicStroke(2);
-      g2.setStroke(bs);
+      if (bs != null) g2.setStroke(bs);
 
       Rectangle r = buildSelectionRect();
       Rectangle c = new Rectangle(0, 0, cornerWidth, cornerWidth);
 
       switch (mode) {
 
-        case MODE_LINE: // Line
+        case 0: // Line
           g2.drawLine(x1, y1, x2, y2);
 
           g2.setStroke(old);
@@ -670,7 +430,7 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
           g2.drawRect(c.x, c.y, c.width, c.height);
           break;
 
-        case MODE_RECT: // Rectangle
+        case 1: // Rectangle
 
           g2.drawRect(r.x, r.y, r.width, r.height);
 
@@ -686,146 +446,48 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
           g2.drawRect(c.x, c.y, c.width, c.height);
           c.translate(r.width / 2, -r.height / 2);
           g2.drawRect(c.x, c.y, c.width, c.height);
-          break;
 
-        case MODE_CROSS:
-
-          int xv, yh;
-          switch (horizontalPosition) {
-              case HORIZONTAL_TOP:
-                  yh = (y1<y2?y1:y2);
-                  break;
-              case HORIZONTAL_CENTER:
-                  yh = (y1+y2)/2;
-                  break;
-              case HORIZONTAL_BOTTOM:
-                  yh = (y1<y2?y2:y1);
-                  break;
-              default:
-                  yh = -1;
-          }
-          switch (verticalPosition) {
-              case VERTICAL_LEFT:
-                  xv = (x1<x2?x1:x2);
-                  break;
-              case VERTICAL_CENTER:
-                  xv = (x1+x2)/2;
-                  break;
-              case VERTICAL_RIGHT:
-                  xv = (x1<x2?x2:x1);
-                  break;
-              default:
-                  xv = -1;
-          }
-          if ( xv >= 0 && yh >= 0 ) {
-              // Draw Lines
-              g2.drawLine( x1, yh, x2, yh );
-              g2.drawLine( xv, y1, xv, y2 );
-              // Draw arrow
-              // horizontal
-              if ( x1 < x2 ) {
-                  g2.drawLine( x2, yh, x2 - 8, yh - 8 );
-                  g2.drawLine( x2 - 8, yh - 8, x2 - 8, yh + 8 );
-                  g2.drawLine( x2 - 8, yh + 8, x2, yh );
-              }
-              else {
-                  g2.drawLine( x2, yh, x2 + 8, yh - 8 );
-                  g2.drawLine( x2 + 8, yh - 8, x2 + 8, yh + 8 );
-                  g2.drawLine( x2 + 8, yh + 8, x2, yh );
-              }
-              // vertical
-              if ( y1 < y2 ) {
-                  g2.drawLine( xv, y2, xv - 8, y2 - 8 );
-                  g2.drawLine( xv - 8, y2 - 8, xv + 8, y2 - 8 );
-                  g2.drawLine( xv + 8, y2 - 8, xv, y2 );
-              }
-              else {
-                  g2.drawLine( xv, y2, xv - 8, y2 + 8 );
-                  g2.drawLine( xv - 8, y2 + 8, xv + 8, y2 + 8 );
-                  g2.drawLine( xv + 8, y2 + 8, xv, y2 );
-              }
-              // Draw corners
-              g2.setStroke( old );
-              c.translate( r.x - cornerWidth / 2, r.y - cornerWidth / 2 );
-              g2.drawRect( c.x, c.y, c.width, c.height );
-              c.translate( r.width, 0 );
-              g2.drawRect( c.x, c.y, c.width, c.height );
-              c.translate( 0, r.height );
-              g2.drawRect( c.x, c.y, c.width, c.height );
-              c.translate( -r.width, 0 );
-              g2.drawRect( c.x, c.y, c.width, c.height );
-              c.translate( r.width / 2, -r.height / 2 );
-              g2.drawRect( c.x, c.y, c.width, c.height );
-          }
           break;
       }
 
       //restore default
-      g2.setColor(oldColor);
       g2.setPaintMode();
 
     }
 
   }
 
-  protected void measureAxis() {
+  private void measureAxis() {
 
     xAxisHeight = 0;
     yAxisWidth  = 0;
-    xAxisUpMargin = 0;
-    yAxisRightMargin = 0;
     if(xAxis.isVisible()) {
       xAxis.measureAxis(ATKGraphicsUtils.getDefaultRenderContext(), theImage.getWidth() , 0);
-      if(xAxis.getOrientation() == JLAxis.HORIZONTAL_UP) {
-        xAxisHeight = 7;
-        xAxisUpMargin =  xAxis.getThickness();
-      } else {
-        xAxisHeight = xAxis.getThickness();
-        xAxisUpMargin = 7;
-      }
+      xAxisHeight = xAxis.getThickness();
     }
     if(yAxis.isVisible()) {
       yAxis.measureAxis(ATKGraphicsUtils.getDefaultRenderContext(), 0, theImage.getHeight());
       yAxisWidth = yAxis.getThickness();
-      yAxisRightMargin = 15;
     }
 
   }
 
-  protected void paintAxis(Graphics g) {
+  private void paintAxis(Graphics g) {
 
     if(yAxis.isVisible()) {
-      if (yAxis.getOrientation() == JLAxis.VERTICAL_RIGHT) {
-        yAxis.paintAxisDirect(g,ATKGraphicsUtils.getDefaultRenderContext(),
-                theImage.getWidth()-yAxis.getThickness(),0,Color.BLACK,0,0);
-        if(yAxis.isDrawOpposite())
-          yAxis.paintAxisOpposite(g,ATKGraphicsUtils.getDefaultRenderContext(),
-                     -yAxis.getThickness(),0,Color.BLACK,0,0);
-      }
-      else {
-        yAxis.paintAxisDirect(g,ATKGraphicsUtils.getDefaultRenderContext(),
-                  -yAxis.getThickness(),0,Color.BLACK,0,0);
-        if(yAxis.isDrawOpposite())
-          yAxis.paintAxisOpposite(g,ATKGraphicsUtils.getDefaultRenderContext(),
-                     theImage.getWidth()-yAxis.getThickness(),0,Color.BLACK,0,0);
-      }
+      yAxis.paintAxisDirect(g,ATKGraphicsUtils.getDefaultRenderContext(),
+                            -yAxis.getThickness(),0,Color.BLACK,0,0);
+      if(yAxis.isDrawOpposite())
+        yAxis.paintAxisOpposite(g,ATKGraphicsUtils.getDefaultRenderContext(),
+                               theImage.getWidth()-yAxis.getThickness(),0,Color.BLACK,0,0);
     }
 
     if(xAxis.isVisible()) {
-      if (xAxis.getOrientation() == JLAxis.HORIZONTAL_UP) {
-        xAxis.paintAxisDirect(g,ATKGraphicsUtils.getDefaultRenderContext(),
-                  0,0,Color.BLACK,0,0);
-        if(xAxis.isDrawOpposite())
-          xAxis.paintAxisOpposite(g,ATKGraphicsUtils.getDefaultRenderContext(),
-                      0,theImage.getHeight(),Color.BLACK,0,0);
-      }
-      else {
-        xAxis.paintAxisDirect(g,ATKGraphicsUtils.getDefaultRenderContext(),
-                  0,theImage.getHeight(),Color.BLACK,0,0);
-        if(xAxis.isDrawOpposite())
-          xAxis.paintAxisOpposite(g,ATKGraphicsUtils.getDefaultRenderContext(),
-                      0,0,Color.BLACK,0,0);
-      }
+      xAxis.paintAxisDirect(g,ATKGraphicsUtils.getDefaultRenderContext(),
+                            0,theImage.getHeight(),Color.BLACK,0,0);
+      if(xAxis.isDrawOpposite())
+        xAxis.paintAxisOpposite(g,ATKGraphicsUtils.getDefaultRenderContext(),
+                                0,0,Color.BLACK,0,0);
     }
 
   }
@@ -844,28 +506,14 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
     if(theImage == null)
       return;
 
-    if ( xAxis.isAutoScale() ) {
-      xAxis.setAutoScale(false);
-      xAxis.setMinimum(0);
-      xAxis.setMaximum( theImage.getWidth()/markerScaleFactor );
-      xAxis.setAutoScale(true);
-    }
-    if ( yAxis.isAutoScale() ) {
-      yAxis.setAutoScale(false);
-      yAxis.setMinimum(0);
-      yAxis.setMaximum( theImage.getHeight()/markerScaleFactor );
-      yAxis.setAutoScale(true);
-    }
-
     measureAxis();
 
-    xOrg = (d.width - (theImage.getWidth() + yAxisWidth + yAxisRightMargin)) / 2 ;
-    yOrg = (d.height - (theImage.getHeight() + xAxisHeight + xAxisUpMargin)) / 2;
-    g.translate(xOrg + yAxisWidth , yOrg + xAxisUpMargin);
+    xOrg = (d.width - (theImage.getWidth() + yAxisWidth)) / 2 ;
+    yOrg = (d.height - (theImage.getHeight() + xAxisHeight)) / 2;
+    g.translate(xOrg + yAxisWidth, yOrg);
     g.drawImage(theImage, 0 , 0, null);
     paintAxis(g);
     paintSelection(g);
-    paintCursor(g);
 
     if (markers != null) {
       int i;
@@ -895,14 +543,6 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
               g.drawRect(x, y, w, h);
               break;
 
-            case MARKER_VLINE:
-              g.drawLine(x, 0, x, theImage.getHeight());
-              break;
-
-            case MARKER_HLINE:
-              g.drawLine(0, y, theImage.getWidth(), y);
-              break;
-
           }
         }
 
@@ -924,9 +564,8 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
       return new Dimension(320, 200);
     } else {
       measureAxis();
-      return new Dimension(
-        theImage.getWidth() + margin.right + margin.left + yAxisWidth + yAxisRightMargin ,
-        theImage.getHeight() + margin.top + margin.bottom + xAxisHeight + xAxisUpMargin );
+      return new Dimension(theImage.getWidth() + margin.right + margin.left + yAxisWidth,
+        theImage.getHeight() + margin.top + margin.bottom + xAxisHeight);
     }
 
   }
@@ -939,25 +578,25 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
   // Private stuff
   // --------------------------------------------------------
 
-  protected boolean cornerMatch(int x, int y, int xc, int yc) {
+  private boolean cornerMatch(int x, int y, int xc, int yc) {
     int cw = cornerWidth / 2;
     return (x >= xc - cw) && (x <= xc + cw) && (y >= yc - cw) && (y <= yc + cw);
   }
 
-  protected int findCorner(int x, int y) {
+  private int findCorner(int x, int y) {
     if (hasSelection()) {
       int xc = (x2 + x1) / 2;
       int yc = (y2 + y1) / 2;
       if (cornerMatch(x, y, x1, y1)) return 1;
-      if (cornerMatch(x, y, x2, y1) && mode != MODE_LINE) return 2;
+      if (cornerMatch(x, y, x2, y1) && mode == 1) return 2;
       if (cornerMatch(x, y, x2, y2)) return 3;
-      if (cornerMatch(x, y, x1, y2) && mode != MODE_LINE) return 4;
+      if (cornerMatch(x, y, x1, y2) && mode == 1) return 4;
       if (cornerMatch(x, y, xc, yc)) return 5;
     }
     return 0;
   }
 
-  protected Rectangle buildSelectionRect() {
+  private Rectangle buildSelectionRect() {
 
     Rectangle r = new Rectangle();
 
@@ -978,7 +617,7 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
     return r;
   }
 
-  protected void repaintBoundingRect(Rectangle oldSel) {
+  private void repaintBoundingRect(Rectangle oldSel) {
 
     // Create bounding rect and repaint
     // Repaint only if selection has changed
@@ -1002,10 +641,10 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
 
       int cw = cornerWidth / 2;
 
-      if ( mode == MODE_LINE || mode == MODE_CROSS ) {
-        repaint(0, (bx1 - cw) + xOrg + yAxisWidth - 4, (by1 - cw) + yOrg + xAxisUpMargin - 4, (bx2 - bx1) + cornerWidth + 8, (by2 - by1) + cornerWidth + 8);
+      if (this.mode == 0) {
+        repaint(0, (bx1 - cw) + xOrg + yAxisWidth - 4, (by1 - cw) + yOrg - 4, (bx2 - bx1) + cornerWidth + 8, (by2 - by1) + cornerWidth + 8);
       } else {
-        repaint(0, (bx1 - cw) + xOrg + yAxisWidth, (by1 - cw) + yOrg + xAxisUpMargin, (bx2 - bx1) + cornerWidth + 1, (by2 - by1) + cornerWidth + 1);
+        repaint(0, (bx1 - cw) + xOrg + yAxisWidth, (by1 - cw) + yOrg, (bx2 - bx1) + cornerWidth + 1, (by2 - by1) + cornerWidth + 1);
       }
 
     }
@@ -1013,12 +652,12 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
   }
 
   //Reclip
-  protected void clipSelection() {
+  private void clipSelection() {
 
     if (hasSelection()) {
 
       Dimension d = getImageSize();
-      if (mode == MODE_LINE) {
+      if (mode == 0) {
         if (x1 >= d.width) x1 = d.width - 1;
         if (y1 >= d.height) y1 = d.height - 1;
         if (x2 >= d.width) x2 = d.width - 1;
@@ -1057,11 +696,11 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
 
   }
 
-  protected void alignSelection() {
+  private void alignSelection() {
 
     if (snapToGrid && hasSelection()) {
 
-      if (mode == MODE_RECT) {
+      if (mode == 1) {
 
         x1 = x1 / grid * grid;
         x2 = x2 / grid * grid;
@@ -1101,24 +740,18 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
 
   public void mouseDragged(MouseEvent e) {
 
-    if(crossCursor) {
-      xCursor = e.getX() - xOrg - yAxisWidth;
-      yCursor = e.getY() - yOrg - xAxisUpMargin;
-      repaint();
-    }
-
     if (isDragging) {
 
       Rectangle oldSel = buildSelectionRect();
       int nx = e.getX() - xOrg - yAxisWidth;
-      int ny = e.getY() - yOrg - xAxisUpMargin;
+      int ny = e.getY() - yOrg;
 
       // Clip
       Dimension d = getImageSize();
       if (nx < 0) nx = 0;
       if (ny < 0) ny = 0;
 
-      if (mode == MODE_LINE) {
+      if (mode == 0) {
         if (nx >= d.width) nx = d.width - 1;
         if (ny >= d.height) ny = d.height - 1;
       } else {
@@ -1162,7 +795,7 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
           if ((y1 + ty) < 0) ty = -y1;
           if ((y2 + ty) < 0) ty = -y2;
 
-          if (mode == MODE_LINE) {
+          if (mode == 0) {
             if ((x1 + tx) >= d.width) tx = d.width - 1 - x1;
             if ((x2 + tx) >= d.width) tx = d.width - 1 - x2;
             if ((y1 + ty) >= d.height) ty = d.height - 1 - y1;
@@ -1189,22 +822,12 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
   }
 
   public void mouseMoved(MouseEvent e) {
-    if(crossCursor) {
-      xCursor = e.getX() - xOrg - yAxisWidth;
-      yCursor = e.getY() - yOrg - xAxisUpMargin;
-      repaint();
-    }
   }
 
   public void mouseEntered(MouseEvent e) {
   }
 
   public void mouseExited(MouseEvent e) {
-    if(crossCursor) {
-      xCursor = -1;
-      yCursor = -1;
-      repaint();
-    }
   }
 
   public void mouseClicked(MouseEvent e) {
@@ -1218,10 +841,9 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
   public void mousePressed(MouseEvent e) {
 
     if (e.getButton() == MouseEvent.BUTTON1) {
-      grabFocus();
 
       int x = e.getX() - xOrg - yAxisWidth;
-      int y = e.getY() - yOrg - xAxisUpMargin;
+      int y = e.getY() - yOrg;
 
       if (selectionEnabled) {
 
@@ -1258,102 +880,6 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
       }
 
     }
-  }
-
-  public void keyPressed (KeyEvent e) {
-    // if a selection exists, and the key is an arrow, move selection
-    if (hasSelection()) {
-
-      if (e.isShiftDown()) {
-
-        switch (e.getKeyCode()) {
-          case KeyEvent.VK_UP:
-            if (horizontalPosition == HORIZONTAL_BOTTOM) {
-              setHorizontalPosition(HORIZONTAL_CENTER);
-            } else {
-              setHorizontalPosition(HORIZONTAL_TOP);
-            }
-            break;
-          case KeyEvent.VK_DOWN:
-            if (horizontalPosition == HORIZONTAL_TOP) {
-              setHorizontalPosition(HORIZONTAL_CENTER);
-            } else {
-              setHorizontalPosition(HORIZONTAL_BOTTOM);
-            }
-            break;
-          case KeyEvent.VK_LEFT:
-            if (verticalPosition == VERTICAL_RIGHT) {
-              setVerticalPosition(VERTICAL_CENTER);
-            } else {
-              setVerticalPosition(VERTICAL_LEFT);
-            }
-            break;
-          case KeyEvent.VK_RIGHT:
-            if (verticalPosition == VERTICAL_LEFT) {
-              setVerticalPosition(VERTICAL_CENTER);
-            } else {
-              setVerticalPosition(VERTICAL_RIGHT);
-            }
-            break;
-        }
-
-      } else {
-
-        Dimension d = getImageSize();
-        Rectangle oldSel = buildSelectionRect();
-        int step = isSnapToGrid() ? grid : 1;
-        switch (e.getKeyCode()) {
-          case KeyEvent.VK_UP:
-            if (y1 >= step && y2 >= step) {
-              y1 -= step;
-              y2 -= step;
-            }
-            break;
-          case KeyEvent.VK_DOWN:
-            if (y2 < d.getHeight() - step && y1 < d.getHeight() - step) {
-              y1 += step;
-              y2 += step;
-            }
-            break;
-          case KeyEvent.VK_LEFT:
-            if (x1 >= step && x2 >= step) {
-              x1 -= step;
-              x2 -= step;
-            }
-            break;
-          case KeyEvent.VK_RIGHT:
-            if (x2 < d.getWidth() - step && x1 < d.getWidth() - step) {
-              x1 += step;
-              x2 += step;
-            }
-            break;
-        }
-        alignSelection();
-        repaintBoundingRect(oldSel);
-
-      }
-    }
-  }
-
-  public void keyReleased (KeyEvent e) {
-      // nothing to do
-  }
-
-  public void keyTyped (KeyEvent e) {
-      // nothing to do
-  }
-
-  public static void main (String[] args) {
-      JFrame frame = new JFrame();
-      frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-      JImage image = new JImage();
-      BufferedImage img = new BufferedImage(800, 600, BufferedImage.TYPE_INT_RGB);
-      image.setImage( img );
-      image.mode = MODE_CROSS;
-      image.setSelectionColor( Color.GREEN );
-      frame.setContentPane( image );
-      frame.pack();
-      frame.setVisible( true );
   }
 
 }

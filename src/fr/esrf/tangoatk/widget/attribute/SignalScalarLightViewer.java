@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 //+============================================================================
 //Source: package tangowidget.attribute;/AttributeBooleanBulb.java
 //
@@ -70,76 +48,23 @@ public class SignalScalarLightViewer extends JButton
                                      implements INumberScalarListener, 
                                                 IBooleanScalarListener {
 
-    public final static ImageIcon bulbOff = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/bulbDisabled.gif"));
-    public final static ImageIcon bulbOn = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/bulbEnabled.gif"));
-    public final static ImageIcon bulbKO = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/bulbKO.gif"));
-    public final static ImageIcon blueLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledBlue.gif"));
-    public final static ImageIcon brownGrayLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledBrownGray.gif"));
-    public final static ImageIcon darkGrayLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledDarkGray.gif"));
-    public final static ImageIcon darkOrangeLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledDarkOrange.gif"));
-    public final static ImageIcon grayLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledGray.gif"));
-    public final static ImageIcon greenLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledGreen.gif"));
-    public final static ImageIcon darkGreenLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledDarkGreen.gif"));
-    public final static ImageIcon lightOrangeLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledLightOrange.gif"));
-    public final static ImageIcon pinkLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledPink.gif"));
-    public final static ImageIcon redLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledRed.gif"));
-    public final static ImageIcon whiteLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledWhite.gif"));
-    public final static ImageIcon yellowLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledYellow.gif"));
-    public final static ImageIcon KOLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledKO.gif"));
-
+    static ImageIcon bulbOff = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/bulbDisabled.gif"));
+    static ImageIcon bulbOn = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/bulbEnabled.gif"));
+    static ImageIcon blueLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledBlue.gif"));
+    static ImageIcon brownGrayLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledBrownGray.gif"));
+    static ImageIcon darkGrayLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledDarkGray.gif"));
+    static ImageIcon darkOrangeLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledDarkOrange.gif"));
+    static ImageIcon grayLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledGray.gif"));
+    static ImageIcon greenLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledGreen.gif"));
+    static ImageIcon lightOrangeLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledLightOrange.gif"));
+    static ImageIcon pinkLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledPink.gif"));
+    static ImageIcon redLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledRed.gif"));
+    static ImageIcon whiteLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledWhite.gif"));
+    static ImageIcon yellowLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledYellow.gif"));
+    
     private ImageIcon m_iconLightOn;
     private ImageIcon m_iconLightOff;
-    private ImageIcon m_iconLightKO;
     private IAttribute attributeModel;
-    private String  falseLabel  = "FALSE";
-    private String  trueLabel   = "TRUE";
-    private String  errorLabel  = "ERROR";
-    private Boolean formerValue = null;
-
-    /**
-     * int representing the option to see attribute's boolean value as label
-     */
-    public static final int booleanLabel = 0;
-    /**
-     * int representing the option to see attribute's label as label
-     */
-    public static final int label = 1;
-    /**
-     * int representing the option to see attribute's name as label
-     */
-    public static final int name = 2;
-    /**
-     * int representing the option to see attribute's complete Name as label
-     */
-    public static final int completeName = 3;
-    /**
-     * int representing the option to see a custom Label as label
-     */
-    public static final int customLabel = 4;
-    /**
-     * int representing the option to see attribute's label and the boolean value as label
-     */
-    public static final int labelAndBoolean = 5;
-    /**
-     * int representing the option to see attribute's name and the boolean value as label
-     */
-    public static final int nameAndBoolean = 6;
-    
-    /**
-     * possibles values :
-     * SignalScalarLightViewer.booleanLabel
-     * SignalScalarLightViewer.label
-     * SignalScalarLightViewer.labelAndBoolean
-     * SignalScalarLightViewer.name
-     * SignalScalarLightViewer.nameAndBoolean
-     * SignalScalarLightViewer.completeName
-     * SignalScalarLightViewer.customLabel
-     */
-    private int chosenLabel = booleanLabel;
-    
-   
-    
-    
     private boolean viewLabel;
 
     /**
@@ -147,7 +72,12 @@ public class SignalScalarLightViewer extends JButton
      * show devicePropertyModel's label on setModel(...)
      */
     public SignalScalarLightViewer() {
-        this(false);
+        super();
+        attributeModel = null;
+        viewLabel = false;
+        setIconLightOn(redLED);
+        setIconLightOff(grayLED);
+        setIcon(m_iconLightOff);
     }
 
     /**
@@ -160,33 +90,22 @@ public class SignalScalarLightViewer extends JButton
         this.viewLabel = viewLabel;
         setIconLightOn(redLED);
         setIconLightOff(grayLED);
-        setIconLightKO(KOLED);
-        setIcon(m_iconLightKO);
-        repaint();
+        setIcon(m_iconLightOff);
     }
 
     /**
      * @see fr.esrf.tangoatk.core.INumberScalarListener#numberScalarChange(fr.esrf.tangoatk.core.NumberScalarEvent)
      */
     public void numberScalarChange(NumberScalarEvent arg0) {
-        Boolean boolValue = null;
-        try
-        {
+        try {
             if (arg0.getValue() == 1)
-            {
                 setIcon(m_iconLightOn);
-                boolValue = new Boolean(true);
-            }
             else
-            {
                 setIcon(m_iconLightOff);
-                boolValue = new Boolean(false);
-            }
         } catch (Exception e) {
-            setIcon(m_iconLightKO);
+            setIcon(m_iconLightOff);
         }
-        manageLabel(boolValue);
-        repaint();
+
     }
     
     /**
@@ -197,7 +116,12 @@ public class SignalScalarLightViewer extends JButton
      */
     public void setViewLabel(boolean b){
         viewLabel = b;
-        manageLabel(formerValue);
+        if (viewLabel && (attributeModel!=null)){
+            setText(attributeModel.getLabel());
+        }
+        else{
+            setText("");
+        }
     }
     /**
      * To know whether devicePropertyModel's label is text of this JLabel or not
@@ -216,9 +140,6 @@ public class SignalScalarLightViewer extends JButton
      * @see fr.esrf.tangoatk.core.IErrorListener#errorChange(fr.esrf.tangoatk.core.ErrorEvent)
      */
     public void errorChange(ErrorEvent arg0) {
-        setIcon(m_iconLightKO);
-        manageLabel(null);
-        repaint();
     }
 
     /**
@@ -236,7 +157,7 @@ public class SignalScalarLightViewer extends JButton
      */
     public void setAttributeModel(IAttribute numberModel) {
         if (!(numberModel instanceof INumberScalar)
-                && !(numberModel instanceof IBooleanScalar)) {
+                && !(numberModel instanceof INumberScalar)) {
             return;
         }
         clearAttributeModel();
@@ -266,92 +187,6 @@ public class SignalScalarLightViewer extends JButton
         }
     }
 
-    public int getChosenLabel() {
-        return chosenLabel;
-    }
-    
-    public void setChosenLabel(int chosenLabel) {
-        this.chosenLabel = chosenLabel;
-    }
-    
-    public String getFalseLabel() {
-        return falseLabel;
-    }
-    
-    public void setFalseLabel(String falseLabel) {
-        this.falseLabel = falseLabel;
-    }
-    
-    public String getTrueLabel() {
-        return trueLabel;
-    }
-    
-    public void setTrueLabel(String trueLabel) {
-        this.trueLabel = trueLabel;
-    }
-    
-    private void manageLabel(Boolean booleanValue) {
-        formerValue = booleanValue;
-        if (viewLabel) {
-            if (attributeModel == null)
-            {
-                setText("Unknown Attribute");
-                return;
-            }
-            switch (chosenLabel) {
-            case label:
-                setText(attributeModel.getLabel());
-                break;
-            case name:
-                setText(attributeModel.getNameSansDevice());
-                break;
-            case booleanLabel:
-                if (booleanValue == null)
-                {
-                    setText(errorLabel);
-                }
-                else
-                {
-                    if(booleanValue.booleanValue())
-                        setText(trueLabel);
-                    else
-                        setText(falseLabel);
-                }
-                break;
-            case labelAndBoolean:
-                if (booleanValue == null)
-                {
-                    setText(attributeModel.getLabel() + ":" + errorLabel);
-                }
-                else
-                {
-                    if(booleanValue.booleanValue())
-                        setText(attributeModel.getLabel() + ":" + trueLabel);
-                    else
-                        setText(attributeModel.getLabel() + ":" + falseLabel);
-                }
-                break;
-            case nameAndBoolean:
-                if (booleanValue == null)
-                {
-                    setText(attributeModel.getNameSansDevice() + ":" + errorLabel);
-                }
-                else
-                {
-                    if(booleanValue.booleanValue())
-                        setText(attributeModel.getNameSansDevice() + ":" + trueLabel);
-                    else
-                        setText(attributeModel.getNameSansDevice() + ":" + falseLabel);
-                }
-                break;
-            case completeName :
-                setText(attributeModel.getName());
-                break;
-            default: //nothing to do
-            }// end switch (chosenLabel)
-        }// end if (viewLabel)
-    }// end manageLabel()
-
     /**
      * sets the icon associated with the "true" or "1" value
      * (default : SignalScalarLightViewer.redLED)
@@ -369,30 +204,17 @@ public class SignalScalarLightViewer extends JButton
     }
 
     /**
-     * sets the icon associated with "KO" value = "could not get value"
-     * (default : SignalScalarLightViewer.KOLED)
-     */
-    public void setIconLightKO(ImageIcon icon) {
-        m_iconLightKO = icon;
-    }
-
-    /**
      * @see fr.esrf.tangoatk.core.IBooleanScalarListener#booleanScalarChange(fr.esrf.tangoatk.core.BooleanScalarEvent)
      */
     public void booleanScalarChange(BooleanScalarEvent arg0) {
-        try
-        {
+        try {
             if (arg0.getValue())
                 setIcon(m_iconLightOn);
             else
                 setIcon(m_iconLightOff);
+        } catch (Exception e) {
+            setIcon(m_iconLightOff);
         }
-        catch (Exception e)
-        {
-            setIcon(m_iconLightKO);
-        }
-        manageLabel(new Boolean(arg0.getValue()));
-        repaint();
     }
     
     /**
@@ -412,10 +234,9 @@ public class SignalScalarLightViewer extends JButton
             attributeList.setRefreshInterval(1000);
             attributeList.startRefresher();
             JFrame f = new JFrame(sslv.getAttributeModel().getName().substring(0,sslv.getAttributeModel().getName().lastIndexOf("/")));
-            f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             f.getContentPane().add(sslv);
             f.setSize(300,50);
-            f.setVisible(true);
+            f.show();
         }
         catch(Exception e){
             e.printStackTrace();

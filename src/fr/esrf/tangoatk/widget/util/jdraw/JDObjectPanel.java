@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util.jdraw;
 
 import javax.swing.*;
@@ -28,10 +6,8 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
-class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, KeyListener {
+class JDObjectPanel extends JPanel implements ActionListener, ChangeListener {
 
   private JTextField nameText;
   private JButton applyNameBtn;
@@ -62,7 +38,6 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
   private JDBrowserPanel invoker2;
   private Rectangle oldRect;
   private boolean isUpdating = false;
-  private boolean nameHasChanged;
 
   public JDObjectPanel() {
     this(null,null,null);
@@ -85,14 +60,11 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
     namePanel.setBounds(5, 5, 370, 55);
 
     nameText = new JTextField();
-    nameText.setMargin(JDUtils.zMargin);
     nameText.setEditable(true);
     nameText.setFont(JDUtils.labelFont);
     nameText.setBounds(10, 20, 260, 24);
     nameText.addActionListener(this);
-    nameText.addKeyListener(this);
     namePanel.add(nameText);
-    nameHasChanged = false;
 
     applyNameBtn = new JButton("Apply");
     applyNameBtn.setFont(JDUtils.labelFont);
@@ -237,30 +209,10 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
     updatePanel(p);
   }
 
-  public boolean nameHasChanged() {
-    return nameHasChanged;
-  }
-
-  public void applyName() {
-    
-    for (int i = 0; i < allObjects.length; i++)
-      allObjects[i].setName(nameText.getText());
-    invoker.setNeedToSave(true,"Change name");
-    if(invoker2!=null) invoker2.updateNode();
-    nameText.setCaretPosition(0);
-    nameHasChanged = false;
-
-  }
-
-  public void cancelNameChanged() {
-    nameHasChanged = false;
-  }
-
   public void updatePanel(JDObject[] objs) {
 
     allObjects = objs;
     isUpdating = true;
-    nameHasChanged = false;
 
     if (objs == null || objs.length <= 0) {
       
@@ -375,7 +327,11 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
         allObjects[i].setInverseShadow(invertShadowCheckBox.isSelected());
       invoker.setNeedToSave(true,"Change invert shadow");
     } else if (src == nameText || src == applyNameBtn) {
-      applyName();
+      for (i = 0; i < allObjects.length; i++)
+        allObjects[i].setName(nameText.getText());
+      invoker.setNeedToSave(true,"Change name");
+      if(invoker2!=null) invoker2.updateNode();
+      nameText.setCaretPosition(0);
     } else if (src == visibleCheckBox) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setVisible(visibleCheckBox.isSelected());
@@ -392,19 +348,6 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
 
     repaintObjects();
   }
-
-  // ---------------------------------------------------------
-  // Key listener
-  // ---------------------------------------------------------
-  public void keyTyped(KeyEvent e) {}
-  public void keyReleased(KeyEvent e) {}
-  public void keyPressed(KeyEvent e) {
-    Object src = e.getSource();
-    if( src==nameText ) {
-      nameHasChanged = true;
-    }
-  }
-
 
   // ---------------------------------------------------------
   //Change listener
