@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util.jdraw;
 
 import fr.esrf.tangoatk.widget.util.ATKConstant;
@@ -29,7 +7,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyListener;
 import java.io.IOException;
 
 /**
@@ -97,27 +74,16 @@ import java.io.IOException;
  *}
  * </pre>
  */
-public class JDLibraryViewer extends JFrame implements ActionListener, JDrawEditorListener//, KeyListener 
-{
+public class JDLibraryViewer extends JFrame implements ActionListener {
 
   JDrawEditor libViewer;
   JDrawEditor invoker;
   JPanel      controlPanel;
   JButton     copyButton;
   JButton     closeButton;
-  
-  JMenuItem copyMenuItem;
-  JMenuItem exitMenuItem;
-  
+
   public JDLibraryViewer(String libName,JDrawEditor invoker) {
-	  initComponents(libName, invoker, true);
-  }
-  
-  public JDLibraryViewer(String libName,JDrawEditor invoker, boolean lPanel) {
-	  initComponents(libName,invoker,lPanel);
-  }
-  
-  public void initComponents(String libName,JDrawEditor invoker, boolean lPanel) {
+
     this.invoker = invoker;
     Container pane = getContentPane();
 
@@ -134,59 +100,31 @@ public class JDLibraryViewer extends JFrame implements ActionListener, JDrawEdit
     libViewer.setBorder(BorderFactory.createEtchedBorder());
     pane.add(libViewer,BorderLayout.CENTER);
 
-    if (lPanel) {
-	    // Control panel
-	    controlPanel=new JPanel();
-	    copyButton=new JButton("Copy");
-	    copyButton.setFont(ATKConstant.labelFont);
-	    copyButton.setMnemonic(java.awt.event.KeyEvent.VK_C);
-	    copyButton.addActionListener(this);    
-	    closeButton=new JButton("Close");
-	    closeButton.setFont(ATKConstant.labelFont);
-	    closeButton.setMnemonic(java.awt.event.KeyEvent.VK_L);
-	    closeButton.addActionListener(this);    
-	    controlPanel.add(copyButton);
-	    controlPanel.add(closeButton);
-	    pane.add(controlPanel,BorderLayout.SOUTH);
-    }
-    
-    copyMenuItem = new JMenuItem("Copy");
-    //copyMenuItem.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_C,java.awt.event.InputEvent.CTRL_MASK));
-    copyMenuItem.addActionListener(this);
-    //copyMenuItem.fireActionPerformed(new java.awt.event.ActionEvent(copyMenuItem,java.awt.event.ACTION_PERFORMED,"Copy"));
-        
-    exitMenuItem = new JMenuItem("Exit");
-    //exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ESCAPE,0));
-    exitMenuItem.addActionListener(this);
-    libViewer.addToMenu(copyMenuItem);
-    libViewer.addToMenu(exitMenuItem);
-    
-    libViewer.addEditorListener(this);
+    // Control panel
+    controlPanel=new JPanel();
+    copyButton=new JButton("Copy");
+    copyButton.setFont(ATKConstant.labelFont);
+    copyButton.addActionListener(this);
+    closeButton=new JButton("Close");
+    closeButton.setFont(ATKConstant.labelFont);
+    closeButton.addActionListener(this);
+    controlPanel.add(copyButton);
+    controlPanel.add(closeButton);
+    pane.add(controlPanel,BorderLayout.SOUTH);
+
   }
 
   public void actionPerformed(ActionEvent e) {
 
     Object src = e.getSource();
-    if( src == closeButton || src == exitMenuItem ) {
+    if( src == closeButton ) {
       setVisible(false);
-    } else if (src == copyButton || src == copyMenuItem ) {
+    } else if (src == copyButton) {
       if(invoker!=null)
         invoker.addObjectToClipboard(libViewer.getSelectedObjects());
     }
 
   }
-  
-  public void selectionChanged() {
-	  if (libViewer.getSelectionLength()>0) {
-		  invoker.addObjectToClipboard(libViewer.getSelectedObjects());
-		  invoker.create(JDrawEditor.CREATE_CLIPBOARD);
-	  }
-  }
-  
-  public void sizeChanged() {}
-  public void clipboardChanged() {}
-  public void valueChanged() {}
-  public void creationDone() {}
 
   public static void main(String[] args) {
 

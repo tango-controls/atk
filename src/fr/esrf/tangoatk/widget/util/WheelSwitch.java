@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * WheelSwitch.java
  * Author: JL Pons 2002 E.S.R.F.
  */
@@ -68,7 +46,6 @@ public class WheelSwitch extends JComponent {
     private int expNumber; // Number of exponential digit
     private double value; // Current value
     private double maxValue; // Maximun value
-    private double minValue; // Minimun value
     private Dimension dz; // digit size
     private boolean editMode; // edition mode
     private String editValue; // value entered by keyboard
@@ -244,8 +221,6 @@ public class WheelSwitch extends JComponent {
                 value = newValue;
             }
         }
-
-        updateButtonVisibility();
         repaint();
     }
 
@@ -306,7 +281,7 @@ public class WheelSwitch extends JComponent {
                         {
                             int x = Integer.parseInt( format.substring(1, format.indexOf(".")) );
                             int y = Integer.parseInt( format.substring(format.indexOf(".")+1, format.length()-1) );
-                            if (x > y && x > 0 && y >= 0)
+                            if (x > y && x > 0 && y > 0)
                             {
                                 return true;
                             }
@@ -376,39 +351,6 @@ public class WheelSwitch extends JComponent {
      */
     public Color getSelButtonColor() {
         return selectionColor;
-    }
-
-  /**
-   * Sets the max value. Must be called after setFormat() or setPrecision().
-   * Ingnored if scientific format is used.
-   * @param max Maximum allowed value
-   */
-    public void setMaxValue(double max) {
-      if (format.indexOf('e') == -1) {
-        maxValue = max;
-        updateButtonVisibility();
-      }
-    }
-
-    public void setEnabled(boolean arg0) {
-        super.setEnabled(arg0);
-        if(buttons_up == null || buttons_down == null)
-            return;
-        for (int i = 0; i < buttons_up.length; i++)
-            buttons_up[i].setEnabled(arg0);
-        for (int i = 0; i < buttons_down.length; i++)
-            buttons_down[i].setEnabled(arg0);        
-    }
-  /**
-   * Sets the min value. Must be called after setFormat() or setPrecision().
-   * Ingnored if scientific format is used.
-   * @param min Minimum allowed value
-   */
-    public void setMinValue(double min) {
-      if (format.indexOf('e') == -1) {
-        minValue = min;
-        updateButtonVisibility();
-      }
     }
 
     /**
@@ -545,11 +487,10 @@ public class WheelSwitch extends JComponent {
         }
 
         if (expNumber == 0) {
-            maxValue =  Math.pow(10, intNumber);
-            minValue = -Math.pow(10, intNumber);
-        } else {
-            maxValue =  Double.MAX_VALUE;
-            minValue = -Double.MAX_VALUE;
+            maxValue = Math.pow(10, intNumber);
+        }
+        else {
+            maxValue = Double.MAX_VALUE;
         }
 
         for (i = 0; i < nb && editable; i++) {
@@ -601,9 +542,7 @@ public class WheelSwitch extends JComponent {
 
     // Call when user click on top button
     private void clickUp(MouseEvent evt) {
-        if(!isEnabled())
-            return;
-        
+
         int i = 0;
         boolean found = false;
 
@@ -628,8 +567,7 @@ public class WheelSwitch extends JComponent {
 
     // Call when user click on bottom buttons
     private void clickDown(MouseEvent evt) {
-        if(!isEnabled())
-            return;
+
         int i = 0;
         boolean found = false;
 
@@ -716,39 +654,30 @@ public class WheelSwitch extends JComponent {
             String intPart = "";
             if (format.indexOf('d') != -1) {
                 intPart = valueFormated;
-            } else {
+            }
+            else {
                 intPart = valueFormated.substring(0, valueFormated.indexOf('.'));
             }
-
-          if (pos < intNumber) {
-
-            // integer part
-            if (intPart.length() < intNumber) {
-              if (pos < intNumber - intPart.length()) {
-                return "0";
-              } else {
-                return intPart.substring(pos + intPart.length() - intNumber, pos + 1 + intPart.length() - intNumber);
-              }
-            } else if(intPart.length()==intNumber) {
-                return intPart.substring(pos, pos + 1);
-            } else {
-                // Here, intPart.length() > intNumber
-                int over = intPart.length() - intNumber;
-                return intPart.substring(pos+over, pos+over + 1);
+            if (pos < intNumber) {
+                if (intPart.length() < intNumber) {
+                    if (pos < intNumber - intPart.length()) {
+                        return "0";
+                    }
+                    else {
+                        return intPart.substring(pos + intPart.length() - intNumber, pos + 1 + intPart.length() - intNumber);
+                    }
+                }
+                else {
+                    return intPart.substring(pos, pos + 1);
+                }
             }
-
-          } else if (pos < intNumber + fracNumber) {
-
-            // Decimal part
-            return valueFormated.substring(pos + 1 + intPart.length() - intNumber, pos + 2 + intPart.length() - intNumber);
-
-          } else {
-
-            // Exponential part
-            int e = valueFormated.indexOf('e');
-            return valueFormated.substring(pos + e + 1 - intNumber - fracNumber, pos + e + 2 - intNumber - fracNumber);
-
-          }
+            else if (pos < intNumber + fracNumber) {
+                return valueFormated.substring(pos + 1 + intPart.length() - intNumber, pos + 2 + intPart.length() - intNumber);
+            }
+            else {
+                int e = valueFormated.indexOf('e');
+                return valueFormated.substring(pos + e + 1 - intNumber - fracNumber, pos + e + 2 - intNumber - fracNumber);
+            }
         }
         /*double tmp = value;
         if (tmp < 0) {
@@ -946,8 +875,6 @@ public class WheelSwitch extends JComponent {
 
     // Update button color according to the focus.
     private void updateButtonFocus() {
-      if(!isEnabled())
-            return;
       if(!editable) return;
         for (int i = 0; i < nbButton; i++) {
             if (i == selButton && hasFocus()) {
@@ -991,7 +918,7 @@ public class WheelSwitch extends JComponent {
         if (!Double.isNaN(newValue)) {
             //double newValue = near(value + Math.pow(10, (intNumber - idx -
             // 1)));
-            if ((newValue <= maxValue) && (newValue >= minValue)) {
+            if (Math.abs(newValue) < maxValue) {
                 //value = newValue;
                 setValue(newValue);
                 if (format.indexOf('e') > 0) {
@@ -1000,7 +927,6 @@ public class WheelSwitch extends JComponent {
             }
             fireValueChange();
         }
-        updateButtonVisibility();
     }
 
     private double incrementeValue(double val, int idx, int ref) {
@@ -1043,7 +969,7 @@ public class WheelSwitch extends JComponent {
            
             //double newValue = near(value + Math.pow(10, (intNumber - idx -
             // 1)));
-            if ((newValue <= maxValue) && (newValue >= minValue)) {
+            if (Math.abs(newValue) < maxValue) {
                 //value = newValue;
                 setValue(newValue);
                 if (format.indexOf('e') > 0) {
@@ -1052,7 +978,6 @@ public class WheelSwitch extends JComponent {
             }
             fireValueChange();
         }
-        updateButtonVisibility();
         /*if (!Double.isNaN(value)) {
             double newValue = near(value - Math.pow(10, (intNumber - idx - 1)));
             if (Math.abs(newValue) < maxValue)
@@ -1123,65 +1048,33 @@ public class WheelSwitch extends JComponent {
             repaint();
         }
 
-        if (code == KeyEvent.VK_ENTER) {
-            if (editMode) {
-                try {
-                    double newValue = Double.parseDouble(editValue);
-                    if ((newValue <= maxValue) && (newValue >= minValue)) {
-                        value = newValue; // For a value entered manually, we don't want to round it
-                        updateButtonVisibility();
-                        fireValueChange();
+        if (editMode && code == KeyEvent.VK_ENTER) {
+            try {
+                double newValue = Double.parseDouble(editValue);
+                if (Math.abs(newValue) < maxValue) {
+                    value = newValue; // For a value entered manually, we don't want to round it
+                    fireValueChange();
+                    editValue = "";
+                    editMode = false;
+                    repaint();
+                }
+                else {
+                    int r = JOptionPane
+                            .showConfirmDialog(
+                                    this,
+                                    "Warning: value out of range allowed by the format.\nCancel editing ?",
+                                    "[WheelSwitch error]",
+                                    JOptionPane.YES_NO_OPTION);
+                    if (r == JOptionPane.YES_OPTION) {
                         editValue = "";
                         editMode = false;
                         repaint();
                     }
-                    else {
-                      String mesg = "Warning, value is out of the range ["+minValue+","+maxValue+"]\nCancel editing ?";
-                        int r = JOptionPane
-                                .showConfirmDialog(
-                                        this,mesg,
-                                        "[WheelSwitch error]",
-                                        JOptionPane.YES_NO_OPTION);
-                        if (r == JOptionPane.YES_OPTION) {
-                            editValue = "";
-                            editMode = false;
-                            repaint();
-                        }
-                    }
-                }
-                catch (NumberFormatException n) {
-                    // nothing to do
                 }
             }
-            else {
-                // allowing to quickly enter the same value
-                fireValueChange();
-                repaint();
+            catch (NumberFormatException n) {
             }
         }
-
-    }
-
-    private void updateButtonVisibility() {
-    
-      double val;
-
-      // Update button visibility
-      if(editable) {
-
-        // Dont affect button in scientific format
-        if (format.indexOf('e') == -1) {
-
-          for(int i=0;i<nbButton;i++) {
-            val = incrementeValue(value, i, intNumber);
-            buttons_up[i].setVisible(val<=maxValue);
-            val = decrementeValue(value, i, intNumber);
-            buttons_down[i].setVisible(val>=minValue);
-          }
-
-        }
-
-      }
 
     }
 
@@ -1259,11 +1152,9 @@ public class WheelSwitch extends JComponent {
         });
 
         // float format
-        ws2.setFormat("%6.0f");
+        ws2.setFormat("%6.3f");
         ws2.setButtonColor(Color.GREEN);
         ws2.setValue(-12.5);
-        ws2.setMaxValue(75.0);
-        ws2.setMinValue(-25.0);
         ws2.setFont(new Font("Dialog", Font.BOLD, 50));
         ws2.addWheelSwitchListener(new IWheelSwitchListener() {
             public void valueChange(WheelSwitchEvent e) {

@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 //
 // JLChartOption.java
 // Description: A Class to handle 2D graphics plot
@@ -77,11 +55,6 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
   private JComboBox generalLabelPCombo;
   private JLabel generalLabelPLabel;
 
-  private JCheckBox  xSubGribVisibleCheck;
-
-  private JLabel     xNbTickLabel;
-  private JTextField xNbTickText;
-
   private JComboBox generalGridStyleCombo;
   private JLabel generalGridStyleLabel;
 
@@ -90,8 +63,6 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
   private JLabel generalDurationLabel;
   private JTextField generalDurationText;
 
-  private JLabel percentScrollLabel;
-  private JTextField percentScrollText;
 
   // Axis panel
   private AxisPanel y1Panel;
@@ -131,7 +102,7 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
 
     addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent evt) {
-        setVisible(false);
+        hide();
         dispose();
       }
     });
@@ -201,7 +172,6 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
     generalLabelPCombo.addItem("Top");
     generalLabelPCombo.addItem("Right");
     generalLabelPCombo.addItem("Left");
-    generalLabelPCombo.addItem("Row");
     generalLabelPCombo.setSelectedIndex(chart.getLabelPlacement());
     generalLabelPCombo.addActionListener(this);
 
@@ -243,24 +213,6 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
     generalGridStyleCombo.setSelectedIndex(chart.getY1Axis().getGridStyle());
     generalGridStyleCombo.addActionListener(this);
 
-    xSubGribVisibleCheck = new JCheckBox();
-    xSubGribVisibleCheck.setFont(GraphicsUtils.labelFont);
-    xSubGribVisibleCheck.setForeground(GraphicsUtils.fColor);
-    xSubGribVisibleCheck.setText("show X sub grid");
-    xSubGribVisibleCheck.setSelected(chart.getXAxis().isSubGridVisible());
-    xSubGribVisibleCheck.addActionListener(this);
-
-    xNbTickLabel = new JLabel("Sub tick interval number");
-    xNbTickLabel.setFont(GraphicsUtils.labelFont);
-    xNbTickLabel.setForeground(GraphicsUtils.fColor);
-    
-    xNbTickText = new JTextField();
-    xNbTickText.setEditable(true);
-    xNbTickText.setToolTipText("Number of sub tick interval (0 to disable)");
-    xNbTickText.setText(Integer.toString(chart.getXAxis().getTimeAnnoSubTickInterval()));
-    xNbTickText.setMargin(GraphicsUtils.zInset);
-    xNbTickText.addKeyListener(this);
-
     generalDurationLabel = new JLabel("Display duration (s)");
     generalDurationLabel.setFont(GraphicsUtils.labelFont);
     generalDurationLabel.setForeground(GraphicsUtils.fColor);
@@ -270,16 +222,6 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
     generalDurationText.setText(Double.toString(chart.getDisplayDuration() / 1000.0));
     generalDurationText.setMargin(GraphicsUtils.zInset);
     generalDurationText.addKeyListener(this);
-
-    percentScrollLabel = new JLabel("Percent scrollback");
-    percentScrollLabel.setFont(GraphicsUtils.labelFont);
-    percentScrollLabel.setForeground(GraphicsUtils.fColor);
-    percentScrollText = new JTextField();
-    percentScrollText.setEditable(true);
-    percentScrollText.setToolTipText("Type 0 disable");
-    percentScrollText.setText(Double.toString(chart.getXAxis().getPercentScrollback()));
-    percentScrollText.setMargin(GraphicsUtils.zInset);
-    percentScrollText.addKeyListener(this);
 
     generalFontHeaderLabel = new JLabel("Header font");
     generalFontHeaderLabel.setFont(GraphicsUtils.labelFont);
@@ -313,9 +255,6 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
     gGridPanel.add(generalGridCombo);
     gGridPanel.add(generalGridStyleLabel);
     gGridPanel.add(generalGridStyleCombo);
-    gGridPanel.add(xSubGribVisibleCheck);
-    gGridPanel.add(xNbTickLabel);
-    gGridPanel.add(xNbTickText);
     generalPanel.add(gGridPanel);
 
     gColorFontPanel.add(generalBackColorLabel);
@@ -333,8 +272,6 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
     gMiscPanel.add(generalLegendText);
     gMiscPanel.add(generalDurationLabel);
     gMiscPanel.add(generalDurationText);
-    gMiscPanel.add(percentScrollLabel);
-    gMiscPanel.add(percentScrollText);
     generalPanel.add(gMiscPanel);
 
     generalLabelVisibleCheck.setBounds(5, 20, 80, 25);
@@ -356,38 +293,13 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
     generalGridCombo.setBounds(10, 20, 120, 25);
     generalGridStyleLabel.setBounds(135, 20, 45, 25);
     generalGridStyleCombo.setBounds(185, 20, 100, 25);
-    xSubGribVisibleCheck.setBounds(7,50,150,25);
-    xNbTickLabel.setBounds(10,75,180,25);
-    xNbTickText.setBounds(195,75,90,25);
-
-    if( chart.getXAxis().getAnnotation()!=JLAxis.TIME_ANNO ) {
-      gGridPanel.setBounds(5,190,290,55);
-      xSubGribVisibleCheck.setVisible(false);
-      xNbTickLabel.setVisible(false);
-      xNbTickText.setVisible(false);
-    } else {
-      gGridPanel.setBounds(5,190,290,105);
-      xSubGribVisibleCheck.setVisible(true);
-      xNbTickLabel.setVisible(true);
-      xNbTickText.setVisible(true);
-    }
+    gGridPanel.setBounds(5,190,290,55);
 
     generalLegendLabel.setBounds(10, 20, 70, 25);
     generalLegendText.setBounds(85, 20, 200, 25);
     generalDurationLabel.setBounds(10, 50, 120, 25);
     generalDurationText.setBounds(135, 50, 150, 25);
-    percentScrollLabel.setBounds(10, 80, 120, 25);
-    percentScrollText.setBounds(135, 80, 150, 25);
-
-    if( chart.getXAxis().getAnnotation()!=JLAxis.TIME_ANNO ) {
-      gMiscPanel.setBounds(5,250,290,85);
-      percentScrollLabel.setVisible(false);
-      percentScrollText.setVisible(false);
-    } else {
-      gMiscPanel.setBounds(5,300,290,110);
-      percentScrollLabel.setVisible(true);
-      percentScrollText.setVisible(true);
-    }
+    gMiscPanel.setBounds(5,250,290,85);
 
     // **********************************************
     // Axis panel construction
@@ -409,18 +321,12 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
     closeBtn.setText("Close");
     innerPane.add(closeBtn);
 
-    if( chart.getXAxis().getAnnotation()!=JLAxis.TIME_ANNO ) {
-      tabPane.setBounds(5, 5, 300, 370);
-      closeBtn.setBounds(225, 380, 80, 25);
-      innerPane.setPreferredSize(new Dimension(310,410));
-    } else {
-      tabPane.setBounds(5, 5, 300, 445);
-      closeBtn.setBounds(225, 455, 80, 25);
-      innerPane.setPreferredSize(new Dimension(310,485));
-    }
+    tabPane.setBounds(5, 5, 300, 370);
+    closeBtn.setBounds(225, 380, 80, 25);
 
     closeBtn.addMouseListener(this);
 
+    innerPane.setPreferredSize(new Dimension(310,410));
     setContentPane(innerPane);
     setResizable(false);
 
@@ -434,7 +340,7 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
   public void mouseClicked(MouseEvent e) {
     // ------------------------------
     if (e.getSource() == closeBtn) {
-      setVisible(false);
+      hide();
       dispose();
     } else if (e.getSource() == generalBackColorBtn) {
       Color c = JColorChooser.showDialog(this, "Choose background Color", chart.getChartBackground());
@@ -546,13 +452,7 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
       chart.setLabelPlacement(s);
       Commit();
 
-    } else if (e.getSource() == xSubGribVisibleCheck) {
-
-      chart.getXAxis().setSubGridVisible(xSubGribVisibleCheck.isSelected());
-      Commit();
-
     }
-
   }
 
   //***************************************************************
@@ -610,40 +510,6 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
         generalLegendText.setText(Double.toString(chart.getDisplayDuration() / 1000.0));
       }
 
-    } else if (e.getSource() == xNbTickText) {
-
-      if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-
-        try {
-
-          int d = Integer.parseInt(xNbTickText.getText());
-          chart.getXAxis().setTimeAnnoSubTickInterval(d);
-          Commit();
-
-        } catch (NumberFormatException err) {
-          error("Sub tick number: malformed number.");
-        }
-        Commit();
-      }
-
-    } else if (e.getSource() == percentScrollText) {
-
-      if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-
-        try {
-          double p = Double.parseDouble(percentScrollText.getText());
-          if(p<0.0 || p>100.0) {
-            error("Invalid percent scrollback value [0,100]");
-            return;
-          }
-          chart.getXAxis().setPercentScrollback(p);
-          Commit();
-        } catch (NumberFormatException ex) {
-          error("Percent scrollbak: malformed number.");
-        }
-
-      }
-
     }
 
   } // End keyReleased
@@ -653,5 +519,6 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
     JOptionPane.showMessageDialog(this, m, "Chart options error",
       JOptionPane.ERROR_MESSAGE);
   }
+
 
 }

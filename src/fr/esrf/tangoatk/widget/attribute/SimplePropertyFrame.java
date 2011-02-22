@@ -1,33 +1,11 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.attribute;
 
 import fr.esrf.tangoatk.core.*;
+import fr.esrf.tangoatk.core.attribute.NumberImage;
 import fr.esrf.tangoatk.widget.util.JAutoScrolledText;
 import fr.esrf.Tango.AttrWriteType;
 import fr.esrf.Tango.DispLevel;
 
-import fr.esrf.tangoatk.core.attribute.ANumber;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
@@ -52,11 +30,8 @@ public class SimplePropertyFrame extends JDialog {
   private JLabel attLabel;
   private JTextField attText;
 
-  private SimpleScalarViewer          numberAndStringValue = null;
-  private BooleanScalarCheckBoxViewer booleanValue         = null;
-  private NumberScalarWheelEditor     numberSetter         = null;
-  private StringScalarEditor          stringSetter         = null;
-  private BooleanScalarComboEditor    booleanSetter        = null;
+  private SimpleScalarViewer theValue = null;
+  private NumberScalarWheelEditor theSetter = null;
 
   private JPanel propPanel;
 
@@ -74,18 +49,6 @@ public class SimplePropertyFrame extends JDialog {
 
   private JLabel almaxLabel;
   private JTextField almaxText;
-
-  private JLabel minWarningLabel;
-  private JTextField minWarningText;
-
-  private JLabel maxWarningLabel;
-  private JTextField maxWarningText;
-
-  private JLabel deltaTLabel;
-  private JTextField deltaTText;
-
-  private JLabel deltaValLabel;
-  private JTextField deltaValText;
 
   private JLabel formatLabel;
   private JTextField formatText;
@@ -160,34 +123,16 @@ public class SimplePropertyFrame extends JDialog {
     identPanel.add(attText);
     pane.add(identPanel);
 
-    numberAndStringValue = new SimpleScalarViewer();
-    numberAndStringValue.setFont(new Font("Dialog", Font.BOLD, 30));
-    numberAndStringValue.setBorder(BorderFactory.createLoweredBevelBorder());
-    numberAndStringValue.setSizingBehavior(JAutoScrolledText.MATRIX_BEHAVIOR);
+    theValue = new SimpleScalarViewer();
+    theValue.setFont(new Font("Dialog", Font.BOLD, 30));
+    theValue.setBorder(BorderFactory.createLoweredBevelBorder());
+    theValue.setSizingBehavior(JAutoScrolledText.MATRIX_BEHAVIOR);
+    pane.add(theValue);
 
-    booleanValue = new BooleanScalarCheckBoxViewer();
-    booleanValue.setQualityEnabled(true);
-    booleanValue.setTrueLabel("True");
-    booleanValue.setFalseLabel("False");
-    booleanValue.setOpaque(true);
-    booleanValue.setFont(new Font("Dialog", Font.BOLD, 30));
-    booleanValue.setBorder(BorderFactory.createLoweredBevelBorder());
-
-    pane.add(numberAndStringValue);
-
-    numberSetter = new NumberScalarWheelEditor();
-    numberSetter.setFont(new Font("Dialog", Font.BOLD, 20));
-    numberSetter.setVisible(false);
-
-    stringSetter = new StringScalarEditor();
-    stringSetter.setFont(new Font("Dialog", java.awt.Font.PLAIN, 14));
-    stringSetter.setVisible(false);
-
-    booleanSetter = new BooleanScalarComboEditor();
-    booleanSetter.setFont(new Font("Dialog", java.awt.Font.PLAIN, 14));
-    booleanSetter.setVisible(false);
-
-    pane.add(numberSetter);
+    theSetter = new NumberScalarWheelEditor();
+    theSetter.setFont(new Font("Dialog", Font.BOLD, 20));
+    theSetter.setVisible(false);
+    pane.add(theSetter);
 
     propPanel = new JPanel();
     propPanel.setLayout(null);
@@ -228,34 +173,6 @@ public class SimplePropertyFrame extends JDialog {
     almaxText.setEditable(true);
     propPanel.add(almaxText);
 
-    minWarningLabel = new JLabel("Min. warning");
-    propPanel.add(minWarningLabel);
-    minWarningText = new JTextField();
-    minWarningText.setMargin(noMargin);
-    minWarningText.setEditable(true);
-    propPanel.add(minWarningText);
-
-    maxWarningLabel = new JLabel("Max. warning");
-    propPanel.add(maxWarningLabel);
-    maxWarningText = new JTextField();
-    maxWarningText.setMargin(noMargin);
-    maxWarningText.setEditable(true);
-    propPanel.add(maxWarningText);
-
-    deltaTLabel = new JLabel("Delta t(ms)");
-    propPanel.add(deltaTLabel);
-    deltaTText = new JTextField();
-    deltaTText.setMargin(noMargin);
-    deltaTText.setEditable(true);
-    propPanel.add(deltaTText);
-
-    deltaValLabel = new JLabel("Delta Val");
-    propPanel.add(deltaValLabel);
-    deltaValText = new JTextField();
-    deltaValText.setMargin(noMargin);
-    deltaValText.setEditable(true);
-    propPanel.add(deltaValText);
-
     formatLabel = new JLabel("Format");
     propPanel.add(formatLabel);
     formatText = new JTextField();
@@ -280,7 +197,7 @@ public class SimplePropertyFrame extends JDialog {
     okButton = new JButton("Dismiss");
     okButton.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent evt) {
-        setVisible(false);
+        hide();
         dispose();
       }
     });
@@ -315,10 +232,6 @@ public class SimplePropertyFrame extends JDialog {
 
   }
 
-  public boolean propertyReset(String s) {
-    return s.equalsIgnoreCase("Not specified") || s.equals("") || s.equalsIgnoreCase("NaN");
-  }
-
   // Apply resource change
   public void applyChange() {
     Map pmap = model.getPropertyMap();
@@ -329,17 +242,15 @@ public class SimplePropertyFrame extends JDialog {
     p.setValue(nameText.getText());
     p.refresh();
 
-    if (model instanceof ANumber)
-    {
-      ANumber aNbModel = (ANumber) model;
+    if (model instanceof INumberImage) {
       // Update min
       p = (Property) pmap.get("min_value");
       String v = minText.getText();
-      if (propertyReset(v)) {
-        p.setValue("NaN");
+      if (v.equalsIgnoreCase("Not specified")) {
+        p.setValue(v);
       } else {
         try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
+          Double d = new Double(v);
           p.setValue(d);
           p.refresh();
         } catch (NumberFormatException e) {
@@ -350,11 +261,11 @@ public class SimplePropertyFrame extends JDialog {
       // Update max
       p = (Property) pmap.get("max_value");
       v = maxText.getText();
-      if (propertyReset(v)) {
-        p.setValue("NaN");
+      if (v.equalsIgnoreCase("Not specified")) {
+        p.setValue(v);
       } else {
         try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
+          Double d = new Double(v);
           p.setValue(d);
           p.refresh();
         } catch (NumberFormatException e) {
@@ -365,11 +276,11 @@ public class SimplePropertyFrame extends JDialog {
       // Update almin
       p = (Property) pmap.get("min_alarm");
       v = alminText.getText();
-      if (propertyReset(v)) {
-        p.setValue("NaN");
+      if (v.equalsIgnoreCase("Not specified")) {
+        p.setValue(v);
       } else {
         try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
+          Double d = new Double(v);
           p.setValue(d);
           p.refresh();
         } catch (NumberFormatException e) {
@@ -380,78 +291,17 @@ public class SimplePropertyFrame extends JDialog {
       // Update almax
       p = (Property) pmap.get("max_alarm");
       v = almaxText.getText();
-      if (propertyReset(v)) {
-        p.setValue("NaN");
-      } else {
-        try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
-          p.setValue(d);
-          p.refresh();
-        } catch (NumberFormatException e) {
-          JOptionPane.showMessageDialog(this, "Invalid maximum alarm\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-      }
-
-      // Update min warning
-      p = (Property) pmap.get("min_warning");
-      v = minWarningText.getText();
-      if (propertyReset(v)) {
-        p.setValue("NaN");
-      } else {
-        try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
-          p.setValue(d);
-          p.refresh();
-        } catch (NumberFormatException e) {
-          JOptionPane.showMessageDialog(this, "Invalid minimum warning\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-      }
-
-      // Update max warning
-      p = (Property) pmap.get("max_warning");
-      v = maxWarningText.getText();
-      if (propertyReset(v)) {
-        p.setValue("NaN");
-      } else {
-        try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
-          p.setValue(d);
-          p.refresh();
-        } catch (NumberFormatException e) {
-          JOptionPane.showMessageDialog(this, "Invalid maximum warning\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-      }
-
-      // Update delta t
-      p = (Property) pmap.get("delta_t");
-      v = deltaTText.getText();
-      if (propertyReset(v)) {
-        p.setValue("NaN");
+      if (v.equalsIgnoreCase("Not specified")) {
+        p.setValue(v);
       } else {
         try {
           Double d = new Double(v);
           p.setValue(d);
           p.refresh();
         } catch (NumberFormatException e) {
-          JOptionPane.showMessageDialog(this, "Invalid delta t\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+          JOptionPane.showMessageDialog(this, "Invalid maximum alarm\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
       }
-
-      // Update delta val
-      p = (Property) pmap.get("delta_val");
-      v = deltaValText.getText();
-      if (propertyReset(v)) {
-        p.setValue("NaN");
-      } else {
-        try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
-          p.setValue(d);
-          p.refresh();
-        } catch (NumberFormatException e) {
-          JOptionPane.showMessageDialog(this, "Invalid delta val\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-      }
-
     }
 
     // Update format
@@ -471,7 +321,7 @@ public class SimplePropertyFrame extends JDialog {
 
     //Commit change
     model.storeConfig();
-    updateComponents();
+    placeComponents();
 
   }
 
@@ -481,137 +331,56 @@ public class SimplePropertyFrame extends JDialog {
     if (model == null)
       return;
 
-    Container pane = getContentPane();
-    pane.remove(1);
     deviceText.setText(model.getDevice().getName());
     attText.setText(model.getNameSansDevice());
 
     if (model instanceof INumberScalar) {
-      numberAndStringValue.setModel((INumberScalar) model);
-      numberAndStringValue.setVisible(true);
-      booleanValue.clearModel();
-      booleanValue.setVisible(false);
-      pane.add(numberAndStringValue, 1);
+      theValue.setModel((INumberScalar) model);
+      theValue.setVisible(true);
     } else if (model instanceof IStringScalar) {
-      numberAndStringValue.setModel((IStringScalar) model);
-      numberAndStringValue.setVisible(true);
-      booleanValue.clearModel();
-      booleanValue.setVisible(false);
-      pane.add(numberAndStringValue, 1);
+      theValue.setModel((IStringScalar) model);
+      theValue.setVisible(true);
     } else {
-      numberAndStringValue.clearModel();
-      numberAndStringValue.setText("");
-      numberAndStringValue.setVisible(false);
-      if (model instanceof IBooleanScalar) {
-        booleanValue.setAttModel((IBooleanScalar)model);
-        booleanValue.setVisible(true);
-        pane.add(booleanValue, 1);
-      }
-      else {
-        booleanValue.clearModel();
-        booleanValue.setVisible(false);
-        pane.add(numberAndStringValue, 1);
-      }
-    }
-    if ( pane.getComponent(2) == numberSetter
-            || pane.getComponent(2) == stringSetter
-            || pane.getComponent(2) == booleanSetter) {
-        pane.remove(2);
+      theValue.clearModel();
+      theValue.setText("");
+      theValue.setVisible(false);
     }
 
-    if ( model.isWritable() ) {
-      if ( model instanceof INumberScalar ) {
-        numberSetter.setModel((INumberScalar) model);
-        numberSetter.setVisible(true);
-        stringSetter.setModel(null);
-        stringSetter.setVisible(false);
-        booleanSetter.setAttModel(null);
-        booleanSetter.setVisible(false);
-        pane.add( numberSetter, 2 );
-      }
-      else if ( model instanceof IStringScalar ) {
-        numberSetter.setModel(null);
-        numberSetter.setVisible(false);
-        stringSetter.setModel((IStringScalar) model);
-        stringSetter.setVisible(true);
-        booleanSetter.setAttModel(null);
-        booleanSetter.setVisible(false);
-        pane.add( stringSetter, 2 );
-      }
-      else if ( model instanceof IBooleanScalar ) {
-        numberSetter.setModel(null);
-        numberSetter.setVisible(false);
-        stringSetter.setModel(null);
-        stringSetter.setVisible(false);
-        booleanSetter.setAttModel((IBooleanScalar) model);
-        booleanSetter.setVisible(true);
-        pane.add( booleanSetter, 2 );
-      }
-      else {
-        numberSetter.setModel(null);
-        numberSetter.setVisible(false);
-        stringSetter.setModel(null);
-        stringSetter.setVisible(false);
-        booleanSetter.setAttModel(null);
-        booleanSetter.setVisible(false);
-      }
+    if (model.isWritable() && model instanceof INumberScalar) {
+      theSetter.setModel((INumberScalar) model);
+      theSetter.setVisible(true);
     } else {
-      numberSetter.setModel(null);
-      numberSetter.setVisible(false);
-      stringSetter.setModel(null);
-      stringSetter.setVisible(false);
-      booleanSetter.setAttModel(null);
-      booleanSetter.setVisible(false);
+      theSetter.setModel(null);
+      theSetter.setVisible(false);
     }
-    pane.repaint();
 
     nameText.setText(model.getLabel());
 
-    if (model instanceof ANumber) {
+    if (model instanceof NumberImage) {
       double v;
-      ANumber m = (ANumber) model;
+      NumberImage m = (NumberImage) model;
 
       v = m.getMinValue();
       if( Double.isNaN(v) ) minText.setText("Not specified");
-      else                  minText.setText(Double.toString(m.getValueInDisplayUnit(v)));
+      else                  minText.setText(Double.toString(v));
 
       v = m.getMaxValue();
       if (Double.isNaN(v))   maxText.setText("Not specified");
-      else                   maxText.setText(Double.toString(m.getValueInDisplayUnit(v)));
+      else                   maxText.setText(Double.toString(v));
 
       v = m.getMinAlarm();
       if (Double.isNaN(v))   alminText.setText("Not specified");
-      else                   alminText.setText(Double.toString(m.getValueInDisplayUnit(v)));
+      else                   alminText.setText(Double.toString(v));
 
       v = m.getMaxAlarm();
       if (Double.isNaN(v))   almaxText.setText("Not specified");
-      else                   almaxText.setText(Double.toString(m.getValueInDisplayUnit(v)));
-
-      v = m.getMinWarning();
-      if (Double.isNaN(v))   minWarningText.setText("Not specified");
-      else                   minWarningText.setText(Double.toString(m.getValueInDisplayUnit(v)));
-
-      v = m.getMaxWarning();
-      if (Double.isNaN(v))   maxWarningText.setText("Not specified");
-      else                   maxWarningText.setText(Double.toString(m.getValueInDisplayUnit(v)));
-
-      v = m.getDeltaT();
-      if (Double.isNaN(v))   deltaTText.setText("Not specified");
-      else                   deltaTText.setText(Double.toString(v));
-
-      v = m.getDeltaVal();
-      if (Double.isNaN(v))   deltaValText.setText("Not specified");
-      else                   deltaValText.setText(Double.toString(m.getValueInDisplayUnit(v)));
+      else                   almaxText.setText(Double.toString(v));
 
     } else {
       minText.setText("None");
       maxText.setText("None");
       alminText.setText("None");
       almaxText.setText("None");
-      minWarningText.setText("None");
-      maxWarningText.setText("None");
-      deltaTText.setText("None");
-      deltaValText.setText("None");
     }
 
     formatText.setText(model.getFormat());
@@ -631,27 +400,16 @@ public class SimplePropertyFrame extends JDialog {
     attText.setBounds(80, 45, 345, 25);
 
     // Value
-    if (numberAndStringValue.isVisible()) {
-      if ( (!numberSetter.isVisible())
-              && (!stringSetter.isVisible()) ) {
-        numberAndStringValue.setBounds(5, 87, 440, 45);
+    if (theValue.isVisible()) {
+      if (!theSetter.isVisible()) {
+        theValue.setBounds(5, 87, 440, 45);
       } else {
-        int w = (int) numberSetter.getPreferredSize().getWidth();
-        numberAndStringValue.setBounds(5, 87, 435 - w, 45);
-        numberSetter.setBounds(5 + 435 - w, 87, w, 45);
-        stringSetter.setBounds(5 + 435 - w, 87, w, 45);
+        int w = (int) theSetter.getPreferredSize().getWidth();
+        theValue.setBounds(5, 87, 435 - w, 45);
+        theSetter.setBounds(5 + 435 - w, 87, w, 45);
       }
       propPanel.setBounds(5, 135, 440, 280);
 
-    } else if (booleanValue.isVisible()) {
-      if ( (!booleanSetter.isVisible()) ) {
-          booleanValue.setBounds(5, 87, 440, 45);
-      } else {
-        int w = (int) booleanSetter.getPreferredSize().getWidth();
-        booleanValue.setBounds(5, 87, 435 - w, 45);
-        booleanSetter.setBounds(5 + 435 - w, 87, w, 45);
-      }
-      propPanel.setBounds(5, 135, 440, 280);
     } else {
 
       propPanel.setBounds(5, 85, 440, 280);
@@ -681,23 +439,11 @@ public class SimplePropertyFrame extends JDialog {
     unitLabel.setBounds(225, 105, 110, 25);
     unitText.setBounds(330, 105, 100, 25);
 
-    minWarningLabel.setBounds(10, 135, 110, 25);
-    minWarningText.setBounds(120, 135, 100, 25);
-
-    maxWarningLabel.setBounds(225, 135, 110, 25);
-    maxWarningText.setBounds(330, 135, 100, 25);
-
-    deltaTLabel.setBounds(10, 165, 110, 25);
-    deltaTText.setBounds(120, 165, 100, 25);
-
-    deltaValLabel.setBounds(225, 165, 110, 25);
-    deltaValText.setBounds(330, 165, 100, 25);
-
-    textView.setBounds(10, 195, 425, 80);
+    textView.setBounds(10, 135, 425, 140);
 
 
     // Buttons
-    if (numberAndStringValue.isVisible() || booleanValue.isVisible()) {
+    if (theValue.isVisible()) {
       applyButton.setBounds(5, 420, 120, 30);
       infoButton.setBounds(160, 420, 120, 30);
       okButton.setBounds(325, 420, 120, 30);
@@ -793,7 +539,7 @@ public class SimplePropertyFrame extends JDialog {
       fr.esrf.tangoatk.core.AttributeList();
 
     try {
-      pf.setModel((IAttribute) attributeList.add("jlp/test/1/att_un"));
+      pf.setModel((IAttribute) attributeList.add("//orion:10000/sys/machstat/tango/sig_current"));
     } catch (Exception e) {
       System.out.println("attributeList.add() failed with " + e.getMessage());
       e.printStackTrace();

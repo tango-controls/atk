@@ -12,8 +12,6 @@ ALL =  	$(TARGET)/PropertyViewer.class \
 	$(TARGET)/DevicePropertyDialog.class \
 	$(TARGET)/DevicePropertyListPanel.class \
 	$(TARGET)/UnitViewer.class \
-	$(TARGET)/PropertyAreaEditor.class \
-	$(TARGET)/PropertyFieldEditor.class \
 
 
 all: properties beaninfo

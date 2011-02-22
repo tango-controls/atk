@@ -26,6 +26,7 @@ all: icon-components       \
      image-components      \
      attribute-components  \
      command-components    \
+     jloox-components       \
      jdraw-components       \
      image-components      \
 
@@ -82,6 +83,9 @@ command-components:
 device-components:
 	(cd device && $(MAKE) all)
 
+jloox-components:
+	(cd jloox && $(MAKE) all)
+
 jdraw-components:
 	(cd jdraw && $(MAKE) all)
 
@@ -130,6 +134,8 @@ command-manifest:
 jdraw-manifest:
 	(cd jdraw && $(MAKE) manifest.mf)
 
+#jloox-manifest:
+#	(cd jloox && $(MAKE) manifest.mf)
 
 manifest: attributes-manifest \
           device-manifest     \

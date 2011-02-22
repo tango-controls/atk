@@ -1,25 +1,8 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
+// File:          Refresher.java
+// Created:       2001-09-28 10:42:32, assum
+// By:            <assum@esrf.fr>
+// Time-stamp:    <2002-07-23 15:48:42, assum>
+// 
 // $Id$
 // 
 // Description:       
@@ -110,7 +93,7 @@ public class Refresher extends Thread implements java.io.Serializable {
                 }
                 //after = System.currentTimeMillis();
                 //duree = after - before;
-                //System.out.println("The sleep in refresher took "+ duree + "milli seconds.");
+                //System.out.println("The slepp in refresher took "+ duree + "milli seconds.");
             }
             catch (Exception e) {
                 if (traceUnexpected) {
@@ -145,11 +128,12 @@ public class Refresher extends Thread implements java.io.Serializable {
         //synchronizing refreshment with its expected period.
         after = System.currentTimeMillis();
         sleepingPeriod = refreshInterval - (after - before);
+        if (sleepingPeriod < 0) {
+            sleepingPeriod = 0;
+        }
         try {
             // resynchronizes the period
-            if (sleepingPeriod > 0) {
-                sleep(sleepingPeriod);
-            }
+            sleep(sleepingPeriod);
         }
         catch (InterruptedException e) {
             if (traceUnexpected) {
@@ -168,7 +152,7 @@ public class Refresher extends Thread implements java.io.Serializable {
 
     /**
      * To synchronize or not the refreshing period.
-     * @param synchronizedP 21 dec. 2005
+     * @param synchronizedP 21 déc. 2005
      */
     public void setSynchronizedPeriod(boolean synchronizedP) {
         synchronizedPeriod = synchronizedP;
@@ -176,7 +160,7 @@ public class Refresher extends Thread implements java.io.Serializable {
 
     /**
      * To know wheather the period is resynchronized or not
-     * @return 21 dec. 2005
+     * @return 21 déc. 2005
      */
     public boolean isSynchronizedPeriod() {
         return synchronizedPeriod;
@@ -184,7 +168,7 @@ public class Refresher extends Thread implements java.io.Serializable {
 
     /**
      * To trace or not unexpected Exceptions.
-     * @param synchronizedP 21 dec. 2005
+     * @param synchronizedP 21 déc. 2005
      */
     public void setTraceUnexpected(boolean trace) {
         traceUnexpected = trace;
@@ -192,18 +176,9 @@ public class Refresher extends Thread implements java.io.Serializable {
 
     /**
      * To know wheather unexpected exceptions are traced or not
-     * @return 21 dec. 2005
+     * @return 21 déc. 2005
      */
     public boolean isTraceUnexpected() {
         return traceUnexpected;
     }
-    
-    public IRefreshee getRefreshee() {
-	    return refreshee;
-    }
-
-    public void setRefreshee(IRefreshee refreshee) {
-	    this.refreshee = refreshee;
-    }
-
 }
