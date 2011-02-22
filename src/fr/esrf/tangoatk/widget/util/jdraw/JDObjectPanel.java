@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util.jdraw;
 
 import javax.swing.*;
@@ -28,13 +6,10 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
-class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, KeyListener {
+class JDObjectPanel extends JPanel implements ActionListener, ChangeListener {
 
   private JTextField nameText;
-  private JButton applyNameBtn;
   private JLabel backgroundLabel;
   private JButton backgroundButton;
   private JLabel foregroundLabel;
@@ -50,28 +25,20 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
   private JButton fillCustomButton;
 
   private JCheckBox visibleCheckBox;
-  private JCheckBox antiAliasCheckBox;
 
   private JCheckBox shadowCheckBox;
   private JCheckBox invertShadowCheckBox;
   private JLabel shadowWidthLabel;
   private JSpinner shadowWidthSpinner;
 
-  private JDObject[] allObjects = null;
-  private JDrawEditor invoker;
-  private JDBrowserPanel invoker2;
-  private Rectangle oldRect;
-  private boolean isUpdating = false;
-  private boolean nameHasChanged;
+  JDObject[] allObjects;
+  JComponent invoker;
+  Rectangle oldRect;
 
-  public JDObjectPanel() {
-    this(null,null,null);
-  }
+  public JDObjectPanel(JDObject[] p, JComponent jc) {
 
-  public JDObjectPanel(JDObject[] p, JDrawEditor jc,JDBrowserPanel jb) {
-
+    allObjects = p;
     invoker = jc;
-    invoker2 = jb;
 
     setForeground(JDUtils.labelColor);
     setFont(JDUtils.labelFont);
@@ -82,36 +49,28 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
     // ------------------------------------------------------------------------------------
     JPanel namePanel = new JPanel(null);
     namePanel.setBorder(JDUtils.createTitleBorder("Object name"));
-    namePanel.setBounds(5, 5, 370, 55);
+    namePanel.setBounds(5, 5, 370, 50);
 
     nameText = new JTextField();
-    nameText.setMargin(JDUtils.zMargin);
     nameText.setEditable(true);
     nameText.setFont(JDUtils.labelFont);
-    nameText.setBounds(10, 20, 260, 24);
+    nameText.setText(p[0].getName());
+    nameText.setBounds(10, 20, 350, 24);
     nameText.addActionListener(this);
-    nameText.addKeyListener(this);
     namePanel.add(nameText);
-    nameHasChanged = false;
-
-    applyNameBtn = new JButton("Apply");
-    applyNameBtn.setFont(JDUtils.labelFont);
-    applyNameBtn.setBounds(270, 20, 90, 24);
-    applyNameBtn.addActionListener(this);
-    namePanel.add(applyNameBtn);
-
     add(namePanel);
 
     // ------------------------------------------------------------------------------------
     JPanel colorPanel = new JPanel(null);
     colorPanel.setBorder(JDUtils.createTitleBorder("Colors"));
-    colorPanel.setBounds(5, 60, 370, 55);
+    colorPanel.setBounds(5, 55, 370, 55);
 
     foregroundLabel = JDUtils.createLabel("Foreground");
     foregroundLabel.setBounds(10, 20, 100, 24);
     colorPanel.add(foregroundLabel);
     foregroundButton = new JButton("...");
     foregroundButton.setMargin(new Insets(0, 0, 0, 0));
+    foregroundButton.setBackground(p[0].getForeground());
     foregroundButton.setForeground(Color.BLACK);
     foregroundButton.addActionListener(this);
     foregroundButton.setBounds(120, 20, 60, 24);
@@ -123,6 +82,7 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
     colorPanel.add(backgroundLabel);
     backgroundButton = new JButton("");
     backgroundButton.setMargin(new Insets(0, 0, 0, 0));
+    backgroundButton.setBackground(p[0].getBackground());
     backgroundButton.setForeground(Color.BLACK);
     backgroundButton.addActionListener(this);
     backgroundButton.setBounds(300, 20, 60, 24);
@@ -132,7 +92,7 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
     // ------------------------------------------------------------------------------------
     JPanel stylePanel = new JPanel(null);
     stylePanel.setBorder(JDUtils.createTitleBorder("Styles"));
-    stylePanel.setBounds(5, 115, 370, 115);
+    stylePanel.setBounds(5, 110, 370, 115);
 
     lineDashLabel = JDUtils.createLabel("Line style");
     lineDashLabel.setBounds(10, 20, 70, 25);
@@ -145,6 +105,7 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
     lineDashCombo.addItem("Short dash");
     lineDashCombo.addItem("Long dash");
     lineDashCombo.addItem("Dot dash");
+    lineDashCombo.setSelectedIndex(p[0].getLineStyle());
     lineDashCombo.addActionListener(this);
     lineDashCombo.setBounds(80, 20, 140, 25);
     stylePanel.add(lineDashCombo);
@@ -155,6 +116,12 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
     stylePanel.add(lineWidthLabel);
 
     lineWidthSpinner = new JSpinner();
+    Integer value = new Integer(p[0].getLineWidth());
+    Integer min = new Integer(0);
+    Integer max = new Integer(10);
+    Integer step = new Integer(1);
+    SpinnerNumberModel spModel = new SpinnerNumberModel(value, min, max, step);
+    lineWidthSpinner.setModel(spModel);
     lineWidthSpinner.addChangeListener(this);
     lineWidthSpinner.setBounds(315, 20, 45, 25);
     stylePanel.add(lineWidthSpinner);
@@ -178,6 +145,7 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
     fillDashCombo.addItem("Dot pattern 2");
     fillDashCombo.addItem("Dot pattern 3");
     fillDashCombo.addItem("Gradient fill");
+    fillDashCombo.setSelectedIndex(p[0].getFillStyle());
     fillDashCombo.addActionListener(this);
     fillDashCombo.setBounds(80, 50, 140, 25);
     stylePanel.add(fillDashCombo);
@@ -188,31 +156,27 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
     fillCustomButton.setForeground(Color.BLACK);
     fillCustomButton.addActionListener(this);
     fillCustomButton.setBounds(230, 50, 130, 25);
+    fillCustomButton.setEnabled(p[0].getFillStyle()==JDObject.FILL_STYLE_GRADIENT);
     stylePanel.add(fillCustomButton);
 
     visibleCheckBox = new JCheckBox("Visible");
     visibleCheckBox.setFont(JDUtils.labelFont);
     visibleCheckBox.setForeground(JDUtils.labelColor);
     visibleCheckBox.setBounds(5, 80, 90, 25);
+    visibleCheckBox.setSelected(p[0].isVisible());
     visibleCheckBox.addActionListener(this);
     stylePanel.add(visibleCheckBox);
-
-    antiAliasCheckBox = new JCheckBox("Anti alias");
-    antiAliasCheckBox.setFont(JDUtils.labelFont);
-    antiAliasCheckBox.setForeground(JDUtils.labelColor);
-    antiAliasCheckBox.setBounds(110, 80, 90, 25);
-    antiAliasCheckBox.addActionListener(this);
-    stylePanel.add(antiAliasCheckBox);
 
     // ------------------------------------------------------------------------------------
     JPanel shadowPanel = new JPanel(null);
     shadowPanel.setBorder(JDUtils.createTitleBorder("Shadows"));
-    shadowPanel.setBounds(5, 230, 370, 55);
+    shadowPanel.setBounds(5, 225, 370, 55);
 
     shadowCheckBox = new JCheckBox("Shadow");
     shadowCheckBox.setFont(JDUtils.labelFont);
     shadowCheckBox.setForeground(JDUtils.labelColor);
     shadowCheckBox.setBounds(5, 20, 90, 25);
+    shadowCheckBox.setSelected(p[0].hasShadow());
     shadowCheckBox.addActionListener(this);
     shadowPanel.add(shadowCheckBox);
 
@@ -220,6 +184,7 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
     invertShadowCheckBox.setFont(JDUtils.labelFont);
     invertShadowCheckBox.setForeground(JDUtils.labelColor);
     invertShadowCheckBox.setBounds(110, 20, 90, 25);
+    invertShadowCheckBox.setSelected(p[0].hasInverseShadow());
     invertShadowCheckBox.addActionListener(this);
     shadowPanel.add(invertShadowCheckBox);
 
@@ -229,101 +194,27 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
     shadowPanel.add(shadowWidthLabel);
 
     shadowWidthSpinner = new JSpinner();
+    value = new Integer(p[0].getShadowWidth());
+    min = new Integer(1);
+    max = new Integer(20);
+    step = new Integer(1);
+    SpinnerNumberModel sp2Model = new SpinnerNumberModel(value, min, max, step);
+    shadowWidthSpinner.setModel(sp2Model);
     shadowWidthSpinner.addChangeListener(this);
     shadowWidthSpinner.setBounds(295, 20, 65, 25);
     shadowPanel.add(shadowWidthSpinner);
+
     add(shadowPanel);
-
-    updatePanel(p);
-  }
-
-  public boolean nameHasChanged() {
-    return nameHasChanged;
-  }
-
-  public void applyName() {
-    
-    for (int i = 0; i < allObjects.length; i++)
-      allObjects[i].setName(nameText.getText());
-    invoker.setNeedToSave(true,"Change name");
-    if(invoker2!=null) invoker2.updateNode();
-    nameText.setCaretPosition(0);
-    nameHasChanged = false;
-
-  }
-
-  public void cancelNameChanged() {
-    nameHasChanged = false;
-  }
-
-  public void updatePanel(JDObject[] objs) {
-
-    allObjects = objs;
-    isUpdating = true;
-    nameHasChanged = false;
-
-    if (objs == null || objs.length <= 0) {
-      
-      nameText.setText("");
-      foregroundButton.setBackground(Color.LIGHT_GRAY);
-      backgroundButton.setBackground(Color.LIGHT_GRAY);
-      lineDashCombo.setSelectedIndex(-1);
-
-      lineWidthSpinner.setModel(new SpinnerNumberModel(0,0,0,0));
-      shadowWidthSpinner.setModel(new SpinnerNumberModel(0,0,0,0));
-
-      fillDashCombo.setSelectedIndex(-1);
-      fillCustomButton.setEnabled(false);
-      visibleCheckBox.setSelected(false);
-      antiAliasCheckBox.setSelected(false);
-      shadowCheckBox.setSelected(false);
-      invertShadowCheckBox.setSelected(false);
-
-    } else {
-
-      JDObject p = objs[0];
-
-      nameText.setText(p.getName());
-      foregroundButton.setBackground(p.getForeground());
-      backgroundButton.setBackground(p.getBackground());
-      lineDashCombo.setSelectedIndex(p.getLineStyle());
-
-      Integer value = new Integer(p.getLineWidth());
-      Integer min = new Integer(0);
-      Integer max = new Integer(10);
-      Integer step = new Integer(1);
-      SpinnerNumberModel spModel = new SpinnerNumberModel(value, min, max, step);
-      lineWidthSpinner.setModel(spModel);
-
-      min = new Integer(1);
-      max = new Integer(20);
-      step = new Integer(1);
-      value = new Integer(p.getShadowWidth());
-      SpinnerNumberModel sp2Model = new SpinnerNumberModel(value, min, max, step);
-      shadowWidthSpinner.setModel(sp2Model);
-
-      fillDashCombo.setSelectedIndex(p.getFillStyle());
-      fillCustomButton.setEnabled(p.getFillStyle() == JDObject.FILL_STYLE_GRADIENT);
-      visibleCheckBox.setSelected(p.isVisible());
-      antiAliasCheckBox.setSelected(p.isAntiAliased());
-      shadowCheckBox.setSelected(p.hasShadow());
-      invertShadowCheckBox.setSelected(p.hasInverseShadow());
-
-    }
-
-    isUpdating = false;
 
   }
 
   private void initRepaint() {
-    if(allObjects==null) return;
     oldRect = allObjects[0].getRepaintRect();
     for (int i = 1; i < allObjects.length; i++)
       oldRect = oldRect.union(allObjects[i].getRepaintRect());
   }
 
   private void repaintObjects() {
-    if(allObjects==null) return;
     Rectangle newRect = allObjects[0].getRepaintRect();
     for (int i = 1; i < allObjects.length; i++)
       newRect = newRect.union(allObjects[i].getRepaintRect());
@@ -335,8 +226,6 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
   // ---------------------------------------------------------
   public void actionPerformed(ActionEvent e) {
 
-    if(allObjects==null || isUpdating) return;
-
     Object src = e.getSource();
     int i;
     initRepaint();
@@ -347,7 +236,7 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
         for (i = 0; i < allObjects.length; i++)
           allObjects[i].setBackground(c);
         backgroundButton.setBackground(c);
-        invoker.setNeedToSave(true,"Change background");
+        JDUtils.modified = true;
       }
     } else if (src == foregroundButton) {
       Color c = JColorChooser.showDialog(this, "Choose foreground color", allObjects[0].getForeground());
@@ -355,64 +244,48 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
         for (i = 0; i < allObjects.length; i++)
           allObjects[i].setForeground(c);
         foregroundButton.setBackground(c);
-        invoker.setNeedToSave(true,"Change foreground");
+        JDUtils.modified = true;
       }
     } else if (src == lineDashCombo) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setLineStyle(lineDashCombo.getSelectedIndex());
-      invoker.setNeedToSave(true,"Change line style");
+      JDUtils.modified = true;
     } else if (src == fillDashCombo) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setFillStyle(fillDashCombo.getSelectedIndex());
       fillCustomButton.setEnabled(fillDashCombo.getSelectedIndex()==JDObject.FILL_STYLE_GRADIENT);
-      invoker.setNeedToSave(true,"Change fill style");
+      JDUtils.modified = true;
     } else if (src == shadowCheckBox) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setShadow(shadowCheckBox.isSelected());
-      invoker.setNeedToSave(true,"Change shadow");
+      JDUtils.modified = true;
     } else if (src == invertShadowCheckBox) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setInverseShadow(invertShadowCheckBox.isSelected());
-      invoker.setNeedToSave(true,"Change invert shadow");
-    } else if (src == nameText || src == applyNameBtn) {
-      applyName();
+      JDUtils.modified = true;
+    } else if (src == nameText) {
+      for (i = 0; i < allObjects.length; i++)
+        allObjects[i].setName(nameText.getText());
+      JDUtils.modified = true;
+      nameText.setCaretPosition(0);
     } else if (src == visibleCheckBox) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setVisible(visibleCheckBox.isSelected());
-      invoker.setNeedToSave(true,"Change visible");
+      JDUtils.modified = true;
+      nameText.setCaretPosition(0);
     } else if (src == fillCustomButton) {
       JDialog d = (JDialog)getRootPane().getRootPane().getParent();
       JDGradientDialog dlg = new JDGradientDialog(d,allObjects,invoker);
-      if(dlg.editGradient()) invoker.setNeedToSave(true,"Change gradient fill");
-    } else if (src == antiAliasCheckBox) {
-      for (i = 0; i < allObjects.length; i++)
-        allObjects[i].setAntiAlias(antiAliasCheckBox.isSelected());
-      invoker.setNeedToSave(true,"Change anti alias");
+      dlg.show();
     }
 
     repaintObjects();
   }
 
   // ---------------------------------------------------------
-  // Key listener
-  // ---------------------------------------------------------
-  public void keyTyped(KeyEvent e) {}
-  public void keyReleased(KeyEvent e) {}
-  public void keyPressed(KeyEvent e) {
-    Object src = e.getSource();
-    if( src==nameText ) {
-      nameHasChanged = true;
-    }
-  }
-
-
-  // ---------------------------------------------------------
   //Change listener
   // ---------------------------------------------------------
   public void stateChanged(ChangeEvent e) {
-
-    if(allObjects==null || isUpdating) return;
-
     Object src = e.getSource();
     Integer v;
     int i;
@@ -422,16 +295,15 @@ class JDObjectPanel extends JPanel implements ActionListener, ChangeListener, Ke
       v = (Integer) lineWidthSpinner.getValue();
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setLineWidth(v.intValue());
-      invoker.setNeedToSave(true,"Change line width");
+      JDUtils.modified = true;
     } else if (src == shadowWidthSpinner) {
       v = (Integer) shadowWidthSpinner.getValue();
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setShadowWidth(v.intValue());
-      invoker.setNeedToSave(true,"Change shadow width");
+      JDUtils.modified = true;
     }
 
     repaintObjects();
   }
-
 
 }

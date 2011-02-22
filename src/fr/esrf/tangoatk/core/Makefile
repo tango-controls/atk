@@ -16,14 +16,12 @@ ERRORHANDLER = 	$(TARGET)/ErrorHandlerAdapter.class \
 
 
 DEVICE = $(TARGET)/DeviceFactory.class \
-	$(TARGET)/DeviceProperty.class \
-        $(TARGET)/Device.class 
+         $(TARGET)/Device.class 
 
 
 INTERFACES = $(TARGET)/INumber.class   \
 	$(TARGET)/IDevice.class      \
 	$(TARGET)/IEntityFilter.class \
-	$(TARGET)/IEntityList.class \
 	$(TARGET)/IString.class \
         $(TARGET)/IDeviceApplication.class \
 	$(TARGET)/IErrorListener.class \
@@ -58,26 +56,8 @@ INTERFACES = $(TARGET)/INumber.class   \
         $(TARGET)/IStringSpectrum.class \
         $(TARGET)/IStringSpectrumListener.class \
 	$(TARGET)/IRefresherListener.class \
-        $(TARGET)/IBooleanImage.class \
-        $(TARGET)/IBooleanSpectrum.class \
-        $(TARGET)/IBooleanScalar.class \
-        $(TARGET)/IBooleanImageListener.class \
-        $(TARGET)/IBooleanSpectrumListener.class \
-        $(TARGET)/IBooleanScalarListener.class \
-        $(TARGET)/IDevStateScalar.class \
-        $(TARGET)/IDevStateScalarListener.class \
-        $(TARGET)/ICommandGroup.class \
-        $(TARGET)/IEndGroupExecutionListener.class \
-        $(TARGET)/IRawImage.class \
-        $(TARGET)/IRawImageListener.class \
-        $(TARGET)/IEnumScalar.class \
-        $(TARGET)/IEnumScalarListener.class \
-        $(TARGET)/IStringImage.class \
-        $(TARGET)/IStringImageListener.class \
-        $(TARGET)/IDevStateSpectrum.class \
-        $(TARGET)/IDevStateSpectrumListener.class \
-        $(TARGET)/IAttributeSpectrumHistory.class \
-        $(TARGET)/INumberSpectrumHistory.class
+	$(TARGET)/INonAttrNumberSpectrum.class \
+	$(TARGET)/INonAttrSpectrumListener.class \
 
 
 PROPERTIES = $(TARGET)/Property.class \
@@ -87,11 +67,9 @@ PROPERTIES = $(TARGET)/Property.class \
 	     $(TARGET)/FormatProperty.class \
 	     $(TARGET)/DisplayLevelProperty.class \
 	     $(TARGET)/TypeProperty.class \
-	     $(TARGET)/PropertyStorage.class \
 
 
-EVENTS =  $(TARGET)/AtkEventListenerList.class \
-          $(TARGET)/EventSupport.class \
+EVENTS =  $(TARGET)/EventSupport.class \
 	  $(TARGET)/ATKEvent.class \
           $(TARGET)/NumberScalarEvent.class \
           $(TARGET)/StringScalarEvent.class \
@@ -103,15 +81,7 @@ EVENTS =  $(TARGET)/AtkEventListenerList.class \
           $(TARGET)/ResultEvent.class \
           $(TARGET)/AttributeStateEvent.class \
           $(TARGET)/StringSpectrumEvent.class \
-          $(TARGET)/BooleanImageEvent.class \
-          $(TARGET)/BooleanSpectrumEvent.class \
-          $(TARGET)/BooleanScalarEvent.class \
-          $(TARGET)/DevStateScalarEvent.class \
-          $(TARGET)/EndGroupExecutionEvent.class \
-          $(TARGET)/RawImageEvent.class \
-          $(TARGET)/EnumScalarEvent.class \
-          $(TARGET)/StringImageEvent.class \
-          $(TARGET)/DevStateSpectrumEvent.class \
+          $(TARGET)/NonAttrNumberSpectrumEvent.class \
 
 
 ABSTRACTS = $(TARGET)/AEntityList.class \
@@ -121,11 +91,10 @@ ABSTRACTS = $(TARGET)/AEntityList.class \
 
 
 
-LISTS = $(TARGET)/DeviceItem.class \
-	$(TARGET)/AttributeList.class \
+LISTS = $(TARGET)/AttributeList.class \
 	$(TARGET)/AttributePolledList.class \
 	$(TARGET)/CommandList.class \
-        $(TARGET)/CommandGroup.class \
+
 
 PRE = $(INTERFACES) $(ABSTRACTS) $(DEVICE) $(ERRORHANDLER) \
       $(EXCEPTIONS) $(EVENTS)  $(PROPERTIES) 
@@ -156,7 +125,7 @@ utils:
 core: pre commands attributes post
 
 
-all:  core utils beaninfo
+all:  utils core beaninfo
 
 
 attribute-clean:

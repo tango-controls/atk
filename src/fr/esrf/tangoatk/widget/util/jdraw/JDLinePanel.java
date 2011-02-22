@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /** A panel for JDLine private properties */
 package fr.esrf.tangoatk.widget.util.jdraw;
 
@@ -63,13 +41,13 @@ class JDLinePanel extends JPanel implements ActionListener, ChangeListener {
   private JLabel arrowWidthLabel;
   private JSpinner arrowWidthSpinner;
 
-  private JDLine[] allObjects = null;
-  private JDrawEditor invoker;
-  private Rectangle oldRect;
-  private boolean isUpdating = false;
+  JDLine[] allObjects;
+  JComponent invoker;
+  Rectangle oldRect;
 
-  public JDLinePanel(JDLine[] p, JDrawEditor jc) {
+  public JDLinePanel(JDLine[] p, JComponent jc) {
 
+    allObjects = p;
     invoker = jc;
     setLayout(null);
     setBorder(BorderFactory.createEtchedBorder());
@@ -179,49 +157,18 @@ class JDLinePanel extends JPanel implements ActionListener, ChangeListener {
     arrowPanel.add(arrowWidthLabel);
 
     arrowWidthSpinner = new JSpinner();
+    Integer value = new Integer(p[0].getArrowSize());
+    Integer min = new Integer(0);
+    Integer max = new Integer(20);
+    Integer step = new Integer(1);
+    SpinnerNumberModel spModel = new SpinnerNumberModel(value, min, max, step);
+    arrowWidthSpinner.setModel(spModel);
     arrowWidthSpinner.addChangeListener(this);
     arrowWidthSpinner.setBounds(10, 110, 60, 25);
     arrowPanel.add(arrowWidthSpinner);
+
     add(arrowPanel);
-
-    updatePanel(p);
-
-  }
-
-  public void updatePanel(JDLine[] objs) {
-
-    allObjects = objs;
-    isUpdating = true;
-
-    if (objs == null || objs.length <= 0) {
-
-      arrowWidthSpinner.setModel(new SpinnerNumberModel(0,0,0,0));
-      line1CheckBox.setSelected(false);
-      line2CheckBox.setSelected(false);
-      line3CheckBox.setSelected(false);
-      line4CheckBox.setSelected(false);
-      line5CheckBox.setSelected(false);
-      line6CheckBox.setSelected(false);
-      line7CheckBox.setSelected(false);
-      line8CheckBox.setSelected(false);
-      line9CheckBox.setSelected(false);
-
-    } else {
-
-      JDLine p = objs[0];
-
-      Integer value = new Integer(p.getArrowSize());
-      Integer min = new Integer(0);
-      Integer max = new Integer(20);
-      Integer step = new Integer(1);
-      SpinnerNumberModel spModel = new SpinnerNumberModel(value, min, max, step);
-      arrowWidthSpinner.setModel(spModel);
-      updateControls();
-
-    }
-
-    isUpdating = false;
-
+    updateControls();
   }
 
   private void updateControls() {
@@ -237,14 +184,12 @@ class JDLinePanel extends JPanel implements ActionListener, ChangeListener {
   }
 
   private void initRepaint() {
-    if(allObjects==null) return;
     oldRect = allObjects[0].getRepaintRect();
     for (int i = 1; i < allObjects.length; i++)
       oldRect = oldRect.union(allObjects[i].getRepaintRect());
   }
 
   private void repaintObjects() {
-    if(allObjects==null) return;
     Rectangle newRect = allObjects[0].getRepaintRect();
     for (int i = 1; i < allObjects.length; i++)
       newRect = newRect.union(allObjects[i].getRepaintRect());
@@ -256,46 +201,44 @@ class JDLinePanel extends JPanel implements ActionListener, ChangeListener {
   // ---------------------------------------------------------
   public void actionPerformed(ActionEvent e) {
     int i;
-    if(allObjects==null || isUpdating) return;
-
     initRepaint();
     Object src = e.getSource();
     if (src == line1CheckBox) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setArrow(JDLine.ARROW_NONE);
-      invoker.setNeedToSave(true,"Change arrow");
+      JDUtils.modified=true;
     } else if (src == line2CheckBox) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setArrow(JDLine.ARROW1_LEFT);
-      invoker.setNeedToSave(true,"Change arrow");
+      JDUtils.modified=true;
     } else if (src == line3CheckBox) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setArrow(JDLine.ARROW1_RIGHT);
-      invoker.setNeedToSave(true,"Change arrow");
+      JDUtils.modified=true;
     } else if (src == line4CheckBox) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setArrow(JDLine.ARROW1_BOTH);
-      invoker.setNeedToSave(true,"Change arrow");
+      JDUtils.modified=true;
     } else if (src == line5CheckBox) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setArrow(JDLine.ARROW1_CENTER);
-      invoker.setNeedToSave(true,"Change arrow");
+      JDUtils.modified=true;
     } else if (src == line6CheckBox) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setArrow(JDLine.ARROW2_LEFT);
-      invoker.setNeedToSave(true,"Change arrow");
+      JDUtils.modified=true;
     } else if (src == line7CheckBox) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setArrow(JDLine.ARROW2_RIGHT);
-      invoker.setNeedToSave(true,"Change arrow");
+      JDUtils.modified=true;
     } else if (src == line8CheckBox) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setArrow(JDLine.ARROW2_BOTH);
-      invoker.setNeedToSave(true,"Change arrow");
+      JDUtils.modified=true;
     } else if (src == line9CheckBox) {
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setArrow(JDLine.ARROW2_CENTER);
-      invoker.setNeedToSave(true,"Change arrow");
+      JDUtils.modified=true;
     }
     updateControls();
     repaintObjects();
@@ -307,7 +250,6 @@ class JDLinePanel extends JPanel implements ActionListener, ChangeListener {
   public void stateChanged(ChangeEvent e) {
 
     int i;
-    if(allObjects==null || isUpdating) return;
     initRepaint();
     Object src = e.getSource();
     Integer v;
@@ -316,7 +258,7 @@ class JDLinePanel extends JPanel implements ActionListener, ChangeListener {
       v = (Integer) arrowWidthSpinner.getValue();
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setArrowSize(v.intValue());
-      invoker.setNeedToSave(true,"Change arrow size");
+      JDUtils.modified=true;
     }
     repaintObjects();
 

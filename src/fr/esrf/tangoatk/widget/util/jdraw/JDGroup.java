@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /**
  * JDraw Group graphic object
  */
@@ -31,30 +9,20 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Vector;
 
-/** JDraw Group graphic object. A group can contains all JDObject including group.
- * If the group is scaled, all object within this group will also be scaled.
- * <p>Here is an exmaple of few group :<p>
- * <img src="JDGroup.gif" border="0" alt="JDGroup examples"></img>
- */
+/** JDraw Group graphic object */
 public class JDGroup extends JDRectangular {
 
   // Vars
-  private Vector children;
+  Vector children;
 
-  // Bounding box
-  private double x1;
-  private double y1;
-  private double x2;
-  private double y2;
+  double x1;
+  double y1;
+  double x2;
+  double y2;
 
-  private boolean vFlat = false;  // Flat group width = 0
-  private boolean hFlat = false;  // Flat group height = 0
-
-  /**
-   * Construct a group.
-   * @param objectName Group name.
-   * @param o Vector of JDObject to be grouped.
-   */
+  // -----------------------------------------------------------
+  // Construction
+  // -----------------------------------------------------------
   public JDGroup(String objectName, Vector o) {
     initDefault();
     children = new Vector();
@@ -66,7 +34,7 @@ public class JDGroup extends JDRectangular {
     updateShape();
   }
 
-  JDGroup(JDGroup e, int x, int y) {
+  public JDGroup(JDGroup e, int x, int y) {
     cloneObject(e, x, y);
 
     // Clone child
@@ -92,54 +60,21 @@ public class JDGroup extends JDRectangular {
     updateShape();
   }
 
-  JDGroup(LXObject lxObj, Vector o) {
-    initDefault();
-    loadObject(lxObj);
-    children = o;
-    summit = new Point.Double[8];
-    createSummit();
-    computeSummitCoordinates();
-    updateShape();
-  }
-
   // -----------------------------------------------------------
   // Overrides
   // -----------------------------------------------------------
-  private boolean canPaint() {
 
-    if (!visible) return false;
-
-    // Horizontal flat
-    if(hFlat) {
-      if(boundRect.width <= 1)
-        if( Math.abs(summit[4].x-summit[0].x)<0.5)
-          return false;
-      return true;
-    }
-
-    // Vertical flat
-    if(vFlat) {
-      if(boundRect.height <= 1)
-        if( Math.abs(summit[4].y-summit[0].y)<0.5)
-          return false;
-      return true;
-    }
+  public void paint(Graphics g) {
+    if (!visible) return;
 
     if (boundRect.width <= 1 || boundRect.height <= 1) {
       if( Math.abs(summit[4].x-summit[0].x)<0.5 ||
           Math.abs(summit[4].y-summit[0].y)<0.5  )
-      return false;
+      return;
     }
 
-    return true;
-
-  }
-
-  public void paint(JDrawEditor parent,Graphics g) {
-    if(canPaint()) {
-      for (int i = 0; i < children.size(); i++)
-        ((JDObject) children.get(i)).paint(parent,g);
-    }
+    for (int i = 0; i < children.size(); i++)
+      ((JDObject) children.get(i)).paint(g);
   }
 
   void paintShadows(Graphics g) {}
@@ -155,22 +90,14 @@ public class JDGroup extends JDRectangular {
     return found;
   }
 
-  void updateShape() {
+  public void updateShape() {
 
     int i;
 
     // Does not compute anything for null width group
-    if (hFlat) {
-      if (Math.abs(summit[4].x - summit[0].x) < 0.5)
-        return;
-    } else if (vFlat) {
-      if (Math.abs(summit[4].y - summit[0].y) < 0.5)
-        return;
-    } else {
-      if (Math.abs(summit[4].x - summit[0].x) < 0.5 ||
-          Math.abs(summit[4].y - summit[0].y) < 0.5)
-        return;
-    }
+    if( Math.abs(summit[4].x-summit[0].x)<0.5 ||
+        Math.abs(summit[4].y-summit[0].y)<0.5  )
+      return;
 
     //Compute transformation for chidlren
 
@@ -184,8 +111,8 @@ public class JDGroup extends JDRectangular {
     double ty = ny1 - y1;
 
     // Scale
-    double sx = (vFlat)?1.0:(nx2 - nx1) / (x2 - x1);
-    double sy = (hFlat)?1.0:(ny2 - ny1) / (y2 - y1);
+    double sx = (nx2 - nx1) / (x2 - x1);
+    double sy = (ny2 - ny1) / (y2 - y1);
 
     if (sx == 1.0 && sy == 1.0) {
       // Translation
@@ -230,110 +157,10 @@ public class JDGroup extends JDRectangular {
   
   }
 
-  int getSummitMotion(int id) {
-
-    // Horizontal flat group
-    if (hFlat) {
-      if (id == 1 || id == 5) {
-        return JDObject.NONE_SM;
-      } else {
-        return JDObject.HORIZONTAL_SM;
-      }
-    }
-
-    // Vertical flat group
-    if (vFlat) {
-      if (id == 7 || id == 3) {
-        return JDObject.NONE_SM;
-      } else {
-        return JDObject.VERTICAL_SM;
-      }
-    }
-
-    return super.getSummitMotion(id);
-
-  }
-
-  public void moveSummit(int id,double x,double y) {
-
-    // Horizontal flat group
-    if (hFlat) {
-      switch(id) {
-        case 0:
-        case 6:
-        case 7:
-          super.moveSummit(7,x,y);
-          break;
-        case 2:
-        case 3:
-        case 4:
-          super.moveSummit(3,x,y);
-          break;
-      }
-      return;
-    }
-
-    // Vertical flat group
-    if (vFlat) {
-      switch(id) {
-        case 0:
-        case 1:
-        case 2:
-          super.moveSummit(1,x,y);
-          break;
-        case 4:
-        case 5:
-        case 6:
-          super.moveSummit(5,x,y);
-          break;
-      }
-      return;
-    }
-
-    super.moveSummit(id,x,y);
-
-  }
-
-  void paintSummit(Graphics g,double summitWidth) {
-
-    int sw  = (int)(summitWidth/2.0 + 1.0);
-
-    if( hFlat ) {
-
-      g.setColor(Color.black);
-      g.setXORMode(Color.white);
-      g.fillRect((int) (summit[0].x - sw), (int) (summit[0].y - sw), 2*sw, 2*sw);
-      g.fillRect((int) (summit[2].x - sw), (int) (summit[2].y - sw), 2*sw, 2*sw);
-      g.setPaintMode();
-      return;
-
-    }
-
-    if( vFlat ) {
-
-      g.setColor(Color.black);
-      g.setXORMode(Color.white);
-      g.fillRect((int) (summit[0].x - sw), (int) (summit[0].y - sw), 2*sw, 2*sw);
-      g.fillRect((int) (summit[6].x - sw), (int) (summit[6].y - sw), 2*sw, 2*sw);
-      g.setPaintMode();
-      return;
-
-    }
-
-    super.paintSummit(g,summitWidth);
-
-  }
-
-  void setParent(JDrawEditor p) {
-    super.setParent(p);
-    for(int i=0;i<getChildrenNumber();i++) 
-      getChildAt(i).setParent(p);    
-  }
-  
   // -----------------------------------------------------------
   // Overrided Property
   // -----------------------------------------------------------
-  Rectangle getRepaintRect() {
+  public Rectangle getRepaintRect() {
 
     // Compute repaint rectangle
     Rectangle r = null;
@@ -352,109 +179,48 @@ public class JDGroup extends JDRectangular {
 
   }
 
-  /**
-   * Sets the background of this group, Apply it on all children.
-   * @param c Background color.
-   * @see JDObject#setBackground
-   */
   public void setBackground(Color c) {
     background = c;
     for (int i = 0; i < children.size(); i++)
       ((JDObject) children.get(i)).setBackground(c);
   }
 
-  /**
-   * Sets the foreground of this group, Apply it on all children.
-   * @param c Foreground color.
-   * @see JDObject#setForeground
-   */
   public void setForeground(Color c) {
     foreground = c;
     for (int i = 0; i < children.size(); i++)
       ((JDObject) children.get(i)).setForeground(c);
   }
 
-  /**
-   * Sets the fill style of this group, Apply it on all children.
-   * @param s Fill style.
-   * @see JDObject#setFillStyle
-   */
   public void setFillStyle(int s) {
     fillStyle = s;
     for (int i = 0; i < children.size(); i++)
       ((JDObject) children.get(i)).setFillStyle(s);
   }
 
-  /**
-   * Sets the line style of this group, Apply it on all children.
-   * @param s Line style.
-   * @see JDObject#setLineStyle
-   */
   public void setLineStyle(int s) {
     lineStyle = s;
     for (int i = 0; i < children.size(); i++)
       ((JDObject) children.get(i)).setLineStyle(s);
   }
 
-  /**
-   * Sets the anti aliasing for all objects of this group
-   * @param alias Anti alias
-   * @see JDObject#setAntiAlias
-   */
-  public void setAntiAlias(boolean alias) {
-    antiAlias = alias;
-    for (int i = 0; i < children.size(); i++)
-      ((JDObject) children.get(i)).setAntiAlias(alias);
-  }
-
-  /**
-   * Sets the line width of this group, Apply it on all children.
-   * @param w Line width.
-   * @see JDObject#setLineWidth
-   */
   public void setLineWidth(int w) {
     lineWidth = w;
     for (int i = 0; i < children.size(); i++)
       ((JDObject) children.get(i)).setLineWidth(w);
   }
 
-  /**
-   * Sets the shadow of this group, Apply it on all children.
-   * @param b Shadow flag.
-   * @see JDObject#setShadow
-   */
   public void setShadow(boolean b) {
     isShadowed = b;
     for (int i = 0; i < children.size(); i++)
       ((JDObject) children.get(i)).setShadow(b);
   }
 
-  /**
-   * Shows or hides this object, Apply it on all children.
-   * @param b True to show, false otherwise.
-   */
-  public void setVisible(boolean b) {
-    visible = b;
-    for (int i = 0; i < children.size(); i++)
-      ((JDObject) children.get(i)).setVisible(b);
-  }
-
-  /**
-   * Sets the inverse shadow of this group, Apply it on all children.
-   * @param b Invert shadow flag.
-   * @see JDObject#setInverseShadow
-   */
   public void setInverseShadow(boolean b) {
     invertShadow = b;
     for (int i = 0; i < children.size(); i++)
       ((JDObject) children.get(i)).setInverseShadow(b);
   }
 
-  /**
-   * Sets the shadow width of this group, Apply it on all children.
-   * @param w Shadow width.
-   * @see JDObject#setShadowWidth
-   */
   public void setShadowWidth(int w) {
     shadowThickness = w;
     for (int i = 0; i < children.size(); i++)
@@ -469,7 +235,7 @@ public class JDGroup extends JDRectangular {
     super.setVal(v,master);
   }
 
-  void initVal(JDObject master) {
+  public void initVal(JDObject master) {
     JDObject m = isInteractive()?this:master;
     super.initVal(m);
     for (int i=0;i<children.size();i++)
@@ -515,17 +281,6 @@ public class JDGroup extends JDRectangular {
     }
   }
 
-  void getObjectsByClassList(Vector result,Class theClass) {
-    for (int i=0;i<children.size();i++)
-      getChildAt(i).getObjectsByClassList(result,theClass);
-  }
-
-  public void getObjectsByName(Vector result,String name,boolean recurseGroup) {
-    super.getObjectsByName(result,name,recurseGroup);
-    for (int i=0;i<children.size() && recurseGroup;i++)
-      getChildAt(i).getObjectsByName(result,name,recurseGroup);
-  }
-
   public boolean isProgrammed() {
     boolean ret = super.isProgrammed();
     for (int i=0;i<children.size();i++)
@@ -536,25 +291,15 @@ public class JDGroup extends JDRectangular {
   // -----------------------------------------------------------
   // Children management
   // -----------------------------------------------------------
-/**
- * Returns the child at the specifed position.
- * @param idx Child index
- */
+
   public JDObject getChildAt(int idx) {
     return (JDObject)children.get(idx);
   }
 
-  /**
-   * Returns the number of child of this group.
-   */
   public int getChildrenNumber() {
     return children.size();
   }
 
-  /**
-   * Sets the children of this group.
-   * @param o Vector of JDObject to be grouped.
-   */
   public void setChildrenList(Vector o) {
     children = new Vector();
     for (int i = 0; i < o.size(); i++) children.add(o.get(i));
@@ -562,9 +307,6 @@ public class JDGroup extends JDRectangular {
     updateShape();
   }
 
-  /**
-   * Returns a Vector containing all children of this group.
-   */
   public Vector getChildren() {
     return children;
   }
@@ -779,29 +521,24 @@ public class JDGroup extends JDRectangular {
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
-  void saveObject(FileWriter f, int level) throws IOException {
+  public void saveObject(FileWriter f, int level) throws IOException {
 
-    // Do not save empty group
-    if (children.size() > 0) {
+    String decal = saveObjectHeader(f, level);
 
-      String decal = saveObjectHeader(f, level);
+    String to_write = decal + "children: {\n";
+    f.write(to_write, 0, to_write.length());
 
-      String to_write = decal + "children: {\n";
-      f.write(to_write, 0, to_write.length());
+    for (int i = 0; i < children.size(); i++)
+      ((JDObject) children.get(i)).saveObject(f,level+2);
 
-      for (int i = 0; i < children.size(); i++)
-        ((JDObject) children.get(i)).saveObject(f, level + 2);
+    to_write = decal + "}\n";
+    f.write(to_write, 0, to_write.length());
 
-      to_write = decal + "}\n";
-      f.write(to_write, 0, to_write.length());
-
-      closeObjectHeader(f, level);
-
-    }
+    closeObjectHeader(f, level);
 
   }
 
-  JDGroup(JDFileLoader f) throws IOException {
+  public JDGroup(JDFileLoader f) throws IOException {
 
     children = new Vector();
 
@@ -832,15 +569,13 @@ public class JDGroup extends JDRectangular {
   // Undo buffer
   // -----------------------------------------------------------
   UndoPattern getUndoPattern() {
-
     UndoPattern u = new UndoPattern(UndoPattern._JDGroup);
     fillUndoPattern(u);
     u.gChildren = new Vector();
-    for(int i=0;i<children.size();i++)
+    for(int i=0;i<children.size();i++) {
       u.gChildren.add( ((JDObject)children.get(i)).getUndoPattern() );
-
+    }
     return u;
-
   }
 
   JDGroup(UndoPattern e) {
@@ -850,7 +585,37 @@ public class JDGroup extends JDRectangular {
     children=new Vector();
     for(int i=0;i<e.gChildren.size();i++) {
       UndoPattern u = (UndoPattern)e.gChildren.get(i);
-      UndoBuffer.rebuildObject(u,children);
+      switch(u.JDclass) {
+        case UndoPattern._JDEllipse:
+          children.add(new JDEllipse(u));
+          break;
+        case UndoPattern._JDGroup:
+          children.add(new JDGroup(u));
+          break;
+        case UndoPattern._JDLabel:
+          children.add(new JDLabel(u));
+          break;
+        case UndoPattern._JDLine:
+          children.add(new JDLine(u));
+          break;
+        case UndoPattern._JDPolyline:
+          children.add(new JDPolyline(u));
+          break;
+        case UndoPattern._JDRectangle:
+          children.add(new JDRectangle(u));
+          break;
+        case UndoPattern._JDRoundRectangle:
+          children.add(new JDRoundRectangle(u));
+          break;
+        case UndoPattern._JDSpline:
+          children.add(new JDSpline(u));
+          break;
+        case UndoPattern._JDImage:
+          children.add(new JDImage(u));
+          break;
+        default:
+          System.out.println("!!! WARNING Undo failure !!!");
+      }
     }
 
     computeGroupBoundRect();
@@ -879,9 +644,6 @@ public class JDGroup extends JDRectangular {
       }
     }
 
-    hFlat = (y2==y1);
-    vFlat = (x2==x1);
-
     //Swap min and max according to summit
     if(summit[0].x>summit[4].x) {
       t=x1;x1=x2;x2=t;
@@ -889,7 +651,6 @@ public class JDGroup extends JDRectangular {
     if(summit[0].y>summit[4].y) {
       t=y1;y1=y2;y2=t;
     }
-
 
   }
 

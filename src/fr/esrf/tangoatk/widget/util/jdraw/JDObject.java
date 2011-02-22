@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util.jdraw;
 
 import java.awt.*;
@@ -30,8 +8,7 @@ import java.io.IOException;
 import java.util.Vector;
 
 /**
- * An abstract class for the JDraw graphics objects. This class handle all common properties
- * of JDObject.
+ * An abstract class for the JDraw graphics objects.
  */
 public abstract class JDObject {
 
@@ -84,11 +61,15 @@ public abstract class JDObject {
   /** the object value receive the y mouse coordinates when dragged (relative to bottom of object) */
   public static final int VALUE_CHANGE_ON_YDRAG_BOTTOM = 5;
 
+  /** ValueListener are trigerred when the object value change */
+  public static final int TRIGGER_ON_CHANGE = 0;
+  /** ValueListener are trigerred when the object value exceeds bounds (cf minValue,maxValue) */
+  public static final int TRIGGER_ON_EXCEED = 1;
+
   // Summit motion type
-  final static int NONE_SM = 0;
-  final static int HORIZONTAL_SM = 1;
-  final static int VERTICAL_SM = 2;
-  final static int BOTH_SM = 3;
+  final static int HORIZONTAL = 1;
+  final static int VERTICAL = 2;
+  final static int BOTH = 3;
 
   // Event for value processing
   final static int MPRESSED  = 1;
@@ -118,7 +99,6 @@ public abstract class JDObject {
   private static final Color gradientC1default=Color.BLACK;
   private static final Color gradientC2default=Color.WHITE;
   private static final boolean gradientCyclicdefault=false;
-  private static final boolean antiAliasDefault=false;
 
   // Vars
   Rectangle boundRect = new Rectangle(0, 0, 0, 0);
@@ -135,7 +115,6 @@ public abstract class JDObject {
   String name;
   boolean userValue;
   int valueChangeMode;
-  boolean antiAlias;
 
   // Value properties
   private int value;
@@ -172,7 +151,6 @@ public abstract class JDObject {
   private double[] sSummit=null;
   private double   sXOrg;
   private double   sYOrg;
-  private Rectangle preRefreshRect = null;
 
   // Gradient paint param
   float   gradientX1;
@@ -212,7 +190,6 @@ public abstract class JDObject {
     shadowThickness = shadowThicknessDefault;
     visible = visibleDefault;
     name = nameDefault;
-    antiAlias = antiAliasDefault;
     minValue = minValueDefault;
     maxValue = maxValueDefault;
     initValue = initValueDefault;
@@ -252,7 +229,7 @@ public abstract class JDObject {
 
   /**
    * Sets the value of this object and execute the dynamic object program if enabled.
-   * If this object is a JDGroup, the specified value is spread all over children of
+   * If this object is a JDGroup, the specified value is spread over all object of
    * this group.
    * @param v New value
    */
@@ -288,6 +265,7 @@ public abstract class JDObject {
     }
   }
 
+  /** Returns true if this object has value mapper */
   boolean hasValueProgram() {
     return (backgroundMapper!=null) ||
            (foregroundMapper!=null) ||
@@ -378,7 +356,6 @@ public abstract class JDObject {
   private void manageMappers(JDObject master) {
     if(hasMapper) {
       manageBackgroundMapper();
-      manageForegroundMapper();
       manageVisibilityMapper();
       manageInvertShadowMapper();
       manageTranslationMapper(master);
@@ -389,13 +366,6 @@ public abstract class JDObject {
     if( backgroundMapper!=null ) {
        Color nC = backgroundMapper.getColorMappingFor(this);
        setBackground(nC);
-    }
-  }
-
-  private void manageForegroundMapper() {
-    if( foregroundMapper!=null ) {
-       Color nC = foregroundMapper.getColorMappingFor(this);
-       setForeground(nC);
     }
   }
 
@@ -422,52 +392,34 @@ public abstract class JDObject {
     translate((double) x, (double)y);
   }
 
-  /**
-   * Adds the specified value listener to this object.
-   * @param l Value listener
-   */
   public void addValueListener(JDValueListener l) {
     if(valueListener==null)
       valueListener=new Vector();
     valueListener.add(l);
   }
 
-  /**
-   * Adds the specified mouse listener to this object.
-   * @param l JDMouseListener
-   */
   public void addMouseListener(JDMouseListener l) {
     if(mouseListener==null)
       mouseListener=new Vector();
     mouseListener.add(l);
   }
 
-  /**
-   * Remove the specified value listener from this object.
-   * @param l Listener to be removed.
-   */
   public void removeValueListener(JDValueListener l) {
      if(valueListener!=null)
        valueListener.remove(l);
   }
 
-  /**
-   * Remove the specified mouse listener from this object.
-   * @param l Listener to be removed.
-   */
   public void removeMouseListener(JDMouseListener l) {
      if(mouseListener!=null)
        mouseListener.remove(l);
   }
 
-  /** Remove all value listener belonging to this object. */
   public void clearValueListener() {
     if(valueListener!=null)
       valueListener.clear();
     valueListener=null;
   }
 
-  /** Remove all mouse listener belonging to this object. */
   public void clearMouseListener() {
     if(mouseListener!=null)
       mouseListener.clear();
@@ -528,28 +480,12 @@ public abstract class JDObject {
   // Painting stuff
   // -----------------------------------------------------------
   /**
-   * Paints this object.
-   * @param parent JdrawEditor parent (Can be null except for JDSwingObject)
+   * Paints this objects.
    * @param g the specified Graphics window
    */
-  public abstract void paint(JDrawEditor parent,Graphics g);
+  public abstract void paint(Graphics g);
 
-  void getObjectsByClassList(Vector result,Class theClass) {
-    if(getClass()==theClass) result.add(this);
-  }
-
-  /**
-   * Returns all objects having the given name.
-   * @param result Result vector (must be constructed by the caller)
-   * @param name JDObject name (Case sensitive)
-   * @param recurseGroup true to perform a deep search whithin group, false otherwise.
-   * @see JDrawEditor#getObjectsByName
-   */
-  public void getObjectsByName(Vector result,String name,boolean recurseGroup) {
-    if(getName().equals(name)) result.add(this);
-  }
-
-  Rectangle getRepaintRect() {
+  public Rectangle getRepaintRect() {
 
     int sw = (lineWidth + 1);
     if (!hasShadow()) {
@@ -563,9 +499,6 @@ public abstract class JDObject {
 
   }
 
-  /**
-   * Gets the bounding rectangle of this object.
-   */
   public Rectangle getBoundRect() {
 
     return boundRect;
@@ -585,16 +518,11 @@ public abstract class JDObject {
   // -----------------------------------------------------------
   // Selection Summit handling
   // -----------------------------------------------------------
-  void createSummit() {
+  public void createSummit() {
     for (int i = 0; i < summit.length; i++)
       summit[i] = new Point.Double(0, 0);
   }
 
-  /**
-   * Determines whether the specified point is inside this object.
-   * @param x X coordinate (pixel)
-   * @param y Y coordinate (pixel)
-   */
   public boolean isInsideObject(int x, int y) {
     if (!visible) return false;
     int lw = (lineWidth + 1) * 2;
@@ -602,14 +530,11 @@ public abstract class JDObject {
     return r.contains(x, y);
   }
 
-  /**
-   * Returns the summit number of this object.
-   */
   public int getSummitNumber() {
     return summit.length;
   }
 
-  int getSummit(int x, int y,double summitWidth) {
+  public int getSummit(int x, int y,double summitWidth) {
     int i = 0;
     boolean found = false;
     int sw  = (int)(summitWidth/2.0 + 1.0);
@@ -623,20 +548,11 @@ public abstract class JDObject {
     return -1;
   }
 
-  /**
-   * Returns the summit at the specified position. Do not use this
-   * to change summit coordinates, Use moveSummit() instead.
-   * @param id Summit index
-   * @see #getSummitNumber
-   * @see #moveSummit
-   * @see #moveSummitH
-   * @see #moveSummitV
-   */
   public Point.Double getSummit(int id) {
     return summit[id];
   }
 
-  void computeBoundRect() {
+  public void computeBoundRect() {
 
     double maxx = -65536;
     double maxy = -65536;
@@ -660,7 +576,7 @@ public abstract class JDObject {
     g.setXORMode(Color.white);
     int sw  = (int)(summitWidth/2.0 + 1.0);
     for (int i = 0; i < summit.length; i++) {
-      g.fillRect((int) (summit[i].x+0.5) - sw, (int) (summit[i].y+0.5) - sw, 2*sw, 2*sw);
+      g.fillRect((int) (summit[i].x - sw), (int) (summit[i].y - sw), 2*sw, 2*sw);
     }
     g.setPaintMode();
   }
@@ -671,50 +587,11 @@ public abstract class JDObject {
     g.drawLine((int)(origin.x),(int)(origin.y-10.0), (int)(origin.x),(int)(origin.y+10));
   }
 
-  /**
-   * Moves the specifed summit to the specified position. When using
-   * moveSummit() to animate objects, A call to refresh() of this
-   * object may be needed.
-   * @param id Summit index
-   * @param x Absolute X position
-   * @param y Absolute Y position
-   * @see JDObject#refresh
-   */
   public abstract void moveSummit(int id, double x, double y);
 
-  /**
-   * Moves horizontaly the specifed summit to the specified position. When using
-   * moveSummit() to animate objects, A call to refresh() of this
-   * object may be needed.
-   * @param id Summit index
-   * @param x Absolute X position
-   * @see JDObject#refresh
-   * @see #moveSummit
-   * @see #moveSummitV
-   */
-  public void moveSummitH(int id,double x) {
-    double y = summit[id].y;
-    moveSummit(id,x,y);
-  }
+  public abstract int getSummitMotion(int id);
 
-  /**
-   * Moves verticaly the specifed summit to the specified position. When using
-   * moveSummit() to animate objects, A call to refresh() of this
-   * object may be needed.
-   * @param id Summit index
-   * @param y Absolute Y position
-   * @see JDObject#refresh
-   * @see #moveSummit
-   * @see #moveSummitH
-   */
-  public void moveSummitV(int id,double y) {
-    double x = summit[id].x;
-    moveSummit(id,x,y);
-  }
-
-  abstract int getSummitMotion(int id);
-
-  boolean isPointOnLine(int x, int y, int x1, int y1, int x2, int y2) {
+  public boolean isPointOnLine(int x, int y, int x1, int y1, int x2, int y2) {
     Line2D l = new Line2D.Double((double) x1, (double) y1, (double) x2, (double) y2);
     return l.intersects((double) (x - 2), (double) (y - 2), 4.0, 4.0);
   }
@@ -722,12 +599,6 @@ public abstract class JDObject {
   // -----------------------------------------------------------
   // Copy
   // -----------------------------------------------------------
-  /**
-   * Returns a copy of this object at the specified location.
-   * @param x Horizontal position of the copied object (pixel)
-   * @param y Vertical Position of the copied object (pixel)
-   * @return The copy of this object.
-   */
   public abstract JDObject copy(int x, int y);
 
   JDPolyline buildDefaultPolyline() {
@@ -748,7 +619,6 @@ public abstract class JDObject {
     fillStyle = e.fillStyle;
     lineWidth = e.lineWidth;
     lineStyle = e.lineStyle;
-    antiAlias = e.antiAlias;
     isShadowed = e.isShadowed;
     invertShadow = e.invertShadow;
     shadowThickness = e.shadowThickness;
@@ -779,7 +649,6 @@ public abstract class JDObject {
     gradientCyclic=e.gradientCyclic;
 
     if( e.extParamName!=null ) {
-      extParamName = e.extParamName;
       extParamValue = new String[e.extParamValue.length];
       for(int i=0;i<e.extParamValue.length;i++)
         extParamValue[i] = new String(e.extParamValue[i]);
@@ -805,12 +674,9 @@ public abstract class JDObject {
   // -----------------------------------------------------------
   // Transformation
   // -----------------------------------------------------------
-  /** Translate this object. A call to refresh() is needed after translation.
-   * @param x H translation
-   * @param y V translation
+  /** Translate this object.
    * @see #restoreTransform()
    * @see #saveTransform()
-   * @see #refresh
    */
   public void translate(double x, double y) {
     for (int i = 0; i < summit.length; i++) {
@@ -822,16 +688,9 @@ public abstract class JDObject {
     updateShape();
   }
 
-  /** Scale, then translate this object. A call to refresh() is needed after transformation.
-   * @param scaleX Scaling origin
-   * @param scaleY Scaling origin
-   * @param ratioX H scaling ratio
-   * @param ratioY V scaling ration
-   * @param transX H translation
-   * @param transY V translation
+  /** Scale and Translate this object.
    * @see #restoreTransform()
    * @see #saveTransform()
-   * @see #refresh
    */
   public void scaleTranslate(double scaleX, double scaleY, double ratioX, double ratioY, double transX, double transY) {
 
@@ -856,14 +715,9 @@ public abstract class JDObject {
 
   }
 
-  /** Scale this object. A call to refresh() is needed after transformation.
-   * @param x Scaling origin
-   * @param y Scaling origin
-   * @param rx H scaling ratio
-   * @param ry V scaling ration
+  /** Scale this object.
    * @see #restoreTransform()
    * @see #saveTransform()
-   * @see #refresh
    */
   public void scale(double x, double y, double rx, double ry) {
     for (int i = 0; i < summit.length; i++) {
@@ -876,10 +730,9 @@ public abstract class JDObject {
   }
 
   /**
-   * Rotate the object by 90deg. A call to refresh() is needed after transformation.
+   * Rotate the object by 90deg.
    * @param x Rotation center horizontal pos
    * @param y Rotation center vertical pos
-   * @see #refresh
    */
   public void rotate90(double x,double y) {
 
@@ -917,9 +770,9 @@ public abstract class JDObject {
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
-  abstract void saveObject(FileWriter f, int level) throws IOException;
+  public abstract void saveObject(FileWriter f, int level) throws IOException;
 
-  void loadDefaultPropery(JDFileLoader f, String propName) throws IOException {
+  public void loadDefaultPropery(JDFileLoader f, String propName) throws IOException {
 
     if (propName.equals("origin")) {
       origin = f.parsePoint();
@@ -933,8 +786,6 @@ public abstract class JDObject {
       lineWidth = (int) f.parseDouble();
     } else if (propName.equals("lineStyle")) {
       lineStyle = (int) f.parseDouble();
-    } else if (propName.equals("antiAlias")) {
-      antiAlias = f.parseBoolean();
     } else if (propName.equals("isShadowed")) {
       isShadowed = f.parseBoolean();
     } else if (propName.equals("invertShadow")) {
@@ -1016,7 +867,7 @@ public abstract class JDObject {
 
   }
 
-  void loadObject(JDFileLoader f) throws IOException {
+  public void loadObject(JDFileLoader f) throws IOException {
 
     f.startBlock();
     summit = f.parseSummitArray();
@@ -1051,26 +902,6 @@ public abstract class JDObject {
       gradientC1 = o.style.gradientC1;
       gradientC2 = o.style.gradientC2;
       gradientCyclic = o.style.gradientCyclic;
-
-  }
-
-  void loadObject(LXObject o) {
-
-      foreground = o.foreground;
-      background = o.background;
-      fillStyle = o.fillStyle;
-      lineWidth = o.lineWidth;
-      lineStyle = o.lineStyle;
-      isShadowed = (o.shadowWidth!=0);
-      invertShadow = o.invertShadow;
-      name = o.name;
-      shadowThickness = (o.shadowWidth<0)?-o.shadowWidth:o.shadowWidth;
-      if(shadowThickness==0) shadowThickness=1;
-      visible = o.visible;
-      if(o.userClass!=0) {
-        addExtension("UserClass");
-        setExtendedParam("UserClass",Integer.toString(o.userClass));
-      }
 
   }
 
@@ -1138,35 +969,20 @@ public abstract class JDObject {
 
     int sz = getExtendedParamNumber();
     if( sz>0 ) {
-      int i,j;
+      int i;
 
       to_write = decal + "extensions:{\n";
       f.write(to_write);
 
       for (i = 0; i < sz; i++) {
-
-        // Write extension name
         if( extParamName[i].indexOf(' ')>0 ) {
-          to_write = decal + "  \"" + extParamName[i] + "\":";
+          to_write = decal + "  \"" + extParamName[i] + "\":\"";
         } else {
-          to_write = decal + "  " + extParamName[i] + ":";
+          to_write = decal + "  " + extParamName[i] + ":\"";
         }
-
-        // Write extension value
-        String decal2 = "";
-        String[] vals = JDUtils.makeStringArray(extParamValue[i]);
-        for(j=0;j<to_write.length();j++) decal2 += " ";
-
-        for(j=0;j<vals.length;j++) {
-          if(j>0) to_write = decal2;
-          to_write += "\"";
-          to_write += vals[j];
-          to_write += "\"";
-          if(j<vals.length-1) to_write += ",";
-          to_write += "\n";
-          f.write(to_write);
-        }
-
+        to_write += extParamValue[i];
+        to_write += "\"\n";
+        f.write(to_write);
       }
 
       to_write = decal + "}\n";
@@ -1226,11 +1042,6 @@ public abstract class JDObject {
 
     if (lineWidth != lineWidthDefault) {
       to_write = decal + "lineWidth:" + lineWidth + "\n";
-      f.write(to_write, 0, to_write.length());
-    }
-
-    if( antiAlias != antiAliasDefault ) {
-      to_write = decal + "antiAlias:" + antiAlias + "\n";
       f.write(to_write, 0, to_write.length());
     }
 
@@ -1365,7 +1176,6 @@ public abstract class JDObject {
     e.fillStyle = fillStyle;
     e.lineWidth = lineWidth;
     e.lineStyle = lineStyle;
-    e.antiAlias = antiAlias;
     e.isShadowed = isShadowed;
     e.invertShadow = invertShadow;
     e.name = new String(name);
@@ -1412,7 +1222,6 @@ public abstract class JDObject {
     fillStyle = e.fillStyle;
     lineWidth = e.lineWidth;
     lineStyle = e.lineStyle;
-    antiAlias = e.antiAlias;
     isShadowed = e.isShadowed;
     invertShadow = e.invertShadow;
     name = e.name;
@@ -1468,7 +1277,7 @@ public abstract class JDObject {
 
   }
 
-  /** Backup the shape. This can be usefull when making scaling animation, after
+  /** Backup the shape. this can be usefull when making scaling animation, after
    * multiple scale the rounding may result in deformed shape. To avoid this
    * you can use saveTransform() and restoreTransform().
    * Note: This is done once when JDrawEditor.loadFile() is called().
@@ -1677,7 +1486,7 @@ public abstract class JDObject {
     // Tmp variable
     double[] c = new double[2];
     normes = new double[ptsx.length];
-    Polygon[] nShadows = new Polygon[nb];
+    shadows = new Polygon[nb];
     double cx;
     double cy;
     int[] shx = new int[4];
@@ -1709,16 +1518,16 @@ public abstract class JDObject {
       //Calculate shadow coodinates
       shx[0] = ptsx[i];
       shy[0] = ptsy[i];
-      shx[1] = ptsx[i] + (int)Math.round(st * c[0]);
-      shy[1] = ptsy[i] + (int)Math.round(st * c[1]);
+      shx[1] = ptsx[i] + (int) (st * c[0]);
+      shy[1] = ptsy[i] + (int) (st * c[1]);
 
       computeNextShadowSegment(i, poly, c);
 
       //Calculate shadow coodinates
       int inext = i + 1;
       if (inext >= ptsx.length) inext = 0;
-      shx[2] = ptsx[inext] + (int)Math.round(st * c[0]);
-      shy[2] = ptsy[inext] + (int)Math.round(st * c[1]);
+      shx[2] = ptsx[inext] + (int) (st * c[0]);
+      shy[2] = ptsy[inext] + (int) (st * c[1]);
       shx[3] = ptsx[inext];
       shy[3] = ptsy[inext];
 
@@ -1731,12 +1540,9 @@ public abstract class JDObject {
       if (m[1] >= maxy) maxy = m[1];
 
       //Create the polygon
-      nShadows[i] = new Polygon(shx, shy, 4);
+      shadows[i] = new Polygon(shx, shy, 4);
 
     }
-
-    // Set up shadow
-    shadows = nShadows;
 
     // Create the shadow boundRect
     sBoundRect.setBounds(minx, miny, maxx - minx + 1, maxy - miny + 1);
@@ -1786,87 +1592,49 @@ public abstract class JDObject {
 
   }
 
-  /**
-   * Shows or hides this object.
-   * @param b True to show, false otherwise.
-   */
   public void setVisible(boolean b) {
     visible = b;
   }
 
-  /**
-   * Determines whether this object is visible.
-   */
   public boolean isVisible() {
     return visible;
   }
 
-  /**
-   * Sets the name of this object.
-   * @param s Object name
-   */
   public void setName(String s) {
     name = s;
   }
 
-  /**
-   * Returns the current name of this object.
-   */
   public String getName() {
     return name;
   }
 
-  /**
-   * Sets the background color (usualy fill color) of this object.
-   * @param c Background color
-   */
   public void setBackground(Color c) {
     background = c;
   }
 
-  /**
-   * Returns the current background color of this object.
-   * @see #setBackground
-   */
   public Color getBackground() {
     return background;
   }
 
-  /**
-   * Sets the foreground color (usualy line color) of this object.
-   * This color is also used for base shadow color.
-   * @param c Foreground color
-   */
   public void setForeground(Color c) {
     foreground = c;
     if (hasShadow()) computeShadowColors();
   }
 
-  /**
-   * Returns the current foreground color of this object.
-   * @see #setForeground
-   */
   public Color getForeground() {
     return foreground;
   }
 
-  /**
-   * Sets the origin of this object.
-   * @param p Origin point.
-   */
   public void setOrigin(Point.Double p) {
     origin = p;
   }
 
-  /** Center the origin. */
+  /** Center the origin */
   public void centerOrigin() {
     origin.x = boundRect.x + boundRect.width/2;
     origin.y = boundRect.y + boundRect.height/2;
   }
 
-  /**
-   * Returns the current origin.
-   */
   public Point.Double getOrigin() {
     return origin;
   }
@@ -1878,406 +1646,169 @@ public abstract class JDObject {
     return className;
   }
 
-  /**
-   * Sets the fill style of this object.
-   * @param style Fill style
-   * @see #FILL_STYLE_NONE
-   * @see #FILL_STYLE_SOLID
-   * @see #FILL_STYLE_LARGE_RIGHT_HATCH
-   * @see #FILL_STYLE_LARGE_LEFT_HATCH
-   * @see #FILL_STYLE_LARGE_CROSS_HATCH
-   * @see #FILL_STYLE_SMALL_RIGHT_HATCH
-   * @see #FILL_STYLE_SMALL_LEFT_HATCH
-   * @see #FILL_STYLE_SMALL_CROSS_HATCH
-   * @see #FILL_STYLE_DOT_PATTERN_1
-   * @see #FILL_STYLE_DOT_PATTERN_2
-   * @see #FILL_STYLE_DOT_PATTERN_3
-   * @see #FILL_STYLE_GRADIENT
-   */
   public void setFillStyle(int style) {
     fillStyle = style;
   }
 
-  /**
-   * Returns the current fill style of this object.
-   * @see #setFillStyle
-   */
   public int getFillStyle() {
     return fillStyle;
   }
 
-  /**
-   * Sets the line style.
-   * @param style Line style
-   * @see #LINE_STYLE_SOLID
-   * @see #LINE_STYLE_DOT
-   * @see #LINE_STYLE_DASH
-   * @see #LINE_STYLE_LONG_DASH
-   * @see #LINE_STYLE_DASH_DOT
-   */
   public void setLineStyle(int style) {
     lineStyle = style;
   }
 
-  /**
-   * Returns the current line style of this object.
-   * @see #setLineStyle
-   */
   public int getLineStyle() {
     return lineStyle;
   }
 
-  /**
-   * Enables or disables the anti aliasing for this object.
-   * @param aliasing True to enable antialiasing, false otherwise
-   */
-  public void setAntiAlias(boolean aliasing) {
-    antiAlias = aliasing;
-  }
-
-  /**
-   * Determines wheter this object is anti aliased.
-   */
-  public boolean isAntiAliased() {
-    return antiAlias;
-  }
-
-  /**
-   * Sets the line width of this object.
-   * @param width Line width (pixel)
-   */
   public void setLineWidth(int width) {
     lineWidth = width;
   }
 
-  /**
-   * Returns the current line width of this object.
-   */
   public int getLineWidth() {
     return lineWidth;
   }
 
-  /**
-   * Returns true only if this object is shadowed.
-   */
   public boolean hasShadow() {
     return isShadowed;
   }
 
-  /**
-   * Enables or disabled shadow for this object. By default
-   * shadow represents a lowered bevel border. To change
-   * the shadow orientation, you can call setInverseShadow().
-   * @param b Shadow flag.
-   * @see #setInverseShadow
-   */
   public void setShadow(boolean b) {
     isShadowed = b;
     updateShape();
   }
 
-  /**
-   * Sets the shadow thickness of this object.
-   * @param w Shadow thickness.
-   */
   public void setShadowWidth(int w) {
     shadowThickness = w;
     updateShape();
   }
 
-  /**
-   * Returns the current shadow thickness.
-   * @see #setShadowWidth
-   */
   public int getShadowWidth() {
     return shadowThickness;
   }
 
-  /**
-   * Determines whether this object has inverse shadow.
-   * @see #setInverseShadow
-   */
   public boolean hasInverseShadow() {
     return invertShadow;
   }
 
-  /**
-   * Sets inverse shadow for this object.
-   * @param b Inverse shadow flag.
-   * @see #setShadow
-   */
   public void setInverseShadow(boolean b) {
     invertShadow = b;
     if (hasShadow()) computeShadowColors();
   }
 
-  /**
-   * Sets the minimum value of this object.
-   * @param min Min value
-   * @see #setInitValue
-   * @see #setMaxValue
-   * @see #setValue
-   */
   public void setMinValue(int min) {
     minValue = min;
   }
 
-  /**
-   * Returns the minimum value of this object.
-   * @see #setMinValue
-   */
   public int getMinValue() {
     return minValue;
   }
 
-  /**
-   * Sets the max value of this object.
-   * @param max Max value
-   * @see #setInitValue
-   * @see #setMinValue
-   * @see #setValue
-   */
   public void setMaxValue(int max) {
     maxValue = max;
   }
 
-  /**
-   * Returns the maximum value of this object.
-   * @see #setMaxValue
-   */
   public int getMaxValue() {
     return maxValue;
   }
 
-  /**
-   * Sets the init value of this object.
-   * @param i Initial value object.
-   * @see #setMaxValue
-   * @see #setMinValue
-   * @see #setValue
-   */
   public void setInitValue(int i) {
     initValue = i;
   }
 
-  /**
-   * Returns the init value of this object.
-   * @see #setInitValue
-   */
   public int getInitValue() {
     return initValue;
   }
 
-  /**
-   * Determines whether this object is interactive.
-   * @see #setInteractive
-   */
   public boolean isInteractive() {
     return userValue;
   }
 
-  /**
-   * Enables or disabled the interactivity. When enabled the object value
-   * change with user interaction.
-   * @param b Interactive flag.
-   * @see #setValueChangeMode
-   * @see #setValue
-   */
   public void setInteractive(boolean b) {
     userValue=b;
   }
 
-  /**
-   * Returns the value change mode of this object for user interaction.
-   * @see #setValueChangeMode
-   */
   public int getValueChangeMode() {
     return valueChangeMode;
   }
 
-  /**
-   * Sets the value change mode of this object for user interaction.
-   * @param m Interaction mode
-   * @see #VALUE_INC_ON_PRESSRELEASE
-   * @see #VALUE_CHANGE_ON_XDRAG_LEFT
-   * @see #VALUE_CHANGE_ON_XDRAG_RIGHT
-   * @see #VALUE_CHANGE_ON_YDRAG_TOP
-   * @see #VALUE_CHANGE_ON_YDRAG_BOTTOM
-   */
   public void setValueChangeMode(int m) {
     valueChangeMode=m;
   }
 
-  /**
-   * Determines whether this object has a value program for background color.
-   * @see #setBackgroundMapper
-   */
   public boolean hasBackgroundMapper() {
     return backgroundMapper!=null;
   }
 
-  /**
-   * Sets the value program for background color of this object.
-   * @param m Value program.
-   * @see #isProgrammed
-   */
   public void setBackgroundMapper(JDValueProgram m) {
     backgroundMapper=m;
   }
 
-  /**
-   * Returns the current value program for background color of this object.
-   */
   public JDValueProgram getBackgroundMapper() {
     return backgroundMapper;
   }
 
-
-  /**
-   * Determines whether this object has a value program for foreground color.
-   * @see #setForegroundMapper
-   */
   public boolean hasForegroundMapper() {
     return foregroundMapper!=null;
   }
 
-  /**
-   * Sets the value program for foreground color of this object.
-   * @param m Value program.
-   * @see #isProgrammed
-   */
   public void setForegroundMapper(JDValueProgram m) {
     foregroundMapper=m;
   }
 
-  /**
-   * Returns the current value program for foreground color of this object.
-   */
   public JDValueProgram getForegroundMapper() {
     return foregroundMapper;
   }
 
-  /**
-   * Determines whether this object has a value program for visibility.
-   * @see #setVisibilityMapper
-   */
   public boolean hasVisibilityMapper() {
     return visibilityMapper!=null;
   }
 
- /**
-  * Sets the value program for visibility of this object.
-  * @param m Value program.
-  * @see #isProgrammed
-  */
   public void setVisibilityMapper(JDValueProgram m) {
     visibilityMapper=m;
   }
 
-  /**
-   * Returns the current value program for visibility of this object.
-   */
   public JDValueProgram getVisibilityMapper() {
     return visibilityMapper;
   }
 
-  /**
-   * Determines whether this object has a value program for invert shadow.
-   * @see #setInvertShadowMapper
-   */
   public boolean hasInvertShadowMapper() {
     return invertShadowMapper!=null;
   }
 
-  /**
-   * Sets the value program for invert shadow of this object.
-   * @param m Value program.
-   * @see #isProgrammed
-   */
   public void setInvertShadowMapper(JDValueProgram m) {
     invertShadowMapper=m;
   }
 
-  /**
-   * Returns the current value program for invert shadow of this object.
-   */
   public JDValueProgram getInvertShadowMapper() {
     return invertShadowMapper;
   }
 
-  /**
-   * Determines whether this object has a value program for horizontal translation.
-   * @see #setHTranslationMapper
-   */
   public boolean hasHTranslationMapper() {
     return hTranslationMapper!=null;
   }
 
-  /**
-   * Sets the value program for horizontal translation of this object.
-   * @param m Value program.
-   * @see #isProgrammed
-   */
   public void setHTranslationMapper(JDValueProgram m) {
     hTranslationMapper=m;
   }
 
-  /**
-   * Returns the current value program for horizontal translation of this object.
-   */
   public JDValueProgram getHTranslationMapper() {
     return hTranslationMapper;
   }
 
-  /**
-   * Determines whether this object has a value program for vertical translation.
-   * @see #setVTranslationMapper
-   */
   public boolean hasVTranslationMapper() {
     return vTranslationMapper!=null;
   }
 
-  /**
-   * Sets the value program for vertical translation of this object.
-   * @param m Value program.
-   * @see #isProgrammed
-   */
   public void setVTranslationMapper(JDValueProgram m) {
     vTranslationMapper=m;
   }
 
-  /**
-   * Returns the current value program for vertical translation of this object.
-   */
   public JDValueProgram getVTranslationMapper() {
     return vTranslationMapper;
   }
 
-  void prepareRendering(Graphics2D g2) {
-    if(antiAlias)
-      g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
-    else
-      g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_OFF);
-  }
-
-  /**
-   * Sets the gradient of this object. Has effects only if fill style is FILL_STYLE_GRADIENT.
-   * @param x1 x coordinate of the first specified
-   * <code>Point</code> in user space
-   * @param y1 y coordinate of the first specified
-   * <code>Point</code> in user space
-   * @param color1 <code>Color</code> at the first specified
-   * <code>Point</code>
-   * @param x2 x coordinate of the second specified
-   * <code>Point</code> in user space
-   * @param y2 y coordinate of the second specified
-   * <code>Point</code> in user space
-   * @param color2 <code>Color</code> at the second specified
-   * <code>Point</code>
-   * @param cyclic <code>true</code> if the gradient pattern should cycle
-   * repeatedly between the two colors; <code>false</code> otherwise
-   * @see #setFillStyle
-   */
   public void setGradientFillParam(float x1, float y1, Color color1, float x2, float y2, Color color2, boolean cyclic) {
     gradientX1=x1;
     gradientX2=x2;
@@ -2292,49 +1823,18 @@ public abstract class JDObject {
     parent = p;
   }
 
-  JDrawEditor getParent() {
-    return parent;
-  }
-
-  /** Determines whether this object has a programmed behavior. If this object is
-    * a JDGroup, the function return true if at least one of grouped JDObject is programmed.
-    * @see #setValue
-    */
+  /** Returns true is this object has a programmed behavior. If this object is
+   * a JDGroup, the function return true if at least one of grouped JDObject is programmed. */
   public boolean isProgrammed() {
     return hasValueProgram();
   }
 
   /**
-   * Refresh the JDObject on the screen by repainting
-   * its bounding rectangle. This method
-   * shoud be called after a property change.
-   * @see #translate
-   * @see #scaleTranslate
-   * @see #scale
-   * @see #moveSummit
-   * @see #preRefresh
+   * Refresh the JDObject on the screen. This shoud be called after a property change.
    */
   public void refresh() {
-    if ( parent!=null ) {
-      if(preRefreshRect!=null)
-        parent.repaint(preRefreshRect.union(getRepaintRect()));
-      else
-        parent.repaint(getRepaintRect());
-    }
-    preRefreshRect = null;
-  }
-
-  /**
-   * Prepare this object to be repainted. Certain modifications
-   * of the object may need to be repainted outside the new bounding
-   * rectangle. So before applying modifcations to the object , a call
-   * to preRefresh() will memorize the current repaint region
-   * then a call to refresh() after mofications will repaint the
-   * union of the 2 rectangles.
-   * @see #refresh
-   */
-  public void preRefresh() {
-    preRefreshRect = getRepaintRect();
+    if ( parent!=null )
+      parent.repaint(getRepaintRect());
   }
 
   /**
@@ -2356,13 +1856,8 @@ public abstract class JDObject {
    */
   public void addExtension(String name) {
 
-    int i = getExtendedParamIndex(name);
-    if(i!=-1) {
-      //Extension already exists
-      return;
-    }
-
     int nbExt = getExtendedParamNumber();
+    int i;
 
     String[] newExts   = new String[nbExt+1];
     String[] newValues = new String[nbExt+1];
@@ -2388,39 +1883,8 @@ public abstract class JDObject {
   public void setExtendedParam(String name,String value) {
 
     int i = getExtendedParamIndex(name);
-    if(i!=-1) extParamValue[i] = value;
-    else System.out.println("JDObject.setExtendedParam() : " + name + " does not exist for " + getName() + ".");
-
-  }
-
-  /**
-   * Remove the extended param at the specified index.
-   * @param extIdx Index of the extension.
-   */
-  public void removeExtension(int extIdx) {
-
-    int nbExt = getExtendedParamNumber();
-    if(extIdx >= nbExt || extIdx<0) {
-      System.out.println("JDObject.removeExtension() : " + extIdx + " index out of bounds.");
-      return;
-    }
-    int i;
-
-    String[] newExts   = new String[nbExt-1];
-    String[] newValues = new String[nbExt-1];
-
-    for(i=0;i<extIdx;i++) {
-      newExts[i] = extParamName[i];
-      newValues[i] = extParamValue[i];
-    }
-
-    for(i=extIdx+1;i<nbExt;i++) {
-      newExts[i-1] = extParamName[i];
-      newValues[i-1] = extParamValue[i];
-    }
-
-    extParamName=newExts;
-    extParamValue=newValues;
+    if(i!=-1) extParamValue[i] = name;
+    else System.out.println("JDObject.setExtendedParam() : " + name + " does not exist.");
 
   }
 
@@ -2441,7 +1905,7 @@ public abstract class JDObject {
 
   /**
    * Returns the value of the specified extended param, an empty string if not found.
-   * @param name Extension name
+   * @param name Param name
    * @return param value
    * @see #setExtensionList
    */
@@ -2456,7 +1920,7 @@ public abstract class JDObject {
 
   /**
    * Returns the value of the specified extended param, an empty string if not found.
-   * @param extIdx Index of the extension.
+   * @param extIdx Index of the extensions.
    * @return param value
    * @see #setExtensionList
    */
@@ -2486,14 +1950,6 @@ public abstract class JDObject {
 
   }
 
-  /**
-   * Returns the description of the specified extension.
-   * @param extName Extension name
-   */
-  public String getExtendedParamDesc(String extName) {
-    return "";
-  }
-
   /** Returns the number of extensions */
   public int getExtendedParamNumber() {
    if( extParamValue == null )
@@ -2520,16 +1976,6 @@ public abstract class JDObject {
     else
       return -1;
 
-  }
-
-  /** returns true if the specified extended param exists , false otherwise */
-  public boolean hasExtendedParam(String name) {
-    return getExtendedParamIndex(name)>=0;
-  }
-
-  /** returns true if this parameters is fixed and cannot be removed. */
-  public boolean isFixedExtendedParam(String name) {
-    return false;
   }
 
 }

@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /**
  * JDraw Polyline graphic object
  */
@@ -31,11 +9,8 @@ import java.awt.geom.Point2D;
 import java.io.FileWriter;
 import java.io.IOException;
 
-/** JDraw Polyline graphic object.
- *  <p>Here is an example of few JDPolyline:<p>
- *  <img src="JDPolyline.gif" border="0" alt="JDPolyline examples"></img>
- */
-public class JDPolyline extends JDObject implements JDRotatable {
+/** JDraw Polyline graphic object */
+public class JDPolyline extends JDObject {
 
   // Default
   static final boolean isClosedDefault = true;
@@ -52,13 +27,9 @@ public class JDPolyline extends JDObject implements JDRotatable {
   // -----------------------------------------------------------
   // Construction
   // -----------------------------------------------------------
-  JDPolyline() {}
+  public JDPolyline() {
+  }
 
-  /**
-   * Contructs a polyline.
-   * @param objectName Polyline name
-   * @param p Array of control point.
-   */
   public JDPolyline(String objectName, Point[] p) {
     initDefault();
     summit = new Point.Double[p.length];
@@ -69,7 +40,7 @@ public class JDPolyline extends JDObject implements JDRotatable {
     setOrigin(org);
   }
 
-  JDPolyline(JDPolyline e, int x, int y) {
+  public JDPolyline(JDPolyline e, int x, int y) {
     cloneObject(e, x, y);
     isClosed = e.isClosed;
     step = e.step;
@@ -104,38 +75,10 @@ public class JDPolyline extends JDObject implements JDRotatable {
 
   }
 
-  JDPolyline(LXObject lxObj,double[] ptsx,double[] ptsy,boolean closed) {
-
-    initDefault();
-    loadObject(lxObj);
-
-    int nbp = ptsx.length;
-    summit = new Point2D.Double[nbp];
-    createSummit();
-
-    for(int i=0;i<nbp;i++) {
-      summit[i].x = ptsx[i];
-      summit[i].y = ptsy[i];
-    }
-
-    isClosed = closed;
-    step = stepDefault;
-
-    updateShape();
-
-    double x = boundRect.getX();
-    double y = boundRect.getY();
-    double w = boundRect.getWidth();
-    double h = boundRect.getHeight();
-    setOrigin(new Point2D.Double(x+w/2.0, y+h/2.0));
-
-
-  }
-
   // -----------------------------------------------------------
   // Overrides
   // -----------------------------------------------------------
-  void initDefault() {
+  public void initDefault() {
     super.initDefault();
     step = stepDefault;
     isClosed = isClosedDefault;
@@ -145,17 +88,10 @@ public class JDPolyline extends JDObject implements JDRotatable {
     return new JDPolyline(this, x, y);
   }
 
-  public void paint(JDrawEditor parent,Graphics g) {
+  public void paint(Graphics g) {
     if (!visible) return;
 
     Graphics2D g2 = (Graphics2D) g;
-    prepareRendering(g2);
-
-    if (fillStyle != FILL_STYLE_NONE) {
-      Paint p = GraphicsUtils.createPatternForFilling(this);
-      if (p != null) g2.setPaint(p);
-      g.fillPolygon(ptsx, ptsy, ptsx.length);
-    }
 
     if (!isClosed) {
 
@@ -174,6 +110,12 @@ public class JDPolyline extends JDObject implements JDRotatable {
       }
 
     } else {
+
+      if (fillStyle != FILL_STYLE_NONE) {
+        Paint p = GraphicsUtils.createPatternForFilling(this);
+        if (p != null) g2.setPaint(p);
+        g.fillPolygon(ptsx, ptsy, ptsx.length);
+      }
 
       if (lineWidth > 0) {
         g.setColor(foreground);
@@ -195,47 +137,8 @@ public class JDPolyline extends JDObject implements JDRotatable {
 
   }
 
-  void paintSelectedSummit(Graphics g,int[] ids,double summitWidth) {
-
-    g.setColor(Color.MAGENTA);
-    g.setXORMode(Color.white);
-    int sw  = (int)(summitWidth/2.0 + 1.0);
-    for (int i = 0; i < ids.length; i++) {
-      g.fillRect((int) (summit[ids[i]].x+0.5) - sw, (int) (summit[ids[i]].y+0.5) - sw, 2*sw, 2*sw);
-    }
-    g.setPaintMode();
-  }
-
-  int getSummitMotion(int id) {
-    return JDObject.BOTH_SM;
-  }
-
-  void translateSummits(int[] ids,double tx,double ty) {
-
-    for(int i=0;i<ids.length;i++) {
-      summit[ids[i]].x += tx;
-      summit[ids[i]].y += ty;
-    }
-    updateShape();
-
-  }
-
-  int[] getSummitsInsideRectangle(Rectangle r) {
-
-    int[] tmp = new int[summit.length];
-    int   nb  = 0;
-
-    for(int i=0;i<summit.length;i++)
-      if(r.contains((int)(summit[i].x+0.5), (int)(summit[i].y+0.5))) {
-        tmp[nb] = i;
-        nb++;
-      }
-
-    int[] ret = new int[nb];
-    for(int i=0;i<nb;i++)
-      ret[i] = tmp[i];
-    return ret;
-
+  public int getSummitMotion(int id) {
+    return JDObject.BOTH;
   }
 
   public void moveSummit(int id, double x, double y) {
@@ -246,7 +149,7 @@ public class JDPolyline extends JDObject implements JDRotatable {
 
   }
 
-  void deleteSummit() {
+  public void deleteSummit() {
     if (breakId < 0) return;
     Point.Double[] nSummit = new Point.Double[summit.length - 1];
     for (int i = 0,nb = 0; i < summit.length; i++)
@@ -255,7 +158,7 @@ public class JDPolyline extends JDObject implements JDRotatable {
     updateShape();
   }
 
-  boolean canDeleteSummit(int id) {
+  public boolean canDeleteSummit(int id) {
     if (!visible) return false;
     breakId = -1;
     if ((id < 0) || (id >= summit.length) || summit.length <= 2)
@@ -264,7 +167,7 @@ public class JDPolyline extends JDObject implements JDRotatable {
     return true;
   }
 
-  boolean canBreakShape(int x, int y) {
+  public boolean canBreakShape(int x, int y) {
     if (!visible) return false;
     Line2D.Double l = new Line2D.Double();
     int inext;
@@ -284,7 +187,7 @@ public class JDPolyline extends JDObject implements JDRotatable {
     return false;
   }
 
-  void breakShape() {
+  public void breakShape() {
     if (breakId < 0) return;
     // Add a summit
     Point.Double[] nSummit = new Point.Double[summit.length + 1];
@@ -324,115 +227,30 @@ public class JDPolyline extends JDObject implements JDRotatable {
     return found;
   }
 
-  public void rotate(double angle,double xCenter,double yCenter) {
-
-    double sn = Math.sin(angle);
-    double cs = Math.cos(angle);
-    double vx,vy;
-    for(int i=0;i<summit.length;i++) {
-      vx = summit[i].x - xCenter;
-      vy = summit[i].y - yCenter;
-      summit[i].x = (vx*cs + vy*sn) + xCenter;
-      summit[i].y = (-vx*sn + vy*cs) + yCenter;
-    }
-    updateShape();
-
-  }
-
   // -----------------------------------------------------------
   // Property
   // -----------------------------------------------------------
-  /**
-   * Determines whether this polyline is closed.
-   * @see #setClosed
-   */
   public boolean isClosed() {
     return isClosed;
   }
 
-  /**
-   * Close or Open the polyline.
-   * @param b True to close, false otherwise.
-   */
   public void setClosed(boolean b) {
     isClosed = b;
     updateShape();
   }
 
-  /**
-   * Returns the polyline interpolation step.
-   * @see #setStep
-   */
   public int getStep() {
     return step;
   }
 
-  /**
-   * Sets the polyline interpolation step.
-   * @param s Interpolation step (must be >=1).
-   */
   public void setStep(int s) {
     step = 1;
-  }
-
-  /**
-   * Rotate control points to make idx as stating point (index 0).
-   * @param idx Point index to be moved to the starting point.
-   */
-  public void setStartingPoint(int idx) {
-
-    // Rotate summits
-    Point.Double[] nSummit = new Point.Double[summit.length];
-    idx = idx % summit.length;
-    for(int i=idx;i<summit.length;i++)
-      nSummit[i-idx] = summit[i];
-    for(int i=0;i<idx;i++)
-      nSummit[i+ summit.length-idx] = summit[i];
-    summit = nSummit;
-    updateShape();
-
-  }
-
-  /**
-   * Connects this polyline to an other polyline. Points
-   * are added to the end of this polyline.
-   * @param pline Polyline to be concatened.
-   */
-  public void connect(JDPolyline pline) {
-
-    JDPolyline p;
-    if(pline instanceof JDSpline)
-      p = ((JDSpline)pline).convertToPolyline();
-    else
-      p = pline;
-
-    Point.Double[] nSummit = new Point.Double[summit.length + p.getSummitNumber()];
-    for(int i=0;i<summit.length;i++)
-      nSummit[i] = summit[i];
-    for(int i=0;i<p.getSummitNumber();i++)
-      nSummit[i+summit.length] = new Point.Double(p.getSummit(i).x, p.getSummit(i).y);
-    summit = nSummit;
-    updateShape();
-
-  }
-
-  /**
-   * Invert control point order.
-   */
-  public void invertSummitOrder() {
-
-    Point.Double[] nSummit = new Point.Double[summit.length];
-    for(int i=0;i<summit.length;i++)
-      nSummit[summit.length-i-1] = summit[i];
-    summit = nSummit;
-    updateShape();
-
   }
 
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
-  void saveObject(FileWriter f, int level) throws IOException {
+  public void saveObject(FileWriter f, int level) throws IOException {
 
     String decal = saveObjectHeader(f, level);
 
@@ -452,7 +270,7 @@ public class JDPolyline extends JDObject implements JDRotatable {
 
   }
 
-  JDPolyline(JDFileLoader f) throws IOException {
+  public JDPolyline(JDFileLoader f) throws IOException {
     initDefault();
     int l = f.getCurrentLine();
 
@@ -510,8 +328,8 @@ public class JDPolyline extends JDObject implements JDRotatable {
     ptsx = new int[summit.length];
     ptsy = new int[summit.length];
     for (int i = 0; i < summit.length; i++) {
-      ptsx[i] = (int)(summit[i].x+0.5);
-      ptsy[i] = (int)(summit[i].y+0.5);
+      ptsx[i] = (int) summit[i].x;
+      ptsy[i] = (int) summit[i].y;
     }
 
     if (hasShadow()) {

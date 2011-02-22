@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util.jdraw;
 
 import java.awt.*;
@@ -27,10 +5,7 @@ import java.awt.geom.Point2D;
 import java.io.FileWriter;
 import java.io.IOException;
 
-/** JDraw Ellipse graphic object.
- *  <p>Here is an example of few JDEllipse:<p>
- *  <img src="JDEllipse.gif" border="0" alt="JDEllipse examples"></img>
- */
+/** JDraw Ellipse graphic object */
 public class JDEllipse extends JDRectangular implements JDPolyConvert {
 
   /** Opened arc */
@@ -52,12 +27,10 @@ public class JDEllipse extends JDRectangular implements JDPolyConvert {
   int angleStart;
   int angleExtent;
   int sAngleStart;
-  private boolean useOval = false;
-  private double x1;
-  private double y1;
-  private double width;
-  private double height;
 
+  // -----------------------------------------------------------
+  // Construction
+  // -----------------------------------------------------------
   /**
    * Construct a JDEllipse.
    * @param objectName
@@ -76,7 +49,13 @@ public class JDEllipse extends JDRectangular implements JDPolyConvert {
     updateShape();
   }
 
-  JDEllipse(JDEllipse e,int x,int y) {
+  /**
+   * Construct a clone of the given JDEllipse and translate it.
+   * @param e JDEllipse to be cloned
+   * @param x Horizontal translation
+   * @param y VErtical translation
+   */
+  public JDEllipse(JDEllipse e,int x,int y) {
     cloneObject(e,x,y);
     step = e.step;
     arcType = e.arcType;
@@ -126,60 +105,7 @@ public class JDEllipse extends JDRectangular implements JDPolyConvert {
     step = stepDefault;
     angleStart  = a;
     angleExtent = b;
-    if(fillStyle==JDObject.FILL_STYLE_NONE)
-      arcType = ARC_OPEN;
-    else
-      arcType = (atype==1)?ARC_CLOSED:ARC_PIE;
-
-    updateShape();
-
-  }
-
-  JDEllipse(LXObject lxObj,int a,int b,int atype) {
-
-    initDefault();
-    loadObject(lxObj);
-
-    double x = lxObj.boundRect.getX();
-    double y = lxObj.boundRect.getY();
-    double w = lxObj.boundRect.getWidth();
-    double h = lxObj.boundRect.getHeight();
-
-    setOrigin(new Point2D.Double(x+w/2.0, y+h/2.0));
-    summit = new Point2D.Double[8];
-    createSummit();
-
-    summit[0].x = x;
-    summit[0].y = y;
-
-    summit[1].x = x+w/2;
-    summit[1].y = y;
-
-    summit[2].x = x+w;
-    summit[2].y = y;
-
-    summit[3].x = x+w;
-    summit[3].y = y+h/2;
-
-    summit[4].x = x+w;
-    summit[4].y = y+h;
-
-    summit[5].x = x+w/2;
-    summit[5].y = y+h;
-
-    summit[6].x = x;
-    summit[6].y = y+h;
-
-    summit[7].x = x;
-    summit[7].y = y+h/2;
-
-    step = stepDefault;
-    angleStart  = a;
-    angleExtent = b;
-    if(fillStyle==JDObject.FILL_STYLE_NONE)
-      arcType = ARC_OPEN;
-    else
-      arcType = (atype==1)?ARC_CLOSED:ARC_PIE;
+    arcType = (atype==1)?ARC_CLOSED:ARC_PIE;
 
     updateShape();
 
@@ -264,29 +190,6 @@ public class JDEllipse extends JDRectangular implements JDPolyConvert {
     super.saveTransform();
   }
 
-  void computeBoundRect() {
-
-    double maxx = -65536;
-    double maxy = -65536;
-    double minx = 65536;
-    double miny = 65536;
-
-    for (int i = 0; i < summit.length; i++) {
-      if (summit[i].x < minx) minx = summit[i].x;
-      if (summit[i].x > maxx) maxx = summit[i].x;
-      if (summit[i].y < miny) miny = summit[i].y;
-      if (summit[i].y > maxy) maxy = summit[i].y;
-    }
-
-    x1 = minx;
-    y1 = miny;
-    width = maxx - minx;
-    height = maxy - miny;
-
-    boundRect = new Rectangle((int) minx, (int) miny, (int) (maxx - minx) + 1, (int) (maxy - miny) + 1);
-
-  }
-
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
@@ -315,7 +218,7 @@ public class JDEllipse extends JDRectangular implements JDPolyConvert {
     updateShape();
   }
 
-  void saveObject(FileWriter f,int level) throws IOException {
+  public void saveObject(FileWriter f,int level) throws IOException {
 
     String decal = saveObjectHeader(f,level);
 
@@ -438,50 +341,40 @@ public class JDEllipse extends JDRectangular implements JDPolyConvert {
     return angleExtent;
   }
 
-  public void paint(JDrawEditor parent,Graphics g) {
+  public void paint(Graphics g) {
     if(!visible) return;
 
     Graphics2D g2 = (Graphics2D) g;
-    prepareRendering(g2);
 
     if (fillStyle != FILL_STYLE_NONE && isClosed()) {
-
       Paint p = GraphicsUtils.createPatternForFilling(this);
       if(p!=null) {
         g2.setPaint(p);
-        if(useOval)
-          g.fillOval((int)(x1+0.5), (int)(y1+0.5), (int)(width+1), (int)(height+1));
-        else
-          g.fillPolygon(ptsx, ptsy, ptsx.length);
+        g.fillPolygon(ptsx, ptsy, ptsx.length);
       }
-
     }
 
     if (lineWidth > 0) {
-
       g.setColor(foreground);
       BasicStroke bs = GraphicsUtils.createStrokeForLine(lineWidth, lineStyle);
-      Stroke old = null;
 
       if (bs != null) {
-        old = g2.getStroke();
+        Stroke old = g2.getStroke();
         g2.setStroke(bs);
-      }
-
-      if(isClosed()) {
-        if(useOval)
-          g.drawOval((int)(x1+0.5), (int)(y1+0.5), (int)(width), (int)(height));
-        else
+        if(isClosed())
           g.drawPolygon(ptsx, ptsy, ptsx.length);
-      } else
-        g.drawPolyline(ptsx, ptsy, ptsx.length);
-
-      if(bs != null) g2.setStroke(old);
-
+        else
+          g.drawPolyline(ptsx, ptsy, ptsx.length);
+        g2.setStroke(old);
+      } else {
+        if(isClosed())
+          g.drawPolygon(ptsx, ptsy, ptsx.length);
+        else
+          g.drawPolyline(ptsx, ptsy, ptsx.length);
+      }
     }
 
     paintShadows(g);
-
   }
 
   // -----------------------------------------------------------
@@ -512,18 +405,15 @@ public class JDEllipse extends JDRectangular implements JDPolyConvert {
 
   }
 
-  // Compute ellispe polygon from the bounding rect
+
+  // Compute ellispe ploygon from the boudning rect
   private void makePolygon() {
 
-    double w=width/2.0;
-    double h=height/2.0;
+    double w=(double)boundRect.width/2.0;
+    double h=(double)boundRect.height/2.0;
 
-    double xc =x1 + w;
-    double yc =y1 + h;
-
-    // For double to int rounding, remove a half pixel.
-    w -= 0.5;
-    h -= 0.5;
+    double xc = boundRect.x + boundRect.width/2;
+    double yc = boundRect.y + boundRect.height/2;
 
     int nbp = (arcType==ARC_PIE && angleExtent!=360)?step+1:step;
     ptsx = new int[nbp];
@@ -533,18 +423,14 @@ public class JDEllipse extends JDRectangular implements JDPolyConvert {
 
     int i;
     for(i=0;i<step;i++) {
-      double x = w * Math.cos(r0 + r * (double)i);
-      double y = h * Math.sin(r0 + r * (double)i);
-      ptsx[i]        = (int)(xc + x);
-      ptsy[i]        = (int)(yc + y);
+      ptsx[i] = (int)(xc + w * Math.cos(r0 + r * (double)i) + 0.5);
+      ptsy[i] = (int)(yc - h * Math.sin(r0 + r * (double)i) + 0.5);
     }
 
     if(arcType==ARC_PIE && angleExtent!=360) {
       ptsx[i] = (int)(xc);
       ptsy[i] = (int)(yc);
     }
-
-    useOval = (angleExtent==360) && (step==stepDefault);
 
   }
 

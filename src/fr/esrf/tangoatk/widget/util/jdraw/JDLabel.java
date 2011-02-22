@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /**
  * JDraw Label graphic object
  */
@@ -33,30 +11,19 @@ import java.awt.geom.Point2D;
 import java.io.FileWriter;
 import java.io.IOException;
 
-/** JDraw Label graphic object.
- *  <p>Here is an example of few JDLabel:<p>
- *  <img src="JDLabel.gif" border="0" alt="JDLabel examples"></img>
- */
+/** JDraw Label graphic object */
 public class JDLabel extends JDRectangular {
 
-  /** Text is centered */
+  // Global vars
   final static public int CENTER_ALIGNMENT = 0;
-  /** Left justification for text (H alignement) */
   final static public int LEFT_ALIGNMENT = 1;
-  /** Right justification for text (H alignement) */
   final static public int RIGHT_ALIGNMENT = 2;
-  /** Up justification for text (V alignement) */
   final static public int UP_ALIGNMENT = 1;
-  /** Down justification for text (V alignement) */
   final static public int DOWN_ALIGNMENT = 2;
 
-  /** Text orientation */
   final static public int LEFT_TO_RIGHT = 0;
-  /** Text orientation */
   final static public int BOTTOM_TO_TOP = 1;
-  /** Text orientation */
   final static public int RIGHT_TO_LEFT = 2;
-  /** Text orientation */
   final static public int TOP_TO_BOTTOM = 3;
 
   static final double NINETY_DEGREES = Math.toRadians(90.0);
@@ -78,13 +45,9 @@ public class JDLabel extends JDRectangular {
   private int textOrientation;
   private int sTextOrientation;
 
-  /**
-   * Construcxt a label.
-   * @param objectName Name of this label
-   * @param text Text
-   * @param x Up left corner x coordinate
-   * @param y Up left corner y coordinate
-   */
+  // -----------------------------------------------------------
+  // Construction
+  // -----------------------------------------------------------
   public JDLabel(String objectName, String text, int x, int y) {
     initDefault();
     setOrigin(new Point.Double(0.0, 0.0));
@@ -99,7 +62,7 @@ public class JDLabel extends JDRectangular {
     centerOrigin();
   }
 
-  JDLabel(JDLabel e, int x, int y) {
+  public JDLabel(JDLabel e, int x, int y) {
     cloneObject(e, x, y);
     theText = new String(e.theText);
     theFont = new Font(e.theFont.getName(), e.theFont.getStyle(), e.theFont.getSize());
@@ -143,37 +106,10 @@ public class JDLabel extends JDRectangular {
     updateShape();
   }
 
-  JDLabel(LXObject lxObj,String text) {
-
-    initDefault();
-    loadObject(lxObj);
-
-    summit = new Point2D.Double[8];
-    createSummit();
-
-    theFont = lxObj.font;
-    theText = text;
-    hAlignment = LEFT_ALIGNMENT;
-    vAlignment = UP_ALIGNMENT;
-    lineWidth = 0;
-
-    Dimension d = getMinSize();
-    computeSummitCoordinates((int)lxObj.px,(int)lxObj.py,d.width,d.height);
-
-    updateShape();
-
-    double bx = boundRect.getX();
-    double by = boundRect.getY();
-    double bw = boundRect.getWidth();
-    double bh = boundRect.getHeight();
-    setOrigin(new Point2D.Double(bx+bw/2.0, by+bh/2.0));
-
-  }
-
   // -----------------------------------------------------------
   // Overrides
   // -----------------------------------------------------------
-  void initDefault() {
+  public void initDefault() {
     super.initDefault();
     theText = textDefault;
     theFont = fontDefault;
@@ -186,14 +122,13 @@ public class JDLabel extends JDRectangular {
     return new JDLabel(this, x, y);
   }
 
-  public void paint(JDrawEditor parent,Graphics g) {
+  public void paint(Graphics g) {
 
     if (!visible) return;
-    Graphics2D g2 = (Graphics2D) g;
-    prepareRendering(g2);
-    super.paint(parent,g);
+    super.paint(g);
 
     // G2 initilialisation ----------------------------------
+    Graphics2D g2 = (Graphics2D) g;
 
     g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
         RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -385,7 +320,7 @@ public class JDLabel extends JDRectangular {
 
   }
 
-  void updateShape() {
+  public void updateShape() {
     computeBoundRect();
 
     // Update shadow coordinates
@@ -460,111 +395,45 @@ public class JDLabel extends JDRectangular {
   // -----------------------------------------------------------
   // Property stuff
   // -----------------------------------------------------------
-  /**
-   * Sets the Font of this label.
-   * @param f Font
-   */
   public void setFont(Font f) {
-    setFont(f,false);
-  }
-
-  /**
-   * Sets the font of this label and resize it if needed and specified.
-   * @param f Font
-   * @param resize true to resize label when text is out of bounds.
-   */
-  public void setFont(Font f,boolean resize) {
     theFont = f;
-    updateLabel(resize);
+    resizeLabel();
   }
 
-  /**
-   * Returns the current font of this label.
-   */
   public Font getFont() {
     return theFont;
   }
 
-  /**
-   * Sets the horizontal alignement of this label.
-   * @param a Alignement value
-   * @see #CENTER_ALIGNMENT
-   * @see #LEFT_ALIGNMENT
-   * @see #RIGHT_ALIGNMENT
-   */
   public void setHorizontalAlignment(int a) {
     hAlignment = a;
   }
 
-  /**
-   * Returns the current horizontal text alignement.
-   * @see #setHorizontalAlignment
-   */
   public int getHorizontalAlignment() {
     return hAlignment;
   }
 
-  /**
-   * Sets the vertical alignement of this label.
-   * @param a Alignement value
-   * @see #CENTER_ALIGNMENT
-   * @see #UP_ALIGNMENT
-   * @see #DOWN_ALIGNMENT
-   */
   public void setVerticalAlignment(int a) {
     vAlignment = a;
   }
 
-  /**
-   * Returns the current vetical text alignement.
-   * @see #setHorizontalAlignment
-   */
-  public int setVerticalAlignment() {
+  public int getVerticalAlignment() {
     return vAlignment;
   }
 
-  /**
-   * Sets the text orientation.
-   * @param a Orientation
-   * @see #LEFT_TO_RIGHT
-   * @see #BOTTOM_TO_TOP
-   * @see #RIGHT_TO_LEFT
-   * @see #TOP_TO_BOTTOM
-   */
   public void setOrientation(int a) {
     textOrientation = a;
-    updateLabel(true);
+    resizeLabel();
   }
 
-  /**
-   * Gets the current text orientation.
-   * @see #setOrientation
-   */
   public int getOrientation() {
     return textOrientation;
   }
 
-  /**
-   * Sets the text of this label.
-   * @param s Text value
-   */
   public void setText(String s) {
-    setText(s,false);
-  }
-
-  /**
-   * Sets the text of this label and resize label if desried.
-   * @param s Text value
-   * @param resize true to resize label when text is out of bounds.
-   */
-  public void setText(String s,boolean resize) {
     theText = s;
-    updateLabel(resize);
+    resizeLabel();
   }
 
-  /**
-   * Returns the current label text.
-   */
   public String getText() {
     return theText;
   }
@@ -572,7 +441,7 @@ public class JDLabel extends JDRectangular {
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
-  void saveObject(FileWriter f, int level) throws IOException {
+  public void saveObject(FileWriter f, int level) throws IOException {
 
     String decal = saveObjectHeader(f, level);
     String to_write;
@@ -622,7 +491,7 @@ public class JDLabel extends JDRectangular {
 
   }
 
-  JDLabel(JDFileLoader f) throws IOException {
+  public JDLabel(JDFileLoader f) throws IOException {
 
     initDefault();
     f.startBlock();
@@ -707,23 +576,21 @@ public class JDLabel extends JDRectangular {
 
   }
 
-  private void updateLabel(boolean resize) {
+  private void resizeLabel() {
     preferredSize = null;
     Dimension d = getMinSize();
-    if (resize) {
-      if ((summit[2].x - summit[0].x <= d.width) ||
-              (summit[6].y - summit[0].y <= d.height)) {
-        // Need resize
-        // System.out.println("Resize label");
-        double x = summit[0].x + d.width;
-        double y = summit[0].y + d.height;
-        summit[2].x = x;
-        summit[4].x = x;
-        summit[4].y = y;
-        summit[6].y = y;
-        centerSummit();
-        updateShape();
-      }
+    if ((summit[2].x - summit[0].x <= d.width) ||
+        (summit[6].y - summit[0].y <= d.height)) {
+      // Need resize
+      // System.out.println("Resize label");
+      double x = summit[0].x + d.width;
+      double y = summit[0].y + d.height;
+      summit[2].x = x;
+      summit[4].x = x;
+      summit[4].y = y;
+      summit[6].y = y;
+      centerSummit();
+      updateShape();
     }
   }
 

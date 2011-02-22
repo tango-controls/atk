@@ -1,495 +1,452 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * DeviceFinder.java
  *
  * Created on June 18, 2002, 10:28 AM
  */
 
 package fr.esrf.tangoatk.widget.util;
-
 import javax.swing.*;
 import javax.swing.tree.*;
+import javax.swing.event.*;
 import fr.esrf.Tango.DevFailed;
-import fr.esrf.Tango.AttrDataFormat;
 import fr.esrf.TangoApi.Database;
-import fr.esrf.TangoApi.ApiUtil;
-import fr.esrf.TangoApi.CommandInfo;
-import fr.esrf.TangoApi.AttributeInfo;
-import fr.esrf.TangoDs.TangoConst;
-import fr.esrf.tangoatk.core.*;
-
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Vector;
-
-
+import java.util.*;
 /**
- * A panel for selecting device , attribute or command.
+ *
+ * @author  root
  */
-public class DeviceFinder extends JPanel {
+public class DeviceFinder extends javax.swing.JPanel {
+    Domain[] domains = new Domain[0];
 
-  /** Select device */
-  public final static int MODE_DEVICE    = 0;
-  /** Select all attributes */
-  public final static int MODE_ATTRIBUTE = 1;
-  /** Select command */
-  public final static int MODE_COMMAND   = 2;
-  /** Select all scalar attributes */
-  public final static int MODE_ATTRIBUTE_SCALAR = 3;
-  /** Select all number scalar attributes */
-  public final static int MODE_ATTRIBUTE_NUMBER_SCALAR = 4;
-  /** Select all boolean scalar attributes */
-  public final static int MODE_ATTRIBUTE_BOOLEAN_SCALAR = 5;
-  /** Select all string scalar attributes */
-  public final static int MODE_ATTRIBUTE_STRING_SCALAR = 6;
-  /** Select all number spectrum attributes */
-  public final static int MODE_ATTRIBUTE_NUMBER_SPECTRUM = 7;
+    String deviceName = null;
+    JDialog parent;
+    DefaultMutableTreeNode top;
 
-  static Database  db;
-  JTree            tree;
-  JScrollPane      treeView;
-  DefaultTreeModel treeModel;
-  int              mode;
-
-  /**
-   * Construct a DeviceFinder panel using the given mode.
-   * @param mode Mode
-   * @see #MODE_DEVICE
-   * @see #MODE_ATTRIBUTE
-   * @see #MODE_COMMAND
-   */
-  public DeviceFinder(int mode) {
-
-    this.mode = mode;
-    try {
-      db = ApiUtil.get_db_obj();
-    } catch (DevFailed e) {
-      ErrorPane.showErrorMessage(null,"Database",e);
-      return;
+    public DeviceFinder(JDialog dialog) {
+	this();
+	parent = dialog;
     }
-    setLayout(new BorderLayout());
-    createTree();
-    add(treeView,BorderLayout.CENTER);
+    /** Creates new form DeviceFinder */
+    public DeviceFinder() {
 
-  }
+	top = new DefaultMutableTreeNode("Devices");	
+	try {
+	    Database db = new Database();
+	    String[] dms = db.get_device_domain("*");
+	    addDomains(top, db, dms);
+	} catch (Exception e) {
+	    
+	} // end of try-catch
 
-  /**
-   * Sets the selection model for the tree
-   * @see TreeSelectionModel#SINGLE_TREE_SELECTION
-   * @see TreeSelectionModel#CONTIGUOUS_TREE_SELECTION
-   * @see TreeSelectionModel#SINGLE_TREE_SELECTION
-   * @param selectionModel The selection model
-   */
-  public void setSelectionModel(int selectionModel) {
-    tree.getSelectionModel().setSelectionMode(selectionModel);
-  }
+        initComponents();
+	deviceTree.addTreeSelectionListener(new TreeSelectionListener() {
+		public void valueChanged(TreeSelectionEvent e) {
+		    DefaultMutableTreeNode n = (DefaultMutableTreeNode)
+			deviceTree.getLastSelectedPathComponent();
+		    
+		    Object nodeInfo = n.getUserObject();
+		    if (n == null ||
+			!(nodeInfo instanceof ANode))
+			return;
+		    inputField.setText(((ANode)nodeInfo).getName());
+		}
 
-  /**
-   * Returns the list of selected entities.
-   */
-  public String[] getSelectedNames() {
+	    });
 
-    TreePath[] p = tree.getSelectionPaths();
-    Vector completePath = new Vector();
+    }
 
-    if (p != null) {
-      for (int i = 0; i < p.length; i++) {
+    private void addDomains(DefaultMutableTreeNode top, Database db,
+			    String[] dms) throws DevFailed {
+        DefaultMutableTreeNode domainNode = null;
+	domains = new Domain[dms.length];
+	for (int i = 0; i < dms.length; i++) {
+	    String d = dms[i];
+	    Domain domain = new Domain(d, db);
+	    domainNode = new DefaultMutableTreeNode(domain); 
+	    String[] families = db.get_device_family(d + "/*");
+	    domain.setNode(domainNode);
+	    domains[i] = domain;
+	    initialAddFamilies(domainNode, db, domain, families);
+	    top.add(domainNode);
+	} // end of for ()
+    }
 
-        Object[] pth = p[i].getPath();
-        String name = "";
+    private void initialAddFamilies(DefaultMutableTreeNode top, Database db,
+				    Domain domain, String [] fms) throws DevFailed {
+	DefaultMutableTreeNode familyNode = null;
+	for (int i = 0; i < fms.length; i++) {
+	    String f = fms[i];
+	    String []members = db.get_device_member(domain.getName() +
+						     f + "/*");
+	    Family family = new Family(domain, f, db);
+	    familyNode = new DefaultMutableTreeNode(family);
+	    family.setNode(familyNode);
+	    domain.addFamily(family);
+	    initialAddMembers(familyNode, db, family, members);
+	    top.add(familyNode);
+	} // end of for ()
+    }
 
-        switch (mode) {
-          case MODE_DEVICE:
-            if (pth.length == 4) {
-              name = pth[1] + "/" + pth[2] + "/" + pth[3];
-              completePath.add(name);
+    private void initialAddMembers(DefaultMutableTreeNode top, Database db,
+				   Family family,
+				   String [] members) throws DevFailed {
+
+	DefaultMutableTreeNode memberNode = null;
+	for (int i = 0; i < members.length; i++) {
+	    String m = members[i];
+	    Member member = new Member(family, m, db);
+	    memberNode = new DefaultMutableTreeNode(member);
+	    family.addMember(member);
+	    member.setNode(memberNode);
+	    top.add(memberNode);
+	} // end of for ()
+    }
+
+    private void openPath(DefaultMutableTreeNode node) {
+	TreePath tp = new TreePath(node.getPath());
+	deviceTree.getSelectionModel().setSelectionPath(tp);
+	deviceTree.expandPath(tp);
+    }
+    
+    /** This method is called from within the constructor to
+     * initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is
+     * always regenerated by the Form Editor.
+     */
+    private void initComponents() {//GEN-BEGIN:initComponents
+          label = new javax.swing.JLabel();
+          inputField = new javax.swing.JTextField();
+          jScrollPane1 = new javax.swing.JScrollPane();
+          deviceTree = new javax.swing.JTree(top);
+          ok = new javax.swing.JButton();
+          cancel = new javax.swing.JButton();
+          
+          setLayout(new java.awt.GridBagLayout());
+          java.awt.GridBagConstraints gridBagConstraints1;
+          
+          label.setFont(new java.awt.Font("Dialog", 0, 12));
+          label.setText("Device");
+          gridBagConstraints1 = new java.awt.GridBagConstraints();
+          gridBagConstraints1.gridx = 0;
+          gridBagConstraints1.gridy = 1;
+          gridBagConstraints1.insets = new java.awt.Insets(0, 10, 9, 5);
+          add(label, gridBagConstraints1);
+          
+          inputField.setColumns(40);
+          inputField.addKeyListener(new java.awt.event.KeyAdapter() {
+              public void keyTyped(java.awt.event.KeyEvent evt) {
+                  inputFieldKeyTyped(evt);
+              }
+          });
+          
+          gridBagConstraints1 = new java.awt.GridBagConstraints();
+          gridBagConstraints1.gridx = 1;
+          gridBagConstraints1.gridy = 1;
+          gridBagConstraints1.fill = java.awt.GridBagConstraints.HORIZONTAL;
+          gridBagConstraints1.insets = new java.awt.Insets(0, 5, 10, 10);
+          gridBagConstraints1.weightx = 0.1;
+          add(inputField, gridBagConstraints1);
+          
+          jScrollPane1.setViewportView(deviceTree);
+          
+          gridBagConstraints1 = new java.awt.GridBagConstraints();
+        gridBagConstraints1.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+        gridBagConstraints1.fill = java.awt.GridBagConstraints.BOTH;
+        gridBagConstraints1.insets = new java.awt.Insets(5, 10, 0, 10);
+        gridBagConstraints1.weightx = 0.1;
+        gridBagConstraints1.weighty = 0.1;
+        add(jScrollPane1, gridBagConstraints1);
+        
+        ok.setFont(new java.awt.Font("Dialog", 0, 12));
+        ok.setText("OK");
+        ok.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                okActionPerformed(evt);
             }
-            break;
-          case MODE_ATTRIBUTE:
-          case MODE_ATTRIBUTE_SCALAR:
-          case MODE_ATTRIBUTE_BOOLEAN_SCALAR:
-          case MODE_ATTRIBUTE_NUMBER_SCALAR:
-          case MODE_ATTRIBUTE_STRING_SCALAR:
-          case MODE_COMMAND:
-          case MODE_ATTRIBUTE_NUMBER_SPECTRUM:
-            if (pth.length == 5) {
-              name = pth[1] + "/" + pth[2] + "/" + pth[3] + "/" + pth[4];
-              completePath.add(name);
+        });
+        
+        gridBagConstraints1 = new java.awt.GridBagConstraints();
+        gridBagConstraints1.gridx = 3;
+        gridBagConstraints1.gridy = 1;
+        gridBagConstraints1.insets = new java.awt.Insets(0, 5, 9, 10);
+        add(ok, gridBagConstraints1);
+        
+        cancel.setFont(new java.awt.Font("Dialog", 0, 12));
+        cancel.setText("Cancel");
+        cancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelActionPerformed(evt);
             }
-            break;
-        }
+        });
+        
+        gridBagConstraints1 = new java.awt.GridBagConstraints();
+        gridBagConstraints1.gridx = 2;
+        gridBagConstraints1.gridy = 1;
+        gridBagConstraints1.insets = new java.awt.Insets(0, 0, 9, 0);
+        add(cancel, gridBagConstraints1);
+        
+    }//GEN-END:initComponents
 
-      }
+    private void okActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okActionPerformed
+        // Add your handling code here:
+	if (parent != null) {
+	    parent.dispose();
+	}
+	
+	deviceName = inputField.getText();
+	
+    }//GEN-LAST:event_okActionPerformed
+
+    private void cancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelActionPerformed
+        // Add your handling code here:
+	if (parent != null) {
+	    parent.dispose();
+	}
+	
+	deviceName = null;
+    }//GEN-LAST:event_cancelActionPerformed
+
+    synchronized private void inputFieldKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_inputFieldKeyTyped
+        // Add your handling code here:
+
+	if (Character.isISOControl(evt.getKeyChar()))
+	    return;
+	inputField.setEditable(false);
+	String tmp = inputField.getText() + evt.getKeyChar();
+
+	Domain domain = null;
+	Family family = null;
+	Member member = null;
+	
+	String domainName = tmp, familyName = null, memberName = null;
+	Object [] path;
+	DefaultMutableTreeNode node;
+
+	if (tmp.indexOf('/') != -1) {
+	    try {
+		domainName = tmp.substring(0, tmp.indexOf('/'));
+	    } catch (Exception e) {
+
+	    } // end of try-catch
+
+	    try {
+		String fm = tmp.substring(tmp.indexOf('/') + 1,
+					 tmp.length());
+		familyName = fm;
+
+		familyName = fm.substring(0, fm.indexOf('/')); 
+
+		memberName = fm.substring(fm.indexOf('/') + 1, fm.length());
+	    } catch (Exception e) {
+		    
+	    } // end of try-catch
+	}
+
+	domain = findDomain(domainName);
+	if (domain != null) {
+	    evt.consume();
+	    family = domain.findFamily(familyName);
+	    if (family != null) {
+		member = family.findMember(memberName);
+		if (member != null) {
+		    node = member.getNode();
+		    tmp = member.getName();
+		} else {
+		    node = family.getNode();
+		    tmp = family.getName() +
+			(memberName == null ? "" : memberName);
+
+		    
+		} // end of else
+	    } else {
+		node = domain.getNode();
+		tmp = domain.getName() +
+		    (familyName == null ? "" : familyName);
+	    } // end of else
+	    openPath(node);
+	    inputField.setText(tmp);
+	} 
+
+
+	inputField.setEditable(true);
+
+	
+    }//GEN-LAST:event_inputFieldKeyTyped
+
+
+    Domain findDomain(String name) {
+	if (domains.length == 1) return domains[0];
+	int found = 0;
+	Domain d = null;
+	   
+	for (int i = 0; i < domains.length; i++) 
+	    if (domains[i].toString().startsWith(name)) {
+		d = domains[i];
+		found++;
+	    }
+	if (found == 1) return d;
+
+	return null;
     }
 
-    String[] ret = new String[completePath.size()];
-    for(int i=0;i<completePath.size();i++)
-      ret[i] = (String)completePath.get(i);
-    return ret;
-
-  }
-
-  private void createTree() {
-
-    treeModel = new DefaultTreeModel(new RootNode(mode));
-    tree = new JTree(treeModel);
-    tree.setEditable(false);
-    tree.setCellRenderer(new TreeNodeRenderer());
-    tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
-    tree.setRootVisible(false);
-    tree.setShowsRootHandles(true);
-    tree.setBorder(BorderFactory.createLoweredBevelBorder());
-    treeView = new JScrollPane(tree);
-
-  }
-
-  public JTree getTree() {
-    return tree;
-  }
-
-  /** test function */
-  public static void main(String[] args) {
-
-    final DeviceFinder df = new DeviceFinder(MODE_ATTRIBUTE_NUMBER_SPECTRUM);
-    df.setSelectionModel(TreeSelectionModel.SINGLE_TREE_SELECTION);
-
-    JFrame f = new JFrame();
-    JPanel p = new JPanel();
-    p.setLayout(new BorderLayout());
-    JButton selButton = new JButton("Select");
-    selButton.addActionListener(new ActionListener(){
-      public void actionPerformed(ActionEvent e) {
-        String[] names = df.getSelectedNames();
-        System.out.println("-------------------------");
-        for(int i=0;i<names.length;i++)
-          System.out.println(names[i]);
-      }
-    });
-    p.add(selButton,BorderLayout.SOUTH);
-    p.add(df,BorderLayout.CENTER);
-    f.setContentPane(p);
-    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    ATKGraphicsUtils.centerFrameOnScreen(f);
-    f.setVisible(true);
-
-  }
-
-}
-
-// ---------------------------------------------------------------
-
-abstract class Node extends DefaultMutableTreeNode {
-
-  private boolean areChildrenDefined = false;
-  int mode;
-
-  public int getChildCount() {
-    try {
-      if(!areChildrenDefined) {
-        areChildrenDefined = true;
-        populateNode();
-      }
-    } catch (DevFailed e) {
-      TreeNode[] pth = getPath();
-      String nodeName = "";
-      for(int i=1;i<pth.length;i++) {
-        if(i<pth.length-1)
-          nodeName += (pth[i].toString()+"/");
-        else
-          nodeName += pth[i].toString();
-      }
-      ErrorPane.showErrorMessage(null,nodeName,e);
-    }
-    return super.getChildCount();
-  }
-
-  // Fill children
-  abstract void populateNode() throws DevFailed;
-
-  public boolean isLeaf() {
-    return false;
-  }
-
-}
-
-// ---------------------------------------------------------------
-
-class RootNode extends Node {
-
-  RootNode(int mode) {
-    this.mode = mode;
-  }
-
-  void populateNode() throws DevFailed {
-    String[] list = DeviceFinder.db.get_device_domain("*");
-    for(int i=0;i<list.length;i++)
-      add(new DomainNode(mode,list[i]));
-  }
-
-  public String toString() {
-    return "RootNode";
-  }
-
-}
-
-// ---------------------------------------------------------------
-
-class DomainNode extends Node {
-
-  private String domain;
-
-  DomainNode(int mode,String domain) {
-    this.domain = domain;
-    this.mode = mode;
-  }
-
-  void populateNode() throws DevFailed {
-    String[] list = DeviceFinder.db.get_device_family(domain+"/*");
-    for(int i=0;i<list.length;i++)
-      add(new FamilyNode(mode,domain,list[i]));
-  }
-
-  public String toString() {
-    return domain;
-  }
-
-}
-
-// ---------------------------------------------------------------
-
-class FamilyNode extends Node {
-
-  private String domain;
-  private String family;
-
-  FamilyNode(int mode,String domain,String family) {
-    this.mode = mode;
-    this.domain = domain;
-    this.family = family;
-  }
-
-  void populateNode() throws DevFailed {
-    String[] list = DeviceFinder.db.get_device_member(domain+"/"+family+"/*");
-    for(int i=0;i<list.length;i++)
-      add(new MemberNode(mode,domain,family,list[i]));
-  }
-
-  public String toString() {
-    return family;
-  }
-
-}
-
-// ---------------------------------------------------------------
-
-class MemberNode extends Node {
-
-  private String domain;
-  private String family;
-  private String member;
-
-  MemberNode(int mode,String domain,String family,String member) {
-    this.mode = mode;
-    this.domain = domain;
-    this.family = family;
-    this.member = member;
-  }
-
-  void populateNode() throws DevFailed {
-
-    if(!isLeaf()) {
-      String devName = domain + "/" + family + "/" + member;
-      try {
-        Device ds = DeviceFactory.getInstance().getDevice(devName);
-        switch(mode) {
-          case DeviceFinder.MODE_ATTRIBUTE:
-            String[] attList = ds.get_attribute_list();
-            for(int i=0;i<attList.length;i++)
-              add(new EntityNode(mode,attList[i]));
-            break;
-          case DeviceFinder.MODE_ATTRIBUTE_SCALAR:
-              AttributeInfo[] ai = ds.get_attribute_info();
-              for(int i=0;i<ai.length;i++) {
-                if(ai[i].data_format.value() == AttrDataFormat._SCALAR)
-                  add(new EntityNode(mode,ai[i].name));
-              }
-              ai = null;
-              break;
-          case DeviceFinder.MODE_ATTRIBUTE_BOOLEAN_SCALAR:
-              AttributeInfo[] aib = ds.get_attribute_info();
-              for(int i=0;i<aib.length;i++) {
-                if(aib[i].data_format.value() == AttrDataFormat._SCALAR && aib[i].data_type == TangoConst.Tango_DEV_BOOLEAN)
-                  add(new EntityNode(mode,aib[i].name));
-              }
-              aib = null;
-              break;
-          case DeviceFinder.MODE_ATTRIBUTE_NUMBER_SCALAR:
-              AttributeInfo[] ain = ds.get_attribute_info();
-              for(int i=0;i<ain.length;i++) {
-                if(ain[i].data_format.value() == AttrDataFormat._SCALAR)
-                  switch(ain[i].data_type)
-                  {
-                      case TangoConst.Tango_DEV_CHAR:
-                      case TangoConst.Tango_DEV_UCHAR:
-                      case TangoConst.Tango_DEV_SHORT:
-                      case TangoConst.Tango_DEV_USHORT:
-                      case TangoConst.Tango_DEV_LONG:
-                      case TangoConst.Tango_DEV_ULONG:
-                      case TangoConst.Tango_DEV_FLOAT:
-                      case TangoConst.Tango_DEV_DOUBLE:
-                          add(new EntityNode(mode,ain[i].name));
-                          break;
-                  }
-              }
-              ain = null;
-              break;
-          case DeviceFinder.MODE_ATTRIBUTE_NUMBER_SPECTRUM:
-              AttributeInfo[] aisp = ds.get_attribute_info();
-              for(int i=0;i<aisp.length;i++) {
-                if(aisp[i].data_format.value() == AttrDataFormat._SPECTRUM)
-                  switch(aisp[i].data_type)
-                  {
-                      case TangoConst.Tango_DEV_CHAR:
-                      case TangoConst.Tango_DEV_UCHAR:
-                      case TangoConst.Tango_DEV_SHORT:
-                      case TangoConst.Tango_DEV_USHORT:
-                      case TangoConst.Tango_DEV_LONG:
-                      case TangoConst.Tango_DEV_ULONG:
-                      case TangoConst.Tango_DEV_FLOAT:
-                      case TangoConst.Tango_DEV_DOUBLE:
-                          add(new EntityNode(mode,aisp[i].name));
-                          break;
-                  }
-              }
-              ain = null;
-              break;
-          case DeviceFinder.MODE_ATTRIBUTE_STRING_SCALAR:
-            AttributeInfo[] ais = ds.get_attribute_info();
-            for(int i=0;i<ais.length;i++) {
-              if(ais[i].data_format.value() == AttrDataFormat._SCALAR && ais[i].data_type == TangoConst.Tango_DEV_STRING)
-                add(new EntityNode(mode,ais[i].name));
-            }
-            ais = null;
-            break;
-          case DeviceFinder.MODE_COMMAND:
-            CommandInfo[] cmdList = ds.command_list_query();
-            for(int i=0;i<cmdList.length;i++)
-              add(new EntityNode(mode,cmdList[i].cmd_name));
-            break;
-        }
-      } catch (ConnectionException e) {
-        ErrorPane.showErrorMessage(null,devName,e);
-      }
+    public String getDevice() {
+	return deviceName;
     }
 
-  }
+    public static String getDeviceName() {
+	JDialog f = new JDialog();
+	DeviceFinder finder = new DeviceFinder(f);
+	f.setContentPane(finder);
+	f.pack();
+	f.setModal(true);
+	f.show();
+	System.out.println("> " + finder.getDevice());
+	return finder.getDevice();
+    }
+	
+	
+    public static void main (String[] args) {
+	getDeviceName();
+    } // end of main ()
+    
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel label;
+    private javax.swing.JTextField inputField;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTree deviceTree;
+    private javax.swing.JButton ok;
+    private javax.swing.JButton cancel;
+    // End of variables declaration//GEN-END:variables
 
-  public boolean isLeaf() {
-    return (mode == DeviceFinder.MODE_DEVICE);
-  }
+    abstract class ANode {
+	String name;
+	DefaultMutableTreeNode node;
+	Database database;
+	
+	public abstract String getName();
 
-  public String toString() {
-    return member;
-  }
+	public void setNode(DefaultMutableTreeNode node) {
+	    this.node = node;
 
-}
+	}
 
-// ---------------------------------------------------------------
+	public DefaultMutableTreeNode getNode() {
+	    return node;
+	}
 
-class EntityNode extends Node {
-
-  private String entitytName;
-
-  EntityNode(int mode,String entitytName) {
-    this.entitytName = entitytName;
-    this.mode = mode;
-  }
-
-  void populateNode() throws DevFailed {}
-
-  public boolean isLeaf() {
-    return true;
-  }
-
-  public String toString() {
-    return entitytName;
-  }
-
-}
-
-// ---------------------------------------------------------------
-
-class TreeNodeRenderer extends DefaultTreeCellRenderer {
-
-  ImageIcon devicon;
-  ImageIcon cmdicon;
-  ImageIcon atticon;
-
-  public TreeNodeRenderer() {
-    devicon = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/util/device.gif"));
-    cmdicon = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/util/command.gif"));
-    atticon = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/util/attribute.gif"));
-  }
-
-  public Component getTreeCellRendererComponent(
-      JTree tree,
-      Object value,
-      boolean sel,
-      boolean expanded,
-      boolean leaf,
-      int row,
-      boolean hasFocus) {
-
-    super.getTreeCellRendererComponent(
-        tree, value, sel,
-        expanded, leaf, row,
-        hasFocus);
-
-    // Device Icon
-    if (value instanceof MemberNode) {
-      setIcon(devicon);
-      return this;
+	public String toString() {
+	    return name;
+	}
+	
     }
 
-    if (value instanceof EntityNode) {
-      switch (((Node) value).mode) {
-        case DeviceFinder.MODE_COMMAND:
-          setIcon(cmdicon);
-          break;
-        case DeviceFinder.MODE_ATTRIBUTE:
-        case DeviceFinder.MODE_ATTRIBUTE_SCALAR:
-        case DeviceFinder.MODE_ATTRIBUTE_BOOLEAN_SCALAR:
-        case DeviceFinder.MODE_ATTRIBUTE_NUMBER_SCALAR:
-        case DeviceFinder.MODE_ATTRIBUTE_NUMBER_SPECTRUM:
-        case DeviceFinder.MODE_ATTRIBUTE_STRING_SCALAR:
-          setIcon(atticon);
-          break;
-      }
+    class Domain extends  ANode{
+	List families = new Vector();
+
+	Domain(String name, Database database) {
+	    this.name = name;
+	    this.database = database;
+	}
+
+	Family findFamily(String familyName) {
+	    if (families.size() == 1) 
+		return (Family)families.get(0);
+
+	    if (familyName == null) return null;
+
+	    int found = 0;
+	    Family family = null;
+	    for (int i = 0; i < families.size(); i++) {
+		Family f  = (Family)families.get(i);
+		System.out.println(f + " = " + familyName);
+		if (f.toString().startsWith(familyName)) {
+		    family = f;
+		    found++;
+		}
+		
+	    } // end of for ()
+	    if (found == 1) return family;
+
+	    return null;
+	}
+
+
+	public String getName() {
+	    return name + "/";
+	}
+	
+	public void addFamily(Family f) {
+	    families.add(f);
+	}
+
+	public List getFamilies() {
+	    return families;
+	}
     }
 
-    return this;
-  }
+    class Family extends ANode {
+
+	Domain domain;
+	Database database;
+	List members = new Vector();
+	DefaultMutableTreeNode node;
+	Family(Domain domain, String name,
+	       Database database) {
+	    this.name = name;
+	    this.domain = domain;
+	    this.database = database;
+	}
+
+	public String getName() {
+	    return domain + "/" + name + "/";
+	}
+
+	public List getMembers() {
+	    return members;
+	}
+	
+	public void addMember(Member m) {
+	    members.add(m);
+	}
+
+	Member findMember(String memberName) {
+	    if (members.size() == 1) 
+		return (Member)members.get(0);
+
+	    if (memberName == null) return null;
+
+	    int found = 0;
+	    Member member = null;
+	    for (int i = 0; i < members.size(); i++) {
+		Member f  = (Member)members.get(i);
+		if (f.toString().startsWith(memberName)) {
+		    member = f;
+		    found++;
+		}
+		
+	    } // end of for ()
+	    if (found == 1) return member;
+
+	    return null;
+	}
+
+
+    }
+
+    class Member extends ANode {
+
+	Family family;
+	
+	Member(Family family, String name, Database database) {
+	    this.name = name;
+	    this.database = database;
+	    this.family = family;
+	}
+
+	public String getName() {
+	    return family.getName() + name;
+
+	}
+    }
 
 }

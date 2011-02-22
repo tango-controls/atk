@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /**
  * JDraw Image graphic object
  */
@@ -33,10 +11,8 @@ import java.awt.image.BufferedImage;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.File;
-import java.io.InputStream;
 
-/** JDraw Image graphic object. JDraw supports GIF, JPG and PNG format. Alpha mask is supported for
-    PNG image. */
+/** JDraw Image graphic object */
 public class JDImage extends JDRectangular {
 
   // Vars
@@ -46,13 +22,9 @@ public class JDImage extends JDRectangular {
   private int imgHeight = 0;
   private String fileName;
 
-  /**
-   * Contruct an image.
-   * @param objectName Image name
-   * @param fileName Image file name.
-   * @param x Up left corner x coordinate
-   * @param y Up left corner y coordinate
-   */
+  // -----------------------------------------------------------
+  // Construction
+  // -----------------------------------------------------------
   public JDImage(String objectName, String fileName, int x, int y) {
     initDefault();
     setOrigin(new Point.Double(0.0, 0.0));
@@ -68,7 +40,7 @@ public class JDImage extends JDRectangular {
 
   }
 
-  JDImage(JDImage e, int x, int y) {
+  public JDImage(JDImage e, int x, int y) {
     cloneObject(e, x, y);
     fileName = new String(e.fileName);
     invalidateImage();
@@ -125,74 +97,24 @@ public class JDImage extends JDRectangular {
 
   }
 
-  JDImage(LXObject lxObj,String fileName) {
-
-    initDefault();
-    loadObject(lxObj);
-
-    double x = lxObj.boundRect.getX();
-    double y = lxObj.boundRect.getY();
-    double w = lxObj.boundRect.getWidth()-1;
-    double h = lxObj.boundRect.getHeight()-1;
-
-    setOrigin(new Point2D.Double(x+w/2.0, y+h/2.0));
-    summit = new Point2D.Double[8];
-    createSummit();
-
-    if(fileName.startsWith("file:/"))
-      fileName = fileName.substring(6);
-    this.fileName = fileName;
-    lineWidth = 0;
-    fillStyle = JDObject.FILL_STYLE_NONE;
-
-    summit[0].x = x;
-    summit[0].y = y;
-
-    summit[1].x = x+w/2;
-    summit[1].y = y;
-
-    summit[2].x = x+w;
-    summit[2].y = y;
-
-    summit[3].x = x+w;
-    summit[3].y = y+h/2;
-
-    summit[4].x = x+w;
-    summit[4].y = y+h;
-
-    summit[5].x = x+w/2;
-    summit[5].y = y+h;
-
-    summit[6].x = x;
-    summit[6].y = y+h;
-
-    summit[7].x = x;
-    summit[7].y = y+h/2;
-
-    loadImage();
-
-    updateShape();
-
-  }
-
   // -----------------------------------------------------------
   // Overrides
   // -----------------------------------------------------------
+
   public JDObject copy(int x, int y) {
     return new JDImage(this, x, y);
   }
 
-  public void paint(JDrawEditor parent,Graphics g) {
+  public void paint(Graphics g) {
 
     if (!visible) return;
-    prepareRendering((Graphics2D)g);
-    super.paint(parent,g);
+    super.paint(g);
     loadImage();
     g.drawImage(theImage,boundRect.x, boundRect.y, boundRect.width, boundRect.height,null);
 
   }
 
-  void updateShape() {
+  public void updateShape() {
     computeBoundRect();
 
     // Update shadow coordinates
@@ -243,8 +165,8 @@ public class JDImage extends JDRectangular {
 
   }
 
-  /** Returns false, Image cannot be shadowed. */
   public boolean hasShadow() {
+    // Image cannot have shadow
     return false;
   }
 
@@ -252,10 +174,7 @@ public class JDImage extends JDRectangular {
   // Property stuff
   // -----------------------------------------------------------
 
-  /**
-   * Loads a new image into this object.
-   * @param fileName Image file name.
-   */
+  /** Loads a new image into this object */
   public void setFileName(String fileName) {
     this.fileName = fileName;
     invalidateImage();
@@ -270,23 +189,17 @@ public class JDImage extends JDRectangular {
     return fileName;
   }
 
-  /** Reset the size to its original size. */
+  /** Reset the size to its original size */
   public void resetToOriginalSize() {
     computeSummitCoordinates((int)summit[0].x, (int)summit[0].y, imgWidth,imgHeight);
     updateShape();
     centerOrigin();
   }
 
-  /**
-   * Returns original image widht.
-   */
   public int getImageWidth() {
     return imgWidth;
   }
 
-  /**
-   * Returns original image height.
-   */
   public int getImageHeight() {
     return imgHeight;
   }
@@ -294,7 +207,7 @@ public class JDImage extends JDRectangular {
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
-  void saveObject(FileWriter f, int level) throws IOException {
+  public void saveObject(FileWriter f, int level) throws IOException {
 
     String decal = saveObjectHeader(f, level);
     String to_write;
@@ -304,7 +217,7 @@ public class JDImage extends JDRectangular {
 
   }
 
-  JDImage(JDFileLoader f) throws IOException {
+  public JDImage(JDFileLoader f) throws IOException {
 
     initDefault();
     f.startBlock();
@@ -384,19 +297,10 @@ public class JDImage extends JDRectangular {
     if (theImage == null) {
 
       try {
-
-        if( fileName.startsWith("jar:")) {
-          // Load from resource
-          InputStream stream = getClass().getResourceAsStream(fileName.substring(4));
-          theImage = ImageIO.read(stream);
-        } else {
-          // Load form disk
-          File in = new File(fileName);
-          theImage = ImageIO.read(in);
-        }
+        File in = new File(fileName);
+        theImage = ImageIO.read(in);
         imgWidth = ((BufferedImage)theImage).getWidth();
         imgHeight = ((BufferedImage)theImage).getHeight();
-
       } catch (IOException e) {
         // Load failure
         System.out.println("JDImage.loadImage() Warning " + fileName + " load failed : " + e.getMessage());

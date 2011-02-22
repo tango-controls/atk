@@ -1,41 +1,45 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /** A JDGroup editor */
 package fr.esrf.tangoatk.widget.util.jdraw;
-
-import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.InputEvent;
 
 class JDGroupEditor extends JDrawEditor {
 
-  JDGroupEditor() {
-    super(JDrawEditor.MODE_EDIT_GROUP);
+  JDGroupEditor(int mode) {
+    super(mode);
+  }
+
+  // Handle Cut,Copy paste and delete shortcut here (not done by the menu here)
+  public void keyPressed(KeyEvent e) {
+
+    switch (e.getKeyCode()) {
+      case KeyEvent.VK_C:
+        if (e.isControlDown())
+          copySelection();
+        break;
+      case KeyEvent.VK_X:
+        if (e.isControlDown())
+          cutSelection();
+        break;
+      case KeyEvent.VK_V:
+        if (e.isControlDown())
+          create(JDrawEditor.CLIPBOARD);
+        break;
+      case KeyEvent.VK_DELETE:
+        deleteSelection();
+        break;
+      case KeyEvent.VK_G:
+        if (e.isControlDown())
+          showGroupEditorWindow();
+        break;
+      default:
+        super.keyPressed(e);
+    }
+
   }
 
 }
@@ -48,46 +52,15 @@ class JDGroupEditorView extends JComponent implements JDrawEditorListener,Action
   JScrollPane   theEditorView;
   Rectangle     oldRect;
 
-  JMenuBar   menuBar;
-
-  /* File menu */
-  JMenu      fileMenu;
-  JMenuItem  exitMenuItem;
-
-  /** Create menu */
-  JDCreationMenu creationMenu;
-
-  /* Edit menu */
-  JMenu     editMenu;
-  JMenuItem editCutMenuItem;
-  JMenuItem editCopyMenuItem;
-  JMenuItem editPasteMenuItem;
-  JMenuItem editDeleteMenuItem;
-  JMenuItem editSelectAllMenuItem;
-  JMenuItem editSelectNoneMenuItem;
-
-  /* Views menu */
-  JMenu     viewsMenu;
-  JMenuItem viewsOptionMenuItem;
-  JMenuItem viewsGroupEditMenuItem;
-
-  /** Tools menu */
-  JMenu     toolsMenu;
-  JMenuItem toolsHMirrorMenuItem;
-  JMenuItem toolsVMirrorMenuItem;
-  JMenuItem toolsAligntopMenuItem;
-  JMenuItem toolsAlignleftMenuItem;
-  JMenuItem toolsAlignbottomMenuItem;
-  JMenuItem toolsAlignrightMenuItem;
-  JMenuItem toolsRaiseMenuItem;
-  JMenuItem toolsLowerMenuItem;
-  JMenuItem toolsFrontMenuItem;
-  JMenuItem toolsBackMenuItem;
-  JMenuItem toolsConvertPolyMenuItem;
-  JCheckBoxMenuItem toolsGridVisible;
-  JCheckBoxMenuItem toolsAlignToGrid;
-  JMenuItem toolsGridSettings;
-  JMenuItem toolsFitToGraph;
+  JToolBar      toolBar;
+  JButton       lineBtn;
+  JButton       rectangleBtn;
+  JButton       roundRectBtn;
+  JButton       circleBtn;
+  JButton       polylineBtn;
+  JButton       labelBtn;
+  JButton       splineBtn;
+  JButton       imageBtn;
 
   public JDGroupEditorView(JDGroup g, JDrawEditor jc) {
 
@@ -99,11 +72,10 @@ class JDGroupEditorView extends JComponent implements JDrawEditorListener,Action
     setLayout(new BorderLayout());
 
     // Create the editor
-    theEditor = new JDGroupEditor();
+    theEditor = new JDGroupEditor(JDrawEditor.MODE_EDIT_GROUP);
     Rectangle r = g.getBoundRect();
     theEditor.addEditorListener(this);
-    int gSize = jc.getGridSize();
-    theEditor.setTranslation(round(-r.x + margin,gSize) ,round(-r.y + margin,gSize));
+    theEditor.setTranslation(-r.x + margin ,-r.y + margin);
     theEditor.setPreferredSize(new Dimension(r.width+2*margin,r.height+2*margin));
 
     for(i=0;i<g.getChildrenNumber();i++)
@@ -115,189 +87,38 @@ class JDGroupEditorView extends JComponent implements JDrawEditorListener,Action
     theEditor.setZoomFactor(invoker.getZoomFactor());
 
     // --- toolbar
-    creationMenu = new JDCreationMenu();
-    creationMenu.setEditor(theEditor);
-    add(creationMenu.getToolbar(),BorderLayout.WEST);
 
-    // -----------------------------
-    JMenuBar  menuBar = new JMenuBar();
+    toolBar = new JToolBar();
+    lineBtn = JDUtils.createIconButton("jdraw_line",false,"Create a line",this);
+    rectangleBtn = JDUtils.createIconButton("jdraw_rectangle",false,"Create a rectangle",this);
+    roundRectBtn = JDUtils.createIconButton("jdraw_roundrect",false,"Create a rounded rectangle",this);
+    circleBtn = JDUtils.createIconButton("jdraw_circle",false,"Create an ellipse",this);
+    polylineBtn = JDUtils.createIconButton("jdraw_polyline",false,"Create a polyline",this);
+    labelBtn = JDUtils.createIconButton("jdraw_label",false,"Create a label",this);
+    splineBtn = JDUtils.createIconButton("jdraw_spline",false,"Create a spline",this);
+    imageBtn = JDUtils.createIconButton("jdraw_image",false,"Create an image",this);
+    toolBar.add(lineBtn);
+    toolBar.add(rectangleBtn);
+    toolBar.add(roundRectBtn);
+    toolBar.add(circleBtn);
+    toolBar.add(labelBtn);
+    toolBar.add(polylineBtn);    
+    toolBar.add(splineBtn);
+    toolBar.add(imageBtn);
+    toolBar.setOrientation(JToolBar.VERTICAL);
+    add(toolBar,BorderLayout.WEST);
 
-    JMenu     fileMenu = new JMenu("File");
-    fileMenu.setMnemonic('E');
-    menuBar.add(fileMenu);
-
-    exitMenuItem = new JMenuItem("Close");
-    exitMenuItem.addActionListener(this);
-    fileMenu.add(exitMenuItem);
-
-    editCutMenuItem = new JMenuItem("Cut");
-    editCutMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,InputEvent.CTRL_MASK));
-    editCutMenuItem.addActionListener(this);
-    editCopyMenuItem = new JMenuItem("Copy");
-    editCopyMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C,InputEvent.CTRL_MASK));
-    editCopyMenuItem.addActionListener(this);
-    editPasteMenuItem = new JMenuItem("Paste");
-    editPasteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,InputEvent.CTRL_MASK));
-    editPasteMenuItem.addActionListener(this);
-    editDeleteMenuItem = new JMenuItem("Delete");
-    editDeleteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,0));
-    editDeleteMenuItem.addActionListener(this);
-    editSelectAllMenuItem = new JMenuItem("Select all");
-    editSelectAllMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,InputEvent.CTRL_MASK));
-    editSelectAllMenuItem.addActionListener(this);
-    editSelectNoneMenuItem = new JMenuItem("Select none");
-    editSelectNoneMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,InputEvent.CTRL_MASK));
-    editSelectNoneMenuItem.addActionListener(this);
-
-
-    editMenu = new JMenu("Edit");
-    editMenu.setMnemonic('E');
-    editMenu.add(new JSeparator());
-    editMenu.add(editCutMenuItem);
-    editMenu.add(editCopyMenuItem);
-    editMenu.add(editPasteMenuItem);
-    editMenu.add(editDeleteMenuItem);
-    editMenu.add(new JSeparator());
-    editMenu.add(editSelectAllMenuItem);
-    editMenu.add(editSelectNoneMenuItem);
-
-    menuBar.add(editMenu);
-    menuBar.add(creationMenu.getMenu());
-
-    viewsOptionMenuItem = new JMenuItem("Object properties...");
-    viewsOptionMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,InputEvent.CTRL_MASK));
-    viewsOptionMenuItem.addActionListener(this);
-    viewsGroupEditMenuItem = new JMenuItem("Group editor...");
-    viewsGroupEditMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G,InputEvent.CTRL_MASK));
-    viewsGroupEditMenuItem.addActionListener(this);
-
-    viewsMenu = new JMenu("Views");
-    viewsMenu.setMnemonic('V');
-    viewsMenu.add(viewsOptionMenuItem);
-    viewsMenu.add(viewsGroupEditMenuItem);
-
-    menuBar.add(viewsMenu);
-
-    toolsHMirrorMenuItem = new JMenuItem("Horizontal mirror");
-    toolsHMirrorMenuItem.addActionListener(this);
-    toolsVMirrorMenuItem = new JMenuItem("Vertical mirror");
-    toolsVMirrorMenuItem.addActionListener(this);
-    toolsAligntopMenuItem = new JMenuItem("Align top");
-    toolsAligntopMenuItem.addActionListener(this);
-    toolsAlignleftMenuItem = new JMenuItem("Align left");
-    toolsAlignleftMenuItem.addActionListener(this);
-    toolsAlignbottomMenuItem = new JMenuItem("Align bottom");
-    toolsAlignbottomMenuItem.addActionListener(this);
-    toolsAlignrightMenuItem = new JMenuItem("Align right");
-    toolsAlignrightMenuItem.addActionListener(this);
-    toolsConvertPolyMenuItem = new JMenuItem("Convert to Polyline");
-    toolsConvertPolyMenuItem.addActionListener(this);
-    toolsRaiseMenuItem = new JMenuItem("Raise");
-    toolsRaiseMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,InputEvent.SHIFT_MASK +InputEvent.CTRL_MASK));
-    toolsRaiseMenuItem.addActionListener(this);
-    toolsLowerMenuItem = new JMenuItem("Lower");
-    toolsLowerMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,InputEvent.SHIFT_MASK +InputEvent.CTRL_MASK));
-    toolsLowerMenuItem.addActionListener(this);
-    toolsFrontMenuItem = new JMenuItem("Bring to front");
-    toolsFrontMenuItem.addActionListener(this);
-    toolsBackMenuItem = new JMenuItem("Send to back");
-    toolsBackMenuItem.addActionListener(this);
-    toolsAlignToGrid = new JCheckBoxMenuItem("Align to grid");
-    toolsAlignToGrid.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,InputEvent.SHIFT_MASK +InputEvent.CTRL_MASK));
-    toolsAlignToGrid.setSelected(false);
-    toolsAlignToGrid.addActionListener(this);
-    toolsGridVisible = new JCheckBoxMenuItem("Show grid");
-    toolsGridVisible.setSelected(false);
-    toolsGridVisible.addActionListener(this);
-    toolsGridSettings = new JMenuItem("Grid settings...");
-    toolsGridSettings.addActionListener(this);
-    toolsFitToGraph = new JMenuItem("Fit view to graph");
-    toolsFitToGraph.addActionListener(this);
-
-    toolsMenu = new JMenu("Tools");
-    toolsMenu.setMnemonic('T');
-    toolsMenu.add(toolsHMirrorMenuItem);
-    toolsMenu.add(toolsVMirrorMenuItem);
-    toolsMenu.add(new JSeparator());
-    toolsMenu.add(toolsAligntopMenuItem);
-    toolsMenu.add(toolsAlignleftMenuItem);
-    toolsMenu.add(toolsAlignbottomMenuItem);
-    toolsMenu.add(toolsAlignrightMenuItem);
-    toolsMenu.add(new JSeparator());
-    toolsMenu.add(toolsRaiseMenuItem);
-    toolsMenu.add(toolsLowerMenuItem);
-    toolsMenu.add(toolsFrontMenuItem);
-    toolsMenu.add(toolsBackMenuItem);
-    toolsMenu.add(new JSeparator());
-    toolsMenu.add(toolsConvertPolyMenuItem);
-    toolsMenu.add(new JSeparator());
-    toolsMenu.add(toolsAlignToGrid);
-    toolsMenu.add(toolsGridVisible);
-    toolsMenu.add(toolsGridSettings);
-    toolsMenu.add(new JSeparator());
-    toolsMenu.add(toolsFitToGraph);
-
-    menuBar.add(toolsMenu);
-
-    add(menuBar,BorderLayout.NORTH);
-
-    // Copy clipboard
-    theEditor.setClipboard(invoker.getClipboardObjects());
-
-    // Update controls
-    selectionChanged();
-    valueChanged();
-    clipboardChanged();
   }
 
-  // ---------------------------------------------------------
-  private int round(int value,int prec) {
-    return (value / prec) * prec;
-  }
 
   // ---------------------------------------------------------
 
   public void creationDone() {}
-
-  public void selectionChanged() {
-
-    int sz = theEditor.getSelectionLength();
-
-    editCutMenuItem.setEnabled(sz>0);
-    editCopyMenuItem.setEnabled(sz>0);
-    editPasteMenuItem.setEnabled(theEditor.getClipboardLength()>0);
-    editDeleteMenuItem.setEnabled(sz>0);
-    editSelectAllMenuItem.setEnabled(sz<theEditor.getObjectNumber());
-    editSelectNoneMenuItem.setEnabled(sz>0);
-
-    viewsGroupEditMenuItem.setEnabled(theEditor.canEditGroup());
-    viewsOptionMenuItem.setEnabled(sz>0);
-
-    toolsHMirrorMenuItem.setEnabled(sz>0);
-    toolsVMirrorMenuItem.setEnabled(sz>0);
-    toolsAlignleftMenuItem.setEnabled(sz>1);
-    toolsAligntopMenuItem.setEnabled(sz>1);
-    toolsAlignrightMenuItem.setEnabled(sz>1);
-    toolsAlignbottomMenuItem.setEnabled(sz>1);
-    toolsConvertPolyMenuItem.setEnabled(theEditor.canConvertToPolyline());
-    toolsRaiseMenuItem.setEnabled((sz == 1));
-    toolsLowerMenuItem.setEnabled((sz == 1));
-    toolsFrontMenuItem.setEnabled((sz >= 1));
-    toolsBackMenuItem.setEnabled((sz >= 1));
-    toolsAlignToGrid.setSelected(theEditor.isAlignToGrid());
-    toolsGridVisible.setSelected(theEditor.isGridVisible());
-
-  }
-
-  public void clipboardChanged() {
-    int sz=theEditor.getClipboardLength();
-    editPasteMenuItem.setEnabled(sz>0);
-  }
-
+  public void selectionChanged() {}
+  public void clipboardChanged() {}
   public void valueChanged() {
     rebuildGroup();
   }
-
   public void sizeChanged() {
     theEditorView.revalidate();
     repaint();
@@ -307,67 +128,23 @@ class JDGroupEditorView extends JComponent implements JDrawEditorListener,Action
 
   public void actionPerformed(ActionEvent e) {
     Object src = e.getSource();
-    if (src==editCutMenuItem) {
-      theEditor.cutSelection();
-    } else if (src==editCopyMenuItem) {
-      theEditor.copySelection();
-    } else if (src==editPasteMenuItem) {
-      Point p = JDUtils.getTopLeftCorner(theEditor.getClipboardObjects());
-      theEditor.pasteClipboard(p.x+30, p.y+30);
-    } else if (src==editDeleteMenuItem) {
-      theEditor.deleteSelection();
-    } else if (src==editSelectAllMenuItem) {
-      theEditor.selectAll();
-    } else if (src==editSelectNoneMenuItem) {
-      theEditor.unselectAll();
-    } else if (src==exitMenuItem) {
-      ATKGraphicsUtils.getWindowForComponent(this).setVisible(false);
-      invoker.setClipboard(theEditor.getClipboardObjects());
-      invoker.fireClipboardChange();
-    } else if (src==viewsOptionMenuItem) {
-      theEditor.showPropertyWindow();
-    } else if (src == viewsGroupEditMenuItem) {
-      theEditor.showGroupEditorWindow();
-    } else if (src == toolsConvertPolyMenuItem) {
-      theEditor.convertToPolyline();
-    } else if (src == toolsRaiseMenuItem) {
-      theEditor.raiseObject();
-    } else if (src == toolsLowerMenuItem) {
-      theEditor.lowerObject();
-    } else if (src == toolsFrontMenuItem) {
-      theEditor.frontSelection();
-    } else if (src == toolsBackMenuItem) {
-      theEditor.backSelection();
-    } else if (src == toolsAlignToGrid) {
-      theEditor.setAlignToGrid(toolsAlignToGrid.isSelected());
-    } else if (src == toolsGridVisible) {
-      theEditor.setGridVisible(toolsGridVisible.isSelected());
-    } else if (src == toolsGridSettings) {
-      String newSize = JOptionPane.showInputDialog("Enter Grid Size",new Integer(theEditor.getGridSize()));
-      if( newSize!=null ) {
-        try {
-          int sz = Integer.parseInt(newSize);
-          theEditor.setGridSize(sz);
-        } catch (NumberFormatException e2) {
-          JOptionPane.showMessageDialog(this,"Wrong integer value\n" + e2.getMessage());
-        }
-      }
-    } else if (src == toolsFitToGraph) {
-      theEditor.computePreferredSize();
-    } else if (src==toolsHMirrorMenuItem) {
-      theEditor.scaleSelection(-1.0,1.0);
-    } else if (src==toolsVMirrorMenuItem) {
-      theEditor.scaleSelection( 1.0,-1.0);
-    } else if (src==toolsAligntopMenuItem) {
-      theEditor.aligntopSelection();
-    } else if (src==toolsAlignleftMenuItem) {
-      theEditor.alignleftSelection();
-    } else if (src==toolsAlignbottomMenuItem) {
-      theEditor.alignbottomSelection();
-    }  else if (src==toolsAlignrightMenuItem) {
-      theEditor.alignrightSelection();
+    if (src==rectangleBtn) {
+      theEditor.create(JDrawEditor.RECTANGLE);
+    } else if (src==roundRectBtn) {
+      theEditor.create(JDrawEditor.RRECTANGLE);
+    } else if (src==lineBtn) {
+      theEditor.create(JDrawEditor.LINE);
+    } else if (src==circleBtn) {
+      theEditor.create(JDrawEditor.ELLIPSE);
+    } else if (src==polylineBtn) {
+      theEditor.create(JDrawEditor.POLYLINE);
+    } else if (src==labelBtn) {
+      theEditor.create(JDrawEditor.LABEL);
+    } else if (src==splineBtn) {
+      theEditor.create(JDrawEditor.SPLINE);
+    } else if (src==imageBtn) {
+      theEditor.create(JDrawEditor.IMAGE);
     }
-
   }
 
   // ---------------------------------------------------------

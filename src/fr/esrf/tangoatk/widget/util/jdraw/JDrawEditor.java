@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /**
  * A set of class to handle a graphical synoptic viewer (vector drawing) and its editor.
  */
@@ -27,9 +5,6 @@ package fr.esrf.tangoatk.widget.util.jdraw;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.*;
 import java.awt.geom.*;
 import java.awt.event.*;
 import java.util.Vector;
@@ -37,12 +12,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
-/** The graph editor/viewer component. */
-public class JDrawEditor extends JComponent implements MouseMotionListener, MouseListener,
-                                                       ActionListener, KeyListener, ComponentListener,
-                                                       DropTargetListener {
+/** The graph editor/viewer component */
+public class JDrawEditor extends JComponent implements MouseMotionListener, MouseListener, ActionListener, KeyListener {
 
   // Mode of the editor
   /** Editor is in classic edition mode */
@@ -51,39 +23,17 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   final static public int MODE_EDIT_GROUP = 2;
   /** Play mode, play object according to their value , in this mode no contextual menu is displayed */
   final static public int MODE_PLAY = 3;
-  /** Library mode, allow only selection and clipboard */
-  final static public int MODE_LIB = 4;
 
-  /** Creation mode of the editor */
-  final static public int CREATE_RECTANGLE = 1;
-  /** Creation mode of the editor */
-  final static public int CREATE_LINE = 2;
-  /** Creation mode of the editor */
-  final static public int CREATE_ELLIPSE = 3;
-  /** Creation mode of the editor */
-  final static public int CREATE_POLYLINE = 4;
-  /** Creation mode of the editor */
-  final static public int CREATE_LABEL = 5;
-  /** Creation mode of the editor */
-  final static public int CREATE_SPLINE = 6;
-  /** Creation mode of the editor */
-  final static public int CREATE_CLIPBOARD = 7;
-  /** Creation mode of the editor */
-  final static public int CREATE_RRECTANGLE = 8;
-  /** Creation mode of the editor */
-  final static public int CREATE_IMAGE = 9;
-  /** Creation mode of the editor */
-  final static public int CREATE_SWINGOBJECT = 10;
-  /** Creation mode of the editor */
-  final static public int CREATE_AXIS = 11;
-  /** Creation mode of the editor */
-  final static public int CREATE_BAR = 12;
-  /** Creation mode of the editor */
-  final static public int CREATE_SLIDER = 13;
-  /** Creation mode of the editor */
-  final static int CREATE_SLIDER_CURSOR = 14;
-  /** Creation mode of the editor */
-  final static int CREATE_CONNECT_POLY = 15;
+  // Creation mode
+  final static public int RECTANGLE = 1;
+  final static public int LINE = 2;
+  final static public int ELLIPSE = 3;
+  final static public int POLYLINE = 4;
+  final static public int LABEL = 5;
+  final static public int SPLINE = 6;
+  final static public int CLIPBOARD = 7;
+  final static public int RRECTANGLE = 8;
+  final static public int IMAGE = 9;
 
   final static private int undoLength=20;
 
@@ -92,12 +42,10 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   private Vector clipboard;
   private Vector undo;
   private int undoPos;
+  private int selSummit;
   private int curObject;
   private Vector selObjects;
-  private boolean isDraggingSummits;
-  private int[]   selSummits;
   private boolean isDraggingSummit;
-  private int     selSummit;
   private boolean isDraggingObject;
   private boolean isDraggingSelection;
   private boolean hasMoved;
@@ -111,11 +59,8 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   private JDObject lastCreatedObject=null;
   private Vector tmpPoints;
   private JPopupMenu objMenu;
-  private JPopupMenu polyMenu;
   private JDPolyline editedPolyline;
   private int zoomFactor = 0;
-  private double autoZoomFactor = 1.0;
-  private boolean autoZoom = false;
   private int sizeX;
   private int sizeY;
   private String lastFileName = "";
@@ -129,16 +74,8 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   private boolean alignToGrid=false;
   private int GRID_SIZE=16;
   private boolean gridVisible=false;
-  private String creationParam = null;
-  boolean resizeLabelOnFontChange = true;
-  boolean resizeLabelOnTextChange = true;
-  private JDSlider sliderRef; // Used to pick new cursor
-  private JDPolyline connectPolyline;
-  private JLabel statusLabel = null;
-  private String currentStatus = "";
-  private DropTarget dropTarget;
 
-  // ------- Object Contextual menu ----------------
+  // ------- Contextual menu ----------------
   private JSeparator sep1;
   private JSeparator sep2;
   private JSeparator sep3;
@@ -158,22 +95,14 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   private JMenuItem groupMenuItem;
   private JMenuItem ungroupMenuItem;
 
-  private JMenuItem editShapeMenuItem;
-  private JMenuItem connectShapeMenuItem;
+  private JMenuItem deleteSummitMenuItem;
+  private JMenuItem breakShapeMenuItem;
 
   private JMenuItem raiseMenuItem;
   private JMenuItem lowerMenuItem;
   private JMenuItem frontMenuItem;
   private JMenuItem backMenuItem;
 
-  // ------- Polyline Contextual menu ----------------
-  private JMenuItem infoPolyMenuItem;
-
-  private JMenuItem delSummitMenuItem;
-  private JMenuItem brkShapeMenuItem;
-  private JMenuItem set0ShapeMenuItem;
-  private JMenuItem reorderShapeMenuItem;
-  private JMenuItem cancelShapeMenuItem;
 
   static private Cursor hCursor = Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR);
   static private Cursor vCursor = Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR);
@@ -234,7 +163,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     setBackground(defaultBackground);
     setOpaque(true);
     isDraggingSummit = false;
-    isDraggingSummits = false;
     isDraggingObject = false;
     isDraggingSelection = false;
     hasMoved=false;
@@ -243,8 +171,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     transx = transy = 0;
     listeners = new Vector();
     needToSave = false;
-    editedPolyline = null;
-    selSummits = new int[0];
 
     switch(mode) {
       case MODE_EDIT:
@@ -259,7 +185,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
         clipboard = new Vector();
         createContextualMenu();
         break;
-      case MODE_LIB:
       case MODE_PLAY:
         break;
     }
@@ -268,33 +193,22 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     addKeyListener(this);
     addMouseListener(this);
     addMouseMotionListener(this);
-    if(mode==MODE_EDIT) dropTarget = new DropTarget(this,this);
 
   }
 
   // -----------------------------------------------------
   // Editing stuff
   // -----------------------------------------------------
-  /**
-   * Shows or hide the grid.
-   * @param b True to show the grid, false otherwise.
-   */
+
   public void setGridVisible(boolean b) {
     gridVisible=b;
     repaint();
   }
 
-  /**
-   * Determines whether the grid is visible.
-   */
   public boolean isGridVisible() {
     return gridVisible;
   }
 
-  /**
-   * Sets the grid step size.
-   * @param size Grid size (pixel)
-   */
   public void setGridSize(int size) {
     if(size>1) {
       GRID_SIZE = size;
@@ -302,41 +216,23 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     }
   }
 
-  /**
-   * Returns the current gid size.
-   * @see #setGridSize
-   */
   public int getGridSize() {
     return GRID_SIZE;
   }
 
-  /**
-   * When enabled, all moved control points and objects will be aligned
-   * to the grid.
-   * @param b True to align object to grid , false otherwise.
-   */
   public void setAlignToGrid(boolean b) {
     alignToGrid = b;
   }
 
-  /**
-   * Determines whether object and control point are aligned to the grid.
-   * @see #setAlignToGrid
-   * @see #setGridSize
-   */
   public boolean isAlignToGrid() {
     return alignToGrid;
   }
 
-  /** Returns the mode of the editor. */
+  /** Returns the mode of the editor */
   public int getMode() {
     return mode;
   }
 
-  /**
-   * Select the specified object. Does not fire selectionChanged().
-   * @param obj Object to be selected.
-   */
   public void selectObject(JDObject obj) {
     if (obj != null && mode!=MODE_PLAY) {
       if (!isSelected(obj))
@@ -345,10 +241,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     }
   }
 
-  /**
-   * Unselect the specified object. Does not fire selectionChanged().
-   * @param obj Object to be deselected.
-   */
   public void unselectObject(JDObject obj) {
     if (obj != null && mode!=MODE_PLAY) {
       selObjects.remove(obj);
@@ -356,21 +248,11 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     }
   }
 
-  /**
-   * Determine wheter the specifed object is selected.
-   * @param obj JDObject
-   * @see #selectObject
-   * @see #unselectObject
-   */
   public boolean isSelected(JDObject obj) {
     if( mode==MODE_PLAY ) return false;
     return selObjects.contains(obj);
   }
 
-  /**
-   * Selects all specified objects.
-   * @param objs Array of JDObject to be selected.
-   */
   public void selectObjects(JDObject[] objs) {
     if (objs.length>0 && mode!=MODE_PLAY && selObjects.size()==0) {
       for (int i = 0; i < objs.length; i++)
@@ -384,130 +266,35 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     return objects.size();
   }
 
-  /** Get the JDObject at the specified position.
-   * @param idx Object index.
-   */
+  /** Get the JDObject at the specified position */
   public JDObject getObjectAt(int idx) {
     return (JDObject)objects.get(idx);
   }
 
-  /** Used for read only purpose , vector should not be modified by this way. */
+  /* Used for read only purpose , vector should not be modified by this way */
   public Vector getObjects() {
     return objects;
   }
 
-  /** Used for read only purpose , vector should not be modified by this way. */
-  public Vector getSelectedObjects() {
-    return selObjects;
-  }
-
-  /** Used for read only purpose , vector should not be modified by this way. */
-  public Vector getClipboardObjects() {
-    return clipboard;
-  }
-
-  void setClipboard(Vector objects) {
-    clipboard.clear();
-    clipboard.addAll(objects);
-  }
-
   /** Unselect all object */
   public void unselectAll() {
-    unselectAll(true);
-  }
-
-  private void unselectAll(boolean fireSelChanged) {
     if(mode==MODE_PLAY) return;
     repaint(buildRepaintRect(selObjects));
     selObjects.clear();
-    editedPolyline = null;
-    if(fireSelChanged)
-      fireSelectionChange();
   }
 
   /** Select all object */
   public void selectAll() {
-    selectAll(true);
-  }
-
-  /** Select non visible items */
-  public void selectNotVisible() {
-    if(mode==MODE_PLAY) return;
-    selObjects.clear();
-    int nbObj = objects.size();
-    for(int i=0;i<nbObj;i++) {
-      JDObject obj = (JDObject)objects.get(i);
-      if(!obj.isVisible()) selObjects.add(obj);
-    }
-    editedPolyline = null;
-    repaint();
-    fireSelectionChange();
-  }
-
-  private void selectAll(boolean fireSelChanged) {
     if(mode==MODE_PLAY) return;
     selObjects.clear();
     selObjects.addAll(objects);
-    editedPolyline = null;
     repaint(buildRepaintRect(objects));
-    if(fireSelChanged)
-      fireSelectionChange();
   }
 
-  /** Sets the editor in creation mode.
-   *  @param what Object to be created
-   *  @see #create(int,String)
-   *  @see #CREATE_RECTANGLE
-   *  @see #CREATE_LINE
-   *  @see #CREATE_ELLIPSE
-   *  @see #CREATE_POLYLINE
-   *  @see #CREATE_LABEL
-   *  @see #CREATE_SPLINE
-   *  @see #CREATE_CLIPBOARD
-   *  @see #CREATE_RRECTANGLE
-   *  @see #CREATE_IMAGE
-   *  @see #CREATE_SWINGOBJECT
-   *  @see #CREATE_AXIS
-   *  @see #CREATE_BAR
-   *  @see #CREATE_SLIDER
-   */
+  /** Sets the editor in creation mode */
   public void create(int what) {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
-    initCreate(what);
-  }
-
-
-  /** Sets the editor in creation mode.
-   *  @param what Object to be created
-   *  @param param Optional parameters (used for JDSwingObject className)
-   *  @see #create(int)
-   */
-  public void create(int what,String param) {
-    if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
-    initCreate(what);
-    creationParam = param;
-  }
-
-  void pickCursor(JDSlider parent) {
-    if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
-    if(parent==null) return;
-    initCreate(CREATE_SLIDER_CURSOR);
-    sliderRef = parent;
-  }
-
-  void pickPolyline() {
-    if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
-    if(selObjects.size()>0) {
-      JDObject s = (JDObject)selObjects.get(0);
-      if(s instanceof JDPolyline) {
-        initCreate(CREATE_CONNECT_POLY);
-        connectPolyline = (JDPolyline)s;
-      }
-    }
+    creationMode = what;
   }
 
   /** Get number of selected object */
@@ -519,21 +306,19 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   /** Get number of object inside the clipboard */
   public int getClipboardLength() {
     if(mode==MODE_PLAY) return 0;
-    if(mode==MODE_LIB) return 0;
     return clipboard.size();
   }
 
   /** Shows the property window */
   public void showPropertyWindow() {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
-    JDUtils.showPropertyDialog(this, selObjects);
+    boolean m = JDUtils.showPropertyDialog(this, selObjects,0);
+    if (m) setNeedToSave(true,"Property change");
   }
 
   /** Shows the property window */
   public void showTransformWindow() {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
     boolean m = JDUtils.showTransformDialog(this, selObjects);
     if (m) setNeedToSave(true,"transform");
   }
@@ -541,7 +326,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   /** Shows the object browser */
   public void showBrowserWindow() {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
     boolean m = JDUtils.showBrowserDialog(this, selObjects);
     if (m) setNeedToSave(true,"Property change");
   }
@@ -549,7 +333,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   /** Shows the group editor dialog */
   public void showGroupEditorWindow() {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
     if (selObjects.size() == 1) {
       JDObject p =(JDObject)selObjects.get(0);
       if (p instanceof JDGroup) {
@@ -592,7 +375,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   /** Shows the java generation file selection box */
   public void showGroupJavaWindow() {
     if (mode == MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
     if (selObjects.size() >= 1) {
       JFileChooser jf = new JFileChooser(".");
       jf.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -607,67 +389,39 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     }
   }
 
-  /**
-   * Fill the clipboard with a copy of given objects.
-   * @param objs Objects to add
-   */
-  void addObjectToClipboard(Vector objs) {
-    clipboard.clear();
-    for (int i = 0; i < objs.size(); i++)
-      clipboard.add(((JDObject)objs.get(i)).copy(0,0));
-    fireClipboardChange();
-  }
-
   /** Copy selection to clipboard */
   public void copySelection() {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
     if(selObjects.size()==0) return;
-    addObjectToClipboard(selObjects);
+
+    clipboard.clear();
+    for (int i = 0; i < selObjects.size(); i++)
+      clipboard.add(((JDObject)selObjects.get(i)).copy(0,0));
+    fireClipboardChange();
   }
 
-  /** Paste the selection at the specified pos.
-  * @param x Up left corner x coordinate
-  * @param y Up left corner y coordinate
-  */
+  /** Paste the selection at the specified pos */
   public void pasteClipboard(int x, int y) {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
     if(clipboard.size()==0) return;
 
-    unselectAll(false);
+    unselectAll();
     Point org = JDUtils.getTopLeftCorner(clipboard);
-    int tx=x - org.x;
-    int ty=y - org.y;
 
-    if( alignToGrid ) {
-      tx = ((tx + GRID_SIZE / 2) / GRID_SIZE) * GRID_SIZE;
-      ty = ((ty + GRID_SIZE / 2) / GRID_SIZE) * GRID_SIZE;
-    }
-
-    boolean hasSwing=false;
     for (int i = 0; i < clipboard.size(); i++) {
-      JDObject n = ((JDObject) clipboard.get(i)).copy(tx,ty);
-      hasSwing = (n instanceof JDSwingObject) || hasSwing;
+      JDObject n = ((JDObject) clipboard.get(i)).copy(x - org.x, y - org.y);
       objects.add(n);
       selObjects.add(n);
     }
 
     setNeedToSave(true,"Paste");
-    if(!hasSwing)
-      repaint(buildRepaintRect(selObjects));
-    else
-      repaintLater();
+    repaint(buildRepaintRect(selObjects));
     fireSelectionChange();
   }
 
-  /** Scale selection around the selection center.
-   * @param rx Horizontal sace ratio.
-   * @param ry Vertical sace ratio.
-   */
+  /** Scale selection */
   public void scaleSelection(double rx, double ry) {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
 
     // Repaint old rectangle
     repaint(buildRepaintRect(selObjects));
@@ -684,14 +438,12 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   /** Move the selection to clipboard */
   public void cutSelection() {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
     if(selObjects.size()==0) return;
     clipboard.clear();
     objects.removeAll(selObjects);
     clipboard.addAll(selObjects);
     repaint(buildRepaintRect(selObjects));
     selObjects.clear();
-    editedPolyline = null;
     setNeedToSave(true,"Cut");
     fireSelectionChange();
     fireClipboardChange();
@@ -701,12 +453,10 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   /** Delete selection from the draw */
   public void deleteSelection() {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
     if(selObjects.size()==0) return;
     objects.removeAll(selObjects);
     repaint(buildRepaintRect(selObjects));
     selObjects.clear();
-    editedPolyline = null;
     setNeedToSave(true,"Delete");
     fireSelectionChange();
   }
@@ -721,8 +471,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
     int ok = JOptionPane.YES_OPTION;
     JFileChooser chooser = new JFileChooser(defaultDir);
-    if(lastFileName.length()>0)
-      chooser.setSelectedFile(new File(lastFileName));
+    chooser.setSelectedFile(new File(lastFileName));
     int returnVal = chooser.showSaveDialog(this);
 
     if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -750,15 +499,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     
     if(fileName.endsWith(".jlx")) {
       String fName = fileName.substring(0,fileName.lastIndexOf('.'));
-      if( JOptionPane.showConfirmDialog(this,"Cannot save to JLoox (.jlx) format , save to jdw format ?\n"+fName + ".jdw",
-                                        "Save confirmation",JOptionPane.YES_NO_OPTION)==JOptionPane.NO_OPTION)
-        return;
-      fileName = fName + ".jdw";
-    }
-
-    if(fileName.endsWith(".g")) {
-      String fName = fileName.substring(0,fileName.lastIndexOf('.'));
-      if( JOptionPane.showConfirmDialog(this,"Cannot save to Loox (.g) format , save to jdw format ?\n"+fName + ".jdw",
+      if( JOptionPane.showConfirmDialog(this,"Cannot save to jlx format , save to jdw format ?\n"+fName + ".jdw",
                                         "Save confirmation",JOptionPane.YES_NO_OPTION)==JOptionPane.NO_OPTION)
         return;
       fileName = fName + ".jdw";
@@ -798,46 +539,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     }
 
   }
-  
-  /** Load a jdraw grpahics input stream reader into the editor. Available only for play mode. The .jlx and .g files are not supported.
-   *  This method is only called by TangoSynopticHandler which is in fact in Play mode.
-   * @param inp opened for the synoptic resource
-   * @throws IOException Exception containing error message when failed.
-   * @see JDrawEditorListener#valueChanged
-   */
-  
-  protected void loadFromStream(InputStreamReader inp) throws IOException
-  {
-
-      Vector         objs;
-      File           jdFile=null;
-
-      if (mode!=MODE_PLAY) return;
-      
-      JDFileLoader fl = new JDFileLoader(inp);
-      try {
-        objs = fl.parseFile();
-        inp.close();
-      } catch (IOException e) {
-        inp.close();
-        throw e;
-      }
-
-      applyGlobalOption(fl);
-
-      // Load success
-      clearObjects();
-      editedPolyline = null;
-      objects = objs;
-      for(int i=0;i<objects.size();i++)
-	((JDObject)objects.get(i)).setParent(this);
-
-      initPlayer();
-
-      computePreferredSize();
-      repaintLater();
-
-  }
 
   /** Load a jdraw grpahics file into the editor
    * Trigger valueChanged() if a file is selected to be loaded.
@@ -852,22 +553,10 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
     FileReader fr = new FileReader(fileName);
 
-    if (fileName.endsWith(".jlx")) {
+    if (fileName.endsWith("jlx")) {
 
       // JLOOX files
       JLXFileLoader fl = new JLXFileLoader(fr);
-      try {
-        objs = fl.parseFile();
-        fr.close();
-      } catch (IOException e) {
-        fr.close();
-        throw e;
-      }
-
-    } else if (fileName.endsWith(".g")) {
-
-      // LOOX files
-      LXFileLoader fl = new LXFileLoader(fr);
       try {
         objs = fl.parseFile();
         fr.close();
@@ -894,7 +583,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
     // Load success
     clearObjects();
-    editedPolyline = null;
     objects = objs;
     for(int i=0;i<objects.size();i++)
       ((JDObject)objects.get(i)).setParent(this);
@@ -909,7 +597,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     }
 
     computePreferredSize();
-    repaintLater();
+    repaint();
 
   }
 
@@ -932,12 +620,9 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     if (ok == JOptionPane.YES_OPTION || ok == JOptionPane.NO_OPTION) {
 
       JFileChooser chooser = new JFileChooser(defaultDir);
-      if(lastFileName.length()>0)
-        chooser.setSelectedFile(new File(lastFileName));
+      chooser.setSelectedFile(new File(lastFileName));
       JDFileFilter jlxFilter = new JDFileFilter("JLoox vectorial draw",new String[]{"jlx"});
       chooser.addChoosableFileFilter(jlxFilter);
-      JDFileFilter lxFilter = new JDFileFilter("Loox vectorial draw",new String[]{"g"});
-      chooser.addChoosableFileFilter(lxFilter);
       JDFileFilter jdwFilter = new JDFileFilter("JDraw graphics program",new String[]{"jdw"});
       chooser.addChoosableFileFilter(jdwFilter);
 
@@ -959,7 +644,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   /** bring selected object to foreground */
   public void frontSelection() {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
 
     Vector nObjects = new Vector();
 
@@ -980,7 +664,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   /** send selected object to background */
   public void backSelection() {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
 
     Vector nObjects = new Vector();
 
@@ -1001,7 +684,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   /** group selected objects */
   public void groupSelection() {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
 
     Vector nObjects = new Vector();
 
@@ -1020,7 +702,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
       JDGroup g = new JDGroup("JDGroup", nObjects);
       selObjects.add(g);
       objects.add(g);
-      editedPolyline = null;
       fireSelectionChange();
       setNeedToSave(true,"Group");
       repaint(g.getRepaintRect());
@@ -1031,7 +712,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   /** ungroup selected object */
   public void ungroupSelection() {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
 
     if (selObjects.size() == 1) {
       JDObject p = (JDObject) selObjects.get(0);
@@ -1044,8 +724,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
         // Readd objects
         selObjects.addAll(g.getChildren());
         objects.addAll(id,g.getChildren());
-        editedPolyline = null;
-        fireSelectionChange();
+        fireSelectionChange();        
         setNeedToSave(true,"Ungroup");
       }
     }
@@ -1111,51 +790,16 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     return zoomFactor;
   }
 
-  /** Sets the zoom factor. Does not have effect if autoZoom is enabled.
-    *  @param z ZoomFactor ( -1=33% , 0=50% , 1=100% , 2=200% )
-    * @see #setAutoZoomFactor
-    */
+  /** Sets the zoom factor */
   public void setZoomFactor(int z) {
     zoomFactor=z;
     invalidate();
     fireSizeChanged();
   }
 
-  /** Sets the auto zoom. When auto zoom is enabled, the drawing area follows the
-   * window size. This works only in MODE_PLAY.
-   * @param b True to enable auto zoom, false otherwise.
-   * @see #setAutoZoomFactor
-   */
-  public void setAutoZoom(boolean b) {
-    autoZoom = b;
-    if(autoZoom) {
-      addComponentListener(this);
-    } else {
-      removeComponentListener(this);
-    }
-  }
-
-  /**
-   * Sets the initial autoZoom factor. This allows to start the
-   * player (PLAY_MOE) with an arbitrary size.
-   * @param ratio Zoom factor
-   */
-  public void setAutoZoomFactor(double ratio) {
-    autoZoomFactor = ratio;
-  }
-
-  /**
-   * Returns true is auto zoom is enabled, false otherwise.
-   * @see #setAutoZoom
-   */
-  public boolean isAutoZoom() {
-    return autoZoom;
-  }
-
   /** Translate selected Object */
   public void translateSelection(int x, int y) {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
 
     if (selObjects.size() > 0 && (x!=0 || y!=0)) {
 
@@ -1174,12 +818,12 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
   /** Get undo state */
   public boolean canUndo() {
-    return (mode==MODE_EDIT) && undoPos>=2;
+    return mode==MODE_EDIT && undoPos>=2;
   }
 
   /** Get redo state */
   public boolean canRedo() {
-    return (mode==MODE_EDIT) && undoPos<undo.size();
+    return mode==MODE_EDIT && undoPos<undo.size();
   }
 
   /** Get name of the last action */
@@ -1212,7 +856,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
   /** Clear the undo buffer */
   public void clearUndo() {
-    if (mode==MODE_EDIT) {
+    if (mode == MODE_EDIT) {
       undo.clear();
       undo.add(new UndoBuffer(objects, "Init"));
       undoPos = 1;
@@ -1222,19 +866,16 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   /** Align selection to top */
   public void aligntopSelection() {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
-    if(selObjects.size()==0) return;
 
     // repaint old rectangle
     repaint(buildRepaintRect(selObjects));
 
-    JDObject first = (JDObject)selObjects.get(0);
-    int orgy = first.getBoundRect().y;
+    Point org = JDUtils.getTopLeftCorner(selObjects);
 
     for (int i = 0; i < selObjects.size(); i++) {
       JDObject n = (JDObject) selObjects.get(i);
       double y = n.boundRect.y;
-      n.translate(0.0,orgy-y);
+      n.translate(0.0,org.y-y);
     }
 
     setNeedToSave(true,"Align");
@@ -1244,19 +885,16 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   /** Align selection to left */
   public void alignleftSelection() {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
-    if(selObjects.size()==0) return;
 
     // repaint old rectangle
     repaint(buildRepaintRect(selObjects));
 
-    JDObject first = (JDObject)selObjects.get(0);
-    int orgx = first.getBoundRect().x;
+    Point org = JDUtils.getTopLeftCorner(selObjects);
 
     for (int i = 0; i < selObjects.size(); i++) {
       JDObject n = (JDObject) selObjects.get(i);
       double x = n.boundRect.x;
-      n.translate(orgx-x,0.0);
+      n.translate(org.x-x,0.0);
     }
 
     setNeedToSave(true,"Align");
@@ -1266,19 +904,16 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   /** Align selection to bottom */
   public void alignbottomSelection() {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
-    if(selObjects.size()==0) return;
 
     // repaint old rectangle
     repaint(buildRepaintRect(selObjects));
 
-    JDObject first = (JDObject)selObjects.get(0);
-    int orgy = first.getBoundRect().y + first.getBoundRect().height;
+    Point org = JDUtils.getBottomRightCorner(selObjects);
 
     for (int i = 0; i < selObjects.size(); i++) {
       JDObject n = (JDObject) selObjects.get(i);
       double y = n.boundRect.y+n.boundRect.height;
-      n.translate(0.0,orgy-y);
+      n.translate(0.0,org.y-y);
     }
 
     setNeedToSave(true,"Align");
@@ -1288,19 +923,16 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   /** Align selection to right */
   public void alignrightSelection() {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
-    if(selObjects.size()==0) return;
 
     // repaint old rectangle
     repaint(buildRepaintRect(selObjects));
 
-    JDObject first = (JDObject)selObjects.get(0);
-    int orgx = first.getBoundRect().x + first.getBoundRect().width;
+    Point org = JDUtils.getBottomRightCorner(selObjects);
 
     for (int i = 0; i < selObjects.size(); i++) {
       JDObject n = (JDObject) selObjects.get(i);
       double x = n.boundRect.x+n.boundRect.width;
-      n.translate(orgx-x,0.0);
+      n.translate(org.x-x,0.0);
     }
 
     setNeedToSave(true,"Align");
@@ -1382,8 +1014,8 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
       d.width  = 320;
       d.height = 200;
     } else {
-      d.width   = old.x + old.width + 1;
-      d.height  = old.y + old.height + 1;
+      d.width   = old.x + old.width + 5;
+      d.height  = old.y + old.height + 5;
     }
 
     setPreferredSize(d);
@@ -1396,72 +1028,26 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     sizeY = d.height;
   }
 
-
   public Dimension getPreferredSize() {
-    Insets insets = getInsets();
-    int bW = (insets.right+insets.left);
-    int bH = (insets.bottom+insets.top);
-    return new Dimension(zbconvert(sizeX,0)+bW, zbconvert(sizeY,0)+bH);
+    return new Dimension(zbconvert(sizeX,0), zbconvert(sizeY,0));
   }
 
   public Dimension getMinimumSize() {
-    Object p = getParent();
-    if(p instanceof JSplitPane) {
-      return new Dimension(16,16);
-    } else {
-      return getPreferredSize();
-    }
+    return getPreferredSize();
   }
 
   /** Inits the player, This function should be called only if you want
    * to build dynamicaly a graph with addObject(). Call it after all
    * objects are inserted in the Editor.
-   * The call to this function is not absolutly needed. Call it
-   * only if you want to PLAY JDSwingObject or if you want to
-   * animate objects.
    * @see #addObject
    */
   public void initPlayer() {
-
-    if(mode!=MODE_PLAY)
-      return;
 
     for(int i=0;i<objects.size();i++) {
       getObjectAt(i).saveTransform();
       getObjectAt(i).initValue();
     }
 
-    // Add Swing JDObject into the Container
-    removeAll();
-    Vector v = getObjectsOfClass(JDSwingObject.class);
-    int sz = v.size();
-    for(int i=0;i<sz;i++) {
-      add(((JDSwingObject)v.get(sz-i-1)).getComponent());
-    }
-
-  }
-
-  /**
-   * Retunrs all objects of the specified class present in the drawing area.
-   * @param theClass JDObject subclass
-   */
-  public Vector getObjectsOfClass(Class theClass) {
-    Vector ret = new Vector();
-    for(int i=0;i<objects.size();i++)
-      ((JDObject)objects.get(i)).getObjectsByClassList(ret,theClass);
-    return ret;
-  }
-
-  /**
-   * Returns all objects having the given name present in the drawing area.
-   * @param name JDObject name (Case sensitive)
-   * @param recurseGroup true to perform a deep search whithin group, false otherwise.
-   */
-  public Vector getObjectsByName(String name,boolean recurseGroup) {
-    Vector ret = new Vector();
-    for(int i=0;i<objects.size();i++)
-      ((JDObject)objects.get(i)).getObjectsByName(ret,name,recurseGroup);
-    return ret;
   }
 
   /** Convert the selected objects to JDPolyline. */
@@ -1535,74 +1121,33 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     return ret;
   }
 
-  /**
-   * Sets the status label where are printed creation information.
-   * @param label Label
-   */
-  public void setStatusLabel(JLabel label) {
-    statusLabel = label;
-  }
-
 // -----------------------------------------------------
 // Key listener
 // -----------------------------------------------------
   public void keyPressed(KeyEvent e) {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
     int t = (alignToGrid)?GRID_SIZE:1;
 
     switch (e.getKeyCode()) {
       case KeyEvent.VK_UP:
-        if (editedPolyline != null) {
-          Rectangle old = editedPolyline.getRepaintRect();
-          editedPolyline.translateSummits(selSummits, 0, -t);
-          repaint(old.union(editedPolyline.getRepaintRect()));
-          setNeedToSave(true, "Shape edit");
-        } else {
-          translateSelection(0, -t);
-          setNeedToSave(true, "Translate");
-        }
-        // consume event (does not allow the parent ScrollPane to get the keyEvent)
-        e.consume();
+        translateSelection(0, -t);
+        setNeedToSave(true,"Translate");
+         // consume event (does not allow the parent ScrollPane to get the keyEvent)
+         e.consume();
         break;
       case KeyEvent.VK_DOWN:
-        if (editedPolyline != null) {
-          Rectangle old = editedPolyline.getRepaintRect();
-          editedPolyline.translateSummits(selSummits, 0, t);
-          repaint(old.union(editedPolyline.getRepaintRect()));
-          setNeedToSave(true, "Shape edit");
-        } else {
-          translateSelection(0, t);
-          setNeedToSave(true, "Translate");
-        }
+        translateSelection(0, t);
+        setNeedToSave(true,"Translate");
         e.consume();
         break;
       case KeyEvent.VK_LEFT:
-        if (editedPolyline != null) {
-          Rectangle old = editedPolyline.getRepaintRect();
-          editedPolyline.translateSummits(selSummits, -t, 0);
-          repaint(old.union(editedPolyline.getRepaintRect()));
-          setNeedToSave(true, "Shape edit");
-        } else {
-          translateSelection(-t, 0);
-          setNeedToSave(true, "Translate");
-        }
+        translateSelection(-t, 0);
+        setNeedToSave(true,"Translate");
         e.consume();
         break;
       case KeyEvent.VK_RIGHT:
-        if (editedPolyline != null) {
-          Rectangle old = editedPolyline.getRepaintRect();
-          editedPolyline.translateSummits(selSummits, t, 0);
-          repaint(old.union(editedPolyline.getRepaintRect()));
-          setNeedToSave(true, "Shape edit");
-        } else {
-          translateSelection(t, 0);
-          setNeedToSave(true, "Translate");
-        }
-        e.consume();
-        break;
-      case KeyEvent.VK_DELETE:
-        deleteSelection();
+        translateSelection(t, 0);
+        setNeedToSave(true,"Translate");
         e.consume();
         break;
     }
@@ -1662,24 +1207,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
       return;
 
     }
-    if(mode==MODE_LIB) return;
-
-    //---------------------------------------------------
-    if (isDraggingSummits) {
-
-      if( alignToGrid ) {
-        ex = ((ex + GRID_SIZE / 2) / GRID_SIZE) * GRID_SIZE;
-        ey = ((ey + GRID_SIZE / 2) / GRID_SIZE) * GRID_SIZE;
-      }
-
-      Rectangle old = editedPolyline.getRepaintRect();
-      editedPolyline.translateSummits(selSummits, ex - lastX, ey - lastY);
-      repaint(old.union(editedPolyline.getRepaintRect()));
-      hasMoved=true;
-      lastX = ex;
-      lastY = ey;
-
-    }
 
     //---------------------------------------------------
     if (isDraggingSummit) {
@@ -1693,23 +1220,16 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
       Rectangle old = p.getRepaintRect();
 
       switch (p.getSummitMotion(selSummit)) {
-        case JDObject.BOTH_SM:
+        case JDObject.BOTH:
           p.moveSummit(selSummit, ex, ey);
           break;
-        case JDObject.HORIZONTAL_SM:
+        case JDObject.HORIZONTAL:
           p.moveSummit(selSummit, ex, p.getSummit(selSummit).y);
           break;
-        case JDObject.VERTICAL_SM:
+        case JDObject.VERTICAL:
           p.moveSummit(selSummit, p.getSummit(selSummit).x, ey);
           break;
       }
-
-      addStatus("[" + Integer.toString(selSummit) + " @"
-                     + Integer.toString(ex) + "," +
-                       Integer.toString(ey) + " "+ " ("
-                     + Integer.toString(p.getBoundRect().width-1) + "," +
-                       Integer.toString(p.getBoundRect().height-1) + ")]");
-
       hasMoved=true;
       repaint(old.union(p.getRepaintRect()));
 
@@ -1733,7 +1253,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   }
 
   public void mouseMoved(MouseEvent e) {
-    if(mode==MODE_LIB) return;
     if(mode==MODE_PLAY) {
       relayPlayerMouseMoveEvent(e);
       return;
@@ -1742,7 +1261,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     int ex = zconvert(e.getX(),transx);
     int ey = zconvert(e.getY(),transy);
 
-    if ((creationMode == CREATE_POLYLINE || creationMode == CREATE_SPLINE) && tmpPoints.size() > 0) {
+    if ((creationMode == POLYLINE || creationMode == SPLINE) && tmpPoints.size() > 0) {
       if( alignToGrid ) {
         ex = ((ex + GRID_SIZE / 2) / GRID_SIZE) * GRID_SIZE;
         ey = ((ey + GRID_SIZE / 2) / GRID_SIZE) * GRID_SIZE;
@@ -1755,7 +1274,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
       return;
     }
 
-    if (!isDraggingSummit && !isDraggingObject && !isDraggingSelection && !isDraggingSummits)
+    if (!isDraggingSummit && !isDraggingObject && !isDraggingSelection)
       findSummit(ex, ey);
   }
 
@@ -1773,7 +1292,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
   public void mouseClicked(MouseEvent e) {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
 
     int ex = zconvert(e.getX(),transx);
     int ey = zconvert(e.getY(),transy);
@@ -1787,7 +1305,10 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
         if (!found) i--;
       }
 
-      if (found) showPropertyWindow();
+      if (found) {
+        boolean m = JDUtils.showPropertyDialog(this, selObjects,0);
+        if (m) setNeedToSave(true,"Property change");
+      }
 
     }
 
@@ -1824,11 +1345,10 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
   private void mouseReleasedEditor(MouseEvent e) {
 
-    if((isDraggingSummits || isDraggingSummit || isDraggingObject) && hasMoved) {
+    if((isDraggingSummit || isDraggingObject) && hasMoved) {
       if(isDraggingSummit) {
         if( lastCreatedObject==null ) {
           setNeedToSave(true,"Shape edit");
-          setStatus("");
         } else {
           // Creation done
           setNeedToSave(true,"Object creation");
@@ -1841,15 +1361,10 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
         setNeedToSave(true,"Translate");
         repaint(buildRepaintRect(selObjects));
       }
-      if(isDraggingSummits) {
-        setNeedToSave(true,"Shape edit");
-        repaint(buildRepaintRect(selObjects));
-      }
     }
 
-    isDraggingSummit  = false;
-    isDraggingSummits = false;
-    isDraggingObject  = false;
+    isDraggingSummit = false;
+    isDraggingObject = false;
     hasMoved=false;
 
     if (isDraggingSelection) {
@@ -1857,38 +1372,24 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
       Rectangle sr = buildSelectionRect();
       Rectangle rep = null;
       selX1 = selX2 = selY1 = selY2 = 0;
-
-      if (editedPolyline != null) {
-
-        // Summit selection for editedPolyline
-        int[] nSummit = editedPolyline.getSummitsInsideRectangle(sr);
-        for(int i=0;i<nSummit.length;i++)
-          selectSummit(nSummit[i]);
-
-      } else {
-
-        // Look for all object int the selection rectangle
-        for (int i = 0; i < objects.size(); i++) {
-          JDObject p = (JDObject) objects.get(i);
-          if (p.isVisible() && sr.contains(p.getBoundRect())) {
-            if (!isSelected(p)) {
-              selObjects.add(p);
-            } else {
-              if (e.isControlDown()) {
-                // Invert selection
-                selObjects.remove(p);
-              }
+      // Look for all object int the selection rectangle
+      for (int i = 0; i < objects.size(); i++) {
+        JDObject p = (JDObject) objects.get(i);
+        if (p.isVisible() && sr.contains(p.getBoundRect())) {
+          if( !isSelected(p) ) {
+            selObjects.add(p);
+          } else {
+            if( e.isControlDown() ) {
+              // Invert selection
+              selObjects.remove(p);
             }
-
-            if (rep == null)
-              rep = p.getRepaintRect();
-            else
-              rep = rep.union(p.getRepaintRect());
           }
-        }
-        fireSelectionChange();
 
+          if( rep==null ) rep = p.getRepaintRect();
+          else rep = rep.union(p.getRepaintRect());
+        }
       }
+      fireSelectionChange();
 
       if( rep!=null ) repaint(sr.union(rep));
       else            repaint(sr);
@@ -1903,63 +1404,14 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     int ey = zconvert(e.getY(),transy);
 
     // -----------------------------------------------------------------------
-    if (editedPolyline != null) {
-
-      findSummit(ex, ey);
-      if (selSummit == -1) {
-
-        // Starting rectangle selection
-        if (!e.isControlDown()) {
-          // Empty summit selection
-          selSummits = new int[0];
-          repaint(editedPolyline.getRepaintRect());
-        }
-        selX1 = ex;
-        selY1 = ey;
-        selX2 = ex;
-        selY2 = ey;
-        isDraggingSelection = true;
-
-      } else {
-
-        if (alignToGrid) {
-          ex = ((ex + GRID_SIZE / 2) / GRID_SIZE) * GRID_SIZE;
-          ey = ((ey + GRID_SIZE / 2) / GRID_SIZE) * GRID_SIZE;
-        }
-        lastX = ex;
-        lastY = ey;
-
-        if (isSelectedSummit(selSummit)) {
-          isDraggingSummits = true;
-        } else {
-          if(e.isControlDown()) {
-            // Add the summit to selection
-            selectSummit(selSummit);
-          } else {
-            // Select this summit
-            selSummits = new int[1];
-            selSummits[0] = selSummit;
-            isDraggingSummits = true;
-          }
-          repaint(editedPolyline.getRepaintRect());
-        }
-
-      }
-
-      return;
-    }
-
-    // -----------------------------------------------------------------------
     if( createObject(ex,ey) )
       return;
 
     // -----------------------------------------------------------------------
     // Starts by looking if a summit has been hit
-    if (mode != MODE_LIB) {
-      if (findSummit(ex, ey)) {
-        isDraggingSummit = true;
-        return;
-      }
+    if (findSummit(ex, ey)) {
+      isDraggingSummit = true;
+      return;
     }
 
     JDObject p = findObject(ex,ey);
@@ -1967,7 +1419,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     if (p!=null) {
       //Select it if not
       if (!isSelected(p)) {
-        if (!e.isControlDown()) unselectAll(false);
+        if (!e.isControlDown()) unselectAll();
         selObjects.add(p);
         repaint(p.getRepaintRect());
         fireSelectionChange();
@@ -1980,21 +1432,20 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
           return;
         }
       }
-      if (mode != MODE_LIB) {
-        curObject = selObjects.indexOf(p);
-        isDraggingObject = true;
-        if (alignToGrid) {
-          ex = ((ex + GRID_SIZE / 2) / GRID_SIZE) * GRID_SIZE;
-          ey = ((ey + GRID_SIZE / 2) / GRID_SIZE) * GRID_SIZE;
-        }
-        lastX = ex;
-        lastY = ey;
-        setCursor(bCursor);
+      curObject = selObjects.indexOf(p);
+      isDraggingObject = true;
+      if( alignToGrid ) {
+        ex = ((ex + GRID_SIZE / 2) / GRID_SIZE) * GRID_SIZE;
+        ey = ((ey + GRID_SIZE / 2) / GRID_SIZE) * GRID_SIZE;
       }
+      lastX = ex;
+      lastY = ey;
+      setCursor(bCursor);
     } else {
       // Starting rectangle selection
       if (!e.isControlDown()) {
         unselectAll();
+        fireSelectionChange();
       }
       selX1 = ex;
       selY1 = ey;
@@ -2006,14 +1457,10 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   }
 
   public void mousePressedEditorB3(MouseEvent e) {
-    //if (mode == MODE_LIB) return;
-    if (creationMode == 0) showMenu(e);
-
     int i;
-    
+
     // --------------------------------------- Creation mode
-    
-    if (creationMode == CREATE_POLYLINE) {
+    if (creationMode == POLYLINE) {
 
       if (tmpPoints.size() != 0) {
         // Create the Polyline
@@ -2035,7 +1482,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
       creationMode = 0;
       return;
 
-    } else if (creationMode == CREATE_SPLINE) {
+    } else if (creationMode == SPLINE) {
 
       // Create the Spline
       int s = tmpPoints.size();
@@ -2172,144 +1619,23 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   }
 
 // -----------------------------------------------------
-// Component listener
-// -----------------------------------------------------
-  public void componentResized(ComponentEvent e) {
-
-    if(autoZoom && mode==MODE_PLAY) {
-
-      // Compute autoZoomFactor
-      Dimension d = getSize();
-      double ratioX = (double)d.width  / (double)sizeX;
-      double ratioY = (double)d.height / (double)sizeY;
-      if(ratioX>ratioY) {
-        autoZoomFactor = ratioY;
-      } else {
-        autoZoomFactor = ratioX;
-      }
-
-      // Saturate
-      if( autoZoomFactor<0.1 ) autoZoomFactor = 0.1;
-      //System.out.println("zoomFactor=" + autoZoomFactor);
-
-      // Do proportionnal resizing for JDSwingObject
-      Vector v = getObjectsOfClass(JDSwingObject.class);
-      int sz = v.size();
-      for(int i=0;i<sz;i++) {
-        // Get original coordinates
-        JDSwingObject jdw = ((JDSwingObject)v.get(i));
-        Rectangle r = new Rectangle(jdw.getBoundRect());
-        // Zoom
-        r.x      = (int)Math.rint( (double)r.x * autoZoomFactor );
-        r.y      = (int)Math.rint( (double)r.y * autoZoomFactor );
-        r.width  = (int)Math.rint( (double)r.width * autoZoomFactor );
-        r.height = (int)Math.rint( (double)r.height * autoZoomFactor );
-        jdw.getComponent().setBounds(r);
-        jdw.getComponent().validate();
-      }
-      repaint();
-
-    }
-
-  }
-  public void componentMoved(ComponentEvent e) {}
-  public void componentShown(ComponentEvent e) {}
-  public void componentHidden(ComponentEvent e) {}
-
-// -----------------------------------------------------
-// DropTargetListener listener
-// -----------------------------------------------------
-  public void dragEnter(DropTargetDragEvent dtde) {
-  }
-
-  public void dragOver(DropTargetDragEvent dtde) {
-  }
-
-  public void dropActionChanged(DropTargetDragEvent dtde) {
-  }
-
-  public void dragExit(DropTargetEvent dte) {
-  }
-
-  public void drop(DropTargetDropEvent dtde) {
-
-    if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
-
-    Transferable trans = dtde.getTransferable();
-    if (trans.isDataFlavorSupported(JDEntityNode.JDENTITY_NODE_FLAVOR)) {
-        dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-        try {
-          JDEntityNode jde = (JDEntityNode)trans.getTransferData(JDEntityNode.JDENTITY_NODE_FLAVOR);
-          Point location = dtde.getLocation();
-
-          int ex = zconvert(location.x,transx);
-          int ey = zconvert(location.y,transy);
-
-          boolean found = false;
-          int i = objects.size() - 1;
-          while (!found && i >= 0) {
-            found = ((JDObject) objects.get(i)).isInsideObject(ex, ey);
-            if (!found) i--;
-          }
-
-          if (found) {
-            JDObject p = (JDObject) objects.get(i);
-            p.setName(jde.getName());
-            setNeedToSave(true,"Change name");
-            unselectAll(false);
-            selObjects.add(p);
-            repaint(p.getRepaintRect());
-            fireSelectionChange();
-            //JDUtils.updatePropertyDialog(selObjects);
-          } else {
-            JOptionPane.showMessageDialog(this,"No object found here");
-          }
-
-        } catch(IOException e1) {
-          JOptionPane.showMessageDialog(this,"Drag operation not allowed");
-        } catch (UnsupportedFlavorException e2) {
-          JOptionPane.showMessageDialog(this,"Drag operation not allowed");
-        }
-        dtde.dropComplete(true);
-    } else {
-      JOptionPane.showMessageDialog(this,"Drag operation not allowed");
-    }
-  }
-
-// -----------------------------------------------------
 // Action listener
 // -----------------------------------------------------
   public void actionPerformed(ActionEvent e) {
     if(mode==MODE_PLAY) return;
-    if(mode==MODE_LIB) return;
 
     Object src = e.getSource();
     Rectangle rep = null;
 
-    if (src == delSummitMenuItem) {
+    if (src == deleteSummitMenuItem) {
       rep = editedPolyline.getRepaintRect();
       editedPolyline.deleteSummit();
-      selSummits = new int[0];
-      setNeedToSave(true,"Delete polyline point");
+      setNeedToSave(true,"Shape edit");
       repaint(rep.union(editedPolyline.getRepaintRect()));
-    } else if (src == brkShapeMenuItem) {
+    } else if (src == breakShapeMenuItem) {
       rep = editedPolyline.getRepaintRect();
-      setNeedToSave(true,"Add polyline point");
+      setNeedToSave(true,"Shape edit");
       editedPolyline.breakShape();
-      selSummits = new int[0];
-      repaint(rep.union(editedPolyline.getRepaintRect()));
-    } else if (src == set0ShapeMenuItem) {
-      rep = editedPolyline.getRepaintRect();
-      setNeedToSave(true,"Set starting point");
-      editedPolyline.setStartingPoint(selSummit);
-      selSummits = new int[0];
-      repaint(rep.union(editedPolyline.getRepaintRect()));
-    } else if (src == reorderShapeMenuItem) {
-      rep = editedPolyline.getRepaintRect();
-      setNeedToSave(true,"Reorder polyline");
-      editedPolyline.invertSummitOrder();
-      selSummits = new int[0];
       repaint(rep.union(editedPolyline.getRepaintRect()));
     } else if (src == copyMenuItem) {
       copySelection();
@@ -2335,35 +1661,17 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
       zoomIn();
     } else if (src == zoomOutMenuItem) {
       zoomOut();
-    } else if (src == editShapeMenuItem) {
-      if(selObjects.size()>0) {
-        selSummits = new int[0];
-        editedPolyline = (JDPolyline)selObjects.get(0);
-        repaint(editedPolyline.getRepaintRect());
-      }
-    } else if (src == connectShapeMenuItem) {
-      pickPolyline();
-    } else if (src == cancelShapeMenuItem) {
-      rep = editedPolyline.getRepaintRect();
-      editedPolyline = null;
-      repaint(rep);
     }
 
   }
 
-  /**
-   * Paints all JDObjects of the components.
-   * @param g Graphics
-   */
   public void paintObjects(Graphics g) {
-    for (int i = 0; i < objects.size(); i++)
-      ((JDObject) objects.get(i)).paint(this,g);
+    for (int i = 0; i < objects.size(); i++) {
+      ((JDObject) objects.get(i)).paint(g);
+      //((JDObject) objects.get(i)).paintOrigin(g);
+    }
   }
 
-  /**
-   * Paints selection area and control points.
-   * @param g Graphics
-   */
   public void paintSelection(Graphics g) {
 
     if (mode != MODE_PLAY) {
@@ -2375,10 +1683,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
         for (i = 0; i < selObjects.size(); i++)
           ((JDObject) selObjects.get(i)).paintSummit(g, zdconvert(6.0, 0.0));
 
-      // Paint edition polyline
-      if(editedPolyline!=null)
-        editedPolyline.paintSelectedSummit(g,selSummits,zdconvert(6.0, 0.0));
-
       // Paint selection rectangle
       if (selX1 != selX2 && selY1 != selY2) {
         g.setColor(Color.darkGray);
@@ -2388,14 +1692,12 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
         g.drawLine(selX1, selY2, selX1, selY1);
       }
 
-      if (mode != MODE_LIB) {
-        // Paint creation polyline
-        for (i = 1; i < tmpPoints.size(); i++) {
-          g.setColor(Color.darkGray);
-          Point p1 = (Point) tmpPoints.get(i - 1);
-          Point p2 = (Point) tmpPoints.get(i);
-          g.drawLine(p1.x, p1.y, p2.x, p2.y);
-        }
+      // Paint creation polyline
+      for (i = 1; i < tmpPoints.size(); i++) {
+        g.setColor(Color.darkGray);
+        Point p1 = (Point) tmpPoints.get(i - 1);
+        Point p2 = (Point) tmpPoints.get(i);
+        g.drawLine(p1.x, p1.y, p2.x, p2.y);
       }
 
     }
@@ -2403,10 +1705,8 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   }
 
   private void paintGrid(Graphics gr) {
-    if (mode == MODE_PLAY) return;
-    if (mode == MODE_LIB) return;
 
-    if (gridVisible) {
+    if (gridVisible && mode!=MODE_PLAY) {
       Dimension d = getSize();
       double gs = zbdconvert((double)GRID_SIZE,0.0);
       int r,g,b,x,y;
@@ -2473,19 +1773,11 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     g2.setTransform(oldT);
 
     // Paint swing stuff
-    // Use this ugly hack instead of paintComponents() ,
-    // but this is the only way to avoid repaint problems.
-    boolean oldOpaque = isOpaque();
-    setOpaque(false);
-    super.paint(g);
-    setOpaque(oldOpaque);
+    paintComponents(g);
+    paintBorder(g);
 
   }
 
-  /**
-   * Repaint the specified rectangle.
-   * @param r Rectangle to be repainted ('not zoomed' coordinates).
-   */
   public void repaint(Rectangle r) {
     if (r != null) {
       int m = (int) (zdconvert(3.0, 0.0) + 0.5) + 1; // summitWidth
@@ -2498,13 +1790,13 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 // -----------------------------------------------------
 // Private stuff
 // -----------------------------------------------------
-  void setNeedToSave(boolean b,String s) {
+  private void setNeedToSave(boolean b,String s) {
 
     //System.out.println("Need to save:(" + s + ")" + b);
 
     needToSave = b;
 
-    if(needToSave && (mode==MODE_EDIT)) {
+    if( needToSave && mode==MODE_EDIT ) {
       // Clear upper undo buffer
       for(int i=undo.size()-1;i>=undoPos;i--) {
         undo.removeElementAt(i);
@@ -2525,270 +1817,152 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
   private double getZoomScaleRatio() {
 
-    if( autoZoom ) {
-
-      return autoZoomFactor;
-
-    } else {
-
-      double r = 1.0;
-      if (zoomFactor != 0) {
-        if (zoomFactor >= 0)
-          r = (double) (zoomFactor + 1);
-        else
-          r = 1.0 / (double) (-zoomFactor + 1);
-      }
-      return r;
-
+    double r = 1.0;
+    if (zoomFactor != 0) {
+      if (zoomFactor >= 0)
+        r = (double) (zoomFactor + 1);
+      else
+        r = 1.0 / (double) (-zoomFactor + 1);
     }
+    return r;
 
   }
 
   private int zconvert(int x,int t) {
 
-    if (autoZoom) {
-
-      return (int) ((double) (x) / autoZoomFactor) - t;
-
+    if (zoomFactor == 0) {
+      return x-t;
+    } else if (zoomFactor > 0) {
+      return (int) ((double) (x) / (double) (zoomFactor + 1)) - t;
     } else {
-
-      if (zoomFactor == 0) {
-        return x - t;
-      } else if (zoomFactor > 0) {
-        return (int) ((double) (x) / (double) (zoomFactor + 1)) - t;
-      } else {
-        return (x) * (-zoomFactor + 1) - t;
-      }
-
+      return (x) * (-zoomFactor + 1) - t;
     }
 
   }
 
   private int zbconvert(int x,int t) {
 
-    if (autoZoom) {
-
-      return (int)((x + t) * autoZoomFactor);
-
+    if (zoomFactor == 0) {
+      return x+t;
+    } else if (zoomFactor > 0) {
+      return (x+t) * (zoomFactor + 1);
     } else {
-
-      if (zoomFactor == 0) {
-        return x + t;
-      } else if (zoomFactor > 0) {
-        return (x + t) * (zoomFactor + 1);
-      } else {
-        return (int) ((double) (x + t) / (double) (-zoomFactor + 1));
-      }
-
+      return (int) ((double) (x+t) / (double) (-zoomFactor + 1));
     }
 
   }
 
   private double zdconvert(double x,double tx) {
 
-    if (autoZoom) {
-
-      return (x - tx)/autoZoomFactor;
-
+    if (zoomFactor == 0) {
+      return x-tx;
+    } else if (zoomFactor > 0) {
+      return (x-tx)/(double)(zoomFactor + 1);
     } else {
-
-      if (zoomFactor == 0) {
-        return x - tx;
-      } else if (zoomFactor > 0) {
-        return (x - tx) / (double) (zoomFactor + 1);
-      } else {
-        return (x - tx) * (-zoomFactor + 1);
-      }
-
+      return (x-tx)*(-zoomFactor + 1);
     }
 
   }
 
   private double zbdconvert(double x,double tx) {
 
-    if (autoZoom) {
-
-      return (x + tx) * autoZoomFactor;
-
+    if (zoomFactor == 0) {
+      return x+tx;
+    } else if (zoomFactor > 0) {
+      return (x+tx) * (double)(zoomFactor + 1);
     } else {
-
-      if (zoomFactor == 0) {
-        return x + tx;
-      } else if (zoomFactor > 0) {
-        return (x + tx) * (double) (zoomFactor + 1);
-      } else {
-        return (x + tx) / (double) (-zoomFactor + 1);
-      }
-
+      return (x+tx)/(double)(-zoomFactor + 1);
     }
 
   }
 
-  public void addToMenu(JMenuItem newItem) {
-	  if (objMenu == null) {
-		  objMenu = new JPopupMenu();
-		  infoMenuItem = new JMenuItem();
-		  infoMenuItem.setEnabled(false);
-		  objMenu.add(infoMenuItem);
-		  sep1 = new JSeparator();
-		  objMenu.add(sep1);
-	  }		  
-	  if (newItem != null)
-		  objMenu.add(newItem);
-  }
-  
   private void showMenu(MouseEvent e) {
 
     int ex = zconvert(e.getX(),transx);
     int ey = zconvert(e.getY(),transy);
-    findSummit(ex, ey);
 
-    if (editedPolyline!=null && mode != MODE_LIB) {
+    // -------------- Contextual menu
+    JDObject p = findObject(ex,ey);
 
-      // Polyline edition mode
-      infoPolyMenuItem.setText("Polyline edition");
-
-      delSummitMenuItem.setEnabled(false);
-      brkShapeMenuItem.setEnabled(false);
-      set0ShapeMenuItem.setEnabled(selSummit != -1);
-
-      if (selSummit != -1) {
-        delSummitMenuItem.setEnabled(editedPolyline.canDeleteSummit(selSummit));
-        String s = infoPolyMenuItem.getText();
-        s = s + " [Summit: " + selSummit+" ]";
-        infoPolyMenuItem.setText(s);
-      } else {
-        brkShapeMenuItem.setEnabled(editedPolyline.canBreakShape(ex, ey));
+    if (p!=null) {
+      //Select it if not
+      if (!isSelected(p)) {
+        unselectAll();
+        selObjects.add(p);
+        repaint(p.getRepaintRect());
+        fireSelectionChange();
       }
-
-      // Popup the menu
-      lastX = ex;
-      lastY = ey;
-      polyMenu.show(this, e.getX(), e.getY());
-
-    } else {
-
-      // Object contextual menu
-
-      JDObject p = findObject(ex, ey);
-
-      if (p != null) {
-        //Select it if not
-        if (!isSelected(p)) {
-          unselectAll(false);
-          selObjects.add(p);
-          repaint(p.getRepaintRect());
-          fireSelectionChange();
-        }
-      }
-
-      int sz = selObjects.size();
-      p = null;
-      if (sz > 0) p = (JDObject) selObjects.get(0);
-      
-      if (mode == MODE_LIB && objMenu == null) {
-	      addToMenu(null); //Creates a void Library Context Menu
-      }
-
-      infoMenuItem.setVisible(sz >= 1);
-      if (sz == 1) {
-        String sId = (selSummit!=-1) ? " Summit:" + Integer.toString(selSummit) : "";
-        infoMenuItem.setText(p.getName() + " [" + p.toString() + "]" + sId);
-      } else
-        infoMenuItem.setText("Multiple selection");
-	
-      if (mode == MODE_LIB) {
-	      Component[] menuComps = objMenu.getComponents();
-	      for (int k=0;k<menuComps.length;k++) {
-		      if (k<menuComps.length-1) {
-			      menuComps[k].setEnabled(k>1 && sz>0);
-			      menuComps[k].setVisible(sz>0);
-		      } else { //Exit Command
-		      	      menuComps[k].setEnabled(k>1);
-			      menuComps[k].setVisible(true);
-		      }
-	      }
-      } else {
-	      cutMenuItem.setEnabled((sz > 0));
-	      copyMenuItem.setEnabled((sz > 0));
-	      pasteMenuItem.setEnabled((clipboard.size() > 0));
-	      deleteMenuItem.setEnabled((sz > 0));
-	
-	      groupMenuItem.setVisible((sz > 0));
-	      if (sz == 1) {
-		ungroupMenuItem.setVisible(p instanceof JDGroup);
-	      } else {
-		ungroupMenuItem.setVisible(false);
-	      }
-	
-	      raiseMenuItem.setVisible((sz == 1));
-	      lowerMenuItem.setVisible((sz == 1));
-	      frontMenuItem.setVisible((sz >= 1));
-	      backMenuItem.setVisible((sz >= 1));
-	
-	      if (p != null) {
-		int pos = objects.indexOf(p);
-		raiseMenuItem.setEnabled(pos < objects.size() - 1);
-		lowerMenuItem.setEnabled(pos > 0);
-	      }
-	
-	      boolean isPoly = (p instanceof JDPolyline) && (sz==1);
-	      editShapeMenuItem.setVisible(isPoly);
-	      connectShapeMenuItem.setVisible(isPoly);
-	      
-	      //Separator
-	      sep1.setVisible(infoMenuItem.isVisible());
-	      sep2.setVisible(editShapeMenuItem.isVisible());
-	      sep3.setVisible(groupMenuItem.isVisible() || ungroupMenuItem.isVisible());
-	      sep5.setVisible(raiseMenuItem.isVisible() || frontMenuItem.isVisible());	      
-      }
-
-      // Popup the menu
-      lastX = ex;
-      lastY = ey;
-      objMenu.show(this, e.getX(), e.getY());
     }
 
-  }
+    breakShapeMenuItem.setVisible(false);
+    deleteSummitMenuItem.setVisible(false);
+    editedPolyline = null;
+    int sz = selObjects.size();
+    p = null;
 
-  private void initCreate(int mode) {
-    creationMode = mode;
-    creationParam = null;
-    sliderRef = null;
-    connectPolyline = null;
-    if(editedPolyline!=null) {
-      Rectangle r = editedPolyline.getRepaintRect();
-      editedPolyline = null;
-      repaint(r);
-    }
-    updateCreationStatus();
-  }
+    if (sz > 0) p = (JDObject) selObjects.get(0);
 
-  void setStatus(String s) {
+    infoMenuItem.setVisible(sz >= 1);
 
-    if(s==null)
-      currentStatus=" ";
-    else if (s.length()==0)
-      currentStatus=" ";
+    if (sz == 1)
+      infoMenuItem.setText(p.getName() + " [" + p.toString() + "]");
     else
-      currentStatus=s;
+      infoMenuItem.setText("Multiple selection");
 
-    if(statusLabel!=null) {
-      statusLabel.setText(currentStatus);
+    cutMenuItem.setEnabled((sz>0));
+    copyMenuItem.setEnabled((sz>0));
+    pasteMenuItem.setEnabled((clipboard.size()>0));
+    deleteMenuItem.setEnabled((sz>0));
+
+    groupMenuItem.setVisible((sz > 0));
+    if (sz==1) {
+      ungroupMenuItem.setVisible(p instanceof JDGroup);
+    } else {
+      ungroupMenuItem.setVisible(false);
     }
 
-  }
+    raiseMenuItem.setVisible((sz == 1));
+    lowerMenuItem.setVisible((sz == 1));
+    frontMenuItem.setVisible((sz >= 1));
+    backMenuItem.setVisible((sz >= 1));
 
-  private void addStatus(String s) {
-    if(statusLabel!=null) {
-      statusLabel.setText(currentStatus + s);
+    if (p != null) {
+      int pos = objects.indexOf(p);
+      raiseMenuItem.setEnabled(pos < objects.size() - 1);
+      lowerMenuItem.setEnabled(pos > 0);
     }
+
+    // Special polyline edition
+    findSummit(ex, ey);
+    if (selSummit != -1) {
+      if (selObjects.get(curObject) instanceof JDPolyline) {
+        editedPolyline = (JDPolyline) selObjects.get(curObject);
+        deleteSummitMenuItem.setVisible(editedPolyline.canDeleteSummit(selSummit));
+      }
+    } else {
+      if (p instanceof JDPolyline) {
+        editedPolyline = (JDPolyline) p;
+        breakShapeMenuItem.setVisible(editedPolyline.canBreakShape(ex, ey));
+      }
+    }
+
+    //Separator
+    sep1.setVisible(infoMenuItem.isVisible());
+    sep2.setVisible(deleteSummitMenuItem.isVisible() || breakShapeMenuItem.isVisible());
+    sep3.setVisible(groupMenuItem.isVisible() || ungroupMenuItem.isVisible());
+    sep5.setVisible(raiseMenuItem.isVisible() || frontMenuItem.isVisible());
+
+    // Popup the menu
+    lastX = ex;
+    lastY = ey;
+    objMenu.show(this, e.getX(), e.getY());
+
   }
 
   private Cursor getCursorForMotion(JDObject p,int summit) {
 
     switch (p.getSummitMotion(summit)) {
-      case JDObject.BOTH_SM:
+      case JDObject.BOTH:
         if (p instanceof JDRectangular) {
           double x = p.getSummit(summit).getX();
           double y = p.getSummit(summit).getY();
@@ -2808,11 +1982,9 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
         } else {
           return bCursor;
         }
-      case JDObject.NONE_SM:
-        return dCursor;
-      case JDObject.HORIZONTAL_SM:
+      case JDObject.HORIZONTAL:
         return hCursor;
-      case JDObject.VERTICAL_SM:
+      case JDObject.VERTICAL:
         return vCursor;
     }
 
@@ -2863,7 +2035,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
       JDObject p = null;
       while (i < selObjects.size() && !found) {
         p = (JDObject) selObjects.get(i);
-        selSummit = p.getSummit(x,y,zdconvert(6.0,0.0));
+        selSummit = p.getSummit(x, y,zdconvert(6.0,0.0));
         found = (selSummit != -1);
         if (!found) i++;
       }
@@ -2929,7 +2101,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   }
 
   private void createObject(JDObject p, int summit) {
-    unselectAll(false);
+    unselectAll();
     lastCreatedObject=p;
     objects.add(p);
     creationMode = 0;
@@ -2937,7 +2109,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     isDraggingSummit = (summit >= 0);
     curObject = 0;
     selSummit = summit;
-    editedPolyline = null;
     repaint(p.getRepaintRect());
     fireSelectionChange();
 
@@ -2950,64 +2121,10 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
   }
 
-  private void updateCreationStatus() {
-
-    switch (creationMode) {
-      case CREATE_RECTANGLE:
-        setStatus("Left click and drag to create a rectangle");
-        break;
-      case CREATE_RRECTANGLE:
-        setStatus("Left click and drag to create a rounded rectangle");
-        break;
-      case CREATE_LINE:
-        setStatus("Left click and drag to create a line");
-        break;
-      case CREATE_ELLIPSE:
-        setStatus("Left click and drag to create an ellipse");
-        break;
-      case CREATE_POLYLINE:
-        setStatus("Left click to create a new point and right click to create the last point");
-        break;
-      case CREATE_LABEL:
-        setStatus("Left click to create the label");
-        break;
-      case CREATE_SPLINE:
-        setStatus("Left click to create a new point and right click to create the last point");
-        break;
-      case CREATE_IMAGE:
-        setStatus("Left click to insert an image");
-        break;
-      case CREATE_AXIS:
-        setStatus("Left click to create an axis");
-        break;
-      case CREATE_BAR:
-        setStatus("Left click and drag to create a bar");
-        break;
-      case CREATE_SLIDER:
-        setStatus("Left click and drag to create a slider");
-        break;
-      case CREATE_SLIDER_CURSOR:
-        setStatus("Left click on a object to pick up new slider cursor");
-        break;
-      case CREATE_CONNECT_POLY:
-        setStatus("Left click on the polyline to be connected.");
-        break;
-      case CREATE_SWINGOBJECT:
-        setStatus("Left click to create a JDSwingObject : " +
-                  JDUtils.buildShortClassName(creationParam));
-        break;
-      case CREATE_CLIPBOARD:
-        setStatus("Left click to paste");
-        break;
-    }
-
-  }
-
   private void rebuildBackup(int pos) {
 
     // Free All
     clearObjects();
-    editedPolyline = null;
 
     //Rebuild form backup
     objects = ((UndoBuffer)undo.get(pos)).rebuild();
@@ -3019,19 +2136,17 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     fireSelectionChange();
   }
 
-  void fireSelectionChange() {
-    JDUtils.updatePropertyDialog(selObjects);
+  private void fireSelectionChange() {
     for(int i=0;i<listeners.size();i++)
       ((JDrawEditorListener)listeners.get(i)).selectionChanged();
   }
 
   private void fireCreationDone() {
-    setStatus("");
     for(int i=0;i<listeners.size();i++)
       ((JDrawEditorListener)listeners.get(i)).creationDone();
   }
 
-  void fireClipboardChange() {
+  private void fireClipboardChange() {
     for(int i=0;i<listeners.size();i++)
       ((JDrawEditorListener)listeners.get(i)).clipboardChanged();
   }
@@ -3068,11 +2183,11 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     deleteMenuItem = new JMenuItem("Delete");
     deleteMenuItem.addActionListener(this);
 
-    editShapeMenuItem =  new JMenuItem("Edit polyline");
-    editShapeMenuItem.addActionListener(this);
+    deleteSummitMenuItem = new JMenuItem("Delete control point");
+    deleteSummitMenuItem.addActionListener(this);
 
-    connectShapeMenuItem =  new JMenuItem("Connect");
-    connectShapeMenuItem.addActionListener(this);
+    breakShapeMenuItem = new JMenuItem("Add a control point here");
+    breakShapeMenuItem.addActionListener(this);
 
     raiseMenuItem = new JMenuItem("Raise");
     raiseMenuItem.addActionListener(this);
@@ -3111,8 +2226,8 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     objMenu.add(ungroupMenuItem);
     sep3 = new JSeparator();
     objMenu.add(sep3);
-    objMenu.add(editShapeMenuItem);
-    objMenu.add(connectShapeMenuItem);
+    objMenu.add(deleteSummitMenuItem);
+    objMenu.add(breakShapeMenuItem);
     sep2 = new JSeparator();
     objMenu.add(sep2);
     objMenu.add(raiseMenuItem);
@@ -3124,57 +2239,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     objMenu.add(zoomInMenuItem);
     objMenu.add(zoomOutMenuItem);
 
-    // Polyline menu
-    polyMenu = new JPopupMenu();
-
-    infoPolyMenuItem = new JMenuItem();
-    infoPolyMenuItem.setEnabled(false);
-
-    delSummitMenuItem = new JMenuItem("Delete control point");
-    delSummitMenuItem.addActionListener(this);
-
-    brkShapeMenuItem = new JMenuItem("Add a control point here");
-    brkShapeMenuItem.addActionListener(this);
-
-    set0ShapeMenuItem = new JMenuItem("Set as starting point");
-    set0ShapeMenuItem.addActionListener(this);
-
-    reorderShapeMenuItem = new JMenuItem("Invert order");
-    reorderShapeMenuItem.addActionListener(this);
-
-    cancelShapeMenuItem = new JMenuItem("Return to normal edition mode");
-    cancelShapeMenuItem.addActionListener(this);
-
-    polyMenu.add(infoPolyMenuItem);
-    polyMenu.add(new JSeparator());
-    polyMenu.add(delSummitMenuItem);
-    polyMenu.add(set0ShapeMenuItem);
-    polyMenu.add(brkShapeMenuItem);
-    polyMenu.add(reorderShapeMenuItem);
-    polyMenu.add(cancelShapeMenuItem);
-
-  }
-
-  private boolean isSelectedSummit(int id) {
-    boolean found=false;
-    int i=0;
-    while(i<selSummits.length && !found) {
-      found = (selSummits[i]==id);
-      if(!found) i++;
-    }
-    return found;
-  }
-
-  private void selectSummit(int id) {
-    if (!isSelectedSummit(id)) {
-      int i;
-      int[] nSelSummits = new int[selSummits.length + 1];
-      for (i = 0; i < selSummits.length; i++) {
-        nSelSummits[i] = selSummits[i];
-      }
-      nSelSummits[i] = id;
-      selSummits = nSelSummits;
-    }
   }
 
   private Rectangle buildRepaintRect(Vector obs) {
@@ -3194,44 +2258,31 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
   }
 
-  private void repaintLater() {
-    // JDSwingObbjects need repaintLater
-    SwingUtilities.invokeLater(new Runnable(){
-      public void run() {
-        repaint();
-      }
-    });
-  }
+  private boolean createObject(int ex,int ey) {
 
-  private boolean createObject(int eX,int eY) {
-
-    int ex,ey;
     if( alignToGrid ) {
-      ex = ((eX + GRID_SIZE / 2) / GRID_SIZE) * GRID_SIZE;
-      ey = ((eY + GRID_SIZE / 2) / GRID_SIZE) * GRID_SIZE;
-    } else {
-      ex = eX;
-      ey = eY;
+      ex = ((ex + GRID_SIZE / 2) / GRID_SIZE) * GRID_SIZE;
+      ey = ((ey + GRID_SIZE / 2) / GRID_SIZE) * GRID_SIZE;
     }
 
     switch (creationMode) {
-      case CREATE_RECTANGLE:
+      case RECTANGLE:
         createObject(new JDRectangle("Rectangle", ex, ey, 4, 4), 4);
         return true;
-      case CREATE_RRECTANGLE:
+      case RRECTANGLE:
         createObject(new JDRoundRectangle("RoundRectangle", ex, ey, 4, 4), 4);
         return true;
-      case CREATE_LINE:
+      case LINE:
         createObject(new JDLine("Line", ex, ey, ex, ey), 1);
         return true;
-      case CREATE_ELLIPSE:
+      case ELLIPSE:
         createObject(new JDEllipse("Ellipse", ex, ey, 4, 4), 4);
         return true;
-      case CREATE_POLYLINE:
-      case CREATE_SPLINE:
+      case POLYLINE:
+      case SPLINE:
         int s = tmpPoints.size();
         if (s == 0) {
-          unselectAll(false);
+          unselectAll();
           tmpPoints.clear();
           tmpPoints.add(new Point(ex, ey));
           tmpPoints.add(new Point(ex + 4, ey + 4));
@@ -3242,7 +2293,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
         }
         fireSelectionChange();
         return true;
-      case CREATE_LABEL:
+      case LABEL:
         String str = JOptionPane.showInputDialog(this, "Enter a text", "Create label", JOptionPane.INFORMATION_MESSAGE);
         if (str != null)
           createObject(new JDLabel("Label", str, ex, ey), -1);
@@ -3252,8 +2303,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
           fireCreationDone();
         }
         return true;
-
-      case CREATE_IMAGE:
+      case IMAGE:
         JFileChooser chooser = new JFileChooser(".");
         String[] exts={"gif","png","jpg"};
         chooser.addChoosableFileFilter(new JDFileFilter("Image file",exts));
@@ -3262,65 +2312,11 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
           return true;
         }
         break;
-
-      case CREATE_SWINGOBJECT:
-        if(creationParam!=null) {
-          createObject(new JDSwingObject("SwingObject", creationParam , ex, ey), -1);
-          repaintLater();
-        }
-        return true;
-
-      case CREATE_AXIS:
-        createObject(new JDAxis("Axis", ex, ey , 50,100), -1);
-        return true;
-
-      case CREATE_BAR:
-        createObject(new JDBar("Bar", ex, ey, 4, 4), 4);
-        return true;
-
-      case CREATE_SLIDER:
-        createObject(new JDSlider("Slider", ex, ey, 4, 4), 4);
-        return true;
-
-      case CREATE_SLIDER_CURSOR:
-        JDObject e = findObject(eX,eY);
-        if(e==null) {
-          JOptionPane.showMessageDialog(this, "Cannot pick new cursor for slider:\nNo object found here.");
-        } else if (e instanceof JDSlider) {
-          JOptionPane.showMessageDialog(this, "Cannot pick new cursor for slider:\n.Slider cannot be taken as cursor.");
-        } else {
-          sliderRef.setCursor(e.copy(0,0));
-          setNeedToSave(true, "Pick new cursor");
-        }
-        repaint();
+      case CLIPBOARD:
         creationMode = 0;
+        this.pasteClipboard(ex, ey);
         fireCreationDone();
         return true;
-
-      case CREATE_CONNECT_POLY:
-        e = findObject(eX,eY);
-        if(e==null) {
-          JOptionPane.showMessageDialog(this, "No polyline found here.");
-        } else if (!(e instanceof JDPolyline)) {
-          JOptionPane.showMessageDialog(this, "This object is not a polyline.");
-        } else if (e.equals(connectPolyline)) {
-          JOptionPane.showMessageDialog(this, "Cannot connect to itself.");
-        } else {
-          connectPolyline.connect((JDPolyline)e);
-          objects.remove(e);
-          setNeedToSave(true, "Connect polyline");
-        }
-        repaint();
-        creationMode = 0;
-        fireCreationDone();
-        return true;
-
-      case CREATE_CLIPBOARD:
-        creationMode = 0;
-        pasteClipboard(ex, ey);
-        fireCreationDone();
-        return true;
-
     }
 
     return false;

@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          SynopticFileViewer.java
 // Created:       2004-11-09 15:22:29, poncet
 // By:            <poncet@esrf.fr>
@@ -42,16 +20,18 @@ import javax.swing.JFrame;
 
 import fr.esrf.tangoatk.widget.util.ErrorHistory;
 
-public class SynopticFileViewer extends TangoSynopticHandler
+public class SynopticFileViewer extends javax.swing.JPanel
 {
 
     private String                 jdrawDir = null;    
     private String                 jdrawFileName = null;
+    private fr.esrf.tangoatk.widget.jdraw.TangoSynopticHandler   tsh = null;
+    private ErrorHistory           errorHistWind = null;
 
 
     public SynopticFileViewer()
     {
-	super();
+	initComponents();
     }
  
     public SynopticFileViewer(String  jdrawf)
@@ -72,36 +52,13 @@ public class SynopticFileViewer extends TangoSynopticHandler
     
     public String getJdrawDir()
     {
-	String   fn = null;
-	
-	fn = getSynopticFileName();
-	
-	if (fn != null)
-	{
-	   int  indSlash = fn.lastIndexOf('/');
-	   try
-	   {
-	      jdrawDir = fn.substring(0, indSlash-1);
-	   }
-	   catch (Exception ex)
-	   {
-	      jdrawDir = null;
-	   }
-	}
 	return jdrawDir;
     }  
     
     
     public void setJdrawDir(String newDir)
     {
-	String   fn = null;
-	
-	fn = getSynopticFileName();
-	
-	if (fn != null)
-	   return;
-
-	if (newDir == null)
+        if (newDir == null)
 	   return;
 	if (newDir.length() <= 0)
 	   return;
@@ -109,30 +66,24 @@ public class SynopticFileViewer extends TangoSynopticHandler
     }
     
     
+    public int getToolTipMode() throws IllegalStateException
+    {
+	if (tsh == null)
+	   throw new IllegalStateException ("toto");
+	return tsh.getToolTipMode();
+    }  
+    
    
+    public void setToolTipMode(int ttm) throws IllegalStateException
+    {
+	if (tsh == null)
+	   throw new IllegalStateException ("toto");
+        tsh.setToolTipMode(ttm);
+    }
      
     
     public String getJdrawFileName()
     {
-	String   fn = null;
-	
-	fn = getSynopticFileName();
-	
-	if (fn == null)
-	   jdrawFileName = null;
-	else
-	{
-	   int  indSlash = fn.lastIndexOf('/');
-	   int  fnSize = fn.length();
-	   try
-	   {
-	      jdrawFileName = fn.substring(indSlash+1, fnSize-1);
-	   }
-	   catch (Exception ex)
-	   {
-	      jdrawFileName = null;
-	   }
-	}
 	return jdrawFileName;
     }  
      
@@ -141,36 +92,43 @@ public class SynopticFileViewer extends TangoSynopticHandler
               throws MissingResourceException, FileNotFoundException, IllegalArgumentException
     {
        String          fullFileName;
-       
-       if (jdrawf == null)
-       {
-           clearDirAndFileNames();
-	   return;
-       }
 
        jdrawFileName = jdrawf;
-       
-       if (jdrawFileName.startsWith("/"))
-       {
-          fullFileName = jdrawFileName;
-       }
-       else
-          if (getJdrawDir() == null)
-              fullFileName = jdrawFileName;
-          else
-              fullFileName =  getJdrawDir() + "/" + jdrawFileName;
-       
-       setSynopticFileName(fullFileName);
+       fullFileName =  jdrawDir + "/" + jdrawFileName;
 
-    }  
+       if (errorHistWind != null)
+          tsh = new fr.esrf.tangoatk.widget.jdraw.TangoSynopticHandler(fullFileName, errorHistWind);
+       else
+          tsh = new fr.esrf.tangoatk.widget.jdraw.TangoSynopticHandler(fullFileName);
+       
+       
     
-    public void clearDirAndFileNames()
-    {
-        jdrawDir = null;
-	jdrawFileName = null;
+       // Add tsh into the panel (this)    
+       java.awt.GridBagConstraints      gbc;
+       gbc = new java.awt.GridBagConstraints();
+       gbc.gridx = 0;
+       gbc.gridy = 1;
+       gbc.insets = new java.awt.Insets(5, 5, 5, 5);
+       gbc.fill = java.awt.GridBagConstraints.BOTH;
+       gbc.weightx = 1.0;
+       gbc.weighty = 1.0;
+       
+       this.add(tsh, gbc);
+    }  
+
+    public void setErrorWindow(ErrorHistory  errw)
+    {	   
+        if (errw != null)
+	   errorHistWind = errw;
     }
 
-
+    private void initComponents()
+    {//initComponents
+       this.setMinimumSize(new java.awt.Dimension(22, 22));
+       this.setLayout(new java.awt.GridBagLayout());
+    }//initComponents
+    
+     
     /**
     * @param args the command line arguments
     */
@@ -189,15 +147,15 @@ public class SynopticFileViewer extends TangoSynopticHandler
 				 });
 
        ErrorHistory errorHistory = new ErrorHistory();
-       sfv = new SynopticFileViewer();
 
        try
        {
-	  sfv.setErrorHistoryWindow(errorHistory);
+          sfv = new SynopticFileViewer();
+	  sfv.setErrorWindow(errorHistory);
+          sfv.setJdrawDir("/users/poncet/ATK_OLD/jloox_files");
+          //sfv.setJdrawFileName("id14.jlx");
+          sfv.setJdrawFileName("id14_4.jlx");
 	  sfv.setToolTipMode(TangoSynopticHandler.TOOL_TIP_NAME);
-	  sfv.setAutoZoom(true);
-          //sfv.setJdrawFileName("/segfs/tango/jclient/JMultiBunchFdbk/src/mbFeedBack/mfdbk.jdw");
-          sfv.setJdrawFileName("/tmp_14_days/poncet/test_synoptic.jdw");
           jf.setContentPane(sfv);
        }
        catch (Exception e)
@@ -208,20 +166,7 @@ public class SynopticFileViewer extends TangoSynopticHandler
        }
        
        jf.pack();
-       jf.setVisible(true);
-//       try
-//       {
-//          Thread.sleep(10000);
-//	  System.out.println("coucou");
-//	  sfv.setJdrawFileName("/segfs/tango/jclient/JBpss/jdraw_files/Bpss.jdw");
-//
-//          Thread.sleep(10000);
-//	  System.out.println("coucou");
-//	  sfv.setJdrawFileName("/segfs/tango/jclient/JMultiBunchFdbk/src/mbFeedBack/mfdbk.jdw");
-//       }
-//       catch (Exception ex)
-//       {
-//       }
+       jf.show();
     }
 
 

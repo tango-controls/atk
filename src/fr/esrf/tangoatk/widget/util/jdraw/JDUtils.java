@@ -1,74 +1,26 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util.jdraw;
 
-import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
-
 import javax.swing.*;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import java.util.Vector;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ComponentListener;
-import java.awt.event.ComponentEvent;
 
 class JDUtils {
 
   static boolean modified;
   private static Insets bMargin = new Insets(3,3,3,3);
-  static Insets zMargin = new Insets(0, 0, 0, 0);
+  private static Insets zMargin = new Insets(0, 0, 0, 0);
   private static Class theClass=null;
   static Font  labelFont  = new Font("Dialog", Font.PLAIN, 12);
   static Font  labelFontBold  = new Font("Dialog", Font.BOLD, 12);
   static Color labelColor = new Color(85, 87, 140);
-
-  // For non modal property window
-  private static JDialog               nonModalPropDlg=null;
-  private static JDrawEditor           lastInvoker=null;
-  private static Component             lastSelectedPanel=null;
-  private static boolean               updatingProp=false;
-  private static JTabbedPane           innerPane = null;
-  private static JDObjectPanel         objectPanel=null;
-  private static JDLabelPanel          labelPanel=null;
-  private static JDLinePanel           linePanel=null;
-  private static JDPolylinePanel       polylinePanel=null;
-  private static JDEllipsePanel        ellipsePanel=null;
-  private static JDRoundRectanglePanel roundRectanglePanel=null;
-  private static JDImagePanel          imagePanel=null;
-  private static JDSwingPanel          swingPanel=null;
-  private static JDAxisPanel           axisPanel=null;
-  private static JDBarPanel            barPanel=null;
-  private static JDSliderPanel         sliderPanel=null;
-  private static JDValuePanel          valuePanel=null;
-  private static JDExtensionPanel      extensionPanel=null;
+  private static Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
   static private void init() {
     if( theClass==null ) {
-      String className = "fr.esrf.tangoatk.widget.util.jdraw.JDUtils";
+      String className = "jdraw.JDUtils";
       try {
         theClass = Class.forName(className);
       } catch (Exception e) {
@@ -77,60 +29,31 @@ class JDUtils {
     }
   }
 
-  static private JDialog buildDialog(JComponent invoker,boolean modal) {
+  static private JDialog buildModalDialog(JComponent invoker) {
 
     Object parent = invoker.getRootPane().getParent();
     JDialog dlg;
 
     if (parent instanceof JDialog) {
-      dlg = new JDialog((JDialog) parent, modal);
+      dlg = new JDialog((JDialog) parent, true);
     } else if (parent instanceof JFrame) {
-      dlg = new JDialog((JFrame) parent, modal);
+      dlg = new JDialog((JFrame) parent, true);
     } else {
-      dlg = new JDialog((JFrame) null, modal);
+      dlg = new JDialog((JFrame) null, true);
     }
 
     return dlg;
 
   }
 
-  static private JDialog buildModalDialog(JComponent invoker) {
-    return buildDialog(invoker,true);
-  }
+  static public boolean showPropertyDialog(JComponent invoker, Vector objects,int panel) {
 
-  static public void updatePropertyDialog(Vector objects) {
+    if (objects.size() == 0)
+      return false;
 
-    if(nonModalPropDlg==null)
-      return;
+    // Get the parent
 
-    if(objectPanel.nameHasChanged()) {
-      if( JOptionPane.showConfirmDialog(nonModalPropDlg,
-          "Object name has changed but has not been applied\nDo you want to apply ?",
-          "Confirmation",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION ) {
-        objectPanel.applyName();
-      } else {
-        objectPanel.cancelNameChanged();
-      }
-    }
-
-    if(objects.size()==0) {
-      nonModalPropDlg.setTitle("Properties [None selected]");
-      objectPanel.updatePanel(null);
-      labelPanel.updatePanel(null);
-      linePanel.updatePanel(null);
-      polylinePanel.updatePanel(null);
-      ellipsePanel.updatePanel(null);
-      roundRectanglePanel.updatePanel(null);
-      imagePanel.updatePanel(null);
-      swingPanel.updatePanel(null);
-      axisPanel.updatePanel(null);
-      barPanel.updatePanel(null);
-      valuePanel.updatePanel(null);
-      extensionPanel.updatePanel(null);
-      return;
-    }
-
-    updatingProp = true;
+    JDialog propDlg = buildModalDialog(invoker);
 
     // Check object instance and make object array
     JDObject[] objs = new JDObject[objects.size()];
@@ -143,187 +66,79 @@ class JDUtils {
       sameClass &= firstClass.equals(objs[i].getClass());
     }
 
-    innerPane.removeAll();
-    innerPane.add(objectPanel,"Graphics");
-    objectPanel.updatePanel(objs);
+    // Create panel
+    JPanel innerPanel = new JPanel();
+    JTabbedPane innerPane = new JTabbedPane();
+
+    // Common properties
+    JPanel p0 = new JDObjectPanel(objs, invoker);
+    innerPane.add(p0,"Graphics");
 
     // Specific properties
     if (sameClass && objs[0] instanceof JDLabel) {
       JDLabel[] objs2 = new JDLabel[objs.length];
       for (i = 0; i < objs.length; i++) objs2[i] = (JDLabel) objs[i];
-      labelPanel.updatePanel(objs2);
-      innerPane.add(labelPanel, "Text");
+      innerPane.add(new JDLabelPanel(objs2, invoker), "Text");
     }
 
     if (sameClass && objs[0] instanceof JDLine) {
       JDLine[] objs2 = new JDLine[objs.length];
       for (i = 0; i < objs.length; i++) objs2[i] = (JDLine) objs[i];
-      linePanel.updatePanel(objs2);
-      innerPane.add(linePanel, "Line");
+      innerPane.add(new JDLinePanel(objs2, invoker), "Line");
     }
 
     if (sameClass && objs[0] instanceof JDPolyline) {
       JDPolyline[] objs2 = new JDPolyline[objs.length];
       for (i = 0; i < objs.length; i++) objs2[i] = (JDPolyline) objs[i];
-      polylinePanel.updatePanel(objs2);
-      innerPane.add(polylinePanel, "Polyline");
+      innerPane.add(new JDPolylinePanel(objs2, invoker), "Polyline");
     }
 
     if (sameClass && objs[0] instanceof JDEllipse) {
       JDEllipse[] objs2 = new JDEllipse[objs.length];
       for (i = 0; i < objs.length; i++) objs2[i] = (JDEllipse) objs[i];
-      ellipsePanel.updatePanel(objs2);
-      innerPane.add(ellipsePanel, "Ellipse");
+      innerPane.add(new JDEllipsePanel(objs2, invoker), "Ellipse");
     }
 
     if (sameClass && objs[0] instanceof JDRoundRectangle) {
       JDRoundRectangle[] objs2 = new JDRoundRectangle[objs.length];
       for (i = 0; i < objs.length; i++) objs2[i] = (JDRoundRectangle) objs[i];
-      roundRectanglePanel.updatePanel(objs2);
-      innerPane.add(roundRectanglePanel, "Corner");
+      innerPane.add(new JDRoundRectanglePanel(objs2, invoker), "Corner");
     }
 
     if (sameClass && objs[0] instanceof JDImage) {
       JDImage[] objs2 = new JDImage[objs.length];
       for (i = 0; i < objs.length; i++) objs2[i] = (JDImage) objs[i];
-      imagePanel.updatePanel(objs2);
-      innerPane.add(imagePanel, "Image");
-    }
-
-    if (sameClass && objs[0] instanceof JDSwingObject) {
-      JDSwingObject[] objs2 = new JDSwingObject[objs.length];
-      for (i = 0; i < objs.length; i++) objs2[i] = (JDSwingObject) objs[i];
-      swingPanel.updatePanel(objs2);
-      innerPane.add(swingPanel, "Swing");
-    }
-
-    if (sameClass && objs[0] instanceof JDAxis) {
-      JDAxis[] objs2 = new JDAxis[objs.length];
-      for (i = 0; i < objs.length; i++) objs2[i] = (JDAxis) objs[i];
-      axisPanel.updatePanel(objs2);
-      innerPane.add(axisPanel, "Axis");
-    }
-
-    if (sameClass && objs[0] instanceof JDBar) {
-      JDBar[] objs2 = new JDBar[objs.length];
-      for (i = 0; i < objs.length; i++) objs2[i] = (JDBar) objs[i];
-      barPanel.updatePanel(objs2);
-      innerPane.add(barPanel, "Bar");
-    }
-
-    if (sameClass && objs[0] instanceof JDSlider) {
-      JDSlider[] objs2 = new JDSlider[objs.length];
-      for (i = 0; i < objs.length; i++) objs2[i] = (JDSlider) objs[i];
-      sliderPanel.updatePanel(objs2);
-      innerPane.add(sliderPanel, "Slider");
+      innerPane.add(new JDImagePanel(objs2, invoker), "Image");
     }
 
     // Dynamic properties
-    valuePanel.updatePanel(objs);
-    innerPane.add(valuePanel, "Value");
-    extensionPanel.updatePanel(objs);
-    innerPane.add(extensionPanel, "Extensions");
+    JPanel p1 = new JDValuePanel(objs, invoker);
+    innerPane.add(p1, "Value");
+    JPanel p2 = new JDExtensionPanel(objs, invoker);
+    innerPane.add(p2, "Extensions");
+
+    innerPanel.add(innerPane);
+    propDlg.setContentPane(innerPanel);
 
     String title = "Properties";
     JDObject p = (JDObject) objects.get(0);
     if (sameClass) title += " [" + objects.size() + " " + p.toString() + " selected]";
     else           title += " [" + objects.size() + " objects selected]";
-    nonModalPropDlg.setTitle(title);
+    propDlg.setTitle(title);
+    propDlg.setResizable(false);
+    centerDialog(propDlg);
 
-    // Reselect last panel if possible
-    try {
-      innerPane.setSelectedComponent(lastSelectedPanel);
-    } catch (IllegalArgumentException e) {}
-
-    // Work around a X11 JVM bug
-    innerPane.getSelectedComponent().setVisible(true);
-
-    updatingProp = false;
-
-  }
-
-  static public void showPropertyDialog(JDrawEditor invoker,Vector objects) {
-
-    if(nonModalPropDlg!=null ) {
-      if( lastInvoker!=invoker ) {
-        // We need to reconstruct the dialog
-        nonModalPropDlg.dispose();
-        nonModalPropDlg = null;
-      }
+    switch(panel) {
+      case 0:
+        innerPane.setSelectedComponent(p0);
+        break;
+      case 1:
+        innerPane.setSelectedComponent(p1);
+        break;
     }
-
-    if(nonModalPropDlg==null ) {
-
-      // Construct the dialog
-      nonModalPropDlg = buildDialog(invoker,false);
-      lastInvoker = invoker;
-
-      // Create panel
-      JPanel innerPanel = new JPanel();
-      innerPanel.setLayout(new BorderLayout());
-
-      JPanel buttonPanel= new JPanel();
-      FlowLayout fl = new FlowLayout();
-      fl.setAlignment(FlowLayout.RIGHT);
-      buttonPanel.setLayout(fl);
-
-      JButton dismissBtn = new JButton("Dismiss");
-      dismissBtn.setFont(labelFont);
-      dismissBtn.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          if(objectPanel.nameHasChanged()) {
-            if( JOptionPane.showConfirmDialog(nonModalPropDlg,
-                "Object name has changed but has not been applied\nDo you want to apply ?",
-                "Confirmation",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION ) {
-              objectPanel.applyName();
-            } else {
-              objectPanel.cancelNameChanged();
-            }
-          }
-          nonModalPropDlg.setVisible(false);
-        }
-      });
-      buttonPanel.add(dismissBtn);
-      innerPanel.add(buttonPanel,BorderLayout.SOUTH);
-
-      // Tabbed pane
-      innerPane = new JTabbedPane();
-      objectPanel = new JDObjectPanel(null, invoker, null);
-      labelPanel = new JDLabelPanel(null, invoker);
-      linePanel = new JDLinePanel(null, invoker);
-      polylinePanel = new JDPolylinePanel(null, invoker);
-      ellipsePanel = new JDEllipsePanel(null, invoker);
-      roundRectanglePanel = new JDRoundRectanglePanel(null, invoker);
-      imagePanel = new JDImagePanel(null, invoker);
-      swingPanel = new JDSwingPanel(null, invoker);
-      axisPanel = new JDAxisPanel(null, invoker);
-      barPanel = new JDBarPanel(null, invoker);
-      sliderPanel = new JDSliderPanel(null, invoker);
-      valuePanel = new JDValuePanel(null, invoker, null);
-      extensionPanel = new JDExtensionPanel(null, invoker);
-
-      innerPanel.add(innerPane,BorderLayout.CENTER);
-      nonModalPropDlg.setContentPane(innerPanel);
-      nonModalPropDlg.setResizable(false);
-
-      innerPane.addChangeListener(new ChangeListener() {
-        public void stateChanged(ChangeEvent e) {
-          if(innerPane.getSelectedComponent()!=null && !updatingProp) {
-            lastSelectedPanel = innerPane.getSelectedComponent();
-          }
-        }
-      });
-
-    }
-
-    updatePropertyDialog(objects);
-
-    // Recenter on show
-    if (!nonModalPropDlg.isVisible())
-      ATKGraphicsUtils.centerDialog(nonModalPropDlg);
-
-    nonModalPropDlg.setVisible(true);
-
+    modified=false;
+    propDlg.setVisible(true);
+    return modified;
   }
 
   static public boolean showBrowserDialog(JDrawEditor invoker, Vector objects) {
@@ -331,41 +146,21 @@ class JDUtils {
     if (objects.size() == 0)
       return false;
 
-    if(nonModalPropDlg!=null)
-      nonModalPropDlg.setVisible(false);
-
     JDialog propDlg = buildModalDialog(invoker);
 
     // Set the browser panel
     JDObject[] objs = new JDObject[objects.size()];
     for(int i=0;i<objs.length;i++) objs[i]=(JDObject)objects.get(i);
-    JDBrowserPanel bp = new JDBrowserPanel(objs, invoker);
-    propDlg.setContentPane(bp);
-    bp.postInit();
-    ATKGraphicsUtils.centerDialog(propDlg);
-
-    // Set minimum dialog size
-    propDlg.addComponentListener(new ComponentListener() {
-      public void componentResized(ComponentEvent e) {
-        JDialog dlg = (JDialog)e.getSource();
-        dlg.setSize(
-              Math.max(460, dlg.getWidth()),
-              Math.max(400, dlg.getHeight()));
-      }
-      public void componentMoved(ComponentEvent e) {}
-      public void componentShown(ComponentEvent e) {}
-      public void componentHidden(ComponentEvent e) {}
-
-    });
+    propDlg.setContentPane(new JDBrowserPanel(objs, invoker));
+    propDlg.setTitle("Object browser");
+    centerDialog(propDlg);
 
     modified=false;
     propDlg.setVisible(true);
-    propDlg.dispose();
 
     // Rebuild old selection
     invoker.unselectAll();
     invoker.selectObjects(objs);
-    invoker.fireSelectionChange();
 
     return modified;
 
@@ -373,17 +168,13 @@ class JDUtils {
 
   static public boolean showGroupEditorDialog(JDrawEditor invoker, JDGroup g) {
 
-    if(nonModalPropDlg!=null)
-      nonModalPropDlg.setVisible(false);
-
     JDialog propDlg = buildModalDialog(invoker);
     JDGroupEditorView gEdit = new JDGroupEditorView(g, invoker);
     propDlg.setContentPane(gEdit);
     propDlg.setTitle("Group Editor [" + g.getName() + "]");
     propDlg.setResizable(true);
-    ATKGraphicsUtils.centerDialog(propDlg);
+    centerDialog(propDlg);
     propDlg.setVisible(true);
-    propDlg.dispose();
     return modified;
 
   }
@@ -392,9 +183,6 @@ class JDUtils {
 
     if (objects.size() == 0)
       return false;
-
-    if(nonModalPropDlg!=null)
-      nonModalPropDlg.setVisible(false);
 
     JDialog propDlg = buildModalDialog(invoker);
 
@@ -408,20 +196,16 @@ class JDUtils {
     JDObject p = (JDObject) objects.get(0);
     if (objects.size() == 1) title += ": " + p.getName();
     propDlg.setTitle(title);
-    ATKGraphicsUtils.centerDialog(propDlg);
+    centerDialog(propDlg);
     propDlg.setResizable(false);
 
     modified=false;
     propDlg.setVisible(true);
-    propDlg.dispose();
     return modified;
 
   }
 
   static public boolean showGlobalDialog(JDrawEditor invoker) {
-
-    if(nonModalPropDlg!=null)
-      nonModalPropDlg.setVisible(false);
 
     JDialog propDlg = buildModalDialog(invoker);
 
@@ -430,12 +214,11 @@ class JDUtils {
 
     String title = "Global graph properties";
     propDlg.setTitle(title);
-    ATKGraphicsUtils.centerDialog(propDlg);
+    centerDialog(propDlg);
     propDlg.setResizable(false);
 
     modified=false;
     propDlg.setVisible(true);
-    propDlg.dispose();
     return modified;
 
   }
@@ -454,10 +237,10 @@ class JDUtils {
     String title = "Mapping for " + desc;
     title += " [" + objs.length + " objects selected]";
     propDlg.setTitle(title);
-    ATKGraphicsUtils.centerDialog(propDlg);
+    centerDialog(propDlg);
     propDlg.setResizable(false);
+
     propDlg.setVisible(true);
-    propDlg.dispose();
     if(vp.hasChanged())
       return vp.getMapper();
     else
@@ -479,9 +262,8 @@ class JDUtils {
     panel.setPreferredSize(new Dimension(170,40));
     propDlg.setContentPane(panel);
     propDlg.setTitle(name);
-    ATKGraphicsUtils.centerDialog(propDlg);
+    centerDialog(propDlg);
     propDlg.setVisible(true);
-    propDlg.dispose();
     return (boolCombo.getSelectedIndex()==1);
 
   }
@@ -618,42 +400,68 @@ class JDUtils {
     return cb;
   }
 
-  static String buildFontName(Font f) {
-    String name = f.getName();
-    String size = Integer.toString(f.getSize());
-    String style = "";
-    switch(f.getStyle()) {
-      case Font.PLAIN:
-        style="Plain";
-        break;
-      case Font.ITALIC:
-        style="Italic";
-        break;
-      case Font.BOLD:
-        style="Bold";
-        break;
-      case Font.BOLD+Font.ITALIC:
-        style="Italic Bold";
-        break;
-    }
-    return name + "," + style + "," + size;
+  static void centerDialog(Dialog dlg) {
+    centerDialog(dlg,dlg.getPreferredSize().width,dlg.getPreferredSize().height);
   }
 
-  static String[] makeStringArray(String value) {
-    // Remove extra \n at the end of the string (not handled by split)
-    while (value.endsWith("\n")) value = value.substring(0, value.length() - 1);
-    return value.split("\n");
+  static void centerDialog(Dialog dlg,int dlgWidth,int dlgHeight) {
+
+    // Get the parent rectangle
+    Rectangle r = new Rectangle(0,0,0,0);
+    if (dlg.getParent() != null)
+      r = dlg.getParent().getBounds();
+
+    // Check rectangle validity
+    if(r.width==0 || r.height==0) {
+      r.x = 0;
+      r.y = 0;
+      r.width  = screenSize.width;
+      r.height = screenSize.height;
+    }
+
+    // Get the window insets.
+    dlg.pack();
+    Insets insets = dlg.getInsets();
+
+    // Center
+    int xe,ye,wx,wy;
+    wx = dlgWidth  + (insets.right + insets.left);
+    wy = dlgHeight + (insets.bottom + insets.top);
+    // Saturate
+    if(wx>screenSize.width)  wx = screenSize.width;
+    if(wy>screenSize.height) wy = screenSize.height;
+    xe = r.x + (r.width - wx) / 2;
+    ye = r.y + (r.height - wy) / 2;
+
+    // Saturate
+    if( xe<0 ) xe=0;
+    if( ye<0 ) ye=0;
+    if( (xe+wx) > screenSize.width )
+      xe = screenSize.width - wx;
+    if( (ye+wy) > screenSize.height )
+      ye = screenSize.height - wy;
+
+    // Set bounds
+    //System.out.println("Centering dialog to :"+xe+","+ye+","+wx+","+wy);
+    dlg.setBounds(xe, ye, wx, wy);
+
   }
 
-  static String buildShortClassName(String className) {
-    if(className==null)
-      return "";    
-    int i = className.lastIndexOf('.');
-    if(i!=-1) {
-      return className.substring(i+1);
-    } else {
-      return className;
-    }
+  static void centerFrameOnScreen(Frame fr) {
+
+    Rectangle r = new Rectangle(0,0,screenSize.width,screenSize.height);
+    fr.pack();
+
+    // Center
+    int xe,ye,wx,wy;
+    wx = fr.getPreferredSize().width;
+    wy = fr.getPreferredSize().height;
+    xe = r.x + (r.width - wx) / 2;
+    ye = r.y + (r.height - wy) / 2;
+
+    // Set bounds
+    fr.setBounds(xe, ye, wx, wy);
+
   }
 
   static void computeSpline(double x1,double y1,double x2,double y2,
@@ -691,8 +499,8 @@ class JDUtils {
       if((full) || (j < step)) {
         if(pts!=null) {
           double[] pt = new double[2];
-          pt[0] = (int)(x+0.5);
-          pt[1] = (int)(y+0.5);
+          pt[0] = x;
+          pt[1] = y;
           pts.add(pt);
         } else {
           ptsx[start+j] = (int)(x+0.5);

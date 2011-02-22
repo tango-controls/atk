@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /** A panel for JDPolyline private properties */
 package fr.esrf.tangoatk.widget.util.jdraw;
 
@@ -37,29 +15,29 @@ class JDImagePanel extends JPanel implements ActionListener {
   private JLabel  heightLabel;
   private JButton resetBtn;
 
-  private JDImage[] allObjects = null;
-  private JDrawEditor invoker;
-  private Rectangle oldRect;
-  private boolean isUpdating = false;
+  JDImage[] allObjects;
+  JComponent invoker;
+  Rectangle oldRect;
 
-  public JDImagePanel(JDImage[] p, JDrawEditor jc) {
+  public JDImagePanel(JDImage[] p, JComponent jc) {
 
+    allObjects = p;
     invoker = jc;
 
     setLayout(null);
     setBorder(BorderFactory.createEtchedBorder());
-    setPreferredSize(new Dimension(380, 290));
+    setPreferredSize(new Dimension(380, 300));
 
     // ------------------------------------------------------------------------------------
     JPanel imgPanel = new JPanel(null);
     imgPanel.setBorder(JDUtils.createTitleBorder("Filename"));
     imgPanel.setBounds(5,5,370,60);
 
-    filenameLabel = new JTextField();
-    filenameLabel.setMargin(JDUtils.zMargin);
+    filenameLabel = new JTextField(p[0].getFileName());
     filenameLabel.setFont(JDUtils.labelFont);
     filenameLabel.setEditable(false);
     filenameLabel.setBorder(null);
+    filenameLabel.setCaretPosition(p[0].getFileName().length());
     filenameLabel.setForeground(JDUtils.labelColor);
     filenameLabel.setBounds(10, 20, 310, 25);
     imgPanel.add(filenameLabel);
@@ -79,12 +57,12 @@ class JDImagePanel extends JPanel implements ActionListener {
     dimPanel.setBorder(JDUtils.createTitleBorder("Dimension"));
     dimPanel.setBounds(5,75,370,115);
 
-    widthLabel = new JLabel();
+    widthLabel = new JLabel("Width: " + p[0].getImageWidth());
     widthLabel.setBounds(10, 20, 240, 25);
     widthLabel.setFont(JDUtils.labelFont);
     dimPanel.add(widthLabel);
 
-    heightLabel = new JLabel();
+    heightLabel = new JLabel("Height: " + p[0].getImageHeight());
     heightLabel.setBounds(10, 50, 240, 25);
     heightLabel.setFont(JDUtils.labelFont);
     dimPanel.add(heightLabel);
@@ -96,45 +74,18 @@ class JDImagePanel extends JPanel implements ActionListener {
     resetBtn.setBounds(10, 80, 180, 24);
     resetBtn.addActionListener(this);
     dimPanel.add(resetBtn);
+
     add(dimPanel);
-
-    updatePanel(p);
-
-  }
-
-  public void updatePanel(JDImage[] objs) {
-
-    allObjects = objs;
-    isUpdating = true;
-
-    if (objs == null || objs.length <= 0) {
-
-      filenameLabel.setText("");
-      widthLabel.setText("Width: ");
-      heightLabel.setText("Height: ");
-
-    } else {
-      JDImage p = objs[0];
-
-      filenameLabel.setText(p.getFileName());
-      filenameLabel.setCaretPosition(p.getFileName().length());
-      widthLabel.setText("Width: " + p.getImageWidth());
-      heightLabel.setText("Height: " + p.getImageHeight());
-    }
-
-    isUpdating = false;
 
   }
 
   private void initRepaint() {
-    if(allObjects==null) return;
     oldRect = allObjects[0].getRepaintRect();
     for (int i = 1; i < allObjects.length; i++)
       oldRect = oldRect.union(allObjects[i].getRepaintRect());
   }
 
   private void repaintObjects() {
-    if(allObjects==null) return;
     Rectangle newRect = allObjects[0].getRepaintRect();
     for (int i = 1; i < allObjects.length; i++)
       newRect = newRect.union(allObjects[i].getRepaintRect());
@@ -146,9 +97,6 @@ class JDImagePanel extends JPanel implements ActionListener {
   // Action listener
   // ---------------------------------------------------------
   public void actionPerformed(ActionEvent e) {
-
-    if(allObjects==null || isUpdating) return;
-
     int i;
     initRepaint();
     Object src = e.getSource();
@@ -160,14 +108,14 @@ class JDImagePanel extends JPanel implements ActionListener {
       if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
         for(i=0;i<allObjects.length;i++)
           allObjects[i].setFileName(chooser.getSelectedFile().getAbsolutePath());
-        invoker.setNeedToSave(true,"New image");
+        JDUtils.modified=true;
       }
 
     } else if ( src == resetBtn ) {
 
       for(i=0;i<allObjects.length;i++)
         allObjects[i].resetToOriginalSize();
-      invoker.setNeedToSave(true,"Reset size");
+      JDUtils.modified=true;
 
     }
     repaintObjects();

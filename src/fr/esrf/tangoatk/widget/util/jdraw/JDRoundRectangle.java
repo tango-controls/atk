@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /**
  * User: Jean Luc
  * Date: Aug 9, 2003
@@ -32,10 +10,7 @@ import java.awt.geom.Point2D;
 import java.io.FileWriter;
 import java.io.IOException;
 
-/** JDraw Rectangle graphic object.
-  *  <p>Here is an example of few JDRoundRectangle:<p>
-  *  <img src="JDRRectangle.gif" border="0" alt="JDRoundRectangle examples"></img>
-  */
+/** JDraw Rectangle graphic object */
 public class JDRoundRectangle extends JDRectangular implements JDPolyConvert {
 
   // Default
@@ -43,17 +18,12 @@ public class JDRoundRectangle extends JDRectangular implements JDPolyConvert {
   static final int cornerWidthDefault = 24;
 
   // Vars
-  private int step;
-  private int cornerWidth;
+  int step;
+  int cornerWidth;
 
-  /**
-   * Contructs a JDRoundRectangle.
-   * @param objectName Object name
-   * @param x Up left corner x coordinate
-   * @param y Up left corner y coordinate
-   * @param w Rectangle width
-   * @param h Rectangle height
-   */
+  // -----------------------------------------------------------
+  // Construction
+  // -----------------------------------------------------------
   public JDRoundRectangle(String objectName, int x, int y, int w, int h) {
     initDefault();
     setOrigin(new Point.Double(x, y));
@@ -64,7 +34,7 @@ public class JDRoundRectangle extends JDRectangular implements JDPolyConvert {
     updateShape();
   }
 
-  JDRoundRectangle(JDRoundRectangle e, int x, int y) {
+  public JDRoundRectangle(JDRoundRectangle e, int x, int y) {
     cloneObject(e, x, y);
     cornerWidth = e.cornerWidth;
     step = e.step;
@@ -119,7 +89,7 @@ public class JDRoundRectangle extends JDRectangular implements JDPolyConvert {
   // -----------------------------------------------------------
   // Ovverides
   // -----------------------------------------------------------
-  void initDefault() {
+  public void initDefault() {
     super.initDefault();
     step = stepDefault;
     cornerWidth = cornerWidthDefault;
@@ -157,21 +127,21 @@ public class JDRoundRectangle extends JDRectangular implements JDPolyConvert {
 
   }
 
-  void updateShape() {
+  public void updateShape() {
     computeBoundRect();
     if ((boundRect.width <= cornerWidth * 2) || (boundRect.height <= cornerWidth * 2)) {
 
       //Build non rounded rect
       ptsx = new int[4];
       ptsy = new int[4];
-      ptsx[0] = (int) (summit[0].x+0.5);
-      ptsy[0] = (int) (summit[0].y+0.5);
-      ptsx[1] = (int) (summit[2].x+0.5);
-      ptsy[1] = (int) (summit[2].y+0.5);
-      ptsx[2] = (int) (summit[4].x+0.5);
-      ptsy[2] = (int) (summit[4].y+0.5);
-      ptsx[3] = (int) (summit[6].x+0.5);
-      ptsy[3] = (int) (summit[6].y+0.5);
+      ptsx[0] = (int) summit[0].x;
+      ptsy[0] = (int) summit[0].y;
+      ptsx[1] = (int) summit[2].x;
+      ptsy[1] = (int) summit[2].y;
+      ptsx[2] = (int) summit[4].x;
+      ptsy[2] = (int) summit[4].y;
+      ptsx[3] = (int) summit[6].x;
+      ptsy[3] = (int) summit[6].y;
 
     } else {
 
@@ -259,12 +229,12 @@ public class JDRoundRectangle extends JDRectangular implements JDPolyConvert {
               + kc * p4y + 0.5);
 
           if (j == 0) {
-            ptsx[nb] = (int) (p1x+0.5);
-            ptsy[nb] = (int) (p1y+0.5);
+            ptsx[nb] = (int) p1x;
+            ptsy[nb] = (int) p1y;
           }
           if (j == step) {
-            ptsx[nb] = (int) (p4x+0.5);
-            ptsy[nb] = (int) (p4y+0.5);
+            ptsx[nb] = (int) p4x;
+            ptsy[nb] = (int) p4y;
           } else {
             ptsx[nb] = x;
             ptsy[nb] = y;
@@ -294,7 +264,7 @@ public class JDRoundRectangle extends JDRectangular implements JDPolyConvert {
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
-  void saveObject(FileWriter f, int level) throws IOException {
+  public void saveObject(FileWriter f, int level) throws IOException {
 
     String decal = saveObjectHeader(f, level);
 
@@ -314,7 +284,7 @@ public class JDRoundRectangle extends JDRectangular implements JDPolyConvert {
 
   }
 
-  JDRoundRectangle(JDFileLoader f) throws IOException {
+  public JDRoundRectangle(JDFileLoader f) throws IOException {
 
     initDefault();
     f.startBlock();
@@ -358,35 +328,20 @@ public class JDRoundRectangle extends JDRectangular implements JDPolyConvert {
   // -----------------------------------------------------------
   // Property stuff
   // -----------------------------------------------------------
-  /**
-   * Returns the interpolation of rounded corner.
-   * @see #setStep
-   */
+
   public int getStep() {
     return step;
   }
 
-  /**
-   * Sets the interpolation step of the rounded corner.
-   * @param s Interpolation step
-   */
   public void setStep(int s) {
     step = s;
     updateShape();
   }
 
-  /**
-   * Returns the rouded corner width.
-   * @see #setCornerWidth
-   */
   public int getCornerWidth() {
     return cornerWidth;
   }
 
-  /**
-   * Sets the rounded corner width.
-   * @param w Corner width
-   */
   public void setCornerWidth(int w) {
     cornerWidth = w;
     updateShape();

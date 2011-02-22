@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util.jdraw;
 
 import java.io.FileReader;
@@ -276,7 +254,7 @@ class JLXFileLoader {
     int a = (int)read_double(); // Angle start
     int b = (int)read_double(); // Angle extent
     int atype = read_int();     // Chord closed
-    return new JDEllipse(r,360-(a+b),b,atype);
+    return new JDEllipse(r,a,b,atype);
 
   }
 
@@ -467,19 +445,8 @@ class JLXFileLoader {
     boolean found;
     Vector ret = new Vector();
     for(int i=0;i<nb;i++) {
-      JDObject obj = (JDObject)objs.get(i);
-      if(obj instanceof JDGroup) {
-        if(obj.name.equals(name)) {
-          ret.add(obj);
-        } else {
-          Vector objs2 = ((JDGroup)obj).getChildren();
-          Vector ret2 = findObjects(name,objs2);
-          ret.addAll(ret2);
-        }
-      } else {
-        found = obj.name.equals(name);
-        if(found) ret.add(objs.get(i));
-      }
+      found = ((JDObject)objs.get(i)).name.equals(name);
+      if(found) ret.add(objs.get(i));
     }
     return ret;
   }
@@ -514,86 +481,23 @@ class JLXFileLoader {
       String oname = Integer.toString(i);
 
       Vector subO = findObjects(oname,objects);
-      if(subO.size()==0) {
+      if(subO.size()==0)
+        throw new IOException("MultiState sub-object '" + oname + "' not found in " + r.name);
 
-        System.out.println("JLXFileLoader.parseLxMultiState() : Warning, sub-object '" + oname + "' not found in " + r.name);
+      JDValueProgram vp = new JDValueProgram(JDValueProgram.BOOLEAN_TYPE);
+      vp.addNewEntry();
+      vp.setDefaultMapping("false");
+      vp.setMappingAt(0,"true");
+      vp.setValueAt(0,oname);
 
-      } else {
-
-        JDValueProgram vp = new JDValueProgram(JDValueProgram.BOOLEAN_TYPE);
-        vp.addNewEntry();
-        vp.setDefaultMapping("false");
-        vp.setMappingAt(0,"true");
-        vp.setValueAt(0,oname);
-
-        for(int j=0;j<subO.size();j++)
-          ((JDObject)subO.get(j)).setVisibilityMapper(vp.copy());
-
-      }
+      for(int j=0;j<subO.size();j++)
+        ((JDObject)subO.get(j)).setVisibilityMapper(vp.copy());
 
     }
 
     JDObject ret = new JDGroup(r,objects);
     ret.setMinValue(min);
     ret.setMaxValue(max);
-    ret.setInitValue(v0);
-    ret.setInteractive(interactive);
-    ret.setValueChangeMode(JDObject.VALUE_INC_ON_CLICK);
-
-    return ret;
-
-  }
-
-  // ****************************************************
-  JDObject parseLxToggle(double x,double y) throws IOException {
-
-    JLXObject r = new JLXObject("Toggle");
-    r.parse(this,true);
-    r.correct(x,y);
-    Vector objects = new Vector();
-
-    int nbObject = read_int();
-    int i;
-
-    for(i=0;i<nbObject;i++) {
-      JDObject o = parseObject(r.boundRect.getX(),r.boundRect.getY());
-      if(o!=null) objects.add(o);
-    }
-
-    boolean interactive=false;
-    if(version.compareTo("1.3.0") >= 0)
-      interactive = (read_int()==1);
-
-    int v0   = read_int(); // Init value
-
-    // Set up visibilty mappers
-
-    Vector subO = findObjects("OFF",objects);
-    Vector sub1 = findObjects("ON",objects);
-    if(subO.size()==0)
-        throw new IOException("Toggle sub-object '" + "OFF" + "' not found in " + r.name);
-    if(sub1.size()==0)
-        throw new IOException("Toggle sub-object '" + "ON" + "' not found in " + r.name);
-
-    JDValueProgram vp = new JDValueProgram(JDValueProgram.BOOLEAN_TYPE);
-    vp.addNewEntry();
-    vp.setDefaultMapping("false");
-    vp.setMappingAt(0,"true");
-    vp.setValueAt(0,"1");
-    for(int j=0;j<subO.size();j++)
-      ((JDObject)subO.get(j)).setVisibilityMapper(vp);
-
-    JDValueProgram vp2 = new JDValueProgram(JDValueProgram.BOOLEAN_TYPE);
-    vp2.addNewEntry();
-    vp2.setDefaultMapping("true");
-    vp2.setMappingAt(0,"false");
-    vp2.setValueAt(0,"1");
-    for(int j=0;j<sub1.size();j++)
-      ((JDObject)sub1.get(j)).setVisibilityMapper(vp2);
-
-    JDObject ret = new JDGroup(r,objects);
-    ret.setMinValue(0);
-    ret.setMaxValue(1);
     ret.setInitValue(v0);
     ret.setInteractive(interactive);
     ret.setValueChangeMode(JDObject.VALUE_INC_ON_CLICK);
@@ -677,8 +581,6 @@ class JLXFileLoader {
       return parseLxMultiState(x,y);
     } else if (className.equals("com.loox.jloox.LxCustomShape")) {
       return parseLxCustomShape(x,y);
-    } else if (className.equals("com.loox.jloox.LxToggle")) {
-      return parseLxToggle(x,y);
     } else {
 
       if(className.startsWith("com")) {
