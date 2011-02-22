@@ -1,31 +1,9 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/**
  * CfFileReader.java
  * A config file browser
  */
-package fr.esrf.tangoatk.widget.util.chart;
 
+package fr.esrf.tangoatk.widget.util.chart;
 
 import java.io.*;
 import java.util.*;
@@ -40,13 +18,13 @@ public class CfFileReader {
   // Inner class Item
   // Handle one property in the config file
   // ----------------------------------------------------
-  protected class Item {
+  class Item {
 
-    public Vector<String> items;
+    public Vector items;
     String name;
 
     public Item(String name) {
-      items = new Vector<String>();
+      items = new Vector();
       this.name=name;
     }
 
@@ -63,39 +41,33 @@ public class CfFileReader {
   // ----------------------------------------------------
   // Class variable
   // ----------------------------------------------------
-  protected Vector<Item>   prop;
-  protected FileReader     file;
-  protected String         cfStr;
-  protected char           currentChar;
-  protected BufferedReader stream;
+  Vector     prop;
+  FileReader file;
+  String     cfStr;
+  char       currentChar;
 
   // ----------------------------------------------------
   // General constructor
   // ----------------------------------------------------
   public CfFileReader() {
-    prop  = new Vector<Item>();
+    prop  = new Vector();
     cfStr = null;
     file  = null;
-    stream = null;
   }
 
   // ----------------------------------------------------
   // Get the current char
   // ----------------------------------------------------
-  protected char getCurrentChar() throws IOException {
+  private char getCurrentChar() throws IOException {
 
     char c;
 
     if( file!=null ) {
       return (char)file.read();
-      
     } else if( cfStr!=null ) {
       c = (char)cfStr.charAt(0);
       cfStr = cfStr.substring(1);
       return c;
-      
-    } else if( stream != null){
-    	return (char)stream.read();
     }
 
     return (char)0;
@@ -104,26 +76,21 @@ public class CfFileReader {
   // ----------------------------------------------------
   // Return true when EOF
   // ----------------------------------------------------
-  protected boolean eof() throws IOException {
+  private boolean eof() throws IOException {
 
     if( file!=null ) {
       return !file.ready();
-      
     } else if( cfStr!=null ) {
       return cfStr.length()==0;
-      
-    } else if ( stream != null) {
-    	
-    	return !stream.ready();
-	}
-    
+    }
+
     return true;
   }
 
   // ----------------------------------------------------
   // Read the file word by word
   // ----------------------------------------------------
-  protected String readWord() throws IOException {
+  private String readWord() throws IOException {
 
     boolean found=(currentChar>32);
     String  ret = "";
@@ -179,7 +146,7 @@ public class CfFileReader {
   // Read the config file and fill properties vector
   // Return true when succesfully browsed
   // ----------------------------------------------------
-  protected boolean parse() throws IOException {
+  private boolean parse() throws IOException {
 
     prop.clear();
     currentChar=0;
@@ -251,43 +218,15 @@ public class CfFileReader {
 
     return ok;
   }
-  /**
-   * Parse the given file and fill property vector.
-   * @param filename File to parse
-   * @return Return true when file succesfully parsed
-   */
-
-   public boolean readFile(File file) {
-     boolean ok=false;
-     try {
-       this.file = new FileReader(file);
-       ok = parse();
-       this.file.close();
-     } catch ( Exception e ) {
-     }
-
-     return ok;
-   }
-
-   public boolean readStream(BufferedReader stream) {
-	     boolean ok=false;
-	     try {
-	       this.stream = stream;
-	       ok = parse();
-	       this.stream.close();
-	     } catch ( Exception e ) {
-	     }
-	     return ok;
-	   }
 
   /**
   * Return all parameter names found in the config file.
   * @return Returns a vector of String.
   */
 
-   public Vector<String> getNames() {
+   public Vector getNames() {
 
-    Vector<String> v = new Vector<String>();
+    Vector v = new Vector();
     for( int i=0;i<prop.size();i++ ) {
       v.add( prop.get(i).toString() );
     }
@@ -301,7 +240,7 @@ public class CfFileReader {
   * @return Returns a vector of String. (1 string per field)
   */
 
-  public Vector<String> getParam(String name) {
+  public Vector getParam(String name) {
     boolean found=false;
     int i=0;
 
@@ -320,24 +259,24 @@ public class CfFileReader {
 
   // ----------------------------------------------------
   public static void main(String args[]) {
-    final CfFileReader cf = new CfFileReader();
+      final CfFileReader cf = new CfFileReader();
 
-    if( cf.readFile("test.cfg") ) {
+      if( cf.readFile("test.cfg") ) {
 
-	  Vector<String> names = cf.getNames();
-      System.out.println("Read " + names.size() +" params");
+	Vector names = cf.getNames();
+        System.out.println("Read " + names.size() +" params");
 
-	  for(int i=0;i<names.size();i++) {
-	    System.out.println( names.get(i).toString() );
-	    Vector<String> values = cf.getParam( names.get(i).toString() );
-	    for(int j=0;j<values.size();j++) {
-	      System.out.println( "   " + values.get(j).toString() );
-	    }
+	for(int i=0;i<names.size();i++) {
+	  System.out.println( names.get(i).toString() );
+	  Vector values = cf.getParam( names.get(i).toString() );
+	  for(int j=0;j<values.size();j++) {
+	    System.out.println( "   " + values.get(j).toString() );
 	  }
+	}
 
-    } else {
-      System.out.println("Error while reading config file");
-    }
+      } else {
+        System.out.println("Error while reading config file");
+      }
   }
 
 }

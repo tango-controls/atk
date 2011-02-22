@@ -17,6 +17,7 @@ import fr.esrf.Tango.DevFailed;
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.core.attribute.AttributeFactory;
 import fr.esrf.tangoatk.core.command.*;
+import fr.esrf.tangoatk.widget.device.StateViewer;
 import fr.esrf.tangoatk.widget.command.AnyCommandViewer;
 import fr.esrf.tangoatk.widget.util.*;
 
@@ -83,8 +84,7 @@ import java.util.regex.Pattern;
   */
   
 
-public class TangoSynopticHandler implements IStateListener, IStatusListener,
-                                             INumberScalarListener
+public class TangoSynopticHandler implements IStateListener, IStatusListener
 {
 
    public static final int          TOOL_TIP_NONE = 0;
@@ -762,80 +762,10 @@ invoqex.printStackTrace();
 
    private void addAttribute(LxComponent lxcomp, String s)
    {
-      if (lxcomp instanceof LxDigit)
-	 addAttribute((LxDigit)lxcomp, s);
-      if (lxcomp instanceof LxSlider)
-	 addAttribute((LxSlider)lxcomp, s);
    }
 
-
-   private void addAttribute(LxDigit lxdg, String s)
-   {
-      IAttribute  att = null;
-
-      try
-      {
-         att = aFac.getAttribute(s);
-	 if (att != null)
-	 {
-	    if (att instanceof INumberScalar)
-	    {
-	       addAttributeListener((INumberScalar) att);
-	       // set min, max, value for the digit? lxdg.setAll();
-	       stashComponent(s, lxdg);
-	    }
-	 }
-      } 
-      catch (ConnectionException connectionexception)
-      {
-	 System.out.println("Couldn't load device for attribute" + s + " " + connectionexception);
-      }
-      catch (DevFailed dfEx)
-      {
-	 System.out.println("Couldn't find the attribute" + s + " " + dfEx);
-      }
-
-   }
-
-
-   private void addAttribute(LxSlider lxsl, String s)
-   {
-      IAttribute  att = null;
-
-      try
-      {
-         att = aFac.getAttribute(s);
-	 if (att != null)
-	 {
-	    if (att instanceof INumberScalar)
-	    {
-	       addAttributeListener((INumberScalar) att);
-	       // set min, max, value for the digit? lxdg.setAll();
-	       stashComponent(s, lxsl);
-	    }
-	 }
-      } 
-      catch (ConnectionException connectionexception)
-      {
-	 System.out.println("Couldn't load device for attribute" + s + " " + connectionexception);
-      }
-      catch (DevFailed dfEx)
-      {
-	 System.out.println("Couldn't find the attribute" + s + " " + dfEx);
-      }
-
-   }
-
-
- 
-   private void addAttributeListener(INumberScalar ins)
-   {
-      System.out.println("connecting to a number scalar attribute : " + ins);
-      ins.addNumberScalarListener(this);
-      if (errorHistWind != null) 
-         ins.addErrorListener(errorHistWind);      
-   }
    
+
 
 
 
@@ -843,66 +773,7 @@ invoqex.printStackTrace();
 // Implement the interface methods for synoptic animation 
 // -------------------------------------------------------
 
-
-   // Interface INumberScalarListener
-   public void numberScalarChange(NumberScalarEvent evt)
-   {
-      LxComponent    lxComp;
-      INumberScalar  ins;
-      LxDigit        lxdg;
-      LxSlider       lxsl;
-      double         value;
-
-      
-      ins = null;
-      ins = evt.getNumberSource();
-      
-      String s = ins.getName();
-      
-      if (ins != null)
-      {
-	 List list = (List) lxHash.get(s);
-	 if (list == null)
-            return;
-
-	 int  nbLxComps = list.size();
-	 int  i;
-
-	 for (i=0; i<nbLxComps; i++)
-	 {
-            lxComp = null;
-	    lxComp = (LxComponent) list.get(i);
-
-	    if (lxComp != null)
-	    {
-	       if (lxComp instanceof LxDigit)
-	       {
-	          lxdg = (LxDigit) lxComp;
-		  value = evt.getValue();
-		  lxdg.setValue(value);
-	       }
-	       
-	       if (lxComp instanceof LxSlider)
-	       {
-	          lxsl = (LxSlider) lxComp;
-		  value = evt.getValue();
-		  lxsl.setValue(value);
-	       }
-	    }
-	 }
-      }
-   }
-
-
-
-   // Interface INumberScalarListener (superclass of IStateListener and INumberScalarListener)
-   public void stateChange(AttributeStateEvent evt)
-   {
-   }
-
-
-
-   // Interface IErrorListener (superclass of IStateListener and INumberScalarListener)
+   // Interface IErrorListener (superclass of IStateListener)
    public void errorChange(ErrorEvent evt)
    {
    }
@@ -964,9 +835,9 @@ invoqex.printStackTrace();
 	 if (lxComp instanceof LxElement)
 	 {
 	    if (((LxElement) lxComp).getPaint().getTransparency() == java.awt.Paint.OPAQUE)
-	       ((LxElement) lxComp).setPaint(ATKConstant.getColor4State(event.getState()));
+	       ((LxElement) lxComp).setPaint(StateViewer.getColor4State(event.getState()));
 	    else
-	       ((LxElement) lxComp).setLineColor(ATKConstant.getColor4State(event.getState()));
+	       ((LxElement) lxComp).setLineColor(StateViewer.getColor4State(event.getState()));
 	 }
 	 else
 	 {
@@ -1047,14 +918,14 @@ invoqex.printStackTrace();
 	 {
 	    if (((LxElement)lxc).getPaint() == null)
 	    {
-	       ((LxElement)lxc).setLineColor(ATKConstant.getColor4State(state));
+	       ((LxElement)lxc).setLineColor(StateViewer.getColor4State(state));
 	    }
 	    else
 	    {
 	       if (((LxElement)lxc).getPaint().getTransparency() == java.awt.Paint.OPAQUE)
-		  ((LxElement)lxc).setPaint(ATKConstant.getColor4State(state));
+		  ((LxElement)lxc).setPaint(StateViewer.getColor4State(state));
 	       else
-		  ((LxElement)lxc).setLineColor(ATKConstant.getColor4State(state));
+		  ((LxElement)lxc).setLineColor(StateViewer.getColor4State(state));
 	    }
 	 }
 	 else

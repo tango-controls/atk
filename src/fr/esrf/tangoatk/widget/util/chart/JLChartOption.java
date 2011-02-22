@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 //
 // JLChartOption.java
 // Description: A Class to handle 2D graphics plot
@@ -28,8 +6,6 @@
 
 package fr.esrf.tangoatk.widget.util.chart;
 
-import fr.esrf.tangoatk.widget.util.JSmoothLabel;
-import fr.esrf.tangoatk.widget.util.ATKFontChooser;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -38,6 +14,7 @@ import javax.swing.event.*;
 
 /**
  * A class to display global graph settings dialog.
+ * @author JL Pons
  */
 public class JLChartOption extends JDialog implements ActionListener, MouseListener, ChangeListener, KeyListener {
 
@@ -49,54 +26,110 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
   // general panel
   private JPanel generalPanel;
 
-  private JPanel gLegendPanel;
-
   private JLabel generalLegendLabel;
   private JTextField generalLegendText;
 
   private JCheckBox generalLabelVisibleCheck;
 
-  private JPanel gColorFontPanel;
-
-  private JLabel generalFontHeaderLabel;
-  private JSmoothLabel generalFontHeaderSampleLabel;
-  private JButton generalFontHeaderBtn;
-
-  private JLabel generalFontLabelLabel;
-  private JSmoothLabel generalFontLabelSampleLabel;
-  private JButton generalFontLabelBtn;
-
   private JLabel generalBackColorLabel;
   private JLabel generalBackColorView;
   private JButton generalBackColorBtn;
 
-  private JPanel gGridPanel;
-
   private JComboBox generalGridCombo;
-
-  private JComboBox generalLabelPCombo;
-  private JLabel generalLabelPLabel;
-
-  private JCheckBox  xSubGribVisibleCheck;
-
-  private JLabel     xNbTickLabel;
-  private JTextField xNbTickText;
+  private JLabel generalGridLabel;
 
   private JComboBox generalGridStyleCombo;
   private JLabel generalGridStyleLabel;
 
-  private JPanel gMiscPanel;
-
   private JLabel generalDurationLabel;
   private JTextField generalDurationText;
 
-  private JLabel percentScrollLabel;
-  private JTextField percentScrollText;
+  private JLabel generalFontHeaderLabel;
+  private JALabel generalFontHeaderSampleLabel;
+  private JButton generalFontHeaderBtn;
 
-  // Axis panel
-  private AxisPanel y1Panel;
-  private AxisPanel y2Panel;
-  private AxisPanel xPanel;
+  private JLabel generalFontLabelLabel;
+  private JALabel generalFontLabelSampleLabel;
+  private JButton generalFontLabelBtn;
+
+  // Y1Axis panel
+  private JPanel y1Panel;
+
+  private JLabel y1MinLabel;
+  private JTextField y1MinText;
+  private JLabel y1MaxLabel;
+  private JTextField y1MaxText;
+  private JCheckBox y1AutoScaleCheck;
+
+  private JLabel y1ScaleLabel;
+  private JComboBox y1ScaleCombo;
+  private JCheckBox y1SubGridCheck;
+
+  private JComboBox y1FormatCombo;
+  private JLabel y1FormatLabel;
+
+  private JLabel y1TitleLabel;
+  private JTextField y1TitleText;
+
+  private JLabel y1ColorLabel;
+  private JLabel y1ColorView;
+  private JButton y1ColorBtn;
+
+  private JLabel y1PositionLabel;
+  private JComboBox y1PositionCombo;
+
+  // Y2Axis panel
+  private JPanel y2Panel;
+
+  private JLabel y2MinLabel;
+  private JTextField y2MinText;
+  private JLabel y2MaxLabel;
+  private JTextField y2MaxText;
+  private JCheckBox y2AutoScaleCheck;
+
+  private JLabel y2ScaleLabel;
+  private JComboBox y2ScaleCombo;
+  private JCheckBox y2SubGridCheck;
+
+  private JComboBox y2FormatCombo;
+  private JLabel y2FormatLabel;
+
+  private JLabel y2TitleLabel;
+  private JTextField y2TitleText;
+
+  private JLabel y2ColorLabel;
+  private JLabel y2ColorView;
+  private JButton y2ColorBtn;
+
+  private JLabel y2PositionLabel;
+  private JComboBox y2PositionCombo;
+
+  // XAxis panel
+  private JPanel xPanel;
+
+  private JLabel xMinLabel;
+  private JTextField xMinText;
+  private JLabel xMaxLabel;
+  private JTextField xMaxText;
+  private JCheckBox xAutoScaleCheck;
+
+  private JLabel xScaleLabel;
+  private JComboBox xScaleCombo;
+  private JCheckBox xSubGridCheck;
+
+  private JComboBox xFormatCombo;
+  private JLabel xFormatLabel;
+
+  private JLabel xTitleLabel;
+  private JTextField xTitleText;
+
+  private JLabel xColorLabel;
+  private JLabel xColorView;
+  private JButton xColorBtn;
+  private Font labelFont;
+
+  private JLabel xPositionLabel;
+  private JComboBox xPositionCombo;
 
   //
   // parent: parent frame
@@ -107,7 +140,7 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
    * @param chart Chart to be edited.
    */
   public JLChartOption(JDialog parent, JLChart chart) {
-    super(parent, false);
+    super(parent, true);
     this.chart = chart;
     initComponents();
   }
@@ -118,7 +151,7 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
    * @param chart Chart to be edited.
    */
   public JLChartOption(JFrame parent, JLChart chart) {
-    super(parent, false);
+    super(parent, true);
     this.chart = chart;
     initComponents();
   }
@@ -126,87 +159,60 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
 
   private void initComponents() {
 
-    JPanel innerPane = new JPanel();
-    innerPane.setLayout(null);
+    getContentPane().setLayout(null);
+
+    labelFont = new Font("Dialog", Font.PLAIN, 12);
 
     addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent evt) {
-        setVisible(false);
+        hide();
         dispose();
       }
     });
 
-    setTitle("Chart properties");
+    setTitle("Graph options");
 
     tabPane = new JTabbedPane();
 
     // **********************************************
     // General panel construction
     // **********************************************
+    Color fColor = new Color(99, 97, 156);
 
     generalPanel = new JPanel();
     generalPanel.setLayout(null);
 
-    gLegendPanel = new JPanel();
-    gLegendPanel.setLayout(null);
-    gLegendPanel.setBorder(GraphicsUtils.createTitleBorder("Legends"));
-
-    gColorFontPanel= new JPanel();
-    gColorFontPanel.setLayout(null);
-    gColorFontPanel.setBorder(GraphicsUtils.createTitleBorder("Colors & Fonts"));
-
-    gGridPanel= new JPanel();
-    gGridPanel.setLayout(null);
-    gGridPanel.setBorder(GraphicsUtils.createTitleBorder("Axis grid"));
-
-    gMiscPanel= new JPanel();
-    gMiscPanel.setLayout(null);
-    gMiscPanel.setBorder(GraphicsUtils.createTitleBorder("Misc"));
-
-    generalLegendLabel = new JLabel("Chart title");
-    generalLegendLabel.setFont(GraphicsUtils.labelFont);
-    generalLegendLabel.setForeground(GraphicsUtils.fColor);
+    generalLegendLabel = new JLabel("Graph title");
+    generalLegendLabel.setFont(labelFont);
+    generalLegendLabel.setForeground(fColor);
     generalLegendText = new JTextField();
     generalLegendText.setEditable(true);
     generalLegendText.setText(chart.getHeader());
-    generalLegendText.setMargin(GraphicsUtils.zInset);
     generalLegendText.addKeyListener(this);
 
     generalLabelVisibleCheck = new JCheckBox();
-    generalLabelVisibleCheck.setFont(GraphicsUtils.labelFont);
-    generalLabelVisibleCheck.setForeground(GraphicsUtils.fColor);
-    generalLabelVisibleCheck.setText("Visible");
+    generalLabelVisibleCheck.setFont(labelFont);
+    generalLabelVisibleCheck.setForeground(fColor);
+    generalLabelVisibleCheck.setText("Legend visible");
     generalLabelVisibleCheck.setSelected(chart.isLabelVisible());
     generalLabelVisibleCheck.addActionListener(this);
 
-    generalBackColorLabel = new JLabel("Chart background");
-    generalBackColorLabel.setFont(GraphicsUtils.labelFont);
-    generalBackColorLabel.setForeground(GraphicsUtils.fColor);
+    generalBackColorLabel = new JLabel("Background");
+    generalBackColorLabel.setFont(labelFont);
+    generalBackColorLabel.setForeground(fColor);
     generalBackColorView = new JLabel("");
     generalBackColorView.setOpaque(true);
     generalBackColorView.setBorder(BorderFactory.createLineBorder(Color.black));
     generalBackColorView.setBackground(chart.getChartBackground());
     generalBackColorBtn = new JButton("...");
     generalBackColorBtn.addMouseListener(this);
-    generalBackColorBtn.setMargin(GraphicsUtils.zInset);
 
-    generalLabelPLabel = new JLabel("Placement");
-    generalLabelPLabel.setHorizontalAlignment(JLabel.RIGHT);
-    generalLabelPLabel.setFont(GraphicsUtils.labelFont);
-    generalLabelPLabel.setForeground(GraphicsUtils.fColor);
-
-    generalLabelPCombo = new JComboBox();
-    generalLabelPCombo.setFont(GraphicsUtils.labelFont);
-    generalLabelPCombo.addItem("Bottom");
-    generalLabelPCombo.addItem("Top");
-    generalLabelPCombo.addItem("Right");
-    generalLabelPCombo.addItem("Left");
-    generalLabelPCombo.addItem("Row");
-    generalLabelPCombo.setSelectedIndex(chart.getLabelPlacement());
-    generalLabelPCombo.addActionListener(this);
+    generalGridLabel = new JLabel("Grid");
+    generalGridLabel.setFont(labelFont);
+    generalGridLabel.setForeground(fColor);
 
     generalGridCombo = new JComboBox();
-    generalGridCombo.setFont(GraphicsUtils.labelFont);
+    generalGridCombo.setFont(labelFont);
     generalGridCombo.addItem("None");
     generalGridCombo.addItem("On X");
     generalGridCombo.addItem("On Y1");
@@ -229,204 +235,532 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
     generalGridCombo.addActionListener(this);
 
     generalGridStyleLabel = new JLabel("Style");
-    generalGridStyleLabel.setFont(GraphicsUtils.labelFont);
-    generalGridStyleLabel.setHorizontalAlignment(JLabel.RIGHT);
-    generalGridStyleLabel.setForeground(GraphicsUtils.fColor);
+    generalGridStyleLabel.setFont(labelFont);
+    generalGridStyleLabel.setForeground(fColor);
 
     generalGridStyleCombo = new JComboBox();
-    generalGridStyleCombo.setFont(GraphicsUtils.labelFont);
+    generalGridStyleCombo.setFont(labelFont);
     generalGridStyleCombo.addItem("Solid");
-    generalGridStyleCombo.addItem("Dot");
+    generalGridStyleCombo.addItem("Point dash");
     generalGridStyleCombo.addItem("Short dash");
     generalGridStyleCombo.addItem("Long dash");
     generalGridStyleCombo.addItem("Dot dash");
     generalGridStyleCombo.setSelectedIndex(chart.getY1Axis().getGridStyle());
     generalGridStyleCombo.addActionListener(this);
 
-    xSubGribVisibleCheck = new JCheckBox();
-    xSubGribVisibleCheck.setFont(GraphicsUtils.labelFont);
-    xSubGribVisibleCheck.setForeground(GraphicsUtils.fColor);
-    xSubGribVisibleCheck.setText("show X sub grid");
-    xSubGribVisibleCheck.setSelected(chart.getXAxis().isSubGridVisible());
-    xSubGribVisibleCheck.addActionListener(this);
-
-    xNbTickLabel = new JLabel("Sub tick interval number");
-    xNbTickLabel.setFont(GraphicsUtils.labelFont);
-    xNbTickLabel.setForeground(GraphicsUtils.fColor);
-    
-    xNbTickText = new JTextField();
-    xNbTickText.setEditable(true);
-    xNbTickText.setToolTipText("Number of sub tick interval (0 to disable)");
-    xNbTickText.setText(Integer.toString(chart.getXAxis().getTimeAnnoSubTickInterval()));
-    xNbTickText.setMargin(GraphicsUtils.zInset);
-    xNbTickText.addKeyListener(this);
-
     generalDurationLabel = new JLabel("Display duration (s)");
-    generalDurationLabel.setFont(GraphicsUtils.labelFont);
-    generalDurationLabel.setForeground(GraphicsUtils.fColor);
+    generalDurationLabel.setFont(labelFont);
+    generalDurationLabel.setForeground(fColor);
     generalDurationText = new JTextField();
     generalDurationText.setEditable(true);
     generalDurationText.setToolTipText("Type Infinity to disable");
     generalDurationText.setText(Double.toString(chart.getDisplayDuration() / 1000.0));
-    generalDurationText.setMargin(GraphicsUtils.zInset);
     generalDurationText.addKeyListener(this);
 
-    percentScrollLabel = new JLabel("Percent scrollback");
-    percentScrollLabel.setFont(GraphicsUtils.labelFont);
-    percentScrollLabel.setForeground(GraphicsUtils.fColor);
-    percentScrollText = new JTextField();
-    percentScrollText.setEditable(true);
-    percentScrollText.setToolTipText("Type 0 disable");
-    percentScrollText.setText(Double.toString(chart.getXAxis().getPercentScrollback()));
-    percentScrollText.setMargin(GraphicsUtils.zInset);
-    percentScrollText.addKeyListener(this);
-
     generalFontHeaderLabel = new JLabel("Header font");
-    generalFontHeaderLabel.setFont(GraphicsUtils.labelFont);
-    generalFontHeaderLabel.setForeground(GraphicsUtils.fColor);
-    generalFontHeaderSampleLabel = new JSmoothLabel();
-    generalFontHeaderSampleLabel.setText("Sample text");
-    generalFontHeaderSampleLabel.setForeground(GraphicsUtils.fColor);
+    generalFontHeaderLabel.setFont(labelFont);
+    generalFontHeaderLabel.setForeground(fColor);
+    generalFontHeaderSampleLabel = new JALabel("Sample text");
+    generalFontHeaderSampleLabel.setForeground(fColor);
     generalFontHeaderSampleLabel.setOpaque(false);
     generalFontHeaderSampleLabel.setFont(chart.getHeaderFont());
     generalFontHeaderBtn = new JButton("...");
     generalFontHeaderBtn.addMouseListener(this);
-    generalFontHeaderBtn.setMargin(GraphicsUtils.zInset);
 
     generalFontLabelLabel = new JLabel("Label font");
-    generalFontLabelLabel.setFont(GraphicsUtils.labelFont);
-    generalFontLabelLabel.setForeground(GraphicsUtils.fColor);
-    generalFontLabelSampleLabel = new JSmoothLabel();
-    generalFontLabelSampleLabel.setText("Sample 0123456789");
-    generalFontLabelSampleLabel.setForeground(GraphicsUtils.fColor);
+    generalFontLabelLabel.setFont(labelFont);
+    generalFontLabelLabel.setForeground(fColor);
+    generalFontLabelSampleLabel = new JALabel("Sample 0123456789");
+    generalFontLabelSampleLabel.setForeground(fColor);
     generalFontLabelSampleLabel.setOpaque(false);
     generalFontLabelSampleLabel.setFont(chart.getXAxis().getFont());
     generalFontLabelBtn = new JButton("...");
     generalFontLabelBtn.addMouseListener(this);
-    generalFontHeaderBtn.setMargin(GraphicsUtils.zInset);
 
-    gLegendPanel.add(generalLabelVisibleCheck);
-    gLegendPanel.add(generalLabelPLabel);
-    gLegendPanel.add(generalLabelPCombo);
-    generalPanel.add(gLegendPanel);
+    generalPanel.add(generalLegendLabel);
+    generalPanel.add(generalLegendText);
+    generalPanel.add(generalLabelVisibleCheck);
+    generalPanel.add(generalGridLabel);
+    generalPanel.add(generalGridCombo);
+    generalPanel.add(generalGridStyleLabel);
+    generalPanel.add(generalGridStyleCombo);
+    generalPanel.add(generalDurationLabel);
+    generalPanel.add(generalDurationText);
+    generalPanel.add(generalBackColorLabel);
+    generalPanel.add(generalBackColorView);
+    generalPanel.add(generalBackColorBtn);
+    generalPanel.add(generalFontHeaderLabel);
+    generalPanel.add(generalFontHeaderSampleLabel);
+    generalPanel.add(generalFontHeaderBtn);
+    generalPanel.add(generalFontLabelLabel);
+    generalPanel.add(generalFontLabelSampleLabel);
+    generalPanel.add(generalFontLabelBtn);
 
-    gGridPanel.add(generalGridCombo);
-    gGridPanel.add(generalGridStyleLabel);
-    gGridPanel.add(generalGridStyleCombo);
-    gGridPanel.add(xSubGribVisibleCheck);
-    gGridPanel.add(xNbTickLabel);
-    gGridPanel.add(xNbTickText);
-    generalPanel.add(gGridPanel);
+    generalLegendLabel.setBounds(10, 10, 70, 25);
+    generalLegendText.setBounds(85, 10, 200, 25);
+    generalLabelVisibleCheck.setBounds(5, 40, 110, 25);
+    generalBackColorLabel.setBounds(125, 40, 70, 25);
+    generalBackColorView.setBounds(200, 40, 40, 25);
+    generalBackColorBtn.setBounds(245, 40, 40, 25);
+    generalGridLabel.setBounds(10, 70, 30, 25);
+    generalGridCombo.setBounds(45, 70, 100, 25);
+    generalGridStyleLabel.setBounds(150, 70, 40, 25);
+    generalGridStyleCombo.setBounds(195, 70, 90, 25);
+    generalDurationLabel.setBounds(10, 100, 120, 25);
+    generalDurationText.setBounds(135, 100, 150, 25);
 
-    gColorFontPanel.add(generalBackColorLabel);
-    gColorFontPanel.add(generalBackColorView);
-    gColorFontPanel.add(generalBackColorBtn);
-    gColorFontPanel.add(generalFontHeaderLabel);
-    gColorFontPanel.add(generalFontHeaderSampleLabel);
-    gColorFontPanel.add(generalFontHeaderBtn);
-    gColorFontPanel.add(generalFontLabelLabel);
-    gColorFontPanel.add(generalFontLabelSampleLabel);
-    gColorFontPanel.add(generalFontLabelBtn);
-    generalPanel.add(gColorFontPanel);
+    generalFontHeaderLabel.setBounds(10, 130, 80, 25);
+    generalFontHeaderSampleLabel.setBounds(95, 130, 145, 25);
+    generalFontHeaderBtn.setBounds(245, 130, 40, 25);
 
-    gMiscPanel.add(generalLegendLabel);
-    gMiscPanel.add(generalLegendText);
-    gMiscPanel.add(generalDurationLabel);
-    gMiscPanel.add(generalDurationText);
-    gMiscPanel.add(percentScrollLabel);
-    gMiscPanel.add(percentScrollText);
-    generalPanel.add(gMiscPanel);
-
-    generalLabelVisibleCheck.setBounds(5, 20, 80, 25);
-    generalLabelPLabel.setBounds(90, 20, 95, 25);
-    generalLabelPCombo.setBounds(190, 20, 95, 25);
-    gLegendPanel.setBounds(5,10,290,55);
-
-    generalBackColorLabel.setBounds(10, 20, 140, 25);
-    generalBackColorView.setBounds(155, 20, 95, 25);
-    generalBackColorBtn.setBounds(255, 20, 30, 25);
-    generalFontHeaderLabel.setBounds(10, 50, 90, 25);
-    generalFontHeaderSampleLabel.setBounds(105, 50, 145, 25);
-    generalFontHeaderBtn.setBounds(255, 50, 30, 25);
-    generalFontLabelLabel.setBounds(10, 80, 90, 25);
-    generalFontLabelSampleLabel.setBounds(105, 80, 145, 25);
-    generalFontLabelBtn.setBounds(255, 80, 30, 25);
-    gColorFontPanel.setBounds(5,70,290,115);
-
-    generalGridCombo.setBounds(10, 20, 120, 25);
-    generalGridStyleLabel.setBounds(135, 20, 45, 25);
-    generalGridStyleCombo.setBounds(185, 20, 100, 25);
-    xSubGribVisibleCheck.setBounds(7,50,150,25);
-    xNbTickLabel.setBounds(10,75,180,25);
-    xNbTickText.setBounds(195,75,90,25);
-
-    if( chart.getXAxis().getAnnotation()!=JLAxis.TIME_ANNO ) {
-      gGridPanel.setBounds(5,190,290,55);
-      xSubGribVisibleCheck.setVisible(false);
-      xNbTickLabel.setVisible(false);
-      xNbTickText.setVisible(false);
-    } else {
-      gGridPanel.setBounds(5,190,290,105);
-      xSubGribVisibleCheck.setVisible(true);
-      xNbTickLabel.setVisible(true);
-      xNbTickText.setVisible(true);
-    }
-
-    generalLegendLabel.setBounds(10, 20, 70, 25);
-    generalLegendText.setBounds(85, 20, 200, 25);
-    generalDurationLabel.setBounds(10, 50, 120, 25);
-    generalDurationText.setBounds(135, 50, 150, 25);
-    percentScrollLabel.setBounds(10, 80, 120, 25);
-    percentScrollText.setBounds(135, 80, 150, 25);
-
-    if( chart.getXAxis().getAnnotation()!=JLAxis.TIME_ANNO ) {
-      gMiscPanel.setBounds(5,250,290,85);
-      percentScrollLabel.setVisible(false);
-      percentScrollText.setVisible(false);
-    } else {
-      gMiscPanel.setBounds(5,300,290,110);
-      percentScrollLabel.setVisible(true);
-      percentScrollText.setVisible(true);
-    }
+    generalFontLabelLabel.setBounds(10, 160, 80, 25);
+    generalFontLabelSampleLabel.setBounds(95, 160, 145, 25);
+    generalFontLabelBtn.setBounds(245, 160, 40, 25);
 
     // **********************************************
-    // Axis panel construction
+    // Y1 Axis panel construction
     // **********************************************
-    y1Panel = new AxisPanel(chart.getY1Axis(),AxisPanel.Y1_TYPE,chart);
-    y2Panel = new AxisPanel(chart.getY2Axis(),AxisPanel.Y2_TYPE,chart);
-    xPanel  = new AxisPanel(chart.getXAxis() ,AxisPanel.X_TYPE ,chart);
+    y1Panel = new JPanel();
+    y1Panel.setLayout(null);
+
+    JLAxis y1 = chart.getY1Axis();
+
+    y1MinLabel = new JLabel("Min");
+    y1MinLabel.setFont(labelFont);
+    y1MinText = new JTextField();
+    y1MinLabel.setForeground(fColor);
+    y1MinLabel.setEnabled(!y1.isAutoScale());
+    y1MinText.setText(Double.toString(y1.getMinimum()));
+    y1MinText.setEditable(true);
+    y1MinText.setEnabled(!y1.isAutoScale());
+    y1MinText.addKeyListener(this);
+
+    y1MaxLabel = new JLabel("Max");
+    y1MaxLabel.setFont(labelFont);
+    y1MaxText = new JTextField();
+    y1MaxLabel.setForeground(fColor);
+    y1MaxLabel.setEnabled(!y1.isAutoScale());
+    y1MaxText.setText(Double.toString(y1.getMaximum()));
+    y1MaxText.setEditable(true);
+    y1MaxText.setEnabled(!y1.isAutoScale());
+    y1MaxText.addKeyListener(this);
+
+    y1AutoScaleCheck = new JCheckBox("Auto scale");
+    y1AutoScaleCheck.setFont(labelFont);
+    y1AutoScaleCheck.setForeground(fColor);
+    y1AutoScaleCheck.setSelected(y1.isAutoScale());
+    y1AutoScaleCheck.addActionListener(this);
+
+    y1ScaleLabel = new JLabel("Scale");
+    y1ScaleLabel.setFont(labelFont);
+    y1ScaleLabel.setForeground(fColor);
+    y1ScaleCombo = new JComboBox();
+    y1ScaleCombo.setFont(labelFont);
+    y1ScaleCombo.addItem("Linear");
+    y1ScaleCombo.addItem("Logarithmic");
+    y1ScaleCombo.setSelectedIndex(y1.getScale());
+    y1ScaleCombo.addActionListener(this);
+
+    y1SubGridCheck = new JCheckBox("Show sub grid");
+    y1SubGridCheck.setFont(labelFont);
+    y1SubGridCheck.setForeground(fColor);
+    y1SubGridCheck.setSelected(y1.isSubGridVisible());
+    y1SubGridCheck.setToolTipText("You have to select the grid in the general option panel");
+    y1SubGridCheck.addActionListener(this);
+
+    y1FormatCombo = new JComboBox();
+    y1FormatCombo.setFont(labelFont);
+    y1FormatCombo.addItem("Automatic");
+    y1FormatCombo.addItem("Scientific");
+    y1FormatCombo.addItem("Time (hh:mm:ss)");
+    y1FormatCombo.addItem("Decimal int");
+    y1FormatCombo.addItem("Hexadecimal int");
+    y1FormatCombo.addItem("Binary int");
+    y1FormatCombo.setSelectedIndex(y1.getLabelFormat());
+    y1FormatCombo.addActionListener(this);
+
+    y1FormatLabel = new JLabel("Format");
+    y1FormatLabel.setFont(labelFont);
+    y1FormatLabel.setForeground(fColor);
+
+    y1TitleLabel = new JLabel("Axis title");
+    y1TitleLabel.setFont(labelFont);
+    y1TitleLabel.setForeground(fColor);
+    y1TitleText = new JTextField();
+    y1TitleText.setEditable(true);
+    y1TitleText.setText(y1.getName());
+    y1TitleText.addKeyListener(this);
+
+    y1ColorLabel = new JLabel("Axis color");
+    y1ColorLabel.setFont(labelFont);
+    y1ColorLabel.setForeground(fColor);
+    y1ColorView = new JLabel("");
+    y1ColorView.setOpaque(true);
+    y1ColorView.setBorder(BorderFactory.createLineBorder(Color.black));
+    y1ColorView.setBackground(chart.getY1Axis().getAxisColor());
+    y1ColorBtn = new JButton("...");
+    y1ColorBtn.addMouseListener(this);
+
+    y1PositionLabel = new JLabel("Axis position");
+    y1PositionLabel.setFont(labelFont);
+    y1PositionLabel.setForeground(fColor);
+    y1PositionCombo = new JComboBox();
+    y1PositionCombo.setFont(labelFont);
+    y1PositionCombo.addItem("Left");
+    y1PositionCombo.addItem("X Origin");
+    y1PositionCombo.setSelectedIndex((y1.getPosition()==JLAxis.VERTICAL_ORG)?1:0);
+    y1PositionCombo.addActionListener(this);
+
+    y1Panel.add(y1MinLabel);
+    y1Panel.add(y1MinText);
+    y1Panel.add(y1MaxLabel);
+    y1Panel.add(y1MaxText);
+    y1Panel.add(y1AutoScaleCheck);
+    y1Panel.add(y1ScaleLabel);
+    y1Panel.add(y1SubGridCheck);
+    y1Panel.add(y1ScaleCombo);
+    y1Panel.add(y1FormatCombo);
+    y1Panel.add(y1FormatLabel);
+    y1Panel.add(y1TitleLabel);
+    y1Panel.add(y1TitleText);
+    y1Panel.add(y1ColorLabel);
+    y1Panel.add(y1ColorView);
+    y1Panel.add(y1ColorBtn);
+    y1Panel.add(y1PositionLabel);
+    y1Panel.add(y1PositionCombo);
+
+    y1MinLabel.setBounds(10, 10, 30, 25);
+    y1MinText.setBounds(35, 10, 80, 25);
+    y1MaxLabel.setBounds(120, 10, 30, 25);
+    y1MaxText.setBounds(155, 10, 80, 25);
+
+    y1AutoScaleCheck.setBounds(5, 40, 110, 25);
+    y1FormatLabel.setBounds(120, 40, 40, 25);
+    y1FormatCombo.setBounds(165, 40, 125, 25);
+
+    y1SubGridCheck.setBounds(5, 70, 110, 25);
+    y1ScaleLabel.setBounds(120, 70, 40, 25);
+    y1ScaleCombo.setBounds(165, 70, 125, 25);
+
+    y1TitleLabel.setBounds(10, 100, 70, 25);
+    y1TitleText.setBounds(85, 100, 205, 25);
+
+    y1ColorLabel.setBounds(10, 130, 170, 25);
+    y1ColorView.setBounds(185, 130, 55, 25);
+    y1ColorBtn.setBounds(245, 130, 40, 25);
+
+    y1PositionLabel.setBounds(10, 160, 100, 25);
+    y1PositionCombo.setBounds(115, 160, 175, 25);
+
+    // **********************************************
+    // Y2 Axis panel construction
+    // **********************************************
+    y2Panel = new JPanel();
+    y2Panel.setLayout(null);
+
+    JLAxis y2 = chart.getY2Axis();
+
+    y2MinLabel = new JLabel("Min");
+    y2MinLabel.setFont(labelFont);
+    y2MinText = new JTextField();
+    y2MinLabel.setForeground(fColor);
+    y2MinLabel.setEnabled(!y2.isAutoScale());
+    y2MinText.setText(Double.toString(y2.getMinimum()));
+    y2MinText.setEditable(true);
+    y2MinText.setEnabled(!y2.isAutoScale());
+    y2MinText.addKeyListener(this);
+
+    y2MaxLabel = new JLabel("Max");
+    y2MaxLabel.setFont(labelFont);
+    y2MaxText = new JTextField();
+    y2MaxLabel.setForeground(fColor);
+    y2MaxLabel.setEnabled(!y2.isAutoScale());
+    y2MaxText.setText(Double.toString(y2.getMaximum()));
+    y2MaxText.setEditable(true);
+    y2MaxText.setEnabled(!y2.isAutoScale());
+    y2MaxText.addKeyListener(this);
+
+    y2AutoScaleCheck = new JCheckBox("Auto scale");
+    y2AutoScaleCheck.setFont(labelFont);
+    y2AutoScaleCheck.setForeground(fColor);
+    y2AutoScaleCheck.setSelected(y2.isAutoScale());
+    y2AutoScaleCheck.addActionListener(this);
+
+    y2ScaleLabel = new JLabel("Scale");
+    y2ScaleLabel.setFont(labelFont);
+    y2ScaleLabel.setForeground(fColor);
+    y2ScaleCombo = new JComboBox();
+    y2ScaleCombo.setFont(labelFont);
+    y2ScaleCombo.addItem("Linear");
+    y2ScaleCombo.addItem("Logarithmic");
+    y2ScaleCombo.setSelectedIndex(y2.getScale());
+    y2ScaleCombo.addActionListener(this);
+
+    y2SubGridCheck = new JCheckBox("Show sub grid");
+    y2SubGridCheck.setFont(labelFont);
+    y2SubGridCheck.setForeground(fColor);
+    y2SubGridCheck.setSelected(y2.isSubGridVisible());
+    y2SubGridCheck.setToolTipText("You have to select the grid in the general option panel");
+    y2SubGridCheck.addActionListener(this);
+
+    y2FormatCombo = new JComboBox();
+    y2FormatCombo.setFont(labelFont);
+    y2FormatCombo.addItem("Automatic");
+    y2FormatCombo.addItem("Scientific");
+    y2FormatCombo.addItem("Time (hh:mm:ss)");
+    y2FormatCombo.addItem("Decimal int");
+    y2FormatCombo.addItem("Hexadecimal int");
+    y2FormatCombo.addItem("Binary int");
+    y2FormatCombo.setSelectedIndex(y2.getLabelFormat());
+    y2FormatCombo.addActionListener(this);
+
+    y2FormatLabel = new JLabel("Format");
+    y2FormatLabel.setFont(labelFont);
+    y2FormatLabel.setForeground(fColor);
+
+    y2TitleLabel = new JLabel("Axis title");
+    y2TitleLabel.setFont(labelFont);
+    y2TitleLabel.setForeground(fColor);
+    y2TitleText = new JTextField();
+    y2TitleText.setEditable(true);
+    y2TitleText.setText(y2.getName());
+    y2TitleText.addKeyListener(this);
+
+    y2ColorLabel = new JLabel("Axis color");
+    y2ColorLabel.setFont(labelFont);
+    y2ColorLabel.setForeground(fColor);
+    y2ColorView = new JLabel("");
+    y2ColorView.setOpaque(true);
+    y2ColorView.setBorder(BorderFactory.createLineBorder(Color.black));
+    y2ColorView.setBackground(chart.getY2Axis().getAxisColor());
+    y2ColorBtn = new JButton("...");
+    y2ColorBtn.addMouseListener(this);
+
+    y2PositionLabel = new JLabel("Axis position");
+    y2PositionLabel.setFont(labelFont);
+    y2PositionLabel.setForeground(fColor);
+    y2PositionCombo = new JComboBox();
+    y2PositionCombo.setFont(labelFont);
+    y2PositionCombo.addItem("Right");
+    y2PositionCombo.addItem("X Origin");
+    y2PositionCombo.setSelectedIndex((y1.getPosition() == JLAxis.VERTICAL_ORG) ? 1 : 0);
+    y2PositionCombo.addActionListener(this);
+
+    y2Panel.add(y2MinLabel);
+    y2Panel.add(y2MinText);
+    y2Panel.add(y2MaxLabel);
+    y2Panel.add(y2MaxText);
+    y2Panel.add(y2AutoScaleCheck);
+    y2Panel.add(y2ScaleLabel);
+    y2Panel.add(y2SubGridCheck);
+    y2Panel.add(y2ScaleCombo);
+    y2Panel.add(y2FormatCombo);
+    y2Panel.add(y2FormatLabel);
+    y2Panel.add(y2TitleLabel);
+    y2Panel.add(y2TitleText);
+    y2Panel.add(y2ColorLabel);
+    y2Panel.add(y2ColorView);
+    y2Panel.add(y2ColorBtn);
+    y2Panel.add(y2PositionLabel);
+    y2Panel.add(y2PositionCombo);
+
+    y2MinLabel.setBounds(10, 10, 30, 25);
+    y2MinText.setBounds(35, 10, 80, 25);
+    y2MaxLabel.setBounds(120, 10, 30, 25);
+    y2MaxText.setBounds(155, 10, 80, 25);
+
+    y2AutoScaleCheck.setBounds(5, 40, 110, 25);
+    y2FormatLabel.setBounds(120, 40, 40, 25);
+    y2FormatCombo.setBounds(165, 40, 125, 25);
+
+    y2SubGridCheck.setBounds(5, 70, 110, 25);
+    y2ScaleLabel.setBounds(120, 70, 40, 25);
+    y2ScaleCombo.setBounds(165, 70, 125, 25);
+
+    y2TitleLabel.setBounds(10, 100, 70, 25);
+    y2TitleText.setBounds(85, 100, 205, 25);
+
+    y2ColorLabel.setBounds(10, 130, 170, 25);
+    y2ColorView.setBounds(185, 130, 55, 25);
+    y2ColorBtn.setBounds(245, 130, 40, 25);
+
+    y2PositionLabel.setBounds(10, 160, 100, 25);
+    y2PositionCombo.setBounds(115, 160, 175, 25);
+
+    // **********************************************
+    // X Axis panel construction
+    // **********************************************
+    xPanel = new JPanel();
+    xPanel.setLayout(null);
+
+    JLAxis x = chart.getXAxis();
+
+    xMinLabel = new JLabel("Min");
+    xMinLabel.setFont(labelFont);
+    xMinText = new JTextField();
+    xMinLabel.setForeground(fColor);
+    xMinLabel.setEnabled(!x.isAutoScale());
+    xMinText.setText(Double.toString(x.getMinimum()));
+    xMinText.setEditable(true);
+    xMinText.setEnabled(!x.isAutoScale());
+    xMinText.addKeyListener(this);
+
+    xMaxLabel = new JLabel("Max");
+    xMaxLabel.setFont(labelFont);
+    xMaxText = new JTextField();
+    xMaxLabel.setForeground(fColor);
+    xMaxLabel.setEnabled(!x.isAutoScale());
+    xMaxText.setText(Double.toString(x.getMaximum()));
+    xMaxText.setEditable(true);
+    xMaxText.setEnabled(!x.isAutoScale());
+    xMaxText.addKeyListener(this);
+
+    xAutoScaleCheck = new JCheckBox("Auto scale");
+    xAutoScaleCheck.setFont(labelFont);
+    xAutoScaleCheck.setForeground(fColor);
+    xAutoScaleCheck.setSelected(x.isAutoScale());
+    xAutoScaleCheck.addActionListener(this);
+
+    xScaleLabel = new JLabel("Scale");
+    xScaleLabel.setFont(labelFont);
+    xScaleLabel.setForeground(fColor);
+    xScaleCombo = new JComboBox();
+    xScaleCombo.setFont(labelFont);
+    xScaleCombo.addItem("Linear");
+    xScaleCombo.addItem("Logarithmic");
+    xScaleCombo.setSelectedIndex(x.getScale());
+    xScaleCombo.addActionListener(this);
+
+    xSubGridCheck = new JCheckBox("Show sub grid");
+    xSubGridCheck.setFont(labelFont);
+    xSubGridCheck.setForeground(fColor);
+    xSubGridCheck.setSelected(x.isSubGridVisible());
+    xSubGridCheck.addActionListener(this);
+
+    xFormatCombo = new JComboBox();
+    xFormatCombo.setFont(labelFont);
+    xFormatCombo.addItem("Automatic");
+    xFormatCombo.addItem("Scientific");
+    xFormatCombo.addItem("Time (hh:mm:ss)");
+    xFormatCombo.addItem("Decimal int");
+    xFormatCombo.addItem("Hexadecimal int");
+    xFormatCombo.addItem("Binary int");
+    xFormatCombo.setSelectedIndex(x.getLabelFormat());
+    xFormatCombo.addActionListener(this);
+
+    xFormatLabel = new JLabel("Format");
+    xFormatLabel.setFont(labelFont);
+    xFormatLabel.setForeground(fColor);
+
+    xTitleLabel = new JLabel("Axis title");
+    xTitleLabel.setFont(labelFont);
+    xTitleLabel.setForeground(fColor);
+    xTitleText = new JTextField();
+    xTitleText.setEditable(true);
+    xTitleText.setText(x.getName());
+    xTitleText.addKeyListener(this);
+
+    xColorLabel = new JLabel("Axis color");
+    xColorLabel.setFont(labelFont);
+    xColorLabel.setForeground(fColor);
+    xColorView = new JLabel("");
+    xColorView.setOpaque(true);
+    xColorView.setBorder(BorderFactory.createLineBorder(Color.black));
+    xColorView.setBackground(chart.getXAxis().getAxisColor());
+    xColorBtn = new JButton("...");
+    xColorBtn.addMouseListener(this);
+
+    xPositionLabel = new JLabel("Axis position");
+    xPositionLabel.setFont(labelFont);
+    xPositionLabel.setForeground(fColor);
+    xPositionCombo = new JComboBox();
+    xPositionCombo.setFont(labelFont);
+    xPositionCombo.addItem("Down");
+    xPositionCombo.addItem("Up");
+    xPositionCombo.addItem("Y1 Origin");
+    xPositionCombo.addItem("Y2 Origin");
+    xPositionCombo.setSelectedIndex(x.getPosition()-1);
+    xPositionCombo.addActionListener(this);
+
+    xPanel.add(xMinLabel);
+    xPanel.add(xMinText);
+    xPanel.add(xMaxLabel);
+    xPanel.add(xMaxText);
+    xPanel.add(xAutoScaleCheck);
+    xPanel.add(xScaleLabel);
+    xPanel.add(xSubGridCheck);
+    xPanel.add(xScaleCombo);
+    xPanel.add(xFormatCombo);
+    xPanel.add(xFormatLabel);
+    xPanel.add(xTitleLabel);
+    xPanel.add(xTitleText);
+    xPanel.add(xColorLabel);
+    xPanel.add(xColorView);
+    xPanel.add(xColorBtn);
+    xPanel.add(xPositionCombo);
+    xPanel.add(xPositionLabel);
+
+    xMinLabel.setBounds(10, 10, 30, 25);
+    xMinText.setBounds(35, 10, 80, 25);
+    xMaxLabel.setBounds(120, 10, 30, 25);
+    xMaxText.setBounds(155, 10, 80, 25);
+
+    xAutoScaleCheck.setBounds(5, 40, 110, 25);
+    xFormatLabel.setBounds(120, 40, 40, 25);
+    xFormatCombo.setBounds(165, 40, 125, 25);
+
+    xSubGridCheck.setBounds(5, 70, 110, 25);
+    xScaleLabel.setBounds(120, 70, 40, 25);
+    xScaleCombo.setBounds(165, 70, 125, 25);
+
+    xTitleLabel.setBounds(10, 100, 70, 25);
+    xTitleText.setBounds(85, 100, 205, 25);
+
+    xColorLabel.setBounds(10, 130, 170, 25);
+    xColorView.setBounds(185, 130, 55, 25);
+    xColorBtn.setBounds(245, 130, 40, 25);
+
+    xPositionLabel.setBounds(10, 160, 100, 25);
+    xPositionCombo.setBounds(115, 160, 175, 25);
 
     // Global frame construction
 
     tabPane.add("General", generalPanel);
-    if(chart.getXAxis().getAnnotation()!=JLAxis.TIME_ANNO) tabPane.add("X axis", xPanel);
+    if(x.getAnnotation()!=JLAxis.TIME_ANNO) tabPane.add("X axis", xPanel);
     tabPane.add("Y1 axis", y1Panel);
     tabPane.add("Y2 axis", y2Panel);
 
-    innerPane.add(tabPane);
+    getContentPane().add(tabPane);
 
     closeBtn = new JButton();
     closeBtn.setText("Close");
-    innerPane.add(closeBtn);
+    getContentPane().add(closeBtn);
 
-    if( chart.getXAxis().getAnnotation()!=JLAxis.TIME_ANNO ) {
-      tabPane.setBounds(5, 5, 300, 370);
-      closeBtn.setBounds(225, 380, 80, 25);
-      innerPane.setPreferredSize(new Dimension(310,410));
-    } else {
-      tabPane.setBounds(5, 5, 300, 445);
-      closeBtn.setBounds(225, 455, 80, 25);
-      innerPane.setPreferredSize(new Dimension(310,485));
-    }
+    tabPane.setBounds(5, 5, 300, 220);
+    closeBtn.setBounds(225, 230, 80, 25);
 
     closeBtn.addMouseListener(this);
 
-    setContentPane(innerPane);
+    Rectangle r;
+    if (getParent() != null) {
+      r = getParent().getBounds();
+    } else {
+      Toolkit toolkit = Toolkit.getDefaultToolkit();
+      Dimension d = toolkit.getScreenSize();
+      r = new Rectangle(0, 0, d.width, d.height);
+    }
+
+    int xe = r.x + (r.width - 320) / 2;
+    int y = r.y + (r.height - 290) / 2;
+    setBounds(xe, y, 320, 290);
     setResizable(false);
 
   }
 
-  private void Commit() {
+  /**
+   * Force graph to repainted.
+   */
+  public void Commit() {
     if (chart != null) chart.repaint();
   }
 
@@ -434,7 +768,7 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
   public void mouseClicked(MouseEvent e) {
     // ------------------------------
     if (e.getSource() == closeBtn) {
-      setVisible(false);
+      hide();
       dispose();
     } else if (e.getSource() == generalBackColorBtn) {
       Color c = JColorChooser.showDialog(this, "Choose background Color", chart.getChartBackground());
@@ -445,7 +779,8 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
       }
     } else if (e.getSource() == generalFontHeaderBtn) {
 
-      Font f = ATKFontChooser.getNewFont(this,"Choose Header Font", chart.getHeaderFont());
+      JFontChooser fc = new JFontChooser("Choose Header Font", chart.getHeaderFont());
+      Font f = fc.getNewFont();
       if (f != null) {
         chart.setHeaderFont(f);
         generalFontHeaderSampleLabel.setFont(f);
@@ -454,7 +789,8 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
 
     } else if (e.getSource() == generalFontLabelBtn) {
 
-      Font f = ATKFontChooser.getNewFont(this,"Choose label Font", chart.getXAxis().getFont());
+      JFontChooser fc = new JFontChooser("Choose label Font", chart.getXAxis().getFont());
+      Font f = fc.getNewFont();
       if (f != null) {
         chart.getXAxis().setFont(f);
         chart.getY1Axis().setFont(f);
@@ -464,7 +800,29 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
         Commit();
       }
 
+    } else if (e.getSource() == y1ColorBtn) {
+      Color c = JColorChooser.showDialog(this, "Choose Y1 axis Color", chart.getY1Axis().getAxisColor());
+      if (c != null) {
+        chart.getY1Axis().setAxisColor(c);
+        y1ColorView.setBackground(c);
+        Commit();
+      }
+    } else if (e.getSource() == y2ColorBtn) {
+      Color c = JColorChooser.showDialog(this, "Choose Y2 axis Color", chart.getY2Axis().getAxisColor());
+      if (c != null) {
+        chart.getY2Axis().setAxisColor(c);
+        y2ColorView.setBackground(c);
+        Commit();
+      }
+    } else if (e.getSource() == xColorBtn) {
+      Color c = JColorChooser.showDialog(this, "Choose X axis Color", chart.getXAxis().getAxisColor());
+      if (c != null) {
+        chart.getXAxis().setAxisColor(c);
+        xColorView.setBackground(c);
+        Commit();
+      }
     }
+
 
   }
 
@@ -539,16 +897,189 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
       chart.getY2Axis().setGridStyle(s);
       Commit();
 
-      // ------------------------------------------------------------
-    } else if (e.getSource() == generalLabelPCombo) {
+      // Y1 ------------------------------------------------------------
+    } else if (e.getSource() == y1AutoScaleCheck) {
 
-      int s = generalLabelPCombo.getSelectedIndex();
-      chart.setLabelPlacement(s);
+      boolean b = y1AutoScaleCheck.isSelected();
+
+      chart.getY1Axis().setAutoScale(b);
+
+      if (!b) {
+        try {
+
+          double min = Double.parseDouble(y1MinText.getText());
+          double max = Double.parseDouble(y1MaxText.getText());
+
+          if (max > min) {
+            chart.getY1Axis().setMinimum(min);
+            chart.getY1Axis().setMaximum(max);
+          }
+
+        } catch (NumberFormatException err) {
+
+        }
+      }
+
+      y1MinLabel.setEnabled(!b);
+      y1MinText.setEnabled(!b);
+      y1MaxLabel.setEnabled(!b);
+      y1MaxText.setEnabled(!b);
+
       Commit();
 
-    } else if (e.getSource() == xSubGribVisibleCheck) {
+      // ------------------------------------------------------------
+    } else if (e.getSource() == y1FormatCombo) {
 
-      chart.getXAxis().setSubGridVisible(xSubGribVisibleCheck.isSelected());
+      int s = y1FormatCombo.getSelectedIndex();
+      chart.getY1Axis().setLabelFormat(s);
+      Commit();
+
+      // ------------------------------------------------------------
+    } else if (e.getSource() == xPositionCombo) {
+
+      int s = xPositionCombo.getSelectedIndex();
+      chart.getXAxis().setPosition(s+1);
+      Commit();
+
+      // ------------------------------------------------------------
+    } else if (e.getSource() == y1PositionCombo) {
+
+      int s = y1PositionCombo.getSelectedIndex();
+      switch(s) {
+        case 0:
+          chart.getY1Axis().setPosition(JLAxis.VERTICAL_LEFT);
+          break;
+        case 1:
+          chart.getY1Axis().setPosition(JLAxis.VERTICAL_ORG);
+          break;
+      }
+      Commit();
+
+      // ------------------------------------------------------------
+    } else if (e.getSource() == y2PositionCombo) {
+
+      int s = y2PositionCombo.getSelectedIndex();
+      switch (s) {
+        case 0:
+          chart.getY2Axis().setPosition(JLAxis.VERTICAL_RIGHT);
+          break;
+        case 1:
+          chart.getY2Axis().setPosition(JLAxis.VERTICAL_ORG);
+          break;
+      }
+      Commit();
+
+      // ------------------------------------------------------------
+    } else if (e.getSource() == y1ScaleCombo) {
+
+      int s = y1ScaleCombo.getSelectedIndex();
+      chart.getY1Axis().setScale(s);
+      Commit();
+
+      // ------------------------------------------------------------
+    } else if (e.getSource() == y1SubGridCheck) {
+
+      chart.getY1Axis().setSubGridVisible(y1SubGridCheck.isSelected());
+      Commit();
+
+      // Y2 ------------------------------------------------------------
+    } else if (e.getSource() == y2AutoScaleCheck) {
+
+      boolean b = y2AutoScaleCheck.isSelected();
+
+      chart.getY2Axis().setAutoScale(b);
+
+      if (!b) {
+        try {
+
+          double min = Double.parseDouble(y2MinText.getText());
+          double max = Double.parseDouble(y2MaxText.getText());
+
+          if (max > min) {
+            chart.getY2Axis().setMinimum(min);
+            chart.getY2Axis().setMaximum(max);
+          }
+
+        } catch (NumberFormatException err) {
+
+        }
+      }
+
+      y2MinLabel.setEnabled(!b);
+      y2MinText.setEnabled(!b);
+      y2MaxLabel.setEnabled(!b);
+      y2MaxText.setEnabled(!b);
+
+      Commit();
+
+      // ------------------------------------------------------------
+    } else if (e.getSource() == y2FormatCombo) {
+
+      int s = y2FormatCombo.getSelectedIndex();
+      chart.getY2Axis().setLabelFormat(s);
+      Commit();
+
+      // ------------------------------------------------------------
+    } else if (e.getSource() == y2ScaleCombo) {
+
+      int s = y2ScaleCombo.getSelectedIndex();
+      chart.getY2Axis().setScale(s);
+      Commit();
+
+      // ------------------------------------------------------------
+    } else if (e.getSource() == y2SubGridCheck) {
+
+      chart.getY2Axis().setSubGridVisible(y2SubGridCheck.isSelected());
+      Commit();
+
+      // X ------------------------------------------------------------
+    } else if (e.getSource() == xAutoScaleCheck) {
+
+      boolean b = xAutoScaleCheck.isSelected();
+
+      chart.getXAxis().setAutoScale(b);
+
+      if (!b) {
+        try {
+
+          double min = Double.parseDouble(xMinText.getText());
+          double max = Double.parseDouble(xMaxText.getText());
+
+          if (max > min) {
+            chart.getXAxis().setMinimum(min);
+            chart.getXAxis().setMaximum(max);
+          }
+
+        } catch (NumberFormatException err) {
+
+        }
+      }
+
+      xMinLabel.setEnabled(!b);
+      xMinText.setEnabled(!b);
+      xMaxLabel.setEnabled(!b);
+      xMaxText.setEnabled(!b);
+
+      Commit();
+
+      // ------------------------------------------------------------
+    } else if (e.getSource() == xFormatCombo) {
+
+      int s = xFormatCombo.getSelectedIndex();
+      chart.getXAxis().setLabelFormat(s);
+      Commit();
+
+      // ------------------------------------------------------------
+    } else if (e.getSource() == xScaleCombo) {
+
+      int s = xScaleCombo.getSelectedIndex();
+      chart.getXAxis().setScale(s);
+      Commit();
+
+      // ------------------------------------------------------------
+    } else if (e.getSource() == xSubGridCheck) {
+
+      chart.getXAxis().setSubGridVisible(xSubGridCheck.isSelected());
       Commit();
 
     }
@@ -610,47 +1141,133 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
         generalLegendText.setText(Double.toString(chart.getDisplayDuration() / 1000.0));
       }
 
-    } else if (e.getSource() == xNbTickText) {
+      // Y1 ------------------------------------------------------------
+    } else if ((e.getSource() == y1MinText || e.getSource() == y1MaxText) && !chart.getY1Axis().isAutoScale()) {
 
       if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 
         try {
 
-          int d = Integer.parseInt(xNbTickText.getText());
-          chart.getXAxis().setTimeAnnoSubTickInterval(d);
+          double min = Double.parseDouble(y1MinText.getText());
+          double max = Double.parseDouble(y1MaxText.getText());
+
+          if (max <= min) {
+            error("Min must be strictly lower than max.");
+            return;
+          }
+
+          if (chart.getY1Axis().getScale() == JLAxis.LOG_SCALE) {
+            if (min <= 0 || max <= 0) {
+              error("Min and max must be strictly positive with logarithmic scale.");
+              return;
+            }
+          }
+
+          chart.getY1Axis().setMinimum(min);
+          chart.getY1Axis().setMaximum(max);
           Commit();
 
         } catch (NumberFormatException err) {
-          error("Sub tick number: malformed number.");
+          error("Min or Max: malformed number.");
         }
+
+      }
+
+      // ------------------------------------------------------------
+    } else if (e.getSource() == y1TitleText) {
+
+      if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+        chart.getY1Axis().setName(y1TitleText.getText());
         Commit();
       }
 
-    } else if (e.getSource() == percentScrollText) {
+      // Y2 ------------------------------------------------------------
+    } else if ((e.getSource() == y2MinText || e.getSource() == y2MaxText) && !chart.getY2Axis().isAutoScale()) {
 
       if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 
         try {
-          double p = Double.parseDouble(percentScrollText.getText());
-          if(p<0.0 || p>100.0) {
-            error("Invalid percent scrollback value [0,100]");
+
+          double min = Double.parseDouble(y2MinText.getText());
+          double max = Double.parseDouble(y2MaxText.getText());
+
+          if (max <= min) {
+            error("Min must be strictly lower than max.");
             return;
           }
-          chart.getXAxis().setPercentScrollback(p);
+
+          if (chart.getY2Axis().getScale() == JLAxis.LOG_SCALE) {
+            if (min <= 0 || max <= 0) {
+              error("Min and max must be strictly positive with logarithmic scale.");
+              return;
+            }
+          }
+
+          chart.getY2Axis().setMinimum(min);
+          chart.getY2Axis().setMaximum(max);
           Commit();
-        } catch (NumberFormatException ex) {
-          error("Percent scrollbak: malformed number.");
+
+        } catch (NumberFormatException err) {
+          error("Min or Max: malformed number.");
         }
 
       }
 
-    }
+      // ------------------------------------------------------------
+    } else if (e.getSource() == y2TitleText) {
+
+      if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+        chart.getY2Axis().setName(y2TitleText.getText());
+        Commit();
+      }
+
+      // X ------------------------------------------------------------
+    } else if ((e.getSource() == xMinText || e.getSource() == xMaxText) && !chart.getXAxis().isAutoScale()) {
+
+      if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+
+        try {
+
+          double min = Double.parseDouble(xMinText.getText());
+          double max = Double.parseDouble(xMaxText.getText());
+
+          if (max <= min) {
+            error("Min must be strictly lower than max.");
+            return;
+          }
+
+          if (chart.getXAxis().getScale() == JLAxis.LOG_SCALE) {
+            if (min <= 0 || max <= 0) {
+              error("Min and max must be strictly positive with logarithmic scale.");
+              return;
+            }
+          }
+
+          chart.getXAxis().setMinimum(min);
+          chart.getXAxis().setMaximum(max);
+          Commit();
+
+        } catch (NumberFormatException err) {
+          error("Min or Max: malformed number.");
+        }
+
+      }
+
+      // ------------------------------------------------------------
+    } else if (e.getSource() == xTitleText) {
+
+      if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+        chart.getXAxis().setName(xTitleText.getText());
+        Commit();
+      }
+
+    }// end elseifs
 
   } // End keyReleased
 
   // Error message
   private void error(String m) {
-    JOptionPane.showMessageDialog(this, m, "Chart options error",
+    JOptionPane.showMessageDialog(this, m, "Graph options error",
       JOptionPane.ERROR_MESSAGE);
   }
 
