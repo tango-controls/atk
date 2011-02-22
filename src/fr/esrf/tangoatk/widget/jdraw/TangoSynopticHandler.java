@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          TangoSynopticHandler.java
 // Created:       2004-10-13 16:45:29, poncet
 // By:            <poncet@esrf.fr>
@@ -141,11 +119,11 @@ public class TangoSynopticHandler extends JDrawEditor
 
    /** Does not display tooltip */
    public static final int          TOOL_TIP_NONE = 0;
-   /** Displays device state within tooltip only for Device objects */
+   /** Displays device state within tooltip */
    public static final int          TOOL_TIP_STATE = 1;
-  /** Displays device status within tooltip only for Device objects */
+  /** Displays device status within tooltip */
    public static final int          TOOL_TIP_STATUS = 2;
-  /** Displays the attribute name within tooltip */
+  /** Displays device name within tooltip */
    public static final int          TOOL_TIP_NAME = 3;
 
 
@@ -218,7 +196,7 @@ public class TangoSynopticHandler extends JDrawEditor
    {
 
       super(JDrawEditor.MODE_PLAY);
-      toolTipMode = TOOL_TIP_NAME;
+      toolTipMode = TOOL_TIP_NONE;
       jdrawFileFullName = null;
 
       aFac = AttributeFactory.getInstance();
@@ -461,9 +439,6 @@ public class TangoSynopticHandler extends JDrawEditor
    public void setSynopticFileName( String  jdFileName)
                throws MissingResourceException, FileNotFoundException, IllegalArgumentException
    {
-      if (jdrawFileFullName != null)
-          clearSynopticFileModel();
-
       jdHash = new HashMap<String, List<JDObject>> ();
       stateCashHash = new HashMap<String, List<String>> ();
       // Here should disconnect from all attributes and devices in the previous
@@ -501,32 +476,6 @@ public class TangoSynopticHandler extends JDrawEditor
 // not needed : automatically started in dFac class      dFac.startRefresher();
    }
 
-   public void clearSynopticFileModel()
-   {
-       if (allAttributes != null)
-       {
-           allAttributes.stopRefresher();
-           if (allAttributes.size() > 0)
-               allAttributes.clear();
-           allAttributes = new AttributeList();
-       }
-
-       if (jdHash != null)
-       {
-           if (!jdHash.isEmpty())
-               jdHash.clear();
-           jdHash = null;
-       }
-
-       if (stateCashHash != null)
-       {
-           if (!stateCashHash.isEmpty())
-               stateCashHash.clear();
-           stateCashHash = null;
-       }
-       jdrawFileFullName = null;
-  }
-
    /**
     * Parses JDraw components , detects tango entity name and attatch a model.
     * This method does not recurse group and use isDevice() , isAttribute()
@@ -556,8 +505,8 @@ public class TangoSynopticHandler extends JDrawEditor
 	    {
                addAttribute(jdObj, s);
 	    }
-            else
-            {
+	    else
+	    {
                if (isSpectrumAttElement(s))
                {
                   addSpectrumAttElement(jdObj, s);
@@ -565,19 +514,19 @@ public class TangoSynopticHandler extends JDrawEditor
                else
                {
                   if (isCommand(s))
-                  {
-                    addCommand(jdObj, s);
+	          {
+        	    addCommand(jdObj, s);
                   }
-                  else //System.out.println(s+" is not an attribute, nor a command, nor a device; ignored.");
-                  {
-                     // Check if it's an interactiveButton for shellCommands
-                     if (jdObj.isInteractive() && jdObj.hasExtendedParam("shellCommand"))
-                     {
-                        addShellCmdButton(jdObj);
-                     }
+	          else //System.out.println(s+" is not an attribute, nor a command, nor a device; ignored.");
+	          {
+		     // Check if it's an interactiveButton for shellCommands
+	             if (jdObj.isInteractive() && jdObj.hasExtendedParam("shellCommand"))
+		     {
+		        addShellCmdButton(jdObj);
+		     }
                   }
                }
-            }
+	    }
 	 }
       } /* for */
    }
@@ -642,33 +591,26 @@ public class TangoSynopticHandler extends JDrawEditor
 
        try
        {
-           attDevName = s.substring(0, lastSlash);
-           isdev = isDevice(attDevName);
-           if (isdev == false)
-           {
-               if (s.toLowerCase().endsWith("/state"))
-                   return aFac.isConnectionLessAttribute(s);
-               else
-                   return false;
-           }
-           
-           attName = s.substring(lastSlash, s.length());
+	  attDevName = s.substring(0, lastSlash);
 
-           boolean attPattern;
+	  isdev = isDevice(attDevName);
 
-           attPattern = Pattern.matches("/[a-zA-Z_0-9[-]]+", attName);
-           if (attPattern == false)
-           {
-               return false;
-           }
-           else
-           {
-               return aFac.isAttribute(s);
-           }
+	  if (isdev == false)
+             return false;
+
+	  attName = s.substring(lastSlash, s.length());
+
+	  boolean   attPattern;
+
+	  attPattern = Pattern.matches("/[a-zA-Z_0-9[-]]+", attName);
+	  if (attPattern == false)
+	     return false;
+	  else
+             return aFac.isAttribute(s);
        }
        catch (IndexOutOfBoundsException ex)
        {
-           return false;
+          return false;
        }
    }
 
@@ -784,6 +726,7 @@ public class TangoSynopticHandler extends JDrawEditor
    */
    protected boolean isDevice(String devName)
    {
+
        // Check syntax
        if(!isDeviceName(devName))
          return false;
@@ -841,16 +784,11 @@ public class TangoSynopticHandler extends JDrawEditor
   {
       try
       {
-	 Device     dev = dFac.getDevice(s);
-         if (dev == null) return;
-         if (!dev.areDevPropertiesLoaded())
-              dev.loadDevProperties();
-
-         addDeviceListener(dev);
+	 addDeviceListener(dFac.getDevice(s));
 	 mouseifyDevice(jdObj);
 	 stashComponent(s, jdObj);
 	 addDevToStateCashHashMap(s);
-         refreshStateJDObj(jdObj, dev);
+         refreshStateJDObj(jdObj, dFac.getDevice(s));
       } catch (ConnectionException connectionexception)
       {
 	 System.out.println("Couldn't load device " + s + " " +
@@ -1441,10 +1379,6 @@ invoqex.printStackTrace();
     mouseifyStateAttribute(jdObj);
     stashComponent(attName, jdObj);
     addDevToStateCashHashMap(attName);
-    
-    if (!model.areAttPropertiesLoaded())
-            model.loadAttProperties();
-         
     model.addDevStateScalarListener(this);
     allAttributes.add(model);
     if (errorHistWind != null)
@@ -1587,10 +1521,6 @@ invoqex.printStackTrace();
 
     //String attName = model.getName();
     System.out.println("Connecting to a DevStateSpectrum element : " + jdObj.getName());
-    
-    if (!model.areAttPropertiesLoaded())
-        model.loadAttProperties();
-    
     mouseifyStateSpectrumElement(jdObj, model);
     stashComponent(jdObj.getName().toLowerCase(), jdObj);
     model.addDevStateSpectrumListener(this);
@@ -1644,73 +1574,22 @@ invoqex.printStackTrace();
      }
   }
 
-  private void addNumberSpectrumAttribute(JDObject jdObj,INumberSpectrum model)
-  {
-     if (jdObj instanceof JDSwingObject)
-     {
-        JComponent atkObj = ((JDSwingObject) jdObj).getComponent();
+  private void addNumberSpectrumAttribute(JDObject jdObj,INumberSpectrum model) {
 
-        if (atkObj instanceof NumberSpectrumViewer)
-        {
-           NumberSpectrumViewer nsv = (NumberSpectrumViewer) atkObj;
-           nsv.setModel(model);
-           allAttributes.add(model);
-           if (errorHistWind != null)
-              model.addErrorListener(errorHistWind);
-           if (nsv.getManageXaxis())
-              if (model.hasMinxMaxxAttributes())
-                  addSpectMinxMaxxAttributes(nsv, model);
-        } 
-        else
-        {
-           System.out.println(atkObj.getClass().getName() + " does not accept INumberSpectrum model");
-        }
-     }
+    if (jdObj instanceof JDSwingObject) {
+      JComponent atkObj = ((JDSwingObject) jdObj).getComponent();
+
+      if (atkObj instanceof NumberSpectrumViewer) {
+        ((NumberSpectrumViewer) atkObj).setModel(model);
+        allAttributes.add(model);
+        if (errorHistWind != null)
+           model.addErrorListener(errorHistWind);
+      } else {
+        System.out.println(atkObj.getClass().getName() + " does not accept INumberSpectrum model");
+      }
+    }
+
   }
-  
-  private void addSpectMinxMaxxAttributes(NumberSpectrumViewer nsv, INumberSpectrum ins)
-  {
-      String            attFullName;
-      IAttribute        iatt = null;
-      INumberScalar     minAtt=null, maxAtt=null;
-      if ((nsv == null) || (ins == null)) return;
-      if ((ins.getMinxAttName() == null) || (ins.getMaxxAttName() == null)) return;
-      
-      
-      // get the minAtt from the factory
-      try
-      {
-         attFullName = ins.getDevice()+"/"+ ins.getMinxAttName();
-         iatt = null;
-         iatt = aFac.getAttribute(attFullName);
-      }
-      catch (Exception ex) {}
-      
-      if (iatt != null)
-         if (iatt instanceof INumberScalar)
-            minAtt = (INumberScalar) iatt;
-      if (minAtt == null) return;
-      
-      // get the maxAtt from the factory
-      try
-      {
-         attFullName = ins.getDevice()+"/"+ ins.getMaxxAttName();
-         iatt = null;
-         iatt = aFac.getAttribute(attFullName);
-      }
-      catch (Exception ex) {}
-      
-      if (iatt != null)
-         if (iatt instanceof INumberScalar)
-            maxAtt = (INumberScalar) iatt;
-      if (maxAtt == null) return;
-      
-      if (minAtt == maxAtt) return;
-      
-      allAttributes.add(minAtt);
-      allAttributes.add(maxAtt);      
-      nsv.setXaxisModels(minAtt, maxAtt);
- }
 
   private void addNumberImageAttribute(JDObject jdObj,INumberImage model) {
 
@@ -1766,33 +1645,6 @@ invoqex.printStackTrace();
 	    }
      }
   }
-
-  private void addEnumScalarAttribute(JDObject jdObj,IEnumScalar model)
-  {
-     if (jdObj instanceof JDSwingObject)
-     {
-	 JComponent atkObj = ((JDSwingObject) jdObj).getComponent();
-
-	 if (atkObj instanceof SimpleEnumScalarViewer)
-	 {
-	    ((SimpleEnumScalarViewer) atkObj).setModel(model);
-	    allAttributes.add(model);
-	    if (errorHistWind != null)
-               model.addErrorListener(errorHistWind);
-	 }
-	 else
-	    if (atkObj instanceof EnumScalarComboEditor)
-	    {
-               ((EnumScalarComboEditor) atkObj).setEnumModel(model);
-               allAttributes.add(model);
-               model.addSetErrorListener(errPopup);
-	    }
-	    else
-	    {
-	      System.out.println(atkObj.getClass().getName() + " does not accept IStringScalar model");
-	    }
-     }
-  }
   
   private String[]  parsePossStringValues(String vals)
   {
@@ -1837,12 +1689,6 @@ invoqex.printStackTrace();
         // StringScalar attributes
         if (att instanceof IStringScalar) {
           addStringScalarAttribute(jddg,(IStringScalar) att);
-          return;
-        }
-
-        // EnumScalar attributes
-        if (att instanceof IEnumScalar) {
-          addEnumScalarAttribute(jddg,(IEnumScalar) att);
           return;
         }
 

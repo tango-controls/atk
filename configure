@@ -1233,10 +1233,9 @@ TANGO=$TANGOLIB/TangORB.jar
 PRINTF=$ATKLIB/printf.jar
 IMAGEJ=$ATKLIB/ij.jar
 JEP=$ATKLIB/jep.jar:$ATKLIB/jepext.jar
-JOGL=$ATKLIB/jogl.jar:$ATKLIB/gluegen-rt.jar
 JTARGETDIR=$ATKLIB
 BEANBOX=$JAVA_HOME/beans/beanbox/classes:$JAVA_HOME/beans/infobus.jar:$JAVA_HOME/beans/lib/methodtracer.jar
-CLASSPATH=$TANGO:$PRINTF:$JEP:$IMAGEJ:$JOGL:$ATKLIB:$BEANBOX:.;export CLASSPATH
+CLASSPATH=$TANGO:$PRINTF:$JEP:$IMAGEJ:$ATKLIB:$BEANBOX:.;export CLASSPATH
 
 
 
@@ -1414,7 +1413,7 @@ EOF
 if uudecode$EXEEXT Test.uue; then
 	ac_cv_prog_uudecode_base64=yes
 else
-	echo "configure: 1417: uudecode had trouble decoding base 64 file 'Test.uue'" >&5
+	echo "configure: 1416: uudecode had trouble decoding base 64 file 'Test.uue'" >&5
 	echo "configure: failed file was:" >&5
 	cat Test.uue >&5
 	ac_cv_prog_uudecode_base64=no
@@ -1535,7 +1534,7 @@ JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 TEST=Test
 cat << \EOF > $JAVA_TEST
-/* [#]line 1538 "configure" */
+/* [#]line 1537 "configure" */
 public class Test {
 public static void main (String args[]) {
 	System.exit (0);
@@ -1859,7 +1858,7 @@ else
 JAVA_TEST=Xyzzy.java
 CLASS_TEST=Xyzzy.class
 cat << \EOF > $JAVA_TEST
-/* #line 1862 "configure" */
+/* #line 1861 "configure" */
 public class Xyzzy {
 }
 EOF
@@ -1917,7 +1916,7 @@ EOF
 		if uudecode$EXEEXT Test.uue; then
 			:
 		else
-			echo "configure: 1920: uudecode had trouble decoding base 64 file 'Test.uue'" >&5
+			echo "configure: 1919: uudecode had trouble decoding base 64 file 'Test.uue'" >&5
 			echo "configure: failed file was:" >&5
 			cat Test.uue >&5
 			ac_cv_prog_uudecode_base64=no
@@ -1937,7 +1936,7 @@ EOF
 else
 
 cat << \EOF > Test.java
-/* #line 1940 "configure" */
+/* #line 1939 "configure" */
 import fr.esrf.TangoDs.Attribute;
 public class Test {
 
@@ -2014,7 +2013,7 @@ EOF
 		if uudecode$EXEEXT Test.uue; then
 			:
 		else
-			echo "configure: 2017: uudecode had trouble decoding base 64 file 'Test.uue'" >&5
+			echo "configure: 2016: uudecode had trouble decoding base 64 file 'Test.uue'" >&5
 			echo "configure: failed file was:" >&5
 			cat Test.uue >&5
 			ac_cv_prog_uudecode_base64=no
@@ -2034,7 +2033,7 @@ EOF
 else
 
 cat << \EOF > Test.java
-/* #line 2037 "configure" */
+/* #line 2036 "configure" */
 import fr.esrf.Tango.Device;
 public class Test {
 
@@ -2111,7 +2110,7 @@ EOF
 		if uudecode$EXEEXT Test.uue; then
 			:
 		else
-			echo "configure: 2114: uudecode had trouble decoding base 64 file 'Test.uue'" >&5
+			echo "configure: 2113: uudecode had trouble decoding base 64 file 'Test.uue'" >&5
 			echo "configure: failed file was:" >&5
 			cat Test.uue >&5
 			ac_cv_prog_uudecode_base64=no
@@ -2131,7 +2130,7 @@ EOF
 else
 
 cat << \EOF > Test.java
-/* #line 2134 "configure" */
+/* #line 2133 "configure" */
 import fr.esrf.TangoApi.Connection;
 public class Test {
 

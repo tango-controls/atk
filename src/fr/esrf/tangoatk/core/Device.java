@@ -1,24 +1,8 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
+// File:          Device.java
+// Created:       2001-09-24 13:14:14, assum
+// By:            <erik@assum.net>
+// Time-stamp:    <2002-07-18 15:35:52, assum>
+//
 // $Id$
 //
 // Description:
@@ -62,11 +46,9 @@ public class Device extends DeviceProxy implements IDevice, Serializable {
     transient protected DeviceProxy proxy;
     private long refreshCount = 0;
     private int idlVersion = 0;
-    private boolean        connected = true;
     protected Map<String,DeviceProperty>  propertyMap;
-    private boolean openCloseInverted=false;
-    private boolean insertExtractInverted=false;
-    protected boolean devPropertiesLoaded=false;
+    private boolean openCloseInverted;
+    private boolean insertExtractInverted;
     
     private static Map<String, DevState> stringStateMap;
 
@@ -111,30 +93,10 @@ public class Device extends DeviceProxy implements IDevice, Serializable {
         init(name);
     }
 
-    public Device(String name, boolean connectionLess) throws DevFailed
+    protected void init(String name) throws DevFailed 
     {
-        super(name);
-        long t0 = System.currentTimeMillis();
-        if (connectionLess == false)
-            init(name);
-        else
-        {
-            try
-            {
-                init(name);
-            }
-            catch (DevFailed df)
-            {
-
-                trace(DeviceFactory.TRACE_FAIL, "Device.get_idl_version(" + name
-                        + ") failed", t0);
-                setConnected(false);
-            }
-        }
-    }
-
-    protected void init(String name) throws DevFailed
-    {
+        DbDatum    openCloseDbd, insertExtractDbd;
+        
         long t0 = System.currentTimeMillis();
 
         propertyMap = new HashMap<String,DeviceProperty>();
@@ -148,41 +110,56 @@ public class Device extends DeviceProxy implements IDevice, Serializable {
         this.insertExtractInverted = false;
 
         // Check if the device is "event compatible"
-        idlVersion = get_idl_version();
-        trace(DeviceFactory.TRACE_SUCCESS, "Device.get_idl_version(" + name
-                + ") ok", t0);
-        if (idlVersion >= 3) // all idl versions >= 3 are event compatible
-            this.supportsEvents = true;
-    }
-
-    public void reconnect()
-    {
-        long t0 = System.currentTimeMillis();
-        // Check if the device is "event compatible"
-        try
+        try 
         {
             idlVersion = get_idl_version();
-            setConnected(true);
-            trace(DeviceFactory.TRACE_SUCCESS, "Device.reconnect get_idl_version(" + name
+            trace(DeviceFactory.TRACE_SUCCESS, "Device.get_idl_version(" + name
                     + ") ok", t0);
             if (idlVersion >= 3) // all idl versions >= 3 are event compatible
                 this.supportsEvents = true;
-        }
-        catch (DevFailed dfe)
+        } 
+        catch (DevFailed dfe) 
         {
-            trace(DeviceFactory.TRACE_FAIL, "Device.reconnect get_idl_version(" + name
+            trace(DeviceFactory.TRACE_FAIL, "Device.get_idl_version(" + name
                     + ") failed", t0);
         }
-    }
 
-    public boolean isConnected()
-    {
-        return connected;
-    }
+        // Check if the colors should be inverted for open and close states 
+        try
+        {
+            openCloseDbd = get_property(OPEN_CLOSE_PROP);
+            trace(DeviceFactory.TRACE_SUCCESS, "Device.get_property(" + OPEN_CLOSE_PROP
+                    + ") ok", t0);
+            if (openCloseDbd != null)
+                if (!openCloseDbd.is_empty())
+                {
+                    openCloseInverted = openCloseDbd.extractBoolean();
+                }
+        } 
+        catch (DevFailed dfe) 
+        {
+            trace(DeviceFactory.TRACE_FAIL, "Device.get_property(" + OPEN_CLOSE_PROP
+                    + ") failed", t0);
+        }
 
-    private void setConnected(boolean b)
-    {
-        connected = b;
+        // Check if the colors should be inverted for insert and extract states 
+        try
+        {
+            insertExtractDbd = get_property(INSERT_EXTRACT_PROP);
+            trace(DeviceFactory.TRACE_SUCCESS, "Device.get_property(" + INSERT_EXTRACT_PROP
+                    + ") ok", t0);
+            if (insertExtractDbd != null)
+                if (!insertExtractDbd.is_empty())
+                {
+                    insertExtractInverted = insertExtractDbd.extractBoolean();
+                }
+        } 
+        catch (DevFailed dfe) 
+        {
+            trace(DeviceFactory.TRACE_FAIL, "Device.get_property(" + INSERT_EXTRACT_PROP
+                    + ") failed", t0);
+        }
+
     }
 
     public void addErrorListener(IErrorListener l) {
@@ -267,83 +244,76 @@ public class Device extends DeviceProxy implements IDevice, Serializable {
      * <code>refresh</code> sends out status and state events. This forces a
      * synchronous device state and status reading.
      */
-    public void refresh()
-    {
-        if (!isConnected())
-            reconnect();
-        if (isConnected())
-        {
-            refreshCount++;
-            DevState s = null;
-            String newStatus;
-            long t0 = System.currentTimeMillis();
-            try
-            {
-                try // Get the state
-                {
+    public void refresh() {
 
-                    s = state(ApiDefs.FROM_CMD);
-                    trace(DeviceFactory.TRACE_STATE_REFRESHER,
-                            "Device.refresh(State," + name + ") success", t0);
-                    propChanges.fireStateEvent(this, toString(s));
-                }
-                catch (DevFailed ex)
-                {
+        refreshCount++;
+        DevState s = null;
+        String newStatus;
+        long t0 = System.currentTimeMillis();
 
-                    trace(DeviceFactory.TRACE_STATE_REFRESHER,
-                            "Device.refresh(State," + name + ") failed", t0);
-                    ConnectionException e = new ConnectionException(ex);
-                    deviceError("Couldn't read state: ", e);
-                    newStatus = getName() + ":\n" + e.getDescription();
-                    propChanges.fireStateEvent(this, IDevice.UNKNOWN);
-                    propChanges.fireStatusEvent(this, newStatus);
-                    return;
-                }
+        try {
 
-                t0 = System.currentTimeMillis();
+            // Get the state
+            try {
 
-                // Get the status
-                try
-                {
+                s = state(ApiDefs.FROM_CMD);
+                trace(DeviceFactory.TRACE_STATE_REFRESHER,
+                        "Device.refresh(State," + name + ") success", t0);
+                propChanges.fireStateEvent(this, toString(s));
 
-                    newStatus = status(ApiDefs.FROM_CMD);
-                    trace(DeviceFactory.TRACE_STATE_REFRESHER,
-                            "Device.refresh(Status," + name + ") success", t0);
-                    propChanges.fireStatusEvent(this, newStatus);
+            } catch (DevFailed ex) {
 
-                }
-                catch (DevFailed ex)
-                {
+                trace(DeviceFactory.TRACE_STATE_REFRESHER,
+                        "Device.refresh(State," + name + ") failed", t0);
+                ConnectionException e = new ConnectionException(ex);
+                deviceError("Couldn't read state: ", e);
+                newStatus = getName() + ":\n" + e.getDescription();
+                propChanges.fireStateEvent(this, IDevice.UNKNOWN);
+                propChanges.fireStatusEvent(this, newStatus);
+                return;
 
-                    trace(DeviceFactory.TRACE_STATE_REFRESHER,
-                            "Device.refresh(Status," + name + ") failed", t0);
-                    ConnectionException e = new ConnectionException(ex);
-                    newStatus = getName() + ":\n" + e.getDescription();
-                    propChanges.fireStatusEvent(this, newStatus);
-                    return;
-
-                }
             }
-            catch (Exception ex)
-            {
-                // Code failure
-                System.out.println("-- Device.refresh() : Unexpected exception -----------------------");
-                ex.printStackTrace();
 
-                // Try to fire a deviceError event if execption has
-                // happened if JavaApi.
-                try
-                {
-                    ConnectionException e = new ConnectionException(ex);
-                    propChanges.fireStateEvent(this, IDevice.UNKNOWN);
-                    propChanges.fireStatusEvent(this, IDevice.UNKNOWN);
-                    deviceError("Couldn't read state: ", e);
-                }
-                catch (Exception e)
-                {
-                }
+            t0 = System.currentTimeMillis();
+
+            // Get the status
+            try {
+
+                newStatus = status(ApiDefs.FROM_CMD);
+                trace(DeviceFactory.TRACE_STATE_REFRESHER,
+                        "Device.refresh(Status," + name + ") success", t0);
+                propChanges.fireStatusEvent(this, newStatus);
+
+            } catch (DevFailed ex) {
+
+                trace(DeviceFactory.TRACE_STATE_REFRESHER,
+                        "Device.refresh(Status," + name + ") failed", t0);
+                ConnectionException e = new ConnectionException(ex);
+                newStatus = getName() + ":\n" + e.getDescription();
+                propChanges.fireStatusEvent(this, newStatus);
+                return;
+
             }
+
+        } catch (Exception ex) {
+
+            // Code failure
+            System.out
+                    .println("-- Device.refresh() : Unexpected exception -----------------------");
+            ex.printStackTrace();
+
+            // Try to fire a deviceError event if execption has
+            // happened if JavaApi.
+            try {
+                ConnectionException e = new ConnectionException(ex);
+                propChanges.fireStateEvent(this, IDevice.UNKNOWN);
+                propChanges.fireStatusEvent(this, IDevice.UNKNOWN);
+                deviceError("Couldn't read state: ", e);
+            } catch (Exception e) {
+            }
+
         }
+
     }
 
     /**
@@ -1025,44 +995,6 @@ public class Device extends DeviceProxy implements IDevice, Serializable {
     void setInvertedInsertExtract(boolean b)
     {
        insertExtractInverted = b;
-    }
-    
-    public boolean areDevPropertiesLoaded()
-    {
-        return devPropertiesLoaded;
-    }
-    
-    public void loadDevProperties()
-    {
-        long         t0 = System.currentTimeMillis();
-        String[]     propList = {OPEN_CLOSE_PROP, INSERT_EXTRACT_PROP};
-        DbDatum[]    propDbDatums=null;
-        
-       
-        // Get the open/close inverted and insert/extract inverted properties from the Tango DB
-        try
-        {
-            devPropertiesLoaded = true;
-            propDbDatums = this.get_property(propList);
-        } 
-        catch (DevFailed dfe) 
-        {
-            trace(DeviceFactory.TRACE_FAIL, "Device.get_property(" + OPEN_CLOSE_PROP + ", " + INSERT_EXTRACT_PROP
-                    + ") failed", t0);
-        }
-
-        if (propDbDatums == null) return;
-        
-        if (propDbDatums.length != 2) return;
-        
-        // Check if the colors should be inverted for open and close states
-        if (!propDbDatums[0].is_empty())
-           openCloseInverted = propDbDatums[0].extractBoolean();
-
-        // Check if the colors should be inverted for insert and extract states 
-        if (!propDbDatums[1].is_empty())
-           insertExtractInverted = propDbDatums[1].extractBoolean();
-        
     }
     
 }

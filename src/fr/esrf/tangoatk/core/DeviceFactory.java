@@ -1,25 +1,8 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
+// File:          DeviceFactory.java
+// Created:       2001-09-19 09:50:31, assum
+// By:            <assum@esrf.fr> <pons@esrf.fr>
+// Time-stamp:    <2002-07-23 10:30:15, assum>
+//
 // $Id$
 //
 // Description:
@@ -56,8 +39,6 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
   public final static int TRACE_ATTFACTORY=512;
   // Debug trace for command factory.
   public final static int TRACE_CMDFACTORY=1024;
-  // Debug trace for attributes refreshed by att config events.
-  public final static int TRACE_ATT_CONFIG_EVENT=2048;
   // Trace all
   public final static int TRACE_ALL=0xFF;
 
@@ -273,68 +254,6 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
     return d;
 
   }
-
-    /**
-     * Get a handle to a device and add it to the global state/status refresher list.
-     * @param name Device name
-     * @return Device handle
-     * @throws ConnectionException In case of failure.
-     */
-    public synchronized Device getConnectionlessDevice(String name) throws ConnectionException
-    {
-
-        int pos;
-        Device d = null;
-        String lowerName = name.toLowerCase();
-
-        pos = Arrays.binarySearch(deviceNames, lowerName);
-        //if(pos>=0) d = (Device)devices.get(pos);
-        if (pos >= 0)
-        {
-            d = devices.get(pos);
-        }
-
-        if (pos < 0)
-        {
-
-            // The device has not been found, we have to create it
-            long t0 = System.currentTimeMillis();
-            try
-            {
-                d = new Device(name, true);
-                trace(TRACE_SUCCESS, "DeviceFactory.getConnectionlessDevice(" + name + ") ok", t0);
-            }
-            catch (DevFailed e)
-            {
-                trace(TRACE_FAIL, "DeviceFactory.getConnectionlessDevice(" + name + ") failed", t0);
-                throw new ConnectionException(e);
-            }
-
-            // Build the new deviceNames array
-            int ipos = -(pos + 1);
-            int lgth = deviceNames.length;
-            String[] newDeviceNames = new String[lgth + 1];
-            System.arraycopy(deviceNames, 0, newDeviceNames, 0, ipos);
-            System.arraycopy(deviceNames, ipos, newDeviceNames, ipos + 1, lgth - ipos);
-            newDeviceNames[ipos] = lowerName;
-
-            synchronized (deviceMonitor)
-            {
-                // Update list
-                devices.add(ipos, d);
-                deviceNames = newDeviceNames;
-            }
-
-            dumpFactory("Adding " + lowerName);
-
-            if (autoStart)
-            {
-                startRefresher();
-            }
-
-        }
-        return d;
-    }
 
   /**
    * Executes the global state/status refresh on all device registered.

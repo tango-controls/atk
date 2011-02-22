@@ -1,28 +1,5 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.core;
 
-import fr.esrf.tangoatk.core.attribute.AAttribute;
 import java.util.Vector;
 
 // --------------------------------------------------------------
@@ -31,12 +8,12 @@ import java.util.Vector;
 public class DeviceItem 
 {
 
-     private Vector<AAttribute> entities;
+     private Vector<IAttribute> entities;
      private Device device;
 
      DeviceItem(Device dev) {
        device   = dev;
-       entities = new Vector<AAttribute> ();
+       entities = new Vector<IAttribute> ();
      }
 
      Device getDevice() {
@@ -47,8 +24,8 @@ public class DeviceItem
        return entities.size();
      }
 
-     AAttribute getEntity(int idx) {
-       return (AAttribute)entities.get(idx);
+     IAttribute getEntity(int idx) {
+       return (IAttribute)entities.get(idx);
      }
 
      String[] getNames() {
@@ -58,11 +35,11 @@ public class DeviceItem
        return ret;
      }
 
-     void add(AAttribute entity) {
+     void add(IAttribute entity) {
        entities.add(entity);
      }
 
-     void remove(AAttribute entity) {
+     void remove(IAttribute entity) {
        entities.remove(entity);
      }
 }

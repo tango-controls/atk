@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 
 package fr.esrf.tangoatk.core.util;
 
@@ -33,7 +11,6 @@ import fr.esrf.TangoApi.AttributeInfo;
 import fr.esrf.TangoApi.DeviceAttribute;
 import fr.esrf.TangoDs.TangoConst;
 import fr.esrf.tangoatk.core.Device;
-import fr.esrf.tangoatk.core.IDevice;
 
 /**
  *
@@ -51,18 +28,18 @@ public class AttrDualSpectrum extends AttrFunctionSpectrum {
     /**
      * Creates a new instance of AttrDualSpectrum
      */
-    public AttrDualSpectrum (IDevice device_x, String attr_x, IDevice device_y,
+    public AttrDualSpectrum (Device device_x, String attr_x, Device device_y,
             String attr_y) {
-        this.device_x = (Device) device_x;
-        this.device_y = (Device) device_y;
+        this.device_x = device_x;
+        this.device_y = device_y;
         this.attr_x = attr_x;
         this.attr_y = attr_y;
         this.setXName( attr_x );
         this.setYName( attr_y );
         try {
-            AttributeInfo attr_info = this.device_x.getAttributeInfo(attr_x);
+            AttributeInfo attr_info = device_x.getAttributeInfo(attr_x);
             this.setXUnit(attr_info.unit);
-            attr_info = this.device_y.getAttributeInfo(attr_y);
+            attr_info = device_y.getAttributeInfo(attr_y);
             this.setYUnit(attr_info.unit);
         }
         catch (DevFailed e) {

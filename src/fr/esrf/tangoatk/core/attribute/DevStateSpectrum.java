@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          DevStateSpectrum.java
 // Created:       2008-07-07 15:23:16, poncet
 // By:            <poncet@esrf.fr>
@@ -44,7 +22,6 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
 {
     DevStateSpectrumHelper  dsSpectrumHelper;
     String[]                dsSpectrumValue = null;
-    String[]                dsSpectrumSetPointValue = null;
     String[]                stateLabels;
     boolean[]               invertOpenClose;
     boolean[]               invertInsertExtract;
@@ -73,12 +50,6 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
     {
        return dsSpectrumValue;
     }
-    
-    // getSetPoint returns the attribute's setpoint value
-    public String[] getSetPoint()
-    {
-       return dsSpectrumSetPointValue;
-    }
 
 
     public String[] getDeviceValue()
@@ -88,8 +59,6 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
        {
           da = readValueFromNetwork();
           dsSpectrumValue = dsSpectrumHelper.getStateSpectrumValue(da);
-          // Retreive the setPoint value for the attribute
-          dsSpectrumSetPointValue = dsSpectrumHelper.getStateSpectrumSetPoint(da);
        }
        catch (DevFailed e)
        {
@@ -128,8 +97,6 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
 
               // Retreive the read value for the attribute
               dsSpectrumValue = dsSpectrumHelper.getStateSpectrumValue(att);
-              // Retreive the setPoint value for the attribute
-              dsSpectrumSetPointValue = dsSpectrumHelper.getStateSpectrumSetPoint(att);
 
               // Fire valueChanged
               fireValueChanged(dsSpectrumValue);
@@ -169,8 +136,6 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
 
              // Retreive the read value for the attribute
              dsSpectrumValue = dsSpectrumHelper.getStateSpectrumValue(attValue);
-             // Retreive the setPoint value for the attribute
-             dsSpectrumSetPointValue = dsSpectrumHelper.getStateSpectrumSetPoint(attValue);
 
              // Fire valueChanged
              fireValueChanged(dsSpectrumValue);
@@ -272,8 +237,6 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
               timeStamp = da.getTimeValMillisSec();
               // Retreive the read value for the attribute
               dsSpectrumValue = dsSpectrumHelper.getStateSpectrumValue(da);
-              // Retreive the setPoint value for the attribute
-              dsSpectrumSetPointValue = dsSpectrumHelper.getStateSpectrumSetPoint(da);
               // Fire valueChanged
               fireValueChanged(dsSpectrumValue);
               trace(DeviceFactory.TRACE_PERIODIC_EVENT, "DevStateSpectrum.periodic(" + getName() + ") fireValueChanged(devStateValue) called", t0);
@@ -352,8 +315,6 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
               timeStamp = da.getTimeValMillisSec();
               // Retreive the read value for the attribute
               dsSpectrumValue = dsSpectrumHelper.getStateSpectrumValue(da);
-              // Retreive the setPoint value for the attribute
-              dsSpectrumSetPointValue = dsSpectrumHelper.getStateSpectrumSetPoint(da);
               // Fire valueChanged
               fireValueChanged(dsSpectrumValue);
               trace(DeviceFactory.TRACE_CHANGE_EVENT, "DevStateSpectrum.change(" + getName() + ") fireValueChanged(devStateValue) called", t0);
@@ -385,6 +346,11 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
     public String[] getStateLabels()
     {
         return stateLabels;
+    }
+
+    void setStateLabels(String[] labs)
+    {
+        stateLabels = labs;
     }
 
     public boolean getInvertedOpenCloseForElement(int elemIndex)
@@ -504,68 +470,6 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
         
         elemMap.put(index, elemLogic);
     }
-    
-    
-  @Override
-  public void loadAttProperties()
-  {
-     DbAttribute    dbAtt=null;
-     DbDatum        propDbDatum=null;
- 
-     String[]       invertedOpenCloseLogic = null;
-     String[]       invertedInsertExtractLogic = null;
-     String[]       stateLbls = null;
-          
-     try
-     {
-         attPropertiesLoaded = true;
-         dbAtt = this.getDevice().get_attribute_property(this.getNameSansDevice());
-         if (dbAtt== null) return;
-         
-         // Check if the labels for elements of array are defined through the attribute property
-         if (!dbAtt.is_empty(IDevStateSpectrum.STATE_LABELS))
-         {
-             //System.out.println("Found " + IDevStateSpectrum.STATE_LABELS + " property for "+this.getNameSansDevice());
-             propDbDatum = dbAtt.datum(IDevStateSpectrum.STATE_LABELS);
-             if (propDbDatum != null)
-                if (!propDbDatum.is_empty())
-                       stateLbls = propDbDatum.extractStringArray();
-             if ((stateLbls!=null) && (stateLbls.length > 0))
-                 stateLabels = stateLbls;
-         }
-         
-         // Check if the colors should be inverted for open and close states
-         if (!dbAtt.is_empty(fr.esrf.tangoatk.core.Device.OPEN_CLOSE_PROP))
-         {
-              //System.out.println("Found " + fr.esrf.tangoatk.core.Device.OPEN_CLOSE_PROP + " property for "+this.getNameSansDevice());
-              propDbDatum = dbAtt.datum(fr.esrf.tangoatk.core.Device.OPEN_CLOSE_PROP);
-              //System.out.println(fr.esrf.tangoatk.core.Device.OPEN_CLOSE_PROP+" = "+propVal);
-              if (propDbDatum != null)
-                 if (!propDbDatum.is_empty())
-                    invertedOpenCloseLogic = propDbDatum.extractStringArray();
-              if ( (invertedOpenCloseLogic != null) && (invertedOpenCloseLogic.length > 0) )
-                  setInvertedOpenClose(invertedOpenCloseLogic);
-         }
-         
-         // Check if the colors should be inverted for insert and extract states
-         if (!dbAtt.is_empty(fr.esrf.tangoatk.core.Device.INSERT_EXTRACT_PROP))
-         {
-              //System.out.println("Found " + fr.esrf.tangoatk.core.Device.INSERT_EXTRACT_PROP + " property for "+this.getName());
-              propDbDatum = dbAtt.datum(fr.esrf.tangoatk.core.Device.INSERT_EXTRACT_PROP);
-              //System.out.println(fr.esrf.tangoatk.core.Device.INSERT_EXTRACT_PROP+" = "+propVal);
-              if (propDbDatum != null)
-                 if (!propDbDatum.is_empty())
-                    invertedInsertExtractLogic = propDbDatum.extractStringArray();
-              if ( (invertedInsertExtractLogic != null) && (invertedInsertExtractLogic.length > 0) )
-                  setInvertedInsertExtract(invertedInsertExtractLogic);
-         }
-     }
-     catch (Exception ex)
-     {
-         System.out.println("get_attribute_property("+this.getName()+") thrown exception");
-         ex.printStackTrace();
-     }
-  }
 
 
     private void trace(int level,String msg,long time)

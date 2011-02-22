@@ -1,25 +1,8 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
+// File:          TangoFactory.java
+// Created:       2001-09-28 09:45:55, assum
+// By:            <assum@esrf.fr>
+// Time-stamp:    <2002-07-10 13:53:25, assum>
+//
 // $Id$
 //
 // Description:
@@ -214,50 +197,27 @@ public abstract class AEntityFactory implements TangoConst,
    * @exception ConnectionException if an error occurs
    * @see AEntityFactory#isWildCard(String)
    */
-    public List<IEntity> getEntities(String name) throws ConnectionException
-    {
-        List<IEntity> l;
-        try
-        {
-            Device d = getDevice(extractDeviceName(name));
+  public List<IEntity> getEntities(String name)
+          throws ConnectionException {
 
-            if (!isWildCard(name))
-            {
-                l = new Vector<IEntity>();
-                l.add(getSingleEntity(name, d));
-            }
-            else
-            {
-                l = getWildCardEntities(name, d);
-            }
+    List<IEntity> l;
+    try {
+      Device d = getDevice(extractDeviceName(name));
 
-            return l;
-        }
-        catch (ConnectionException ce)
-        {
-            if (name.toLowerCase().endsWith("/state"))
-            {
-                List<IEntity> eList = getConnectionlessSingleAttribute(name);
-                if (eList == null) // we are in a CommandFactory so we should return exception
-                    throw ce;
-                else
-                    return eList;
-            }
-            else
-                throw ce;
-        }
-        catch (DevFailed d)
-        {
-            throw new ConnectionException(d);
-        }
+      if (!isWildCard(name)) {
+        l = new Vector<IEntity> ();
+        l.add(getSingleEntity(name, d));
+      } else {
+        l = getWildCardEntities(name, d);
+      }
+
+      return l;
+    } catch (DevFailed d) {
+      throw new ConnectionException(d);
     }
 
-  protected List<IEntity> getConnectionlessSingleAttribute(String name) throws ConnectionException
-  {
-      // This mothod is overrid in AttributeFactory because it does not concern
-      // CommandFactory we return null
-      return null;
   }
+
 
   /**
    * <code>getWildCardEntities</code> is called if isWildCard(name) is

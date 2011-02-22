@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.image;
 
 import java.awt.BorderLayout;
@@ -209,15 +187,11 @@ public class LineProfilerPanel extends JPanel implements IJLChartListener, Actio
         std = Math.sqrt(sum2/lgth);
 
         minText.setText(Double.toString(theDataY.getMinimum()));
-        minText.setCaretPosition(0);
         maxText.setText(Double.toString(theDataY.getMaximum()));
-        maxText.setCaretPosition(0);
         Double avgD = new Double(avg);
         Double stdD = new Double(std);
         avgText.setText(Format.sprintf("%.2f",new Double[]{avgD}));
-        avgText.setCaretPosition(0);
         stdText.setText(Format.sprintf("%.2f",new Double[]{stdD}));
-        stdText.setCaretPosition(0);
 
       } else {
 
@@ -231,53 +205,6 @@ public class LineProfilerPanel extends JPanel implements IJLChartListener, Actio
       theGraph.repaint();
       refreshTable();
     }
-
-  public void setData(double[] v, double xgain, double xoffset) {
-
-    theDataY.reset();
-
-    if (v != null) {
-
-      double sum  = 0.0;
-      double sum2 = 0.0;
-      double avg  = 0.0;
-      double std  = 0.0;
-      double lgth = (double)v.length;
-
-      for (int i = 0; i < v.length; i++) {
-        theDataY.add((double)(i)*xgain + xoffset, v[i]);
-        sum  += v[i];
-      }
-      avg = sum/lgth;
-
-      for (int i = 0; i < v.length; i++) {
-        sum2  += (v[i]-avg)*(v[i]-avg);
-      }
-      std = Math.sqrt(sum2/lgth);
-
-      minText.setText(Double.toString(theDataY.getMinimum()));
-      minText.setCaretPosition(0);
-      maxText.setText(Double.toString(theDataY.getMaximum()));
-      maxText.setCaretPosition(0);
-      Double avgD = new Double(avg);
-      Double stdD = new Double(std);
-      avgText.setText(Format.sprintf("%.2f",new Double[]{avgD}));
-      avgText.setCaretPosition(0);
-      stdText.setText(Format.sprintf("%.2f",new Double[]{stdD}));
-      stdText.setCaretPosition(0);
-
-    } else {
-
-      minText.setText("");
-      maxText.setText("");
-      avgText.setText("");
-      stdText.setText("");
-
-    }
-
-    theGraph.repaint();
-    refreshTable();
-  }
 
     // -------------------------------------------------------------
     // Action listener
@@ -297,7 +224,7 @@ public class LineProfilerPanel extends JPanel implements IJLChartListener, Actio
 
       String[] ret = new String[2];
       ret[0] = theGraph.getXAxis().getName() + " = " + evt.getTransformedXValue();
-      ret[1] = theGraph.getY1Axis().getName() + " = " + evt.getTransformedYValue();
+      ret[1] = theDataY.getName() + " = " + evt.getTransformedYValue();
 
       return ret;
     }
