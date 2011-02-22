@@ -214,50 +214,27 @@ public abstract class AEntityFactory implements TangoConst,
    * @exception ConnectionException if an error occurs
    * @see AEntityFactory#isWildCard(String)
    */
-    public List<IEntity> getEntities(String name) throws ConnectionException
-    {
-        List<IEntity> l;
-        try
-        {
-            Device d = getDevice(extractDeviceName(name));
+  public List<IEntity> getEntities(String name)
+          throws ConnectionException {
 
-            if (!isWildCard(name))
-            {
-                l = new Vector<IEntity>();
-                l.add(getSingleEntity(name, d));
-            }
-            else
-            {
-                l = getWildCardEntities(name, d);
-            }
+    List<IEntity> l;
+    try {
+      Device d = getDevice(extractDeviceName(name));
 
-            return l;
-        }
-        catch (ConnectionException ce)
-        {
-            if (name.toLowerCase().endsWith("/state"))
-            {
-                List<IEntity> eList = getConnectionlessSingleAttribute(name);
-                if (eList == null) // we are in a CommandFactory so we should return exception
-                    throw ce;
-                else
-                    return eList;
-            }
-            else
-                throw ce;
-        }
-        catch (DevFailed d)
-        {
-            throw new ConnectionException(d);
-        }
+      if (!isWildCard(name)) {
+        l = new Vector<IEntity> ();
+        l.add(getSingleEntity(name, d));
+      } else {
+        l = getWildCardEntities(name, d);
+      }
+
+      return l;
+    } catch (DevFailed d) {
+      throw new ConnectionException(d);
     }
 
-  protected List<IEntity> getConnectionlessSingleAttribute(String name) throws ConnectionException
-  {
-      // This mothod is overrid in AttributeFactory because it does not concern
-      // CommandFactory we return null
-      return null;
   }
+
 
   /**
    * <code>getWildCardEntities</code> is called if isWildCard(name) is

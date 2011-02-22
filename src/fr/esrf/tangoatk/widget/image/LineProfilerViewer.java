@@ -58,10 +58,6 @@ public class LineProfilerViewer extends JFrame {
     pack();
   }
 
-  public void setXAxisName(String name) {
-    profile1.getChart().getXAxis().setName(name);
-  }
-
   public void setMode(int mode) {
 
     this.mode = mode;
@@ -127,10 +123,6 @@ public class LineProfilerViewer extends JFrame {
 
   public void setData(double[] v) {
     setData(v,0);
-  }
-
-  public void setData(double[] v,double xgain,double xoffset) {
-    profile1.setData(v,xgain,xoffset);
   }
 
   public void setData(double[] v, int startIndexing) {

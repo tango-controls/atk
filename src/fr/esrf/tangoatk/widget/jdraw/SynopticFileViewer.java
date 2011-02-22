@@ -141,34 +141,18 @@ public class SynopticFileViewer extends TangoSynopticHandler
               throws MissingResourceException, FileNotFoundException, IllegalArgumentException
     {
        String          fullFileName;
-       
-       if (jdrawf == null)
-       {
-           clearDirAndFileNames();
-	   return;
-       }
 
        jdrawFileName = jdrawf;
        
-       if (jdrawFileName.startsWith("/"))
-       {
+       if (getJdrawDir() == null)
           fullFileName = jdrawFileName;
-       }
        else
-          if (getJdrawDir() == null)
-              fullFileName = jdrawFileName;
-          else
-              fullFileName =  getJdrawDir() + "/" + jdrawFileName;
+          fullFileName =  getJdrawDir() + "/" + jdrawFileName;
+	  
        
        setSynopticFileName(fullFileName);
 
     }  
-    
-    public void clearDirAndFileNames()
-    {
-        jdrawDir = null;
-	jdrawFileName = null;
-    }
 
 
     /**
@@ -189,15 +173,15 @@ public class SynopticFileViewer extends TangoSynopticHandler
 				 });
 
        ErrorHistory errorHistory = new ErrorHistory();
-       sfv = new SynopticFileViewer();
 
        try
        {
+          sfv = new SynopticFileViewer();
 	  sfv.setErrorHistoryWindow(errorHistory);
 	  sfv.setToolTipMode(TangoSynopticHandler.TOOL_TIP_NAME);
 	  sfv.setAutoZoom(true);
-          //sfv.setJdrawFileName("/segfs/tango/jclient/JMultiBunchFdbk/src/mbFeedBack/mfdbk.jdw");
-          sfv.setJdrawFileName("/tmp_14_days/poncet/test_synoptic.jdw");
+          sfv.setJdrawDir("/segfs/tango/jclient/JLinac/jdraw_file");
+          sfv.setJdrawFileName("jlinac.jdw");
           jf.setContentPane(sfv);
        }
        catch (Exception e)
@@ -209,19 +193,6 @@ public class SynopticFileViewer extends TangoSynopticHandler
        
        jf.pack();
        jf.setVisible(true);
-//       try
-//       {
-//          Thread.sleep(10000);
-//	  System.out.println("coucou");
-//	  sfv.setJdrawFileName("/segfs/tango/jclient/JBpss/jdraw_files/Bpss.jdw");
-//
-//          Thread.sleep(10000);
-//	  System.out.println("coucou");
-//	  sfv.setJdrawFileName("/segfs/tango/jclient/JMultiBunchFdbk/src/mbFeedBack/mfdbk.jdw");
-//       }
-//       catch (Exception ex)
-//       {
-//       }
     }
 
 

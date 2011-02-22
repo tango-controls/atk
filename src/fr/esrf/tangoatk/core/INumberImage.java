@@ -26,14 +26,18 @@
 
 package fr.esrf.tangoatk.core;
 
-public interface INumberImage extends INumber
-{
+import fr.esrf.Tango.*;
+import fr.esrf.TangoApi.*;
+import java.beans.*;
 
-    public void addImageListener(IImageListener l);
+public interface INumberImage extends INumber {
 
-    public void removeImageListener(IImageListener l);
+    public void addImageListener(IImageListener l) ;
+    
+    public void removeImageListener(IImageListener l) ;
 
-    public double[][] getValue();
+    public double[][] getValue() throws DevFailed;
 
-    public void setValue(double[][] d) throws AttributeSetException;
+    public void setValue(double [][] d) throws AttributeSetException;
+
 }

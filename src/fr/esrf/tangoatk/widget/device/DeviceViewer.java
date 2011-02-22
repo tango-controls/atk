@@ -23,8 +23,6 @@
 
     package fr.esrf.tangoatk.widget.device;
 
-import fr.esrf.tangoatk.core.IDevice;
-
     /**
      *
      * @author  root
@@ -36,7 +34,7 @@ import fr.esrf.tangoatk.core.IDevice;
             initComponents();
         }
 
-        public void setModel(IDevice device) {
+        public void setModel(fr.esrf.tangoatk.core.Device device) {
             status.setModel(device);
             state.setModel(device);
             ((javax.swing.border.TitledBorder)getBorder()).setTitle(device.getName());
