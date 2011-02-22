@@ -2,7 +2,7 @@ include ../../../../../../.make-include
 
 ALL = $(TARGET)/Icons.class
 
-all: classes icons
+all: icons classes
 
 classes: $(ALL)
 	$(J)
