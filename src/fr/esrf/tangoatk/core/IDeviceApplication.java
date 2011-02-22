@@ -28,8 +28,8 @@ package fr.esrf.tangoatk.core;
 public interface IDeviceApplication extends Runnable {
 
 
-    public void setModel(IDevice model);
+    public void setModel(Device model);
 
-    public IDevice getModel();
+    public Device getModel();
 
 }

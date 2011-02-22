@@ -24,11 +24,10 @@ package fr.esrf.tangoatk.widget.attribute;
 
 import java.awt.*;
 
-import javax.swing.*;
+import javax.swing.JFrame;
 
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.widget.util.*;
-import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
 
 /** A light weigth viewer which display an enumerated scalar attribute (EnumScalar).
  * Here is an example of use:
@@ -42,9 +41,8 @@ import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
  * </pre>
  */
 
-
 public class SimpleEnumScalarViewer extends JAutoScrolledText
-                                    implements IEnumScalarListener, IErrorListener, JDrawable
+                                    implements IEnumScalarListener, IErrorListener
 {
 
    private IEnumScalar    model = null;
@@ -54,7 +52,6 @@ public class SimpleEnumScalarViewer extends JAutoScrolledText
    private boolean        hasToolTip=false;
    private boolean        qualityInTooltip=false;
 
-   static String[] exts = {"alarmEnabled","validBackground"};
 
    /**
     * Contructs a SimpleEnumScalar viewer.
@@ -271,105 +268,7 @@ public class SimpleEnumScalarViewer extends JAutoScrolledText
    }
   
   
-  // ------------------------------------------------------
-  // Implementation of JDrawable interface
-  // ------------------------------------------------------
-  public void initForEditing() {
-  }
-
-  public JComponent getComponent() {
-    return this;
-  }
-
-  public String getDescription(String name) {
-    
-    if (name.equalsIgnoreCase("alarmEnabled")) {
-      return "When enabled, the background color change with the\n"+
-             "Tango attribute quality factor.\n" +
-             "Default colors are: ( unless they have been changed with\n"+
-             "ATKConstant.setColor4Quality() )\n" +
-             " VALID   => Green\n" +
-             " INVALID => Grey\n" +
-             " ALARM   => Orange\n" +
-             " WARNING => Orange\n" +
-             " CHANGING => Blue\n" +
-             " UNKNOWN => Grey\n" +
-             "Possible values are: true, false.";
-    } else if (name.equalsIgnoreCase("validBackground")) {
-      return "Sets the background color (r,g,b) for the VALID quality factor for this viewer.\n" +
-             "Has effect only if alarmEnabled is true.";
-    }
-
-    return "";
-  }
-
-  public String[] getExtensionList() {
-    return exts;
-  }
-
-  public boolean setExtendedParam(String name,String value,boolean popupErr) {
-
-    if (name.equalsIgnoreCase("alarmEnabled")) {
-
-      if(value.equalsIgnoreCase("true")) {
-        setAlarmEnabled(true);
-        return true;
-      } else if (value.equalsIgnoreCase("false")) {
-        setAlarmEnabled(false);
-        return true;
-      } else {
-        showJdrawError(popupErr,"alarmEnabled","Wrong syntax: 'true' or 'false' expected.");
-        return false;
-      }
-
-    } else if (name.equalsIgnoreCase("validBackground")) {
-
-      String[] c = value.split(",");
-      if (c.length != 3) {
-        showJdrawError(popupErr,"validBackground","Integer list expected: r,g,b");
-        return false;
-      }
-
-      try {
-        int r = Integer.parseInt(c[0]);
-        int g = Integer.parseInt(c[1]);
-        int b = Integer.parseInt(c[2]);
-        if(r<0 || r>255 || g<0 || g>255 || b<0 || b>255) {
-          showJdrawError(popupErr,"validBackground", "Parameter out of bounds. [0..255]");
-          return false;
-        }
-        setBackgroundColor(new Color(r, g, b));
-        return true;
-
-      } catch (NumberFormatException e) {
-        showJdrawError(popupErr,"validBackground", "Wrong integer syntax.");
-        return false;
-      }
-
-    }
-
-    return false;
-
-  }
-
-  public String getExtendedParam(String name) {
-
-    if(name.equals("alarmEnabled")) {
-      return (isAlarmEnabled())?"true":"false";
-    } else if(name.equalsIgnoreCase("validBackground")) {
-      Color c = backgroundColor;
-      return c.getRed() + "," + c.getGreen() + "," + c.getBlue();
-    }
-    return "";
-
-  }
-
-  private void showJdrawError(boolean popup,String paramName,String message) {
-    if(popup)
-      JOptionPane.showMessageDialog(null, "SimpleScalarViewer: "+paramName+" incorrect.\n" + message,
-                                    "Error",JOptionPane.ERROR_MESSAGE);
-  }
-
+  
 
   /**
    * Test function

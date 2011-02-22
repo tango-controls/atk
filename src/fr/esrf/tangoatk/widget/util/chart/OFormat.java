@@ -71,7 +71,7 @@ public class OFormat {
   /**
    * Convert String to integer
    * @param s String to convert
-   * @return Integer representation of the given string.
+   * @return Interger representation of the given string.
    */
   public static int getInt(String s) {
     int ret=0;    
@@ -81,22 +81,7 @@ public class OFormat {
       System.out.println("Failed to parse '" + s + "' as integer");
     }      
     return ret;  
-  }
-
-  /**
-   * Convert String to long
-   * @param s String to convert
-   * @return Long representation of the given string.
-   */
-  public static long getLong(String s) {
-    long ret=0;
-    try {
-      ret = Long.parseLong(s);
-    } catch( NumberFormatException e ) {
-      System.out.println("Failed to parse '" + s + "' as long");
-    }
-    return ret;
-  }
+  }    
 
   /**
    * Convert String to double

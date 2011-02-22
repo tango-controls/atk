@@ -30,13 +30,14 @@
 // Description:
 package fr.esrf.tangoatk.core.attribute;
 
+import fr.esrf.tangoatk.core.*;
 
 import fr.esrf.Tango.*;
 import fr.esrf.TangoApi.*;
 
 class UShortImageHelper extends ANumberImageHelper {
 
-  public UShortImageHelper(AAttribute attribute) {
+  public UShortImageHelper(IAttribute attribute) {
     init(attribute);
   }
 

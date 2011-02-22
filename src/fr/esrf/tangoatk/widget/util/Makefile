@@ -47,12 +47,10 @@ ALL = $(TARGET)/UIManagerHelper.class       \
       $(TARGET)/RoiDefaultUndoableEdit.class \
       $(TARGET)/JFileChooserFilter.class \
       $(TARGET)/EditableTableRowModel.class \
-      $(TARGET)/EditableJTableRow.class \
-      $(TARGET)/J3DTrendListener.class \
-      $(TARGET)/J3DTrend.class
-      
+      $(TARGET)/EditableJTableRow.class
+             
 
-all: gutils uchart itlk utils ujdraw ujgl3dchart icons beaninfo
+all: gutils uchart ujdraw itlk utils icons beaninfo
 
 utils: $(ALL)
 	$(J)
@@ -92,9 +90,6 @@ df: 	all
 
 uchart:
 	(cd chart && $(MAKE) all)
-
-ujgl3dchart:
-	(cd jgl3dchart && $(MAKE) all)
 
 itlk:
 	(cd interlock && $(MAKE) all)

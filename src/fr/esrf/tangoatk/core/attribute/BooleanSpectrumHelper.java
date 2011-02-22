@@ -37,22 +37,22 @@ import fr.esrf.TangoApi.DeviceAttribute;
 
 public class BooleanSpectrumHelper implements java.io.Serializable
 {
-  AAttribute attribute;
+  IAttribute attribute;
   EventSupport propChanges;
 
-  public BooleanSpectrumHelper(AAttribute attribute)
+  public BooleanSpectrumHelper(IAttribute attribute)
   {
     init(attribute);
   }
 
-  void init(AAttribute attribute)
+  void init(IAttribute attribute)
   {
     setAttribute(attribute);
-    propChanges = attribute.getPropChanges();
+    propChanges = ((AAttribute) attribute).getPropChanges();
   }
   
   
-  public void setAttribute(AAttribute attribute)
+  public void setAttribute(IAttribute attribute)
   {
     this.attribute = attribute;
   }

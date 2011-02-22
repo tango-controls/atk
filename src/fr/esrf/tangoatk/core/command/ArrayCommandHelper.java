@@ -118,17 +118,6 @@ class ArrayCommandHelper extends ACommandHelper {
           data.insert(tmp);
         }
         break;
-      case Tango_DEVVAR_CHARARRAY:
-        {
-          byte[] tmp = new byte[size];
-          for (i = 0; i < size; i++)
-          {
-              tmp[i] = Byte.parseByte((String) l.get(i));
-          } // end of for ()
-
-          data.insert(tmp);
-        }
-        break;
     }
     return data;
   }
@@ -191,15 +180,6 @@ class ArrayCommandHelper extends ACommandHelper {
           for (i = 0; i < tmp.length; i++) {
             val.add(tmp[i]);
           }
-        }
-        break;
-      case Tango_DEVVAR_CHARARRAY:
-        {
-          byte[] tmp = d.extractByteArray();
-          for (i = 0; i < tmp.length; i++)
-          {
-              val.add(Byte.toString(tmp[i]));
-          } // end of for ()
         }
         break;
     }
