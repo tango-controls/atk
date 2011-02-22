@@ -29,6 +29,7 @@
 
 package fr.esrf.tangoatk.core.attribute;
 
+import fr.esrf.tangoatk.core.*;
 
 import fr.esrf.Tango.*;
 import fr.esrf.TangoApi.*;
@@ -36,7 +37,7 @@ import fr.esrf.TangoApi.*;
 class ULongImageHelper extends ANumberImageHelper
 {
 
-  public ULongImageHelper(AAttribute attribute)
+  public ULongImageHelper(IAttribute attribute)
   {
      init(attribute);
   }
@@ -55,7 +56,7 @@ class ULongImageHelper extends ANumberImageHelper
      for (int i = 0; i < tmp.length; i++)
         tmp[i] = (long) (flatd[i] / dUnitFactor);
       
-     da.insert_ul(tmp, d[0].length, d.length);
+     da.insert_ul(tmp, d.length, d[0].length);
   }
 
   void setMinAlarm(double d)

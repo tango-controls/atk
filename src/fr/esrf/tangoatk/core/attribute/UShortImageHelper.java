@@ -30,13 +30,14 @@
 // Description:
 package fr.esrf.tangoatk.core.attribute;
 
+import fr.esrf.tangoatk.core.*;
 
 import fr.esrf.Tango.*;
 import fr.esrf.TangoApi.*;
 
 class UShortImageHelper extends ANumberImageHelper {
 
-  public UShortImageHelper(AAttribute attribute) {
+  public UShortImageHelper(IAttribute attribute) {
     init(attribute);
   }
 
@@ -56,7 +57,7 @@ class UShortImageHelper extends ANumberImageHelper {
           tmp[i] = (int) (flatd[i] / dUnitFactor);
       }
       
-      da.insert_us(tmp, d[0].length, d.length);
+      da.insert_us(tmp, d.length, d[0].length);
   }
 
   void setMinAlarm(double d) {
@@ -153,7 +154,7 @@ class UShortImageHelper extends ANumberImageHelper {
     int ydim = deviceAttribute.getDimY();
     int xdim = deviceAttribute.getDimX();
 
-    if (ydim != retval.length || xdim != retval[0].length) {
+    if (retval.length == 0 || ydim != retval.length || xdim != retval[0].length) {
       retval = new double[ydim][xdim];
     }
 

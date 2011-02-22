@@ -30,13 +30,14 @@
 // Description:
 package fr.esrf.tangoatk.core.attribute;
 
+import fr.esrf.tangoatk.core.*;
 
 import fr.esrf.Tango.*;
 import fr.esrf.TangoApi.*;
 
 class UCharImageHelper extends ANumberImageHelper {
 
-  public UCharImageHelper(AAttribute attribute) {
+  public UCharImageHelper(IAttribute attribute) {
     init(attribute);
   }
 
@@ -67,7 +68,7 @@ class UCharImageHelper extends ANumberImageHelper {
           tmp[i] = (short) (flatd[i] / dUnitFactor);
       }
       
-      da.insert_uc(tmp, d[0].length, d.length);
+      da.insert_uc(tmp, d.length, d[0].length);
   }
 
   void setMinAlarm(double d) {

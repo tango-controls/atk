@@ -16,7 +16,6 @@ ALL = $(TARGET)/DataList.class            \
       $(TARGET)/IJLChartActionListener.class \
       $(TARGET)/JLTable.class \
       $(TARGET)/GraphicsUtils.class \
-      $(TARGET)/ColorItem.class \
       $(TARGET)/JLChartActionEvent.class
       
 all: chart mathchart icons

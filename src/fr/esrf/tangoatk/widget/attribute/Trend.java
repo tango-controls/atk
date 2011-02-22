@@ -31,12 +31,15 @@ package fr.esrf.tangoatk.widget.attribute;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
@@ -108,9 +111,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
   protected JMenuItem cfgMenuI;
   protected JButton resetButton;
   protected JMenuItem resetMenuI;
-  protected JCheckBoxMenuItem offLineButton;
-  protected JMenuItem showErrorMenuI;
-  protected JMenuItem showDiagMenuI;
 
   protected JMenuItem showtoolMenuI;
 
@@ -127,8 +127,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
   protected JMenuItem addXMenuItem;
   protected JMenuItem addY1MenuItem;
   protected JMenuItem addY2MenuItem;
-  protected JCheckBoxMenuItem showMinAlarmMenuItem;
-  protected JCheckBoxMenuItem showMaxAlarmMenuItem;
   protected JMenuItem removeMenuItem;
   protected JMenuItem optionMenuItem;
   protected JMenuItem attOptionMenuItem;
@@ -221,16 +219,12 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
   protected JToolBar panelToolBar;    
   protected JButton timeButtonTrend;
   protected JButton refreshButton;
+  protected JButton zoomButtonTrend;
   protected JMenuItem timeMenuTrendI; 
   protected JMenuItem refreshMenuI;
   
   protected int minRefreshTrendInterval = 0;  
-  private int refreshIntervalTrend = 1000;
-
-  protected boolean offLineMode = false;
-
-  protected ErrorHistory errWin;
-
+  private int refreshIntervalTrend = 1000;   
 
   /**
    * Trend constructor.
@@ -239,7 +233,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
   public Trend(JFrame parent) {
     this();
     this.parent = parent;
-    theGraph.setFrameParent(parent);
   }
 
   /**
@@ -248,87 +241,17 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
   public Trend() {
 
     buttonMap = new HashMap();
-      
-    theToolBar = new JToolBar();
-    toolMenu = new JPopupMenu();
 
-    optionButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_settings.gif")));
-    optionButton.setToolTipText("Global settings");
-    optionMenuI = new JMenuItem("Global settings");
+    //construct the tool bar
+    initToolBar();
 
-    stopButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_stop.gif")));
-    stopButton.setToolTipText("Stop monitoring");
-    stopMenuI = new JMenuItem("Stop monitoring");
+    //construct the popupMenu
+    initPopUpMenu();
 
-    startButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_start.gif")));
-    startButton.setToolTipText("Start monitoring");
-    startMenuI = new JMenuItem("Start monitoring");
-
-    loadButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_load.gif")));
-    loadButton.setToolTipText("Load configuration");
-    loadMenuI = new JMenuItem("Load configuration");
-
-    saveButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_save.gif")));
-    saveButton.setToolTipText("Save configuration");
-    saveMenuI = new JMenuItem("Save configuration");
-
-    zoomButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_zoom.gif")));
-    zoomButton.setToolTipText("Zoom");
-    zoomMenuI = new JMenuItem("Zoom");
-
-    timeButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_time.gif")));
-    timeButton.setToolTipText("Set refresh interval");
-    timeMenuI = new JMenuItem("Set refresh interval");
-
-    cfgButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_config.gif")));
-    cfgButton.setToolTipText("Add new attribute");
-    cfgMenuI = new JMenuItem("Add new attribute");
-
-    resetButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_reset.gif")));
-    resetButton.setToolTipText("Reset trend");
-    resetMenuI = new JMenuItem("Reset trend");
-
-    showtoolMenuI = new JMenuItem("Hide toolbar");
-
-    offLineButton = new JCheckBoxMenuItem("Off line mode");
-
-    showErrorMenuI = new JMenuItem("View errors");
-    showDiagMenuI = new JMenuItem("Diagnostic");
-
-    theToolBar.setFloatable(true);
-
-    loadButton.addActionListener(this);
-    loadMenuI.addActionListener(this);
-    saveButton.addActionListener(this);
-    saveMenuI.addActionListener(this);
-    optionButton.addActionListener(this);
-    optionMenuI.addActionListener(this);
-    zoomButton.addActionListener(this);
-    zoomMenuI.addActionListener(this);
-    stopButton.addActionListener(this);
-    stopMenuI.addActionListener(this);
-    startButton.addActionListener(this);
-    startMenuI.addActionListener(this);
-    timeButton.addActionListener(this);
-    timeMenuI.addActionListener(this);
-    cfgButton.addActionListener(this);
-    cfgMenuI.addActionListener(this);
-    resetButton.addActionListener(this);
-    resetMenuI.addActionListener(this);
-    showtoolMenuI.addActionListener(this);
-    offLineButton.addActionListener(this);
-    showErrorMenuI.addActionListener(this);
-    showDiagMenuI.addActionListener(this);
-
-    theToolBar.add(loadButton);
-    theToolBar.add(saveButton);
-    theToolBar.add(optionButton);
-    theToolBar.add(zoomButton);
-    theToolBar.add(startButton);
-    theToolBar.add(stopButton);
-    theToolBar.add(timeButton);
-    theToolBar.add(cfgButton);
-    theToolBar.add(resetButton);
+    //check if we have to add some special buttons
+    setManageIntervalTrend();
+    if(manageIntervalTrend)
+        initTrendRefresher();
 
     buttonMap.put(load,loadButton);
     buttonMap.put(save,saveButton);
@@ -340,6 +263,139 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     buttonMap.put(config,cfgButton);
     buttonMap.put(reset,resetButton);
 
+    // Create the graph
+    initGraph();
+
+    innerPanel = new JPanel();
+    innerPanel.setLayout(new BorderLayout());
+
+    //add all the element in the trend
+    setLayout(new BorderLayout());
+    add(theToolBar, BorderLayout.NORTH);
+    innerPanel.add(theGraph, BorderLayout.CENTER);
+    add(innerPanel, BorderLayout.CENTER);
+
+    // Create the tree popup menu
+    initTreePopUpMenu();
+
+    calendar.setTimeInMillis(System.currentTimeMillis());
+    dateLabel = new JLabel();
+    dateLabel.setText(genFormat.format(calendar.getTime()));
+    dateLabel.setHorizontalAlignment(JLabel.CENTER);
+    dateLabel.setVisible(false);
+    add(dateLabel,BorderLayout.SOUTH);
+
+  }
+
+  void refreshNode(TrendSelectionNode n) {
+    theGraph.repaint();
+    mainTreeModel.nodeChanged(n);
+  }
+
+  //create all the buttons and put it in the tool bar
+  private void initToolBar() {
+	  //we init the global toolBar
+	  theToolBar = new JToolBar();
+	  theToolBar.setFloatable(true);
+	  theToolBar.setLayout(new BorderLayout());
+
+	  JToolBar simpleToolBar = new JToolBar();
+	  simpleToolBar.setFloatable(false);
+
+	  //we create the buttons
+	  optionButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_settings.gif")));
+	  optionButton.setToolTipText("Global settings");
+
+	  stopButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_stop.gif")));
+	  stopButton.setToolTipText("Stop monitoring");
+
+	  startButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_start.gif")));
+	  startButton.setToolTipText("Start monitoring");
+
+	  loadButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_load.gif")));
+	  loadButton.setToolTipText("Load configuration");
+
+	  saveButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_save.gif")));
+	  saveButton.setToolTipText("Save configuration");
+
+	  zoomButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_zoom.gif")));
+	  zoomButton.setToolTipText("fixed time zoom");
+
+	  zoomButtonTrend = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_zoom_2.png")));
+	  zoomButtonTrend.setToolTipText("fixed area zoom");
+
+	  timeButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_time.gif")));
+	  timeButton.setToolTipText("Set refresh interval");
+
+	  cfgButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_config.gif")));
+	  cfgButton.setToolTipText("Add new attribute");
+
+	  resetButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_reset.gif")));
+	  resetButton.setToolTipText("Reset trend");
+
+	  //we add it
+	  simpleToolBar.add(loadButton);
+	  simpleToolBar.add(saveButton);
+	  simpleToolBar.add(optionButton);
+	  simpleToolBar.add(zoomButton);
+	  simpleToolBar.add(zoomButtonTrend);
+	  simpleToolBar.add(startButton);
+	  simpleToolBar.add(stopButton);
+	  simpleToolBar.add(timeButton);
+	  simpleToolBar.add(cfgButton);
+	  simpleToolBar.add(resetButton);
+
+	  //we add the listeners
+	  loadButton.addActionListener(this);
+	  saveButton.addActionListener(this);
+	  optionButton.addActionListener(this);
+	  zoomButton.addActionListener(this);
+
+	  zoomButtonTrend.addActionListener( new java.awt.event.ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (!theGraph.isZoomed()){
+		    		theGraph.setAreaZoom(true);
+		            theGraph.enterZoom();
+		    	} else {
+		            theGraph.exitZoom();
+		    	}
+			}
+	    });
+
+	  stopButton.addActionListener(this);
+	  startButton.addActionListener(this);
+	  timeButton.addActionListener(this);
+	  cfgButton.addActionListener(this);
+	  resetButton.addActionListener(this);
+
+	  theToolBar.add(simpleToolBar,BorderLayout.WEST);
+  }
+
+  private void initPopUpMenu() {
+	toolMenu = new JPopupMenu();
+
+    optionMenuI = new JMenuItem("Global settings");
+    stopMenuI = new JMenuItem("Stop monitoring");
+    startMenuI = new JMenuItem("Start monitoring");
+    loadMenuI = new JMenuItem("Load configuration");
+    saveMenuI = new JMenuItem("Save configuration");
+    zoomMenuI = new JMenuItem("Zoom");
+    timeMenuI = new JMenuItem("Set refresh interval");
+    cfgMenuI = new JMenuItem("Add new attribute");
+    resetMenuI = new JMenuItem("Reset trend");
+    showtoolMenuI = new JMenuItem("Hide toolbar");
+
+    loadMenuI.addActionListener(this);
+    saveMenuI.addActionListener(this);
+    optionMenuI.addActionListener(this);
+    zoomMenuI.addActionListener(this);
+    stopMenuI.addActionListener(this);
+    startMenuI.addActionListener(this);
+    timeMenuI.addActionListener(this);
+    cfgMenuI.addActionListener(this);
+    resetMenuI.addActionListener(this);
+    showtoolMenuI.addActionListener(this);
+
     toolMenu.add(loadMenuI);
     toolMenu.add(saveMenuI);
     toolMenu.add(optionMenuI);
@@ -350,246 +406,161 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     toolMenu.add(cfgMenuI);
     toolMenu.add(resetMenuI);
     toolMenu.add(showtoolMenuI);
-    toolMenu.add(offLineButton);
-    toolMenu.add(showErrorMenuI);
-    toolMenu.add(showDiagMenuI);
-
-    // Create the graph
-    theGraph = new JLChart();
-    theGraph.setBorder(new javax.swing.border.EtchedBorder());
-    theGraph.setBackground(new java.awt.Color(180, 180, 180));
-    theGraph.getY1Axis().setAutoScale(true);
-    theGraph.getY2Axis().setAutoScale(true);
-    theGraph.getXAxis().setAutoScale(true);
-    theGraph.setDisplayDuration(300000.0); // 5min
-    theGraph.addUserAction("chkShow toolbar");
-    theGraph.addUserAction("chkShow selection tree");
-    theGraph.addUserAction("chkShow date");
-    theGraph.addUserAction("Load configuration");
-    theGraph.addUserAction("Save configuration");
-    theGraph.addUserAction("View errors");
-    theGraph.addUserAction("Diagnostic");
-    theGraph.addJLChartActionListener(this);
-    // Commented revision 1.43 modifications :
-    // refuse displayDuration greater than 1 day, in order to limit memory use
-    //theGraph.setMaxDisplayDuration(24 * 60 * 60 * 1000);
-
-    innerPanel = new JPanel();
-    innerPanel.setLayout(new BorderLayout());
-
-    setLayout(new BorderLayout());
-    add(theToolBar, BorderLayout.NORTH);
-    innerPanel.add(theGraph, BorderLayout.CENTER);
-    add(innerPanel, BorderLayout.CENTER);
-
-    // Create the tree popup menu
-    treeMenu = new JPopupMenu();
-    addXMenuItem = new JMenuItem("Set to X");
-    addY1MenuItem = new JMenuItem("Add to Y1");
-    addY2MenuItem = new JMenuItem("Add to Y2");
-    removeMenuItem = new JMenuItem("Remove");
-    showMinAlarmMenuItem = new JCheckBoxMenuItem("Show min alarm");
-    showMaxAlarmMenuItem = new JCheckBoxMenuItem("Show max alarm");
-    optionMenuItem = new JMenuItem("Graphic properties");
-    attOptionMenuItem = new JMenuItem("Attribute properties");
-    treeMenu.add(addXMenuItem);
-    treeMenu.add(addY1MenuItem);
-    treeMenu.add(addY2MenuItem);
-    treeMenu.add(removeMenuItem);
-    treeMenu.add(showMinAlarmMenuItem);
-    treeMenu.add(showMaxAlarmMenuItem);
-    treeMenu.add(optionMenuItem);
-    treeMenu.add(attOptionMenuItem);
-    
-    setManageIntervalTrend();
-    if(manageIntervalTrend)
-        initTrendRefresher();
-
-    addXMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        TrendSelectionNode selNode = (TrendSelectionNode) mainTree.getSelectionPath().getLastPathComponent();
-        INumberScalar m = selNode.getModel();
-        if (m != null) {
-
-          // Remove X view (Only one view on X)
-          int i = 0;
-          boolean found = false;
-          Vector dv = rootNode.getSelectableItems();
-          TrendSelectionNode n = null;
-          while (!found && i < dv.size()) {
-            n = (TrendSelectionNode) dv.get(i);
-            found = (n.getSelected() == SEL_X);
-            if (!found) i++;
-          }
-          if (found) n.setSelected(SEL_NONE);
-
-          // Select new view
-          selNode.setSelected(SEL_X);
-          mainTree.repaint();
-          theGraph.repaint();
-        }
-      }
-    });
-
-
-    addY1MenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        TreePath[] selPaths = mainTree.getSelectionPaths();
-        for (int i = 0; i < selPaths.length; i++) {
-          TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
-          if (selNode.getModel() != null && selNode.getSelected() != SEL_Y1) {
-            selNode.setSelected(SEL_Y1);
-          }
-        }
-        mainTree.repaint();
-        theGraph.repaint();
-      }
-    });
-
-    addY2MenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        TreePath[] selPaths = mainTree.getSelectionPaths();
-        for (int i = 0; i < selPaths.length; i++) {
-          TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
-          if (selNode.getModel() != null && selNode.getSelected() != SEL_Y2) {
-            selNode.setSelected(SEL_Y2);
-          }
-        }
-        mainTree.repaint();
-        theGraph.repaint();
-      }
-    });
-
-    removeMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        TreePath[] selPaths = mainTree.getSelectionPaths();
-        for (int i = 0; i < selPaths.length; i++) {
-          TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
-          if (selNode.getModel() != null && selNode.getSelected() != SEL_NONE) {
-            selNode.setSelected(SEL_NONE);
-          }
-        }
-        mainTree.repaint();
-        theGraph.repaint();
-      }
-    });
-
-    showMinAlarmMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        TreePath[] selPaths = mainTree.getSelectionPaths();
-        for (int i = 0; i < selPaths.length; i++) {
-          TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
-          if (selNode.getModel() != null) {
-            if(showMinAlarmMenuItem.isSelected())
-              selNode.showMinAlarm();
-            else
-              selNode.hideMinAlarm();
-          }
-        }
-        mainTree.repaint();
-        theGraph.repaint();
-      }
-    });
-
-    showMaxAlarmMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        TreePath[] selPaths = mainTree.getSelectionPaths();
-        for (int i = 0; i < selPaths.length; i++) {
-          TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
-          if (selNode.getModel() != null) {
-            if(showMaxAlarmMenuItem.isSelected())
-              selNode.showMaxAlarm();
-            else
-              selNode.hideMaxAlarm();
-          }
-        }
-        mainTree.repaint();
-        theGraph.repaint();
-      }
-    });
-
-    optionMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        TrendSelectionNode selNode = (TrendSelectionNode) mainTree.getSelectionPath().getLastPathComponent();
-        INumberScalar m = selNode.getModel();
-        if (m != null) {
-          selNode.showOptions();
-        }
-      }
-    });
-
-    attOptionMenuItem.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        TrendSelectionNode selNode = (TrendSelectionNode) mainTree.getSelectionPath().getLastPathComponent();
-        INumberScalar m = selNode.getModel();
-        if (m != null) {
-          if(propFrame==null)
-            propFrame = new SimplePropertyFrame();
-          propFrame.setModel(m);
-          propFrame.setVisible(true);
-        }
-      }
-    });
-
-    calendar.setTimeInMillis(System.currentTimeMillis());
-    dateLabel = new JLabel();
-    dateLabel.setText(genFormat.format(calendar.getTime()));
-    dateLabel.setHorizontalAlignment(JLabel.CENTER);
-    dateLabel.setVisible(false);
-    add(dateLabel,BorderLayout.SOUTH);
-
-    errWin = new ErrorHistory();
-
   }
 
-  void refreshNode(TrendSelectionNode n) {
-    theGraph.repaint();
-    mainTreeModel.nodeChanged(n);
+  //init the graph JLChart
+  private void initGraph() {
+	  theGraph = new JLChart();
+	  theGraph.setBorder(new javax.swing.border.EtchedBorder());
+	  theGraph.setBackground(new java.awt.Color(180, 180, 180));
+	  theGraph.getY1Axis().setAutoScale(true);
+	  theGraph.getY2Axis().setAutoScale(true);
+	  theGraph.getXAxis().setAutoScale(true);
+	  theGraph.setDisplayDuration(300000.0); // 5min
+	  theGraph.addUserAction("chkShow toolbar");
+	  theGraph.addUserAction("chkShow selection tree");
+	  theGraph.addUserAction("chkShow date");
+	  theGraph.addUserAction("Load configuration");
+	  theGraph.addUserAction("Save configuration");
+	  theGraph.addJLChartActionListener(this);
+	  // Commented revision 1.43 modifications :
+	  // refuse displayDuration greater than 1 day, in order to limit memory use
+	  //theGraph.setMaxDisplayDuration(24 * 60 * 60 * 1000);
   }
-  
-  private void initTrendRefresher()
-  {
-  	panelToolBar = new JToolBar();
+
+  private void initTreePopUpMenu() {
+	  treeMenu = new JPopupMenu();
+	  addXMenuItem = new JMenuItem("Set to X");
+	  addY1MenuItem = new JMenuItem("Add to Y1");
+	  addY2MenuItem = new JMenuItem("Add to Y2");
+	  removeMenuItem = new JMenuItem("Remove");
+	  optionMenuItem = new JMenuItem("Graphic properties");
+	  attOptionMenuItem = new JMenuItem("Attribute properties");
+	  treeMenu.add(addXMenuItem);
+	  treeMenu.add(addY1MenuItem);
+	  treeMenu.add(addY2MenuItem);
+	  treeMenu.add(removeMenuItem);
+	  treeMenu.add(optionMenuItem);
+	  treeMenu.add(attOptionMenuItem);
+
+	  addXMenuItem.addActionListener(new java.awt.event.ActionListener() {
+	    public void actionPerformed(java.awt.event.ActionEvent evt) {
+	      TrendSelectionNode selNode = (TrendSelectionNode) mainTree.getSelectionPath().getLastPathComponent();
+	      INumberScalar m = selNode.getModel();
+	      if (m != null) {
+
+	        // Remove X view (Only one view on X)
+	        int i = 0;
+	        boolean found = false;
+	        Vector dv = rootNode.getSelectableItems();
+	        TrendSelectionNode n = null;
+	        while (!found && i < dv.size()) {
+	          n = (TrendSelectionNode) dv.get(i);
+	          found = (n.getSelected() == SEL_X);
+	          if (!found) i++;
+	        }
+	        if (found) n.setSelected(SEL_NONE);
+
+	        // Select new view
+	        selNode.setSelected(SEL_X);
+	        mainTree.repaint();
+	        theGraph.repaint();        }
+	    }
+	  });
+
+
+	  addY1MenuItem.addActionListener(new java.awt.event.ActionListener() {
+	    public void actionPerformed(java.awt.event.ActionEvent evt) {
+	      TreePath[] selPaths = mainTree.getSelectionPaths();
+	      for (int i = 0; i < selPaths.length; i++) {
+	    	TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
+	        if (selNode.getModel() != null && selNode.getSelected() != SEL_Y1) {
+	          selNode.setSelected(SEL_Y1);
+	        }
+	      }
+	      mainTree.repaint();
+	      theGraph.repaint();
+	    }
+	  });
+
+	    addY2MenuItem.addActionListener(new java.awt.event.ActionListener() {
+	      public void actionPerformed(java.awt.event.ActionEvent evt) {
+	        TreePath[] selPaths = mainTree.getSelectionPaths();
+	        for (int i = 0; i < selPaths.length; i++) {
+	          TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
+	          if (selNode.getModel() != null && selNode.getSelected() != SEL_Y2) {
+	            selNode.setSelected(SEL_Y2);
+	          }
+	        }
+	        mainTree.repaint();
+	        theGraph.repaint();
+	      }
+	    });
+
+	    removeMenuItem.addActionListener(new java.awt.event.ActionListener() {
+	      public void actionPerformed(java.awt.event.ActionEvent evt) {
+	        TreePath[] selPaths = mainTree.getSelectionPaths();
+	        for (int i = 0; i < selPaths.length; i++) {
+	          TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
+	          if (selNode.getModel() != null && selNode.getSelected() != SEL_NONE) {
+	            selNode.setSelected(SEL_NONE);
+	          }
+	        }
+	        mainTree.repaint();
+	        theGraph.repaint();
+	      }
+	    });
+
+	    optionMenuItem.addActionListener(new java.awt.event.ActionListener() {
+	      public void actionPerformed(java.awt.event.ActionEvent evt) {
+	        TrendSelectionNode selNode = (TrendSelectionNode) mainTree.getSelectionPath().getLastPathComponent();
+	        INumberScalar m = selNode.getModel();
+	        if (m != null) {
+	          selNode.showOptions();
+	        }
+	      }
+	    });
+
+	    attOptionMenuItem.addActionListener(new java.awt.event.ActionListener() {
+	      public void actionPerformed(java.awt.event.ActionEvent evt) {
+	        TrendSelectionNode selNode = (TrendSelectionNode) mainTree.getSelectionPath().getLastPathComponent();
+	        INumberScalar m = selNode.getModel();
+	        if (m != null) {
+	          if(propFrame==null)
+	            propFrame = new SimplePropertyFrame();
+	          propFrame.setModel(m);
+	          propFrame.setVisible(true);
+	        }
+	      }
+	    });
+  }
+
+  //add specific buttons
+  private void initTrendRefresher(){
     panelToolBarTrend = new JToolBar();
-    
+    panelToolBarTrend.setFloatable(false);
+
     timeButtonTrend = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_refresh_time.png")));
     timeButtonTrend.setToolTipText("Set refresh interval Trend");
     timeMenuTrendI = new JMenuItem("Set refresh interval Trend");
-    	
+
     refreshButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_refresh.png")));
     refreshButton.setToolTipText("Refresh trend");
     refreshMenuI = new JMenuItem("Refresh trend");
-    	
+
     timeButtonTrend.addActionListener(this);
-    timeMenuTrendI.addActionListener(this);    	
+    timeMenuTrendI.addActionListener(this);
     refreshButton.addActionListener(this);
-    	
-    panelToolBar.setFloatable(false);
-    panelToolBarTrend.setFloatable(false);
-    
-    panelToolBar.add(loadButton);
-    panelToolBar.add(saveButton);
-    panelToolBar.add(optionButton);
-    panelToolBar.add(zoomButton);
-    panelToolBar.add(startButton);
-    panelToolBar.add(stopButton);
-    panelToolBar.add(timeButton);
-    panelToolBar.add(cfgButton);
-    panelToolBar.add(resetButton);
+
     panelToolBarTrend.add(timeButtonTrend);
     panelToolBarTrend.add(refreshButton);
-          
-    theToolBar.setLayout(new BorderLayout());
-    theToolBar.add(panelToolBar,BorderLayout.WEST);
-    
-    JPanel jPanel = new JPanel();
-    jPanel.setLayout(new BorderLayout());
-    jPanel.add(panelToolBarTrend,BorderLayout.CENTER);
-    theToolBar.add(jPanel,BorderLayout.EAST);
-    
+
+
+    //we add the new buttons in the global toolBar
+    theToolBar.add(panelToolBarTrend,BorderLayout.EAST);
+
     buttonMap.put(reset,refreshButton);
     toolMenu.add(timeMenuTrendI);
-    
   }
 
   // -------------------------------------------------------------
@@ -632,17 +603,10 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
       setButtonBarVisible(b);
     } else if (o == resetButton || o == resetMenuI) {
       resetTrend();
-    } else if (o == refreshButton || o == refreshButton) {
+    }else if (o == refreshButton || o == refreshButton) {
       refreshTrend();
-    } else if (o == timeButtonTrend || o == timeMenuTrendI) {
-      setRefreshIntervalTrend();
-    } else if (o == offLineButton) {
-      setOffLineMode(offLineButton.isSelected());
-    } else if (o == showErrorMenuI) {
-      ATKGraphicsUtils.centerFrameOnScreen(errWin);
-      errWin.setVisible(true);      
-    } else if (o == showDiagMenuI) {
-      fr.esrf.tangoatk.widget.util.ATKDiagnostic.showDiagnostic();
+    }else if (o == timeButtonTrend || o == timeMenuTrendI) {
+        setRefreshIntervalTrend();
     }
 
   }
@@ -662,11 +626,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
       loadButtonActionPerformed();
     } else if (evt.getName().equalsIgnoreCase("Save configuration")) {
       saveButtonActionPerformed();
-    } else if (evt.getName().equalsIgnoreCase("View errors")) {
-      ATKGraphicsUtils.centerFrameOnScreen(errWin);
-      errWin.setVisible(true);
-    } else if (evt.getName().equalsIgnoreCase("Diagnostic")) {
-      fr.esrf.tangoatk.widget.util.ATKDiagnostic.showDiagnostic();
     }
 
   }
@@ -696,38 +655,23 @@ public void setTimePrecision(int timePrecision) {
   // Refresher listener
   // -------------------------------------------------------------
   public void refreshStep() {
-
-    if (isDateVisible()) {
+    // All attribute has been read, we can repaint the graph
+    if(isDateVisible()) {
       calendar.setTimeInMillis(System.currentTimeMillis());
       dateLabel.setText(genFormat.format(calendar.getTime()));
     }
 
-    if (theGraph.getXAxis().getPercentScrollback() == 0.0) {
-
-      if (!offLineMode) {
-        // All attribute has been read, we can repaint the graph
-        if (!manageIntervalTrend)
-          theGraph.repaint();
-        else {
-          // repaint Trend after IntervalTrend time
-          currentTime = System.currentTimeMillis();
-          if (currentTime - oldCurrentTime > getRefreshIntervalTrend()) {
-            theGraph.repaint();
-            oldCurrentTime = currentTime;
-          }
-        }
-      }
-
+  	if(!manageIntervalTrend)
+		theGraph.repaint();
+  	else
+  	{
+  		// repaint Trend after IntervalTrend time
+    	currentTime = System.currentTimeMillis();
+    	if(currentTime - oldCurrentTime > getRefreshIntervalTrend()){
+        	theGraph.repaint(); 
+        	oldCurrentTime = currentTime;
+    	}
     }
-
-  }
-
-  /**
-   * Sets or unset the offline mode (data are updated but not painted)
-   * @param mode Offline mode
-   */
-  public void setOffLineMode(boolean mode) {
-    offLineMode = mode;
   }
 
   private void setRefreshInterval() {
@@ -832,7 +776,6 @@ public void setTimePrecision(int timePrecision) {
     // Remove old listeners and clean former list
     if (attList != null)
     {
-        attList.removeErrorListener(errWin);
         attList.removeRefresherListener(this);
     }
 
@@ -895,8 +838,6 @@ public void setTimePrecision(int timePrecision) {
                   addY1MenuItem.setEnabled(selNode.getSelected() != SEL_Y1);
                   addY2MenuItem.setEnabled(selNode.getSelected() != SEL_Y2);
                   removeMenuItem.setEnabled(selNode.getSelected() != SEL_NONE);
-                  showMinAlarmMenuItem.setSelected(selNode.isShowingMinAlarm());
-                  showMaxAlarmMenuItem.setSelected(selNode.isShowingMaxAlarm());
                   treeMenu.show(mainTree, e.getX(), e.getY());
                 } else if (selNode == rootNode) {
 
@@ -928,15 +869,12 @@ public void setTimePrecision(int timePrecision) {
                     addY1MenuItem.setEnabled(lastAttributeNode.getSelected() != SEL_Y1);
                     addY2MenuItem.setEnabled(lastAttributeNode.getSelected() != SEL_Y2);
                     removeMenuItem.setEnabled(lastAttributeNode.getSelected() != SEL_NONE);
-                    showMinAlarmMenuItem.setSelected(lastAttributeNode.isShowingMinAlarm());
-                    showMaxAlarmMenuItem.setSelected(lastAttributeNode.isShowingMaxAlarm());
-                  } else {
+                  }
+                  else {
                     addXMenuItem.setEnabled(false);
                     addY1MenuItem.setEnabled(true);
                     addY2MenuItem.setEnabled(true);
                     removeMenuItem.setEnabled(true);
-                    showMinAlarmMenuItem.setSelected(false);
-                    showMaxAlarmMenuItem.setSelected(false);
                   }
                   treeMenu.show(mainTree, e.getX(), e.getY());
                   lastAttributeNode = null;
@@ -961,10 +899,8 @@ public void setTimePrecision(int timePrecision) {
     innerPanel.revalidate();
 
     attList = list;
-    if(attList!=null) {
+    if(attList!=null)
       attList.addRefresherListener(this);
-      attList.addErrorListener(errWin);
-    }
 
     updateModel();
   }
@@ -1081,11 +1017,42 @@ public void setTimePrecision(int timePrecision) {
     theGraph.showOptionDialog();
   }
 
+  /**
+   * <code>getExtension</code> returns the extension of a given file,
+   * that is the part after the last `.' in the filename.
+   *
+   * @param f a <code>File</code> value
+   * @return a <code>String</code> value
+   */
+  private String getExtension(File f) {
+		String ext = null;
+		String s = f.getName();
+		int i = s.lastIndexOf('.');
+		if (i > 0 &&  i < s.length() - 1) {
+		    ext = s.substring(i+1).toLowerCase();
+		}
+		return ext;
+  }
+
   private void saveButtonActionPerformed() {
 
     int ok = JOptionPane.YES_OPTION;
     JFileChooser chooser = new JFileChooser(".");
-    chooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
+    chooser.addChoosableFileFilter(new FileFilter() {
+        public boolean accept(File f) {
+            if (f.isDirectory()) {
+                return true;
+            }
+            String extension = getExtension(f);
+            if (extension != null && extension.equals("txt"))
+                return true;
+            return false;
+        }
+
+        public String getDescription() {
+            return "text files ";
+        }
+    });
     if(lastConfig.length()>0)
       chooser.setSelectedFile(new File(lastConfig));
     int returnVal = chooser.showSaveDialog(parent);
@@ -1093,7 +1060,7 @@ public void setTimePrecision(int timePrecision) {
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       File f = chooser.getSelectedFile();
       if (f != null) {
-        if (MultiExtFileFilter.getExtension(f) == null) {
+        if (getExtension(f) == null) {
   		  f = new File(f.getAbsolutePath() + ".txt");
         }
         if (f.exists())
@@ -1110,8 +1077,22 @@ public void setTimePrecision(int timePrecision) {
   private void loadButtonActionPerformed() {
 
     int ok = JOptionPane.YES_OPTION;
-    JFileChooser chooser = new JFileChooser(".");
-    chooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
+    JFileChooser chooser = new JFileChooser();
+    chooser.addChoosableFileFilter(new FileFilter() {
+        public boolean accept(File f) {
+            if (f.isDirectory()) {
+                return true;
+            }
+            String extension = getExtension(f);
+            if (extension != null && extension.equals("txt"))
+                return true;
+            return false;
+        }
+
+        public String getDescription() {
+            return "text files ";
+        }
+    });
     if(lastConfig.length()>0)
       chooser.setSelectedFile(new File(lastConfig));
     int returnVal = chooser.showOpenDialog(parent);
@@ -1151,6 +1132,9 @@ public void setTimePrecision(int timePrecision) {
     if (attList != null) to_write += "refresh_time:" + attList.getRefreshInterval() + "\n";
     to_write += "min_refresh_time:" + getMinRefreshInterval() + "\n";
 
+    if(manageIntervalTrend)
+    	to_write += "refresh_interval_trend:"+refreshIntervalTrend+"\n";
+
     // Axis
     to_write += theGraph.getXAxis().getConfiguration("x");
     to_write += theGraph.getY1Axis().getConfiguration("y1");
@@ -1168,11 +1152,7 @@ public void setTimePrecision(int timePrecision) {
       n = (TrendSelectionNode) dv.get(i);
       to_write += "dv" + i + "_name:\'" + n.getModelName() + "\'\n";
       to_write += "dv" + i + "_selected:" + n.getSelected() + "\n";
-      to_write += "dv" + i + "_showminalarm:" + n.isShowingMinAlarm() + "\n";
-      to_write += "dv" + i + "_showmaxalarm:" + n.isShowingMaxAlarm() + "\n";
       to_write += n.getData().getConfiguration("dv" + i);
-      if( n.isShowingMinAlarm() ) to_write += n.getMinAlarmData().getConfiguration("dv_min_alarm" + i);
-      if( n.isShowingMaxAlarm() ) to_write += n.getMaxAlarmData().getConfiguration("dv_max_alarm" + i);
     }
 
     return to_write;
@@ -1189,10 +1169,6 @@ public void setTimePrecision(int timePrecision) {
     // Reset display duration (to avoid history reading side FX)
     theGraph.setDisplayDuration(Double.POSITIVE_INFINITY);
 
-    // Load isShowingDeviceName parameter before creating dataview
-    p = f.getParam("show_device_name");
-    if (p != null) setShowingDeviceNames(OFormat.getInt(p.get(0).toString()));
-
     //Create a new Attribute List
     AttributePolledList alist = new AttributePolledList();
     alist.setFilter(new fr.esrf.tangoatk.core.IEntityFilter() {
@@ -1204,7 +1180,6 @@ public void setTimePrecision(int timePrecision) {
         return false;
       }
     });
-    alist.addErrorListener(errWin);
 
     // Get all dataviews
     p = f.getParam("dv_number");
@@ -1235,7 +1210,10 @@ public void setTimePrecision(int timePrecision) {
       }
 
       p = f.getParam("min_refresh_time");
-      if (p != null) {
+
+      //we init the min_refresh_time with 1000
+      setMinRefreshInterval(1000);
+      if (p != null && OFormat.getInt(p.get(0).toString()) != 0) {
         setMinRefreshInterval( OFormat.getInt(p.get(0).toString()) );
       }
       if (alist.getRefreshInterval() < getMinRefreshInterval()) {
@@ -1264,6 +1242,19 @@ public void setTimePrecision(int timePrecision) {
         setModel(alist);
         lastCreatedList = alist;
 
+        p = f.getParam("refresh_interval_trend");
+        refreshIntervalTrend = 1000;
+        if( p!= null)
+        	refreshIntervalTrend = OFormat.getInt(p.get(0).toString());
+
+        if ( (refreshIntervalTrend < getMinRefreshInterval()) || (refreshIntervalTrend % alist.getRefreshInterval() != 0)) {
+
+        	if(getMinRefreshInterval() % alist.getRefreshInterval() == 0)
+        		refreshIntervalTrend = getMinRefreshInterval();
+        	else
+        		//refreshInterval is always greater than minRefreshInterval
+        		refreshIntervalTrend = alist.getRefreshInterval();
+        }
       }
 
     } else {
@@ -1284,14 +1275,13 @@ public void setTimePrecision(int timePrecision) {
     p = f.getParam("date_visible");
     if (p != null) setDateVisible(OFormat.getBoolean(p.get(0).toString()));
     p = f.getParam("frame_title");
-    if (p != null) {
-      graphTitle = p.get(0).toString();
-      if(parent!=null) parent.setTitle(graphTitle);
-    }
+    if (p != null) graphTitle = p.get(0).toString();
     p = f.getParam("window_pos");
     if( p != null ) framePos=OFormat.getPoint(p);
     p = f.getParam("window_size");
     if( p != null ) frameDimension=OFormat.getPoint(p);
+    p = f.getParam("show_device_name");
+    if (p != null) setShowingDeviceNames(OFormat.getInt(p.get(0).toString()));
 
     // Axis
     theGraph.getXAxis().applyConfiguration("x",f);
@@ -1328,33 +1318,6 @@ public void setTimePrecision(int timePrecision) {
 
           // Dataview options
           d.applyConfiguration(pref,f);
-
-          // Min alarm
-          p=f.getParam(pref + "_showminalarm");
-          if(p!=null) {
-            boolean showMinAlarm = OFormat.getBoolean(p.get(0).toString());
-            if( showMinAlarm ) {
-              n.showMinAlarm();
-              String prefMinAlarm = "dv_min_alarm" + i;
-              n.getMinAlarmData().applyConfiguration(prefMinAlarm,f);
-            } else {
-              n.hideMinAlarm();
-            }
-          }
-
-          // Max alarm
-          p=f.getParam(pref + "_showmaxalarm");
-          if(p!=null) {
-            boolean showMaxAlarm = OFormat.getBoolean(p.get(0).toString());
-            if( showMaxAlarm ) {
-              n.showMaxAlarm();
-              String prefMaxAlarm = "dv_max_alarm" + i;
-              n.getMaxAlarmData().applyConfiguration(prefMaxAlarm,f);
-            } else {
-              n.hideMaxAlarm();
-            }
-          }
-
         }
       }
     }
@@ -1630,7 +1593,7 @@ public void setTimePrecision(int timePrecision) {
    *            The axis. Can be SEL_X (x axis), SEL_Y1 (y1 axis), SEL_Y2 (y2
    *            axis) or SEL_NONE (removes attribute from axis)
    * @param addToModel
-   *            A boolean to say wheather the attribute has to be added in
+   *            A boolean to say whether the attribute has to be added in
    *            model or not. If <code>true</code> and the attribute is not
    *            in model, the attribute is added in the trend model.
    * @see #SEL_X
@@ -1919,7 +1882,7 @@ public void setTimePrecision(int timePrecision) {
   public static void main(String[] args) throws Exception {
 
     final JFrame f = new JFrame();
-    final Trend t = new Trend(f);
+    final Trend t = new Trend();
 
     //DeviceFactory.getInstance().setTraceMode(DeviceFactory.TRACE_ALL);
     /*
@@ -1933,9 +1896,6 @@ public void setTimePrecision(int timePrecision) {
                  "dv1_selected:3 "+
                  "dv1_linecolor:0,0,255 ");
      */
-
-    // Default title
-    f.setTitle("Trends");
 
     if (args.length > 0) {
       String err = t.loadSetting(args[0]);
@@ -1952,6 +1912,8 @@ public void setTimePrecision(int timePrecision) {
 
     if( t.getTitle().length()>0 )
       f.setTitle(t.getTitle());
+    else
+      f.setTitle("Trends");
 
     f.setContentPane(t);
     Image image = Toolkit.getDefaultToolkit().getImage(t.getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_icon.gif"));

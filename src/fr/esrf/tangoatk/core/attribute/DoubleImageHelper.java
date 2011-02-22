@@ -30,6 +30,7 @@
 // Description:
 package fr.esrf.tangoatk.core.attribute;
 
+import fr.esrf.tangoatk.core.*;
 
 
 import fr.esrf.Tango.*;
@@ -37,7 +38,7 @@ import fr.esrf.TangoApi.*;
 
 class DoubleImageHelper extends ANumberImageHelper {
 
-  public DoubleImageHelper(AAttribute attribute) {
+  public DoubleImageHelper(IAttribute attribute) {
     init(attribute);
   }
 
@@ -65,7 +66,7 @@ class DoubleImageHelper extends ANumberImageHelper {
       flatd = NumberAttributeHelper.flatten(d);
       if (dUnitFactor==1.0)
       {
-    	 da.insert(flatd, d[0].length, d.length);
+         da.insert(flatd, d.length, d[0].length);
 	 return;
       }
       
@@ -76,7 +77,7 @@ class DoubleImageHelper extends ANumberImageHelper {
           tmp[i] = (flatd[i] / dUnitFactor);
       }
       
-      da.insert(tmp, d[0].length, d.length);
+      da.insert(tmp, d.length, d[0].length);
   }
 
   void setMinAlarm(double d, boolean writable) {

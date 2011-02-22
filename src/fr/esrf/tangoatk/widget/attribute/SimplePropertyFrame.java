@@ -36,6 +36,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentAdapter;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Class for display/edit attribute property
@@ -233,6 +234,7 @@ public class SimplePropertyFrame extends JDialog {
     minWarningText = new JTextField();
     minWarningText.setMargin(noMargin);
     minWarningText.setEditable(true);
+    minWarningText.setEnabled(false);
     propPanel.add(minWarningText);
 
     maxWarningLabel = new JLabel("Max. warning");
@@ -240,6 +242,7 @@ public class SimplePropertyFrame extends JDialog {
     maxWarningText = new JTextField();
     maxWarningText.setMargin(noMargin);
     maxWarningText.setEditable(true);
+    maxWarningText.setEnabled(false);
     propPanel.add(maxWarningText);
 
     deltaTLabel = new JLabel("Delta t(ms)");
@@ -247,6 +250,7 @@ public class SimplePropertyFrame extends JDialog {
     deltaTText = new JTextField();
     deltaTText.setMargin(noMargin);
     deltaTText.setEditable(true);
+    deltaTText.setEnabled(false);
     propPanel.add(deltaTText);
 
     deltaValLabel = new JLabel("Delta Val");
@@ -254,6 +258,7 @@ public class SimplePropertyFrame extends JDialog {
     deltaValText = new JTextField();
     deltaValText.setMargin(noMargin);
     deltaValText.setEditable(true);
+    deltaValText.setEnabled(false);
     propPanel.add(deltaValText);
 
     formatLabel = new JLabel("Format");
@@ -331,127 +336,27 @@ public class SimplePropertyFrame extends JDialog {
 
     if (model instanceof ANumber)
     {
-      ANumber aNbModel = (ANumber) model;
-      // Update min
-      p = (Property) pmap.get("min_value");
-      String v = minText.getText();
-      if (propertyReset(v)) {
-        p.setValue("NaN");
-      } else {
-        try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
-          p.setValue(d);
-          p.refresh();
-        } catch (NumberFormatException e) {
-          JOptionPane.showMessageDialog(this, "Invalid minimum value\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-      }
+    	ANumber aNbModel = (ANumber) model;
+    	java.util.HashMap<String, JTextField> properties = new java.util.HashMap<String, JTextField>();
 
-      // Update max
-      p = (Property) pmap.get("max_value");
-      v = maxText.getText();
-      if (propertyReset(v)) {
-        p.setValue("NaN");
-      } else {
-        try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
-          p.setValue(d);
-          p.refresh();
-        } catch (NumberFormatException e) {
-          JOptionPane.showMessageDialog(this, "Invalid maximum value\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-      }
+    	properties.put("min_value", minText);
+    	properties.put("max_value", maxText);
+    	properties.put("min_alarm", alminText);
+    	properties.put("max_alarm", almaxText);
+    	properties.put("min_warning", minWarningText);
+    	properties.put("max_warning", maxWarningText);
+    	properties.put("delta_t", deltaTText);
+    	properties.put("delta_val", deltaValText);
 
-      // Update almin
-      p = (Property) pmap.get("min_alarm");
-      v = alminText.getText();
-      if (propertyReset(v)) {
-        p.setValue("NaN");
-      } else {
-        try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
-          p.setValue(d);
-          p.refresh();
-        } catch (NumberFormatException e) {
-          JOptionPane.showMessageDialog(this, "Invalid minimum alarm\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-      }
+    	for(Entry<String, JTextField> entry : properties.entrySet()) {
+    		p = (Property) pmap.get(entry.getKey());
 
-      // Update almax
-      p = (Property) pmap.get("max_alarm");
-      v = almaxText.getText();
-      if (propertyReset(v)) {
-        p.setValue("NaN");
-      } else {
-        try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
-          p.setValue(d);
-          p.refresh();
-        } catch (NumberFormatException e) {
-          JOptionPane.showMessageDialog(this, "Invalid maximum alarm\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-      }
-
-      // Update min warning
-      p = (Property) pmap.get("min_warning");
-      v = minWarningText.getText();
-      if (propertyReset(v)) {
-        p.setValue("NaN");
-      } else {
-        try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
-          p.setValue(d);
-          p.refresh();
-        } catch (NumberFormatException e) {
-          JOptionPane.showMessageDialog(this, "Invalid minimum warning\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-      }
-
-      // Update max warning
-      p = (Property) pmap.get("max_warning");
-      v = maxWarningText.getText();
-      if (propertyReset(v)) {
-        p.setValue("NaN");
-      } else {
-        try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
-          p.setValue(d);
-          p.refresh();
-        } catch (NumberFormatException e) {
-          JOptionPane.showMessageDialog(this, "Invalid maximum warning\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-      }
-
-      // Update delta t
-      p = (Property) pmap.get("delta_t");
-      v = deltaTText.getText();
-      if (propertyReset(v)) {
-        p.setValue("NaN");
-      } else {
-        try {
-          Double d = new Double(v);
-          p.setValue(d);
-          p.refresh();
-        } catch (NumberFormatException e) {
-          JOptionPane.showMessageDialog(this, "Invalid delta t\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-      }
-
-      // Update delta val
-      p = (Property) pmap.get("delta_val");
-      v = deltaValText.getText();
-      if (propertyReset(v)) {
-        p.setValue("NaN");
-      } else {
-        try {
-          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
-          p.setValue(d);
-          p.refresh();
-        } catch (NumberFormatException e) {
-          JOptionPane.showMessageDialog(this, "Invalid delta val\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-      }
-
+    		//if the property is really in the property map we update it
+    		if( p != null){
+    			String v = entry.getValue().getText();
+    			updateProperty(p, aNbModel, v, entry.getKey());
+    		}
+    	}
     }
 
     // Update format
@@ -474,6 +379,21 @@ public class SimplePropertyFrame extends JDialog {
     updateComponents();
 
   }
+
+private void updateProperty(Property p, ANumber aNbModel, String v, String desc) {
+	if (propertyReset(v)) {
+        p.setValue("NaN");
+      } else {
+        try {
+          Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
+          p.setValue(d);
+          p.refresh();
+        } catch (NumberFormatException e) {
+          JOptionPane.showMessageDialog(this, "Invalid "+desc+" value\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+      }
+}
+
 
   // Update components according to the model
   public void updateComponents() {

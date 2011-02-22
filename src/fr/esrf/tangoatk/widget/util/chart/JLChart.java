@@ -62,7 +62,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Vector;
 import javax.imageio.ImageIO;
 import javax.swing.Box;
@@ -81,11 +80,11 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 import javax.swing.filechooser.FileFilter;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.JTableRow;
-import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
 
 class LabelRect {
   Rectangle rect;
@@ -104,7 +103,7 @@ class TabbedLine {
   int anno;
   int sIndex;
   int precision = 0;
-  String noValueString = "";
+  String noValueString = "*";
 
   TabbedLine(int nb) {
     dv = new JLDataView[nb];
@@ -346,6 +345,18 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
   private boolean zoomDrag;
   private boolean zoomDragAllowed;
+
+  private boolean areaZoom;
+  private boolean isZoomed;
+  private boolean oldAutoScaleY1;
+  private boolean oldAutoScaleY2;
+  private double oldMinY1;
+  private double oldMaxY1;
+  private double oldMinY2;
+  private double oldMaxY2;
+  private double oldTime;
+
+
   private int zoomX;
   private int zoomY;
   private JButton zoomButton;
@@ -394,7 +405,6 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   protected boolean preferDialog = false, modalDialog = false;
   protected JDialog tableDialog = null;
   protected Window dialogParent;
-  protected JFrame parentFrame = null;
 
   // Used to open the file chooser dialog on the last saved snapshot location
   protected String lastSnapshotLocation = ".";
@@ -405,7 +415,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   // Used to open the file chooser dialog with the last used file filter
   protected FileFilter lastFileFilter = null;
 
-  protected String noValueString = "";
+  protected String noValueString = "*";
 
   /**
    * Graph constructor.
@@ -510,6 +520,9 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     zoomButton.setVisible(false);
     zoomButton.addActionListener(this);
     add(zoomButton);
+
+    areaZoom = false;
+    isZoomed = false;
   }
 
   private void saveSnapshot()
@@ -523,7 +536,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
                 {
                     return true;
                 }
-                String extension = MultiExtFileFilter.getExtension( f );
+                String extension = getExtension( f );
                 if ( extension != null && extension.equals( "jpg" ) ) return true;
                 return false;
             }
@@ -553,7 +566,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
                 {
                     return true;
                 }
-                String extension = MultiExtFileFilter.getExtension( f );
+                String extension = getExtension( f );
                 if ( extension != null && extension.equals( "png" ) ) return true;
                 return false;
             }
@@ -602,8 +615,8 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
                 FileFilter filter = chooser.getFileFilter();
                 if ( filter == jpgFilter )
                 {
-                    if ( MultiExtFileFilter.getExtension( f ) == null
-                            || !MultiExtFileFilter.getExtension( f ).equalsIgnoreCase( "jpg" ) )
+                    if ( getExtension( f ) == null
+                            || !getExtension( f ).equalsIgnoreCase( "jpg" ) )
                     {
                         f = new File( f.getAbsolutePath() + ".jpg" );
                     }
@@ -611,8 +624,8 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
                 }
                 else if ( filter == pngFilter )
                 {
-                    if ( MultiExtFileFilter.getExtension( f ) == null
-                            || !MultiExtFileFilter.getExtension( f ).equalsIgnoreCase( "png" ) )
+                    if ( getExtension( f ) == null
+                            || !getExtension( f ).equalsIgnoreCase( "png" ) )
                     {
                         f = new File( f.getAbsolutePath() + ".png" );
                     }
@@ -624,17 +637,17 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
                 if ( ok == JOptionPane.YES_OPTION )
                 {
                     this.repaint();
-                    if ( MultiExtFileFilter.getExtension( f ) == null )
+                    if ( getExtension( f ) == null )
                     {
                         JOptionPane.showMessageDialog( this,
                                 "Unknown file type", "Error",
                                 JOptionPane.ERROR_MESSAGE );
                     }
-                    else if ( MultiExtFileFilter.getExtension( f ).equalsIgnoreCase( "jpg" ) )
+                    else if ( getExtension( f ).equalsIgnoreCase( "jpg" ) )
                     {
                         extension = "jpg";
                     }
-                    else if ( MultiExtFileFilter.getExtension( f ).equalsIgnoreCase( "png" ) )
+                    else if ( getExtension( f ).equalsIgnoreCase( "png" ) )
                     {
                         extension = "png";
                     }
@@ -825,9 +838,6 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
       if (s.length() == 0)
         header = null;
     setHeaderVisible(header != null);
-    if(parentFrame!=null && header!=null) {
-      parentFrame.setTitle(header);
-    }
   }
 
   /**
@@ -839,13 +849,6 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     return header;
   }
 
-  /**
-   * Sets the JFrame that will receive the header as title.
-   * @param parent JFrame parent
-   */
-  public void setFrameParent(JFrame parent) {
-    parentFrame = parent;
-  }
 
   /**
    * Sets the display duration.This will garbage old data in all displayed data views.
@@ -1093,7 +1096,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
    * @return true if the , false otherwise
    */
   public boolean isZoomed() {
-    return xAxis.isZoomed() || y1Axis.isZoomed() || y2Axis.isZoomed();
+    return xAxis.isZoomed() || y1Axis.isZoomed() || y2Axis.isZoomed() || isZoomed;
   }
 
   /**
@@ -1219,10 +1222,34 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
    * Exit zoom mode.
    */
   public void exitZoom() {
-    xAxis.unzoom();
-    y1Axis.unzoom();
-    y2Axis.unzoom();
+
+	 if( areaZoom ) {
+
+		 y1Axis.setAutoScale(oldAutoScaleY1);
+		 y2Axis.setAutoScale(oldAutoScaleY2);
+
+		 if( !oldAutoScaleY1) {
+		  y1Axis.setMaximum(oldMaxY1);
+		  y1Axis.setMinimum(oldMinY1);
+		 }
+
+		 if( !oldAutoScaleY2) {
+		  y2Axis.setMaximum(oldMaxY2);
+		  y2Axis.setMinimum(oldMinY2);
+		 }
+
+		 xAxis.setAutoScale(true);
+
+	    areaZoom = false;
+	 } else {
+		 xAxis.unzoom();
+		 y1Axis.unzoom();
+		 y2Axis.unzoom();
+	 }
+
     zoomDragAllowed = false;
+    zoomButton.setVisible(false);
+	isZoomed = false;
     setCursor(Cursor.getDefaultCursor());
     repaint();
   }
@@ -2110,6 +2137,24 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
       }
   }
 
+  /**
+   * <code>getExtension</code> returns the extension of a given file, that
+   * is the part after the last `.' in the filename.
+   *
+   * @param f
+   *            a <code>File</code> value
+   * @return a <code>String</code> value
+   */
+  protected String getExtension(File f) {
+      String ext = null;
+      String s = f.getName();
+      int i = s.lastIndexOf('.');
+      if (i > 0 && i < s.length() - 1) {
+          ext = s.substring(i + 1).toLowerCase();
+      }
+      return ext;
+  }
+
   // -----------------------------------------------------
   // Action listener
   // -----------------------------------------------------
@@ -2135,14 +2180,28 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
         int ok = JOptionPane.YES_OPTION;
         JFileChooser chooser = new JFileChooser(lastDataFileLocation);
-        chooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
+        chooser.addChoosableFileFilter(new FileFilter() {
+            public boolean accept(File f) {
+                if (f.isDirectory()) {
+                    return true;
+                }
+                String extension = getExtension(f);
+                if (extension != null && extension.equals("txt"))
+                    return true;
+                return false;
+            }
+
+            public String getDescription() {
+                return "text files ";
+            }
+        });
         chooser.setDialogTitle("Save Graph Data (Text file with TAB separated fields)");
         int returnVal = chooser.showSaveDialog(this);
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File f = chooser.getSelectedFile();
             if (f != null) {
-                if (MultiExtFileFilter.getExtension(f) == null) {
+                if (getExtension(f) == null) {
                     f = new File(f.getAbsolutePath() + ".txt");
                 }
                 if (f.exists()) {
@@ -2476,7 +2535,8 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   // Paint the zoom mode label
   private void paintZoomButton(int x,int y) {
 
-    if( isZoomed() ) {
+	//isZoomed is in the case of an area Zoom
+	if( isZoomed || isZoomed()) {
       int w = zoomButton.getPreferredSize().width;
       int h = zoomButton.getPreferredSize().height;
       zoomButton.setBounds(x+7,y+5,w,h);
@@ -2522,6 +2582,16 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 //     return;
 //  }
 
+    //we manually handle the time progression
+    if( areaZoom){
+    	double current = System.currentTimeMillis();
+        double time =  current - oldTime;
+        oldTime = current;
+    	xAxis.setMinimum(xAxis.getMinimum()+time);
+    	xAxis.setMaximum(xAxis.getMaximum()+time);
+    }
+
+
     Graphics2D g2 = (Graphics2D) g;
     g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
       RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
@@ -2562,43 +2632,16 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     if (paintAxisFirst) {
 
       //Draw axes
-      y1Axis.paintAxis(g, frc, xOrgY1, yOrgY, xAxis, xOrg, yOrg, getBackground(),!y2Axis.isVisible() || y2Axis.getViewNumber()==0);
-      y2Axis.paintAxis(g, frc, xOrgY2, yOrgY, xAxis, xOrg, yOrg, getBackground(),!y1Axis.isVisible() || y1Axis.getViewNumber()==0);
-      if( xAxis.getPosition()==JLAxis.HORIZONTAL_ORG2)
-        xAxis.paintAxis(g, frc, xOrg, yOrg, y2Axis, 0, 0, getBackground(),true);
-      else
-        xAxis.paintAxis(g, frc, xOrg, yOrg, y1Axis, 0, 0, getBackground(),true);
+      drawAxes(g, frc, xOrg, yOrg, xOrgY1, xOrgY2, yOrgY);
 
       //Draw data
-      Rectangle clipRect = g.getClipBounds();
-      y1Axis.paintDataViews(g, xAxis, xOrg, yOrg);
-      y2Axis.paintDataViews(g, xAxis, xOrg, yOrg);
-      if (clipRect != null) {
-        g.setClip(clipRect.x,clipRect.y, clipRect.width, clipRect.height);
-      } else {
-        g.setClip(null);
-      }
-
+      drawData(g, xOrg, yOrg);
     } else {
-
       //Draw data
-      Rectangle clipRect = g.getClipBounds();
-      y1Axis.paintDataViews(g, xAxis, xOrg, yOrg);
-      y2Axis.paintDataViews(g, xAxis, xOrg, yOrg);
-      if (clipRect != null) {
-        g.setClip(clipRect.x,clipRect.y, clipRect.width, clipRect.height);
-      } else {
-        g.setClip(null);
-      }
+      drawData(g, xOrg, yOrg);
 
       //Draw axes
-      y1Axis.paintAxis(g, frc, xOrgY1, yOrgY, xAxis, xOrg, yOrg, getBackground(),!y2Axis.isVisible() || y2Axis.getViewNumber()==0);
-      y2Axis.paintAxis(g, frc, xOrgY2, yOrgY, xAxis, xOrg, yOrg, getBackground(),!y1Axis.isVisible() || y1Axis.getViewNumber()==0);
-      if (xAxis.getPosition() == JLAxis.HORIZONTAL_ORG2)
-        xAxis.paintAxis(g, frc, xOrg, yOrg, y2Axis, 0, 0, getBackground(),true);
-      else
-        xAxis.paintAxis(g, frc, xOrg, yOrg, y1Axis, 0, 0, getBackground(),true);
-
+      drawAxes(g, frc, xOrg, yOrg, xOrgY1, xOrgY2, yOrgY);
     }
 
     redrawPanel(g);
@@ -2607,6 +2650,27 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     paintComponents(g);
     paintBorder(g);
   }
+
+	private void drawAxes(Graphics g, FontRenderContext frc, int xOrg, int yOrg,
+			int xOrgY1, int xOrgY2, int yOrgY) {
+		y1Axis.paintAxis(g, frc, xOrgY1, yOrgY, xAxis, xOrg, yOrg, getBackground(),!y2Axis.isVisible() || y2Axis.getViewNumber()==0);
+	      y2Axis.paintAxis(g, frc, xOrgY2, yOrgY, xAxis, xOrg, yOrg, getBackground(),!y1Axis.isVisible() || y1Axis.getViewNumber()==0);
+	      if( xAxis.getPosition()==JLAxis.HORIZONTAL_ORG2)
+	        xAxis.paintAxis(g, frc, xOrg, yOrg, y2Axis, 0, 0, getBackground(),true);
+	      else
+	        xAxis.paintAxis(g, frc, xOrg, yOrg, y1Axis, 0, 0, getBackground(),true);
+	}
+
+	private void drawData(Graphics g, int xOrg, int yOrg) {
+		Rectangle clipRect = g.getClipBounds();
+	      y1Axis.paintDataViews(g, xAxis, xOrg, yOrg);
+	      y2Axis.paintDataViews(g, xAxis, xOrg, yOrg);
+	      if (clipRect != null) {
+	        g.setClip(clipRect.x,clipRect.y, clipRect.width, clipRect.height);
+	      } else {
+	        g.setClip(null);
+	      }
+	}
 
   // Build a valid rectangle with the given coordinates
   private Rectangle buildRect(int x1, int y1, int x2, int y2) {
@@ -2630,6 +2694,125 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     return r;
   }
 
+  //a zoom selection must be contained in the graph zone and big enough
+  private boolean zoomSelectionOK(Rectangle r) {
+
+	  //check the position of the selection
+	  int limitUP = viewR.y + xAxisUpMargin;
+	  int limitDOWN = y1Axis.getLength() + limitUP;
+	  int limitLEFT = y1AxisThickness + viewR.x;
+	  int limitRIGHT = xAxis.getLength() + limitLEFT;
+
+	  //if the whole selection is not contained in the graphe zone OK = false
+	  //selection in the left margin
+	  if( (r.x < limitLEFT) && (r.x +r.width < limitLEFT))
+		  return false;
+
+	  //selection in the right margin
+	  if( (r.x > limitRIGHT))
+		  return false;
+
+	  //selection in the upper margin
+	  if( (r.y < limitUP) && (r.y+r.height < limitUP))
+		  return false;
+
+	  //selection in the lower margin
+	  if( r.y > limitDOWN)
+		  return false;
+
+	  //if it's just a part, we adjust
+	  if ( r.x < limitLEFT) {
+		  int newWidth = r.width - (limitLEFT - r.x);
+		  r.setBounds(limitLEFT, r.y, newWidth, r.height);
+	  }
+
+	  if ( r.y < limitUP) {
+		  int newHeight = r.height - (limitUP - r.y);
+		  r.setBounds(r.x, limitUP, r.width, newHeight);
+	  }
+
+
+	  if ( r.x + r.width > limitRIGHT)
+		  r.setBounds(r.x, r.y, limitRIGHT-r.x, r.height);
+
+	  if ( r.y + r.height > limitDOWN)
+		  r.setBounds(r.x, r.y, r.width, limitDOWN-r.y);
+
+	  //test if the selection is not too small
+	  if( r.width < 10 || r.height < 10)
+	  	return false;
+
+	  //if everything is OK or adjust
+	  return true;
+  }
+
+  //we do the zoom
+  private void applyZoom(int x, int y) {
+	//we set the zoom rectangle (size in px)
+  	Rectangle zoomRect = buildRect(zoomX, zoomY, x, y);
+
+  	//if the zoom is not too small and well-positioned we apply it
+  	if( zoomSelectionOK(zoomRect) ) {
+
+  		//there are 2 types of zoom: areaZoom , fixed a zone ; zoom, fixed a span of time
+  		if( areaZoom ){
+
+	  		//if it's the first zoom, we save information to be able to get back
+		  	if( !isZoomed ) {
+		  		oldAutoScaleY1 = y1Axis.isAutoScale();
+		  		oldAutoScaleY2 = y2Axis.isAutoScale();
+		  		oldMinY1 = y1Axis.getMinimum();
+		  		oldMaxY1 = y1Axis.getMaximum();
+		  		oldMinY2 = y2Axis.getMinimum();
+		  		oldMaxY2 = y2Axis.getMaximum();
+		  	}
+
+		  	//we set the min and the max for the Axis
+		  	//we compute in comparison with the Y origin (upper left)
+		  	//for the min we need to transform the height of the zoom into value
+	  		int yOrgY  = viewR.y + xAxisUpMargin;
+
+		  	double valLength1 = y1Axis.getMax() - y1Axis.getMin();
+		  	double maxY1 = y1Axis.getMax() - ( ( (zoomRect.y - yOrgY)*valLength1 ) / y1Axis.getLength());
+		  	double minY1 = maxY1 - (zoomRect.height * valLength1 / y1Axis.getLength());
+
+		  	y1Axis.setAutoScale(false);
+		  	y1Axis.setMaximum(maxY1);
+		  	y1Axis.setMinimum(minY1);
+
+		  	double valLength2 = y2Axis.getMax() - y2Axis.getMin();
+		  	double maxY2 = y2Axis.getMax() - ( ( (zoomRect.y - yOrgY)*valLength2 ) / y2Axis.getLength());
+		  	double minY2 = maxY2 - (zoomRect.height * valLength2 / y2Axis.getLength());
+
+		    y2Axis.setAutoScale(false);
+		    y2Axis.setMaximum(maxY2);
+		  	y2Axis.setMinimum(minY2);
+
+		  	//we convert the width in px into duration
+		  	xAxis.setAutoScale(false);
+		  	int xOrg = viewR.x + y1AxisThickness;
+		  	double minX = xAxis.getMin() + ((zoomRect.x - xOrg) * getDisplayDuration() ) / xAxis.getLength();
+		  	double maxX = minX +(zoomRect.width*getDisplayDuration())/xAxis.getLength();
+		  	xAxis.setMinimum(minX);
+
+		  	oldTime = System.currentTimeMillis();
+		  	xAxis.setMaximum(maxX);
+	  	}else {
+	  		xAxis.zoom(zoomRect.x, zoomRect.x + zoomRect.width);
+	  		y1Axis.zoom(zoomRect.y, zoomRect.y + zoomRect.height);
+	  		y2Axis.zoom(zoomRect.y, zoomRect.y + zoomRect.height);
+	  	}
+
+  	  //we set that the graph is zoomed
+	  isZoomed = true;
+  	}
+  }
+
+  //allow us to know if we are doing a fixed area zoom or a fixed time zoom
+  public void setAreaZoom(boolean b) {
+	  areaZoom = b;
+  }
+
   // ************************************************************************
   // Mouse Listener
   public void mouseClicked(MouseEvent e) {
@@ -2637,21 +2820,38 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
   public void mouseDragged(MouseEvent e) {
     if (zoomDrag) {
+    	int repaintMaxX;
+        int repaintMinX = Math.min(e.getX(), Math.min(lastX, zoomX));
+        int repaintMinY = Math.min(e.getY(), Math.min(lastY, zoomY));
+        int repaintMaxY = Math.max(e.getY(), Math.max(lastY, zoomY));
 
-      // Clear old rectangle
-      Rectangle r = buildRect(zoomX, zoomY, lastX, lastY);
-      r.width+=1;
-      r.height+=1;
-      repaint(r);
+      //if we do a fixed area zoom, maxX is right graph border
+      if (areaZoom) {
+    	  int limitLEFT = y1AxisThickness + viewR.x;
+    	  int limitRIGHT = xAxis.getLength() + limitLEFT;
 
-      // Draw new one
-      lastX = e.getX();
+    	  repaintMaxX = limitRIGHT;
+    	  lastX = repaintMaxX;
+
+      } else {
+    	  repaintMaxX = Math.max(e.getX(), Math.max(lastX, zoomX));
+    	  lastX = e.getX();
+      }
+
+
+      // create repaint rectangle
+      final Rectangle repaintRect = buildRect(repaintMinX, repaintMinY, repaintMaxX, repaintMaxY);
+      repaintRect.width+=1;
+      repaintRect.height+=1;
+
+      SwingUtilities.invokeLater(new Runnable(){
+	  		public void run() {
+	  	      repaint(repaintRect);
+	  		}
+        });
+
+      //we save current coordinate
       lastY = e.getY();
-      r = buildRect(zoomX, zoomY, lastX, lastY);
-      r.width+=1;
-      r.height+=1;
-      repaint(r);
-
     }
   }
 
@@ -2666,11 +2866,14 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
   public void mouseReleased(MouseEvent e) {
     if (zoomDrag) {
-      Rectangle r = buildRect(zoomX, zoomY, e.getX(), e.getY());
-      zoomDrag = false;
-      xAxis.zoom(r.x, r.x + r.width);
-      y1Axis.zoom(r.y, r.y + r.height);
-      y2Axis.zoom(r.y, r.y + r.height);
+    	zoomDrag = false;
+
+    	//if we are in the area zoom mode lastX contains
+    	//the position of the right graph border
+    	if( areaZoom)
+    		applyZoom(lastX, e.getY());
+    	else
+    		applyZoom(e.getX(), e.getY());
     }
     ipanelVisible = false;
     repaint();
@@ -3011,6 +3214,10 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     //Add data
     v.add(x, y);
 
+    // Garbage
+    int nb = garbageData(v);
+    if (nb > 0 && v.getAxis() != null) need_repaint = true;
+
     // Does not repaint if zoom drag
     if (zoomDrag) return;
 
@@ -3031,12 +3238,9 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
       if (yaxis.getBoundRect().contains(p) && !need_repaint) {
         // We can perform fast update
-        Graphics g = getGraphics();
-        yaxis.drawFast(g, lp, p, v);
-        g.dispose();
+        yaxis.drawFast(getGraphics(), lp, p, v);
       } else {
         // Full update needed
-        garbageData(v);
         repaint();
       }
 
@@ -3051,7 +3255,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   public void setTimePrecision(int milliseconds) {
       timePrecision = milliseconds;
   }
-  
+
   /**
    * Returns the allowed margin to make a projection on a line on data show (default: 0).
    * @return The allowed margin to make a projection on a line on data show (default: 0).
@@ -3061,7 +3265,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   }
 
   /**
-   * Used with saveDataFile(). Returns the String used to represent "no data" (default : "").
+   * Used with saveDataFile(). Returns the String used to represent "no data" (default : "*").
    * @return The String used to represent "no data"
    */
   public String getNoValueString () {
@@ -3069,7 +3273,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   }
 
   /**
-   * Used with saveDataFile(). Sets the String used to represent "no data" (default : "").
+   * Used with saveDataFile(). Sets the String used to represent "no data" (default : "*").
    * @param noValueString The String used to represent "no data"
    */
   public void setNoValueString (String noValueString) {
@@ -3163,25 +3367,6 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     existingViews.clear();
     existingViews = null;
   }
-  
-  protected JMenuItem getUserActionMenuItem(String actionName)
-  {
-      int i;
-      int correspondingIndex = -1;
-
-      for (i = 0; i < userAction.length; i++)
-      {
-          if ( userAction[i].equals(actionName) )
-          {
-              correspondingIndex = i;
-              break;
-          }
-      }
-        
-      if (correspondingIndex == -1) return null;
-      return userActionMenuItem[correspondingIndex];
-  }
-  
   //****************************************
   // Debug stuff
 
@@ -3189,7 +3374,9 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
     final JFrame f = new JFrame();
     final JLChart chart = new JLChart();
-    final JLDataView v = new JLDataView();
+    final JLDataView v1 = new JLDataView();
+    final JLDataView v2 = new JLDataView();
+    //double startTime = (double) ((System.currentTimeMillis() / 1000) * 1000);
 
     // Initialise chart properties
     chart.setHeaderFont(new Font("Times", Font.BOLD, 18));
@@ -3198,41 +3385,82 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
     // Initialise axis properties
     chart.getY1Axis().setName("mAp");
-    chart.getY1Axis().setAutoScale(false);
-    chart.getY1Axis().setMinimum(-1);
-    chart.getY1Axis().setMaximum(1);
+    chart.getY1Axis().setAutoScale(true);
+    chart.getY1Axis().setMinimum(-100);
+    chart.getY1Axis().setMaximum(100);
+    /*
+    chart.getY1Axis().setLabels(
+            new String[] {"-120","-100","-80","-60","-40","-20","0"} ,
+            new double[] {-120,-100,-80,-60,-40,-20,0}
+    );
+    */
+    chart.getY2Axis().setName("unit");
 
+    chart.getXAxis().setAutoScale(true);
     chart.getXAxis().setName("Value");
     chart.getXAxis().setGridVisible(true);
     chart.getXAxis().setSubGridVisible(true);
-    chart.getXAxis().setAnnotation(JLAxis.TIME_ANNO);
-    chart.getXAxis().setPercentScrollback(10.0);
+    chart.getXAxis().setAnnotation(JLAxis.VALUE_ANNO);
     chart.getY1Axis().setGridVisible(true);
     chart.getY1Axis().setSubGridVisible(true);
     chart.getY2Axis().setVisible(true);
     chart.getY2Axis().setName("mAp");
-    chart.setDisplayDuration(100000);
 
-    //v3.setName("Cos() function");
-    v.setMarker(JLDataView.MARKER_DOT);
-    chart.getY1Axis().addDataView(v);
+    if (args.length > 0)
+    {
+      chart.reset(false);
+      chart.loadDataFile(args[0]);
+    }
 
-    Thread refreshThread = new Thread() {
-      public void run() {
-        while(true) {
-          long   now = System.currentTimeMillis();
-          double t = (double)now;
-          double y = Math.cos(t/2000.0);
-          chart.addData(v,t,y);
-          try {
-            Thread.sleep(100);
-          } catch(InterruptedException e) {}
-        }
-      }
-    };
-    refreshThread.start();
-    
-    // -----------------------------------------------------------------
+    // Build dataview
+    double[] xV1 = new double[]{-3,-2,-5 ,3 ,6 ,-4,0 ,-6 ,2 ,4 ,1         ,5 ,-1,7};
+    double[] yV1 = new double[]{21,22,-15,99,30,17,98,-10,21,50,Double.NaN,40,24,20};
+    v1.setUnorderedData(xV1,yV1);
+
+    v1.setMarker(JLDataView.MARKER_CIRCLE);
+    v1.setStyle(JLDataView.STYLE_DASH);
+    v1.setName("Le signal 1");
+    v1.setUnit("std");
+    v1.setClickable(true);
+    v1.setUserFormat("%5.2f");
+
+    // Add the dataview to the chart
+    //chart.getY1Axis().addDataView(v1);
+
+    // Build a second dataview
+    v2.add(-6, -10.0);
+    v2.add(-5, -5.0);
+    v2.add(-4, 7.0);
+    v2.add(-3, 11.0);
+    v2.add(-2, 12.0);
+    v2.add(-1, 14.0);
+    v2.add(0, 78.0);
+    v2.add(1, Double.NaN);
+    v2.add(2, 22.0);
+    v2.add(3, 55.0);
+    v2.add(4, 42.0);
+    v2.add(5, 11.0);
+    v2.add(6, 47.0);
+    v2.add(7, 12.0);
+
+    v2.setName("Le signal 2");
+    v2.setUnit("std");
+    v2.setColor(Color.blue);
+    v2.setLineWidth(3);
+    v2.setFillColor(Color.orange);
+    v2.setFillStyle(JLDataView.FILL_STYLE_SOLID);
+    v2.setViewType(JLDataView.TYPE_BAR);
+
+    // Add it to the chart
+    //chart.getY2Axis().addDataView(v2);
+
+    JLDataView v3 = new JLDataView();
+    v3.setName("Cos() function");
+    for(int i=0;i<1000;i++) {
+      double t = (double)i/25.0;
+      v3.add(t,Math.cos(t));
+    }
+    chart.getY1Axis().addDataView(v3);
 
     JPanel bot = new JPanel();
     bot.setLayout(new FlowLayout());

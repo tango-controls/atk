@@ -41,7 +41,6 @@ public class BooleanSpectrum extends AAttribute
 
   BooleanSpectrumHelper   spectrumHelper;
   boolean[]               spectrumValue = null;
-  boolean[]               spectrumSetPointValue = null;
 
   public BooleanSpectrum()
   {
@@ -55,11 +54,6 @@ public class BooleanSpectrum extends AAttribute
       return spectrumValue;
   }
 
-  // getSetPoint returns the attribute's setpoint value
-  public boolean[] getSetPoint()
-  {
-      return spectrumSetPointValue;
-  }
 
 
   public void setValue(boolean[] bArray)
@@ -93,27 +87,19 @@ public class BooleanSpectrum extends AAttribute
 	      
 	      // Retreive the read value for the attribute
               spectrumValue = spectrumHelper.getBooleanSpectrumValue(att);
-	      // Retreive the setPoint value for the attribute
-	      spectrumSetPointValue = spectrumHelper.getBooleanSpectrumSetPoint(att);
 
 	      // Fire valueChanged
 	      fireValueChanged(spectrumValue);
 	  }
 	  catch (DevFailed e)
 	  {
-	      spectrumValue = null;
-              spectrumSetPointValue = null;
-              
-              // Fire error event
+	      // Fire error event
 	      readAttError(e.getMessage(), new AttributeReadException(e));
 	  }
       }
       catch (Exception e)
       {
 	  // Code failure
-          spectrumValue = null;
-          spectrumSetPointValue = null;
-              
 	  System.out.println("BooleanSpectrum.refresh() Exception caught ------------------------------");
 	  e.printStackTrace();
 	  System.out.println("BooleanSpectrum.refresh()------------------------------------------------");
@@ -128,30 +114,28 @@ public class BooleanSpectrum extends AAttribute
       {
 	  try
 	  {
-              // symetric with refresh
-              if (attValue == null) return;
-              attribute = attValue;
+          // symetric with refresh
+          if (attValue == null) return;
+          attribute = attValue;
 
-              setState(attValue);
-              timeStamp = attValue.getTimeValMillisSec();
+          setState(attValue);
+          timeStamp = attValue.getTimeValMillisSec();
 
 	      // Retreive the read value for the attribute
               spectrumValue = spectrumHelper.getBooleanSpectrumValue(attValue);
-	      // Retreive the setPoint value for the attribute
-              spectrumSetPointValue = spectrumHelper.getBooleanSpectrumSetPoint(attValue);
 
 	      // Fire valueChanged
 	      fireValueChanged(spectrumValue);
 	  }
 	  catch (DevFailed e)
 	  {
+
 	      dispatchError(e);
+
 	  }
       }
       catch (Exception e)
       {
-          spectrumValue = null;
-          spectrumSetPointValue = null;
 	  // Code failure
 	  System.out.println("BooleanSpectrum.dispatch() Exception caught ------------------------------");
 	  e.printStackTrace();
@@ -161,9 +145,6 @@ public class BooleanSpectrum extends AAttribute
 
   public void dispatchError(DevFailed e)
   {
-    spectrumValue = null;
-    spectrumSetPointValue = null;
-              
     // Fire error event
     readAttError(e.getMessage(), new AttributeReadException(e));
   }
@@ -211,8 +192,6 @@ public class BooleanSpectrum extends AAttribute
 	 {
              trace(DeviceFactory.TRACE_PERIODIC_EVENT, "BooleanSpectrum.periodicEvt.getValue(" + getName() + ") failed, got heartbeat error", t0);
 	     // Tango error
-             spectrumValue = null;
-             spectrumSetPointValue = null;
 	     // Fire error event
 	     readAttError(dfe.getMessage(), new AttributeReadException(dfe));
 	 }
@@ -220,8 +199,6 @@ public class BooleanSpectrum extends AAttribute
 	 {
              trace(DeviceFactory.TRACE_PERIODIC_EVENT, "BooleanSpectrum.periodicEvt.getValue(" + getName() + ") failed, got other error", t0);
 	     // Tango error
-             spectrumValue = null;
-             spectrumSetPointValue = null;
 	     // Fire error event
 	     readAttError(dfe.getMessage(), new AttributeReadException(dfe));
 	 }
@@ -229,8 +206,6 @@ public class BooleanSpectrum extends AAttribute
       }
       catch (Exception e) // Code failure
       {
-          spectrumValue = null;
-          spectrumSetPointValue = null;
           trace(DeviceFactory.TRACE_PERIODIC_EVENT, "BooleanSpectrum.periodicEvt.getValue(" + getName() + ") failed, caught Exception, code failure", t0);
 	  System.out.println("BooleanSpectrum.periodic.getValue() Exception caught ------------------------------");
 	  e.printStackTrace();
@@ -249,23 +224,17 @@ public class BooleanSpectrum extends AAttribute
               timeStamp = da.getTimeValMillisSec();
               // Retreive the read value for the attribute
               spectrumValue = spectrumHelper.getBooleanSpectrumValue(da);
-	      // Retreive the setPoint value for the attribute
-	      spectrumSetPointValue = spectrumHelper.getBooleanSpectrumSetPoint(da);
               // Fire valueChanged
               fireValueChanged(spectrumValue);
           }
 	  catch (DevFailed dfe)
 	  {
               // Tango error
-              spectrumValue = null;
-              spectrumSetPointValue = null;
               // Fire error event
               readAttError(dfe.getMessage(), new AttributeReadException(dfe));
           }
 	  catch (Exception e) // Code failure
           {
-              spectrumValue = null;
-              spectrumSetPointValue = null;
               System.out.println("BooleanSpectrum.periodic.extractBooleanArray() Exception caught ------------------------------");
               e.printStackTrace();
               System.out.println("BooleanSpectrum.periodic.extractBooleanArray()------------------------------------------------");
@@ -297,8 +266,6 @@ public class BooleanSpectrum extends AAttribute
 	 {
              trace(DeviceFactory.TRACE_CHANGE_EVENT, "BooleanSpectrum.changeEvt.getValue(" + getName() + ") failed, got heartbeat error", t0);
 	     // Tango error
-             spectrumValue = null;
-             spectrumSetPointValue = null;
 	     // Fire error event
 	     readAttError(dfe.getMessage(), new AttributeReadException(dfe));
 	 }
@@ -306,8 +273,6 @@ public class BooleanSpectrum extends AAttribute
 	 {
              trace(DeviceFactory.TRACE_CHANGE_EVENT, "BooleanSpectrum.changeEvt.getValue(" + getName() + ") failed, got other error", t0);
 	     // Tango error
-             spectrumValue = null;
-             spectrumSetPointValue = null;
 	     // Fire error event
 	     readAttError(dfe.getMessage(), new AttributeReadException(dfe));
 	 }
@@ -315,8 +280,6 @@ public class BooleanSpectrum extends AAttribute
       }
       catch (Exception e) // Code failure
       {
-          spectrumValue = null;
-          spectrumSetPointValue = null;
           trace(DeviceFactory.TRACE_CHANGE_EVENT, "BooleanSpectrum.changeEvt.getValue(" + getName() + ") failed, caught Exception, code failure", t0);
 	  System.out.println("BooleanSpectrum.change.getValue() Exception caught ------------------------------");
 	  e.printStackTrace();
@@ -335,23 +298,17 @@ public class BooleanSpectrum extends AAttribute
               timeStamp = da.getTimeValMillisSec();
               // Retreive the read value for the attribute
               spectrumValue = spectrumHelper.getBooleanSpectrumValue(da);
-	      // Retreive the setPoint value for the attribute
-	      spectrumSetPointValue = spectrumHelper.getBooleanSpectrumSetPoint(da);
               // Fire valueChanged
               fireValueChanged(spectrumValue);
           }
 	  catch (DevFailed dfe)
 	  {
               // Tango error
-              spectrumValue = null;
-              spectrumSetPointValue = null;
               // Fire error event
               readAttError(dfe.getMessage(), new AttributeReadException(dfe));
           }
 	  catch (Exception e) // Code failure
           {
-              spectrumValue = null;
-              spectrumSetPointValue = null;
               System.out.println("BooleanSpectrum.change.extractBooleanArray() Exception caught ------------------------------");
               e.printStackTrace();
               System.out.println("BooleanSpectrum.change.extractBooleanArray()------------------------------------------------");

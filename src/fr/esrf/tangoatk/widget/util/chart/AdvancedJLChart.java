@@ -38,8 +38,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.filechooser.FileFilter;
 
-import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
-
 public class AdvancedJLChart extends JLChart {
 
     /* Load data file menu item */
@@ -84,7 +82,24 @@ public class AdvancedJLChart extends JLChart {
         if ( evt.getSource() == loadFileMenuItem ) {
             JFileChooser chooser = new JFileChooser(lastDataFileLocation);
             chooser.addChoosableFileFilter(
-                    new MultiExtFileFilter("Text files", "txt"));
+                    new FileFilter() {
+                        public boolean accept (File f) {
+                            if ( f.isDirectory() ) {
+                                return true;
+                            }
+                            String extension = getExtension(f);
+                            if ( extension != null
+                                    && extension.equals("txt") ) {
+                                return true;
+                            }
+                            return false;
+                        }
+
+                        public String getDescription () {
+                            return "text files ";
+                        }
+                    }
+            );
             chooser.setDialogTitle(
                     "Load Graph Data (Text file with TAB separated fields)"
             );

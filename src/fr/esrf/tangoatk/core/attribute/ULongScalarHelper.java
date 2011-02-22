@@ -41,7 +41,7 @@ import fr.esrf.Tango.DevFailed;
 public class ULongScalarHelper extends ANumberScalarHelper
 {
 
-   public ULongScalarHelper(AAttribute attribute)
+   public ULongScalarHelper(IAttribute attribute)
    {
       init(attribute);
    }
