@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.command;
 
 import fr.esrf.tangoatk.core.*;
@@ -38,7 +16,7 @@ import java.awt.image.BufferedImage;
 
 /** A ThreeStateSwitchCommandViewer is a 3 states viewer associated with
  * 2 commands (one to switch on the device , one to switch it off) and one
- * scalar attribute which represents the boolean state 0=OFF 1=ON (other=unknown)
+ * scalar attribute which represents the state (Tango::ON or Tanog::OFF)
  * The viewer can also display an undefined state (when different from ON or OFF)
  */
 public class ThreeStateSwitchCommandViewer extends ThreeStateSwitch implements ActionListener, INumberScalarListener {
@@ -133,13 +111,12 @@ public class ThreeStateSwitchCommandViewer extends ThreeStateSwitch implements A
   public void numberScalarChange(NumberScalarEvent e) {
 
     if (e.getSource() == stateAtt) {
-      //int s = (int) e.getNumberSource().getNumberScalarValue();
-      int s = (int) e.getValue();
+      int s = (int) e.getNumberSource().getNumberScalarValue();
       switch(s) {
-        case 1:
+        case DevState._ON:
           setState(ThreeStateSwitch.ON_STATE);
           break;
-        case 0:
+        case DevState._OFF:
           setState(ThreeStateSwitch.OFF_STATE);
           break;
         default:

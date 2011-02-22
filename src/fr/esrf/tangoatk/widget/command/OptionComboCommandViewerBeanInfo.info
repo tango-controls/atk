@@ -1,9 +1,0 @@
-name =  OptionComboCommandViewer
-package = fr.esrf.tangoatk.widget.command
-
-properties = theFont, model, title, optionList 
-
-ICON_COLOR_16x16 = OptionComboCommandViewer.gif
-ICON_MONO_16x16 = OptionComboCommandViewer.gif
-ICON_MONO_32x32 = OptionComboCommandViewer.gif
-ICON_COLOR_32x32 = OptionComboCommandViewer.gif

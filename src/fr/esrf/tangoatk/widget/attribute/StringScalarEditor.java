@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * StringScalarEditor.java
  *
  * Created on July 29, 2003, 11:00 AM
@@ -33,16 +11,11 @@
 package fr.esrf.tangoatk.widget.attribute;
 
 
-import java.awt.Insets;
+import javax.swing.*;
+import javax.swing.text.*;
 
-import javax.swing.JFrame;
-import javax.swing.JTextField;
 
-import fr.esrf.tangoatk.core.AttributeStateEvent;
-import fr.esrf.tangoatk.core.ErrorEvent;
-import fr.esrf.tangoatk.core.IStringScalar;
-import fr.esrf.tangoatk.core.IStringScalarListener;
-import fr.esrf.tangoatk.core.StringScalarEvent;
+import fr.esrf.tangoatk.core.*;
 
 public class StringScalarEditor extends JTextField
              implements IStringScalarListener
@@ -65,7 +38,6 @@ public class StringScalarEditor extends JTextField
 		       }
 		    }
 		 );
-       setMargin( new Insets(0,0,0,0) ); // text will have the maximum available space
     }
 
     public void setModel(IStringScalar is)
@@ -112,19 +84,9 @@ public class StringScalarEditor extends JTextField
     // Listen on valueChange and readSetpoint
     public void stringScalarChange(StringScalarEvent e)
     {
-       String    set = null;
-       
        long now = System.currentTimeMillis();
 
-       //avoiding NullPointerException
-       if (model != null)
-       {
-           if(hasFocus())
-        	   set = model.getStringDeviceSetPoint();
-           else
-        	   set = model.getStringSetPoint();
-       }
-
+       String set = model.getStringSetPoint();
        if ( set != null )
        {
           // Dont update if the set point has not changed
@@ -146,7 +108,6 @@ public class StringScalarEditor extends JTextField
     public void errorChange(ErrorEvent e)
     {
       setText( "Read Error" );
-      lastSet = "Read Error";
     }
 
     public void stateChange(AttributeStateEvent e)
@@ -158,11 +119,7 @@ public class StringScalarEditor extends JTextField
     private void textInsertActionPerformed(java.awt.event.ActionEvent evt)
     {
         lastSet = this.getText();
-        //avoiding NullPointerException
-        if (model != null)
-        {
-            model.setString(lastSet);
-        }
+	model.setString(lastSet);
     }
 
 
@@ -197,7 +154,7 @@ public class StringScalarEditor extends JTextField
        mainFrame.getContentPane().add(sse);
        mainFrame.pack();
 
-       mainFrame.setVisible(true);
+       mainFrame.show();
 
     } // end of main ()
 
