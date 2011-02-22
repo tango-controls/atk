@@ -54,7 +54,7 @@ public class AtkTimer {
      * stored on a stack, so it is able to time recursions correctly.
      * Normally startTimer is called like this
      * AtkTimer.getInstance().startTimer(Thread.currentThread());
-     * @param t The <code>Thread</code> running the calling method.
+     * @param t, the <code>Thread</code> running the calling method.
      */
     public void startTimer(Thread t) {
 	if (!timer) return;
@@ -82,7 +82,7 @@ public class AtkTimer {
      * difference between the methods starttime and the current time, and
      * adds this time to a list containing the other times for this method.
      *
-     *  @param t The <code>Thread</code> running the calling method.
+     *  @param t, the <code>Thread</code> running the calling method.
      *  @throws IllegalStateException if the popped method name is not
      *  that of the caller.
      */

@@ -1,58 +1,58 @@
 include .make-include
+BUILDDIR=/tmp
+PROG=runapp
+CVSROOT=/segfs/tango/cvsroot
+CORE-MAJOR:=0# dont forget to change .core-build when minor and major
+CORE-MINOR:=1# versions are changed
+CORE-BUILD := $(shell cat .core-build)
 
-# dont forget to edit $(ATK_RELDIR)/* files
-# to set the major and minor releases and set the build number to zero
-ifdef ATK_RELDIR
-ATK-MAJOR := $(shell cat $(ATK_RELDIR)/MAJOR)
-ATK-MINOR := $(shell cat $(ATK_RELDIR)/MINOR)
-ATK-BUILD := $(shell cat $(ATK_RELDIR)/BUILD)
+ifeq "$(CORE-BUILD)" ""
+     CORE-BUILD:=0
 endif
 
-ifeq "$(ATK-BUILD)" ""
-     ATK-BUILD:=0
-endif
-     
+WIDGET-MAJOR:=0# dont forget to change .core-build when minor and major
+WIDGET-MINOR:=0# versions are changed
+WIDGET-BUILD:= $(shell cat .widget-build)
 
-ifdef ATK-MAJOR
-ATK-VERSION:=$(ATK-MAJOR).$(ATK-MINOR).$(ATK-BUILD)
-ATK-RELEASE:=ATK-$(subst .,-,$(ATK-VERSION))
+ifeq "$(WIDGET-BUILD)" ""
+     WIDGET-BUILD:=0
 endif
 
+CORE-VERSION:=$(CORE-MAJOR).$(CORE-MINOR).$(CORE-BUILD)
 
+WIDGET-VERSION:=$(WIDGET-MAJOR).$(WIDGET-MINOR).$(WIDGET-BUILD)
 
+CORE-RELEASE:=ATKCore-$(subst .,-,$(CORE-VERSION))
+WIDGET-RELEASE:=ATKWidget-$(subst .,-,$(WIDGET-VERSION))
 
-all: util core widget
+all: util core widget 
 
-
-atk-release:
-ifdef ATK-VERSION
-	@echo "You are building the ATK version : $(ATK-VERSION)"
-	($(CVSSF) tag $(ATK-RELEASE) configure		\
-                                .make-include.in	\
-                               configure.in	\
-                               Makefile &&		\
-	 (cd lib &&                                     \
-	 $(CVSSF) tag $(ATK-RELEASE) printf.jar jep.jar jepext.jar ij.jar jogl.jar gluegen-rt.jar ) && \
-	 (cd src/fr/esrf/tangoatk/ &&			\
-         $(CVSSF) tag -R $(ATK-RELEASE) core) &&        \
-         (cd src/fr/esrf/tangoatk/ &&			\
-         $(CVSSF) tag $(ATK-RELEASE) util)) &&		\
-	 (cd src/fr/esrf/tangoatk/ &&			\
-         $(CVSSF) tag -R $(ATK-RELEASE) widget)
-else
-	@echo "Sorry you cannot perform atk-release; ATK_RELDIR should be set!"
-endif
-
+core-release:
+	(cvs tag $(CORE-RELEASE) configure                     \
+                                 .make-include.in              \
+                                 .core-build                   \
+                                 Makefile &&                   \
+	 (cd src/fr/esrf/tangoatk/ &&                          \
+         cvs tag $(CORE-RELEASE) core)      &&                 \
+         (cd src/fr/esrf/tangoatk/ &&                          \
+         cvs tag $(CORE-RELEASE) util))        
 
 core:
-	(cd src/fr/esrf/tangoatk/core/ && $(MAKE) all)
+	(cd src/fr/esrf/tangoatk/core/ && $(MAKE) all) &&      \
+	 expr $(CORE-BUILD) + 1 > .core-build
 
+widget-release:
+	(cvs tag $(WIDGET-RELEASE) .widget-build               \
+                                   .make-include.in            \
+                                   configure                   \
+                                   Makefile &&                 \
+	 cd src/fr/esrf/tangoatk/           &&                 \
+         cvs tag -R $(WIDGET-RELEASE) widget) 
 
-widgetutil:
-	(cd src/fr/esrf/tangoatk/widget/util && $(MAKE) all)
 
 widget:
-	(cd src/fr/esrf/tangoatk/widget/ && $(MAKE) all)
+	(cd src/fr/esrf/tangoatk/widget/ && $(MAKE) all) &&   \
+        expr $(WIDGET-BUILD) + 1 > .widget-build
 
 util:
 	(cd src/fr/esrf/tangoatk/util/ && $(MAKE) all)
@@ -72,18 +72,22 @@ clean:
 
 
 install: 
-	install -g dserver lib/ATKCore-$(ATK-VERSION).jar              \
-                           lib/ATKWidget-$(ATK-VERSION).jar          \
-                           /segfs/tango/release/java/lib              \
-	&& (cd /segfs/tango/release/java/lib                        \
-            && ln -sf ATKCore-$(ATK-VERSION).jar ATKCore.jar           \
-            && ln -sf ATKWidget-$(ATK-VERSION).jar ATKWidget.jar)    \
+	install -g dserver lib/ATKCore-$(CORE-VERSION).jar              \
+                           lib/ATKWidget-$(WIDGET-VERSION).jar          \
+                           lib/jscrollpane.jar                          \
+                           /segfs/tango/lib/java/                       \
+	&& (cd /segfs/tango/lib/java/                                   \
+            && ln -sf ATKCore-$(CORE-VERSION).jar ATKCore.jar           \
+            && ln -sf ATKWidget-$(WIDGET-VERSION).jar ATKWidget.jar)    \
 
 
 install-doc: 
 	cp -va  doc/* /segfs/tango/doc/www/tango/tango_doc/atk_doc/ 
 
 
+# 
+checkin:
+	cvs ci
 
 jar: core-jar  widget-jar
 
@@ -91,24 +95,16 @@ jar: core-jar  widget-jar
 
 core-jar: core-manifest
 	@(cd lib &&                             \
-	 $(JAR) xf printf.jar &&      \
-	 $(JAR) xf jep.jar &&   \
-	 $(JAR) xf jepext.jar &&   \
-	 $(JAR) xf ij.jar &&   \
-	 $(JAR) xf jogl.jar &&   \
-	 $(JAR) xf gluegen-rt.jar &&   \
          if [ -e $(COREMANIFEST) ]; then       \
-            $(JAR) cmf $(COREMANIFEST) ATKCore-$(ATK-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util com/braju org/lsmp org/nfunk ij com/sun; \
+            $(JAR) cmf $(COREMANIFEST) ATKCore-$(CORE-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util; \
          else                                           \
-            $(JAR) cf ATKCore-$(ATK-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util com/braju org/lsmp org/nfunk ij com/sun;                   \
+            $(JAR) cf ATKCore-$(CORE-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util;                   \
          fi)
-	$(call verifyjar,/tmp/core/jar,ATKCore-$(ATK-VERSION))
-	@(rm -rf /tmp/core)
+	$(call verifyjar,/tmp/core/jar,ATKCore-$(CORE-VERSION))
 
 widget-jar: widget-manifest
-	(cd lib && $(JAR) cmf $(WIDGETMANIFEST) ATKWidget-$(ATK-VERSION).jar fr/esrf/tangoatk/widget); \
-	$(call verifyjar,/tmp/widget/jar,ATKWidget-$(ATK-VERSION))
-	@(rm -rf /tmp/widget)
+	(cd lib && $(JAR) cmf $(WIDGETMANIFEST) ATKWidget-$(WIDGET-VERSION).jar fr/esrf/tangoatk/widget); \
+	$(call verifyjar,/tmp/widget/jar,ATKWidget-$(WIDGET-VERSION))
 
 verify-widget-jar: widget-jar
 
@@ -122,9 +118,14 @@ desktop-jar: desktop
 	$(JAR) cf  jscrollpane.jar com/tomtessier/scrollabledesktop;\
         )
 
+tag:
+	cvs tag -c `cat .version` src 
+
 jdoc:
 	(cd src && $(MAKE) jdoc)
 
+etags:
+	find src  -name "*.java" | xargs etags
 
 manifest: core-manifest widget-manifest
 
@@ -146,6 +147,23 @@ widget-manifest:
 beanbox:
 	$(JAVA) sun.beanbox.BeanBoxFrame
 
+build: core-build widget-build
 
+core-build:
+	(cd $(BUILDDIR);                                                    \
+         cvs -d $(CVSROOT) co -r  $(CORE-RELEASE) jclient_framework;        \
+	(cd jclient_framework/ATK; export JAVA_HOME=$(JAVA_HOME) &&         \
+         ./configure && make core  && make core-test && make util           \
+         && make core-jar ))
+
+widget-build:
+	(cd $(BUILDDIR);	                                            \
+         cvs -d $(CVSROOT) co -r  $(WIDGET-RELEASE) jclient_framework;      \
+	(cd jclient_framework/ATK && export JAVA_HOME=$(JAVA_HOME) &&       \
+        ./configure && make widget && make widget-test &&                   \
+        make widget-jar))
+
+ci:
+	cvs ci 
 
 
