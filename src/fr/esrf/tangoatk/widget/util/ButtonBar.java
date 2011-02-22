@@ -1,33 +1,10 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * ButtonBar.java
  *
  * Created on June 19, 2002, 11:22 AM
  */
 
 package fr.esrf.tangoatk.widget.util;
-import java.net.URL;
 
 /**
  *
@@ -42,7 +19,7 @@ public class ButtonBar extends javax.swing.JPanel {
         cancel.setMnemonic(java.awt.event.KeyEvent.VK_C);
         apply.setMnemonic(java.awt.event.KeyEvent.VK_A);
         help.setMnemonic(java.awt.event.KeyEvent.VK_H);
-	ok.setMnemonic(java.awt.event.KeyEvent.VK_O);
+        ok.setMnemonic(java.awt.event.KeyEvent.VK_O);
     }
 
     /** This method is called from within the constructor to
@@ -60,6 +37,7 @@ public class ButtonBar extends javax.swing.JPanel {
         setLayout(new java.awt.GridBagLayout());
         java.awt.GridBagConstraints gridBagConstraints1;
         
+        help.setFont(new java.awt.Font("Dialog", 0, 12));
         help.setText("Help");
         help.setEnabled(false);
         help.addActionListener(new java.awt.event.ActionListener() {
@@ -74,6 +52,7 @@ public class ButtonBar extends javax.swing.JPanel {
         gridBagConstraints1.anchor = java.awt.GridBagConstraints.SOUTHWEST;
         add(help, gridBagConstraints1);
         
+        ok.setFont(new java.awt.Font("Dialog", 0, 12));
         ok.setText("OK");
         ok.setSelected(true);
         ok.addActionListener(new java.awt.event.ActionListener() {
@@ -90,6 +69,7 @@ public class ButtonBar extends javax.swing.JPanel {
         gridBagConstraints1.anchor = java.awt.GridBagConstraints.SOUTHEAST;
         add(ok, gridBagConstraints1);
         
+        cancel.setFont(new java.awt.Font("Dialog", 0, 12));
         cancel.setText("Cancel");
         cancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -114,6 +94,7 @@ public class ButtonBar extends javax.swing.JPanel {
         gridBagConstraints1.weightx = 0.1;
         add(jLabel1, gridBagConstraints1);
         
+        apply.setFont(new java.awt.Font("Dialog", 0, 12));
         apply.setText("Apply");
         apply.setEnabled(false);
         apply.addActionListener(new java.awt.event.ActionListener() {
@@ -137,10 +118,7 @@ public class ButtonBar extends javax.swing.JPanel {
 
     private void helpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_helpActionPerformed
         // Add your handling code here:
-
-	if (helpUrl != null) {
-	    HelpWindow.getInstance().showUrl(helpUrl);
-	} 
+        ((IHelpful)controlee).help();
     }//GEN-LAST:event_helpActionPerformed
 
     private void okActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okActionPerformed
@@ -153,36 +131,24 @@ public class ButtonBar extends javax.swing.JPanel {
         ((IApplicable)controlee).cancel();
     }//GEN-LAST:event_cancelActionPerformed
 
-
-    public void setHelpUrl(URL url) {
-	helpUrl = url;
-	help.setEnabled(true);
-	
-    }
-    
+ 
     public void setControlee(IControlee controlee) {
         this.controlee = controlee;
         help.setEnabled(false);
-	help.setToolTipText("Brings up the helpwindow");
         apply.setEnabled(false);
-	apply.setToolTipText("Sets the values");
         cancel.setEnabled(false);
-	cancel.setToolTipText("Closes this window without setting values");
-
-
-	if (controlee instanceof IHelpful) {
-	    setHelpUrl(((IHelpful)controlee).getHelpUrl());
-	}
 	
+        if (controlee instanceof IHelpful) {
+            help.setEnabled(true);
+        }
+
         if (controlee instanceof IApplicable) {
             apply.setEnabled(true);
             cancel.setEnabled(true);
-	    ok.setToolTipText("Sets the values and closes this window");
 	    ok.setText("OK");
 	    return;
         }
 
-	ok.setToolTipText("Closes this window");
 	ok.setText("Close");
     }
 
@@ -201,9 +167,7 @@ public class ButtonBar extends javax.swing.JPanel {
     public javax.swing.JButton getApplyButton() {
         return apply;
     }
-
     IControlee controlee;
-    URL helpUrl;
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton help;
