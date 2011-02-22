@@ -38,12 +38,11 @@ import fr.esrf.TangoApi.*;
 
 public class FloatSpectrumHelper extends ANumberSpectrumHelper {
 
-  public FloatSpectrumHelper(AAttribute attribute) {
+  public FloatSpectrumHelper(IAttribute attribute) {
     init(attribute);
   }
 
-    @Override
-  void init(AAttribute attribute) {
+  void init(IAttribute attribute) {
     super.init(attribute);
   }
 
@@ -61,147 +60,6 @@ public class FloatSpectrumHelper extends ANumberSpectrumHelper {
       }
 
       da.insert(tmp);
-  }
-
-  protected INumberSpectrumHistory[] getNumberSpectrumAttHistory(DeviceDataHistory[] attPollHist) {
-
-    NumberSpectrumHistory[] hist = new NumberSpectrumHistory[attPollHist.length];
-    NumberSpectrumHistory histElem;
-    fr.esrf.Tango.AttrQuality attq;
-    int i;
-    double    dUnitFactor=1.0;
-
-    if (attPollHist.length <= 0)
-      return null;
-
-    dUnitFactor = this.attribute.getDisplayUnitFactor();
-    if (dUnitFactor <= 0) dUnitFactor = 1.0;
-
-    for (i = 0; i < attPollHist.length; i++) {
-
-      histElem = new NumberSpectrumHistory();
-
-      try {
-        histElem.setTimestamp(attPollHist[i].getTime());
-      } catch (Exception ex) {
-        histElem.setTimestamp(0);
-      }
-
-      try {
-        attq = attPollHist[i].getAttrQuality();
-
-        if (AttrQuality._ATTR_VALID == attq.value()) {
-          histElem.setState(IAttribute.VALID);
-        } else {
-          if (AttrQuality._ATTR_INVALID == attq.value()) {
-            histElem.setState(IAttribute.INVALID);
-          } else {
-            if (AttrQuality._ATTR_ALARM == attq.value()) {
-              histElem.setState(IAttribute.ALARM);
-            } else {
-              if (AttrQuality._ATTR_WARNING == attq.value()) {
-                histElem.setState(IAttribute.WARNING);
-              } else {
-                if (AttrQuality._ATTR_CHANGING == attq.value()) {
-                  histElem.setState(IAttribute.CHANGING);
-                } else
-                  histElem.setState(IAttribute.UNKNOWN);
-              }
-            }
-          }
-        }
-
-      } catch (Exception ex) {
-        histElem.setState(IAttribute.UNKNOWN);
-      }
-
-
-      try {
-        float[] vals = attPollHist[i].extractFloatArray();
-        double[] newVals = new double[vals.length];
-        for(int j=0;j<vals.length;j++) newVals[j] = (double)vals[j] * dUnitFactor;
-        histElem.setValue(newVals);
-      } catch (Exception ex) {
-        histElem.setValue(new double[0]);
-      }
-
-      hist[i] = histElem;
-    }
-
-    return hist;
-  }
-
-  protected INumberSpectrumHistory[] getNumberSpectrumDeviceAttHistory(DeviceDataHistory[] attPollHist) {
-
-    NumberSpectrumHistory[] hist = new NumberSpectrumHistory[attPollHist.length];
-    NumberSpectrumHistory histElem;
-    fr.esrf.Tango.AttrQuality attq;
-    int i;
-
-    if (attPollHist.length <= 0)
-      return null;
-
-    for (i = 0; i < attPollHist.length; i++) {
-
-      histElem = new NumberSpectrumHistory();
-
-      try {
-        histElem.setTimestamp(attPollHist[i].getTime());
-      } catch (Exception ex) {
-        histElem.setTimestamp(0);
-      }
-
-      try {
-        attq = attPollHist[i].getAttrQuality();
-
-        if (AttrQuality._ATTR_VALID == attq.value()) {
-          histElem.setState(IAttribute.VALID);
-        } else {
-          if (AttrQuality._ATTR_INVALID == attq.value()) {
-            histElem.setState(IAttribute.INVALID);
-          } else {
-            if (AttrQuality._ATTR_ALARM == attq.value()) {
-              histElem.setState(IAttribute.ALARM);
-            } else {
-              if (AttrQuality._ATTR_WARNING == attq.value()) {
-                histElem.setState(IAttribute.WARNING);
-              } else {
-                if (AttrQuality._ATTR_CHANGING == attq.value()) {
-                  histElem.setState(IAttribute.CHANGING);
-                } else
-                  histElem.setState(IAttribute.UNKNOWN);
-              }
-            }
-          }
-        }
-
-      } catch (Exception ex) {
-        histElem.setState(IAttribute.UNKNOWN);
-      }
-
-
-      try {
-        float[] vals = attPollHist[i].extractFloatArray();
-        double[] newVals = new double[vals.length];
-        for(int j=0;j<vals.length;j++) newVals[j] = (double)vals[j];
-        histElem.setValue(newVals);
-      } catch (Exception ex) {
-        histElem.setValue(new double[0]);
-      }
-
-      hist[i] = histElem;
-    }
-
-    return hist;
-
-  }
-
-  protected IAttributeSpectrumHistory[] getSpectrumDeviceAttHistory(DeviceDataHistory[] attPollHist) {
-    return (getNumberSpectrumDeviceAttHistory(attPollHist));
-  }
-
-  protected IAttributeSpectrumHistory[] getSpectrumAttHistory(DeviceDataHistory[] attPollHist) {
-    return (getNumberSpectrumAttHistory(attPollHist));
   }
   
 

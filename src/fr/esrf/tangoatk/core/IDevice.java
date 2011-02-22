@@ -31,6 +31,9 @@
 
 package fr.esrf.tangoatk.core;
 
+import fr.esrf.TangoApi.*;
+import fr.esrf.Tango.DevFailed;
+
 public interface IDevice extends IRefreshee {
 
     public static final String ON = "ON";
@@ -53,6 +56,10 @@ public interface IDevice extends IRefreshee {
     public String getState() ;
 
     public String getName();
+    public DeviceData executeCommand(String command, DeviceData argin)
+	throws DevFailed;
+
+    public AttributeInfo getAttributeInfo(String name) throws DevFailed;
 
     public void removeStatusListener(IStatusListener listener);
 
@@ -74,9 +81,5 @@ public interface IDevice extends IRefreshee {
     public boolean getInvertedOpenClose();
   
     public boolean getInvertedInsertExtract();
-
-    public int getIdlVersion();
-
-    public boolean doesEvent();
 
 }

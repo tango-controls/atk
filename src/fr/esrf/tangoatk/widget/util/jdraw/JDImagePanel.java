@@ -24,6 +24,9 @@
 package fr.esrf.tangoatk.widget.util.jdraw;
 
 import javax.swing.*;
+
+import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -155,8 +158,7 @@ class JDImagePanel extends JPanel implements ActionListener {
     if (src == filenameBtn) {
 
       JFileChooser chooser = new JFileChooser(".");
-      String[] exts={"gif","png","jpg"};
-      chooser.addChoosableFileFilter(new JDFileFilter("Image file",exts));
+      chooser.addChoosableFileFilter(new MultiExtFileFilter("Image file", "gif", "png", "jpg"));
       if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
         for(i=0;i<allObjects.length;i++)
           allObjects[i].setFileName(chooser.getSelectedFile().getAbsolutePath());

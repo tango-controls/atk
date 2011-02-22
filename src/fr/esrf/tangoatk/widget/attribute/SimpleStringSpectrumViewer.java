@@ -178,7 +178,7 @@ public class SimpleStringSpectrumViewer extends javax.swing.JPanel
 
      public void errorChange(ErrorEvent evt)
      {
-       setStrTextArea("Unknown");
+
      }
 
      public void stateChange(AttributeStateEvent evt)
@@ -224,7 +224,7 @@ public class SimpleStringSpectrumViewer extends javax.swing.JPanel
 	 try
 	 {
 	     //final IStringSpectrum attr = (IStringSpectrum)atl.add("JM/test/2/SequenceHistory");
-	     final IStringSpectrum attr = (IStringSpectrum)atl.add("sys/MSTATUS/RF-TRA/Devices");
+	     final IStringSpectrum attr = (IStringSpectrum)atl.add("sy/rf-cavi/cav12/SequenceHistory");	     
              sssv.setModel(attr);
 	     atl.startRefresher();
 
@@ -237,7 +237,7 @@ public class SimpleStringSpectrumViewer extends javax.swing.JPanel
 	 IEntity ie = null;
 	 
 	 //ie = atl.get("JM/test/2/SequenceHistory");
-         ie = atl.get("sys/MSTATUS/RF-TRA/Devices");
+         ie = atl.get("sy/rf-cavi/cav12/SequenceHistory");
 	 if (ie == null)
 	    System.out.println("Cannot retreive the attribute from the list.");
 	 else

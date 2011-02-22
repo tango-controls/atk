@@ -2136,11 +2136,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
     try {
 
       IRawImage theAtt;
-      //theAtt = (IRawImage) attributeList.add("jlp/image/1/image");
-      //theAtt = (IRawImage) attributeList.add("et/jpeg/01/TheImage");
-      //theAtt = (IRawImage) attributeList.add("et/jpeg/01/AnotherImage");
-      //theAtt = (IRawImage) attributeList.add("et/jpeg/01/YetAnother");
-      theAtt = (IRawImage) attributeList.add("et/jpeg/01/TheRGBAattr");
+      theAtt = (IRawImage) attributeList.add("jlp/image/1/image");
       d.setModel(theAtt);
 
     } catch (Exception e) {

@@ -26,7 +26,6 @@ import java.util.*;
 
 import fr.esrf.TangoApi.DeviceAttribute;
 import fr.esrf.Tango.DevFailed;
-import fr.esrf.tangoatk.core.attribute.AAttribute;
 import fr.esrf.tangoatk.core.attribute.PolledAttributeFactory;
 
 /**
@@ -52,34 +51,32 @@ public class AttributePolledList extends AttributeList {
   // --------------------------------------------------------------
   // Overrides addElement to build the optimized internal structure
   // --------------------------------------------------------------
-    @Override
   public void addElement(Object entity) {
 
-    if(!(entity instanceof AAttribute)) {
+    if(!(entity instanceof IAttribute)) {
       System.out.println("Warning, AttributePolledList supports only IAttribute.");
       return;
     }
 
-    AAttribute attToAdd = (AAttribute)entity;
-    super.addElement(attToAdd);
+    IAttribute att = (IAttribute)entity;
+    super.addElement(att);
 
     // Add this entity within the private device list
-    addEntity(attToAdd);
+    addEntity(att);
 
   }
 
   // --------------------------------------------------------------
   // Remove an entity from the internal structure
   // --------------------------------------------------------------
-    @Override
   public Object remove(int index) {
 
     Object removed = super.remove(index);
 
     // look for this entity within the internal structre
     // and remove it
-    if(removed!=null && removed instanceof AAttribute)
-      removeEntity((AAttribute)removed);
+    if(removed!=null && removed instanceof IAttribute)
+      removeEntity((IAttribute)removed);
 
     return removed;
 
@@ -88,7 +85,6 @@ public class AttributePolledList extends AttributeList {
   // --------------------------------------------------------------
   // Refresh implementation
   // --------------------------------------------------------------
-    @Override
   public void refresh()
   {
 
@@ -149,15 +145,15 @@ public class AttributePolledList extends AttributeList {
   // --------------------------------------------------------------
   // private stuff
   // --------------------------------------------------------------
-  synchronized private void addEntity(AAttribute att) {
+  synchronized private void addEntity(IAttribute att) {
   
     int i = 0;
     boolean found = false;
-    Device attDev = att.getDevice();
+    Device dev = att.getDevice();
     
     while(i<deviceList.size() && !found) {
       //found = ((DeviceItem)deviceList.get(i)).getDevice() == dev;
-      found = (deviceList.get(i).getDevice() == attDev);
+      found = (deviceList.get(i).getDevice() == dev);
       if(!found) i++;
     }
     if( found ) {
@@ -165,22 +161,22 @@ public class AttributePolledList extends AttributeList {
       deviceList.get(i).add(att);
     } else {
       // Create a new entry
-      DeviceItem item = new DeviceItem(attDev);
+      DeviceItem item = new DeviceItem(dev);
       item.add(att);
       deviceList.add(item);
     }
     
   }
 
-  synchronized private void removeEntity(AAttribute att) {
+  synchronized private void removeEntity(IAttribute att) {
 
     int i = 0;
     boolean found = false;
-    Device attDev = att.getDevice();
+    Device dev = att.getDevice();
 
     while(i<deviceList.size() && !found) {
       //found = ((DeviceItem)deviceList.get(i)).getDevice() == dev;
-      found = (deviceList.get(i).getDevice() == attDev);
+      found = (deviceList.get(i).getDevice() == dev);
       if(!found) i++;
     }
     if( found ) {

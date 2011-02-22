@@ -262,7 +262,12 @@ public class ScalarInput extends JPanel implements ActionListener{
     {
         attributeTextField.setText(avalue);
         if(scalarModel!= null && scalarModel.isWritable() && scalarModel instanceof IStringScalar)
+            try {
                 ((IStringScalar)scalarModel).setValue(avalue);
+            }
+        	catch (AttributeSetException e) {
+                e.printStackTrace();
+            }
     }
     
     public String getText()

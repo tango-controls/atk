@@ -37,13 +37,12 @@ import fr.esrf.Tango.DevFailed;
 
 public class UShortScalarHelper extends ANumberScalarHelper {
 
-  public UShortScalarHelper(AAttribute attribute) {
+  public UShortScalarHelper(IAttribute attribute) {
     init(attribute);
   }
 
 
-    @Override
-  void init(AAttribute attribute) {
+  void init(IAttribute attribute) {
     super.init(attribute);
   }
 

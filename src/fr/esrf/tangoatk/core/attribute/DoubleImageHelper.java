@@ -30,6 +30,7 @@
 // Description:
 package fr.esrf.tangoatk.core.attribute;
 
+import fr.esrf.tangoatk.core.*;
 
 
 import fr.esrf.Tango.*;
@@ -37,7 +38,7 @@ import fr.esrf.TangoApi.*;
 
 class DoubleImageHelper extends ANumberImageHelper {
 
-  public DoubleImageHelper(AAttribute attribute) {
+  public DoubleImageHelper(IAttribute attribute) {
     init(attribute);
   }
 

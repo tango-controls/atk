@@ -34,6 +34,7 @@ import fr.esrf.Tango.DevFailed;
 import fr.esrf.Tango.AttrDataFormat;
 import fr.esrf.TangoApi.DbAttribute;
 import fr.esrf.TangoApi.AttributeInfoEx;
+import fr.esrf.TangoApi.DbDatum;
 
 /**
  * <code>AttributeFactory</code> is an extension of {@link AEntityFactory}
@@ -133,72 +134,6 @@ public class AttributeFactory extends AEntityFactory {
 
     return list;
   }
-
-    /**
-     * <code>getStatelessDevice</code>
-     *
-     * @param deviceName a <code>String</code> value containing the
-     * name of the device to get.
-     * @return a <code>Device</code> if this device is already known.
-     * @see DeviceFactory#getDevice
-     */
-    Device getConnectionlessDevice(String deviceName) throws ConnectionException
-    {
-        return DeviceFactory.getInstance().getConnectionlessDevice(deviceName);
-    }
-
-  /**
-   * <code>getConnectionlessSingleAttribute</code>
-   *
-   * @param name a <code>String</code> value containing the name of the
-   * state attribute to be instantiated.
-   * @return a <code>List<IEntity></code> value containing the corresponding
-   * IAttributes
-* @see IAttribute
-   */
-    @Override
-    protected synchronized List<IEntity> getConnectionlessSingleAttribute(String name) throws ConnectionException
-    {
-        List<IEntity> list = new Vector<IEntity>();
-        Device d = getConnectionlessDevice(extractDeviceName(name));
-        list.add(getConnectionlessStateAttribute(name, d));
-        return list;
-    }
-
-
-  /**
-   * <code>getConnectionlessStateAttribute</code> returns an attribute corresponding
-   * to the name given in the first parameter. If such an attribute already
-   * exists, the existing attribute is returned. Otherwise it is created.
-   * @param fqname a <code>String</code> value containing the state attribute name
-   * fully qualified with device name.
-   * @param device a <code>Device</code> value the device
-   * @return an <code>IEntity</code> value
-   */
-    protected synchronized IEntity getConnectionlessStateAttribute(String fqname, Device device)  throws ConnectionException
-    {
-        /*
-         * Check if the attribute has already been imported
-         */
-        int pos = getAttributePos(fqname);
-
-        /*
-         * if so we return the old attribute and exit.
-         */
-        if (pos >= 0)
-        {
-            return attributes.get(pos);
-        }
-
-        /*
-         * To obtain a new attribute we must find its name.
-         * The name is passed fully-qualified, that is with the
-         * device-name prefixed, like eas/test-api/1/Attr_name.
-         */
-        String name = extractEntityName(fqname);
-
-        return initConnectionlessStateAttribute(device, -(pos + 1), fqname);
-    }
 
   /**
    * <code>getSingleEntity</code> returns an attribute corresponding
@@ -305,31 +240,6 @@ public class AttributeFactory extends AEntityFactory {
   }
 
   /**
-   * Check whether the given name corresponds to a state attribute whose device is not reachable.
-   * @param fqname Full entity name
-   * @return True if the state attribute exists.
-   */
-    public boolean isConnectionLessAttribute(String fqname)
-    {
-        try
-        {
-            return (getConnectionlessSingleAttribute(fqname) != null);
-        }
-        catch (ConnectionException de)
-        {
-            System.out.println("AttributeFactory.isConnectionLessAttribute(" + fqname + ") : " + de.getErrors()[0].desc);
-            return false;
-        }
-        catch (Exception e)
-        {
-            // Unexpected exception
-            System.out.println("AttributeFactory.isConnectionLessAttribute(" + fqname + ") : Unexpected exception caught...");
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-  /**
    * <code>initAttribute</code> ask getAttributeOfType for an
    * AAttribute of the type given in the AttributeInfo passed as
    * parameter, and then calls <code>init()</code> on the attribute
@@ -359,36 +269,6 @@ public class AttributeFactory extends AEntityFactory {
 
     return attribute;
   }
-
-  /**
-   * <code>initConnectionlessStateAttribute</code> ask getConnectionlessDevStateScalar for an
-   * AAttribute of the type given in the AttributeInfo passed as
-   * parameter, and then calls <code>init()</code> on the attribute
-   *
-   * @param device a <code>Device</code> value
-   * @param insertionPos Insertion postion of this new attribute in the global list
-   * @param fqname Full entity name (can include host and port)
-   * @return an <code>AAttribute</code> value
-   */
-    protected AAttribute initConnectionlessStateAttribute(Device device,
-            int insertionPos,
-            String fqname)  throws ConnectionException
-    {
-
-        AAttribute attribute = getConnectionlessDevStateScalar(device, fqname);
-        long t0 = System.currentTimeMillis();
-        attribute.connectionlessInit(device, extractEntityName(fqname), true);
-        DeviceFactory.getInstance().trace(DeviceFactory.TRACE_SUCCESS, "AttributeFactory.initConnectionlessStateAttribute(" + fqname + ")", t0);
-
-        // Build the new attNames array
-        buildNames(fqname, insertionPos);
-
-        attributes.add(insertionPos, attribute);
-
-        dumpFactory("Adding " + fqname);
-
-        return attribute;
-    }
 
   protected void buildNames(String fqname,int insertionPos) {
 
@@ -435,23 +315,6 @@ public class AttributeFactory extends AEntityFactory {
     }
 
   }
-
-  /**
-   * <code>getConnectionlessDevStateScalar</code> does the work of instantiating the
-   * DevState scalar attribute even if the device is not responding.
-   * @param device a <code>Device</code> value
-   * @return an <code>AAttribute</code> value
-   * @throws IllegalArgumentException if the attribute name is not state.
-   */
-    protected AAttribute getConnectionlessDevStateScalar(Device device, String fqname) throws ConnectionException
-    {
-        String attName = extractEntityName(fqname);
-        if (!attName.equalsIgnoreCase("state"))
-            throw new ConnectionException("Only state attribute can be created without connection to the device.");
-        
-        DevStateScalar dss = new DevStateScalar();
-        return dss;
-    }
 
 
   private EnumScalar getEnumScalar(Device device,AttributeInfoEx config)
@@ -562,7 +425,14 @@ public class AttributeFactory extends AEntityFactory {
                ns.setNumberHelper(new ShortScalarHelper(ns));
             break;
       case Tango_DEV_USHORT:
-            ns.setNumberHelper(new UShortScalarHelper(ns));
+            ens = getEnumScalar(device, config);
+            if (ens != null)
+            {
+               ens.setEnumHelper(new EnumScalarHelper(ens));
+               return ens;
+            }
+            else
+               ns.setNumberHelper(new UShortScalarHelper(ns));
             break;
       case Tango_DEV_DOUBLE:
             ns.setNumberHelper(new DoubleScalarHelper(ns));

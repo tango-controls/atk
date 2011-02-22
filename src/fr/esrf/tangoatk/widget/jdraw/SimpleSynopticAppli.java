@@ -30,10 +30,11 @@ package fr.esrf.tangoatk.widget.jdraw;
 
 import java.io.*;
 import java.util.*;
+
+import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
 import fr.esrf.tangoatk.widget.util.Splash;
 import fr.esrf.tangoatk.widget.util.ErrorHistory;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
-import fr.esrf.tangoatk.widget.util.jdraw.JDFileFilter;
 
 import javax.swing.*;
 
@@ -277,7 +278,7 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
 	{
 	    JFileChooser chooser = new JFileChooser(".");
 	    chooser.setDialogTitle("[SimpleSynopticAppli] Open a synoptic file");
-	    JDFileFilter jdwFilter = new JDFileFilter("JDraw synoptic",new String[]{"jdw"});
+	    MultiExtFileFilter jdwFilter = new MultiExtFileFilter("JDraw synoptic", "jdw");
 	    chooser.addChoosableFileFilter(jdwFilter);
 	    int returnVal = chooser.showOpenDialog(null);
 	    if (returnVal == JFileChooser.APPROVE_OPTION)
