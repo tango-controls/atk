@@ -1,35 +1,11 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * ImageController.java
  *
  * Created on May 31, 2002, 2:43 PM
  */
 
 package fr.esrf.tangoatk.widget.image;
-import fr.esrf.tangoatk.widget.util.*;
-import java.awt.*;
-import javax.swing.event.*;
+
 /**
  *
  * @author  root
@@ -41,20 +17,22 @@ public class ImageController extends javax.swing.JPanel {
     /** Creates new form ImageController */
     public ImageController() {
         initComponents();
-
-	jTabbedPane1.addChangeListener(new ChangeListener() {
-		public void stateChanged(ChangeEvent evt) {
-		    tabChanged(evt);
-		}
-	    });
-
+	buttonBar1.setHelpVisible(false);
+	buttonBar1.setCancelVisible(false);
+	JButton close = buttonBar1.getOKButton();
+	close.setText("Close");
+	close.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                closeActionPerformed(evt);
+            }
+        });
+	    
     }
 
-    void tabChanged(ChangeEvent evt) {
-	Component comp = jTabbedPane1.getSelectedComponent();
-	buttonBar1.setControlee((IControlee)comp);
+    protected void closeActionPerformed(java.awt.event.ActionEvent evt) {
+	getRootPane().getParent().setVisible(false);
     }
-
+    
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -90,7 +68,6 @@ public class ImageController extends javax.swing.JPanel {
 
     public void addToPanel(IImagePanel panel) {
 	jTabbedPane1.add(panel.getComponent(), panel.getName());
-	buttonBar1.setControlee((IControlee)jTabbedPane1.getSelectedComponent());
     }
     
     protected IImageViewer model;    

@@ -1,30 +1,25 @@
-#BEANINFO =	StatusViewerBeanInfo.java
-#		StateViewerBeanInfo.java
+BEANINFO = StateViewerBeanInfo.java       \
+
+#            StatusViewerBeanInfo.java      \
 #            DeviceViewerBeanInfo.java \
 
 
 include ../../../../../../.make-include
 
 ALL =   $(TARGET)/IDevicePopUp.class \
-	  $(TARGET)/StatusViewer.class      \
-	  $(TARGET)/StateViewer.class       \
-	  $(TARGET)/SimpleStateViewer.class       \
-	  $(TARGET)/DeviceStateButtonViewer.class       \
-      $(TARGET)/DeviceViewer.class \
-      $(TARGET)/SingletonStatusViewer.class \
-      $(TARGET)/Tree.class \
-	$(TARGET)/DeviceStateLightViewer.class \
+	$(TARGET)/StatusViewer.class      \
+	$(TARGET)/StateViewer.class       \
+        $(TARGET)/DeviceViewer.class \
+        $(TARGET)/SingletonStatusViewer.class \
 
-all: tree-stuff devices beaninfo icons
+all: devices beaninfo icons
 
 devices: $(ALL)
 	$(J)
 
-tree-stuff:
-	(cd tree && $(MAKE) all)
 
 manifest: manifest-file
 
-dslv: $(ALL)
-	$(JAVA) fr.esrf.tangoatk.widget.device.DeviceStateLightViewer jlp/test/1
+run:
+	$(JAVA) fr.esrf.TangoATK.Widget.Device.DeviceViewer
 

@@ -1,25 +1,7 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
+// Decompiled by Jad v1.5.8e. Copyright 2001 Pavel Kouznetsov.
+// Jad home page: http://www.geocities.com/kpdus/jad.html
+// Decompiler options: packimports(3) space 
+// Source File Name:   SimpleCommandViewer.java
 
 package fr.esrf.tangoatk.widget.command;
 
@@ -34,7 +16,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 
 // Referenced classes of package fr.esrf.tangoatk.widget.command:
-//      ScalarCommandInput, SimpleCommandOutput
+//      ScalarCommandInput, CommandOutput
 
 public class SimpleCommandViewer extends JPanel
     implements IResultListener {
@@ -58,7 +40,7 @@ public class SimpleCommandViewer extends JPanel
 	deviceFrame.getContentPane().add(dv);
 	deviceFrame.pack();
 	scalarCommandInput.setInputEnabled(model.takesInput());
-	Property property = model.getProperty("in_type_desc");
+	Property property = model.getProperty("out_type_desc");
 	if (property != null)
 	    descriptionLabel.setText(property.getPresentation());
     }
@@ -68,7 +50,7 @@ public class SimpleCommandViewer extends JPanel
 	deviceButton = new JButton();
 	descriptionLabel = new JLabel();
 	scalarCommandInput = new ScalarCommandInput();
-	simpleCommandOutput = new SimpleCommandOutput();
+	commandOutput = new CommandOutput();
 	setLayout(new GridBagLayout());
 	setBorder(new TitledBorder("Not Connected"));
 	infoButton.setText("Info");
@@ -114,7 +96,7 @@ public class SimpleCommandViewer extends JPanel
 	gridbagconstraints.fill = 1;
 	gridbagconstraints.weightx = 0.10000000000000001D;
 	gridbagconstraints.weighty = 0.29999999999999999D;
-	add(simpleCommandOutput, gridbagconstraints);
+	add(commandOutput, gridbagconstraints);
     }
 
     private void scalarCommandInputPropertyChange(PropertyChangeEvent propertychangeevent) {
@@ -127,19 +109,19 @@ public class SimpleCommandViewer extends JPanel
     }
 
     private void deviceButtonActionPerformed(ActionEvent actionevent) {
-	deviceFrame.setVisible(true);
+	deviceFrame.show();
     }
 
     private void infoButtonActionPerformed(ActionEvent actionevent) {
-	propertyFrame.setVisible(true);
+	propertyFrame.show();
     }
 
     public void errorChange(ErrorEvent errorevent) {
-	simpleCommandOutput.setResult(errorevent.getError().toString());
+	commandOutput.setResult(errorevent.getError().toString());
     }
 
     public void resultChange(ResultEvent resultevent) {
-	simpleCommandOutput.setResult(resultevent.getResult());
+	commandOutput.setResult(resultevent.getResult());
     }
 
     public void setDeviceButtonVisible(boolean flag) {
@@ -175,35 +157,35 @@ public class SimpleCommandViewer extends JPanel
     }
 
     public void setOutputVisible(boolean flag) {
-	simpleCommandOutput.setVisible(flag);
+	commandOutput.setVisible(flag);
     }
 
     public boolean isOutputVisible() {
-	return simpleCommandOutput.isVisible();
+	return commandOutput.isVisible();
     }
 
     public void clearInput() {
-	scalarCommandInput.setInput(null);
+	scalarCommandInput.setInput("");
     }
 
     public void clearOutput() {
-	simpleCommandOutput.setResult("");
+	commandOutput.setResult("");
     }
 
     public void setOutputFont(Font font) {
-	if (simpleCommandOutput == null) {
+	if (commandOutput == null) {
 	    return;
 	} else {
-	    simpleCommandOutput.setFont(font);
+	    commandOutput.setFont(font);
 	    return;
 	}
     }
 
     public Font getOutputFont() {
-	if (simpleCommandOutput == null)
+	if (commandOutput == null)
 	    return getFont();
 	else
-	    return simpleCommandOutput.getFont();
+	    return commandOutput.getFont();
     }
 
     public void setInputFont(Font font) {
@@ -260,9 +242,9 @@ public class SimpleCommandViewer extends JPanel
     private void serializeInit() {
 	System.out.println(scalarCommandInput + " " +
 			   deviceButton + " " + infoButton);
-	scalarCommandInput.addPropertyChangeListener(new _cls3());
-	deviceButton.addActionListener(new _cls2());
-	infoButton.addActionListener(new _cls1());
+	scalarCommandInput.addPropertyChangeListener(new _cls4());
+	deviceButton.addActionListener(new _cls5());
+	infoButton.addActionListener(new _cls6());
     }
 
     private void readObject(ObjectInputStream objectinputstream)
@@ -280,28 +262,28 @@ public class SimpleCommandViewer extends JPanel
 	JFrame jframe = new JFrame();
 	jframe.getContentPane().add(simplecommandviewer);
 	jframe.pack();
-	jframe.setVisible(true);
+	jframe.show();
     }
 
     public SimpleCommandViewer() {
 	dv = new DeviceViewer();
 	deviceFrame = new JFrame();
-	input = new Vector<java.util.List> ();
+	input = new Vector();
 	propertyFrame = new PropertyFrame();
 	initComponents();
-	input.add(new Vector<String> ());
+	input.add("");
     }
 
     ICommand model;
     DeviceViewer dv;
     JFrame deviceFrame;
-    java.util.List<java.util.List> input;
+    java.util.List input;
     public PropertyFrame propertyFrame;
     private JButton infoButton;
     private JButton deviceButton;
     private JLabel descriptionLabel;
     private ScalarCommandInput scalarCommandInput;
-    private SimpleCommandOutput simpleCommandOutput;
+    private CommandOutput commandOutput;
 
 
 
@@ -327,6 +309,32 @@ public class SimpleCommandViewer extends JPanel
 
 	public void propertyChange(PropertyChangeEvent propertychangeevent) {
 	    scalarCommandInputPropertyChange(propertychangeevent);
+	}
+
+    }
+
+
+    private class _cls4 implements PropertyChangeListener {
+
+	public void propertyChange(PropertyChangeEvent propertychangeevent) {
+	    scalarCommandInputPropertyChange(propertychangeevent);
+	}
+
+    }
+
+
+    private class _cls5 implements ActionListener {
+
+	public void actionPerformed(ActionEvent actionevent) {
+	    deviceButtonActionPerformed(actionevent);
+	}
+    }
+
+
+    private class _cls6 implements ActionListener {
+
+	public void actionPerformed(ActionEvent actionevent) {
+	    infoButtonActionPerformed(actionevent);
 	}
 
     }

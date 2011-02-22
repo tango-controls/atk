@@ -1,20 +1,15 @@
-BEANINFO= JSmoothLabelBeanInfo.java            \
+
+# BEANINFO =  ATKNumberFieldBeanInfo.java \
 
 include ../../../../../../.make-include
 
 ALL = $(TARGET)/UIManagerHelper.class       \
-      $(TARGET)/ATKDiagnostic.class         \
       $(TARGET)/ButtonBar.class             \
-      $(TARGET)/ATKMenuBar.class            \
       $(TARGET)/Splash.class                \
-      $(TARGET)/SplashPanel.class           \
-      $(TARGET)/IControlee.class            \
-      $(TARGET)/IApplicable.class           \
-      $(TARGET)/IHelpful.class              \
       $(TARGET)/DeviceFinder.class          \
       $(TARGET)/ATKFormat.class             \
-      $(TARGET)/ErrorPopup.class            \
-      $(TARGET)/ErrorPane.class             \
+      $(TARGET)/SplashPanel.class           \
+      $(TARGET)/LuserErrorPopup.class       \
       $(TARGET)/ATKFrame.class              \
       $(TARGET)/ATKField.class              \
       $(TARGET)/ATKStringField.class        \
@@ -24,46 +19,13 @@ ALL = $(TARGET)/UIManagerHelper.class       \
       $(TARGET)/ErrorTree.class             \
       $(TARGET)/ErrorAdapter.class          \
       $(TARGET)/ErrorPanel.class            \
+      $(TARGET)/BasicLogWindow.class        \
       $(TARGET)/EntityJTableAdapter.class   \
       $(TARGET)/DropTable.class             \
-      $(TARGET)/JAutoScrolledText.class     \
-      $(TARGET)/JAutoScrolledTextListener.class \
-      $(TARGET)/JSmoothProgressBar.class    \
-      $(TARGET)/WheelSwitchEvent.class      \
-      $(TARGET)/IWheelSwitchListener.class  \
-      $(TARGET)/WheelSwitch.class           \
-      $(TARGET)/JArrowButton.class          \
-      $(TARGET)/HelpWindow.class            \
-      $(TARGET)/Gradient.class              \
-      $(TARGET)/JGradientViewer.class       \
-      $(TARGET)/JGradientEditor.class       \
-      $(TARGET)/JImage.class                \
-      $(TARGET)/ThreeStateSwitch.class      \
-      $(TARGET)/JSmoothDelayDialog.class    \
-      $(TARGET)/LoadingDialog.class        \
-      $(TARGET)/JImageJ.class        \
-      $(TARGET)/AdvancedImagePlus.class        \
-      $(TARGET)/MaskUndoableEdit.class        \
-      $(TARGET)/RoiDefaultUndoableEdit.class \
-      $(TARGET)/JFileChooserFilter.class \
-      $(TARGET)/EditableTableRowModel.class \
-      $(TARGET)/EditableJTableRow.class \
-      $(TARGET)/J3DTrendListener.class \
-      $(TARGET)/J3DTrend.class
-      
 
-all: gutils uchart itlk utils ujdraw ujgl3dchart icons beaninfo
+all: utils icons
 
 utils: $(ALL)
-	$(J)
-
-gutils:	$(TARGET)/ATKGraphicsUtils.class \
-        $(TARGET)/ATKConstant.class      \
-        $(TARGET)/JSmoothLabel.class     \
-	$(TARGET)/TableRowModel.class    \
-        $(TARGET)/JTableRow.class        \
-        $(TARGET)/ATKFontChooser.class	\
-	$(TARGET)/MultiExtFileFilter.class 
 	$(J)
 
 run: all
@@ -72,36 +34,23 @@ run: all
 nf: all
 	$(JAVA) fr.esrf.tangoatk.widget.util.ATKNumberField
 
-mb: all
-	$(JAVA) fr.esrf.tangoatk.widget.util.ATKMenuBar
-
 error: all
 	$(JAVA) fr.esrf.tangoatk.widget.util.ErrorHistory
 
 splash: all
-	$(JAVA) fr.esrf.tangoatk.widget.util.Splash
+	$(JAVA) fr.esrf.tangoatk.widget.util.Splash	
 
 eta:	all
 	$(JAVA) fr.esrf.tangoatk.widget.util.EntityJTableAdapter
 
-ep:	all
-	$(JAVA) fr.esrf.tangoatk.widget.util.ErrorPopup
+lep:	all
+	$(JAVA) fr.esrf.tangoatk.widget.util.LuserErrorPopup
 
 df: 	all
 	$(JAVA) fr.esrf.tangoatk.widget.util.DeviceFinder
 
-uchart:
-	(cd chart && $(MAKE) all)
-
-ujgl3dchart:
-	(cd jgl3dchart && $(MAKE) all)
-
-itlk:
-	(cd interlock && $(MAKE) all)
-
-ujdraw:
-	(cd jdraw && $(MAKE) all)
-
-jsmoothdelay:all
-	$(JAVA) fr.esrf.tangoatk.widget.util.JSmoothDelayDialog
+ci:
+	@cvs ci Makefile `echo $(ALL) \
+                     | sed 's|$(TARGET)/||g' |  \
+                     sed 's|\.class|.java|g'`
 
