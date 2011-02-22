@@ -1,31 +1,15 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
+// File:          DeviceFactory.java
+// Created:       2001-09-19 09:50:31, assum
+// By:            <assum@esrf.fr> <pons@esrf.fr>
+// Time-stamp:    <2002-07-23 10:30:15, assum>
+//
 // $Id$
 //
 // Description:
 
 package fr.esrf.tangoatk.core;
 
+import fr.esrf.tangoatk.core.Device;
 import fr.esrf.Tango.DevFailed;
 
 import java.util.*;
@@ -56,8 +40,6 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
   public final static int TRACE_ATTFACTORY=512;
   // Debug trace for command factory.
   public final static int TRACE_CMDFACTORY=1024;
-  // Debug trace for attributes refreshed by att config events.
-  public final static int TRACE_ATT_CONFIG_EVENT=2048;
   // Trace all
   public final static int TRACE_ALL=0xFF;
 
@@ -66,14 +48,12 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
 
   private Object deviceMonitor = new Object();
   private String[] deviceNames = new String[0]; // For fast string search
-  //private Vector devices       = new Vector();
-  private Vector<Device> devices = new Vector<Device> ();
+  private Vector devices       = new Vector();
   private static DeviceFactory instance;
 
   protected int refreshInterval = 1000;
   protected Refresher refresher = null;
   protected static boolean autoStart = true;
-  protected boolean traceUnexpected = false;
 
   private DeviceFactory() {}
 
@@ -167,11 +147,9 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
    * @see java.lang.Thread
    */
   public void startRefresher() {
-    if ( this.isRefreshing() ) return;
     if (refresher == null) {
       refresher = new Refresher("device");
       refresher.setRefreshInterval(getRefreshInterval());
-      refresher.setTraceUnexpected( traceUnexpected );
       refresher.addRefreshee(this);
     }
     refresher.start();
@@ -234,8 +212,7 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
     String lowerName = name.toLowerCase();
 
     pos = Arrays.binarySearch(deviceNames,lowerName);
-    //if(pos>=0) d = (Device)devices.get(pos);
-    if(pos>=0) d = devices.get(pos);
+    if(pos>=0) d = (Device)devices.get(pos);
 
     if (pos < 0) {
 
@@ -273,68 +250,6 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
     return d;
 
   }
-
-    /**
-     * Get a handle to a device and add it to the global state/status refresher list.
-     * @param name Device name
-     * @return Device handle
-     * @throws ConnectionException In case of failure.
-     */
-    public synchronized Device getConnectionlessDevice(String name) throws ConnectionException
-    {
-
-        int pos;
-        Device d = null;
-        String lowerName = name.toLowerCase();
-
-        pos = Arrays.binarySearch(deviceNames, lowerName);
-        //if(pos>=0) d = (Device)devices.get(pos);
-        if (pos >= 0)
-        {
-            d = devices.get(pos);
-        }
-
-        if (pos < 0)
-        {
-
-            // The device has not been found, we have to create it
-            long t0 = System.currentTimeMillis();
-            try
-            {
-                d = new Device(name, true);
-                trace(TRACE_SUCCESS, "DeviceFactory.getConnectionlessDevice(" + name + ") ok", t0);
-            }
-            catch (DevFailed e)
-            {
-                trace(TRACE_FAIL, "DeviceFactory.getConnectionlessDevice(" + name + ") failed", t0);
-                throw new ConnectionException(e);
-            }
-
-            // Build the new deviceNames array
-            int ipos = -(pos + 1);
-            int lgth = deviceNames.length;
-            String[] newDeviceNames = new String[lgth + 1];
-            System.arraycopy(deviceNames, 0, newDeviceNames, 0, ipos);
-            System.arraycopy(deviceNames, ipos, newDeviceNames, ipos + 1, lgth - ipos);
-            newDeviceNames[ipos] = lowerName;
-
-            synchronized (deviceMonitor)
-            {
-                // Update list
-                devices.add(ipos, d);
-                deviceNames = newDeviceNames;
-            }
-
-            dumpFactory("Adding " + lowerName);
-
-            if (autoStart)
-            {
-                startRefresher();
-            }
-
-        }
-        return d;
-    }
 
   /**
    * Executes the global state/status refresh on all device registered.
@@ -402,8 +317,8 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
    * Returns an array of string containing all device name of this factory.
    * @return A list of device name.
    */
-  public List<String> getDeviceNames() {
-    List<String> l = new Vector<String> ();
+  public List getDeviceNames() {
+    List l = new Vector();
     synchronized (deviceMonitor) {
       for (int i=0; i<deviceNames.length;i++)
         l.add(deviceNames[i]);
@@ -420,8 +335,7 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
     synchronized (deviceMonitor) {
       ret = new Device[devices.size()];
       for(int i=0;i<devices.size();i++)
-        //ret[i] = (Device)devices.get(i);
-        ret[i] = devices.get(i);
+        ret[i] = (Device)devices.get(i);
     }    
     return ret;
 
@@ -455,8 +369,7 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
     String lowerName = name.toLowerCase();
 
     pos = Arrays.binarySearch(deviceNames,lowerName);
-    //if(pos>=0) d = (Device)devices.get(pos);
-    if(pos>=0) d = devices.get(pos);
+    if(pos>=0) d = (Device)devices.get(pos);
 
     if (pos < 0) // The device has not been found
        return false;
@@ -508,17 +421,6 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
   public String getVersion() {
     return "$Id$";
   }
-
-public boolean isTraceUnexpected () {
-    return traceUnexpected;
-}
-
-public void setTraceUnexpected (boolean traceUnexpected) {
-    this.traceUnexpected = traceUnexpected;
-    if (refresher != null) {
-        refresher.setTraceUnexpected( traceUnexpected );
-    }
-}
 
 
 }

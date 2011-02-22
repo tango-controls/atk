@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.attribute;
 
 import fr.esrf.tangoatk.core.IRawImageListener;
@@ -45,7 +23,7 @@ import com.braju.format.Format;
 
 
 /**
- * A high level class to display a TANGO image following Tango DEV_ENCODED specification
+ * A high level class to display a TANGO image (as defined by the CCD abstract class)
  * and handle several image manipulation function.
  */
 public class RawImageViewer extends JPanel implements IRawImageListener,ActionListener,MouseListener, MouseMotionListener {
@@ -54,8 +32,8 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
   // Private data
   // ------------------------------------------------------
   private IRawImage model;
-  private IImageFormat format;
-  private String encFormat;
+  private IImageFormat[] allFormats;
+  private int currentFormat;
   private boolean snapToGrid;
   private boolean isNegative;
   private Gradient gColor;
@@ -70,9 +48,6 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
   private boolean userZoom = false;
   private boolean showingMenu;
   private int profileMode;
-  private double minFit;
-  private double maxFit;
-  private String errorString = "No image";
 
   // ------------------------------------------------------
   // Main panel components
@@ -115,10 +90,8 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
   private JDialog settingsDialog = null;
   private LabelViewer attNameLabel;
   private JButton propButton;
+  private JComboBox formatCombo;
   private JCheckBox bestFitCheck;
-  private JTextField fitMinText;
-  private JTextField fitMaxText;
-  private JTextField formatText;
   private JCheckBox snapToGridCheck;
   private JTextField snapToGridText;
   private JCheckBox negativeCheck;
@@ -150,7 +123,6 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
   // Gradientviewer
   private JGradientViewer gradientTool;
 
-
   /**
    * Create a new RawImageViewer
    */
@@ -161,8 +133,11 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
     // ------------------------------------------------------
 
     // !! Important, a new format must be added at the end of the list
-    format = null;
-    encFormat = null;
+    allFormats = new IImageFormat[3];
+    allFormats[0] = new Mono8ImageFormat();
+    allFormats[1] = new Mono16ImageFormat();
+    allFormats[2] = new RGB24ImageFormat();
+    currentFormat = 0;
 
     // ------------------------------------------------------
     // Graphics stuff
@@ -184,6 +159,14 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
     JMenuItem infoMenuItem = new JMenuItem("Image Viewer");
     infoMenuItem.setEnabled(false);
+
+    JMenu formatMenu = new JMenu("Format");
+    formatMenuItem = new JCheckBoxMenuItem[allFormats.length];
+    for(int i=0;i<allFormats.length;i++) {
+      formatMenuItem[i] = new JCheckBoxMenuItem(allFormats[i].getName());
+      formatMenuItem[i].addActionListener(this);
+      formatMenu.add(formatMenuItem[i]);
+    }
 
     bestFitMenuItem = new JCheckBoxMenuItem("Best fit");
     bestFitMenuItem.addActionListener(this);
@@ -229,6 +212,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
     imgMenu.add(infoMenuItem);
     imgMenu.add(new JSeparator());
+    imgMenu.add(formatMenu);
     imgMenu.add(bestFitMenuItem);
     imgMenu.add(negativeMenuItem);
     imgMenu.add(snapToGridMenuItem);
@@ -354,7 +338,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
     imagePanel.addMouseMotionListener(this);
     imagePanel.addMouseListener(this);
 
-    isBestFit = false;
+    isBestFit = true;
     setAlignToGrid(true);
     isNegative = false;
     gColor = new Gradient();
@@ -364,8 +348,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
     showingMenu = true;
     listenerList = new EventListenerList();
     profileMode = 0;
-    minFit = 0.0;
-    maxFit = 100.0;
+
 
   }
 
@@ -375,72 +358,25 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
   /**
    * Sets data to display.
-   * @param rawData Handle to data
+   * @param image Handle to data
    */
-  public void setData(String encFormat,byte[] rawData) {
+  public void setData(byte[][] image) {
 
-    if( encFormat==null ) {
-
-      // Clear
-      format = null;
-      this.encFormat = null;
-      errorString = "No image";
-      statusLabel.setText("");
-      imagePanel.setImage(null);
-      freePopup();
-      imageView.revalidate();
-
-    } else {
-
-      synchronized(this) {
-
-        // Check format change
-        if( this.encFormat==null || !this.encFormat.equalsIgnoreCase(encFormat) ) {
-
-          this.encFormat = encFormat;
-          if( encFormat.equalsIgnoreCase("JPEG_GRAY8") ) {
-            format = new Jpeg8ImageFormat();
-            format.initDefault(gradientTool);
-          } else if( encFormat.equalsIgnoreCase("GRAY8") ) {
-            format = new Mono8ImageFormat();
-            format.initDefault(gradientTool);
-          } else if( encFormat.equalsIgnoreCase("GRAY16") ) {
-            format = new Mono16ImageFormat();
-            format.initDefault(gradientTool);
-          } else if( encFormat.equalsIgnoreCase("JPEG_RGB") ) {
-            format = new Jpeg24ImageFormat();
-            format.initDefault(gradientTool);
-            setGradientVisible(false);
-          } else if( encFormat.equalsIgnoreCase("RGB24") ) {
-            format = new RGB24ImageFormat();
-            format.initDefault(gradientTool);
-            setGradientVisible(false);
-          } else {
-            // Not supported format
-            errorString = encFormat + " format not supported";
-            statusLabel.setText(errorString);
-            format = null;
-          }
-
-        }
-
-      }
-
-      if(format!=null) {
-        try {
-          format.setData(rawData);
-        } catch( IOException e ) {
-          errorString = e.getMessage();
-          imagePanel.setImage(null);
-          freePopup();
-          imageView.revalidate();
-        }
-      }
+    synchronized(this) {
+      for(int i=0;i<allFormats.length;i++)
+        allFormats[i].setData(image);
       computeAutoZoom();
       convertImage();
       refreshComponents();
-
     }
+
+    // Nothing to display
+    if (image == null) {
+      imagePanel.setImage(null);
+      freePopup();
+      imageView.revalidate();
+    }
+
 
   }
 
@@ -450,7 +386,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
    */
   public void setBestFit(boolean b) {
     isBestFit = b;
-    applyFitting();
+
     synchronized (this) {
       convertImage();
     }
@@ -665,6 +601,32 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
   }
 
   /**
+   * Sets the format of the image (Index in the format combobox)
+   * @param format Format index
+   */
+  public void setFormat(int format) {
+
+    currentFormat = format;
+
+    // Remove the gradient when color format
+    if(allFormats[currentFormat].isColorFormat())
+      gradientTool.setVisible(false);
+
+    synchronized (this) {
+      convertImage();
+    }
+
+  }
+
+  /**
+   * Returns the image format.
+   * #see #setFormat
+   */
+  public int getFormat() {
+    return currentFormat;
+  }
+
+  /**
    * Returns true is the image viewer menu is displayed when clicking
    * on the right mouse button.
    * @return True is menu is enabled
@@ -852,16 +814,9 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
    */
   public Dimension getCurrentImageSize() {
 
-    Dimension d = new Dimension();
-
-    if( format!=null ) {
-      d.width = format.getWidth();
-      d.height = format.getHeight();
-    } else {
-      d.width = 0;
-      d.height = 0;
-    }
-    return d;
+    int dimx = allFormats[currentFormat].getWidth();
+    int dimy = allFormats[currentFormat].getHeight();
+    return new Dimension(dimx, dimy);
 
   }
 
@@ -943,11 +898,16 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
       setGradientVisible(!isGradientVisible());
     } else if (src == statsMenuItem) {
       JOptionPane.showMessageDialog(this,getImageInfo(),"Image Information",JOptionPane.INFORMATION_MESSAGE);
-    } else if (src == bestFitCheck) {
-      boolean sel = bestFitCheck.isSelected();
-      fitMinText.setEnabled(!sel);
-      fitMaxText.setEnabled(!sel);
     }
+
+    // Search if a format menu item has been selected
+    boolean found=false;
+    int i=0;
+    while(i<allFormats.length && !found) {
+      found = (src == formatMenuItem[i]);
+      if(!found) i++;
+    }
+    if(found) setFormat(i);
 
   }
 
@@ -961,9 +921,6 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
   synchronized public void mouseMoved(MouseEvent e) {
 
-    if( format==null )
-      return;
-
     Dimension imgsize = getCurrentImageSize();
     int x = getImageXCoord(e.getX());
     int y = getImageYCoord(e.getY());
@@ -971,7 +928,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
       statusLabel.setText(getLabelInfoString());
     } else {
       statusLabel.setText(getLabelInfoString() + " (" + x + "," + y + ")="
-                         + format.getValueStr(x,y));
+                         + Double.toString(allFormats[currentFormat].getValue(x,y)));
     }
 
   }
@@ -1001,13 +958,15 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
     // Right button click
     if (e.getButton() == MouseEvent.BUTTON3) {
       if (showingMenu && e.getSource()==imagePanel) {
+        for(int i=0;i<allFormats.length;i++)
+          formatMenuItem[i].setSelected(i == currentFormat);
         bestFitMenuItem.setSelected(isBestFit());
         snapToGridMenuItem.setSelected(isAlignToGrid());
         negativeMenuItem.setSelected(isNegative());
         toolbarMenuItem.setSelected(isToolbarVisible());
         statusLineMenuItem.setSelected(isStatusLineVisible());
         showGradMenuItem.setSelected(isGradientVisible());
-        if(format!=null) showGradMenuItem.setEnabled(!format.isColorFormat());
+        showGradMenuItem.setEnabled(!allFormats[currentFormat].isColorFormat());
         imgMenu.show(imagePanel, e.getX() , e.getY() );
       }
     }
@@ -1019,14 +978,14 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
   // ----------------------------------------------------------
 
   public void errorChange(fr.esrf.tangoatk.core.ErrorEvent errorEvent) {
-    setData(null,null);
+    setData(null);
   }
 
   public void stateChange(fr.esrf.tangoatk.core.AttributeStateEvent evt) {
   }
 
   public void rawImageChange(RawImageEvent evt) {
-    setData(evt.getEncodedFormat(),evt.getValue());
+    setData(evt.getValue());
   }
 
   // ----------------------------------------------------------
@@ -1082,14 +1041,13 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
   private void constructSettingsPanel() {
 
     if (settingsDialog == null) {
-
       // ------------------------------------------------------
       // Settings panel
       // ------------------------------------------------------
       JPanel settingsPanel = new JPanel();
       settingsPanel.setLayout(null);
-      settingsPanel.setMinimumSize(new Dimension(290, 235));
-      settingsPanel.setPreferredSize(new Dimension(290, 235));
+      settingsPanel.setMinimumSize(new Dimension(290, 195));
+      settingsPanel.setPreferredSize(new Dimension(290, 195));
 
       attNameLabel = new LabelViewer();
       attNameLabel.setOpaque(false);
@@ -1113,65 +1071,35 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
       js.setBounds(0, 40, 500, 10);
       settingsPanel.add(js);
 
+      JLabel formatLabel = new JLabel("Format");
+      formatLabel.setFont(panelFont);
+      formatLabel.setBounds(5, 50, 70, 20);
+      settingsPanel.add(formatLabel);
+
+      formatCombo = new JComboBox();
+      formatCombo.setFont(panelFont);
+      for(int i=0;i<allFormats.length;i++)
+        formatCombo.addItem(allFormats[i].getName());
+      formatCombo.setBounds(80, 50, 100, 22);
+      settingsPanel.add(formatCombo);
+
       bestFitCheck = new JCheckBox("Best fit");
       bestFitCheck.setSelected(false);
       bestFitCheck.setFont(panelFont);
-      bestFitCheck.setBounds(5, 50, 85, 20);
+      bestFitCheck.setBounds(185, 50, 95, 20);
       bestFitCheck.setToolTipText("Display the image using the whole color range");
-      bestFitCheck.addActionListener(this);
       settingsPanel.add(bestFitCheck);
-
-      JLabel fitMinLabel = new JLabel("Min (%)");
-      fitMinLabel.setFont(panelFont);
-      fitMinLabel.setBounds(90, 50, 50, 20);
-      fitMinLabel.setHorizontalAlignment(JLabel.LEFT);
-      settingsPanel.add(fitMinLabel);
-
-      fitMinText = new JTextField("");
-      fitMinText.setMargin(noMargin);
-      fitMinText.setFont(panelFont);
-      fitMinText.setBounds(140, 50, 40, 20);
-      settingsPanel.add(fitMinText);
-
-      JLabel fitMaxLabel = new JLabel("Max (%)");
-      fitMaxLabel.setFont(panelFont);
-      fitMaxLabel.setBounds(190, 50, 50, 20);
-      fitMaxLabel.setHorizontalAlignment(JLabel.LEFT);
-      settingsPanel.add(fitMaxLabel);
-
-      fitMaxText = new JTextField("");
-      fitMaxText.setMargin(noMargin);
-      fitMaxText.setFont(panelFont);
-      fitMaxText.setBounds(240, 50, 40, 20);
-      settingsPanel.add(fitMaxText);
-
-      // ------------------------------------------------------------------------------------
-      JSeparator js1 = new JSeparator();
-      js1.setBounds(0, 80, 500, 10);
-      settingsPanel.add(js1);
-
-      JLabel formatLabel = new JLabel("Format");
-      formatLabel.setFont(panelFont);
-      formatLabel.setBounds(5, 90, 70, 20);
-      settingsPanel.add(formatLabel);
-
-      formatText = new JTextField("");
-      formatText.setEditable(false);
-      formatText.setMargin(noMargin);
-      formatText.setFont(panelFont);
-      formatText.setBounds(80, 90, 200, 20);
-      settingsPanel.add(formatText);
 
       JLabel gradLabel = new JLabel("Colormap");
       gradLabel.setFont(panelFont);
-      gradLabel.setBounds(5, 115, 70, 20);
+      gradLabel.setBounds(5, 75, 70, 20);
       settingsPanel.add(gradLabel);
 
       gradViewer = new JGradientEditor();
       gradViewer.setGradient(gColor);
       gradViewer.setEditable(false);
       gradViewer.setToolTipText("Display the image using this colormap");
-      gradViewer.setBounds(80, 115, 180, 20);
+      gradViewer.setBounds(80, 75, 180, 20);
       settingsPanel.add(gradViewer);
 
       gradButton = new JButton();
@@ -1179,21 +1107,21 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
       gradButton.setToolTipText("Edit colormap");
       gradButton.setFont(panelFont);
       gradButton.setMargin(new Insets(0, 0, 0, 0));
-      gradButton.setBounds(260, 115, 20, 20);
+      gradButton.setBounds(260, 75, 20, 20);
       gradButton.addActionListener(this);
       settingsPanel.add(gradButton);
 
       negativeCheck = new JCheckBox("Negative image");
       negativeCheck.setSelected(false);
       negativeCheck.setFont(panelFont);
-      negativeCheck.setBounds(5, 140, 110, 20);
+      negativeCheck.setBounds(5, 100, 110, 20);
       negativeCheck.setToolTipText("Display the negative image");
       settingsPanel.add(negativeCheck);
 
 
       JLabel imageSizeLabel = new JLabel("Image size");
       imageSizeLabel.setFont(panelFont);
-      imageSizeLabel.setBounds(115, 140, 85, 20);
+      imageSizeLabel.setBounds(115, 100, 85, 20);
       imageSizeLabel.setHorizontalAlignment(JLabel.CENTER);
       settingsPanel.add(imageSizeLabel);
 
@@ -1205,43 +1133,43 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
       imageSizeCombo.addItem("50   %");
       imageSizeCombo.addItem("25   %");
       imageSizeCombo.addItem("12.5 %");
-      imageSizeCombo.setBounds(200, 140, 80, 22);
+      imageSizeCombo.setBounds(200, 100, 80, 22);
       settingsPanel.add(imageSizeCombo);
 
       // ------------------------------------------------------------------------------------
       JSeparator js2 = new JSeparator();
-      js2.setBounds(0, 168, 500, 10);
+      js2.setBounds(0, 128, 500, 10);
       settingsPanel.add(js2);
 
       snapToGridCheck = new JCheckBox("Align to grid");
       snapToGridCheck.setSelected(false);
       snapToGridCheck.setFont(panelFont);
-      snapToGridCheck.setBounds(5, 175, 100, 20);
+      snapToGridCheck.setBounds(5, 135, 100, 20);
       snapToGridCheck.setToolTipText("Align the selection to the grid");
       settingsPanel.add(snapToGridCheck);
 
       JLabel snapToGridLabel = new JLabel("Grid spacing");
       snapToGridLabel.setFont(panelFont);
-      snapToGridLabel.setBounds(110, 175, 90, 20);
+      snapToGridLabel.setBounds(110, 135, 90, 20);
       settingsPanel.add(snapToGridLabel);
 
       snapToGridText = new JTextField("");
       snapToGridText.setMargin(noMargin);
       snapToGridText.setFont(panelFont);
-      snapToGridText.setBounds(205, 175, 50, 20);
+      snapToGridText.setBounds(205, 135, 50, 20);
       settingsPanel.add(snapToGridText);
 
       okButton = new JButton();
       okButton.setText("Apply");
       okButton.setFont(panelFont);
-      okButton.setBounds(5, 205, 80, 25);
+      okButton.setBounds(5, 165, 80, 25);
       okButton.addActionListener(this);
       settingsPanel.add(okButton);
 
       cancelButton = new JButton();
       cancelButton.setText("Dismiss");
       cancelButton.setFont(panelFont);
-      cancelButton.setBounds(205, 205, 80, 25);
+      cancelButton.setBounds(205, 165, 80, 25);
       cancelButton.addActionListener(this);
       settingsPanel.add(cancelButton);
 
@@ -1265,29 +1193,20 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
     constructSettingsPanel();
 
+    formatCombo.setSelectedIndex(currentFormat);
     bestFitCheck.setSelected(isBestFit);
     snapToGridCheck.setSelected(snapToGrid);
     negativeCheck.setSelected(isNegative);
     imageSizeCombo.setSelectedIndex(getZoom());
 
-    fitMinText.setText(Double.toString(minFit));
-    fitMaxText.setText(Double.toString(maxFit));
-    fitMinText.setEnabled(!isBestFit);
-    fitMaxText.setEnabled(!isBestFit);
-
     snapToGridText.setText(Integer.toString(imagePanel.getSnapGrid()));
-
-    if( format!=null ) {
-      // Remove the gradient when color format
-      if(format.isColorFormat())
-        gradientTool.setVisible(false);
-      formatText.setText(format.getName());
-    } else {
-      formatText.setText("");
-    }
 
     ATKGraphicsUtils.centerDialog(settingsDialog);
     settingsDialog.setVisible(true);
+
+    // Remove the gradient when color format
+    if(allFormats[currentFormat].isColorFormat())
+      gradientTool.setVisible(false);
 
     synchronized (this) {
       convertImage();
@@ -1296,36 +1215,12 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
   }
 
-  private void applyFitting() {
-
-    boolean ok = true;
-
-    try {
-      if(fitMinText!=null) {
-        minFit = Double.parseDouble(fitMinText.getText());
-        maxFit = Double.parseDouble(fitMaxText.getText());
-      }
-    } catch(NumberFormatException e) {
-      ok = false;
-    }
-
-    ok = format.setFitting(isBestFit,minFit,maxFit);
-    if( !ok ) {
-      JOptionPane.showMessageDialog(null, "Invalid fitting parameters\nRestoring default", "Error", JOptionPane.ERROR_MESSAGE);
-      format.setFitting(true,0.0,100.0);
-      minFit=0.0;
-      maxFit=100.0;
-      isBestFit = true;
-    }
-
-  }
-
   private void applySettings() {
 
     String gridStr = snapToGridText.getText();
 
+    currentFormat = formatCombo.getSelectedIndex();
     isBestFit = bestFitCheck.isSelected();
-    applyFitting();
     snapToGrid = snapToGridCheck.isSelected();
     isNegative = negativeCheck.isSelected();
 
@@ -1373,13 +1268,10 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
   private void computeAutoZoom() {
 
-    if(format==null)
-      return;
-
     if (firstRefresh || autoZoom) {
 
-      int dimx = format.getWidth();
-      int dimy = format.getHeight();
+      int dimx = allFormats[currentFormat].getWidth();
+      int dimy = allFormats[currentFormat].getHeight();
 
       if (dimy > 0 && dimx > 0) {
 
@@ -1432,6 +1324,20 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
   }
 
+  private String getExtension(File f) {
+
+    String ext = null;
+    String s = f.getName();
+    int i = s.lastIndexOf('.');
+
+    if (i > 0 && i < s.length() - 1) {
+      ext = s.substring(i + 1).toLowerCase();
+    }
+
+    return ext;
+
+  }
+
   // Save a screenshot
   private void saveFile() {
 
@@ -1442,7 +1348,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("jpg"))
           return true;
         return false;
@@ -1458,7 +1364,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("jpg"))
           return true;
         return false;
@@ -1474,7 +1380,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("png"))
           return true;
         return false;
@@ -1490,7 +1396,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
         if (f.isDirectory()) {
           return true;
         }
-        String extension = MultiExtFileFilter.getExtension(f);
+        String extension = getExtension(f);
         if (extension != null && extension.equals("png"))
           return true;
         return false;
@@ -1516,11 +1422,11 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
         FileFilter filter = chooser.getFileFilter();
 
         if (filter == jpgFilter || filter == jpg8Filter) {
-          if (MultiExtFileFilter.getExtension(f) == null || !MultiExtFileFilter.getExtension(f).equalsIgnoreCase("jpg")) {
+          if (getExtension(f) == null || !getExtension(f).equalsIgnoreCase("jpg")) {
             f = new File(f.getAbsolutePath() + ".jpg");
           }
         } else if (filter == pngFilter || filter == png8Filter) {
-          if (MultiExtFileFilter.getExtension(f) == null || !MultiExtFileFilter.getExtension(f).equalsIgnoreCase("png")) {
+          if (getExtension(f) == null || !getExtension(f).equalsIgnoreCase("png")) {
             f = new File(f.getAbsolutePath() + ".png");
           }
         } else {
@@ -1733,7 +1639,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
       Double[][] d = new Double[r.height][r.width];
       for (int j = 0; j < r.height; j++)
         for (int i = 0; i < r.width; i++)
-          d[j][i] = new Double(format.getValue(r.x + i,r.y + j));
+          d[j][i] = new Double(allFormats[currentFormat].getValue(r.x + i,r.y + j));
       tablePanel.setData(d, r.x, r.y);
     } catch (OutOfMemoryError e) {
       System.out.println("Out of memory, cannot build the table");
@@ -1746,7 +1652,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
   private double[] buildHistogramData() {
 
-    double[] histo = new double[format.getHistogramWidth()];
+    double[] histo = new double[allFormats[currentFormat].getHistogramWidth()];
 
     Rectangle r = imagePanel.getSelectionRect();
 
@@ -1764,7 +1670,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
     try {
       for (i = r.x; i < r.x + r.width; i++)
         for (int j = r.y; j < r.y + r.height; j++)
-          histo[(int) format.getValue(i,j)] += 1.0;
+          histo[(int) allFormats[currentFormat].getValue(i,j)] += 1.0;
     } catch(ArrayIndexOutOfBoundsException e) {
       System.out.println("NumberImageViewer.buildHistogramData() : Cannot build histogram. One or more value exceed the range [0..65535].");
       return null;
@@ -1804,9 +1710,6 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
   }
 
   private void refreshLineProfile() {
-
-    if( format==null )
-      return;
 
     if (lineProfiler != null && lineProfiler.isVisible() && profileMode > 0) {
 
@@ -1856,7 +1759,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
         for (i = 0; i <= adx; i++) {
           ye = p[0].y + (int) (delta * (double) i);
           if (xe >= 0 && xe < d.width && ye >= 0 && ye < d.height)
-            profile[i] = format.getValue(xe,ye);
+            profile[i] = allFormats[currentFormat].getValue(xe,ye);
           else
             profile[i] = Double.NaN;
           if (dx < 0)
@@ -1873,7 +1776,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
         for (i = 0; i <= ady; i++) {
           xe = p[0].x + (int) (delta * (double) i);
           if (xe >= 0 && xe < d.width && ye >= 0 && ye < d.height)
-            profile[i] = format.getValue(xe,ye);
+            profile[i] = allFormats[currentFormat].getValue(xe,ye);
           else
             profile[i] = Double.NaN;
           if (dy < 0)
@@ -1934,9 +1837,6 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
   private void refreshSelectionMinMax() {
 
-    if( format==null )
-      return;
-
     Rectangle r = imagePanel.getSelectionRect();
 
     if (r == null) {
@@ -1952,7 +1852,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
     for (int j = r.y; j < r.y + r.height; j++)
       for (int i = r.x; i < r.x + r.width; i++) {
-        double v = format.getValue(i,j);
+        double v = allFormats[currentFormat].getValue(i,j);
         if (v > curSelMax) curSelMax = v;
         if (v < curSelMin) curSelMin = v;
       }
@@ -1983,10 +1883,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
   private String getImageInfo() {
 
     String retString = "";
-    if( format==null )
-      return "No image";
-
-    IImageFormat cur = format;
+    IImageFormat cur = allFormats[currentFormat];
 
     retString += "Format: " + cur.getName() + "\n";
     retString += "Full Width: " + cur.getWidth() + "\n";
@@ -2044,13 +1941,8 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
   private void convertImage() {
 
-    if(format==null || format.isNull()) {
-      statusLabel.setText(errorString);
-      return;
-    }
-
-    int dimx = format.getWidth();
-    int dimy = format.getHeight();
+    int dimx = allFormats[currentFormat].getWidth();
+    int dimy = allFormats[currentFormat].getHeight();
 
     if(dimx==0 || dimy==0) return;
 
@@ -2079,7 +1971,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
     }
 
     int[] rgb = new int[rdimx];
-    format.computeFitting();
+    allFormats[currentFormat].preComputeBestFit(isBestFit,gradientTool);
     if(isGradientVisible()) gradientTool.repaint();
 
     // Fill the image
@@ -2090,7 +1982,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
       for (int j = 0; j < dimy; j++) {
         for (int i = 0; i < dimx; i++) {
-          int c = format.getRGB(isNegative, gColormap, i, j);
+          int c = allFormats[currentFormat].getRGB(isNegative, gColormap, i, j);
           for (int k = 0; k < sz; k++)
             rgb[i * sz + k] = c;
         }
@@ -2103,7 +1995,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
       //Smaller
       for (int j = 0, l = 0; l < rdimy; j += iSz, l++) {
         for (int i = 0, k = 0; k < rdimx; i += iSz, k++)
-          rgb[k] = format.getRGB(isNegative, gColormap, i, j);
+          rgb[k] = allFormats[currentFormat].getRGB(isNegative, gColormap, i, j);
         lastImg.setRGB(0, l, rdimx, 1, rgb, 0, rdimx);
       }
 
@@ -2136,11 +2028,8 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
     try {
 
       IRawImage theAtt;
-      //theAtt = (IRawImage) attributeList.add("jlp/image/1/image");
-      //theAtt = (IRawImage) attributeList.add("et/jpeg/01/TheImage");
-      //theAtt = (IRawImage) attributeList.add("et/jpeg/01/AnotherImage");
-      //theAtt = (IRawImage) attributeList.add("et/jpeg/01/YetAnother");
-      theAtt = (IRawImage) attributeList.add("et/jpeg/01/TheRGBAattr");
+      theAtt = (IRawImage) attributeList.add("falcon/test/ccd/Image");
+      //theAtt = (IRawImage) attributeList.add("//mufid3:20000/id22eh2/ccd1394/1/Image");
       d.setModel(theAtt);
 
     } catch (Exception e) {

@@ -1,8 +1,7 @@
 include ../../../../../../.make-include
 
 
-ALL = $(TARGET)/ANumber.class \
-      $(TARGET)/NumberImage.class \
+ALL = $(TARGET)/NumberImage.class \
       $(TARGET)/NumberSpectrum.class \
       $(TARGET)/NumberScalar.class \
       $(TARGET)/StringScalar.class \
@@ -29,7 +28,6 @@ ALL = $(TARGET)/ANumber.class \
       $(TARGET)/PolledAttributeFactory.class \
       $(TARGET)/AAttributeHistory.class \
       $(TARGET)/NumberScalarHistory.class \
-      $(TARGET)/NumberSpectrumHistory.class \
       $(TARGET)/StringScalarHistory.class \
       $(TARGET)/StringSpectrum.class \
       $(TARGET)/StringSpectrumHelper.class \
@@ -49,15 +47,6 @@ ALL = $(TARGET)/ANumber.class \
       $(TARGET)/FloatImageHelper.class \
       $(TARGET)/RawImageHelper.class \
       $(TARGET)/RawImage.class \
-      $(TARGET)/EnumScalarHelper.class \
-      $(TARGET)/EnumScalar.class \
-      $(TARGET)/StringImageHelper.class \
-      $(TARGET)/StringImage.class \
-      $(TARGET)/DevStateSpectrumHelper.class \
-      $(TARGET)/DevStateSpectrum.class \
-      $(TARGET)/ULongScalarHelper.class \
-      $(TARGET)/ULongSpectrumHelper.class \
-      $(TARGET)/ULongImageHelper.class \
 
 
 all: $(ALL)
