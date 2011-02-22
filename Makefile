@@ -32,7 +32,7 @@ ifdef ATK-VERSION
                                configure.in	\
                                Makefile &&		\
 	 (cd lib &&                                     \
-	 $(CVSSF) tag $(ATK-RELEASE) printf.jar jep.jar jepext.jar ij.jar jogl.jar gluegen-rt.jar ) && \
+	 $(CVSSF) tag $(ATK-RELEASE) printf.jar jep.jar jepext.jar) && \
 	 (cd src/fr/esrf/tangoatk/ &&			\
          $(CVSSF) tag -R $(ATK-RELEASE) core) &&        \
          (cd src/fr/esrf/tangoatk/ &&			\
@@ -95,12 +95,10 @@ core-jar: core-manifest
 	 $(JAR) xf jep.jar &&   \
 	 $(JAR) xf jepext.jar &&   \
 	 $(JAR) xf ij.jar &&   \
-	 $(JAR) xf jogl.jar &&   \
-	 $(JAR) xf gluegen-rt.jar &&   \
          if [ -e $(COREMANIFEST) ]; then       \
-            $(JAR) cmf $(COREMANIFEST) ATKCore-$(ATK-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util com/braju org/lsmp org/nfunk ij com/sun; \
+            $(JAR) cmf $(COREMANIFEST) ATKCore-$(ATK-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util com/braju; \
          else                                           \
-            $(JAR) cf ATKCore-$(ATK-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util com/braju org/lsmp org/nfunk ij com/sun;                   \
+            $(JAR) cf ATKCore-$(ATK-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util com/braju org/lsmp org/nfunk ij;                   \
          fi)
 	$(call verifyjar,/tmp/core/jar,ATKCore-$(ATK-VERSION))
 	@(rm -rf /tmp/core)

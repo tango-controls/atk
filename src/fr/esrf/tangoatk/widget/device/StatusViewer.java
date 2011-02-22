@@ -23,12 +23,13 @@
 
 package fr.esrf.tangoatk.widget.device;
 
+import fr.esrf.tangoatk.core.Device;
 import fr.esrf.tangoatk.core.StatusEvent;
 import fr.esrf.tangoatk.core.ErrorEvent;
-import fr.esrf.tangoatk.core.IDevice;
 import fr.esrf.tangoatk.widget.util.UIManagerHelper;
 import fr.esrf.tangoatk.widget.util.IControlee;
 
+import java.awt.*;
 import javax.swing.*;
 
 /**
@@ -36,7 +37,7 @@ import javax.swing.*;
  * @author  root
  */
 public class StatusViewer extends javax.swing.JPanel implements fr.esrf.tangoatk.core.IStatusListener, IControlee {
-  IDevice device;
+  Device device;
 
   /** Creates new form StatusViewer */
 
@@ -70,7 +71,7 @@ public class StatusViewer extends javax.swing.JPanel implements fr.esrf.tangoatk
 
   }//GEN-END:initComponents
 
-  public void setModel(IDevice device) {
+  public void setModel(Device device) {
     if (this.device != null)
       this.device.removeStatusListener(this);
     status.setText("");
@@ -86,7 +87,7 @@ public class StatusViewer extends javax.swing.JPanel implements fr.esrf.tangoatk
    *
    * @return a <code>Device</code> value
    */
-  public IDevice getModel() {
+  public Device getModel() {
     return device;
   }
 

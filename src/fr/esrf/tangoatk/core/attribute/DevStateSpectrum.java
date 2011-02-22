@@ -44,7 +44,6 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
 {
     DevStateSpectrumHelper  dsSpectrumHelper;
     String[]                dsSpectrumValue = null;
-    String[]                dsSpectrumSetPointValue = null;
     String[]                stateLabels;
     boolean[]               invertOpenClose;
     boolean[]               invertInsertExtract;
@@ -73,12 +72,6 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
     {
        return dsSpectrumValue;
     }
-    
-    // getSetPoint returns the attribute's setpoint value
-    public String[] getSetPoint()
-    {
-       return dsSpectrumSetPointValue;
-    }
 
 
     public String[] getDeviceValue()
@@ -88,8 +81,6 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
        {
           da = readValueFromNetwork();
           dsSpectrumValue = dsSpectrumHelper.getStateSpectrumValue(da);
-          // Retreive the setPoint value for the attribute
-          dsSpectrumSetPointValue = dsSpectrumHelper.getStateSpectrumSetPoint(da);
        }
        catch (DevFailed e)
        {
@@ -128,8 +119,6 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
 
               // Retreive the read value for the attribute
               dsSpectrumValue = dsSpectrumHelper.getStateSpectrumValue(att);
-              // Retreive the setPoint value for the attribute
-              dsSpectrumSetPointValue = dsSpectrumHelper.getStateSpectrumSetPoint(att);
 
               // Fire valueChanged
               fireValueChanged(dsSpectrumValue);
@@ -169,8 +158,6 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
 
              // Retreive the read value for the attribute
              dsSpectrumValue = dsSpectrumHelper.getStateSpectrumValue(attValue);
-             // Retreive the setPoint value for the attribute
-             dsSpectrumSetPointValue = dsSpectrumHelper.getStateSpectrumSetPoint(attValue);
 
              // Fire valueChanged
              fireValueChanged(dsSpectrumValue);
@@ -272,8 +259,6 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
               timeStamp = da.getTimeValMillisSec();
               // Retreive the read value for the attribute
               dsSpectrumValue = dsSpectrumHelper.getStateSpectrumValue(da);
-              // Retreive the setPoint value for the attribute
-              dsSpectrumSetPointValue = dsSpectrumHelper.getStateSpectrumSetPoint(da);
               // Fire valueChanged
               fireValueChanged(dsSpectrumValue);
               trace(DeviceFactory.TRACE_PERIODIC_EVENT, "DevStateSpectrum.periodic(" + getName() + ") fireValueChanged(devStateValue) called", t0);
@@ -352,8 +337,6 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
               timeStamp = da.getTimeValMillisSec();
               // Retreive the read value for the attribute
               dsSpectrumValue = dsSpectrumHelper.getStateSpectrumValue(da);
-              // Retreive the setPoint value for the attribute
-              dsSpectrumSetPointValue = dsSpectrumHelper.getStateSpectrumSetPoint(da);
               // Fire valueChanged
               fireValueChanged(dsSpectrumValue);
               trace(DeviceFactory.TRACE_CHANGE_EVENT, "DevStateSpectrum.change(" + getName() + ") fireValueChanged(devStateValue) called", t0);

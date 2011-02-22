@@ -193,9 +193,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
   private JComboBox libCombo;
   private JDLibraryViewer[] libViewer;
   private int nLibs;
-  private JDDeviceTree deviceTree;
-  private JPanel editorPanel;
-
+  
   private SimpleSynopticAppli theSynopticAppli = null;
   /**
    * Contruct an Editor frame.
@@ -204,16 +202,12 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
   public JDrawEditorFrame() {
 
     setTitle(APP_RELEASE);
-    JSplitPane sPane = new JSplitPane();
-    editorPanel = new JPanel();
-    editorPanel.setLayout(new BorderLayout());
-
-    // Device tree
-    deviceTree = new JDDeviceTree();
+    Container pane=getContentPane();
+    pane.setLayout(new BorderLayout());
 
     // Help label
     statusLine = new JPanel(new GridLayout(1,1));
-    editorPanel.add(statusLine,BorderLayout.SOUTH);
+    pane.add(statusLine,BorderLayout.SOUTH);
 
     statusLabel = new JLabel();
     statusLabel.setFont(JDUtils.labelFont);
@@ -224,7 +218,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     // The toolbar
     // -------------------------------------
     createMenu = new JDCreationMenu();
-    editorPanel.add(createMenu.getToolbar(),BorderLayout.WEST);
+    pane.add(createMenu.getToolbar(),BorderLayout.WEST);
 
     // -------------------------------------
     // The edit toolbar
@@ -282,7 +276,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     editToolBar.add(editToolAlignRightBtn);
     
     editToolBar.setOrientation(JToolBar.HORIZONTAL);
-    editorPanel.add(editToolBar,BorderLayout.NORTH);
+    pane.add(editToolBar,BorderLayout.NORTH);
     // -------------------------------------
     // Main menu
     // -------------------------------------
@@ -329,7 +323,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     editPasteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,InputEvent.CTRL_MASK));
     editPasteMenuItem.addActionListener(this);
     editDeleteMenuItem = new JMenuItem("Delete");
-    editDeleteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE,0));
+    editDeleteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,0));
     editDeleteMenuItem.addActionListener(this);
     editSelectAllMenuItem = new JMenuItem("Select all");
     editSelectAllMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,InputEvent.CTRL_MASK));
@@ -456,10 +450,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
 
     setJMenuBar(theMenu);
 
-    sPane.setRightComponent(editorPanel);
-    sPane.setLeftComponent(deviceTree);
-    setContentPane(sPane);
-
   }
 
   // ----------------------------------------------------
@@ -475,7 +465,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     theEditor.setBorder(BorderFactory.createEtchedBorder());
     theEditorView = new JScrollPane(editor);
     theEditorView.setWheelScrollingEnabled(true);
-    editorPanel.add(theEditorView,BorderLayout.CENTER);
+    getContentPane().add(theEditorView,BorderLayout.CENTER);
     // Update controls
     selectionChanged();
     valueChanged();
@@ -590,11 +580,11 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
       theEditor.scaleSelection(-1.0,1.0);
     } else if (src==editToolVMirrorBtn || src==toolsVMirrorMenuItem) {
       theEditor.scaleSelection( 1.0,-1.0);
-    } else if (src==fileSaveasMenuItem) {
+    } else if (src==editToolFileSaveBtn || src==fileSaveasMenuItem) {
       theEditor.showSaveDialog(".");
     } else if (src==editToolFileOpenBtn || src==fileOpenMenuItem) {
       theEditor.showOpenDialog(".");
-    } else if(src==editToolFileSaveBtn || src==fileSaveMenuItem) {
+    } else if( src==fileSaveMenuItem) {
       theEditor.instantSave(".");
     } else if (src==editToolZoomInBtn) {
       theEditor.zoomIn();
@@ -943,7 +933,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     final JDrawEditor ed = new JDrawEditor(JDrawEditor.MODE_EDIT);
     final JDrawEditor py = new JDrawEditor(JDrawEditor.MODE_PLAY);
     final JDrawEditorFrame jde = new JDrawEditorFrame();
-    jde.setAppTitle("JDraw Editor 1.13");
+    jde.setAppTitle("JDraw Editor 1.11");
     jde.setEditor(ed);
     jde.setPlayer(py);
     jde.setLibraries(null);

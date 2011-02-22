@@ -62,7 +62,6 @@ public class Device extends DeviceProxy implements IDevice, Serializable {
     transient protected DeviceProxy proxy;
     private long refreshCount = 0;
     private int idlVersion = 0;
-    private boolean        connected = true;
     protected Map<String,DeviceProperty>  propertyMap;
     private boolean openCloseInverted=false;
     private boolean insertExtractInverted=false;
@@ -111,29 +110,7 @@ public class Device extends DeviceProxy implements IDevice, Serializable {
         init(name);
     }
 
-    public Device(String name, boolean connectionLess) throws DevFailed
-    {
-        super(name);
-        long t0 = System.currentTimeMillis();
-        if (connectionLess == false)
-            init(name);
-        else
-        {
-            try
-            {
-                init(name);
-            }
-            catch (DevFailed df)
-            {
-
-                trace(DeviceFactory.TRACE_FAIL, "Device.get_idl_version(" + name
-                        + ") failed", t0);
-                setConnected(false);
-            }
-        }
-    }
-
-    protected void init(String name) throws DevFailed
+    protected void init(String name) throws DevFailed 
     {
         long t0 = System.currentTimeMillis();
 
@@ -148,41 +125,20 @@ public class Device extends DeviceProxy implements IDevice, Serializable {
         this.insertExtractInverted = false;
 
         // Check if the device is "event compatible"
-        idlVersion = get_idl_version();
-        trace(DeviceFactory.TRACE_SUCCESS, "Device.get_idl_version(" + name
-                + ") ok", t0);
-        if (idlVersion >= 3) // all idl versions >= 3 are event compatible
-            this.supportsEvents = true;
-    }
-
-    public void reconnect()
-    {
-        long t0 = System.currentTimeMillis();
-        // Check if the device is "event compatible"
-        try
+        try 
         {
             idlVersion = get_idl_version();
-            setConnected(true);
-            trace(DeviceFactory.TRACE_SUCCESS, "Device.reconnect get_idl_version(" + name
+            trace(DeviceFactory.TRACE_SUCCESS, "Device.get_idl_version(" + name
                     + ") ok", t0);
             if (idlVersion >= 3) // all idl versions >= 3 are event compatible
                 this.supportsEvents = true;
-        }
-        catch (DevFailed dfe)
+        } 
+        catch (DevFailed dfe) 
         {
-            trace(DeviceFactory.TRACE_FAIL, "Device.reconnect get_idl_version(" + name
+            trace(DeviceFactory.TRACE_FAIL, "Device.get_idl_version(" + name
                     + ") failed", t0);
         }
-    }
 
-    public boolean isConnected()
-    {
-        return connected;
-    }
-
-    private void setConnected(boolean b)
-    {
-        connected = b;
     }
 
     public void addErrorListener(IErrorListener l) {
@@ -267,83 +223,76 @@ public class Device extends DeviceProxy implements IDevice, Serializable {
      * <code>refresh</code> sends out status and state events. This forces a
      * synchronous device state and status reading.
      */
-    public void refresh()
-    {
-        if (!isConnected())
-            reconnect();
-        if (isConnected())
-        {
-            refreshCount++;
-            DevState s = null;
-            String newStatus;
-            long t0 = System.currentTimeMillis();
-            try
-            {
-                try // Get the state
-                {
+    public void refresh() {
 
-                    s = state(ApiDefs.FROM_CMD);
-                    trace(DeviceFactory.TRACE_STATE_REFRESHER,
-                            "Device.refresh(State," + name + ") success", t0);
-                    propChanges.fireStateEvent(this, toString(s));
-                }
-                catch (DevFailed ex)
-                {
+        refreshCount++;
+        DevState s = null;
+        String newStatus;
+        long t0 = System.currentTimeMillis();
 
-                    trace(DeviceFactory.TRACE_STATE_REFRESHER,
-                            "Device.refresh(State," + name + ") failed", t0);
-                    ConnectionException e = new ConnectionException(ex);
-                    deviceError("Couldn't read state: ", e);
-                    newStatus = getName() + ":\n" + e.getDescription();
-                    propChanges.fireStateEvent(this, IDevice.UNKNOWN);
-                    propChanges.fireStatusEvent(this, newStatus);
-                    return;
-                }
+        try {
 
-                t0 = System.currentTimeMillis();
+            // Get the state
+            try {
 
-                // Get the status
-                try
-                {
+                s = state(ApiDefs.FROM_CMD);
+                trace(DeviceFactory.TRACE_STATE_REFRESHER,
+                        "Device.refresh(State," + name + ") success", t0);
+                propChanges.fireStateEvent(this, toString(s));
 
-                    newStatus = status(ApiDefs.FROM_CMD);
-                    trace(DeviceFactory.TRACE_STATE_REFRESHER,
-                            "Device.refresh(Status," + name + ") success", t0);
-                    propChanges.fireStatusEvent(this, newStatus);
+            } catch (DevFailed ex) {
 
-                }
-                catch (DevFailed ex)
-                {
+                trace(DeviceFactory.TRACE_STATE_REFRESHER,
+                        "Device.refresh(State," + name + ") failed", t0);
+                ConnectionException e = new ConnectionException(ex);
+                deviceError("Couldn't read state: ", e);
+                newStatus = getName() + ":\n" + e.getDescription();
+                propChanges.fireStateEvent(this, IDevice.UNKNOWN);
+                propChanges.fireStatusEvent(this, newStatus);
+                return;
 
-                    trace(DeviceFactory.TRACE_STATE_REFRESHER,
-                            "Device.refresh(Status," + name + ") failed", t0);
-                    ConnectionException e = new ConnectionException(ex);
-                    newStatus = getName() + ":\n" + e.getDescription();
-                    propChanges.fireStatusEvent(this, newStatus);
-                    return;
-
-                }
             }
-            catch (Exception ex)
-            {
-                // Code failure
-                System.out.println("-- Device.refresh() : Unexpected exception -----------------------");
-                ex.printStackTrace();
 
-                // Try to fire a deviceError event if execption has
-                // happened if JavaApi.
-                try
-                {
-                    ConnectionException e = new ConnectionException(ex);
-                    propChanges.fireStateEvent(this, IDevice.UNKNOWN);
-                    propChanges.fireStatusEvent(this, IDevice.UNKNOWN);
-                    deviceError("Couldn't read state: ", e);
-                }
-                catch (Exception e)
-                {
-                }
+            t0 = System.currentTimeMillis();
+
+            // Get the status
+            try {
+
+                newStatus = status(ApiDefs.FROM_CMD);
+                trace(DeviceFactory.TRACE_STATE_REFRESHER,
+                        "Device.refresh(Status," + name + ") success", t0);
+                propChanges.fireStatusEvent(this, newStatus);
+
+            } catch (DevFailed ex) {
+
+                trace(DeviceFactory.TRACE_STATE_REFRESHER,
+                        "Device.refresh(Status," + name + ") failed", t0);
+                ConnectionException e = new ConnectionException(ex);
+                newStatus = getName() + ":\n" + e.getDescription();
+                propChanges.fireStatusEvent(this, newStatus);
+                return;
+
             }
+
+        } catch (Exception ex) {
+
+            // Code failure
+            System.out
+                    .println("-- Device.refresh() : Unexpected exception -----------------------");
+            ex.printStackTrace();
+
+            // Try to fire a deviceError event if execption has
+            // happened if JavaApi.
+            try {
+                ConnectionException e = new ConnectionException(ex);
+                propChanges.fireStateEvent(this, IDevice.UNKNOWN);
+                propChanges.fireStatusEvent(this, IDevice.UNKNOWN);
+                deviceError("Couldn't read state: ", e);
+            } catch (Exception e) {
+            }
+
         }
+
     }
 
     /**

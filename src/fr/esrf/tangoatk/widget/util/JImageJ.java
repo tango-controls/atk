@@ -73,7 +73,6 @@ import javax.swing.border.LineBorder;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-import java.awt.event.InputEvent;
 
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
 
@@ -957,13 +956,9 @@ public class JImageJ extends JPanel implements ActionListener {
                 formerImage.flush();
                 formerImage = null;
             }
-            boolean selectionMode = false; 
-            if(canvas != null)
-            	selectionMode = canvas.isSelectionMode();
             canvas = new RenderedImageCanvas(imp);
             canvas.removeMouseListener(canvas);
             canvas.removeMouseMotionListener(canvas);
-            canvas.setSelectionMode(selectionMode);
             // called this to create link between imp and canvas, and between
             // toolbar and canvas
             new HiddenWindow(imp, canvas);
@@ -3609,20 +3604,29 @@ public class JImageJ extends JPanel implements ActionListener {
                     }
                     break;
                 case KeyEvent.VK_UP:
+                    if (bounds != null && bounds.y > 0 && bounds.x >= 0) {
+                        roi.setLocation(bounds.x, bounds.y - 1);
+                    }
+                    break;
                 case KeyEvent.VK_DOWN:
+                    if (bounds != null
+                            && theImage != null
+                            && (bounds.y + bounds.height) < theImage.getHeight() - 1
+                            && bounds.x >= 0) {
+                        roi.setLocation(bounds.x, bounds.y + 1);
+                    }
+                    break;
                 case KeyEvent.VK_LEFT:
+                    if (bounds != null && bounds.y >= 0 && bounds.x > 0) {
+                        roi.setLocation(bounds.x - 1, bounds.y);
+                    }
+                    break;
                 case KeyEvent.VK_RIGHT:
-                    // TODO This test is necessary because of a focus problem.
-                	// A click outside the selected ROI makes it loose focus although it remains selected
-                    // (?! -> imp.getRoi() == null) so keyboard doesn't operate
-                    if (bounds != null) {
-                        int onMask = InputEvent.ALT_DOWN_MASK;
-                        if ((e.getModifiersEx() & onMask) == onMask) {
-                            roi.nudgeCorner(e.getKeyCode());
-                        }
-                        else {
-                            roi.nudge(e.getKeyCode());
-                        }
+                    if (bounds != null
+                            && theImage != null
+                            && (bounds.x + bounds.width) < theImage.getWidth() - 1
+                            && bounds.y >= 0) {
+                        roi.setLocation(bounds.x + 1, bounds.y);
                     }
                     break;
                 default:

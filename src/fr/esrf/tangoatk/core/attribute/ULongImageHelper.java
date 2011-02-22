@@ -29,6 +29,7 @@
 
 package fr.esrf.tangoatk.core.attribute;
 
+import fr.esrf.tangoatk.core.*;
 
 import fr.esrf.Tango.*;
 import fr.esrf.TangoApi.*;
@@ -36,7 +37,7 @@ import fr.esrf.TangoApi.*;
 class ULongImageHelper extends ANumberImageHelper
 {
 
-  public ULongImageHelper(AAttribute attribute)
+  public ULongImageHelper(IAttribute attribute)
   {
      init(attribute);
   }
@@ -55,7 +56,7 @@ class ULongImageHelper extends ANumberImageHelper
      for (int i = 0; i < tmp.length; i++)
         tmp[i] = (long) (flatd[i] / dUnitFactor);
       
-     da.insert_ul(tmp, d[0].length, d.length);
+     da.insert_ul(tmp, d.length, d[0].length);
   }
 
   void setMinAlarm(double d)
@@ -140,8 +141,8 @@ class ULongImageHelper extends ANumberImageHelper
 
   double[][] getNumberImageValue(DeviceAttribute deviceAttribute) throws DevFailed
   {
-      int ydim = deviceAttribute.getDimY();
-      int xdim = deviceAttribute.getDimX();
+      int ydim = attribute.getYDimension();
+      int xdim = attribute.getXDimension();
 
       if (ydim != retval.length || xdim != retval[0].length)
          retval = new double[ydim][xdim];
@@ -164,8 +165,8 @@ class ULongImageHelper extends ANumberImageHelper
      tmp = deviceAttribute.extractULongArray();
      dUnitFactor = this.attribute.getDisplayUnitFactor();
 
-     int ydim = deviceAttribute.getDimY();
-     int xdim = deviceAttribute.getDimX();
+     int ydim = attribute.getYDimension();
+     int xdim = attribute.getXDimension();
 
      if (ydim != retval.length || xdim != retval[0].length)
       retval = new double[ydim][xdim];
@@ -178,21 +179,21 @@ class ULongImageHelper extends ANumberImageHelper
      return retval;
   }
 
-  String[][] getImageValueAsString(DeviceAttribute deviceAttribute) throws DevFailed
+  String[][] getImageValue(DeviceAttribute deviceAttribute) throws DevFailed
   {
      long[] tmp = deviceAttribute.extractULongArray();
 
-     int ydim = deviceAttribute.getDimY();
-     int xdim = deviceAttribute.getDimX();
-     String[][] retval_str = new String[ydim][xdim];
+     int ydim = attribute.getYDimension();
+     int xdim = attribute.getXDimension();
+     String[][] retval = new String[ydim][xdim];
 
      int k = 0;
      for (int i = 0; i < ydim; i++)
          for (int j = 0; j < xdim; j++)
          {
-            retval_str[i][j] = Long.toString(tmp[k++]);
+            retval[i][j] = Long.toString(tmp[k++]);
          }
-     return retval_str;
+     return retval;
   }
 
   public String getVersion()

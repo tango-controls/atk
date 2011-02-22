@@ -39,7 +39,7 @@ import fr.esrf.tangoatk.core.INumberImage;
 abstract class ANumberImageHelper extends NumberAttributeHelper {
   double[][] retval = new double[0][0];
 
-  abstract String[][] getImageValueAsString(DeviceAttribute attribute) throws DevFailed;
+  abstract String[][] getImageValue(DeviceAttribute attribute) throws DevFailed;
   
   abstract double[][] getNumberImageDisplayValue(DeviceAttribute deviceAttribute) throws DevFailed;
 

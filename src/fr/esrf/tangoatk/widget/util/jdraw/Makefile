@@ -63,10 +63,7 @@ ALL = $(TARGET)/GraphicsUtils.class \
 	$(TARGET)/LXObject.class \
 	$(TARGET)/JDLibraryViewer.class \
 	$(TARGET)/UndoBuffer.class \
-	$(TARGET)/UndoPattern.class \
-	$(TARGET)/JDNode.class \
-	$(TARGET)/JDEntityNode.class \
-	$(TARGET)/JDDeviceTree.class
+	$(TARGET)/UndoPattern.class
 #	$(TARGET)/JDrawEditorFrame.class \
 
 all: gifs utils

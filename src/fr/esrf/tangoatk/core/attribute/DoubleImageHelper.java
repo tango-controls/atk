@@ -30,6 +30,7 @@
 // Description:
 package fr.esrf.tangoatk.core.attribute;
 
+import fr.esrf.tangoatk.core.*;
 
 
 import fr.esrf.Tango.*;
@@ -37,7 +38,7 @@ import fr.esrf.TangoApi.*;
 
 class DoubleImageHelper extends ANumberImageHelper {
 
-  public DoubleImageHelper(AAttribute attribute) {
+  public DoubleImageHelper(IAttribute attribute) {
     init(attribute);
   }
 
@@ -65,7 +66,7 @@ class DoubleImageHelper extends ANumberImageHelper {
       flatd = NumberAttributeHelper.flatten(d);
       if (dUnitFactor==1.0)
       {
-    	 da.insert(flatd, d[0].length, d.length);
+         da.insert(flatd, d.length, d[0].length);
 	 return;
       }
       
@@ -76,7 +77,7 @@ class DoubleImageHelper extends ANumberImageHelper {
           tmp[i] = (flatd[i] / dUnitFactor);
       }
       
-      da.insert(tmp, d[0].length, d.length);
+      da.insert(tmp, d.length, d[0].length);
   }
 
   void setMinAlarm(double d, boolean writable) {
@@ -146,8 +147,8 @@ class DoubleImageHelper extends ANumberImageHelper {
   double[][] getNumberImageValue(DeviceAttribute deviceAttribute) throws DevFailed {
     double[] tmp;
     tmp = deviceAttribute.extractDoubleArray();
-    int ydim = deviceAttribute.getDimY();
-    int xdim = deviceAttribute.getDimX();
+    int ydim = attribute.getYDimension();
+    int xdim = attribute.getXDimension();
 
     if (ydim != retval.length || retval.length == 0 || xdim != retval[0].length) {
 
@@ -157,7 +158,7 @@ class DoubleImageHelper extends ANumberImageHelper {
     int k = 0;
     for (int y = 0; y < ydim; y++)
       for (int x = 0; x < xdim; x++) {
-          retval[y][x] = tmp[k++];
+        retval[y][x] = tmp[k++];
       }
 
     return retval;
@@ -170,8 +171,8 @@ class DoubleImageHelper extends ANumberImageHelper {
     
     tmp = deviceAttribute.extractDoubleArray();
     dUnitFactor = this.attribute.getDisplayUnitFactor();
-    int ydim = deviceAttribute.getDimY();
-    int xdim = deviceAttribute.getDimX();
+    int ydim = attribute.getYDimension();
+    int xdim = attribute.getXDimension();
 
     if (ydim != retval.length || retval.length == 0 || xdim != retval[0].length) {
 
@@ -187,20 +188,20 @@ class DoubleImageHelper extends ANumberImageHelper {
     return retval;
   }
 
-  String[][] getImageValueAsString(DeviceAttribute deviceAttribute) throws DevFailed {
+  String[][] getImageValue(DeviceAttribute deviceAttribute) throws DevFailed {
     double[] tmp;
     tmp = deviceAttribute.extractDoubleArray();
-    int ydim = deviceAttribute.getDimY();
-    int xdim = deviceAttribute.getDimX();
-    String[][] retval_str = new String[ydim][xdim];
+    int ydim = attribute.getYDimension();
+    int xdim = attribute.getXDimension();
+    String[][] retval = new String[ydim][xdim];
 
     int k = 0;
     for (int i = 0; i < ydim; i++)
       for (int j = 0; j < xdim; j++) {
-        retval_str[i][j] = Double.toString(tmp[k++]);
+        retval[i][j] = Double.toString(tmp[k++]);
       }
 
-    return retval_str;
+    return retval;
   }
 
   public String getVersion() {

@@ -44,8 +44,6 @@ public interface IDevStateSpectrum extends IAttribute
 
     public String[] getValue();
     
-    public String[] getSetPoint();
-    
     public String[] getDeviceValue();
     
     public String[] getStateLabels();

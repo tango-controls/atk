@@ -53,7 +53,6 @@ import fr.esrf.tangoatk.core.INumberSpectrum;
 import fr.esrf.tangoatk.core.ISpectrumListener;
 import fr.esrf.tangoatk.core.NumberSpectrumEvent;
 import fr.esrf.tangoatk.widget.util.ATKConstant;
-import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
 import fr.esrf.tangoatk.widget.util.chart.CfFileReader;
 import fr.esrf.tangoatk.widget.util.chart.JLChart;
 import fr.esrf.tangoatk.widget.util.chart.JLDataView;
@@ -368,7 +367,23 @@ public class NumberSpectrumTrendViewer extends JPanel implements ISpectrumListen
     {
         int ok = JOptionPane.YES_OPTION;
         JFileChooser chooser = new JFileChooser();
-        chooser.addChoosableFileFilter( new MultiExtFileFilter("Text files", "txt"));
+        chooser.addChoosableFileFilter( new FileFilter() {
+            public boolean accept (File f)
+            {
+                if ( f.isDirectory() )
+                {
+                    return true;
+                }
+                String extension = getExtension( f );
+                if ( extension != null && extension.equals( "txt" ) ) return true;
+                return false;
+            }
+
+            public String getDescription ()
+            {
+                return "text files ";
+            }
+        } );
         if ( lastConfig.length() > 0 ) chooser.setSelectedFile( new File(
                 lastConfig ) );
         int returnVal = chooser.showOpenDialog( this );
@@ -390,6 +405,23 @@ public class NumberSpectrumTrendViewer extends JPanel implements ISpectrumListen
             }
         }
 
+    }
+
+    /**
+     * <code>getExtension</code> returns the extension of a given file,
+     * that is the part after the last `.' in the filename.
+     *
+     * @param f a <code>File</code> value
+     * @return a <code>String</code> value
+     */
+    protected String getExtension(File f) {
+        String ext = null;
+        String s = f.getName();
+        int i = s.lastIndexOf('.');
+        if (i > 0 &&  i < s.length() - 1) {
+            ext = s.substring(i+1).toLowerCase();
+        }
+        return ext;
     }
 
     /**
@@ -475,7 +507,23 @@ public class NumberSpectrumTrendViewer extends JPanel implements ISpectrumListen
     {
         int ok = JOptionPane.YES_OPTION;
         JFileChooser chooser = new JFileChooser( "." );
-        chooser.addChoosableFileFilter( new MultiExtFileFilter("Text files", "txt"));
+        chooser.addChoosableFileFilter( new FileFilter() {
+            public boolean accept (File f)
+            {
+                if ( f.isDirectory() )
+                {
+                    return true;
+                }
+                String extension = getExtension( f );
+                if ( extension != null && extension.equals( "txt" ) ) return true;
+                return false;
+            }
+
+            public String getDescription ()
+            {
+                return "text files ";
+            }
+        } );
         if ( lastConfig.length() > 0 ) chooser.setSelectedFile( new File(
                 lastConfig ) );
         int returnVal = chooser.showSaveDialog( this );
@@ -484,7 +532,7 @@ public class NumberSpectrumTrendViewer extends JPanel implements ISpectrumListen
             File f = chooser.getSelectedFile();
             if ( f != null )
             {
-                if ( MultiExtFileFilter.getExtension( f ) == null )
+                if ( getExtension( f ) == null )
                 {
                     f = new File( f.getAbsolutePath() + ".txt" );
                 }

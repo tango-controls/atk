@@ -47,12 +47,6 @@ public class RawImage extends AAttribute
     imageHelper = new RawImageHelper(this);
   }
 
-  /** Overrides the getType() method in AAttribute **/
-  public String getType()
-  {
-      return("RawImage");
-  }
-
   public byte[] getValue() {
     return imageValue;
   }
