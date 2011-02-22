@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util.jdraw;
 
 import java.awt.*;
@@ -84,6 +62,11 @@ public abstract class JDObject {
   /** the object value receive the y mouse coordinates when dragged (relative to bottom of object) */
   public static final int VALUE_CHANGE_ON_YDRAG_BOTTOM = 5;
 
+  /** ValueListener are trigerred when the object value change */
+  public static final int TRIGGER_ON_CHANGE = 0;
+  /** ValueListener are trigerred when the object value exceeds bounds (cf minValue,maxValue) */
+  public static final int TRIGGER_ON_EXCEED = 1;
+
   // Summit motion type
   final static int NONE_SM = 0;
   final static int HORIZONTAL_SM = 1;
@@ -118,7 +101,6 @@ public abstract class JDObject {
   private static final Color gradientC1default=Color.BLACK;
   private static final Color gradientC2default=Color.WHITE;
   private static final boolean gradientCyclicdefault=false;
-  private static final boolean antiAliasDefault=false;
 
   // Vars
   Rectangle boundRect = new Rectangle(0, 0, 0, 0);
@@ -135,7 +117,6 @@ public abstract class JDObject {
   String name;
   boolean userValue;
   int valueChangeMode;
-  boolean antiAlias;
 
   // Value properties
   private int value;
@@ -172,7 +153,6 @@ public abstract class JDObject {
   private double[] sSummit=null;
   private double   sXOrg;
   private double   sYOrg;
-  private Rectangle preRefreshRect = null;
 
   // Gradient paint param
   float   gradientX1;
@@ -212,7 +192,6 @@ public abstract class JDObject {
     shadowThickness = shadowThicknessDefault;
     visible = visibleDefault;
     name = nameDefault;
-    antiAlias = antiAliasDefault;
     minValue = minValueDefault;
     maxValue = maxValueDefault;
     initValue = initValueDefault;
@@ -660,7 +639,7 @@ public abstract class JDObject {
     g.setXORMode(Color.white);
     int sw  = (int)(summitWidth/2.0 + 1.0);
     for (int i = 0; i < summit.length; i++) {
-      g.fillRect((int) (summit[i].x+0.5) - sw, (int) (summit[i].y+0.5) - sw, 2*sw, 2*sw);
+      g.fillRect((int) (summit[i].x - sw), (int) (summit[i].y - sw), 2*sw, 2*sw);
     }
     g.setPaintMode();
   }
@@ -748,7 +727,6 @@ public abstract class JDObject {
     fillStyle = e.fillStyle;
     lineWidth = e.lineWidth;
     lineStyle = e.lineStyle;
-    antiAlias = e.antiAlias;
     isShadowed = e.isShadowed;
     invertShadow = e.invertShadow;
     shadowThickness = e.shadowThickness;
@@ -933,8 +911,6 @@ public abstract class JDObject {
       lineWidth = (int) f.parseDouble();
     } else if (propName.equals("lineStyle")) {
       lineStyle = (int) f.parseDouble();
-    } else if (propName.equals("antiAlias")) {
-      antiAlias = f.parseBoolean();
     } else if (propName.equals("isShadowed")) {
       isShadowed = f.parseBoolean();
     } else if (propName.equals("invertShadow")) {
@@ -1051,26 +1027,6 @@ public abstract class JDObject {
       gradientC1 = o.style.gradientC1;
       gradientC2 = o.style.gradientC2;
       gradientCyclic = o.style.gradientCyclic;
-
-  }
-
-  void loadObject(LXObject o) {
-
-      foreground = o.foreground;
-      background = o.background;
-      fillStyle = o.fillStyle;
-      lineWidth = o.lineWidth;
-      lineStyle = o.lineStyle;
-      isShadowed = (o.shadowWidth!=0);
-      invertShadow = o.invertShadow;
-      name = o.name;
-      shadowThickness = (o.shadowWidth<0)?-o.shadowWidth:o.shadowWidth;
-      if(shadowThickness==0) shadowThickness=1;
-      visible = o.visible;
-      if(o.userClass!=0) {
-        addExtension("UserClass");
-        setExtendedParam("UserClass",Integer.toString(o.userClass));
-      }
 
   }
 
@@ -1229,11 +1185,6 @@ public abstract class JDObject {
       f.write(to_write, 0, to_write.length());
     }
 
-    if( antiAlias != antiAliasDefault ) {
-      to_write = decal + "antiAlias:" + antiAlias + "\n";
-      f.write(to_write, 0, to_write.length());
-    }
-
     if (lineStyle != lineStyleDefault) {
       to_write = decal + "lineStyle:" + lineStyle + "\n";
       f.write(to_write, 0, to_write.length());
@@ -1365,7 +1316,6 @@ public abstract class JDObject {
     e.fillStyle = fillStyle;
     e.lineWidth = lineWidth;
     e.lineStyle = lineStyle;
-    e.antiAlias = antiAlias;
     e.isShadowed = isShadowed;
     e.invertShadow = invertShadow;
     e.name = new String(name);
@@ -1412,7 +1362,6 @@ public abstract class JDObject {
     fillStyle = e.fillStyle;
     lineWidth = e.lineWidth;
     lineStyle = e.lineStyle;
-    antiAlias = e.antiAlias;
     isShadowed = e.isShadowed;
     invertShadow = e.invertShadow;
     name = e.name;
@@ -1677,7 +1626,7 @@ public abstract class JDObject {
     // Tmp variable
     double[] c = new double[2];
     normes = new double[ptsx.length];
-    Polygon[] nShadows = new Polygon[nb];
+    shadows = new Polygon[nb];
     double cx;
     double cy;
     int[] shx = new int[4];
@@ -1709,16 +1658,16 @@ public abstract class JDObject {
       //Calculate shadow coodinates
       shx[0] = ptsx[i];
       shy[0] = ptsy[i];
-      shx[1] = ptsx[i] + (int)Math.round(st * c[0]);
-      shy[1] = ptsy[i] + (int)Math.round(st * c[1]);
+      shx[1] = ptsx[i] + (int) (st * c[0]);
+      shy[1] = ptsy[i] + (int) (st * c[1]);
 
       computeNextShadowSegment(i, poly, c);
 
       //Calculate shadow coodinates
       int inext = i + 1;
       if (inext >= ptsx.length) inext = 0;
-      shx[2] = ptsx[inext] + (int)Math.round(st * c[0]);
-      shy[2] = ptsy[inext] + (int)Math.round(st * c[1]);
+      shx[2] = ptsx[inext] + (int) (st * c[0]);
+      shy[2] = ptsy[inext] + (int) (st * c[1]);
       shx[3] = ptsx[inext];
       shy[3] = ptsy[inext];
 
@@ -1731,12 +1680,9 @@ public abstract class JDObject {
       if (m[1] >= maxy) maxy = m[1];
 
       //Create the polygon
-      nShadows[i] = new Polygon(shx, shy, 4);
+      shadows[i] = new Polygon(shx, shy, 4);
 
     }
-
-    // Set up shadow
-    shadows = nShadows;
 
     // Create the shadow boundRect
     sBoundRect.setBounds(minx, miny, maxx - minx + 1, maxy - miny + 1);
@@ -1834,7 +1780,6 @@ public abstract class JDObject {
 
   /**
    * Sets the foreground color (usualy line color) of this object.
-   * This color is also used for base shadow color.
    * @param c Foreground color
    */
   public void setForeground(Color c) {
@@ -1925,21 +1870,6 @@ public abstract class JDObject {
    */
   public int getLineStyle() {
     return lineStyle;
-  }
-
-  /**
-   * Enables or disables the anti aliasing for this object.
-   * @param aliasing True to enable antialiasing, false otherwise
-   */
-  public void setAntiAlias(boolean aliasing) {
-    antiAlias = aliasing;
-  }
-
-  /**
-   * Determines wheter this object is anti aliased.
-   */
-  public boolean isAntiAliased() {
-    return antiAlias;
   }
 
   /**
@@ -2253,13 +2183,6 @@ public abstract class JDObject {
     return vTranslationMapper;
   }
 
-  void prepareRendering(Graphics2D g2) {
-    if(antiAlias)
-      g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_ON);
-    else
-      g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,RenderingHints.VALUE_ANTIALIAS_OFF);
-  }
-
   /**
    * Sets the gradient of this object. Has effects only if fill style is FILL_STYLE_GRADIENT.
    * @param x1 x coordinate of the first specified
@@ -2305,36 +2228,15 @@ public abstract class JDObject {
   }
 
   /**
-   * Refresh the JDObject on the screen by repainting
-   * its bounding rectangle. This method
-   * shoud be called after a property change.
+   * Refresh the JDObject on the screen. This shoud be called after a property change.
    * @see #translate
    * @see #scaleTranslate
    * @see #scale
    * @see #moveSummit
-   * @see #preRefresh
    */
   public void refresh() {
-    if ( parent!=null ) {
-      if(preRefreshRect!=null)
-        parent.repaint(preRefreshRect.union(getRepaintRect()));
-      else
-        parent.repaint(getRepaintRect());
-    }
-    preRefreshRect = null;
-  }
-
-  /**
-   * Prepare this object to be repainted. Certain modifications
-   * of the object may need to be repainted outside the new bounding
-   * rectangle. So before applying modifcations to the object , a call
-   * to preRefresh() will memorize the current repaint region
-   * then a call to refresh() after mofications will repaint the
-   * union of the 2 rectangles.
-   * @see #refresh
-   */
-  public void preRefresh() {
-    preRefreshRect = getRepaintRect();
+    if ( parent!=null )
+      parent.repaint(getRepaintRect());
   }
 
   /**
@@ -2520,16 +2422,6 @@ public abstract class JDObject {
     else
       return -1;
 
-  }
-
-  /** returns true if the specified extended param exists , false otherwise */
-  public boolean hasExtendedParam(String name) {
-    return getExtendedParamIndex(name)>=0;
-  }
-
-  /** returns true if this parameters is fixed and cannot be removed. */
-  public boolean isFixedExtendedParam(String name) {
-    return false;
   }
 
 }

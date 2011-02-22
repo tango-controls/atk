@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          StatusViewer.java
 // Created:       2005-02-14 18:15:00, poncet
 // By:            <poncet@esrf.fr>
@@ -47,7 +25,6 @@ public class StatusViewer extends javax.swing.JPanel implements IStringScalarLis
     private javax.swing.JScrollPane   jScrollPane1;
     private javax.swing.JTextArea     status;
     private IStringScalar             model;
-    private boolean                   useDeviceAlias = true;
 
     /** Creates new form StatusViewer */
 
@@ -87,7 +64,6 @@ public class StatusViewer extends javax.swing.JPanel implements IStringScalarLis
 	if (model != null)
 	{
 	    model.removeStringScalarListener(this);
-	    setBorder(new javax.swing.border.TitledBorder("Status"));
 	}
                 
 	status.setText("Unknown");
@@ -98,15 +74,6 @@ public class StatusViewer extends javax.swing.JPanel implements IStringScalarLis
 	    model.addStringScalarListener(this);
 	    //model.refresh();
 	    setStatus(model.getStringDeviceValue());
-            if (useDeviceAlias)
-	    {
-	       if (model.getDevice().getAlias() != null)
-		  setBorder(new javax.swing.border.TitledBorder(model.getDevice().getAlias()));
-	       else
-		  setBorder(new javax.swing.border.TitledBorder(model.getDevice().getName()));
-	    }
-	    else
-	       setBorder(new javax.swing.border.TitledBorder(model.getDevice().getName()));
 	}
     }
 
@@ -140,25 +107,6 @@ public class StatusViewer extends javax.swing.JPanel implements IStringScalarLis
     {
         status.setColumns(columns);
     }
-
-    /**
-     * <code>getUseDeviceAlias</code> returns true if the device alias is displayed instead of device name
-     *
-     * @return a <code>boolean</code> value
-     */
-    public boolean getUseDeviceAlias() {
-      return useDeviceAlias;
-    }
-
-    /**
-     * <code>setUseDeviceAlias</code> use or not use device alias
-     *
-     * @param b True to enable device alias usage.
-     */
-    public void setUseDeviceAlias(boolean b) {
-      useDeviceAlias=b;
-    }
-
 
     public JTextArea getText()
     {
@@ -202,17 +150,10 @@ public class StatusViewer extends javax.swing.JPanel implements IStringScalarLis
 
     private void setStatus(String s)
     {
-      if (s == null)
-      {
-        if ( "".equals(status.getText()) || status.getText() == null )
-          return;
-        else
-          status.setText("");
-      }
-      else if (s.equals(status.getText())) 
-        return;
+      if (s.equals(status.getText()))
+	return;
       else
-        status.setText(s);
+	status.setText(s);
     }
 	
     private void attStateChange(String state)
@@ -265,7 +206,7 @@ public class StatusViewer extends javax.swing.JPanel implements IStringScalarLis
        mainFrame.setContentPane(stsv);
        mainFrame.pack();
 
-       mainFrame.setVisible(true);
+       mainFrame.show();
 
     } // end of main ()
 

@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /** A JDObject browser panel */
 package fr.esrf.tangoatk.widget.util.jdraw;
 
@@ -62,7 +40,6 @@ class JDBrowserPanel extends JPanel implements TreeSelectionListener,ActionListe
   private JDImagePanel          imagePanel;
   private JDSwingPanel          swingPanel;
   private JDAxisPanel           axisPanel;
-  private JDBarPanel            barPanel;
   private Component             lastSelectedPanel=null;
   private boolean               updatingProp = false;
 
@@ -111,7 +88,6 @@ class JDBrowserPanel extends JPanel implements TreeSelectionListener,ActionListe
     imagePanel = new JDImagePanel(null, invoker);
     swingPanel = new JDSwingPanel(null, invoker);
     axisPanel = new JDAxisPanel(null, invoker);
-    barPanel = new JDBarPanel(null, invoker);
 
     tabbedPane.add(objectPanel,"Graphics");
     tabbedPane.add(valuePanel, "Value");
@@ -152,15 +128,6 @@ class JDBrowserPanel extends JPanel implements TreeSelectionListener,ActionListe
   public void actionPerformed(ActionEvent e) {
     Object src = e.getSource();
     if(src==dismissBtn) {
-      if(objectPanel.nameHasChanged()) {
-        if( JOptionPane.showConfirmDialog(this,
-            "Object name has changed but has not been applied\nDo you want to apply ?",
-            "Confirmation",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION ) {
-          objectPanel.applyName();
-        }  else {
-          objectPanel.cancelNameChanged();
-        }
-      }
       ATKGraphicsUtils.getWindowForComponent(this).setVisible(false);
     }
   }
@@ -246,13 +213,6 @@ class JDBrowserPanel extends JPanel implements TreeSelectionListener,ActionListe
            tabbedPane.add(axisPanel, "Axis");
          }
 
-         if (jObj instanceof JDBar) {
-           JDBar[] objs2 = new JDBar[1];
-           objs2[0] = (JDBar)jObj;
-           barPanel.updatePanel(objs2);
-           tabbedPane.add(barPanel, "Bar");
-         }
-
          tabbedPane.add(valuePanel, "Value");
          tabbedPane.add(extensionPanel, "Extensions");
 
@@ -283,10 +243,6 @@ class JDBrowserPanel extends JPanel implements TreeSelectionListener,ActionListe
          ((JDialog)ATKGraphicsUtils.getWindowForComponent(this)).setTitle(t);
 
        }
-
-       // Work around a X11 JVM bug
-       tabbedPane.getSelectedComponent().setVisible(true);
-
        updatingProp = false;
 
      }

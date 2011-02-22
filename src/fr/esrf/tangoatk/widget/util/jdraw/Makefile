@@ -1,9 +1,7 @@
 include ../../../../../../../.make-include
 
 ALL = $(TARGET)/GraphicsUtils.class \
-	$(TARGET)/FileFinder.class \
 	$(TARGET)/JDrawable.class \
-	$(TARGET)/JDRotatable.class \
 	$(TARGET)/JDrawableList.class \
 	$(TARGET)/JDBrowserPanel.class \
 	$(TARGET)/JDEllipse.class \
@@ -25,10 +23,6 @@ ALL = $(TARGET)/GraphicsUtils.class \
 	$(TARGET)/JDLinePanel.class \
 	$(TARGET)/JDAxis.class \
 	$(TARGET)/JDAxisPanel.class \
-	$(TARGET)/JDBar.class \
-	$(TARGET)/JDBarPanel.class \
-	$(TARGET)/JDSlider.class \
-	$(TARGET)/JDSliderPanel.class \
 	$(TARGET)/JDMouseAdapter.class \
 	$(TARGET)/JDMouseEvent.class \
 	$(TARGET)/JDMouseListener.class \
@@ -54,20 +48,14 @@ ALL = $(TARGET)/GraphicsUtils.class \
 	$(TARGET)/JDValueProgram.class \
 	$(TARGET)/JDrawEditor.class \
 	$(TARGET)/JDCreationMenu.class \
+	$(TARGET)/JDrawEditorFrame.class \
 	$(TARGET)/JDrawEditorListener.class \
 	$(TARGET)/JLXFileLoader.class \
 	$(TARGET)/JLXObject.class \
 	$(TARGET)/JLXPath.class \
 	$(TARGET)/JLXStyle.class \
-	$(TARGET)/LXFileLoader.class \
-	$(TARGET)/LXObject.class \
-	$(TARGET)/JDLibraryViewer.class \
 	$(TARGET)/UndoBuffer.class \
-	$(TARGET)/UndoPattern.class \
-	$(TARGET)/JDNode.class \
-	$(TARGET)/JDEntityNode.class \
-	$(TARGET)/JDDeviceTree.class
-#	$(TARGET)/JDrawEditorFrame.class \
+	$(TARGET)/UndoPattern.class
 
 all: gifs utils
 

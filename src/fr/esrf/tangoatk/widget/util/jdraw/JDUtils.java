@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util.jdraw;
 
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
@@ -40,7 +18,7 @@ class JDUtils {
 
   static boolean modified;
   private static Insets bMargin = new Insets(3,3,3,3);
-  static Insets zMargin = new Insets(0, 0, 0, 0);
+  private static Insets zMargin = new Insets(0, 0, 0, 0);
   private static Class theClass=null;
   static Font  labelFont  = new Font("Dialog", Font.PLAIN, 12);
   static Font  labelFontBold  = new Font("Dialog", Font.BOLD, 12);
@@ -61,8 +39,6 @@ class JDUtils {
   private static JDImagePanel          imagePanel=null;
   private static JDSwingPanel          swingPanel=null;
   private static JDAxisPanel           axisPanel=null;
-  private static JDBarPanel            barPanel=null;
-  private static JDSliderPanel         sliderPanel=null;
   private static JDValuePanel          valuePanel=null;
   private static JDExtensionPanel      extensionPanel=null;
 
@@ -103,16 +79,6 @@ class JDUtils {
     if(nonModalPropDlg==null)
       return;
 
-    if(objectPanel.nameHasChanged()) {
-      if( JOptionPane.showConfirmDialog(nonModalPropDlg,
-          "Object name has changed but has not been applied\nDo you want to apply ?",
-          "Confirmation",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION ) {
-        objectPanel.applyName();
-      } else {
-        objectPanel.cancelNameChanged();
-      }
-    }
-
     if(objects.size()==0) {
       nonModalPropDlg.setTitle("Properties [None selected]");
       objectPanel.updatePanel(null);
@@ -124,7 +90,6 @@ class JDUtils {
       imagePanel.updatePanel(null);
       swingPanel.updatePanel(null);
       axisPanel.updatePanel(null);
-      barPanel.updatePanel(null);
       valuePanel.updatePanel(null);
       extensionPanel.updatePanel(null);
       return;
@@ -204,20 +169,6 @@ class JDUtils {
       innerPane.add(axisPanel, "Axis");
     }
 
-    if (sameClass && objs[0] instanceof JDBar) {
-      JDBar[] objs2 = new JDBar[objs.length];
-      for (i = 0; i < objs.length; i++) objs2[i] = (JDBar) objs[i];
-      barPanel.updatePanel(objs2);
-      innerPane.add(barPanel, "Bar");
-    }
-
-    if (sameClass && objs[0] instanceof JDSlider) {
-      JDSlider[] objs2 = new JDSlider[objs.length];
-      for (i = 0; i < objs.length; i++) objs2[i] = (JDSlider) objs[i];
-      sliderPanel.updatePanel(objs2);
-      innerPane.add(sliderPanel, "Slider");
-    }
-
     // Dynamic properties
     valuePanel.updatePanel(objs);
     innerPane.add(valuePanel, "Value");
@@ -271,15 +222,6 @@ class JDUtils {
       dismissBtn.setFont(labelFont);
       dismissBtn.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
-          if(objectPanel.nameHasChanged()) {
-            if( JOptionPane.showConfirmDialog(nonModalPropDlg,
-                "Object name has changed but has not been applied\nDo you want to apply ?",
-                "Confirmation",JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION ) {
-              objectPanel.applyName();
-            } else {
-              objectPanel.cancelNameChanged();
-            }
-          }
           nonModalPropDlg.setVisible(false);
         }
       });
@@ -297,8 +239,6 @@ class JDUtils {
       imagePanel = new JDImagePanel(null, invoker);
       swingPanel = new JDSwingPanel(null, invoker);
       axisPanel = new JDAxisPanel(null, invoker);
-      barPanel = new JDBarPanel(null, invoker);
-      sliderPanel = new JDSliderPanel(null, invoker);
       valuePanel = new JDValuePanel(null, invoker, null);
       extensionPanel = new JDExtensionPanel(null, invoker);
 
@@ -646,8 +586,6 @@ class JDUtils {
   }
 
   static String buildShortClassName(String className) {
-    if(className==null)
-      return "";    
     int i = className.lastIndexOf('.');
     if(i!=-1) {
       return className.substring(i+1);
@@ -691,8 +629,8 @@ class JDUtils {
       if((full) || (j < step)) {
         if(pts!=null) {
           double[] pt = new double[2];
-          pt[0] = (int)(x+0.5);
-          pt[1] = (int)(y+0.5);
+          pt[0] = x;
+          pt[1] = y;
           pts.add(pt);
         } else {
           ptsx[start+j] = (int)(x+0.5);

@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * SplashPanel.java
  *
  * Created on February 28, 2002, 10:37 AM
@@ -34,60 +12,30 @@ import java.awt.image.BufferedImage;
 
 class SplashPanel extends JComponent {
 
-  // Default image
-  protected final static String defaultImgLocation = "/fr/esrf/tangoatk/widget/util/splash.jpg";
-  protected final static int foregroundDefault = ( (255 & 0xFF) << 24 )// Alpha
-                                                 | ( (204 & 0xFF) << 16 )// Red
-                                                 | ( (204 & 0xFF) << 8 )// Green
-                                                 | ( (204 & 0xFF) << 0 );// Blue
+  static ImageIcon img = new ImageIcon(SplashPanel.class.getResource("/fr/esrf/tangoatk/widget/util/splash.jpg"));
+  static Dimension imgSize = new Dimension(img.getIconWidth(), img.getIconHeight());
 
   // Panel components
   private JSmoothLabel title;
   private JSmoothLabel message;
   private JSmoothLabel copyright;
-  private JSmoothProgressBar progress = null;
+  private JSmoothProgressBar progress;
   private BufferedImage ddBuffer; // To avoid flickering paint
   private boolean firstUpdate=true;
-  private Dimension imgSize;
-  private ImageIcon img;
-  private Color textForeground;
 
   // Splah panel constructor
+
   public SplashPanel() {
-    this(null,null,null);
-  }
-
-  public SplashPanel(ImageIcon icon,Color textForeground,JSmoothProgressBar bar) {
-
-    if( icon == null ) {
-      img = new ImageIcon(
-              SplashPanel.class.getResource(defaultImgLocation)
-      );
-    }
-    else {
-      img = icon;
-    }
-    if ( textForeground == null ) {
-      this.textForeground = new Color(foregroundDefault);
-    }
-    else {
-      this.textForeground = textForeground;
-    }
-    if(bar!=null) progress = bar;
-    initComponents();
-
-  }
-
-  private void initComponents() {
-
-    imgSize = new Dimension(img.getIconWidth(),img.getIconHeight());
 
     setLayout(null);
+    setPreferredSize(imgSize);
+    setMinimumSize(imgSize);
+    setMaximumSize(imgSize);
     setDoubleBuffered(false);
 
     title = new JSmoothLabel();
     title.setFont(new java.awt.Font("Dialog", Font.BOLD, 18));
-    title.setForeground(textForeground);
+    title.setForeground(new java.awt.Color(204, 204, 204));
     title.setText("");
     title.setHorizontalAlignment(JSmoothLabel.LEFT_ALIGNMENT);
     title.setOpaque(false);
@@ -95,7 +43,7 @@ class SplashPanel extends JComponent {
 
     message = new JSmoothLabel();
     message.setFont(new java.awt.Font("Dialog", Font.BOLD, 12));
-    message.setForeground(textForeground);
+    message.setForeground(new java.awt.Color(204, 204, 204));
     message.setText("Initializing...");
     message.setHorizontalAlignment(JSmoothLabel.LEFT_ALIGNMENT);
     message.setOpaque(false);
@@ -103,21 +51,15 @@ class SplashPanel extends JComponent {
 
     copyright = new JSmoothLabel();
     copyright.setFont(new java.awt.Font("Dialog", Font.PLAIN, 10));
-    copyright.setForeground(textForeground);
+    copyright.setForeground(new java.awt.Color(204, 204, 204));
     copyright.setText("(c) ESRF 2002");
     copyright.setHorizontalAlignment(JSmoothLabel.LEFT_ALIGNMENT);
     copyright.setOpaque(false);
     copyright.setDoubleBuffered(false);
 
-    if(progress==null) {
-      progress = new JSmoothProgressBar();
-      progress.setStringPainted(true);
-    }
+    progress = new JSmoothProgressBar();
+    progress.setStringPainted(true);
     progress.setDoubleBuffered(false);
-
-    setPreferredSize(imgSize);
-    setMinimumSize(imgSize);
-    setMaximumSize(imgSize);
 
     title.setSize(imgSize.width - 10, 23);
     message.setSize(imgSize.width - 10, 18);

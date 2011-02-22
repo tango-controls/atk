@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          BooleanScalarCheckBoxViewer.java
 // Created:       2005-02-14 18:15:00, poncet
 // By:            <poncet@esrf.fr>
@@ -32,13 +10,12 @@ package fr.esrf.tangoatk.widget.attribute;
 
 
 import javax.swing.*;
-import java.awt.Color;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import fr.esrf.tangoatk.core.*;
-import fr.esrf.tangoatk.widget.util.ATKConstant;
-import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
+import fr.esrf.tangoatk.core.attribute.*;
 
 
 /** An BooleanScalarCheckBoxViewer is a BooleanScalar attribute viewer. This means that
@@ -48,63 +25,44 @@ import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
  * if the attribute value is "false".
  *
  */
-public class BooleanScalarCheckBoxViewer extends JCheckBox
-                                        implements ActionListener,
-					           IBooleanScalarListener, ISetErrorListener,
-                                                   JDrawable
+public class BooleanScalarCheckBoxViewer extends JCheckBox 
+                                        implements ActionListener, IBooleanScalarListener 
 {
 
 
   private IBooleanScalar   attModel=null;
   private String           trueLabel=null;
   private String           falseLabel=null;
-  private String           fixedLabel=null;   // JDraw extension, overrides the
-                                              // model label
-
-  private boolean          hasToolTip=false;
-  private boolean          qualityEnabled = false;
-  private Color            background;
-  
-  static String[] exts = {"text"};
-
-  private boolean enabled;
 
   // ---------------------------------------------------
   // Contruction
   // ---------------------------------------------------
   public BooleanScalarCheckBoxViewer()
   {
-    super();
     addActionListener(this);
-    background = getBackground();
-    enabled = isEnabled();
   }
 
   public BooleanScalarCheckBoxViewer(String title)
   {
     super(title);
     addActionListener(this);
-    background = getBackground();
-    enabled = isEnabled();
   }
 
   // ---------------------------------------------------
   // Property stuff
   // ---------------------------------------------------
-
+  
   public IBooleanScalar getAttModel()
   {
      return attModel;
   }
-
-
+  
+  
   public void setAttModel( IBooleanScalar boolModel)
   {
       if (attModel != null)
       {
 	  attModel.removeBooleanScalarListener(this);
-	  if (attModel.isWritable())
-	      attModel.removeSetErrorListener(this);
 	  attModel = null;
 	  setText("");
       }
@@ -113,28 +71,24 @@ public class BooleanScalarCheckBoxViewer extends JCheckBox
       {
 	  attModel = boolModel;
 	  attModel.addBooleanScalarListener(this);
-	  if (attModel.isWritable())
-	      attModel.addSetErrorListener(this);
-	  if ( (trueLabel == null) && (falseLabel == null) && (fixedLabel==null) )
+	  if ( (trueLabel == null) && (falseLabel == null) )
 	      setText(boolModel.getLabel());
-          if (hasToolTip) {
-              setToolTipText(boolModel.getName());
-          }
+	  //attModel.refresh();
 	  setBoolValue(attModel.getDeviceValue());
       }
   }
-
-
+  
+  
   public String getTrueLabel()
   {
      return trueLabel;
   }
-
-
+  
+  
   public void setTrueLabel(String tLabel)
   {
       trueLabel = tLabel;
-
+      
       if ((trueLabel == null) || (falseLabel == null))
       {
          if (attModel != null)
@@ -146,18 +100,18 @@ public class BooleanScalarCheckBoxViewer extends JCheckBox
 	 if (isSelected())
  	    setText(trueLabel);
   }
-
-
+  
+  
   public String getFalseLabel()
   {
      return falseLabel;
   }
-
-
+  
+  
   public void setFalseLabel(String fLabel)
   {
       falseLabel = fLabel;
-
+      
       if ((trueLabel == null) || (falseLabel == null))
       {
          if (attModel != null)
@@ -166,212 +120,79 @@ public class BooleanScalarCheckBoxViewer extends JCheckBox
 	    setText(null);
       }
       else
-	 if (!isSelected())
+	 if (isSelected())
  	    setText(falseLabel);
   }
   
-  /**
-   * <code>getHasToolTip</code> returns true if the viewer has a tooltip (attribute full name)
-   *
-   * @return a <code>boolean</code> value
-   */
-  public boolean getHasToolTip()
-  {
-     return hasToolTip;
-  }
-
-  /**
-   * <code>setHasToolTip</code> display or not a tooltip for this viewer
-   *
-   * @param b If True the attribute full name will be displayed as tooltip for the viewer
-   */
-  public void setHasToolTip(boolean b)
-  {
-      if (hasToolTip != b)
-      {
-	 if (b == false)
-            setToolTipText(null);
-	 else
-            if (attModel != null)
-               setToolTipText(attModel.getName());
-	 hasToolTip=b;
-      }
-  }
-
-  /**
-   *<code>getQualityEnabled</code> returns a boolean to know whether quality will be displayed as background
-   * or not.
-   * 
-   * @return a <code>boolean</code> value
-   */
-  public boolean getQualityEnabled ()
-  {
-      return qualityEnabled;
-  }
-
-  /**
-   * <code>setQualityEnabled</code> view or not the attribute quality for this viewer
-   *
-   * @param b If True the attribute full name will be displayed as tooltip for the viewer
-   * @param qualityEnabled If True the background Color represents the attribute quality factor
-   */
-  public void setQualityEnabled (boolean b)
-  {
-     qualityEnabled = b;
-     if (!qualityEnabled)
-     {
-	super.setBackground(background);
-	repaint();
-     }
-  }
-
-
+  
 
   public void clearModel()
   {
       setAttModel( (IBooleanScalar) null);
   }
 
-  // ---------------------------------------------------
-  // JDrawable implementation
-  // ---------------------------------------------------
-  public void initForEditing() {
-    setText("CheckBox");
-  }
-
-  public JComponent getComponent() {
-    return this;
-  }
-
-  public String getDescription(String extName) {
-
-    if (extName.equalsIgnoreCase("text")) {
-      return "Overrides text given by the model.";
-    }
-    return "";
-
-  }
-
-  public String[] getExtensionList() {
-    return exts;
-  }
-
-  public boolean setExtendedParam(String name,String value,boolean popupErr) {
-
-    if (name.equalsIgnoreCase("text")) {
-      fixedLabel = value;
-      if(fixedLabel.length()==0) {
-        fixedLabel=null;
-        setText("CheckBox");
-      } else {
-        setText(fixedLabel);
-      }
-      return true;
-    }
-
-    return false;
-
-  }
-
-  public String getExtendedParam(String name) {
-
-    if(name.equalsIgnoreCase("text")) {
-      if(fixedLabel!=null) {
-        return fixedLabel;
-      }
-    }
-
-    return "";
-
-  }
 
   // ---------------------------------------------------
   // Action Listener
   // ---------------------------------------------------
   public void actionPerformed(ActionEvent e)
-  {
- //System.out.println("BooleanScalarCheckBoxViewer : actionPerformed called");
+  {      
+ //System.out.println("BooleanScalarCheckBoxViewer : actionPerformed called");     
 
       if (attModel == null) return;
-
+      
       if (!attModel.isWritable())
       {
          setSelected(!isSelected());
 	 return;
       }
-
+             
       if (isSelected())
       {
          attModel.setValue(true);
+	 //if ((trueLabel != null) || (falseLabel != null))
+	    //setText(trueLabel);
       }
       else
       {
          attModel.setValue(false);
+	 //if ((trueLabel != null) || (falseLabel != null))
+	    //setText(falseLabel);
       }
   }
 
   // ---------------------------------------------------
-  // IBooleanScalarListener listener
+  // Scalar listener
   // ---------------------------------------------------
   public void booleanScalarChange(BooleanScalarEvent e)
   {
       setBoolValue(e.getValue());
   }
-
-  public void stateChange(AttributeStateEvent evt)
+  
+  public void stateChange(AttributeStateEvent e)
   {
-      String state = evt.getState();
-      if (!qualityEnabled) return;
-      super.setBackground(ATKConstant.getColor4Quality(state));
-      repaint();
   }
-
+  
   public void errorChange(ErrorEvent evt)
   {
-      super.setEnabled(false);
+      setEnabled(false);
   }
-
-  protected void setBoolValue (boolean val)
+  
+  private void setBoolValue (boolean val)
   {
-      if ( enabled && !isEnabled() )
-         super.setEnabled(enabled);
-
+      if (!isEnabled())
+         setEnabled(true);
+	 
       setSelected(val);
       if ((trueLabel != null) || (falseLabel != null))
       {
-        if (val)
-	      setText(trueLabel);
-        else
-	      setText(falseLabel);
+	 if (val)
+	    setText(trueLabel);
+	 else
+	    setText(falseLabel);
       }
   }
-
-
-  // ---------------------------------------------------
-  // ISetErrorListener listener
-  // ---------------------------------------------------
-  public void setErrorOccured(ErrorEvent evt)
-  {
-     if (attModel == null)
-        return;
-
-     if (evt.getSource() != attModel)
-        return;
-	
-     setBoolValue(attModel.getDeviceValue());
-  }
-
-
-  public void setBackground (Color bg) {
-    background = bg;
-    super.setBackground( bg );
-  }
-
-  @Override
-  public void setEnabled (boolean b) {
-    enabled = b;
-    super.setEnabled(b);
-  }
+  
 
   // ---------------------------------------------------
   // Main test fucntion
@@ -384,28 +205,28 @@ public class BooleanScalarCheckBoxViewer extends JCheckBox
 	    new fr.esrf.tangoatk.core.AttributeList();
        JFrame f = new JFrame();
        BooleanScalarCheckBoxViewer bsv = new BooleanScalarCheckBoxViewer();
-
-       // bsv.setTrueLabel("oui");
-       //bsv.setFalseLabel("non");
+       
+       bsv.setTrueLabel("oui");
+       bsv.setFalseLabel("non");
        try
        {
-	  ie = attl.add("jlp/test/1/att_boolean");
+	  ie = attl.add("dev/test/10/Boolean_attr_w");
 	  //ie = attl.add("dev/test/10/Boolean_attr");
 	  if (!(ie instanceof IBooleanScalar))
 	  {
-              System.out.println("jlp/test/1/att_boolean is not a booleanScalar");
+              System.out.println("dev/test/10/Boolean_attr_w is not a booleanScalar");
 	      System.exit(0);
 	  }
-
+	  
           bAtt = (IBooleanScalar) ie;
 	  bsv.setAttModel(bAtt);
        }
        catch (Exception ex)
        {
-          System.out.println("Cannot connect to elin/mod/aux-1/Economy");
+          System.out.println("Cannot connect to dev/test/10/Boolean_attr_w");
        }
-
-
+  
+       
        f.setContentPane(bsv);
        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
        f.pack();

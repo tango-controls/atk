@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util.jdraw;
 
 import javax.swing.*;
@@ -44,8 +22,6 @@ public class JDCreationMenu implements ActionListener {
   private JMenuItem  createSplineMenuItem;
   private JMenuItem  createImageMenuItem;
   private JMenuItem  createAxisMenuItem;
-  private JMenuItem  createBarMenuItem;
-  private JMenuItem  createSliderMenuItem;
 
   /** JDrawable Swing object */
   private JMenu       swingMenu;
@@ -65,9 +41,9 @@ public class JDCreationMenu implements ActionListener {
   private JButton  objectToolSplineBtn;
   private JButton  objectToolImageBtn;
   private JButton  objectToolAxisBtn;
-  private JButton  objectToolBarBtn;
-  private JButton  objectToolSliderBtn;
   private JButton  objectToolSwingBtn;
+
+  private JLabel statusLabel;
 
   /**
    * Constructs menu and toolbar for JDObject creation.
@@ -75,6 +51,7 @@ public class JDCreationMenu implements ActionListener {
   JDCreationMenu() {
 
     invoker = null;
+    statusLabel = null;
 
     // Create Menu -------------------------------------
 
@@ -96,10 +73,6 @@ public class JDCreationMenu implements ActionListener {
     createImageMenuItem.addActionListener(this);
     createAxisMenuItem = new JMenuItem("Axis");
     createAxisMenuItem.addActionListener(this);
-    createBarMenuItem = new JMenuItem("Bar");
-    createBarMenuItem.addActionListener(this);
-    createSliderMenuItem = new JMenuItem("Slider");
-    createSliderMenuItem.addActionListener(this);
 
     // JDrawable Swing object menu --------------------
 
@@ -128,8 +101,6 @@ public class JDCreationMenu implements ActionListener {
     createMenu.add(createPolylineMenuItem);
     createMenu.add(createImageMenuItem);
     createMenu.add(createAxisMenuItem);
-    createMenu.add(createBarMenuItem);
-    createMenu.add(createSliderMenuItem);
     createMenu.add(swingMenu);
 
     // The toolbal -----------------------------------
@@ -142,10 +113,8 @@ public class JDCreationMenu implements ActionListener {
     objectToolPolylineBtn = JDUtils.createIconButton("jdraw_polyline",false,"Create a polyline",this);
     objectToolLabelBtn = JDUtils.createIconButton("jdraw_label",false,"Create a label",this);
     objectToolSplineBtn = JDUtils.createIconButton("jdraw_spline",false,"Create a spline",this);
-    objectToolImageBtn = JDUtils.createIconButton("jdraw_image",false,"Insert an image",this);
+    objectToolImageBtn = JDUtils.createIconButton("jdraw_image",false,"Create an image",this);
     objectToolAxisBtn = JDUtils.createIconButton("jdraw_axis",false,"Create an axis",this);
-    objectToolBarBtn = JDUtils.createIconButton("jdraw_bar",false,"Create a bar",this);
-    objectToolSliderBtn = JDUtils.createIconButton("jdraw_slider",false,"Create a slider",this);
     objectToolSwingBtn = JDUtils.createIconButton("jdraw_swing",false,"Create a swing object",this);
     objectToolBar.add(objectToolLineBtn);
     objectToolBar.add(objectToolRectangleBtn);
@@ -156,8 +125,6 @@ public class JDCreationMenu implements ActionListener {
     objectToolBar.add(objectToolSplineBtn);
     objectToolBar.add(objectToolImageBtn);
     objectToolBar.add(objectToolAxisBtn);
-    objectToolBar.add(objectToolBarBtn);
-    objectToolBar.add(objectToolSliderBtn);
     objectToolBar.add(objectToolSwingBtn);
     objectToolBar.setOrientation(JToolBar.VERTICAL);
 
@@ -186,6 +153,19 @@ public class JDCreationMenu implements ActionListener {
     invoker = editor;
   }
 
+  /**
+   * Sets the status label where are printed creation information.
+   * @param label Label
+   */
+  public void setStatusLabel(JLabel label) {
+    statusLabel = label;
+  }
+  
+  private void setStatus(String s) {
+    if(statusLabel!=null)
+      statusLabel.setText(s);
+  }
+
   private void invoke(int mode) {
     if(invoker!=null)
       invoker.create(mode);
@@ -201,26 +181,31 @@ public class JDCreationMenu implements ActionListener {
     Object src = e.getSource();
     if (src == objectToolRectangleBtn || src == createRectangleMenuItem) {
       invoke(JDrawEditor.CREATE_RECTANGLE);
+      setStatus("Left click and drag to create a rectangle");
     } else if (src == objectToolRoundRectBtn || src == createRoundRectMenuItem) {
       invoke(JDrawEditor.CREATE_RRECTANGLE);
+      setStatus("Left click and drag to create a rounded rectangle");
     } else if (src == objectToolLineBtn || src == createLineMenuItem) {
       invoke(JDrawEditor.CREATE_LINE);
+      setStatus("Left click and drag to create a line");
     } else if (src == objectToolEllipseBtn || src == createEllipseMenuItem) {
       invoke(JDrawEditor.CREATE_ELLIPSE);
+      setStatus("Left click and drag to create an ellipse");
     } else if (src == objectToolPolylineBtn || src == createPolylineMenuItem) {
       invoke(JDrawEditor.CREATE_POLYLINE);
+      setStatus("Left click to create a new point and right click to create the last point");
     } else if (src == objectToolLabelBtn || src == createLabelMenuItem) {
       invoke(JDrawEditor.CREATE_LABEL);
+      setStatus("Left click to create the label");
     } else if (src == objectToolSplineBtn || src == createSplineMenuItem) {
       invoke(JDrawEditor.CREATE_SPLINE);
+      setStatus("Left click to create a new point and right click to create the last point");
     } else if (src == objectToolImageBtn || src == createImageMenuItem) {
       invoke(JDrawEditor.CREATE_IMAGE);
+      setStatus("Left click to create an image");
     } else if (src == objectToolAxisBtn || src == createAxisMenuItem) {
       invoke(JDrawEditor.CREATE_AXIS);
-    } else if (src == objectToolBarBtn || src == createBarMenuItem) {
-      invoke(JDrawEditor.CREATE_BAR);
-    } else if (src == objectToolSliderBtn || src == createSliderMenuItem) {
-      invoke(JDrawEditor.CREATE_SLIDER);
+      setStatus("Left click to create an axis");
     } else if (src == objectToolSwingBtn) {
       swingPopupMenu.show(objectToolSwingBtn,32,0);
     } else {
@@ -236,6 +221,8 @@ public class JDCreationMenu implements ActionListener {
       if( found ) {
         // We create a Swing object
         invoke(JDrawEditor.CREATE_SWINGOBJECT,drawableItem[i]);
+        setStatus("Left click to create a JDSwingObject : " +
+                            JDUtils.buildShortClassName(drawableItem[i]));
       }
 
     }

@@ -1,30 +1,10 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util;
 
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.font.FontRenderContext;
 
 /** A labeled color gradient viewer (vertical orientation only) */
 public class JGradientViewer extends JComponent {
@@ -43,6 +23,7 @@ public class JGradientViewer extends JComponent {
     setBorder(null);
     setOpaque(true);
     gradient = new Gradient();
+    gradient.buidColorGradient();
     colorMap = gradient.buildColorMap(256);
     axis = new JLAxis(this,JLAxis.VERTICAL_RIGHT);
     axis.setAutoScale(false);
@@ -97,10 +78,17 @@ public class JGradientViewer extends JComponent {
     int bw,startX = 0;
     boolean axisVisible = false;
 
+    Graphics2D g2 = (Graphics2D) g;
+    g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+            RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
+            RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+    FontRenderContext frc = g2.getFontRenderContext();
+
     if (d.height <= 20 || d.width <= 0)
       return;
 
-    axis.measureAxis(ATKGraphicsUtils.getDefaultRenderContext(), 0, d.height - 21);
+    axis.measureAxis(g, frc, 0, d.height - 21);
 
     if (d.width < barWidth) {
       bw = d.width;
@@ -128,17 +116,15 @@ public class JGradientViewer extends JComponent {
     }
 
     if (axisVisible)
-      axis.paintAxisDirect(g, ATKGraphicsUtils.getDefaultRenderContext(), startX + bw, 10, Color.BLACK, 0, 0);
+      axis.paintAxisDirect(g, frc, startX + bw, 10, Color.BLACK, 0, 0);
 
-  }
 
-  public Dimension getPreferredSize() {
-    return getMinimumSize();
+
+
   }
 
   public Dimension getMinimumSize() {
-    axis.measureAxis(ATKGraphicsUtils.getDefaultRenderContext(), 0, getHeight() - 21);
-    return new Dimension(axis.getThickness()+barWidth+4,20);
+    return new Dimension(0,20);
   }
 
   public static void main(String args[]) {

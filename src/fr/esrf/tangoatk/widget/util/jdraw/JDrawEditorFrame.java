@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /**
  * User: Jean Luc
  * Date: Aug 10, 2003
@@ -28,13 +6,11 @@
 package fr.esrf.tangoatk.widget.util.jdraw;
 
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
-import fr.esrf.tangoatk.widget.jdraw.SimpleSynopticAppli;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Vector;
-import java.io.IOException;
 
 /** Main JDrawEditor frame, can be extended to produce customized editor. This class creates all menu and button
  * needed  by the editor. All actions are handled by this class and can be overrided by overriding actionPerformed(). */
@@ -75,8 +51,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
   public JMenuItem editDeleteMenuItem;
   /** Edit->Select All menu item. */
   public JMenuItem editSelectAllMenuItem;
-  /** Edit->Select Not visible menu item. */
-  public JMenuItem editSelectNVMenuItem;
   /** Edit->Select None menu item. */
   public JMenuItem editSelectNoneMenuItem;
 
@@ -86,8 +60,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
   public  JMenuItem viewsTransformMenuItem;
   /** Views->Play menu item. */
   public  JMenuItem viewsPlayMenuItem;
-  /** Views->Tango Synoptic menu item. */
-  public  JMenuItem viewsTangoSynopticMenuItem;  
   /** Views->Object properties menu item. */
   public  JMenuItem viewsOptionMenuItem;
   /** Views->Browse menu item. */
@@ -188,15 +160,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
   private JMenuBar    theMenu;
   private String      APP_RELEASE;
   private JSplitPane  splitPane;
-  
-  private JButton[] libButton;
-  private JComboBox libCombo;
-  private JDLibraryViewer[] libViewer;
-  private int nLibs;
-  private JDDeviceTree deviceTree;
-  private JPanel editorPanel;
 
-  private SimpleSynopticAppli theSynopticAppli = null;
   /**
    * Contruct an Editor frame.
    * @see #main
@@ -204,27 +168,25 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
   public JDrawEditorFrame() {
 
     setTitle(APP_RELEASE);
-    JSplitPane sPane = new JSplitPane();
-    editorPanel = new JPanel();
-    editorPanel.setLayout(new BorderLayout());
-
-    // Device tree
-    deviceTree = new JDDeviceTree();
+    Container pane=getContentPane();
+    pane.setLayout(new BorderLayout());
 
     // Help label
     statusLine = new JPanel(new GridLayout(1,1));
-    editorPanel.add(statusLine,BorderLayout.SOUTH);
+    pane.add(statusLine,BorderLayout.SOUTH);
 
     statusLabel = new JLabel();
     statusLabel.setFont(JDUtils.labelFont);
     statusLabel.setHorizontalAlignment(JLabel.LEFT);
+    statusLabel.setText(" ");
     statusLine.add(statusLabel);
 
     // -------------------------------------
     // The toolbar
     // -------------------------------------
     createMenu = new JDCreationMenu();
-    editorPanel.add(createMenu.getToolbar(),BorderLayout.WEST);
+    createMenu.setStatusLabel(statusLabel);
+    pane.add(createMenu.getToolbar(),BorderLayout.WEST);
 
     // -------------------------------------
     // The edit toolbar
@@ -280,9 +242,9 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     editToolBar.add(editToolAlignLeftBtn);
     editToolBar.add(editToolAlignBottomBtn);
     editToolBar.add(editToolAlignRightBtn);
-    
+
     editToolBar.setOrientation(JToolBar.HORIZONTAL);
-    editorPanel.add(editToolBar,BorderLayout.NORTH);
+    pane.add(editToolBar,BorderLayout.NORTH);
     // -------------------------------------
     // Main menu
     // -------------------------------------
@@ -329,7 +291,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     editPasteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,InputEvent.CTRL_MASK));
     editPasteMenuItem.addActionListener(this);
     editDeleteMenuItem = new JMenuItem("Delete");
-    editDeleteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE,0));
+    editDeleteMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,0));
     editDeleteMenuItem.addActionListener(this);
     editSelectAllMenuItem = new JMenuItem("Select all");
     editSelectAllMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,InputEvent.CTRL_MASK));
@@ -337,8 +299,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     editSelectNoneMenuItem = new JMenuItem("Select none");
     editSelectNoneMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,InputEvent.CTRL_MASK));
     editSelectNoneMenuItem.addActionListener(this);
-    editSelectNVMenuItem = new JMenuItem("Select not visible");
-    editSelectNVMenuItem.addActionListener(this);
+
 
     editMenu = new JMenu("Edit");
     editMenu.setMnemonic('E');
@@ -352,7 +313,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     editMenu.add(new JSeparator());
     editMenu.add(editSelectAllMenuItem);
     editMenu.add(editSelectNoneMenuItem);
-    editMenu.add(editSelectNVMenuItem);
 
     theMenu.add(editMenu);
 
@@ -361,8 +321,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     // Views -----------------------------------------
     viewsPlayMenuItem = new JMenuItem("Player view");
     viewsPlayMenuItem.addActionListener(this);
-    viewsTangoSynopticMenuItem = new JMenuItem("Tango Synoptic view");
-    viewsTangoSynopticMenuItem.addActionListener(this);
     viewsOptionMenuItem = new JMenuItem("Object properties...");
     viewsOptionMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,InputEvent.CTRL_MASK));
     viewsOptionMenuItem.addActionListener(this);
@@ -382,7 +340,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     viewsMenu = new JMenu("Views");
     viewsMenu.setMnemonic('V');
     viewsMenu.add(viewsPlayMenuItem);
-    viewsMenu.add(viewsTangoSynopticMenuItem);
     viewsMenu.add(viewsGlobalMenuItem);
     viewsMenu.add(viewsTransformMenuItem);
     viewsMenu.add(viewsOptionMenuItem);
@@ -456,10 +413,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
 
     setJMenuBar(theMenu);
 
-    sPane.setRightComponent(editorPanel);
-    sPane.setLeftComponent(deviceTree);
-    setContentPane(sPane);
-
   }
 
   // ----------------------------------------------------
@@ -468,14 +421,12 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
   /** Sets the editor of this EditorFrame. */
   public void setEditor(JDrawEditor editor) {
     theEditor = editor;
-    theEditor.setStatusLabel(statusLabel);
-    theEditor.setStatus("");
     theEditor.addEditorListener(this);
     createMenu.setEditor(editor);
     theEditor.setBorder(BorderFactory.createEtchedBorder());
     theEditorView = new JScrollPane(editor);
     theEditorView.setWheelScrollingEnabled(true);
-    editorPanel.add(theEditorView,BorderLayout.CENTER);
+    getContentPane().add(theEditorView,BorderLayout.CENTER);
     // Update controls
     selectionChanged();
     valueChanged();
@@ -525,48 +476,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     APP_RELEASE = title;
   }
 
-  // -------------------------------------
-  // Palette Libraries
-  // -------------------------------------
-  public void setLibraries(String path) {
-    String libPath;
-    if (path == null) libPath = System.getProperty("LIBPATH", "null");
-    else libPath = path;
-    if ( libPath.equals("null") ) System.out.println("Warning LIBPATH is not defined.");
-    FileFinder ff = new FileFinder(libPath,".lib",12);
-    String[] fileList = ff.getList(true);
-    if (fileList == null) {
-        // Either dir does not exist or is not a directory
-	System.out.println("No libraries found in "+libPath);
-	return;
-    }
-    // Customize the editor
-    nLibs = fileList.length;
-    libViewer = new JDLibraryViewer[nLibs];
-    libButton = new JButton[nLibs];
-    libCombo = new JComboBox();
-    libCombo.addItem("Palette Libraries");
-    for (int i=0; i<nLibs; i++) {
-	    libViewer[i] = new JDLibraryViewer(libPath+(!libPath.endsWith("/")?"/":"")+fileList[i],theEditor,false);
-	    libViewer[i].setTitle("JDraw library: "+fileList[i]);
-	    //ATKGraphicsUtils.centerFrameOnScreen(libViewer[i]);
-	    final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-	    libViewer[i].pack();
-	    libViewer[i].setBounds(
-		    screenSize.width-libViewer[i].getPreferredSize().width-15,
-		    (screenSize.height-libViewer[i].getPreferredSize().height)/2,
-		    (libViewer[i].getPreferredSize().width<screenSize.width?libViewer[i].getPreferredSize().width:screenSize.width),
-		    (libViewer[i].getPreferredSize().height<screenSize.height?libViewer[i].getPreferredSize().height:screenSize.width));
-	    libCombo.addItem(fileList[i]);
-    }
-    libCombo.addItem("Choose a file ...");
-    libCombo.setSelectedIndex(0);
-    libCombo.addActionListener(this);
-    editToolBar.add(new JLabel(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/util/jdraw/gif/jdraw_separator.gif"))));
-    editToolBar.add(libCombo);
-    //end-----------------------------------
-  }
-
   // ----------------------------------------------------
   // ACtion listener
   // ----------------------------------------------------
@@ -576,6 +485,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
       exitApp();
     } else if (src==editToolPasteBtn || src==editPasteMenuItem) {
       theEditor.create(JDrawEditor.CREATE_CLIPBOARD);
+      statusLabel.setText("Left click to paste");
     } else if (src==editToolCopyBtn || src==editCopyMenuItem) {
       theEditor.copySelection();
     } else if (src==editToolCutBtn || src==editCutMenuItem) {
@@ -590,11 +500,11 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
       theEditor.scaleSelection(-1.0,1.0);
     } else if (src==editToolVMirrorBtn || src==toolsVMirrorMenuItem) {
       theEditor.scaleSelection( 1.0,-1.0);
-    } else if (src==fileSaveasMenuItem) {
+    } else if (src==editToolFileSaveBtn || src==fileSaveasMenuItem) {
       theEditor.showSaveDialog(".");
     } else if (src==editToolFileOpenBtn || src==fileOpenMenuItem) {
       theEditor.showOpenDialog(".");
-    } else if(src==editToolFileSaveBtn || src==fileSaveMenuItem) {
+    } else if( src==fileSaveMenuItem) {
       theEditor.instantSave(".");
     } else if (src==editToolZoomInBtn) {
       theEditor.zoomIn();
@@ -602,8 +512,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
       theEditor.zoomOut();
     } else if (src==editSelectAllMenuItem) {
       theEditor.selectAll();
-    } else if (src==editSelectNVMenuItem) {
-      theEditor.selectNotVisible();
     } else if (src==editSelectNoneMenuItem) {
       theEditor.unselectAll();
     } else if (src==editToolUndoBtn || src==editUndoMenuItem) {
@@ -622,8 +530,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
       theEditor.showBrowserWindow();
     } else if (src==viewsPlayMenuItem) {
       showPlayer();
-    } else if (src==viewsTangoSynopticMenuItem) {
-      showSimpleSynopticAppli();
     } else if (src == viewsGroupEditMenuItem) {
       theEditor.showGroupEditorWindow();
     } else if (src == viewsJavaMenuItem) {
@@ -665,36 +571,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
         }
       }
     } else if (src == toolsFitToGraph) {
-      theEditor.computePreferredSize();      
-    } else if( src==libCombo) {
-	    if ( libCombo.getSelectedIndex()>libViewer.length) {
-		    String fullFileName;
-		    JFileChooser chooser = new JFileChooser(".");
-		    chooser.setDialogTitle("[SimpleSynopticAppli] Open a synoptic file.");
-		    int returnVal = chooser.showOpenDialog(null);
-		    if (returnVal == JFileChooser.APPROVE_OPTION) {
-			    java.io.File f = chooser.getSelectedFile();
-			    fullFileName = f.getAbsolutePath();
-		    } else {
-			return;
-		    }	
-		    JDLibraryViewer noLib = new JDLibraryViewer(fullFileName,theEditor,false);
-		    noLib.setTitle("JDraw library: "+fullFileName);
-		    final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		    noLib.pack();
-		    noLib.setBounds(
-			    screenSize.width-noLib.getPreferredSize().width-15,
-			    (screenSize.height-noLib.getPreferredSize().height)/2,
-			    (noLib.getPreferredSize().width<screenSize.width?noLib.getPreferredSize().width:screenSize.width),
-			    (noLib.getPreferredSize().height<screenSize.height?noLib.getPreferredSize().height:screenSize.width));
-		    noLib.setVisible(true);
-		    libCombo.setSelectedIndex(0);
-		    return;		    
-	    } else if ( libCombo.getSelectedIndex()>0 ) {
-		    libViewer[libCombo.getSelectedIndex()-1].setVisible(true);
-		    libCombo.setSelectedIndex(0);
-		    return;
-	    }
+      theEditor.computePreferredSize();
     }
 
   }
@@ -702,7 +579,9 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
   // ---------------------------------------------------
   // Editor listener
   // ---------------------------------------------------
-  public void creationDone() {}
+  public void creationDone() {
+    statusLabel.setText(" ");
+  }
 
   public void selectionChanged() {
     int sz=theEditor.getSelectionLength();
@@ -728,7 +607,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     editToolAlignBottomBtn.setEnabled(sz>1);
     toolsAlignbottomMenuItem.setEnabled(sz>1);
     editSelectAllMenuItem.setEnabled(sz<theEditor.getObjectNumber());
-    editSelectNVMenuItem.setEnabled(sz<theEditor.getObjectNumber());
     editSelectNoneMenuItem.setEnabled(sz>0);
     viewsBrowseMenuItem.setEnabled(sz>0);
     toolsConvertPolyMenuItem.setEnabled(theEditor.canConvertToPolyline());
@@ -797,7 +675,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
   private void showPlayer() {
     int i;
     thePlayer.clearObjects();
-
+    
     // Duplicate global option
     thePlayer.setBackground(theEditor.getBackground());
 
@@ -809,7 +687,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
       thePlayer.addObject(p);
       if(p.isProgrammed())
         fpStr.append(p.getName() + " is programmed.\n");
-
+     
       /*
       p.addMouseListener(new JDMouseAdapter() {
         public void mouseReleased(JDMouseEvent e) {
@@ -860,46 +738,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     framePlayer.setVisible(true);
   }
 
-  private void showSimpleSynopticAppli()
-  {
-      if (theSynopticAppli != null)
-      {
-          theSynopticAppli.setVisible(false);
-          theSynopticAppli.stopSimpleSynopticAppli();
-          theSynopticAppli=null;
-      }
-      
-      theEditor.instantSave(".");
-      String  fileName = theEditor.getFileName();
-      if ((fileName == null) || (fileName.length() == 0)) return;
-      
-      java.io.File  f = new java.io.File(fileName);
-      String        absolutePathName = null;
-      try
-      {
-          absolutePathName = f.getAbsolutePath();
-      }
-      catch (Exception ex)
-      {
-          return;
-      }
-      
-      if ((absolutePathName==null) || (absolutePathName.length()==0))
-          return;
-      
-      theSynopticAppli = new SimpleSynopticAppli(absolutePathName);
-      theSynopticAppli.addWindowListener(
-            new java.awt.event.WindowAdapter()
-            {
-                @Override
-                public void windowClosed(java.awt.event.WindowEvent evt)
-                {
-                    theSynopticAppli = null;
-                }
-            });
-  }
-
- 
   /** Ask to save if some modifications are still unsaved then exit the application. Called
    * when the file exit menu is selected or when the frame is closed */
   public void exitApp() {
@@ -937,24 +775,15 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
    *   jde.setVisible(true);
    * }
    </pre>
-   * @param args Filename to be loaded
+   * @param args Not yet used
    */
   public static void main(String[] args) {
     final JDrawEditor ed = new JDrawEditor(JDrawEditor.MODE_EDIT);
     final JDrawEditor py = new JDrawEditor(JDrawEditor.MODE_PLAY);
     final JDrawEditorFrame jde = new JDrawEditorFrame();
-    jde.setAppTitle("JDraw Editor 1.13");
+    jde.setAppTitle("JDraw Editor 1.5");
     jde.setEditor(ed);
     jde.setPlayer(py);
-    jde.setLibraries(null);
-    if(args.length==1) {
-      try {
-        ed.loadFile(args[0]);
-      } catch (IOException e) {
-        JOptionPane.showMessageDialog(null,"Error, cannot load " + args[0] + "\n" + e.getMessage(),
-                                      "JDrawEditor",JOptionPane.ERROR_MESSAGE);
-      }
-    }
     ATKGraphicsUtils.centerFrameOnScreen(jde);
     jde.setVisible(true);
   }

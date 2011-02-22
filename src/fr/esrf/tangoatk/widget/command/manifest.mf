@@ -16,9 +16,3 @@ Java-Bean: True
 Name: fr/esrf/tangoatk/widget/command/OptionComboCommandViewer.class
 Java-Bean: True
 
-Name: fr/esrf/tangoatk/widget/command/ConfirmCommandViewer.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/command/GroupCommandViewer.class
-Java-Bean: True
-

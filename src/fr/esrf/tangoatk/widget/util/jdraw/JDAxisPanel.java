@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /** A panel for JDAxis private properties */
 package fr.esrf.tangoatk.widget.util.jdraw;
 
@@ -49,8 +27,6 @@ class JDAxisPanel extends JPanel implements ActionListener,ChangeListener {
   private JLabel fontLabel;
   private JButton fontBtn;
 
-  private JLabel   tickSpacingLabel;
-  private JSpinner tickSpacingSpinner;
   private JLabel   tickWidthLabel;
   private JSpinner tickWidthSpinner;
   private JCheckBox tickCenterCheckBox;
@@ -154,36 +130,24 @@ class JDAxisPanel extends JPanel implements ActionListener,ChangeListener {
     tickPanel.setBorder(JDUtils.createTitleBorder("Axis tick"));
     tickPanel.setBounds(5,232,370,54);
 
-    tickCenterCheckBox = new JCheckBox("Center");
-    tickCenterCheckBox.setFont(JDUtils.labelFont);
-    tickCenterCheckBox.setForeground(JDUtils.labelColor);
-    tickCenterCheckBox.setBounds(10, 20, 100, 25);
-    tickCenterCheckBox.addActionListener(this);
-    tickPanel.add(tickCenterCheckBox);
-
-    tickSpacingLabel = new JLabel("Spacing");
-    tickSpacingLabel.setHorizontalAlignment(JLabel.RIGHT);
-    tickSpacingLabel.setFont(JDUtils.labelFont);
-    tickSpacingLabel.setForeground(JDUtils.labelColor);
-    tickSpacingLabel.setBounds(110, 20, 60, 25);
-    tickPanel.add(tickSpacingLabel);
-
-    tickSpacingSpinner = new JSpinner();
-    tickSpacingSpinner.addChangeListener(this);
-    tickSpacingSpinner.setBounds(175, 20, 60, 25);
-    tickPanel.add(tickSpacingSpinner);
-
     tickWidthLabel = new JLabel("Width");
     tickWidthLabel.setHorizontalAlignment(JLabel.RIGHT);
     tickWidthLabel.setFont(JDUtils.labelFont);
     tickWidthLabel.setForeground(JDUtils.labelColor);
-    tickWidthLabel.setBounds(235, 20, 60, 25);
+    tickWidthLabel.setBounds(150, 20, 145, 25);
     tickPanel.add(tickWidthLabel);
 
     tickWidthSpinner = new JSpinner();
     tickWidthSpinner.addChangeListener(this);
     tickWidthSpinner.setBounds(300, 20, 60, 25);
     tickPanel.add(tickWidthSpinner);
+
+    tickCenterCheckBox = new JCheckBox("Center");
+    tickCenterCheckBox.setFont(JDUtils.labelFont);
+    tickCenterCheckBox.setForeground(JDUtils.labelColor);
+    tickCenterCheckBox.setBounds(10, 20, 120, 25);
+    tickCenterCheckBox.addActionListener(this);
+    tickPanel.add(tickCenterCheckBox);
 
     add(tickPanel);
 
@@ -200,7 +164,6 @@ class JDAxisPanel extends JPanel implements ActionListener,ChangeListener {
 
     minText = new JTextField();
     minText.setEditable(true);
-    minText.setMargin(JDUtils.zMargin);
     minText.setFont(JDUtils.labelFont);
     minText.setBounds(45, 20, 60, 24);
     minText.addActionListener(this);
@@ -214,7 +177,6 @@ class JDAxisPanel extends JPanel implements ActionListener,ChangeListener {
 
     maxText = new JTextField();
     maxText.setEditable(true);
-    maxText.setMargin(JDUtils.zMargin);
     maxText.setFont(JDUtils.labelFont);
     maxText.setBounds(145, 20, 60, 24);
     maxText.addActionListener(this);
@@ -254,7 +216,6 @@ class JDAxisPanel extends JPanel implements ActionListener,ChangeListener {
 
       SpinnerNumberModel nullModel = new SpinnerNumberModel(0, 0, 0, 0);
       tickWidthSpinner.setModel(nullModel);
-      tickSpacingSpinner.setModel(nullModel);
 
       orientationCombo.setSelectedIndex(-1);
       labelCombo.setSelectedIndex(-1);
@@ -277,12 +238,6 @@ class JDAxisPanel extends JPanel implements ActionListener,ChangeListener {
       SpinnerNumberModel spModel = new SpinnerNumberModel(value, min, max, step);
       tickWidthSpinner.setModel(spModel);
 
-      value = new Integer(p.getTickSpacing());
-      min = new Integer(1);
-      max = new Integer(1000);
-      step = new Integer(1);
-      SpinnerNumberModel spcModel = new SpinnerNumberModel(value, min, max, step);
-      tickSpacingSpinner.setModel(spcModel);
 
       orientationCombo.setSelectedIndex(p.getOrientation());
       labelCombo.setSelectedIndex(p.getLabelPos());
@@ -400,12 +355,7 @@ class JDAxisPanel extends JPanel implements ActionListener,ChangeListener {
       v = (Integer) tickWidthSpinner.getValue();
       for (i = 0; i < allObjects.length; i++)
         allObjects[i].setTickWidth(v.intValue());
-      invoker.setNeedToSave(true,"Change tick length");
-    } else if (src == tickSpacingSpinner) {
-      v = (Integer) tickSpacingSpinner.getValue();
-      for (i = 0; i < allObjects.length; i++)
-        allObjects[i].setTickSpacing(v.intValue());
-      invoker.setNeedToSave(true,"Change tick spacing");
+      invoker.setNeedToSave(true,"Change axis tick");
     }
     repaintObjects();
 

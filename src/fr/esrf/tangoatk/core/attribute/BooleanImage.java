@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 // File:          BooleanImage.java
 // Created:       2005-02-03 10:45:00, poncet
 // By:            <poncet@esrf.fr>
@@ -61,7 +39,7 @@ public class BooleanImage extends AAttribute
       try
       {
 	  checkDimensions(bImage);
-	  insert(bImage);
+	  insert(imageHelper.flatten(bImage));
 	  writeAtt();
 	  imageHelper.fireImageValueChanged(bImage, System.currentTimeMillis());
       }
@@ -76,9 +54,9 @@ public class BooleanImage extends AAttribute
   }
   
   
-  void insert(boolean[][] bImg)
+  void insert(boolean[] bArr)
   {
-      imageHelper.insert(bImg);
+      imageHelper.insert(bArr);
   }
 
 
@@ -89,9 +67,7 @@ public class BooleanImage extends AAttribute
       
       
       if (skippingRefresh) return;
-
-      refreshCount++;
-      try
+      try 
       {
 	  try 
 	  {
@@ -119,47 +95,9 @@ public class BooleanImage extends AAttribute
 	  System.out.println("BooleanImage.refresh()------------------------------------------------");
       }
   }
-
-  public void dispatch(DeviceAttribute attValue) {
-
-    if (skippingRefresh) return;
-    refreshCount++;
-    try {
-      try {
-        // symetric with refresh
-        if (attValue == null) return;
-        attribute = attValue;
-
-        setState(attValue);
-        timeStamp = attValue.getTimeValMillisSec();        
-
-        // Retreive the read value for the attribute
-        imageValue = imageHelper.getBooleanImageValue(attValue);
-
-        // Fire valueChanged
-        fireValueChanged(imageValue);
-      } catch (DevFailed e) {
-
-        dispatchError(e);
-
-      }
-    } catch (Exception e) {
-      // Code failure
-      System.out.println("BooleanImage.dispatch() Exception caught ------------------------------");
-      e.printStackTrace();
-      System.out.println("BooleanImage.dispatch()------------------------------------------------");
-    }
-
-  }
-
-  public void dispatchError(DevFailed e) {
-
-    imageValue = null;
-    // Fire error event
-    readAttError(e.getMessage(), new AttributeReadException(e));
-
-  }
-
+  
+  
+  
 
   public boolean isWritable()
   {
@@ -185,29 +123,26 @@ public class BooleanImage extends AAttribute
   // Implement the method of ITangoPeriodicListener
   public void periodic (TangoPeriodicEvent evt) 
   {
-      periodicCount++;
       DeviceAttribute     da=null;
-      long t0 = System.currentTimeMillis();
-
-      trace(DeviceFactory.TRACE_PERIODIC_EVENT, "BooleanImage.periodic method called for " + getName(), t0);
+//System.out.println("BooleanImage.periodic() called for : " + getName() );
+      
       try
       {
           da = evt.getValue();
-          trace(DeviceFactory.TRACE_PERIODIC_EVENT, "BooleanImage.periodicEvt.getValue(" + getName() + ") success", t0);
       }
       catch (DevFailed  dfe)
       {
-          trace(DeviceFactory.TRACE_PERIODIC_EVENT, "BooleanImage.periodicEvt.getValue(" + getName() + ") failed, caught DevFailed", t0);
+//System.out.println("BooleanImage.periodic() caught DevFailed for : " + getName());
           if (dfe.errors[0].reason.equals("API_EventTimeout")) //heartbeat error
 	  {
-              trace(DeviceFactory.TRACE_PERIODIC_EVENT, "BooleanImage.periodicEvt.getValue(" + getName() + ") failed, got heartbeat error", t0);
+//System.out.println("BooleanImage.periodic() caught heartbeat DevFailed : " + getName());
 	      // Tango error
 	      // Fire error event
 	      readAttError(dfe.getMessage(), new AttributeReadException(dfe));
 	  }
 	  else // For the moment the behaviour for all DevFailed is the same
 	  {
-              trace(DeviceFactory.TRACE_PERIODIC_EVENT, "BooleanImage.periodicEvt.getValue(" + getName() + ") failed, got other error", t0);
+//System.out.println("BooleanImage.periodic() caught other DevFailed : " + getName() );
 	      // Tango error
 	      // Fire error event
 	      readAttError(dfe.getMessage(), new AttributeReadException(dfe));
@@ -216,7 +151,6 @@ public class BooleanImage extends AAttribute
       }
       catch (Exception e) // Code failure
       {
-          trace(DeviceFactory.TRACE_PERIODIC_EVENT, "BooleanImage.periodicEvt.getValue(" + getName() + ") failed, caught Exception, code failure", t0);
 	  System.out.println("BooleanImage.periodic.getValue() Exception caught ------------------------------");
 	  e.printStackTrace();
 	  System.out.println("BooleanImage.periodic.getValue()------------------------------------------------");
@@ -260,29 +194,26 @@ public class BooleanImage extends AAttribute
   // Implement the method of ITangoChangeListener
   public void change (TangoChangeEvent evt) 
   {
-      changeCount++;
       DeviceAttribute     da=null;
-      long t0 = System.currentTimeMillis();
-
-      trace(DeviceFactory.TRACE_CHANGE_EVENT, "BooleanImage.change method called for " + getName(), t0);
+//System.out.println("BooleanImage.change() called for : " + getName() );
+      
       try
       {
           da = evt.getValue();
-          trace(DeviceFactory.TRACE_CHANGE_EVENT, "BooleanImage.changeEvt.getValue(" + getName() + ") success", t0);
       }
       catch (DevFailed  dfe)
       {
-          trace(DeviceFactory.TRACE_CHANGE_EVENT, "BooleanImage.changeEvt.getValue(" + getName() + ") failed, caught DevFailed", t0);
+//System.out.println("BooleanImage.change() caught DevFailed for : " + getName());
           if (dfe.errors[0].reason.equals("API_EventTimeout")) //heartbeat error
 	  {
-              trace(DeviceFactory.TRACE_CHANGE_EVENT, "BooleanImage.changeEvt.getValue(" + getName() + ") failed, got heartbeat error", t0);
+//System.out.println("BooleanImage.change() caught heartbeat DevFailed : " + getName());
 	      // Tango error
 	      // Fire error event
 	      readAttError(dfe.getMessage(), new AttributeReadException(dfe));
 	  }
 	  else // For the moment the behaviour for all DevFailed is the same
 	  {
-              trace(DeviceFactory.TRACE_CHANGE_EVENT, "BooleanImage.changeEvt.getValue(" + getName() + ") failed, got other error", t0);
+//System.out.println("BooleanImage.change() caught other DevFailed : " + getName() );
 	      // Tango error
 	      // Fire error event
 	      readAttError(dfe.getMessage(), new AttributeReadException(dfe));
@@ -291,7 +222,6 @@ public class BooleanImage extends AAttribute
       }
       catch (Exception e) // Code failure
       {
-          trace(DeviceFactory.TRACE_CHANGE_EVENT, "BooleanImage.changeEvt.getValue(" + getName() + ") failed, caught Exception, code failure", t0);
 	  System.out.println("BooleanImage.change.getValue() Exception caught ------------------------------");
 	  e.printStackTrace();
 	  System.out.println("BooleanImage.change.getValue()------------------------------------------------");
@@ -327,12 +257,6 @@ public class BooleanImage extends AAttribute
           } // end of catch
       }
       
-  }
-
-
-  private void trace(int level,String msg,long time)
-  {
-    DeviceFactory.getInstance().trace(level,msg,time);
   }
   
   

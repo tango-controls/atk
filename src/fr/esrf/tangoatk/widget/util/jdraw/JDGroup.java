@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /**
  * JDraw Group graphic object
  */
@@ -85,16 +63,6 @@ public class JDGroup extends JDRectangular {
   JDGroup(JLXObject jlxObj, Vector o) {
     initDefault();
     loadObject(jlxObj);
-    children = o;
-    summit = new Point.Double[8];
-    createSummit();
-    computeSummitCoordinates();
-    updateShape();
-  }
-
-  JDGroup(LXObject lxObj, Vector o) {
-    initDefault();
-    loadObject(lxObj);
     children = o;
     summit = new Point.Double[8];
     createSummit();
@@ -324,12 +292,6 @@ public class JDGroup extends JDRectangular {
 
   }
 
-  void setParent(JDrawEditor p) {
-    super.setParent(p);
-    for(int i=0;i<getChildrenNumber();i++) 
-      getChildAt(i).setParent(p);    
-  }
-  
   // -----------------------------------------------------------
   // Overrided Property
   // -----------------------------------------------------------
@@ -397,17 +359,6 @@ public class JDGroup extends JDRectangular {
   }
 
   /**
-   * Sets the anti aliasing for all objects of this group
-   * @param alias Anti alias
-   * @see JDObject#setAntiAlias
-   */
-  public void setAntiAlias(boolean alias) {
-    antiAlias = alias;
-    for (int i = 0; i < children.size(); i++)
-      ((JDObject) children.get(i)).setAntiAlias(alias);
-  }
-
-  /**
    * Sets the line width of this group, Apply it on all children.
    * @param w Line width.
    * @see JDObject#setLineWidth
@@ -427,16 +378,6 @@ public class JDGroup extends JDRectangular {
     isShadowed = b;
     for (int i = 0; i < children.size(); i++)
       ((JDObject) children.get(i)).setShadow(b);
-  }
-
-  /**
-   * Shows or hides this object, Apply it on all children.
-   * @param b True to show, false otherwise.
-   */
-  public void setVisible(boolean b) {
-    visible = b;
-    for (int i = 0; i < children.size(); i++)
-      ((JDObject) children.get(i)).setVisible(b);
   }
 
   /**
@@ -781,23 +722,18 @@ public class JDGroup extends JDRectangular {
   // -----------------------------------------------------------
   void saveObject(FileWriter f, int level) throws IOException {
 
-    // Do not save empty group
-    if (children.size() > 0) {
+    String decal = saveObjectHeader(f, level);
 
-      String decal = saveObjectHeader(f, level);
+    String to_write = decal + "children: {\n";
+    f.write(to_write, 0, to_write.length());
 
-      String to_write = decal + "children: {\n";
-      f.write(to_write, 0, to_write.length());
+    for (int i = 0; i < children.size(); i++)
+      ((JDObject) children.get(i)).saveObject(f,level+2);
 
-      for (int i = 0; i < children.size(); i++)
-        ((JDObject) children.get(i)).saveObject(f, level + 2);
+    to_write = decal + "}\n";
+    f.write(to_write, 0, to_write.length());
 
-      to_write = decal + "}\n";
-      f.write(to_write, 0, to_write.length());
-
-      closeObjectHeader(f, level);
-
-    }
+    closeObjectHeader(f, level);
 
   }
 
@@ -832,15 +768,13 @@ public class JDGroup extends JDRectangular {
   // Undo buffer
   // -----------------------------------------------------------
   UndoPattern getUndoPattern() {
-
     UndoPattern u = new UndoPattern(UndoPattern._JDGroup);
     fillUndoPattern(u);
     u.gChildren = new Vector();
-    for(int i=0;i<children.size();i++)
+    for(int i=0;i<children.size();i++) {
       u.gChildren.add( ((JDObject)children.get(i)).getUndoPattern() );
-
+    }
     return u;
-
   }
 
   JDGroup(UndoPattern e) {
@@ -850,7 +784,43 @@ public class JDGroup extends JDRectangular {
     children=new Vector();
     for(int i=0;i<e.gChildren.size();i++) {
       UndoPattern u = (UndoPattern)e.gChildren.get(i);
-      UndoBuffer.rebuildObject(u,children);
+      switch(u.JDclass) {
+        case UndoPattern._JDEllipse:
+          children.add(new JDEllipse(u));
+          break;
+        case UndoPattern._JDGroup:
+          children.add(new JDGroup(u));
+          break;
+        case UndoPattern._JDLabel:
+          children.add(new JDLabel(u));
+          break;
+        case UndoPattern._JDLine:
+          children.add(new JDLine(u));
+          break;
+        case UndoPattern._JDPolyline:
+          children.add(new JDPolyline(u));
+          break;
+        case UndoPattern._JDRectangle:
+          children.add(new JDRectangle(u));
+          break;
+        case UndoPattern._JDRoundRectangle:
+          children.add(new JDRoundRectangle(u));
+          break;
+        case UndoPattern._JDSpline:
+          children.add(new JDSpline(u));
+          break;
+        case UndoPattern._JDImage:
+          children.add(new JDImage(u));
+          break;
+        case UndoPattern._JDSwingObject:
+          children.add(new JDSwingObject(u));
+          break;
+        case UndoPattern._JDAxis:
+          children.add(new JDAxis(u));
+          break;
+        default:
+          System.out.println("!!! JDGroup.JDGroup() : WARNING Undo failure !!!");
+      }
     }
 
     computeGroupBoundRect();

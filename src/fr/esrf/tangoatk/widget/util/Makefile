@@ -3,7 +3,6 @@ BEANINFO= JSmoothLabelBeanInfo.java            \
 include ../../../../../../.make-include
 
 ALL = $(TARGET)/UIManagerHelper.class       \
-      $(TARGET)/ATKDiagnostic.class         \
       $(TARGET)/ButtonBar.class             \
       $(TARGET)/ATKMenuBar.class            \
       $(TARGET)/Splash.class                \
@@ -37,22 +36,12 @@ ALL = $(TARGET)/UIManagerHelper.class       \
       $(TARGET)/Gradient.class              \
       $(TARGET)/JGradientViewer.class       \
       $(TARGET)/JGradientEditor.class       \
+      $(TARGET)/JTableRow.class             \
       $(TARGET)/JImage.class                \
       $(TARGET)/ThreeStateSwitch.class      \
-      $(TARGET)/JSmoothDelayDialog.class    \
-      $(TARGET)/LoadingDialog.class        \
-      $(TARGET)/JImageJ.class        \
-      $(TARGET)/AdvancedImagePlus.class        \
-      $(TARGET)/MaskUndoableEdit.class        \
-      $(TARGET)/RoiDefaultUndoableEdit.class \
-      $(TARGET)/JFileChooserFilter.class \
-      $(TARGET)/EditableTableRowModel.class \
-      $(TARGET)/EditableJTableRow.class \
-      $(TARGET)/J3DTrendListener.class \
-      $(TARGET)/J3DTrend.class
-      
+      $(TARGET)/JSmoothDelayDialog.class
 
-all: gutils uchart itlk utils ujdraw ujgl3dchart icons beaninfo
+all: gutils uchart ujdraw itlk utils icons beaninfo
 
 utils: $(ALL)
 	$(J)
@@ -60,10 +49,7 @@ utils: $(ALL)
 gutils:	$(TARGET)/ATKGraphicsUtils.class \
         $(TARGET)/ATKConstant.class      \
         $(TARGET)/JSmoothLabel.class     \
-	$(TARGET)/TableRowModel.class    \
-        $(TARGET)/JTableRow.class        \
-        $(TARGET)/ATKFontChooser.class	\
-	$(TARGET)/MultiExtFileFilter.class 
+        $(TARGET)/ATKFontChooser.class
 	$(J)
 
 run: all
@@ -92,9 +78,6 @@ df: 	all
 
 uchart:
 	(cd chart && $(MAKE) all)
-
-ujgl3dchart:
-	(cd jgl3dchart && $(MAKE) all)
 
 itlk:
 	(cd interlock && $(MAKE) all)

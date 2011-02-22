@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 package fr.esrf.tangoatk.widget.util.jdraw;
 
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
@@ -77,7 +55,6 @@ public class JDAxis extends JDRectangular {
   static private double minDefault = 0.0;
   static private double maxDefault = 100.0;
   static private boolean invertedDefault = true;
-  static private int tickSpacingDefault = 10;
 
   // Axis parametres
   private Font    theFont;
@@ -88,7 +65,6 @@ public class JDAxis extends JDRectangular {
   private int     labelPos;
   private int     scale;
   private int     format;
-  private int     tickSpacing;
   private double  min;
   private double  max;
 
@@ -125,7 +101,6 @@ public class JDAxis extends JDRectangular {
     orientation = e.orientation;
     tickCentered = e.tickCentered;
     tickLength = e.tickLength;
-    tickSpacing = e.tickSpacing;
     labelPos = e.labelPos;
     scale = e.scale;
     min = e.min;
@@ -152,7 +127,6 @@ public class JDAxis extends JDRectangular {
     scale = scaleDefault;
     format = formatDefault;
     inverted = invertedDefault;
-    tickSpacing = tickSpacingDefault;
   }
 
   public JDObject copy(int x, int y) {
@@ -162,10 +136,9 @@ public class JDAxis extends JDRectangular {
   public void paint(JDrawEditor parent,Graphics g) {
 
     if (!visible) return;
-    Graphics2D g2 = (Graphics2D) g;
-    prepareRendering(g2);
     super.paint(parent,g);
 
+    Graphics2D g2 = (Graphics2D) g;
     int tr = 0;
     boolean clipNeeded = false;
     Shape oldClip = null;
@@ -180,7 +153,7 @@ public class JDAxis extends JDRectangular {
 
     if (orientation == VERTICAL_AXIS) {
 
-      theAxis.measureAxis(frc, 0, boundRect.height - 1);
+      theAxis.measureAxis(g, frc, 0, boundRect.height - 1);
 
       // Do we need to clip
       int tickLgth = theAxis.getTickLength();
@@ -201,7 +174,7 @@ public class JDAxis extends JDRectangular {
 
     } else {
 
-      theAxis.measureAxis(frc,  boundRect.width - 1, 0);
+      theAxis.measureAxis(g, frc,  boundRect.width - 1, 0);
 
       // Do we need to clip
       int tickLgth = theAxis.getTickLength();
@@ -209,7 +182,7 @@ public class JDAxis extends JDRectangular {
       clipNeeded = (boundRect.height <= (theAxis.getThickness() + tickLgth));
       if (clipNeeded) {
         oldClip = g.getClip();
-        int fo = theAxis.getFontOverWidth();
+        int fo = theAxis.getFontOverWidht();
         g.setClip(boundRect.x - fo, boundRect.y, boundRect.width + 2*fo, boundRect.height);
       }
 
@@ -228,7 +201,7 @@ public class JDAxis extends JDRectangular {
     Rectangle r = super.getRepaintRect();
     int tick = theAxis.getTickLength();
     if(tick<0) tick = 0;
-    int fo = theAxis.getFontOverWidth();
+    int fo = theAxis.getFontOverWidht();
 
     if(orientation==VERTICAL_AXIS) {
       r.x      -= tick;
@@ -254,43 +227,43 @@ public class JDAxis extends JDRectangular {
 
     if (summit[0].x < summit[2].x) {
       if (summit[0].y < summit[6].y) {
-        ptsx[0] = (int) (summit[0].x+0.5);
-        ptsy[0] = (int) (summit[0].y+0.5);
-        ptsx[1] = (int) (summit[2].x+0.5);
-        ptsy[1] = (int) (summit[2].y+0.5);
-        ptsx[2] = (int) (summit[4].x+0.5);
-        ptsy[2] = (int) (summit[4].y+0.5);
-        ptsx[3] = (int) (summit[6].x+0.5);
-        ptsy[3] = (int) (summit[6].y+0.5);
+        ptsx[0] = (int) summit[0].x;
+        ptsy[0] = (int) summit[0].y;
+        ptsx[1] = (int) summit[2].x;
+        ptsy[1] = (int) summit[2].y;
+        ptsx[2] = (int) summit[4].x;
+        ptsy[2] = (int) summit[4].y;
+        ptsx[3] = (int) summit[6].x;
+        ptsy[3] = (int) summit[6].y;
       } else {
-        ptsx[0] = (int) (summit[6].x+0.5);
-        ptsy[0] = (int) (summit[6].y+0.5);
-        ptsx[1] = (int) (summit[4].x+0.5);
-        ptsy[1] = (int) (summit[4].y+0.5);
-        ptsx[2] = (int) (summit[2].x+0.5);
-        ptsy[2] = (int) (summit[2].y+0.5);
-        ptsx[3] = (int) (summit[0].x+0.5);
-        ptsy[3] = (int) (summit[0].y+0.5);
+        ptsx[0] = (int) summit[6].x;
+        ptsy[0] = (int) summit[6].y;
+        ptsx[1] = (int) summit[4].x;
+        ptsy[1] = (int) summit[4].y;
+        ptsx[2] = (int) summit[2].x;
+        ptsy[2] = (int) summit[2].y;
+        ptsx[3] = (int) summit[0].x;
+        ptsy[3] = (int) summit[0].y;
       }
     } else {
       if (summit[0].y < summit[6].y) {
-        ptsx[0] = (int) (summit[2].x+0.5);
-        ptsy[0] = (int) (summit[2].y+0.5);
-        ptsx[1] = (int) (summit[0].x+0.5);
-        ptsy[1] = (int) (summit[0].y+0.5);
-        ptsx[2] = (int) (summit[6].x+0.5);
-        ptsy[2] = (int) (summit[6].y+0.5);
-        ptsx[3] = (int) (summit[4].x+0.5);
-        ptsy[3] = (int) (summit[4].y+0.5);
+        ptsx[0] = (int) summit[2].x;
+        ptsy[0] = (int) summit[2].y;
+        ptsx[1] = (int) summit[0].x;
+        ptsy[1] = (int) summit[0].y;
+        ptsx[2] = (int) summit[6].x;
+        ptsy[2] = (int) summit[6].y;
+        ptsx[3] = (int) summit[4].x;
+        ptsy[3] = (int) summit[4].y;
       } else {
-        ptsx[0] = (int) (summit[4].x+0.5);
-        ptsy[0] = (int) (summit[4].y+0.5);
-        ptsx[1] = (int) (summit[6].x+0.5);
-        ptsy[1] = (int) (summit[6].y+0.5);
-        ptsx[2] = (int) (summit[0].x+0.5);
-        ptsy[2] = (int) (summit[0].y+0.5);
-        ptsx[3] = (int) (summit[2].x+0.5);
-        ptsy[3] = (int) (summit[2].y+0.5);
+        ptsx[0] = (int) summit[4].x;
+        ptsy[0] = (int) summit[4].y;
+        ptsx[1] = (int) summit[6].x;
+        ptsy[1] = (int) summit[6].y;
+        ptsx[2] = (int) summit[0].x;
+        ptsy[2] = (int) summit[0].y;
+        ptsx[3] = (int) summit[2].x;
+        ptsy[3] = (int) summit[2].y;
       }
     }
 
@@ -315,7 +288,6 @@ public class JDAxis extends JDRectangular {
 
       }
 
-      theAxis.setTickSpacing((double)tickSpacing);
       theAxis.setTickLength(-tickLength);
       theAxis.setScale(scale);
       theAxis.setFont(theFont);
@@ -392,28 +364,10 @@ public class JDAxis extends JDRectangular {
 
   /**
    * Returns the current axis tick width.
-   * @see #setTickWidth
+    * @see #setTickWidth
    */
   public int getTickWidth() {
     return tickLength;
-  }
-
-  /**
-   * Sets the minimum tick spacing (in pixel).
-   * Allows to control the number of generated labels.
-   * @param spacing Minimum tick spacing
-   */
-  public void setTickSpacing(int spacing) {
-    tickSpacing = spacing;
-    updateShape();
-  }
-
-  /**
-   * Returns the current axis spacing (in pixel).
-   * @see #setTickSpacing
-   */
-  public int getTickSpacing() {
-    return tickSpacing;
   }
 
   /**
@@ -575,11 +529,6 @@ public class JDAxis extends JDRectangular {
       f.write(to_write, 0, to_write.length());
     }
 
-    if (tickSpacing != tickSpacingDefault) {
-      to_write = decal + "tickSpacing:" + tickSpacing + "\n";
-      f.write(to_write, 0, to_write.length());
-    }
-
     if (tickLength != tickLengthDefault) {
       to_write = decal + "tickLength:" + tickLength + "\n";
       f.write(to_write, 0, to_write.length());
@@ -635,8 +584,6 @@ public class JDAxis extends JDRectangular {
         inverted = f.parseBoolean();
       } else if (propName.equals("tickLength")) {
         tickLength = (int) f.parseDouble();
-      } else if (propName.equals("tickSpacing")) {
-        tickSpacing = (int) f.parseDouble();
       } else if (propName.equals("labelPos")) {
         labelPos = (int) f.parseDouble();
       } else if (propName.equals("orientation")) {
@@ -671,7 +618,6 @@ public class JDAxis extends JDRectangular {
     u.fSize = theFont.getSize();
     u.tickCentered = tickCentered;
     u.arrowWidth = tickLength;
-    u.cornerWidth = tickSpacing;
     u.vAlignment = labelPos;
     u.arrowMode = orientation;
     u.arcType = scale;
@@ -689,7 +635,6 @@ public class JDAxis extends JDRectangular {
     theFont = new Font(e.fName,e.fStyle,e.fSize);
     tickCentered = e.tickCentered;
     tickLength = e.arrowWidth;
-    tickSpacing = e.cornerWidth;
     labelPos = e.vAlignment;
     orientation = e.arrowMode;
     scale = e.arcType;

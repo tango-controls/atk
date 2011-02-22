@@ -36,16 +36,20 @@ ATKSRC=$ATKHOME/src
 ATKLIB=$ATKHOME/lib
 ATKDOC=$ATKHOME/doc
 TANGOHOST=TANGO_HOST=$TANGO_HOST
-TANGOHOME=/segfs/tango/release
-TANGOLIB=$TANGOHOME/java/lib
+TANGOHOME=/segfs/tango
+TANGOLIB=$TANGOHOME/lib/java
 TANGO=$TANGOLIB/TangORB.jar
-PRINTF=$ATKLIB/printf.jar
-IMAGEJ=$ATKLIB/ij.jar
-JEP=$ATKLIB/jep.jar:$ATKLIB/jepext.jar
-JOGL=$ATKLIB/jogl.jar:$ATKLIB/gluegen-rt.jar
+TANGOTEST=$LIB/
+RT=$JAVA_HOME/jre/lib/rt.jar
 JTARGETDIR=$ATKLIB	
+JUNIT=$TANGOLIB/junit.jar
+PRINTF=$TANGOLIB/printf.jar
+JCCHART=$TANGOLIB/jcchart.jar
 BEANBOX=$JAVA_HOME/beans/beanbox/classes:$JAVA_HOME/beans/infobus.jar:$JAVA_HOME/beans/lib/methodtracer.jar
-CLASSPATH=$TANGO:$PRINTF:$JEP:$IMAGEJ:$JOGL:$ATKLIB:$BEANBOX:.;export CLASSPATH
+EXTENSIONS=$TANGOLIB/jscrollpane.jar
+JLOOX=/segfs/graphics/JLoox/esrfSynoptic/jlooxEsrfSynopt.jar
+ATKPANEL=/segfs/tango/bin/java/atkpanel.jar
+CLASSPATH=$RT:$TANGO:$ATKLIB:$JUNIT:$TANGOTEST:$JCCHART:$BEANBOX:$PRINTF:$JLOOX:$ATKPANEL:$EXTENSIONS:.;export CLASSPATH
 
 AC_SUBST(ATKSRC)
 AC_SUBST(TANGOHOME)

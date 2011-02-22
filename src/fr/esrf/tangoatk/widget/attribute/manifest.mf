@@ -1,3 +1,6 @@
+Name: fr/esrf/tangoatk/widget/attribute/NumberScalarViewer.class
+Java-Bean: True
+
 Name: fr/esrf/tangoatk/widget/attribute/StringScalarViewer.class
 Java-Bean: True
 
@@ -22,7 +25,7 @@ Java-Bean: True
 Name: fr/esrf/tangoatk/widget/attribute/SimpleStringSpectrumViewer.class
 Java-Bean: True
 
-Name: fr/esrf/tangoatk/widget/attribute/NumberSpectrumViewer.class
+Name: fr/esrf/tangoatk/widget/attribute/NumberSpectrumPeakViewer.class
 Java-Bean: True
 
 Name: fr/esrf/tangoatk/widget/attribute/NumberScalarProgressBar.class
@@ -38,53 +41,5 @@ Name: fr/esrf/tangoatk/widget/attribute/BooleanScalarCheckBoxViewer.class
 Java-Bean: True
 
 Name: fr/esrf/tangoatk/widget/attribute/StatusViewer.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/attribute/NumberScalarWheelEditor.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/attribute/NumberScalarViewer.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/attribute/BooleanScalarComboEditor.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/attribute/TabbedPaneDevStateScalarViewer.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/attribute/StringImageTableViewer.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/attribute/MultiNumberSpectrumViewer.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/attribute/NumberScalarSetPanel.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/attribute/StringScalarSetPanel.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/attribute/EnumScalarSetPanel.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/attribute/BooleanScalarSetPanel.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/attribute/ScalarAttributeSetPanel.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/attribute/MultiScalarTableViewer.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/attribute/NumberSpectrumItemTrend.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/attribute/DevStateSpectrumViewer.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/attribute/SimpleStateViewer.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/attribute/NumberSpectrumStateBarChartViewer.class
 Java-Bean: True
 

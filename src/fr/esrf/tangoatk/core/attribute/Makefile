@@ -1,8 +1,7 @@
 include ../../../../../../.make-include
 
 
-ALL = $(TARGET)/ANumber.class \
-      $(TARGET)/NumberImage.class \
+ALL = $(TARGET)/NumberImage.class \
       $(TARGET)/NumberSpectrum.class \
       $(TARGET)/NumberScalar.class \
       $(TARGET)/StringScalar.class \
@@ -13,26 +12,25 @@ ALL = $(TARGET)/ANumber.class \
       $(TARGET)/DoubleScalarHelper.class \
       $(TARGET)/LongScalarHelper.class \
       $(TARGET)/ShortScalarHelper.class \
-      $(TARGET)/UShortScalarHelper.class \
       $(TARGET)/DoubleSpectrumHelper.class \
       $(TARGET)/LongSpectrumHelper.class \
       $(TARGET)/ShortSpectrumHelper.class \
-      $(TARGET)/UShortSpectrumHelper.class \
       $(TARGET)/DoubleImageHelper.class \
       $(TARGET)/LongImageHelper.class \
       $(TARGET)/ShortImageHelper.class \
-      $(TARGET)/UShortImageHelper.class \
       $(TARGET)/StringAttributeHelper.class \
       $(TARGET)/AAttribute.class \
       $(TARGET)/InvalidAttribute.class \
       $(TARGET)/AttributeFactory.class \
-      $(TARGET)/PolledAttributeFactory.class \
       $(TARGET)/AAttributeHistory.class \
       $(TARGET)/NumberScalarHistory.class \
-      $(TARGET)/NumberSpectrumHistory.class \
       $(TARGET)/StringScalarHistory.class \
       $(TARGET)/StringSpectrum.class \
       $(TARGET)/StringSpectrumHelper.class \
+      $(TARGET)/NonAttrNumberSpectrum.class \
+      $(TARGET)/AttrFunctionSpectrum.class \
+      $(TARGET)/AttrDualSpectrum.class \
+      $(TARGET)/AttrVectorSpectrum.class \
       $(TARGET)/BooleanImageHelper.class \
       $(TARGET)/BooleanSpectrumHelper.class \
       $(TARGET)/BooleanScalarHelper.class \
@@ -41,23 +39,6 @@ ALL = $(TARGET)/ANumber.class \
       $(TARGET)/BooleanImage.class \
       $(TARGET)/DevStateScalarHelper.class \
       $(TARGET)/DevStateScalar.class \
-      $(TARGET)/UCharScalarHelper.class \
-      $(TARGET)/UCharSpectrumHelper.class \
-      $(TARGET)/UCharImageHelper.class \
-      $(TARGET)/FloatScalarHelper.class \
-      $(TARGET)/FloatSpectrumHelper.class \
-      $(TARGET)/FloatImageHelper.class \
-      $(TARGET)/RawImageHelper.class \
-      $(TARGET)/RawImage.class \
-      $(TARGET)/EnumScalarHelper.class \
-      $(TARGET)/EnumScalar.class \
-      $(TARGET)/StringImageHelper.class \
-      $(TARGET)/StringImage.class \
-      $(TARGET)/DevStateSpectrumHelper.class \
-      $(TARGET)/DevStateSpectrum.class \
-      $(TARGET)/ULongScalarHelper.class \
-      $(TARGET)/ULongSpectrumHelper.class \
-      $(TARGET)/ULongImageHelper.class \
 
 
 all: $(ALL)

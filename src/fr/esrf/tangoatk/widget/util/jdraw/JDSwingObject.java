@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /**
  * JDraw Swing graphic object
  */
@@ -34,10 +12,6 @@ import java.lang.reflect.Constructor;
 
 /** JDraw Swing graphic object. JDSwingObject allows a JComponent to be edited (and played)
  * within JDraw as if it is a JDObject. The JComponent must implements the JDrawable interface.
- * Implementing JDrawable for a Component is interresting if you want to make your component
- * available in the JDrawEditor. Adding a component for playing only can be done
- * by using the classic add(Component) method, no need here to be JDrawable ,however the add() method
- * shoud be called after initPlayer() or loadFile() is called.
  * Here is an example of a simple JDrawable JButton:<p>
  * <pre>
  public class MyJDButton extends JButton implements JDrawable {
@@ -136,10 +110,10 @@ public class JDSwingObject extends JDRectangular {
 
     if(swingComp!=null) {
       d = swingComp.getComponent().getPreferredSize();
-      if(d.width<16) d.width = 16;
-      if(d.height<16) d.height = 16;
+      if(d.width<8) d.width = 8;
+      if(d.height<8) d.height = 8;
     } else
-      d = new Dimension(16,16);
+      d = new Dimension(10,10);
 
     computeSummitCoordinates(x,y,d.width,d.height);
     updateShape();
@@ -179,53 +153,34 @@ public class JDSwingObject extends JDRectangular {
       return;
 
     Graphics2D g2 = (Graphics2D) g;
-    // No anti aliasing for SwingObject
-    antiAlias = false;
-    prepareRendering(g2);
 
-    // Ugly sequence to paint a JComponent on an arbitrary Graphics.
-    // Tips are welcome...
-    swingComp.getComponent().validate();
     SwingUtilities.paintComponent(g,swingComp.getComponent(),parent,boundRect);
     swingComp.getComponent().setBounds(boundRect);
+
+    // Paint line
+
+    if (lineWidth > 0) {
+      g.setColor(foreground);
+      BasicStroke bs = GraphicsUtils.createStrokeForLine(lineWidth, lineStyle);
+
+      if (bs != null) {
+        Stroke old = g2.getStroke();
+        g2.setStroke(bs);
+        g.drawPolygon(ptsx, ptsy, ptsx.length);
+        g2.setStroke(old);
+      } else {
+        g.drawPolygon(ptsx, ptsy, ptsx.length);
+      }
+    }
 
   }
 
   void setExtendedParam(String name,String value,boolean ignoreError) {
-    if(isFixedExtendedParam(name)) {
-      swingComp.setExtendedParam(name, value, !ignoreError);
-      // Some components may need refresh
-      super.setExtendedParam(name, swingComp.getExtendedParam(name));
-    } else {
-      super.setExtendedParam(name, value);
-    }
-  }
-
-  /**
-   * Returns true if the specified param is fixed. (coming from JDrawable)
-   * @param name Param name.
-   */
-  public boolean isFixedExtendedParam(String name) {
-    return getSwingExtensionIdx(name)>=0;
-  }
-
-  private int getSwingExtensionIdx(String name) {
-
-    int ret = -1;
-    if(swingComp!=null) {
-
-      String[] lst = swingComp.getExtensionList();
-      boolean found = false;
-      int i=0;
-      while(i<lst.length && !found) {
-        found = lst[i].equalsIgnoreCase(name);
-        if(!found) i++;
+    if (swingComp != null) {
+      if (swingComp.setExtendedParam(name, value, !ignoreError)) {
+        super.setExtendedParam(name, value);
       }
-      if(found) return i;
-
     }
-    return ret;
-
   }
 
   public void setExtendedParam(String name,String value) {
@@ -234,8 +189,15 @@ public class JDSwingObject extends JDRectangular {
 
   public void removeExtension(int idx) {
     if(swingComp!=null) {
+      String[] lst = swingComp.getExtensionList();
       String extName = getExtendedParamName(idx);
-      if(isFixedExtendedParam(extName)) {
+      boolean found = false;
+      int i=0;
+      while(i<lst.length && !found) {
+        found = lst[i].equalsIgnoreCase(extName);
+        if(!found) i++;
+      }
+      if(found) {
         // Cannot remove Swing extension
         System.out.println("JDSwingObject.removeExtension() : Warning, trying to remove JDrawable extension '"+extName+"'.");
         return;
@@ -586,11 +548,10 @@ public class JDSwingObject extends JDRectangular {
       Constructor  swingNew = swingClass.getConstructor(types);
       swingComp = (JDrawable)swingNew.newInstance(params);
       swingComp.initForEditing();
-      String[] extList = swingComp.getExtensionList();
 
       // Retrieve extension
       if (loadExtension) {
-
+        String[] extList = swingComp.getExtensionList();
         setExtensionList(extList);
         for (int i = 0; i < extList.length; i++) {
           super.setExtendedParam(i, swingComp.getExtendedParam(extList[i]));
@@ -610,18 +571,6 @@ public class JDSwingObject extends JDRectangular {
         } else if (b == etchedBevelBorder) {
           border = ETCHED_BORDER;
         }
-
-      } else {
-
-        // Check for new extensions
-        for(int i=0;i<extList.length;i++) {
-          if(!hasExtendedParam(extList[i])) {
-            // New extensions
-            addExtension(extList[i]);
-            super.setExtendedParam(extList[i], swingComp.getExtendedParam(extList[i]));
-          }
-        }
-
       }
 
     } catch (Exception e) {

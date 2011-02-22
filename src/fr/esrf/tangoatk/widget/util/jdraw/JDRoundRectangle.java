@@ -1,25 +1,3 @@
-/*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
 /**
  * User: Jean Luc
  * Date: Aug 9, 2003
@@ -164,14 +142,14 @@ public class JDRoundRectangle extends JDRectangular implements JDPolyConvert {
       //Build non rounded rect
       ptsx = new int[4];
       ptsy = new int[4];
-      ptsx[0] = (int) (summit[0].x+0.5);
-      ptsy[0] = (int) (summit[0].y+0.5);
-      ptsx[1] = (int) (summit[2].x+0.5);
-      ptsy[1] = (int) (summit[2].y+0.5);
-      ptsx[2] = (int) (summit[4].x+0.5);
-      ptsy[2] = (int) (summit[4].y+0.5);
-      ptsx[3] = (int) (summit[6].x+0.5);
-      ptsy[3] = (int) (summit[6].y+0.5);
+      ptsx[0] = (int) summit[0].x;
+      ptsy[0] = (int) summit[0].y;
+      ptsx[1] = (int) summit[2].x;
+      ptsy[1] = (int) summit[2].y;
+      ptsx[2] = (int) summit[4].x;
+      ptsy[2] = (int) summit[4].y;
+      ptsx[3] = (int) summit[6].x;
+      ptsy[3] = (int) summit[6].y;
 
     } else {
 
@@ -259,12 +237,12 @@ public class JDRoundRectangle extends JDRectangular implements JDPolyConvert {
               + kc * p4y + 0.5);
 
           if (j == 0) {
-            ptsx[nb] = (int) (p1x+0.5);
-            ptsy[nb] = (int) (p1y+0.5);
+            ptsx[nb] = (int) p1x;
+            ptsy[nb] = (int) p1y;
           }
           if (j == step) {
-            ptsx[nb] = (int) (p4x+0.5);
-            ptsy[nb] = (int) (p4y+0.5);
+            ptsx[nb] = (int) p4x;
+            ptsy[nb] = (int) p4y;
           } else {
             ptsx[nb] = x;
             ptsy[nb] = y;
