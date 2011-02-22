@@ -10,8 +10,6 @@ ALL = $(TARGET)/VoidCommandHelper.class    \
       $(TARGET)/VoidVoidCommand.class      \
       $(TARGET)/InvalidCommand.class       \
       $(TARGET)/ScalarVoidCommand.class    \
-      $(TARGET)/BooleanVoidCommand.class    \
-      $(TARGET)/StringVoidCommand.class    \
       $(TARGET)/ScalarArrayCommand.class   \
       $(TARGET)/VoidArrayCommand.class     \
       $(TARGET)/TableArrayCommand.class    \
