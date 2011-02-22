@@ -163,7 +163,7 @@ public class JLDataView implements java.io.Serializable {
 
   //Local declaration
   private JLAxis parentAxis;
-  private Vector<ColorItem> barFillColor;
+  private Vector barFillColor;
   private Color lineColor;
   private Color fillColor;
   private Color markerColor;
@@ -243,7 +243,7 @@ public class JLDataView implements java.io.Serializable {
     dataLength = 0;
     name = "";
     unit = "";
-    barFillColor = new Vector<ColorItem>();
+    barFillColor = new Vector();
     lineColor = Color.red;
     fillColor = Color.lightGray;
     markerColor = Color.red;
@@ -372,8 +372,8 @@ public class JLDataView implements java.io.Serializable {
       if(!found) i++;
     }
     if(found) {
-      barFillColor.get(i).idx = idx;
-      barFillColor.get(i).fillColor = fillColor;
+      ((ColorItem)barFillColor.get(i)).idx = idx;
+      ((ColorItem)barFillColor.get(i)).fillColor = fillColor;
     } else {
       ColorItem ci = new ColorItem(idx,fillColor);
       barFillColor.add(ci);
@@ -401,26 +401,6 @@ public class JLDataView implements java.io.Serializable {
       return null;
     }
 
-  }
-
-
-  /**
-   * Sets the filling color vector for a barchart.
-   * @param bfColors A vector of Filling colors for barchart
-   * @see JLDataView#getBarFillColors
-   */
-  public void setBarFillColors(Vector<ColorItem> bfColors) {
-    barFillColor = bfColors;
-  }
-
-
-  /**
-   * Gets the filling color vector for a barchart.
-   * @return A vector of Filling colors for barchart
-   * @see JLDataView#setBarFillColors
-   */
-  public Vector<ColorItem> getBarFillColors() {
-    return barFillColor;
   }
 
   /* ----------------------------- Line config --------------------------------- */

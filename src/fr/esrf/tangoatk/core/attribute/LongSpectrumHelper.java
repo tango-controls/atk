@@ -36,15 +36,15 @@ import fr.esrf.tangoatk.core.*;
 import fr.esrf.Tango.*;
 import fr.esrf.TangoApi.*;
 
+import java.beans.*;
 
 public class LongSpectrumHelper extends ANumberSpectrumHelper {
 
-  public LongSpectrumHelper(AAttribute attribute) {
+  public LongSpectrumHelper(IAttribute attribute) {
     init(attribute);
   }
 
-    @Override
-  void init(AAttribute attribute) {
+  void init(IAttribute attribute) {
     super.init(attribute);
   }
 

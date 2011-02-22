@@ -38,12 +38,11 @@ import fr.esrf.TangoApi.*;
 
 public class ShortSpectrumHelper extends ANumberSpectrumHelper {
 
-  public ShortSpectrumHelper(AAttribute attribute) {
+  public ShortSpectrumHelper(IAttribute attribute) {
     init(attribute);
   }
 
-    @Override
-  void init(AAttribute attribute) {
+  void init(IAttribute attribute) {
     super.init(attribute);
   }
 

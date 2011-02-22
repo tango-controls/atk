@@ -307,7 +307,7 @@ public class DevStateScalar extends AAttribute
       long                t0 = System.currentTimeMillis();
 
       trace(DeviceFactory.TRACE_CHANGE_EVENT, "DevStateScalar.change method called for " + getName(), t0);
-//System.out.println("DevStateScalar.change(" + getName() + ") Begin ");
+     
       try
       {
           da = evt.getValue();
@@ -321,7 +321,7 @@ public class DevStateScalar extends AAttribute
               trace(DeviceFactory.TRACE_CHANGE_EVENT, "DevStateScalar.changeEvt.getValue(" + getName() + ") failed, got heartbeat error", t0);
 	      // Tango error
 	      // Fire error event
-              readAttError(dfe.getMessage(), new AttributeReadException(dfe));
+	      readAttError(dfe.getMessage(), new AttributeReadException(dfe));
 	  }
 	  else // For the moment the behaviour for all DevFailed is the same
 	  {
@@ -330,7 +330,7 @@ public class DevStateScalar extends AAttribute
 	      // Fire error event
 	      readAttError(dfe.getMessage(), new AttributeReadException(dfe));
 	  }
-         return;
+          return;
       }
       catch (Exception e) // Code failure
       {
@@ -359,7 +359,7 @@ public class DevStateScalar extends AAttribute
           }
 	  catch (DevFailed dfe)
 	  {
-              trace(DeviceFactory.TRACE_CHANGE_EVENT, "DevStateScalar.change(" + getName() + ") failed, got DevFailed when called da.extractState()", t0);
+              trace(DeviceFactory.TRACE_CHANGE_EVENT, "DevStateScalar.change(" + getName() + ") failed, got DevFailed when called fireValueChanged(devStateValue)", t0);
               // Tango error
               // Fire error event
               readAttError(dfe.getMessage(), new AttributeReadException(dfe));

@@ -90,8 +90,6 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
   private JLabel generalDurationLabel;
   private JTextField generalDurationText;
 
-  private JLabel percentScrollLabel;
-  private JTextField percentScrollText;
 
   // Axis panel
   private AxisPanel y1Panel;
@@ -271,16 +269,6 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
     generalDurationText.setMargin(GraphicsUtils.zInset);
     generalDurationText.addKeyListener(this);
 
-    percentScrollLabel = new JLabel("Percent scrollback");
-    percentScrollLabel.setFont(GraphicsUtils.labelFont);
-    percentScrollLabel.setForeground(GraphicsUtils.fColor);
-    percentScrollText = new JTextField();
-    percentScrollText.setEditable(true);
-    percentScrollText.setToolTipText("Type 0 disable");
-    percentScrollText.setText(Double.toString(chart.getXAxis().getPercentScrollback()));
-    percentScrollText.setMargin(GraphicsUtils.zInset);
-    percentScrollText.addKeyListener(this);
-
     generalFontHeaderLabel = new JLabel("Header font");
     generalFontHeaderLabel.setFont(GraphicsUtils.labelFont);
     generalFontHeaderLabel.setForeground(GraphicsUtils.fColor);
@@ -333,8 +321,6 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
     gMiscPanel.add(generalLegendText);
     gMiscPanel.add(generalDurationLabel);
     gMiscPanel.add(generalDurationText);
-    gMiscPanel.add(percentScrollLabel);
-    gMiscPanel.add(percentScrollText);
     generalPanel.add(gMiscPanel);
 
     generalLabelVisibleCheck.setBounds(5, 20, 80, 25);
@@ -376,17 +362,11 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
     generalLegendText.setBounds(85, 20, 200, 25);
     generalDurationLabel.setBounds(10, 50, 120, 25);
     generalDurationText.setBounds(135, 50, 150, 25);
-    percentScrollLabel.setBounds(10, 80, 120, 25);
-    percentScrollText.setBounds(135, 80, 150, 25);
 
     if( chart.getXAxis().getAnnotation()!=JLAxis.TIME_ANNO ) {
       gMiscPanel.setBounds(5,250,290,85);
-      percentScrollLabel.setVisible(false);
-      percentScrollText.setVisible(false);
     } else {
-      gMiscPanel.setBounds(5,300,290,110);
-      percentScrollLabel.setVisible(true);
-      percentScrollText.setVisible(true);
+      gMiscPanel.setBounds(5,300,290,85);
     }
 
     // **********************************************
@@ -414,9 +394,9 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
       closeBtn.setBounds(225, 380, 80, 25);
       innerPane.setPreferredSize(new Dimension(310,410));
     } else {
-      tabPane.setBounds(5, 5, 300, 445);
-      closeBtn.setBounds(225, 455, 80, 25);
-      innerPane.setPreferredSize(new Dimension(310,485));
+      tabPane.setBounds(5, 5, 300, 420);
+      closeBtn.setBounds(225, 430, 80, 25);
+      innerPane.setPreferredSize(new Dimension(310,460));
     }
 
     closeBtn.addMouseListener(this);
@@ -626,24 +606,6 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
         Commit();
       }
 
-    } else if (e.getSource() == percentScrollText) {
-
-      if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-
-        try {
-          double p = Double.parseDouble(percentScrollText.getText());
-          if(p<0.0 || p>100.0) {
-            error("Invalid percent scrollback value [0,100]");
-            return;
-          }
-          chart.getXAxis().setPercentScrollback(p);
-          Commit();
-        } catch (NumberFormatException ex) {
-          error("Percent scrollbak: malformed number.");
-        }
-
-      }
-
     }
 
   } // End keyReleased
@@ -653,5 +615,6 @@ public class JLChartOption extends JDialog implements ActionListener, MouseListe
     JOptionPane.showMessageDialog(this, m, "Chart options error",
       JOptionPane.ERROR_MESSAGE);
   }
+
 
 }

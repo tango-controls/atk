@@ -56,8 +56,6 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
   public final static int TRACE_ATTFACTORY=512;
   // Debug trace for command factory.
   public final static int TRACE_CMDFACTORY=1024;
-  // Debug trace for attributes refreshed by att config events.
-  public final static int TRACE_ATT_CONFIG_EVENT=2048;
   // Trace all
   public final static int TRACE_ALL=0xFF;
 

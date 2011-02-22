@@ -22,7 +22,7 @@
  
 
 package fr.esrf.tangoatk.widget.device;
-import fr.esrf.tangoatk.core.IDevice;
+import fr.esrf.tangoatk.core.Device;
 /**
  *
  * @author  root
@@ -46,7 +46,7 @@ public class SingletonStatusViewer extends javax.swing.JFrame
         return self;
     }
     
-    public void setModel(IDevice d) {
+    public void setModel(Device d) {
 	if (d == null) return;
 	
         deviceStatus.setModel(d);

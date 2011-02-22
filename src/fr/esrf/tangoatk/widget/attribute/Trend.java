@@ -108,9 +108,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
   protected JMenuItem cfgMenuI;
   protected JButton resetButton;
   protected JMenuItem resetMenuI;
-  protected JCheckBoxMenuItem offLineButton;
-  protected JMenuItem showErrorMenuI;
-  protected JMenuItem showDiagMenuI;
 
   protected JMenuItem showtoolMenuI;
 
@@ -227,11 +224,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
   protected int minRefreshTrendInterval = 0;  
   private int refreshIntervalTrend = 1000;
 
-  protected boolean offLineMode = false;
-
-  protected ErrorHistory errWin;
-
-
   /**
    * Trend constructor.
    * @param parent Parent frame
@@ -290,11 +282,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
 
     showtoolMenuI = new JMenuItem("Hide toolbar");
 
-    offLineButton = new JCheckBoxMenuItem("Off line mode");
-
-    showErrorMenuI = new JMenuItem("View errors");
-    showDiagMenuI = new JMenuItem("Diagnostic");
-
     theToolBar.setFloatable(true);
 
     loadButton.addActionListener(this);
@@ -316,9 +303,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     resetButton.addActionListener(this);
     resetMenuI.addActionListener(this);
     showtoolMenuI.addActionListener(this);
-    offLineButton.addActionListener(this);
-    showErrorMenuI.addActionListener(this);
-    showDiagMenuI.addActionListener(this);
 
     theToolBar.add(loadButton);
     theToolBar.add(saveButton);
@@ -350,9 +334,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     toolMenu.add(cfgMenuI);
     toolMenu.add(resetMenuI);
     toolMenu.add(showtoolMenuI);
-    toolMenu.add(offLineButton);
-    toolMenu.add(showErrorMenuI);
-    toolMenu.add(showDiagMenuI);
 
     // Create the graph
     theGraph = new JLChart();
@@ -367,8 +348,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     theGraph.addUserAction("chkShow date");
     theGraph.addUserAction("Load configuration");
     theGraph.addUserAction("Save configuration");
-    theGraph.addUserAction("View errors");
-    theGraph.addUserAction("Diagnostic");
     theGraph.addJLChartActionListener(this);
     // Commented revision 1.43 modifications :
     // refuse displayDuration greater than 1 day, in order to limit memory use
@@ -538,8 +517,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     dateLabel.setVisible(false);
     add(dateLabel,BorderLayout.SOUTH);
 
-    errWin = new ErrorHistory();
-
   }
 
   void refreshNode(TrendSelectionNode n) {
@@ -632,17 +609,10 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
       setButtonBarVisible(b);
     } else if (o == resetButton || o == resetMenuI) {
       resetTrend();
-    } else if (o == refreshButton || o == refreshButton) {
+    }else if (o == refreshButton || o == refreshButton) {
       refreshTrend();
-    } else if (o == timeButtonTrend || o == timeMenuTrendI) {
-      setRefreshIntervalTrend();
-    } else if (o == offLineButton) {
-      setOffLineMode(offLineButton.isSelected());
-    } else if (o == showErrorMenuI) {
-      ATKGraphicsUtils.centerFrameOnScreen(errWin);
-      errWin.setVisible(true);      
-    } else if (o == showDiagMenuI) {
-      fr.esrf.tangoatk.widget.util.ATKDiagnostic.showDiagnostic();
+    }else if (o == timeButtonTrend || o == timeMenuTrendI) {
+        setRefreshIntervalTrend();
     }
 
   }
@@ -662,11 +632,6 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
       loadButtonActionPerformed();
     } else if (evt.getName().equalsIgnoreCase("Save configuration")) {
       saveButtonActionPerformed();
-    } else if (evt.getName().equalsIgnoreCase("View errors")) {
-      ATKGraphicsUtils.centerFrameOnScreen(errWin);
-      errWin.setVisible(true);
-    } else if (evt.getName().equalsIgnoreCase("Diagnostic")) {
-      fr.esrf.tangoatk.widget.util.ATKDiagnostic.showDiagnostic();
     }
 
   }
@@ -696,38 +661,23 @@ public void setTimePrecision(int timePrecision) {
   // Refresher listener
   // -------------------------------------------------------------
   public void refreshStep() {
-
-    if (isDateVisible()) {
+    // All attribute has been read, we can repaint the graph
+    if(isDateVisible()) {
       calendar.setTimeInMillis(System.currentTimeMillis());
       dateLabel.setText(genFormat.format(calendar.getTime()));
     }
 
-    if (theGraph.getXAxis().getPercentScrollback() == 0.0) {
-
-      if (!offLineMode) {
-        // All attribute has been read, we can repaint the graph
-        if (!manageIntervalTrend)
-          theGraph.repaint();
-        else {
-          // repaint Trend after IntervalTrend time
-          currentTime = System.currentTimeMillis();
-          if (currentTime - oldCurrentTime > getRefreshIntervalTrend()) {
-            theGraph.repaint();
-            oldCurrentTime = currentTime;
-          }
-        }
-      }
-
+  	if(!manageIntervalTrend)
+		theGraph.repaint();
+  	else
+  	{
+  		// repaint Trend after IntervalTrend time
+    	currentTime = System.currentTimeMillis();
+    	if(currentTime - oldCurrentTime > getRefreshIntervalTrend()){
+        	theGraph.repaint(); 
+        	oldCurrentTime = currentTime;
+    	}
     }
-
-  }
-
-  /**
-   * Sets or unset the offline mode (data are updated but not painted)
-   * @param mode Offline mode
-   */
-  public void setOffLineMode(boolean mode) {
-    offLineMode = mode;
   }
 
   private void setRefreshInterval() {
@@ -832,7 +782,6 @@ public void setTimePrecision(int timePrecision) {
     // Remove old listeners and clean former list
     if (attList != null)
     {
-        attList.removeErrorListener(errWin);
         attList.removeRefresherListener(this);
     }
 
@@ -961,10 +910,8 @@ public void setTimePrecision(int timePrecision) {
     innerPanel.revalidate();
 
     attList = list;
-    if(attList!=null) {
+    if(attList!=null)
       attList.addRefresherListener(this);
-      attList.addErrorListener(errWin);
-    }
 
     updateModel();
   }
@@ -1204,7 +1151,6 @@ public void setTimePrecision(int timePrecision) {
         return false;
       }
     });
-    alist.addErrorListener(errWin);
 
     // Get all dataviews
     p = f.getParam("dv_number");

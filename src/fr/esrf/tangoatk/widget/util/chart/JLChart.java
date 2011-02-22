@@ -62,7 +62,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Vector;
 import javax.imageio.ImageIO;
 import javax.swing.Box;
@@ -3011,6 +3010,10 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     //Add data
     v.add(x, y);
 
+    // Garbage
+    int nb = garbageData(v);
+    if (nb > 0 && v.getAxis() != null) need_repaint = true;
+
     // Does not repaint if zoom drag
     if (zoomDrag) return;
 
@@ -3031,12 +3034,9 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
       if (yaxis.getBoundRect().contains(p) && !need_repaint) {
         // We can perform fast update
-        Graphics g = getGraphics();
-        yaxis.drawFast(g, lp, p, v);
-        g.dispose();
+        yaxis.drawFast(getGraphics(), lp, p, v);
       } else {
         // Full update needed
-        garbageData(v);
         repaint();
       }
 
@@ -3051,7 +3051,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   public void setTimePrecision(int milliseconds) {
       timePrecision = milliseconds;
   }
-  
+
   /**
    * Returns the allowed margin to make a projection on a line on data show (default: 0).
    * @return The allowed margin to make a projection on a line on data show (default: 0).
@@ -3189,7 +3189,9 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
     final JFrame f = new JFrame();
     final JLChart chart = new JLChart();
-    final JLDataView v = new JLDataView();
+    final JLDataView v1 = new JLDataView();
+    final JLDataView v2 = new JLDataView();
+    double startTime = (double) ((System.currentTimeMillis() / 1000) * 1000);
 
     // Initialise chart properties
     chart.setHeaderFont(new Font("Times", Font.BOLD, 18));
@@ -3198,41 +3200,86 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
     // Initialise axis properties
     chart.getY1Axis().setName("mAp");
-    chart.getY1Axis().setAutoScale(false);
-    chart.getY1Axis().setMinimum(-1);
-    chart.getY1Axis().setMaximum(1);
+    chart.getY1Axis().setAutoScale(true);
+    chart.getY1Axis().setMinimum(-100);
+    chart.getY1Axis().setMaximum(100);
+    /*
+    chart.getY1Axis().setLabels(
+            new String[] {"-120","-100","-80","-60","-40","-20","0"} ,
+            new double[] {-120,-100,-80,-60,-40,-20,0}
+    );
+    */
+    chart.getY2Axis().setName("unit");
 
+    chart.getXAxis().setAutoScale(true);
     chart.getXAxis().setName("Value");
     chart.getXAxis().setGridVisible(true);
     chart.getXAxis().setSubGridVisible(true);
     chart.getXAxis().setAnnotation(JLAxis.TIME_ANNO);
-    chart.getXAxis().setPercentScrollback(10.0);
     chart.getY1Axis().setGridVisible(true);
     chart.getY1Axis().setSubGridVisible(true);
     chart.getY2Axis().setVisible(true);
     chart.getY2Axis().setName("mAp");
-    chart.setDisplayDuration(100000);
 
+    if (args.length > 0)
+    {
+      chart.reset(false);
+      chart.loadDataFile(args[0]);
+    }
+
+    // Build dataview
+    double[] xV1 = new double[]{-3,-2,-5 ,3 ,6 ,-4,0 ,-6 ,2 ,4 ,1         ,5 ,-1,7};
+    double[] yV1 = new double[]{21,22,-15,99,30,17,98,-10,21,50,Double.NaN,40,24,20};
+    v1.setUnorderedData(xV1,yV1);
+
+    v1.setMarker(JLDataView.MARKER_CIRCLE);
+    v1.setStyle(JLDataView.STYLE_DASH);
+    v1.setName("Le signal 1");
+    v1.setUnit("std");
+    v1.setClickable(true);
+    v1.setUserFormat("%5.2f");
+
+    // Add the dataview to the chart
+    //chart.getY1Axis().addDataView(v1);
+
+    // Build a second dataview
+    v2.add(-6, -10.0);
+    v2.add(-5, -5.0);
+    v2.add(-4, 7.0);
+    v2.add(-3, 11.0);
+    v2.add(-2, 12.0);
+    v2.add(-1, 14.0);
+    v2.add(0, 78.0);
+    v2.add(1, Double.NaN);
+    v2.add(2, 22.0);
+    v2.add(3, 55.0);
+    v2.add(4, 42.0);
+    v2.add(5, 11.0);
+    v2.add(6, 47.0);
+    v2.add(7, 12.0);
+
+    v2.setName("Le signal 2");
+    v2.setUnit("std");
+    v2.setColor(Color.blue);
+    v2.setLineWidth(3);
+    v2.setFillColor(Color.orange);
+    v2.setFillStyle(JLDataView.FILL_STYLE_SOLID);
+    v2.setViewType(JLDataView.TYPE_BAR);
+    v2.setBarFillColorAt(10,Color.BLUE);
+    v2.setBarFillColorAt(5,Color.RED);
+    v2.setBarFillColorAt(4,Color.YELLOW);
+
+    // Add it to the chart
+    //chart.getY2Axis().addDataView(v2);
+
+    JLDataView v3 = new JLDataView();
     //v3.setName("Cos() function");
-    v.setMarker(JLDataView.MARKER_DOT);
-    chart.getY1Axis().addDataView(v);
-
-    Thread refreshThread = new Thread() {
-      public void run() {
-        while(true) {
-          long   now = System.currentTimeMillis();
-          double t = (double)now;
-          double y = Math.cos(t/2000.0);
-          chart.addData(v,t,y);
-          try {
-            Thread.sleep(100);
-          } catch(InterruptedException e) {}
-        }
-      }
-    };
-    refreshThread.start();
-    
-    // -----------------------------------------------------------------
+    for(int i=0;i<1000;i++) {
+      //double t = (double)i/25.0;
+      double t = startTime + (double)i*1000.0;
+      v3.add(t,Math.cos((double)i/100.0));
+    }
+    chart.getY1Axis().addDataView(v3);
 
     JPanel bot = new JPanel();
     bot.setLayout(new FlowLayout());

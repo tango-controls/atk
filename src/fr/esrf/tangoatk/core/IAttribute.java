@@ -26,6 +26,7 @@
 
 package fr.esrf.tangoatk.core;
 import fr.esrf.TangoApi.*;
+import fr.esrf.Tango.AttrDataFormat;
 import fr.esrf.Tango.DevFailed;
 
 /**
@@ -107,7 +108,7 @@ public interface IAttribute extends IEntity
      * attribute.
      * @return a <code>DeviceAttribute</code> value
      */
-    //public DeviceAttribute getAttribute();
+    public DeviceAttribute getAttribute();
     
     /**
      * <code>getLabel</code> returns the label of this attribute.
@@ -141,7 +142,14 @@ public interface IAttribute extends IEntity
      * <code>getTangoDataType</code> returns the type of this attribute.
      * @return an <code>int</code> value
      */
-    //public int getTangoDataType();
+    public int getTangoDataType();
+
+    /**
+     * <code>getTangoDataFormat</code> returns the data format of this
+     * attribute.
+     * @return an <code>AttrDataFormat</code> value
+     */
+    public AttrDataFormat getTangoDataFormat();
 
     /**
      * <code>getDescription</code> returns the description of this attribute.
@@ -282,6 +290,18 @@ public interface IAttribute extends IEntity
     public void setSkippingRefresh(boolean b);
 
     public boolean isSkippingRefresh();
+
+    /**
+     * Method used by optimized AttributePolledList (one read per device)
+     * @param attValue Attribute value
+     */
+    public void dispatch(DeviceAttribute attValue);
+
+    /**
+     * Method used by optimized AttributePolledList (one read per device)
+     * @param e Attribute arror
+     */
+    public void dispatchError(DevFailed e);
     
     /**
      * <code>areAttPropertiesLoaded</code> returns true if the some ATK specific attribute properties have already

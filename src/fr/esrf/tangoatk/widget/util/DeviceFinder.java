@@ -165,10 +165,6 @@ public class DeviceFinder extends JPanel {
 
   }
 
-  public JTree getTree() {
-    return tree;
-  }
-
   /** test function */
   public static void main(String[] args) {
 

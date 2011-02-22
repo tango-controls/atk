@@ -34,6 +34,7 @@ import fr.esrf.Tango.DevFailed;
 import fr.esrf.Tango.AttrDataFormat;
 import fr.esrf.TangoApi.DbAttribute;
 import fr.esrf.TangoApi.AttributeInfoEx;
+import fr.esrf.TangoApi.DbDatum;
 
 /**
  * <code>AttributeFactory</code> is an extension of {@link AEntityFactory}

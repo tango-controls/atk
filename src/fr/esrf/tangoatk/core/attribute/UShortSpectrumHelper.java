@@ -39,7 +39,7 @@ import fr.esrf.TangoApi.*;
 public class UShortSpectrumHelper extends ANumberSpectrumHelper
 {
 
-  public UShortSpectrumHelper(AAttribute attribute)
+  public UShortSpectrumHelper(IAttribute attribute)
   {
       init(attribute);
   }

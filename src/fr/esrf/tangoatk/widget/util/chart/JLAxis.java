@@ -322,7 +322,7 @@ public class JLAxis implements java.io.Serializable {
    * @return scrollback percent
    */
   public double getPercentScrollback() {
-    return percentScrollback * 100;
+    return percentScrollback;
   }
 
   /**
@@ -2319,9 +2319,8 @@ public class JLAxis implements java.io.Serializable {
    */
   public void drawFast(Graphics g, Point lp, Point p, JLDataView v) {
 
-    g.setClip(boundRect.x,boundRect.y,boundRect.width,boundRect.height);
-
     if (lp != null) {
+      if (boundRect.contains(lp)) {
 
         Graphics2D g2 = (Graphics2D) g;
         Stroke old = g2.getStroke();
@@ -2334,7 +2333,7 @@ public class JLAxis implements java.io.Serializable {
 
         //restore default stroke
         g2.setStroke(old);
-
+      }
     }
 
     //Paint marker
@@ -3713,8 +3712,6 @@ public class JLAxis implements java.io.Serializable {
     if (p != null) setFont(OFormat.getFont(p));
     p = f.getParam(prefix + "fit_display_duration");
     if (p != null) this.setFitXAxisToDisplayDuration(OFormat.getBoolean(p.get(0).toString()));
-    p = f.getParam(prefix + "percentscrollback");
-    if (p != null) this.setPercentScrollback(OFormat.getDouble(p.get(0).toString()));
 
   }
 
@@ -3745,7 +3742,6 @@ public class JLAxis implements java.io.Serializable {
     to_write += prefix + "color:" + OFormat.color(getAxisColor()) + "\n";
     to_write += prefix + "label_font:" + OFormat.font(getFont()) + "\n";
     to_write += prefix + "fit_display_duration:" + isFitXAxisToDisplayDuration() + "\n";
-    to_write += prefix + "percentscrollback:" + getPercentScrollback() + "\n";
 
     return to_write;
   }

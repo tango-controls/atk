@@ -76,6 +76,7 @@ import javax.swing.filechooser.FileFilter;
 
 import com.braju.format.Format;
 
+import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoDs.AttrManip;
 import fr.esrf.tangoatk.core.IImageListener;
 import fr.esrf.tangoatk.core.INumberImage;
@@ -119,8 +120,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   private boolean sigHistogram;
   private boolean rectXYmode;
   private boolean isNegative;
-  private int integrationWidthH;
-  private int integrationWidthV;
   protected int startHisto;
   private Gradient gColor;
   private int[] gColormap;
@@ -248,10 +247,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   private JTextField minBestFitText;
   private JLabel maxBestFitLabel;
   private JTextField maxBestFitText;
-  private JLabel integrationWidthHLabel;
-  private JTextField integrationWidthHText;
-  private JLabel integrationWidthVLabel;
-  private JTextField integrationWidthVText;
   private JCheckBox snapToGridCheck;
   private JLabel snapToGridLabel;
   private JTextField snapToGridText;
@@ -339,8 +334,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     // Private stuff
     isBestFit = true;
     rectXYmode = false;
-    integrationWidthH = 1;
-    integrationWidthV = 1;
     setAlignToGrid(true);
     autoBestFit = true;
     sigHistogram = false;
@@ -482,7 +475,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       printButton.setBounds(2, 535, 36, 36);
       printButton.addActionListener(this);
       buttonPanel.add(printButton);
-
   }
 
   protected void initGradient() {
@@ -1574,107 +1566,40 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     int adx = Math.abs(dx);
     int ady = Math.abs(dy);
     double delta;
-    int i, j, xe, ye;
+    int i, xe, ye;
 
-    if( dx==0 && dy==0 ) {
-      return new double[0];
-    }
+    if (adx > ady) {
 
-    if (dx == 0 && dy != 0) {
-
-      // Vertical profile
-      profile = new double[ady + 1];
-      ye = p1.y;
-      xe = p1.x;
-      int dxi = integrationWidthV/2;
-
-      for (i = 0; i <= ady; i++) {
-
-        double sum=0;
-        double n=0;
-
-        for(j=-dxi;j<=dxi;j++) {
-          if ( (xe+j) >= 0 && (xe+j) < d.width && ye >= 0 && ye < d.height)
-            sum += doubleValues[ye][xe+j];
-          else
-            sum = Double.NaN;
-          n = n + 1.0;
-        }
-        profile[i] = sum/n;
-
-        if (dy < 0)
-          ye--;
-        else
-          ye++;
-
-      }
-
-    } else if (dx != 0 && dy == 0) {
-
-      // Horizontal profile
+      delta = (double) dy / (double) adx;
       profile = new double[adx + 1];
       xe = p1.x;
-      ye = p1.y;
-      int dxi = integrationWidthH/2;
-
       for (i = 0; i <= adx; i++) {
-
-        double sum=0;
-        double n=0;
-
-        for(j=-dxi;j<=dxi;j++) {
-          if (xe >= 0 && xe < d.width && (ye+j) >= 0 && (ye+j) < d.height)
-            sum += doubleValues[ye+j][xe];
-          else
-            sum = Double.NaN;
-          n = n + 1.0;
-        }
-        profile[i] = sum/n;
-
+        ye = p1.y + (int) (delta * (double) i);
+        if (xe >= 0 && xe < d.width && ye >= 0 && ye < d.height)
+          profile[i] = doubleValues[ye][xe];
+        else
+          profile[i] = Double.NaN;
         if (dx < 0)
           xe--;
         else
           xe++;
-        
       }
 
     } else {
 
-      // Skew profile
-      if (adx > ady) {
-
-        delta = (double) dy / (double) adx;
-        profile = new double[adx + 1];
-        xe = p1.x;
-        for (i = 0; i <= adx; i++) {
-          ye = p1.y + (int) (delta * (double) i);
-          if (xe >= 0 && xe < d.width && ye >= 0 && ye < d.height)
-            profile[i] = doubleValues[ye][xe];
-          else
-            profile[i] = Double.NaN;
-          if (dx < 0)
-            xe--;
-          else
-            xe++;
-        }
-
-      } else {
-
-        delta = (double) dx / (double) ady;
-        profile = new double[ady + 1];
-        ye = p1.y;
-        for (i = 0; i <= ady; i++) {
-          xe = p1.x + (int) (delta * (double) i);
-          if (xe >= 0 && xe < d.width && ye >= 0 && ye < d.height)
-            profile[i] = doubleValues[ye][xe];
-          else
-            profile[i] = Double.NaN;
-          if (dy < 0)
-            ye--;
-          else
-            ye++;
-        }
-
+      delta = (double) dx / (double) ady;
+      profile = new double[ady + 1];
+      ye = p1.y;
+      for (i = 0; i <= ady; i++) {
+        xe = p1.x + (int) (delta * (double) i);
+        if (xe >= 0 && xe < d.width && ye >= 0 && ye < d.height)
+          profile[i] = doubleValues[ye][xe];
+        else
+          profile[i] = Double.NaN;
+        if (dy < 0)
+          ye--;
+        else
+          ye++;
       }
 
     }
@@ -1961,34 +1886,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     setZoom(imageSizeCombo.getSelectedIndex());
 
     setAlignToGrid(snapToGrid);
-
-    try {
-
-      int iwh = Integer.parseInt(integrationWidthHText.getText());
-
-      if( iwh%2==0 ) {
-        JOptionPane.showMessageDialog(null, "Integration width (H) must be an odd number", "Error", JOptionPane.ERROR_MESSAGE);
-      } else {
-        integrationWidthH = iwh;
-      }
-
-    } catch (Exception e) {
-      JOptionPane.showMessageDialog(null, "Invalid syntax for integration width (H)", "Error", JOptionPane.ERROR_MESSAGE);
-    }
-
-    try {
-
-      int iwv = Integer.parseInt(integrationWidthVText.getText());
-
-      if( iwv%2==0 ) {
-        JOptionPane.showMessageDialog(null, "Integration width (V) must be an odd number", "Error", JOptionPane.ERROR_MESSAGE);
-      } else {
-        integrationWidthV = iwv;
-      }
-
-    } catch (Exception e) {
-      JOptionPane.showMessageDialog(null, "Invalid syntax for integration width (V)", "Error", JOptionPane.ERROR_MESSAGE);
-    }
 
     try {
 
@@ -2685,9 +2582,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       minBestFitText.setText(Double.toString(bfMin));
       maxBestFitText.setText(Double.toString(bfMax));
 
-      integrationWidthVText.setText(Integer.toString(integrationWidthV));
-      integrationWidthHText.setText(Integer.toString(integrationWidthH));
-
       minBestFitLabel.setEnabled(!autoBestFit);
       minBestFitText.setEnabled(!autoBestFit);
       maxBestFitLabel.setEnabled(!autoBestFit);
@@ -2943,8 +2837,8 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       // ------------------------------------------------------
       settingsPanel = new JPanel();
       settingsPanel.setLayout(null);
-      settingsPanel.setMinimumSize(new Dimension(290, 330));
-      settingsPanel.setPreferredSize(new Dimension(290, 330));
+      settingsPanel.setMinimumSize(new Dimension(290, 270));
+      settingsPanel.setPreferredSize(new Dimension(290, 270));
 
       attNameLabel = new LabelViewer();
       attNameLabel.setOpaque(false);
@@ -3058,74 +2952,49 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       js2.setBounds(0, 153, 500, 10);
       settingsPanel.add(js2);
 
-      integrationWidthHLabel = new JLabel("Integration width (Horizontal profile)");
-      integrationWidthHLabel.setFont(panelFont);
-      integrationWidthHLabel.setBounds(5,160,220,20);
-      settingsPanel.add(integrationWidthHLabel);
-
-      integrationWidthHText = new JTextField();
-      integrationWidthHText.setEditable(true);
-      integrationWidthHText.setBounds(230,160,50,20);
-      settingsPanel.add(integrationWidthHText);
-
-      integrationWidthVLabel = new JLabel("Integration width (Vertical profile)");
-      integrationWidthVLabel.setFont(panelFont);
-      integrationWidthVLabel.setBounds(5,185,220,20);
-      settingsPanel.add(integrationWidthVLabel);
-
-      integrationWidthVText = new JTextField();
-      integrationWidthVText.setEditable(true);
-      integrationWidthVText.setBounds(230,185,50,20);
-      settingsPanel.add(integrationWidthVText);
-
-      // ------------------------------------------------------------------------------------
-      JSeparator js3 = new JSeparator();
-      js3.setBounds(0, 218, 500, 10);
-      settingsPanel.add(js3);
-
       snapToGridCheck = new JCheckBox("Align to grid");
       snapToGridCheck.setSelected(false);
       snapToGridCheck.setFont(panelFont);
-      snapToGridCheck.setBounds(5, 225, 100, 20);
+      snapToGridCheck.setBounds(5, 160, 100, 20);
       snapToGridCheck.setToolTipText("Align the selection to the grid");
       settingsPanel.add(snapToGridCheck);
 
       snapToGridLabel = new JLabel("Grid spacing");
       snapToGridLabel.setFont(panelFont);
-      snapToGridLabel.setBounds(110, 225, 90, 20);
+      snapToGridLabel.setBounds(110, 160, 90, 20);
       settingsPanel.add(snapToGridLabel);
 
       snapToGridText = new JTextField("");
       snapToGridText.setMargin(noMargin);
       snapToGridText.setFont(panelFont);
-      snapToGridText.setBounds(205, 225, 50, 20);
+      snapToGridText.setBounds(205, 160, 50, 20);
       settingsPanel.add(snapToGridText);
 
-      sigHistogramCheck = new JCheckBox("Display significant data for histogram");
+      sigHistogramCheck = new JCheckBox("Display significative data for histogram");
       sigHistogramCheck.setSelected(false);
       sigHistogramCheck.setFont(panelFont);
-      sigHistogramCheck.setBounds(5, 250, 280, 20);
-      sigHistogramCheck.setToolTipText("Clip the histogram to significant data");
+      sigHistogramCheck.setBounds(5, 185, 280, 20);
+      sigHistogramCheck.setToolTipText("Clip the histogram to significative data");
       settingsPanel.add(sigHistogramCheck);
 
       rectDisplayCheck = new JCheckBox("Display rectangle as (x1,y1) - (x2,y2)");
       rectDisplayCheck.setSelected(false);
       rectDisplayCheck.setFont(panelFont);
-      rectDisplayCheck.setBounds(5, 275, 280, 20);
+      rectDisplayCheck.setBounds(5, 210, 280, 20);
       rectDisplayCheck.setToolTipText("Display rectangle as (x1,y1) - (x2,y2) instead of (x1,y1) - [width,height]");
       settingsPanel.add(rectDisplayCheck);
 
       okButton = new JButton();
       okButton.setText("Apply");
       okButton.setFont(panelFont);
-      okButton.setBounds(5, 300, 80, 25);
+      okButton.setBounds(5, 240, 80, 25);
       okButton.addActionListener(this);
       settingsPanel.add(okButton);
 
       cancelButton = new JButton();
       cancelButton.setText("Dismiss");
       cancelButton.setFont(panelFont);
-      cancelButton.setBounds(205, 300, 80, 25);
+      cancelButton.setBounds(205, 240, 80, 25);
       cancelButton.addActionListener(this);
       settingsPanel.add(cancelButton);
 
@@ -3400,7 +3269,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     }
 
   }
-  
+
   // ----------------------------------------------------------
   // Keyboard listener
   // ----------------------------------------------------------
@@ -4465,28 +4334,27 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   /**
    * @param logValues the logValues to set
    */
-    public void setLogValues(boolean logValues)
-    {
-        if (logValues != this.logValues)
-        {
-            synchronized (this)
-            {
-                if (model != null)
-                {
-                    double[][] values = model.getValue();
-                    if (logValues)
-                    {
-                        setData(computeLog(values));
-                    }
-                    else
-                    {
-                        setData(values);
-                    }
-                }
+  public void setLogValues (boolean logValues) {
+    if (logValues != this.logValues) {
+      synchronized(this) {
+        if (model != null) {
+          try {
+            double[][] values = model.getValue();
+            if (logValues) {
+              setData( computeLog(values) );
             }
+            else {
+              setData(values);
+            }
+          }
+          catch (DevFailed e) {
+            setData(null);
+          }
         }
-        this.logValues = logValues;
+      }
     }
+    this.logValues = logValues;
+  }
 
   protected double[][] computeLog(double[][] values) {
     if (values == null) {

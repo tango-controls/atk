@@ -38,12 +38,11 @@ import fr.esrf.TangoApi.*;
 
 public class FloatSpectrumHelper extends ANumberSpectrumHelper {
 
-  public FloatSpectrumHelper(AAttribute attribute) {
+  public FloatSpectrumHelper(IAttribute attribute) {
     init(attribute);
   }
 
-    @Override
-  void init(AAttribute attribute) {
+  void init(IAttribute attribute) {
     super.init(attribute);
   }
 

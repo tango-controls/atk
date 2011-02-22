@@ -498,36 +498,22 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
     if (lv != null) ok = (lv.x != x) || (lv.y != y);
 
     if (ok) {
-
-      if (chart.getChart().getXAxis().getPercentScrollback() == 0.0) {
-
-        // No percent scrollback, keep the default behavior
-        data.add((double) evt.getTimeStamp(), evt.getValue());
-        chart.getChart().garbageData(data);
-        if (showMinAlarm) {
-          minAlarmData.add((double) evt.getTimeStamp(), minAlarm);
-          chart.getChart().garbageData(minAlarmData);
-        }
-        if (showMaxAlarm) {
-          maxAlarmData.add((double) evt.getTimeStamp(), maxAlarm);
-          chart.getChart().garbageData(maxAlarmData);
-        }
-
-      } else {
-
-        // percent scrollback
-        chart.getChart().addData(data,(double) evt.getTimeStamp(), evt.getValue());
-        if (showMinAlarm) {
-          chart.getChart().addData(minAlarmData,(double) evt.getTimeStamp(), minAlarm);
-        }
-        if (showMaxAlarm) {
-          chart.getChart().addData(maxAlarmData,(double) evt.getTimeStamp(), maxAlarm);
-        }
-
+      data.add((double) evt.getTimeStamp(), evt.getValue());
+      chart.getChart().garbageData(data);
+      if( showMinAlarm ) {
+        minAlarmData.add((double) evt.getTimeStamp(),minAlarm);
+        chart.getChart().garbageData(minAlarmData);
       }
-
+      if( showMaxAlarm ) {
+        maxAlarmData.add((double) evt.getTimeStamp(),maxAlarm);
+        chart.getChart().garbageData(maxAlarmData);
+      }
     }
-    
+
+    //calendar.setTimeInMillis(evt.getTimeStamp());
+    //java.util.Date date = calendar.getTime();
+    //String tm = format.format(date);
+    //System.out.println( model.getName() + ":" + evt.getValue() + " [" + tm + "]");
   }
 
   public void errorChange(ErrorEvent evt) {
@@ -539,34 +525,21 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
     if (lastErrorTime != evt.getTimeStamp()) {
 
       lastErrorTime = evt.getTimeStamp();
-
-      if (chart.getChart().getXAxis().getPercentScrollback() == 0.0) {
-
-        // No percent scrollback, keep the default behavior
-        data.add((double) lastErrorTime, Double.NaN);
-        chart.getChart().garbageData(data);
-        if (showMinAlarm) {
-          minAlarmData.add((double) evt.getTimeStamp(), minAlarm);
-          chart.getChart().garbageData(minAlarmData);
-        }
-        if (showMaxAlarm) {
-          maxAlarmData.add((double) evt.getTimeStamp(), maxAlarm);
-          chart.getChart().garbageData(maxAlarmData);
-        }
-
-      } else {
-
-        // No percent scrollback, keep the default behavior
-        chart.getChart().addData(data,(double) lastErrorTime, Double.NaN);
-        if (showMinAlarm) {
-          chart.getChart().addData(minAlarmData,(double) evt.getTimeStamp(), minAlarm);
-        }
-        if (showMaxAlarm) {
-          chart.getChart().addData(maxAlarmData,(double) evt.getTimeStamp(), maxAlarm);
-        }
-
+      data.add((double) lastErrorTime, Double.NaN);
+      chart.getChart().garbageData(data);
+      if( showMinAlarm ) {
+        minAlarmData.add((double) evt.getTimeStamp(),minAlarm);
+        chart.getChart().garbageData(minAlarmData);
+      }
+      if( showMaxAlarm ) {
+        maxAlarmData.add((double) evt.getTimeStamp(),maxAlarm);
+        chart.getChart().garbageData(maxAlarmData);
       }
 
+      //calendar.setTimeInMillis(evt.getTimeStamp());
+      //java.util.Date date = calendar.getTime();
+      //String tm = format.format(date);
+      //System.out.println( model.getName() + ": Error [" + tm + "]");
 
     }
   }
