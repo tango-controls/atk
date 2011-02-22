@@ -27,24 +27,22 @@
 package fr.esrf.tangoatk.core.attribute;
 
 
+import java.util.*;
 
 import fr.esrf.tangoatk.core.*;
 
 import fr.esrf.TangoApi.*;
 import fr.esrf.Tango.AttrQuality;
 import fr.esrf.Tango.DevFailed;
-import java.util.List;
-import java.util.Vector;
 
 public class FloatScalarHelper extends ANumberScalarHelper {
 
-  public FloatScalarHelper(AAttribute attribute) {
+  public FloatScalarHelper(IAttribute attribute) {
     init(attribute);
   }
 
 
-    @Override
-  void init(AAttribute attribute) {
+  void init(IAttribute attribute) {
     super.init(attribute);
   }
 

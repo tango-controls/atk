@@ -801,11 +801,11 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   
   /** Load a jdraw grpahics input stream reader into the editor. Available only for play mode. The .jlx and .g files are not supported.
    *  This method is only called by TangoSynopticHandler which is in fact in Play mode.
-   * @param inp opened for the synoptic resource
+   * @param InputStreamReader inp opened for the synoptic resource
    * @throws IOException Exception containing error message when failed.
    * @see JDrawEditorListener#valueChanged
    */
-  
+
   protected void loadFromStream(InputStreamReader inp) throws IOException
   {
 
@@ -1599,10 +1599,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
           translateSelection(t, 0);
           setNeedToSave(true, "Translate");
         }
-        e.consume();
-        break;
-      case KeyEvent.VK_DELETE:
-        deleteSelection();
         e.consume();
         break;
     }
@@ -2975,7 +2971,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
         setStatus("Left click to create a new point and right click to create the last point");
         break;
       case CREATE_IMAGE:
-        setStatus("Left click to insert an image");
+        setStatus("Left click to create an image");
         break;
       case CREATE_AXIS:
         setStatus("Left click to create an axis");

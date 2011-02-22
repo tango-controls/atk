@@ -52,7 +52,7 @@ ALL = $(TARGET)/UIManagerHelper.class       \
       $(TARGET)/J3DTrend.class
       
 
-all: gutils uchart itlk utils ujdraw ujgl3dchart icons beaninfo
+all: gutils uchart itlk utils ujdraw icons beaninfo
 
 utils: $(ALL)
 	$(J)
@@ -92,9 +92,6 @@ df: 	all
 
 uchart:
 	(cd chart && $(MAKE) all)
-
-ujgl3dchart:
-	(cd jgl3dchart && $(MAKE) all)
 
 itlk:
 	(cd interlock && $(MAKE) all)

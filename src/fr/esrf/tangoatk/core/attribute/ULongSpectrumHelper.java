@@ -37,7 +37,7 @@ import fr.esrf.TangoApi.*;
 public class ULongSpectrumHelper extends ANumberSpectrumHelper
 {
 
-  public ULongSpectrumHelper(AAttribute attribute)
+  public ULongSpectrumHelper(IAttribute attribute)
   {
      init(attribute);
   }

@@ -38,12 +38,11 @@ import fr.esrf.TangoApi.*;
 
 public class UCharSpectrumHelper extends ANumberSpectrumHelper {
 
-  public UCharSpectrumHelper(AAttribute attribute) {
+  public UCharSpectrumHelper(IAttribute attribute) {
     init(attribute);
   }
 
-    @Override
-  void init(AAttribute attribute) {
+  void init(IAttribute attribute) {
     super.init(attribute);
   }
 

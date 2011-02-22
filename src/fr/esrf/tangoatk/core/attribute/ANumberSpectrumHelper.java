@@ -36,8 +36,7 @@ import fr.esrf.Tango.DevFailed;
 
 abstract class ANumberSpectrumHelper extends NumberAttributeHelper {
 
-    @Override
-    void init(AAttribute attribute) {
+    void init(IAttribute attribute) {
 	super.init(attribute);
     }
 

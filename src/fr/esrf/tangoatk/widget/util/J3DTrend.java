@@ -31,7 +31,6 @@ import java.awt.event.*;
 
 /**
  *  A class to handle a 3D spectrum image viewer using colormap
- *  This class should be used with NumberSpectrumTrend3DViewer
  */
 public class J3DTrend extends JComponent implements MouseListener, MouseMotionListener, KeyListener  {
 
@@ -75,7 +74,7 @@ public class J3DTrend extends JComponent implements MouseListener, MouseMotionLi
     yAxis.setFont(ATKConstant.labelFont);
     yAxis.setAutoScale(false);
     yAxis.setVisible(true);
-    yAxis.setInverted( false );
+    //yAxis.setInverted( false );
 
     xAxis = new JLAxis(this,JLAxis.HORIZONTAL_DOWN);
     xAxis.setAxisColor(Color.BLACK);
@@ -164,9 +163,9 @@ public class J3DTrend extends JComponent implements MouseListener, MouseMotionLi
       return new Dimension(320, 200);
     } else {
       measureAxis();
-      int xDim =  theImage.getWidth() + margin.right + margin.left + yAxisWidth + yAxisRightMargin;
-      int yDim =  theImage.getHeight() + margin.top + margin.bottom + xAxisHeight + xAxisUpMargin;
-      return new Dimension(xDim,yDim);
+      return new Dimension(
+        theImage.getWidth() + margin.right + margin.left + yAxisWidth + yAxisRightMargin ,
+        theImage.getHeight() + margin.top + margin.bottom + xAxisHeight + xAxisUpMargin );
     }
 
   }
@@ -179,7 +178,7 @@ public class J3DTrend extends JComponent implements MouseListener, MouseMotionLi
    * Sets the image
    * @param img image
    */
-  public void setImage(BufferedImage img,int maxX,int maxY) {
+  public void setImage(BufferedImage img,int xZoom,int yZoom) {
 
     BufferedImage lastImage = theImage;
     theImage = img;
@@ -189,8 +188,8 @@ public class J3DTrend extends JComponent implements MouseListener, MouseMotionLi
     lastImage = null;
 
     yAxis.setMinimum(0);
-    yAxis.setMaximum(maxY);
-    xAxis.setMinimum(-maxX);
+    yAxis.setMaximum(img.getHeight()/yZoom);
+    xAxis.setMinimum(-img.getWidth()/xZoom);
     xAxis.setMaximum(0);
 
   }
@@ -232,15 +231,6 @@ public class J3DTrend extends JComponent implements MouseListener, MouseMotionLi
     if( theImage==null ) return false;
     return (yCursor>=0 && yCursor<theImage.getHeight() &&
             xCursor>=0 && xCursor<theImage.getWidth() );
-  }
-
-  /**
-   * Remove the cursor
-   */
-  public void clearCursor() {
-    xCursor = -1;
-    yCursor = -1;
-    cursorMove();
   }
 
   protected void paintAxis(Graphics g) {
@@ -292,7 +282,7 @@ public class J3DTrend extends JComponent implements MouseListener, MouseMotionLi
 
   }
 
-  public void cursorMove() {
+  private void cursorMove() {
 
     if (parent != null) {
       if (isCursorInside()) parent.updateCursor(xCursor, yCursor);

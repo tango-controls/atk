@@ -88,7 +88,7 @@ public class SimpleStateViewer extends JSmoothLabel implements IDevStateScalarLi
         if (!stateClickable) return;
         if (model == null) return;
         
-        IDevice  dev = model.getDevice();
+        Device  dev = model.getDevice();
         
         if ( (evt.getModifiers() & java.awt.event.InputEvent.BUTTON3_MASK) != 0)
         {
