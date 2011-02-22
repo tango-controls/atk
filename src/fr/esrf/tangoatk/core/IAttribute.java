@@ -26,6 +26,7 @@
 
 package fr.esrf.tangoatk.core;
 import fr.esrf.TangoApi.*;
+import fr.esrf.Tango.AttrDataFormat;
 import fr.esrf.Tango.DevFailed;
 
 /**
@@ -107,7 +108,7 @@ public interface IAttribute extends IEntity
      * attribute.
      * @return a <code>DeviceAttribute</code> value
      */
-    //public DeviceAttribute getAttribute();
+    public DeviceAttribute getAttribute();
     
     /**
      * <code>getLabel</code> returns the label of this attribute.
@@ -141,7 +142,14 @@ public interface IAttribute extends IEntity
      * <code>getTangoDataType</code> returns the type of this attribute.
      * @return an <code>int</code> value
      */
-    //public int getTangoDataType();
+    public int getTangoDataType();
+
+    /**
+     * <code>getTangoDataFormat</code> returns the data format of this
+     * attribute.
+     * @return an <code>AttrDataFormat</code> value
+     */
+    public AttrDataFormat getTangoDataFormat();
 
     /**
      * <code>getDescription</code> returns the description of this attribute.
@@ -282,22 +290,17 @@ public interface IAttribute extends IEntity
     public void setSkippingRefresh(boolean b);
 
     public boolean isSkippingRefresh();
-    
+
     /**
-     * <code>areAttPropertiesLoaded</code> returns true if the some ATK specific attribute properties have already
-     * been loaded from the Tango DB. One example for these ATK specific attribute properties is : OpenCloseInverted for a DevStateScalar
-     * attribute
-     *
-     * @return true if all the attribute properties have been read from the Tango DB and initialized
-     *         false the ATK specific attribute properties have not been initialized yet
+     * Method used by optimized AttributePolledList (one read per device)
+     * @param attValue Attribute value
      */
-    public boolean areAttPropertiesLoaded();
-    
+    public void dispatch(DeviceAttribute attValue);
+
     /**
-     * Method used by some attribute viewers to force the reading of some specific at setModel(). The viewer first
-     * tests if the ATK specific attribute properties have not been initialized yet (call to areAttPropertiesLoaded())
-     * 
+     * Method used by optimized AttributePolledList (one read per device)
+     * @param e Attribute arror
      */
-    public void loadAttProperties();
+    public void dispatchError(DevFailed e);
 
 }

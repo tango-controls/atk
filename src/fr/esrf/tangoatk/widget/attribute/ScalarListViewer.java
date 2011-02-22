@@ -1198,22 +1198,6 @@ public class ScalarListViewer extends javax.swing.JPanel
 		 {
 	            if (enumViewer != null)
 		    {
-                        if (toolTipDisplay.equalsIgnoreCase(TOOLTIP_DISPLAY_ALL))
-                        {
-                           enumViewer.setHasToolTip(true);
-                           enumViewer.setQualityInTooltip(true);
-                        }
-                        else
-                           if (toolTipDisplay.equalsIgnoreCase(TOOLTIP_DISPLAY_NAME_ONLY))
-                           {
-                              enumViewer.setHasToolTip(true);
-                              enumViewer.setQualityInTooltip(false);
-                           }
-                           else
-                           {
-                              enumViewer.setHasToolTip(false);
-                              enumViewer.setQualityInTooltip(false);
-                           }
                 	enumViewer.setFont(theFont);
         		enumViewer.setBackgroundColor(getBackground());
         		enumViewer.setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());
@@ -1536,18 +1520,15 @@ public class ScalarListViewer extends javax.swing.JPanel
 	  //scalarlv.setCheckBoxStrings(attrefsubst, "Pulsed", "W Noise");
      
        
-	  //attn = (INumberScalar) attList.add("jlp/test/1/att_un");
-          //attn = (INumberScalar) attList.add("jlp/test/1/att_deux");
-          //attn = (INumberScalar) attList.add("jlp/test/1/att_trois");
-          //attn = (INumberScalar) attList.add("jlp/test/1/att_quatre");
-          //attstr = (IStringScalar) attList.add("jlp/test/1/att_cinq");
-	  //attbool = (IBooleanScalar) attList.add("jlp/test/1/Att_boolean");
+	  attn = (INumberScalar) attList.add("jlp/test/1/att_un");
+          attn = (INumberScalar) attList.add("jlp/test/1/att_deux");
+          attn = (INumberScalar) attList.add("jlp/test/1/att_trois");
+          attn = (INumberScalar) attList.add("jlp/test/1/att_quatre");
+          attstr = (IStringScalar) attList.add("jlp/test/1/att_cinq");
+	  attbool = (IBooleanScalar) attList.add("jlp/test/1/Att_boolean");
           //attn = (INumberScalar) attList.add("jlp/test/1/att_six");
           //attEnum = (IEnumScalar) attList.add("jlp/test/1/att_six");
-          //iatt = (IAttribute) attList.add("jlp/test/1/att_six");
-          
-          iatt = (IAttribute) attList.add("//orion:10000/elin/master/op/CT_Current");
-          iatt = (IAttribute) attList.add("elin/master/op/CT_Current");
+          iatt = (IAttribute) attList.add("jlp/test/1/att_six");
 
 	  scalarlv.setModel(attList);
 	  
@@ -1573,40 +1554,13 @@ public class ScalarListViewer extends javax.swing.JPanel
 			      }
 			  }
                                      );
-                                     
-       mainFrame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-       mainFrame.getContentPane().setLayout(new java.awt.GridBagLayout());
+				     
 
-       java.awt.GridBagConstraints gridBagConstraints = new java.awt.GridBagConstraints();
-       gridBagConstraints.gridx = 0;
-       gridBagConstraints.gridy = 0;
-       gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-       gridBagConstraints.weightx = 1.0;
-       gridBagConstraints.weighty = 1.0; 
-       gridBagConstraints.insets = new java.awt.Insets(5, 5, 5, 5);
-       mainFrame.getContentPane().add(scalarlv, gridBagConstraints);
-
-       javax.swing.JButton jButton1 = new javax.swing.JButton();
-       jButton1.setText("Atk Diagnostic");
-       jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                fr.esrf.tangoatk.widget.util.ATKDiagnostic.showDiagnostic();
-            }
-       });
-       gridBagConstraints.gridx = 0;
-       gridBagConstraints.gridy = 1;
-       gridBagConstraints.fill = java.awt.GridBagConstraints.NONE;
-       gridBagConstraints.weightx = 0.0;
-       gridBagConstraints.weighty = 0.0; 
-       gridBagConstraints.insets = new java.awt.Insets(10, 10, 10, 10);
-       mainFrame.getContentPane().add(jButton1, gridBagConstraints);
-
-       attList.startRefresher();
+       mainFrame.setContentPane(scalarlv);
        mainFrame.pack();
 
        mainFrame.setVisible(true);
        
     } // end of main ()
-        
         
 }

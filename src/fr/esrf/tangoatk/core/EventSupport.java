@@ -246,8 +246,8 @@ public class EventSupport implements Serializable
         }
         
         // Free memory in the Event Structure
-        //resultEvent.setSource(null);
-        //resultEvent.setResult(null);
+        resultEvent.setSource(null);
+        resultEvent.setResult(null);
     }
 
     public void fireStatusEvent(Object source, String status) {
@@ -283,8 +283,8 @@ public class EventSupport implements Serializable
           }
         }        
         // Free memory in the Event Structure
-        //statusEvent.setSource(null);
-        //statusEvent.setStatus(null);
+        statusEvent.setSource(null);
+        statusEvent.setStatus(null);
     }
 
     public void fireStateEvent(Device source, String state) {
@@ -319,8 +319,8 @@ public class EventSupport implements Serializable
           }
         }       
         // Free memory in the Event Structure
-        //stateEvent.setSource(null);
-        //stateEvent.setState(null);
+        stateEvent.setSource(null);
+        stateEvent.setState(null);
     }
 
 
@@ -359,8 +359,8 @@ public class EventSupport implements Serializable
           }
         }
         // Free memory in the Event Structure
-        //attributeStateEvent.setSource(null);
-        //attributeStateEvent.setState(null);
+        attributeStateEvent.setSource(null);
+        attributeStateEvent.setState(null);
     }
 
     public void fireReadErrorEvent(Object source, Throwable t) {
@@ -397,8 +397,8 @@ public class EventSupport implements Serializable
           }
         }
         // Free memory in the Event Structure
-        //readErrorEvent.setSource(null);
-        //readErrorEvent.setError(null);
+        readErrorEvent.setSource(null);
+        readErrorEvent.setError(null);
     }
 
     public void fireSetErrorEvent(Object source, Throwable t) {
@@ -434,8 +434,8 @@ public class EventSupport implements Serializable
           }
         }
         // Free memory in the Event Structure
-        //setErrorEvent.setSource(null);
-        //setErrorEvent.setError(null);
+        setErrorEvent.setSource(null);
+        setErrorEvent.setError(null);
     }
 
     public void fireNumberScalarEvent(INumberScalar source, double value, long timeStamp)
@@ -468,7 +468,7 @@ public class EventSupport implements Serializable
           }
         }
         // Free memory in the Event Structure
-        //numberScalarEvent.setSource(null);
+        numberScalarEvent.setSource(null);
     }
 
     public void fireStringScalarEvent(IStringScalar source, String value, long timeStamp)
@@ -501,8 +501,8 @@ public class EventSupport implements Serializable
           }
         }
         // Free memory in the Event Structure
-        //stringScalarEvent.setSource(null);
-        //stringScalarEvent.setValue(null);
+        stringScalarEvent.setSource(null);
+        stringScalarEvent.setValue(null);
     }
 
     public void fireSpectrumEvent(INumberSpectrum source, double[] value, long timeStamp)
@@ -535,8 +535,8 @@ public class EventSupport implements Serializable
           }
         }
         // Free memory in the Event Structure
-        //numberSpectrumEvent.setSource(null);
-        //numberSpectrumEvent.setValue(null);
+        numberSpectrumEvent.setSource(null);
+        numberSpectrumEvent.setValue(null);
     }
 
     public void fireImageEvent(INumberImage source, double[][] value, long timeStamp)
@@ -569,8 +569,8 @@ public class EventSupport implements Serializable
           }
         }
         // Free memory in the Event Structure
-        //numberImageEvent.setSource(null);
-        //numberImageEvent.setValue(null);
+        numberImageEvent.setSource(null);
+        numberImageEvent.setValue(null);
     }
 
 
@@ -604,8 +604,8 @@ public class EventSupport implements Serializable
           }
         }
         // Free memory in the Event Structure
-        //stringSpectrumEvent.setSource(null);
-        //stringSpectrumEvent.setValue(null);
+        stringSpectrumEvent.setSource(null);
+        stringSpectrumEvent.setValue(null);
     }
 
     // Added support for new Tango attribute types February 2005
@@ -651,8 +651,8 @@ public class EventSupport implements Serializable
           }
         }
         // Free memory in the Event Structure
-        //boolImageEvent.setSource(null);
-        //boolImageEvent.setValue(null);
+        boolImageEvent.setSource(null);
+        boolImageEvent.setValue(null);
     }
 
 
@@ -696,8 +696,8 @@ public class EventSupport implements Serializable
           }
         }
         // Free memory in the Event Structure
-        //boolSpectrumEvent.setSource(null);
-        //boolSpectrumEvent.setValue(null);
+        boolSpectrumEvent.setSource(null);
+        boolSpectrumEvent.setValue(null);
     }
 
 
@@ -741,7 +741,7 @@ public class EventSupport implements Serializable
           }
         }
         // Free memory in the Event Structure
-        //boolScalarEvent.setSource(null);
+        boolScalarEvent.setSource(null);
     }
 
 
@@ -785,8 +785,8 @@ public class EventSupport implements Serializable
           }
         }
         // Free memory in the Event Structure
-        //devStateScalarEvent.setSource(null);
-        //devStateScalarEvent.setValue(null);
+        devStateScalarEvent.setSource(null);
+        devStateScalarEvent.setValue(null);
     }
 
     
@@ -834,8 +834,8 @@ public class EventSupport implements Serializable
           }
         }
         // Free memory in the Event Structure
-        //endGroupExecEvent.setSource(null);
-        //endGroupExecEvent.setResult(null);
+        endGroupExecEvent.setSource(null);
+        endGroupExecEvent.setResult(null);
     }
 
     public synchronized void addRawImageListener(IRawImageListener l) {
@@ -848,18 +848,18 @@ public class EventSupport implements Serializable
     removeErrorListener(l);
     }
 
-    public void fireRawImageEvent(IRawImage source,String encFormat, byte[] value, long timeStamp)
+    public void fireRawImageEvent(IRawImage source, byte[][] value, long timeStamp)
     {
         // Guaranteed to return a non-null array
         Object[] listeners = listenerList.getListenerList();
 
         // Lazily create the event
         if (rawImageEvent == null)
-          rawImageEvent = new RawImageEvent(source, encFormat, value, timeStamp);
+          rawImageEvent = new RawImageEvent(source, value, timeStamp);
         else
         {
           rawImageEvent.setSource(source);
-          rawImageEvent.setValue(encFormat,value);
+          rawImageEvent.setValue(value);
           rawImageEvent.setTimeStamp(timeStamp);
         }
 
@@ -878,8 +878,8 @@ public class EventSupport implements Serializable
           }
         }
         // Free memory in the Event Structure
-        //rawImageEvent.setSource(null);
-        //rawImageEvent.setValue(null,null);
+        rawImageEvent.setSource(null);
+        rawImageEvent.setValue(null);
     }
 
 
@@ -924,8 +924,8 @@ public class EventSupport implements Serializable
           }
         }
         // Free memory in the Event Structure
-        //enumScalarEvent.setSource(null);
-        //enumScalarEvent.setValue(null);
+        enumScalarEvent.setSource(null);
+        enumScalarEvent.setValue(null);
     }
 
 
@@ -971,8 +971,8 @@ public class EventSupport implements Serializable
           }
         }
         // Free memory in the Event Structure
-        //strImageEvent.setSource(null);
-        //strImageEvent.setValue(null);
+        strImageEvent.setSource(null);
+        strImageEvent.setValue(null);
     }
 
 
@@ -1024,8 +1024,8 @@ public class EventSupport implements Serializable
             }
         }
         // Free memory in the Event Structure
-        //devStateSpectrumEvent.setSource(null);
-        //devStateSpectrumEvent.setValue(null);
+        devStateSpectrumEvent.setSource(null);
+        devStateSpectrumEvent.setValue(null);
      }
   
   

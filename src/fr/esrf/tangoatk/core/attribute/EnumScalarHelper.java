@@ -30,35 +30,38 @@
 
 package fr.esrf.tangoatk.core.attribute;
 
+import java.lang.IllegalArgumentException;
+import java.util.*;
 
 import fr.esrf.tangoatk.core.*;
 
 import fr.esrf.TangoApi.*;
+import fr.esrf.Tango.AttrQuality;
 import fr.esrf.Tango.DevFailed;
 
 public class EnumScalarHelper implements java.io.Serializable
 {
-    AAttribute   enumAtt;
+    IAttribute   enumAtt;
     EventSupport propChanges;
 
-    public EnumScalarHelper(AAttribute attribute)
+    public EnumScalarHelper(IAttribute attribute)
     {
 	init(attribute);
     }
 
-    void init(AAttribute attribute)
+    void init(IAttribute attribute)
     {
         setAttribute(attribute);
-        propChanges = attribute.getPropChanges();
+        propChanges = ((AAttribute) attribute).getPropChanges();
     }
 
 
-    public void setAttribute(AAttribute attribute)
+    public void setAttribute(IAttribute attribute)
     {
       this.enumAtt = attribute;
     }
 
-    public AAttribute getAttribute()
+    public IAttribute getAttribute()
     {
       return enumAtt;
     }

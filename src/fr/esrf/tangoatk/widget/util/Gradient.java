@@ -47,16 +47,6 @@ public class Gradient {
   }
 
   /**
-   * Construct a gradient from a set of color and position
-   * @param pos Color positions
-   * @param colors Colors
-   */
-  public Gradient(double[] pos,Color[] colors) {
-    colorVal = colors;
-    colorPos = pos;
-  }
-
-  /**
    * Please use buildRainbowGradient() instead.
    * @deprecated
    */
@@ -94,7 +84,8 @@ public class Gradient {
     Color[] nColorVal = new Color[colorVal.length];
     for(int i=0;i<colorVal.length;i++)
       nColorVal[i] = colorVal[colorVal.length-i-1];
-    System.arraycopy(nColorVal, 0, colorVal, 0, colorVal.length);
+    for(int i=0;i<colorVal.length;i++)
+      colorVal[i] = nColorVal[i];
     
   }
 
@@ -251,6 +242,8 @@ public class Gradient {
     }
 
     if( found ) {
+      int k=0;
+
       //Check validity
       if( Math.abs(colorPos[i]-pos)<1e-2 )
         return -1;
@@ -262,12 +255,21 @@ public class Gradient {
       colorVal = new Color[colorPos.length+1];
       colorPos = new double[colorVal.length];
 
-      System.arraycopy(oldColor, 0, colorVal, 0, i);
-      System.arraycopy(oldPos, 0, colorPos, 0, i);
-      colorVal[i] = c;
-      colorPos[i] = pos;
-      System.arraycopy(oldColor, i, colorVal, i+1, oldColor.length-i);
-      System.arraycopy(oldPos, i, colorPos, i+1, oldColor.length-i);
+      for(int j=0;j<i;j++) {
+        colorVal[k] = oldColor[j];
+        colorPos[k] = oldPos[j];
+        k++;
+      }
+
+      colorVal[k] = c;
+      colorPos[k] = pos;
+      k++;
+
+      for(int j=i;j<oldColor.length;j++) {
+        colorVal[k] = oldColor[j];
+        colorPos[k] = oldPos[j];
+        k++;
+      }
 
       return i;
 
@@ -286,17 +288,20 @@ public class Gradient {
 
     if( id>0 && id<(colorVal.length-1)) {
 
+      int k=0;
       Color[] oldColor = colorVal;
       double[] oldPos  = colorPos;
 
       colorVal = new Color[colorPos.length-1];
       colorPos = new double[colorVal.length];
 
-      System.arraycopy(oldColor, 0, colorVal, 0, id);
-      System.arraycopy(oldColor, id+1, colorVal, id, oldColor.length-id-1);
-
-      System.arraycopy(oldPos, 0, colorPos, 0, id);
-      System.arraycopy(oldPos, id+1, colorPos, id, oldPos.length-id-1);
+      for(int i=0;i<oldColor.length;i++) {
+        if( i!= id) {
+          colorVal[k] = oldColor[i];
+          colorPos[k] = oldPos[i];
+          k++;
+        }
+      }
     }
 
   }

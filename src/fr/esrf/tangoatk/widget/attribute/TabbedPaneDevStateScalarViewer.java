@@ -207,10 +207,6 @@ public class TabbedPaneDevStateScalarViewer extends JTabbedPane implements IDevS
 
         indexStateAttMap.put(tabIndex, devStateAtt);
         stateModelMap.put(devStateAtt, tabIndex);
-        
-        if (!devStateAtt.areAttPropertiesLoaded())
-            devStateAtt.loadAttProperties();
-        
         devStateAtt.addDevStateScalarListener(this);
         devStateAtt.addErrorListener(this);
         devStateAtt.refresh();

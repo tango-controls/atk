@@ -104,8 +104,6 @@ public class DevStateSpectrumViewer extends javax.swing.JPanel
 	if (stateSpec == null) return;
 	
 	model = stateSpec;
-        if (!model.areAttPropertiesLoaded())
-           model.loadAttProperties();
 	modelStateLabels = model.getStateLabels();
 	modelLabel = model.getLabel();
 	model.getProperty("label").addPresentationListener(this);

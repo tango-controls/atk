@@ -41,8 +41,8 @@ public class DevStateScalar extends AAttribute
 
   DevStateScalarHelper   devStateHelper;
   String                 devStateValue = null;
-  boolean                invertOpenClose = false;
-  boolean                invertInsertExtract = false;
+  boolean                invertOpenClose;
+  boolean                invertInsertExtract;
 
   public DevStateScalar()
   {
@@ -91,10 +91,6 @@ public class DevStateScalar extends AAttribute
       return devStateValue;
   }
 
-    private boolean isConnected()
-    {
-        return getDevice().isConnected();
-    }
 
   public void refresh()
   {
@@ -103,18 +99,6 @@ public class DevStateScalar extends AAttribute
      
       
       if (skippingRefresh) return;
-
-      if (!isConnected())
-          reconnectAtt();
-      
-      if (!isConnected())
-      {
-          trace(DeviceFactory.TRACE_REFRESHER, "DevStateScalar.refresh(" + getName() + ") failed, device not connected; will call readAttError", t0);
-          // Fire error event
-          readAttError("Failed to read the state attribute. Connection to device failed.", new AttributeReadException("Failed to read the state attribute. Connection to device failed."));
-          return;
-      }
-
       refreshCount++;
       trace(DeviceFactory.TRACE_REFRESHER, "DevStateScalar.refresh() method called for " + getName(), t0);
       try
@@ -307,7 +291,7 @@ public class DevStateScalar extends AAttribute
       long                t0 = System.currentTimeMillis();
 
       trace(DeviceFactory.TRACE_CHANGE_EVENT, "DevStateScalar.change method called for " + getName(), t0);
-//System.out.println("DevStateScalar.change(" + getName() + ") Begin ");
+     
       try
       {
           da = evt.getValue();
@@ -321,7 +305,7 @@ public class DevStateScalar extends AAttribute
               trace(DeviceFactory.TRACE_CHANGE_EVENT, "DevStateScalar.changeEvt.getValue(" + getName() + ") failed, got heartbeat error", t0);
 	      // Tango error
 	      // Fire error event
-              readAttError(dfe.getMessage(), new AttributeReadException(dfe));
+	      readAttError(dfe.getMessage(), new AttributeReadException(dfe));
 	  }
 	  else // For the moment the behaviour for all DevFailed is the same
 	  {
@@ -330,7 +314,7 @@ public class DevStateScalar extends AAttribute
 	      // Fire error event
 	      readAttError(dfe.getMessage(), new AttributeReadException(dfe));
 	  }
-         return;
+          return;
       }
       catch (Exception e) // Code failure
       {
@@ -359,7 +343,7 @@ public class DevStateScalar extends AAttribute
           }
 	  catch (DevFailed dfe)
 	  {
-              trace(DeviceFactory.TRACE_CHANGE_EVENT, "DevStateScalar.change(" + getName() + ") failed, got DevFailed when called da.extractState()", t0);
+              trace(DeviceFactory.TRACE_CHANGE_EVENT, "DevStateScalar.change(" + getName() + ") failed, got DevFailed when called fireValueChanged(devStateValue)", t0);
               // Tango error
               // Fire error event
               readAttError(dfe.getMessage(), new AttributeReadException(dfe));
@@ -384,41 +368,15 @@ public class DevStateScalar extends AAttribute
   {
        return invertInsertExtract;
   }
-  
-  @Override
-  public void loadAttProperties()
+
+  void setInvertedOpenClose(boolean b)
   {
-     DbAttribute    dbAtt=null;
-     DbDatum        propDbDatum=null;
- 
-     try
-     {
-         attPropertiesLoaded = true;
-         dbAtt = this.getDevice().get_attribute_property(this.getNameSansDevice());
-         if (dbAtt== null) return;
-         
-         if (!dbAtt.is_empty(fr.esrf.tangoatk.core.Device.OPEN_CLOSE_PROP))
-         {
-             propDbDatum = dbAtt.datum(fr.esrf.tangoatk.core.Device.OPEN_CLOSE_PROP);
-             if (propDbDatum != null)
-                if (!propDbDatum.is_empty())
-                       invertOpenClose = propDbDatum.extractBoolean();
-         }
-         
-         if (!dbAtt.is_empty(fr.esrf.tangoatk.core.Device.INSERT_EXTRACT_PROP))
-         {
-             propDbDatum = dbAtt.datum(fr.esrf.tangoatk.core.Device.INSERT_EXTRACT_PROP);
-             if (propDbDatum != null)
-                if (!propDbDatum.is_empty())
-                       invertInsertExtract = propDbDatum.extractBoolean();
-         }
-     }
-     catch (Exception ex)
-     {
-         System.out.println("get_attribute_property("+this.getName()+") thrown exception");
-         ex.printStackTrace();
-     }
-     
+       invertOpenClose = b;
+  }
+  
+  void setInvertedInsertExtract(boolean b)
+  {
+       invertInsertExtract = b;
   }
 
   

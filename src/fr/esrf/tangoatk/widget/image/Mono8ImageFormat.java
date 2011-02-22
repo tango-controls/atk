@@ -24,38 +24,12 @@ package fr.esrf.tangoatk.widget.image;
 
 import fr.esrf.tangoatk.widget.util.JGradientViewer;
 
-import java.io.IOException;
-
 /**
  * Monochrome 8bits image format
  */
 public class Mono8ImageFormat extends IImageFormat {
 
   public Mono8ImageFormat() {}
-
-  public void setData(byte[] rawData) throws IOException {
-
-    // Get width and height
-    int wh = (rawData[0] & 0xFF);
-    int wl = (rawData[1] & 0xFF);
-    wh = wh << 8;
-    int width = wh | wl;
-
-    int hh = (rawData[2] & 0xFF);
-    int hl = (rawData[3] & 0xFF);
-    hh = hh << 8;
-    int height = hh | hl;
-
-    // Convert data
-    int idx = 4;
-    data = new byte[height][width];
-    for(int j=0;j<height;j++) {
-      for(int i=0;i<width;i++) {
-        data[j][i] = rawData[idx++];
-      }
-    }
-
-  }
 
   public int getWidth() {
     if(getHeight()==0) return 0;
@@ -80,10 +54,6 @@ public class Mono8ImageFormat extends IImageFormat {
     int v = data[y][x] & 0xFF;
     return (double)v;
 
-  }
-
-  public String getValueStr(int x,int y) {
-    return Double.toString(getValue(x,y));
   }
 
   public void computeFitting() {

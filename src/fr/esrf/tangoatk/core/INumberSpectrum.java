@@ -26,41 +26,18 @@
 
 package fr.esrf.tangoatk.core;
 
-public interface INumberSpectrum extends INumber
-{
+import fr.esrf.Tango.*;
+import fr.esrf.TangoApi.*;
+import java.beans.*;
 
-    public static final String XMIN_ATT_PROP = "XminAttribute";
-    public static final String XMAX_ATT_PROP = "XmaxAttribute";
-    public static final String XMIN_PROP = "Xmin";
-    public static final String XMAX_PROP = "Xmax";
-    
+public interface INumberSpectrum extends INumber {
+
     public void addSpectrumListener(ISpectrumListener l) ;
 
     public void removeSpectrumListener(ISpectrumListener l);
 
     public double[] getSpectrumValue();
-    public double[] getSpectrumDeviceValue();
-    public double[] getSpectrumStandardValue();
     
-    public double[] getSpectrumSetPoint();
-    public double[] getSpectrumDeviceSetPoint();
-    public double[] getSpectrumStandardSetPoint();
-    
-    public void setValue(double[] d);
-
-    public INumberSpectrumHistory[] getNumberSpectrumHistory();
-    public INumberSpectrumHistory[] getNumberSpectrumDeviceHistory();
-    
-    public boolean hasMinxMaxxAttributes();
-    
-    public boolean hasMinxMaxxProperties();
-  
-    public String getMinxAttName();
-   
-    public String getMaxxAttName();
-  
-    public double getMinx();
-  
-    public double getMaxx();
+    public void setValue(double[] d) throws AttributeSetException;
 
 }

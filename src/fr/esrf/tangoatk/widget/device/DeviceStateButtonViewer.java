@@ -120,8 +120,6 @@ public class DeviceStateButtonViewer extends JButton implements IStateListener{
         if (devModel == null)
             return;
         deviceModel = devModel;
-        if (!deviceModel.areDevPropertiesLoaded())
-            deviceModel.loadDevProperties();
         deviceModel.addStateListener(this);
     }
     

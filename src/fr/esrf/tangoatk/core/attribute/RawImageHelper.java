@@ -39,11 +39,12 @@ class RawImageHelper implements java.io.Serializable {
 
   IAttribute attribute;
   EventSupport propChanges;
-  String encFormat = null;
+  byte[][] retval = new byte[1][1];
 
   public RawImageHelper(IAttribute attribute) {
     init(attribute);
   }
+
 
   void init(IAttribute attribute) {
     setAttribute(attribute);
@@ -69,19 +70,29 @@ class RawImageHelper implements java.io.Serializable {
   }
 
 
-  void fireRawImageValueChanged(String encFormat,byte[] newValue, long timeStamp) {
-    propChanges.fireRawImageEvent((IRawImage) attribute,encFormat,
+  void fireImageValueChanged(byte[][] newValue, long timeStamp) {
+    propChanges.fireRawImageEvent((IRawImage) attribute,
             newValue, timeStamp);
   }
 
-  byte[] getRawImageValue(DeviceAttribute deviceAttribute) throws DevFailed {
-    DevEncoded e = deviceAttribute.extractDevEncoded();
-    encFormat = e.encoded_format;
-    return e.encoded_data;
-  }
+  byte[][] getRawImageValue(DeviceAttribute deviceAttribute) throws DevFailed {
+    byte[] tmp;
 
-  String getRawImageFormat() {
-    return encFormat;
+    tmp = deviceAttribute.extractCharArray();
+    int ydim = attribute.getYDimension();
+    int xdim = attribute.getXDimension();
+
+    if (ydim != retval.length || xdim != retval[0].length) {
+      retval = new byte[ydim][xdim];
+    }
+
+    int k = 0;
+    for (int y = 0; y < ydim; y++) {
+      System.arraycopy(tmp,k,retval[y],0,xdim);
+      k+=xdim;
+    }
+
+    return retval;
   }
 
   void addRawImageListener(IRawImageListener l) {

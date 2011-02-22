@@ -38,10 +38,8 @@ public interface IRawImage extends IAttribute {
     
     public void removeRawImageListener(IRawImageListener l) ;
 
-    public byte[] getValue() throws DevFailed;
+    public byte[][] getValue() throws DevFailed;
 
-    public String getEncodedFormat() throws DevFailed;
-  
-    public void setValue(String format,byte[] d) throws AttributeSetException;
+    public void setValue(byte[][] d) throws AttributeSetException;
 
 }

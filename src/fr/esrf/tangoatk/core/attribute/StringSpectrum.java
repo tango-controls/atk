@@ -39,9 +39,8 @@ import fr.esrf.TangoApi.events.*;
 public class StringSpectrum extends AAttribute
   implements IStringSpectrum {
 
-  StringSpectrumHelper   stringSpectHelper;
-  String[]               spectrumValue = null;
-  String[]               spectrumSetPointValue = null;
+  StringSpectrumHelper stringSpectHelper;
+  String[] stringValues = null;
 
   public StringSpectrum() {
     stringSpectHelper = new StringSpectrumHelper(this);
@@ -60,13 +59,7 @@ public class StringSpectrum extends AAttribute
 
 
   public String[] getStringSpectrumValue() {
-    return spectrumValue;
-  }
-  
-  // getStringSpectrumSetPoint returns the attribute's setpoint value
-  public String[] getStringSpectrumSetPoint()
-  {
-      return spectrumSetPointValue;
+    return stringValues;
   }
 
 
@@ -81,9 +74,7 @@ public class StringSpectrum extends AAttribute
   }
 
 
-  public void refresh()
-  {
-    DeviceAttribute           da = null;
+  public void refresh() {
 
     if (skippingRefresh) return;
     refreshCount++;
@@ -92,21 +83,16 @@ public class StringSpectrum extends AAttribute
       try {
 
         // Retreive the value from the device
-        // Read the attribute from device cache (readValueFromNetwork)
-	da = readValueFromNetwork();
-        // Retreive the read value for the attribute
-        spectrumValue = stringSpectHelper.getStringSpectrumValue(da);
-        // Retreive the setPoint value for the attribute
-        spectrumSetPointValue = stringSpectHelper.getStringSpectrumSetPoint(da);
+        readValueFromNetwork();
+        stringValues = stringSpectHelper.extract();
 
         // Fire valueChanged
-        fireValueChanged(spectrumValue);
+        fireValueChanged(stringValues);
 
       } catch (DevFailed e) {
 
         // Tango error
-        spectrumValue = null;
-        spectrumSetPointValue = null;
+        stringValues = null;
 
         // Fire error event
         readAttError(e.getMessage(), new AttributeReadException(e));
@@ -116,8 +102,7 @@ public class StringSpectrum extends AAttribute
     } catch (Exception e) {
 
       // Code failure
-      spectrumValue = null;
-      spectrumSetPointValue = null;
+      stringValues = null;
 
       System.out.println("StringSpectrum.refresh() Exception caught ------------------------------");
       e.printStackTrace();
@@ -141,25 +126,21 @@ public class StringSpectrum extends AAttribute
         setState(attValue);
         timeStamp = attValue.getTimeValMillisSec();
 
-        // Retreive the read value for the attribute
-        spectrumValue = stringSpectHelper.getStringSpectrumValue(attValue);
-        // Retreive the setPoint value for the attribute
-        spectrumSetPointValue = stringSpectHelper.getStringSpectrumSetPoint(attValue);
+        stringValues = stringSpectHelper.getStringSpectrumValue(attValue);
 
         // Fire valueChanged
-        fireValueChanged(spectrumValue);
+        fireValueChanged(stringValues);
 
-      } 
-      catch (DevFailed e)
-      {
+      } catch (DevFailed e) {
+
         dispatchError(e);
+
       }
 
     } catch (Exception e) {
 
       // Code failure
-      spectrumValue = null;
-      spectrumSetPointValue = null;
+      stringValues = null;
 
       System.out.println("StringSpectrum.dispatch() Exception caught ------------------------------");
       e.printStackTrace();
@@ -172,8 +153,7 @@ public class StringSpectrum extends AAttribute
   public void dispatchError(DevFailed e) {
 
     // Tango error
-    spectrumValue = null;
-    spectrumSetPointValue = null;
+    stringValues = null;
 
     // Fire error event
     readAttError(e.getMessage(), new AttributeReadException(e));
@@ -201,8 +181,7 @@ public class StringSpectrum extends AAttribute
 	  {
              trace(DeviceFactory.TRACE_PERIODIC_EVENT, "StringSpectrum.periodicEvt.getValue(" + getName() + ") failed, got heartbeat error", t0);
              // Tango error
-             spectrumValue = null;
-             spectrumSetPointValue = null;
+             stringValues = null;
 
              // Fire error event
              readAttError(dfe.getMessage(), new AttributeReadException(dfe));
@@ -211,8 +190,7 @@ public class StringSpectrum extends AAttribute
 	  {
              trace(DeviceFactory.TRACE_PERIODIC_EVENT, "StringSpectrum.periodicEvt.getValue(" + getName() + ") failed, got other error", t0);
              // Tango error
-             spectrumValue = null;
-             spectrumSetPointValue = null;
+             stringValues = null;
 
              // Fire error event
              readAttError(dfe.getMessage(), new AttributeReadException(dfe));
@@ -222,8 +200,7 @@ public class StringSpectrum extends AAttribute
       catch (Exception e) // Code failure
       {
           trace(DeviceFactory.TRACE_PERIODIC_EVENT, "StringSpectrum.periodicEvt.getValue(" + getName() + ") failed, caught Exception, code failure", t0);
-	  spectrumValue = null;
-          spectrumSetPointValue = null;
+	  stringValues = null;
 
 	  System.out.println("StringSpectrum.periodic.getValue() Exception caught ------------------------------");
 	  e.printStackTrace();
@@ -235,36 +212,28 @@ public class StringSpectrum extends AAttribute
       // read the attribute value from the received event!      
       if (da != null)
       {
-            try 
-            {
-               setState(da); // To set the quality factor and fire AttributeState event
-               attribute = da;
-               timeStamp = da.getTimeValMillisSec();
-               // Retreive the read value for the attribute
-               spectrumValue = stringSpectHelper.getStringSpectrumValue(da);
-               // Retreive the setPoint value for the attribute
-               spectrumSetPointValue = stringSpectHelper.getStringSpectrumSetPoint(da);
-               // Fire valueChanged
-               fireValueChanged(spectrumValue);
-            }
-            catch (DevFailed dfe)
-            {
-               // Tango error
-               spectrumValue = null;
-               spectrumSetPointValue = null;
+        try {
+          setState(da); // To set the quality factor and fire AttributeState event
+          attribute = da;
+          timeStamp = da.getTimeValMillisSec();
+          // Retreive the read value for the attribute
+          stringValues = da.extractStringArray();
+          // Fire valueChanged
+          fireValueChanged(stringValues);
+        } catch (DevFailed dfe) {
+          // Tango error
+          stringValues = null;
 
-               // Fire error event
-               readAttError(dfe.getMessage(), new AttributeReadException(dfe));
-            } 
-            catch (Exception e) // Code failure
-            {
-               spectrumValue = null;
-               spectrumSetPointValue = null;
+          // Fire error event
+          readAttError(dfe.getMessage(), new AttributeReadException(dfe));
+        } catch (Exception e) // Code failure
+        {
+          stringValues = null;
 
-               System.out.println("StringSpectrum.periodic.extractStringArray() Exception caught ------------------------------");
-               e.printStackTrace();
-               System.out.println("StringSpectrum.periodic.extractStringArray()------------------------------------------------");
-            } // end of catch
+          System.out.println("StringSpectrum.periodic.extractStringArray() Exception caught ------------------------------");
+          e.printStackTrace();
+          System.out.println("StringSpectrum.periodic.extractStringArray()------------------------------------------------");
+        } // end of catch
       }
       
   }
@@ -293,8 +262,7 @@ public class StringSpectrum extends AAttribute
 	  {
              trace(DeviceFactory.TRACE_CHANGE_EVENT, "StringSpectrum.changeEvt.getValue(" + getName() + ") failed, got heartbeat error", t0);
              // Tango error
-             spectrumValue = null;
-             spectrumSetPointValue = null;
+             stringValues = null;
 
              // Fire error event
              readAttError(dfe.getMessage(), new AttributeReadException(dfe));
@@ -303,8 +271,7 @@ public class StringSpectrum extends AAttribute
 	  {
              trace(DeviceFactory.TRACE_CHANGE_EVENT, "StringSpectrum.changeEvt.getValue(" + getName() + ") failed, got other error", t0);
              // Tango error
-             spectrumValue = null;
-             spectrumSetPointValue = null;
+             stringValues = null;
 
              // Fire error event
              readAttError(dfe.getMessage(), new AttributeReadException(dfe));
@@ -314,8 +281,7 @@ public class StringSpectrum extends AAttribute
       catch (Exception e) // Code failure
       {
           trace(DeviceFactory.TRACE_CHANGE_EVENT, "StringSpectrum.changeEvt.getValue(" + getName() + ") failed, caught Exception, code failure", t0);
-	  spectrumValue = null;
-          spectrumSetPointValue = null;
+	  stringValues = null;
 
 	  System.out.println("StringSpectrum.change.getValue() Exception caught ------------------------------");
 	  e.printStackTrace();
@@ -327,36 +293,28 @@ public class StringSpectrum extends AAttribute
       // read the attribute value from the received event!      
       if (da != null)
       {
-            try 
-            {
-               setState(da); // To set the quality factor and fire AttributeState event
-               attribute = da;
-               timeStamp = da.getTimeValMillisSec();
-               // Retreive the read value for the attribute
-               spectrumValue = stringSpectHelper.getStringSpectrumValue(da);
-               // Retreive the setPoint value for the attribute
-               spectrumSetPointValue = stringSpectHelper.getStringSpectrumSetPoint(da);
-               // Fire valueChanged
-               fireValueChanged(spectrumValue);
-            } 
-            catch (DevFailed dfe) 
-            {
-               // Tango error
-               spectrumValue = null;
-               spectrumSetPointValue = null;
+        try {
+          setState(da); // To set the quality factor and fire AttributeState event
+          attribute = da;
+          timeStamp = da.getTimeValMillisSec();
+          // Retreive the read value for the attribute
+          stringValues = da.extractStringArray();
+          // Fire valueChanged
+          fireValueChanged(stringValues);
+        } catch (DevFailed dfe) {
+          // Tango error
+          stringValues = null;
 
-               // Fire error event
-               readAttError(dfe.getMessage(), new AttributeReadException(dfe));
-            } 
-            catch (Exception e) // Code failure
-            {
-               spectrumValue = null;
-               spectrumSetPointValue = null;
+          // Fire error event
+          readAttError(dfe.getMessage(), new AttributeReadException(dfe));
+        } catch (Exception e) // Code failure
+        {
+          stringValues = null;
 
-               System.out.println("StringSpectrum.change.extractStringArray() Exception caught ------------------------------");
-               e.printStackTrace();
-               System.out.println("StringSpectrum.change.extractStringArray()------------------------------------------------");
-            } // end of catch
+          System.out.println("StringSpectrum.change.extractStringArray() Exception caught ------------------------------");
+          e.printStackTrace();
+          System.out.println("StringSpectrum.change.extractStringArray()------------------------------------------------");
+        } // end of catch
       }
       
   }

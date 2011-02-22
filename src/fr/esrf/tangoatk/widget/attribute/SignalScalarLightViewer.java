@@ -79,7 +79,6 @@ public class SignalScalarLightViewer extends JButton
     public final static ImageIcon darkOrangeLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledDarkOrange.gif"));
     public final static ImageIcon grayLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledGray.gif"));
     public final static ImageIcon greenLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledGreen.gif"));
-    public final static ImageIcon darkGreenLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledDarkGreen.gif"));
     public final static ImageIcon lightOrangeLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledLightOrange.gif"));
     public final static ImageIcon pinkLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledPink.gif"));
     public final static ImageIcon redLED = new ImageIcon(SignalScalarLightViewer.class.getResource("/fr/esrf/tangoatk/widget/icons/ledRed.gif"));

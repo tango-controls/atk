@@ -33,26 +33,25 @@ package fr.esrf.tangoatk.core.attribute;
 import fr.esrf.tangoatk.core.*;
 
 import fr.esrf.Tango.DevFailed;
-import fr.esrf.TangoApi.DeviceAttribute;
 
 public class BooleanSpectrumHelper implements java.io.Serializable
 {
-  AAttribute attribute;
+  IAttribute attribute;
   EventSupport propChanges;
 
-  public BooleanSpectrumHelper(AAttribute attribute)
+  public BooleanSpectrumHelper(IAttribute attribute)
   {
     init(attribute);
   }
 
-  void init(AAttribute attribute)
+  void init(IAttribute attribute)
   {
     setAttribute(attribute);
-    propChanges = attribute.getPropChanges();
+    propChanges = ((AAttribute) attribute).getPropChanges();
   }
   
   
-  public void setAttribute(AAttribute attribute)
+  public void setAttribute(IAttribute attribute)
   {
     this.attribute = attribute;
   }
@@ -72,48 +71,6 @@ public class BooleanSpectrumHelper implements java.io.Serializable
   {
     attribute.setProperty(name, value, writable);
   }
-  
-  boolean[] getBooleanSpectrumValue(DeviceAttribute da) throws DevFailed
-  {
-      boolean[]  tmp = da.extractBooleanArray();
-      int        nbReadElements = da.getNbRead();
-      
-      if (nbReadElements == tmp.length)
-          return tmp;
-      
-      boolean[]  retval = new boolean[nbReadElements];
-      for (int i = 0; i < nbReadElements; i++)
-      {
-          retval[i] = tmp[i];
-      }
-      return retval;
-  }
-  
-
-  boolean[] getBooleanSpectrumSetPoint(DeviceAttribute da) throws DevFailed
-  {
-      boolean[]  tmp = da.extractBooleanArray();
-      int        nbReadElements = da.getNbRead();
-      int        nbSetElements = tmp.length - nbReadElements;
-      
-      // The attributes WRITE (WRITE ONLY) return their setPoint in the first sequence of elements
-      // In all cases when no "set" element sequence is returned, return the read elements for setPoint
-      if (nbSetElements <= 0)
-      {
-          return getBooleanSpectrumValue(da);
-      }
-      else
-      {
-         boolean[]  retval = new boolean[nbSetElements];
-         int j = 0;
-         for (int i = nbReadElements; i < tmp.length; i++)
-         {
-             retval[j] = tmp[i];
-             j++;
-         }
-         return retval;
-      }
-  }
 
 
   void fireSpectrumValueChanged(boolean[] newValue, long timeStamp)
@@ -127,6 +84,11 @@ public class BooleanSpectrumHelper implements java.io.Serializable
       attribute.getAttribute().insert(boolSpect,
       ((IAttribute) attribute).getXDimension(),
       ((IAttribute) attribute).getYDimension());
+  }
+
+  boolean[] extract() throws DevFailed
+  {
+    return attribute.getAttribute().extractBooleanArray();
   }
 
   

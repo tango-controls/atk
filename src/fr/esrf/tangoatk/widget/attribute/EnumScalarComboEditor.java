@@ -42,7 +42,6 @@ import javax.swing.*;
 
 
 import fr.esrf.tangoatk.core.*;
-import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
 
 
 /**
@@ -52,7 +51,7 @@ import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
  * @author  poncet
  */
 public class EnumScalarComboEditor extends JComboBox 
-                                     implements ActionListener, IEnumScalarListener, JDrawable
+                                     implements ActionListener, IEnumScalarListener
 {
 
     private DefaultComboBoxModel     comboModel=null;
@@ -279,31 +278,6 @@ public class EnumScalarComboEditor extends JComboBox
 	this.setActionCommand("dummy");
     }
 
-  // ------------------------------------------------------
-  // Implementation of JDrawable interface
-  // ------------------------------------------------------
-  public void initForEditing() {
-  }
-
-  public JComponent getComponent() {
-    return this;
-  }
-
-  public String getDescription(String name) {
-    return "";
-  }
-
-  public String[] getExtensionList() {
-    return new String[0];
-  }
-
-  public boolean setExtendedParam(String name,String value,boolean popupErr) {
-    return true;
-  }
-
-  public String getExtendedParam(String name) {
-    return "";
-  }
 
 
     public static void main(String[] args)

@@ -106,8 +106,6 @@ public class SimpleStateViewer extends JSmoothLabel
          return;
 
      device = devModel;
-     if (!device.areDevPropertiesLoaded())
-         device.loadDevProperties();
      device.addStateListener(this);
      device.addErrorListener(this);
      setState(device.getState());

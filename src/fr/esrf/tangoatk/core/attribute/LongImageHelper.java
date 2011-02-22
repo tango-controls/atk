@@ -30,6 +30,7 @@
 // Description:
 package fr.esrf.tangoatk.core.attribute;
 
+import fr.esrf.tangoatk.core.*;
 
 
 import fr.esrf.Tango.*;
@@ -37,7 +38,7 @@ import fr.esrf.TangoApi.*;
 
 class LongImageHelper extends ANumberImageHelper {
 
-  public LongImageHelper(AAttribute attribute) {
+  public LongImageHelper(IAttribute attribute) {
     init(attribute);
   }
   
@@ -56,7 +57,7 @@ class LongImageHelper extends ANumberImageHelper {
           tmp[i] = (int) (flatd[i] / dUnitFactor);
       }
       
-      da.insert(tmp, d[0].length, d.length);
+      da.insert(tmp, d.length, d[0].length);
   }
   
 
@@ -127,8 +128,8 @@ class LongImageHelper extends ANumberImageHelper {
 
   double[][] getNumberImageValue(DeviceAttribute deviceAttribute) throws DevFailed {
 
-    int ydim = deviceAttribute.getDimY();
-    int xdim = deviceAttribute.getDimX();
+    int ydim = attribute.getYDimension();
+    int xdim = attribute.getXDimension();
 
     if (ydim != retval.length || xdim != retval[0].length) {
       retval = new double[ydim][xdim];
@@ -152,8 +153,8 @@ class LongImageHelper extends ANumberImageHelper {
     tmp = deviceAttribute.extractLongArray();
     dUnitFactor = this.attribute.getDisplayUnitFactor();
 
-    int ydim = deviceAttribute.getDimY();
-    int xdim = deviceAttribute.getDimX();
+    int ydim = attribute.getYDimension();
+    int xdim = attribute.getXDimension();
 
     if (ydim != retval.length || xdim != retval[0].length) {
       retval = new double[ydim][xdim];
@@ -169,19 +170,19 @@ class LongImageHelper extends ANumberImageHelper {
 
   }
 
-  String[][] getImageValueAsString(DeviceAttribute deviceAttribute) throws DevFailed {
+  String[][] getImageValue(DeviceAttribute deviceAttribute) throws DevFailed {
 
     int[] tmp = deviceAttribute.extractLongArray();
-    int ydim = deviceAttribute.getDimY();
-    int xdim = deviceAttribute.getDimX();
-    String[][] retval_str = new String[ydim][xdim];
+    int ydim = attribute.getYDimension();
+    int xdim = attribute.getXDimension();
+    String[][] retval = new String[ydim][xdim];
 
     int k = 0;
     for (int i = 0; i < ydim; i++)
       for (int j = 0; j < xdim; j++) {
-        retval_str[i][j] = Integer.toString(tmp[k++]);
+        retval[i][j] = Integer.toString(tmp[k++]);
       }
-    return retval_str;
+    return retval;
 
   }
 

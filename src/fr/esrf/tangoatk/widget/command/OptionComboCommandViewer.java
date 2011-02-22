@@ -70,7 +70,6 @@ public class OptionComboCommandViewer extends JPanel
     /* The bean properties */
    private java.awt.Font    theFont;
    private ICommand         model=null;
-   private String[]         valueList = null;
    private String[]         optionList = {"None"};
    private String           title=null;
 
@@ -225,25 +224,7 @@ public class OptionComboCommandViewer extends JPanel
       
   }
 
-  public String[] getValueList() {
-    return valueList;
-  }
 
-  public void setValueList(String[] valueList) {
-    this.valueList = valueList;
-  }
-  
-  public String getCmdOption(JComboBox source){
-      String cmdOption = ((String)source.getSelectedItem());
-      if(valueList == null || valueList.length == 0){
-          return cmdOption;
-      }
-      int index = source.getSelectedIndex();
-      if(index < valueList.length){
-          cmdOption = valueList[index];
-      }
-      return cmdOption;
-  }
 
 
   public String getTitle( )
@@ -288,7 +269,7 @@ public class OptionComboCommandViewer extends JPanel
 
 
       cb = (JComboBox) e.getSource();
-      cmdOption = getCmdOption(cb);
+      cmdOption = (String) cb.getSelectedItem();
       
       if ( !(e.getActionCommand().equals(defActionCmd)) )
       {

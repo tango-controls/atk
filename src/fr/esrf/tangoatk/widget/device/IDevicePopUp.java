@@ -31,11 +31,9 @@
 
 package fr.esrf.tangoatk.widget.device;
 
-import fr.esrf.tangoatk.core.IDevice;
-
 public interface IDevicePopUp {
 
-    public void setModel(IDevice device);
+    public void setModel(fr.esrf.tangoatk.core.Device device);
 
     public void setVisible(boolean visible);
 

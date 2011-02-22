@@ -40,28 +40,17 @@ public class RawImage extends AAttribute
         implements IRawImage {
 
   RawImageHelper imageHelper;
-  byte[] imageValue = null;
-  String encFormat;
+  byte[][] imageValue = null;
 
   public RawImage() {
     imageHelper = new RawImageHelper(this);
   }
 
-  /** Overrides the getType() method in AAttribute **/
-  public String getType()
-  {
-      return("RawImage");
-  }
-
-  public byte[] getValue() {
+  public byte[][] getValue() {
     return imageValue;
   }
 
-  public String getEncodedFormat() {
-    return encFormat;
-  }
-
-  public void setValue(String format, byte[] bImage) {
+  public void setValue(byte[][] bImage) {
     setAttError("Couldn't set value of RawImage",
             new AttributeSetException("RawImage writting not supported"));
   }
@@ -81,10 +70,9 @@ public class RawImage extends AAttribute
 
         // Retreive the read value for the attribute
         imageValue = imageHelper.getRawImageValue(att);
-        encFormat = imageHelper.getRawImageFormat();
 
         // Fire valueChanged
-        fireValueChanged(encFormat,imageValue);
+        fireValueChanged(imageValue);
       }
       catch (DevFailed e) {
         // Fire error event
@@ -114,10 +102,9 @@ public class RawImage extends AAttribute
 
         // Retreive the read value for the attribute
         imageValue = imageHelper.getRawImageValue(attValue);
-        encFormat = imageHelper.getRawImageFormat();
 
         // Fire valueChanged
-        fireValueChanged(encFormat,imageValue);
+        fireValueChanged(imageValue);
       } catch (DevFailed e) {
 
         dispatchError(e);
@@ -145,8 +132,8 @@ public class RawImage extends AAttribute
     return super.isWritable();
   }
 
-  protected void fireValueChanged(String encForamt,byte[] newValue) {
-    imageHelper.fireRawImageValueChanged(encFormat,newValue,timeStamp);
+  protected void fireValueChanged(byte[][] newValue) {
+    imageHelper.fireImageValueChanged(newValue, timeStamp);
   }
 
   public void addRawImageListener(IRawImageListener l) {
@@ -205,10 +192,9 @@ public class RawImage extends AAttribute
         timeStamp = da.getTimeValMillisSec();
         // Retreive the read value for the attribute
         imageValue = imageHelper.getRawImageValue(da);
-        encFormat = imageHelper.getRawImageFormat();
 
         // Fire valueChanged
-        fireValueChanged(encFormat,imageValue);
+        fireValueChanged(imageValue);
       }
       catch (DevFailed dfe) {
         // Tango error
@@ -271,10 +257,9 @@ public class RawImage extends AAttribute
         timeStamp = da.getTimeValMillisSec();
         // Retreive the read value for the attribute
         imageValue = imageHelper.getRawImageValue(da);
-        encFormat = imageHelper.getRawImageFormat();
 
         // Fire valueChanged
-        fireValueChanged(encFormat,imageValue);
+        fireValueChanged(imageValue);
       }
       catch (DevFailed dfe) {
         // Tango error
