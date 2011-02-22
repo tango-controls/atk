@@ -1,26 +1,4 @@
 /*
- *  Copyright (C) :	2002,2003,2004,2005,2006,2007,2008,2009
- *			European Synchrotron Radiation Facility
- *			BP 220, Grenoble 38043
- *			FRANCE
- * 
- *  This file is part of Tango.
- * 
- *  Tango is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU Lesser General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  Tango is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Lesser General Public License for more details.
- *  
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
- */
- 
-/*
  * CommandOutput.java
  *
  * Created on January 16, 2002, 4:52 PM
@@ -70,48 +48,15 @@ public class CommandOutput extends javax.swing.JPanel {
 	jTextArea1.setText(result);
     }
 	
-    public void setResult(java.util.List result)
-    {
+    public void setResult(java.util.List result) {
 	jTextArea1.setText("");
 	if (result == null) return;
-	if (result.size() < 1) return;
 	
-	if (result.get(0) instanceof List) // table results like Tango_DEVVAR_DOUBLESTRINGARRAY or Tango_DEVVAR_LONGSTRINGARRAY
-	   setTableResult(result);
-	else //not table results (scalars or arrays)
-	{
-	   for (Iterator i = result.iterator(); i.hasNext();)
-	   {
-	       jTextArea1.append((String)i.next());
-	       jTextArea1.append("\n");
-	   } // end of for ()
-        }
-    }
-    
-    public void setTableResult(java.util.List result)
-    {
-	jTextArea1.setText("");
-	if (result == null) return;
-	if (result.size() != 2) return;
-	if (!(result.get(0) instanceof List))
-	   return;
-	if (!(result.get(1) instanceof List))
-	   return;
-	   
-	List  res1 = (List) result.get(0);
-	List  res2 = (List) result.get(1);
-	int   res1size = res1.size();
-	int   res2size = res2.size();
-
-        for (int i=0; i<res1size; i++)
-	{
-	    jTextArea1.append(res1.get(i).toString());
-	    if (i < res2size)
-	       jTextArea1.append(", "+ res2.get(i).toString());
+	for (Iterator i = result.iterator(); i.hasNext();) {
+	    jTextArea1.append((String)i.next());
 	    jTextArea1.append("\n");
-	}
+	} // end of for ()
     }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextArea jTextArea1;
