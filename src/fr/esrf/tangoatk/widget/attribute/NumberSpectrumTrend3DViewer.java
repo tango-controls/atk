@@ -1030,8 +1030,17 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
     constructVerticalProfiler();
     vProfiler.setMode(LineProfilerViewer.LINE_MODE_SINGLE);
-    vProfiler.setXAxisName(yName + " [" + yUnit + "]");
-    vProfiler.setYAxisName(valueName + " [" + modelUnit + "]");
+
+    if(yUnit.length()>0)
+      vProfiler.setXAxisName(yName + " [" + yUnit + "]");
+    else
+      vProfiler.setXAxisName(yName);
+
+    if(modelUnit.length()>0)
+      vProfiler.setYAxisName(valueName + " [" + modelUnit + "]");
+    else
+      vProfiler.setYAxisName(valueName);
+
     synchronized (this) {
       buildVerticalProfile();
     }
@@ -1149,7 +1158,10 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       hProfilerGraph.getXAxis().setName("Time");
       hProfilerGraph.getY1Axis().setAutoScale(true);
       hProfilerGraph.getY1Axis().setGridVisible(true);
-      hProfilerGraph.getY1Axis().setName(valueName + " [" + modelUnit + "]");
+      if(modelUnit.length()>0)
+        hProfilerGraph.getY1Axis().setName(valueName + " [" + modelUnit + "]");
+      else
+        hProfilerGraph.getY1Axis().setName(valueName);
       hProfilerGraph.setPreferredSize(new Dimension(600, 400));
       hProfilerGraph.setMinimumSize(new Dimension(600, 400));
       hProfilerGraph.setHeaderFont(new Font("Dialog",Font.BOLD,18));
