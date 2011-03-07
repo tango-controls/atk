@@ -62,6 +62,15 @@ public class LineProfilerViewer extends JFrame {
     profile1.getChart().getXAxis().setName(name);
   }
 
+  public void setYAxisName(String name) {
+    profile1.getChart().getY1Axis().setName(name);
+  }
+
+  public void setFormat(String format) {
+    profile1.setFormat(format);
+    if(profile2!=null) profile2.setFormat(format);
+  }
+
   public void setMode(int mode) {
 
     this.mode = mode;

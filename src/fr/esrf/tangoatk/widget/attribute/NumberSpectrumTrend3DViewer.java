@@ -27,9 +27,7 @@ import fr.esrf.tangoatk.core.ISpectrumListener;
 import fr.esrf.tangoatk.core.INumberSpectrum;
 import fr.esrf.tangoatk.core.INumberSpectrumHistory;
 import fr.esrf.tangoatk.widget.util.*;
-import fr.esrf.tangoatk.widget.util.chart.JLAxis;
-import fr.esrf.tangoatk.widget.util.chart.JLChart;
-import fr.esrf.tangoatk.widget.util.chart.JLDataView;
+import fr.esrf.tangoatk.widget.util.chart.*;
 import fr.esrf.tangoatk.widget.properties.LabelViewer;
 import fr.esrf.tangoatk.widget.image.LineProfilerViewer;
 
@@ -52,7 +50,7 @@ class TrendData {
 /**
  * A class to monitor a spectrum as a function of time using colormap for intensity.
  */
-public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrumListener, ActionListener, MouseListener, J3DTrendListener  {
+public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrumListener, ActionListener, MouseListener, J3DTrendListener, IJLChartListener {
 
   static final java.util.GregorianCalendar calendar = new java.util.GregorianCalendar();
   static final java.text.SimpleDateFormat genFormat = new java.text.SimpleDateFormat("dd/MM/yy HH:mm:ss");
@@ -77,6 +75,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   private boolean           readPollingHistory=true;
   private String            valueName="value";
   private String            yName="Y";
+  private String[]          yIndexName=new String[0];
   private String            yUnit="";
   private double            yGain=1.0;
   private double            yOffset=0.0;
@@ -119,6 +118,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
   // Profile plotter
   protected LineProfilerViewer  vProfiler = null;
+
   protected JFrame              hProfiler = null;
   protected JLChart             hProfilerGraph;
   protected JLDataView          hProfilerData;
@@ -603,14 +603,14 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
    * @param xCursor x coordinates (referenced by the image)
    * @param yCursor y coordinates (referenced by the image)
    */
-  public void updateCursor(int xCursor,int yCursor) {
+  public void updateCursor(int xCursor, int yCursor) {
 
-    String modelName=generalName;
-    String modelUnit=unitName;
+    String modelName = generalName;
+    String modelUnit = unitName;
 
     synchronized (this) {
 
-      if(model!=null) {
+      if (model != null) {
         modelName = model.getName();
         modelUnit = model.getUnit();
       }
@@ -626,36 +626,89 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
           Date date = calendar.getTime();
           String timeStr = genFormat.format(date);
           double val = getValueAt(xCursor, yCursor);
+
           if (Double.isNaN(val)) {
-            if(vZoom>=1) {
-              statusLabel.setText(modelName + "  | " + timeStr + " " +
-                                  valueName+"=NaN at "+yName+"=" +
-                                  ((yCursor/vZoom)*yGain+yOffset) + " " + yUnit);
+
+            if (vZoom >= 1) {
+
+              int yIndex = (int) ((yCursor / vZoom) * yGain + yOffset + 0.5);
+              if (yIndex >= 0 && yIndex < yIndexName.length) {
+                statusLabel.setText(modelName + "  | " + timeStr + " " +
+                        valueName + "=NaN at " + yName + "=" +
+                        yIndexName[yIndex] + " " + yUnit);
+              } else {
+                statusLabel.setText(modelName + "  | " + timeStr + " " +
+                        valueName + "=NaN at " + yName + "=" +
+                        ((yCursor / vZoom) * yGain + yOffset) + " " + yUnit);
+              }
+
             } else {
-              statusLabel.setText(modelName + "  | " + timeStr + " " +
-                                  valueName+"=NaN at "+yName+"=" +
-                                  ((yCursor*(-vZoom))*yGain+yOffset) + " " + yUnit);
+
+              int yIndex = (int) ((yCursor * (-vZoom)) * yGain + yOffset + 0.5);
+              if (yIndex >= 0 && yIndex < yIndexName.length) {
+
+                statusLabel.setText(modelName + "  | " + timeStr + " " +
+                        valueName + "=NaN at " + yName + "=" +
+                        yIndexName[yIndex] + " " + yUnit);
+
+              } else {
+                statusLabel.setText(modelName + "  | " + timeStr + " " +
+                        valueName + "=NaN at " + yName + "=" +
+                        ((yCursor * (-vZoom)) * yGain + yOffset) + " " + yUnit);
+              }
+
             }
+
           } else {
+
             String value;
-            if(format.length()>0) {
+            if (format.length() > 0) {
               Object[] o = {val};
               value = Format.sprintf(format, o);
             } else {
               value = Double.toString(val);
             }
-            if( vZoom>=1 ) {
-              statusLabel.setText(modelName + "  | " + timeStr + " " +
-                                  valueName+"=" + value + " " + modelUnit + " at "+yName+"=" +
-                                  ((yCursor/vZoom)*yGain+yOffset) + " " + yUnit);
+
+            if (vZoom >= 1) {
+
+              int yIndex = (int) ((yCursor / vZoom) * yGain + yOffset + 0.5);
+              if (yIndex >= 0 && yIndex < yIndexName.length) {
+                statusLabel.setText(modelName + "  | " + timeStr + " " +
+                        valueName + "=" + value + " " + modelUnit + " at " + yName + "=" +
+                        yIndexName[yIndex] + " " + yUnit);
+
+              } else {
+                statusLabel.setText(modelName + "  | " + timeStr + " " +
+                        valueName + "=" + value + " " + modelUnit + " at " + yName + "=" +
+                        ((yCursor / vZoom) * yGain + yOffset) + " " + yUnit);
+
+              }
+
             } else {
-              statusLabel.setText(modelName + "  | " + timeStr + " " +
-                                  valueName+"=" + value + " " + modelUnit + " at "+yName+"=" +
-                                  ((yCursor*(-vZoom))*yGain+yOffset) + " " + yUnit);
+
+              int yIndex = (int) ((yCursor * (-vZoom)) * yGain + yOffset + 0.5);
+              if (yIndex >= 0 && yIndex < yIndexName.length) {
+
+                statusLabel.setText(modelName + "  | " + timeStr + " " +
+                        valueName + "=" + value + " " + modelUnit + " at " + yName + "=" +
+                        yIndexName[yIndex] + " " + yUnit);
+
+              } else {
+
+                statusLabel.setText(modelName + "  | " + timeStr + " " +
+                        valueName + "=" + value + " " + modelUnit + " at " + yName + "=" +
+                        ((yCursor * (-vZoom)) * yGain + yOffset) + " " + yUnit);
+
+              }
+
             }
+
           }
+
         }
+
       }
+
 
       // Refresh profile
       if (vProfiler != null)
@@ -717,6 +770,20 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
     } else {
       this.yName = yName;
     }
+  }
+
+  /**
+   * Sets the names of Y index
+   * @param idxName Array of string containing vertical index name
+   */
+  public void setYIndexName(String[] idxName) {
+
+    if( idxName==null ) {
+      yIndexName = new String[0];
+    } else {
+      yIndexName = idxName;
+    }
+
   }
 
   /**
@@ -816,6 +883,43 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
     } else if ( src==formatText ) {
       applyFormat();
     }
+    
+  }
+
+  // ------------------------------------------------------------------------
+  // Chart listener
+  // ------------------------------------------------------------------------
+
+  public String[] clickOnChart(JLChartEvent evt) {
+
+    String[] ret = new String[0];
+    String modelUnit = unitName;
+    if (model != null) modelUnit = model.getUnit();
+
+    Object src = evt.getSource();
+
+    if( src==hProfilerGraph ) {
+
+      ret = new String[2];
+
+      long time = (long)evt.getTransformedXValue();
+      calendar.setTimeInMillis(time);
+      Date date = calendar.getTime();
+      ret[0] = genFormat.format(date);
+
+      double val = evt.getTransformedYValue();
+      String value;
+      if (format.length() > 0) {
+        Object[] o = {val};
+        value = Format.sprintf(format, o);
+      } else {
+        value = Double.toString(val);
+      }
+      ret[1] = valueName + "=" + value + " " + modelUnit;
+
+    }
+
+    return ret;
 
   }
 
@@ -921,9 +1025,13 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
   private void showVerticalProfile() {
 
+    String modelUnit = unitName;
+    if (model != null) modelUnit = model.getUnit();
+
     constructVerticalProfiler();
     vProfiler.setMode(LineProfilerViewer.LINE_MODE_SINGLE);
-    vProfiler.setXAxisName(yName);
+    vProfiler.setXAxisName(yName + " [" + yUnit + "]");
+    vProfiler.setYAxisName(valueName + " [" + modelUnit + "]");
     synchronized (this) {
       buildVerticalProfile();
     }
@@ -971,6 +1079,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
     vProfiler.setTitle("[profile]");
     vProfiler.getProfile1().getChart().setHeader(title);
     vProfiler.getProfile1().getChart().setLabelVisible(false);
+    vProfiler.setFormat(format);
 
   }
 
@@ -1010,7 +1119,12 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
     }
 
     if(yData>=0 && yData<rdimy) {
-      hProfilerGraph.setHeader("Horizontal profile at Y=" + (yData*yGain + yOffset));
+      int idx = (int)(yData*yGain+yOffset+0.5);
+      if( idx>=0 && idx<yIndexName.length) {
+        hProfilerGraph.setHeader("Horizontal profile at " + yName + "=" + yIndexName[idx]);
+      } else {
+        hProfilerGraph.setHeader("Horizontal profile at " + yName + "=" + (yData*yGain + yOffset));
+      }
     } else {
       hProfilerGraph.setHeader("Horizontal profile");      
     }
@@ -1022,6 +1136,9 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
     if (hProfiler == null) {
 
+      String modelUnit = unitName;
+      if (model != null) modelUnit = model.getUnit();
+
       JPanel innerPanel = new JPanel(new BorderLayout());
 
       hProfilerGraph = new JLChart();
@@ -1032,12 +1149,13 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       hProfilerGraph.getXAxis().setName("Time");
       hProfilerGraph.getY1Axis().setAutoScale(true);
       hProfilerGraph.getY1Axis().setGridVisible(true);
-      hProfilerGraph.getY1Axis().setName("Value");
+      hProfilerGraph.getY1Axis().setName(valueName + " [" + modelUnit + "]");
       hProfilerGraph.setPreferredSize(new Dimension(600, 400));
       hProfilerGraph.setMinimumSize(new Dimension(600, 400));
       hProfilerGraph.setHeaderFont(new Font("Dialog",Font.BOLD,18));
       hProfilerGraph.setHeader("Horizontal profile");
       hProfilerGraph.setLabelVisible(false);
+      hProfilerGraph.setJLChartListener(this);
       innerPanel.add(hProfilerGraph, BorderLayout.CENTER);
 
       hProfilerData = new JLDataView();
@@ -1960,6 +2078,12 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       nstv.setYName("Height");
       nstv.setValueName("Strength");
       nstv.setYUnit("yu");
+      nstv.setFormat("%.3f");
+      String[] idxName = new String[200];
+      for(int i=0;i<idxName.length;i++) {
+        idxName[i] = new String("I"+i);
+      }
+      nstv.setYIndexName(idxName);
       //nstv.setYTransfom(2,10);
 
       nstv.setModel((INumberSpectrum) attributeList.add("jlp/test/1/att_spectrum"));
