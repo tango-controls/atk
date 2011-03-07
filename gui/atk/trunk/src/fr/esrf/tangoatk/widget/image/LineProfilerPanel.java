@@ -61,6 +61,7 @@ public class LineProfilerPanel extends JPanel implements IJLChartListener, Actio
     protected JTextField avgText;
     protected JLabel stdLabel;
     protected JTextField stdText;
+    protected String userFormat="";
 
     protected static String[]   colName  = {"Index", "Value"};
     protected static String[][] emptyStr = {{"", ""}};
@@ -159,6 +160,9 @@ public class LineProfilerPanel extends JPanel implements IJLChartListener, Actio
 
     }
 
+    public void setFormat(String format) {
+      userFormat = format;
+    }
 
     private void refreshTable() {
 
@@ -297,7 +301,13 @@ public class LineProfilerPanel extends JPanel implements IJLChartListener, Actio
 
       String[] ret = new String[2];
       ret[0] = theGraph.getXAxis().getName() + " = " + evt.getTransformedXValue();
-      ret[1] = theGraph.getY1Axis().getName() + " = " + evt.getTransformedYValue();
+
+      if( userFormat.length()>0 ) {
+        Object[] o = {evt.getTransformedYValue()};
+        ret[1] = theGraph.getY1Axis().getName() + " = " + Format.sprintf(userFormat, o);
+      } else {
+        ret[1] = theGraph.getY1Axis().getName() + " = " + evt.getTransformedYValue();
+      }
 
       return ret;
     }
