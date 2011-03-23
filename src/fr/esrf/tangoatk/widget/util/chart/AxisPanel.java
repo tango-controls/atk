@@ -31,6 +31,7 @@ package fr.esrf.tangoatk.widget.util.chart;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Vector;
 import javax.swing.*;
 
 /**
@@ -50,6 +51,7 @@ public class AxisPanel extends JPanel implements ActionListener, KeyListener {
   private JLabel MaxLabel;
   private JTextField MaxText;
   private JCheckBox AutoScaleCheck;
+  private JButton AutoScaleOnceBtn;
 
   private JLabel ScaleLabel;
   private JComboBox ScaleCombo;
@@ -123,6 +125,11 @@ public class AxisPanel extends JPanel implements ActionListener, KeyListener {
     AutoScaleCheck.setForeground(GraphicsUtils.fColor);
     AutoScaleCheck.setSelected(a.isAutoScale());
     AutoScaleCheck.addActionListener(this);
+
+    AutoScaleOnceBtn = new JButton("Auto scale once");
+    AutoScaleOnceBtn.setFont(GraphicsUtils.labelFont);
+    AutoScaleOnceBtn.addActionListener(this);
+    AutoScaleOnceBtn.setMargin(GraphicsUtils.zInset);
 
     ScaleLabel = new JLabel("Mode");
     ScaleLabel.setFont(GraphicsUtils.labelFont);
@@ -227,6 +234,7 @@ public class AxisPanel extends JPanel implements ActionListener, KeyListener {
     scalePanel.add(MaxLabel);
     scalePanel.add(MaxText);
     scalePanel.add(AutoScaleCheck);
+    scalePanel.add(AutoScaleOnceBtn);
     scalePanel.add(ScaleLabel);
     scalePanel.add(ScaleCombo);
     add(scalePanel);
@@ -251,7 +259,8 @@ public class AxisPanel extends JPanel implements ActionListener, KeyListener {
     MaxText.setBounds(190, 20, 90, 25);
     ScaleLabel.setBounds(10, 50, 100, 25);
     ScaleCombo.setBounds(115, 50, 165, 25);
-    AutoScaleCheck.setBounds(5, 80, 275, 25);
+    AutoScaleCheck.setBounds(5, 80, 105, 25);
+    AutoScaleOnceBtn.setBounds(115, 80, 165, 25);
     scalePanel.setBounds(5,10,290,115);
 
     FormatLabel.setBounds(10, 20, 100, 25);
@@ -297,6 +306,39 @@ public class AxisPanel extends JPanel implements ActionListener, KeyListener {
       MinText.setEnabled(!b);
       MaxLabel.setEnabled(!b);
       MaxText.setEnabled(!b);
+
+      Commit();
+
+      // ------------------------------------------------------------
+    } else if (e.getSource() == AutoScaleOnceBtn) {
+
+      AutoScaleCheck.setSelected(false);
+      MinLabel.setEnabled(true);
+      MinText.setEnabled(true);
+      MaxLabel.setEnabled(true);
+      MaxText.setEnabled(true);
+      pAxis.setAutoScale(true);
+
+      switch(type) {
+
+        case X_TYPE:
+          Vector<JLDataView> views = new Vector<JLDataView> (pChart.getY1Axis().getViews());
+          views.addAll(pChart.getY2Axis().getViews());
+          pAxis.computeXScale(views);
+          break;
+
+        case Y1_TYPE:
+        case Y2_TYPE:
+          pAxis.computeAutoScale();
+          break;
+
+      }
+
+      MinText.setText(Double.toString(pAxis.getMin()));
+      MaxText.setText(Double.toString(pAxis.getMax()));
+      pAxis.setMinimum(pAxis.getMin());
+      pAxis.setMaximum(pAxis.getMax());
+      pAxis.setAutoScale(false);
 
       Commit();
 

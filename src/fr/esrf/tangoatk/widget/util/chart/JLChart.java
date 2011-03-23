@@ -3199,38 +3199,24 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     // Initialise axis properties
     chart.getY1Axis().setName("mAp");
     chart.getY1Axis().setAutoScale(false);
-    chart.getY1Axis().setMinimum(-1);
-    chart.getY1Axis().setMaximum(1);
 
     chart.getXAxis().setName("Value");
     chart.getXAxis().setGridVisible(true);
     chart.getXAxis().setSubGridVisible(true);
-    chart.getXAxis().setAnnotation(JLAxis.TIME_ANNO);
-    chart.getXAxis().setPercentScrollback(10.0);
+    chart.getXAxis().setAnnotation(JLAxis.VALUE_ANNO);
+    chart.getXAxis().setPercentScrollback(0.0);
+    chart.getXAxis().setAutoScale(false);
     chart.getY1Axis().setGridVisible(true);
     chart.getY1Axis().setSubGridVisible(true);
     chart.getY2Axis().setVisible(true);
     chart.getY2Axis().setName("mAp");
     chart.setDisplayDuration(100000);
 
-    //v3.setName("Cos() function");
-    v.setMarker(JLDataView.MARKER_DOT);
     chart.getY1Axis().addDataView(v);
 
-    Thread refreshThread = new Thread() {
-      public void run() {
-        while(true) {
-          long   now = System.currentTimeMillis();
-          double t = (double)now;
-          double y = Math.cos(t/2000.0);
-          chart.addData(v,t,y);
-          try {
-            Thread.sleep(100);
-          } catch(InterruptedException e) {}
-        }
-      }
-    };
-    refreshThread.start();
+    for(double i=-10.0;i<=10.0;i+=0.1) {
+      v.add(i,Math.exp(-i*i));
+    }
     
     // -----------------------------------------------------------------
 

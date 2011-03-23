@@ -1317,7 +1317,7 @@ public class JLAxis implements java.io.Serializable {
     return Math.pow(10.0, p);
   }
 
-  private void computeAutoScale() {
+  void computeAutoScale() {
 
     int i = 0;
     int sz = dataViews.size();
