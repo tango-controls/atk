@@ -98,9 +98,9 @@ core-jar: core-manifest
 	 $(JAR) xf jogl.jar &&   \
 	 $(JAR) xf gluegen-rt.jar &&   \
          if [ -e $(COREMANIFEST) ]; then       \
-            $(JAR) cmf $(COREMANIFEST) ATKCore-$(ATK-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util com/braju org/lsmp org/nfunk ij com/sun; \
+            $(JAR) cmf $(COREMANIFEST) ATKCore-$(ATK-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util com/braju org/lsmp org/nfunk ij com/sun javax/media; \
          else                                           \
-            $(JAR) cf ATKCore-$(ATK-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util com/braju org/lsmp org/nfunk ij com/sun;                   \
+            $(JAR) cf ATKCore-$(ATK-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util com/braju org/lsmp org/nfunk ij com/sun javax/media;                   \
          fi)
 	$(call verifyjar,/tmp/core/jar,ATKCore-$(ATK-VERSION))
 	@(rm -rf /tmp/core)
