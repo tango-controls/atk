@@ -203,11 +203,38 @@ public class EnumScalar extends AAttribute implements IEnumScalar
   }
   
 
-  // getEnumScalarSetPoint returns the attribute's setpoint value
-  public String getEnumScalarSetPoint()
+ // getEnumScalarSetPoint returns the attribute's setpoint value
+ public String getEnumScalarSetPoint()
+ {
+     return setPointValue;
+ }
+
+ public short getShortValueFromEnumScalar(String enumStr)
+ {
+    short shortValue = -1;
+    try
+    {
+        shortValue = enumHelper.getShortValueForEnum(enumStr);
+    }
+    catch (IllegalArgumentException ex)
+    {
+    }
+    return shortValue;
+ }
+
+  public String getEnumScalarFromShortValue(short shortValue)
   {
-      return setPointValue;
+    String enumStr = null;
+    try
+    {
+        enumStr = enumHelper.getEnumValueFromShort(shortValue);
+    }
+    catch (IllegalArgumentException ex)
+    {
+    }
+    return enumStr;
   }
+
 
   // getEnumScalarSetPointFromDevice  returns the attribute's setpoint value
   // This method makes a call to read attribute on the device proxy

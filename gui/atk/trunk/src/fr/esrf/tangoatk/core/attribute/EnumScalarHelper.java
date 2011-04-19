@@ -148,7 +148,7 @@ public class EnumScalarHelper implements java.io.Serializable
     }
     
     
-    private short getShortValueForEnum(String enumVal) throws IllegalArgumentException
+    short getShortValueForEnum(String enumVal) throws IllegalArgumentException
     {
 	EnumScalar   ens;
 	String[]     enums=null;
@@ -176,7 +176,7 @@ public class EnumScalarHelper implements java.io.Serializable
 	return shVal;
     }
     
-    private String getEnumValueFromShort(short shortVal) throws IllegalArgumentException
+    String getEnumValueFromShort(short shortVal) throws IllegalArgumentException
     {
 	EnumScalar   ens;
 	String[]     enums=null;
