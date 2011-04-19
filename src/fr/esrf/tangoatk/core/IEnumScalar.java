@@ -53,4 +53,8 @@ public interface IEnumScalar extends IAttribute
     
     public String[] getSetEnumValues();
 
+    public short getShortValueFromEnumScalar(String enumStr);
+
+    public String getEnumScalarFromShortValue(short shortValue);
+
 }
