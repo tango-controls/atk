@@ -1397,15 +1397,15 @@ public class JLAxis implements java.io.Serializable {
       //System.out.println("ComputeAutoScale: Prec= " + prec );
 
       if (min < 0)
-        min = ((int) (min / prec) - 1) * prec;
+        min = ((long) (min / prec) - 1) * prec;
       else
-        min = (int) (min / prec) * prec;
+        min = (long) (min / prec) * prec;
 
 
       if (max < 0)
-        max = (int) (max / prec) * prec;
+        max = (long) (max / prec) * prec;
       else
-        max = ((int) (max / prec) + 1) * prec;
+        max = ((long) (max / prec) + 1) * prec;
 
       //System.out.println("ComputeAutoScale: " + min + "," + max );
 
@@ -3785,3 +3785,4 @@ public class JLAxis implements java.io.Serializable {
   }
 
 }
+
