@@ -3197,27 +3197,28 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     chart.setHeader("Test DataView");
 
     // Initialise axis properties
-    chart.getY1Axis().setName("mAp");
-    chart.getY1Axis().setAutoScale(false);
 
     chart.getXAxis().setName("Value");
     chart.getXAxis().setGridVisible(true);
     chart.getXAxis().setSubGridVisible(true);
     chart.getXAxis().setAnnotation(JLAxis.VALUE_ANNO);
     chart.getXAxis().setPercentScrollback(0.0);
-    chart.getXAxis().setAutoScale(false);
+    chart.getXAxis().setAutoScale(true);
+
+    chart.getY1Axis().setName("mAp");
+    chart.getY1Axis().setAutoScale(true);
     chart.getY1Axis().setGridVisible(true);
     chart.getY1Axis().setSubGridVisible(true);
+
     chart.getY2Axis().setVisible(true);
     chart.getY2Axis().setName("mAp");
     chart.setDisplayDuration(100000);
 
     chart.getY1Axis().addDataView(v);
 
-    for(double i=-10.0;i<=10.0;i+=0.1) {
-      v.add(i,Math.exp(-i*i));
-    }
-    
+    v.add(0,2.147483647E9);
+    v.add(1,2.147483647E9);
+
     // -----------------------------------------------------------------
 
     JPanel bot = new JPanel();
