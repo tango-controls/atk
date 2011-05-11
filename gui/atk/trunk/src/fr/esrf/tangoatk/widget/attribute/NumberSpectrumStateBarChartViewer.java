@@ -55,7 +55,7 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
     private double A1 = 1.0;
     private String format = null;
     private String[] currentStates = null;
-    private String[] names = null;
+    protected String[] names = null;
 
     /* The bean properties */
     private Color            defaultBarChartColor = ATKConstant.getColor4State(IDevice.UNKNOWN);
