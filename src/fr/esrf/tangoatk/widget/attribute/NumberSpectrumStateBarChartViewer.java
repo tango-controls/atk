@@ -184,6 +184,15 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
         setToolTipText(null);
     }
 
+
+    /**<code>getStatesModel</code> Gets the devState spectrum model.
+     * @returns the devState spectrum model.
+     */
+    public IDevStateSpectrum getStatesModel()
+    {
+        return stateModel;
+    }
+
     /**<code>setModel</code> Set the devstate spectrum model.
      * @param idss  the devstate spectrum attribute to assign to model.
      */
@@ -216,6 +225,15 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
             }
         }
         currentStates = null;
+    }
+
+
+    /**<code>getNamesModel</code> Gets the string spectrum model.
+     * @returns the string spectrum model.
+     */
+    public IStringSpectrum getNamesModel()
+    {
+        return nameModel;
     }
 
     /**<code>setModel</code> Set the string spectrum model.
