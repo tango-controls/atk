@@ -132,7 +132,15 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
         }
     }
 
-    /**<code>setModel</code> Set the numberspectrum model.
+    /**<code>getModel</code> Gets the numberspectrum model.
+     * @returns the numberspectrum model.
+     */
+    public INumberSpectrum getModel()
+    {
+        return numberModel;
+    }
+
+    /**<code>setModel</code> Sets the numberspectrum model.
      * @param ins  the numberspectrum attribute to assign to model.
      */
     public void setModel(INumberSpectrum ins)
