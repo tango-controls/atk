@@ -58,7 +58,8 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
     private String[] names = null;
 
     /* The bean properties */
-    private Color            defaultBarChartColor = Color.BLUE;
+    private Color            defaultBarChartColor = ATKConstant.getColor4State(IDevice.UNKNOWN);
+    private int              barChartFillMethod = JLDataView.METHOD_FILL_FROM_BOTTOM;
 
     public NumberSpectrumStateBarChartViewer()
     {
@@ -115,6 +116,20 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
             dvy.setFillColor(defaultBarChartColor);
             repaint();
 	}
+    }
+
+    public int getBarChartFillMethod()
+    {
+        return (barChartFillMethod);
+    }
+
+    public void setBarChartFillMethod(int fillMethod)
+    {
+        if (barChartFillMethod != fillMethod)
+        {
+            dvy.setFillMethod(fillMethod);
+            barChartFillMethod = dvy.getFillMethod();
+        }
     }
 
     /**<code>setModel</code> Set the numberspectrum model.
@@ -472,22 +487,18 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
             AttributeList attl = new AttributeList();
 
             NumberSpectrumStateBarChartViewer nssbcv = new NumberSpectrumStateBarChartViewer();
-            nssbcv.setDefaultBarChartColor(ATKConstant.getColor4State(IDevice.UNKNOWN));
+            nssbcv.setBarChartFillMethod(JLDataView.METHOD_FILL_FROM_ZERO);
+            nssbcv.getXAxis().setGridVisible(true);
+            nssbcv.getY1Axis().setGridVisible(true);
+            nssbcv.getY1Axis().setName("Inst Loss Rate ( ne/s )");
 
-
-            //INumberSpectrum ins = (INumberSpectrum) attl.add("//kidiboo:10000/fp/test/1/wave");
-            INumberSpectrum      ins = (INumberSpectrum) attl.add("sr/st-v/all/current");
+            INumberSpectrum      ins = (INumberSpectrum) attl.add("sr/beamlossMch/test/Beamloss");
             nssbcv.setModel(ins);
-            IDevStateSpectrum      idss = (IDevStateSpectrum) attl.add("sr/st-v/all/SteererStates");
+            IDevStateSpectrum      idss = (IDevStateSpectrum) attl.add("sr/beamlossMch/test/SubDevicesStates");
             nssbcv.setModel(idss);
-            IStringSpectrum      iss = (IStringSpectrum) attl.add("sr/st-v/all/SteererNames");
+            IStringSpectrum      iss = (IStringSpectrum) attl.add("sr/beamlossMch/test/SubDevicesNames");
             nssbcv.setModel(iss);
 
-            INumberScalar minAlarm = (INumberScalar) attl.add("//kidiboo:10000/fp/test/1/double_scalar_w");
-            INumberScalar maxAlarm = (INumberScalar) attl.add("//kidiboo:10000/fp/test/2/double_scalar_w");
-
-            nssbcv.setMinAlarmModel(minAlarm);
-            nssbcv.setMaxAlarmModel(maxAlarm);
 
             nssbcv.setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());
             nssbcv.setFont(new java.awt.Font("Dialog", 0, 12));
