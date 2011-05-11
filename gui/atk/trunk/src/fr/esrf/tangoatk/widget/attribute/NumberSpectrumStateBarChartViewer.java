@@ -48,8 +48,8 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
     private IStringSpectrum   nameModel = null;
     private INumberScalar     minAlarmModel = null, maxAlarmModel = null;
     
-    private JLDataView dvy = null;
-    private JLDataView minAlarmDv = null, maxAlarmDv = null;
+    protected JLDataView dvy = null;
+    protected JLDataView minAlarmDv = null, maxAlarmDv = null;
     private SimplePropertyFrame pf = null;
     private double A0 = 0.0;
     private double A1 = 1.0;
