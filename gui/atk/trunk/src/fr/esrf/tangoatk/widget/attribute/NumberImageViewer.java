@@ -44,9 +44,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.Vector;
 
 import javax.imageio.ImageIO;
@@ -3588,7 +3586,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
     try {
 
-      FileWriter fw = new FileWriter(filename);
+      DataOutputStream fw = new DataOutputStream(new FileOutputStream(filename));
 
       StringBuffer to_write= new StringBuffer();
 
@@ -3615,8 +3613,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       while(l<1022) { to_write.append(' ');l++; }
       to_write.append("}\n");
 
-      //System.out.println("Writting EDF header " + to_write.length() + " bytes");
-      fw.write(to_write.toString());
+      fw.writeBytes(to_write.toString());
 
       /*
       *(short *)(edf_header + 1018) = (short) w;
@@ -3627,15 +3624,20 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       */
 
       // Write data
-      char[] bytes = new char[2];
+      to_write = new StringBuffer();
+      
       for (int j = r.y; j < r.y + r.height; j++) {
         for (int i = r.x; i < r.x + r.width; i++) {
           int v = (int)doubleValues[j][i];
-          bytes[0] = (char)(  v & 0xFF       );  //Low bytes first
-          bytes[1] = (char)( (v >> 8) & 0xFF );
-          fw.write(bytes);
+          to_write.append((char)(v & 0xFF)); //Low bytes first
+          to_write.append((char)( (v >> 8) & 0xFF ));
         }
       }
+
+      //long t0 = System.currentTimeMillis();
+      fw.writeBytes(to_write.toString());
+      //long t1 = System.currentTimeMillis();
+      //System.out.println("writeBytes takes " + (t1-t0) + " ms");
 
       fw.close();
 
