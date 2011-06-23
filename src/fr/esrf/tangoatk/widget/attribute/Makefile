@@ -101,8 +101,8 @@ ALL =	$(TARGET)/IAttributeViewer.class            \
 	$(TARGET)/DevStateSpectrumViewer.class       \
 	$(TARGET)/SimpleStateViewer.class           \
 	$(TARGET)/NumberSpectrumTrend3DViewer.class \
-	$(TARGET)/NumberSpectrumStateBarChartViewer.class 
-	
+	$(TARGET)/NumberSpectrumStateBarChartViewer.class \
+   	$(TARGET)/DigitalNumberScalarViewer.class
 
 #	$(TARGET)/AttributeBarChart.class
 

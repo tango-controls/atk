@@ -1522,61 +1522,63 @@ invoqex.printStackTrace();
      }
   }
 
-  private void addNumberScalarAttribute(JDObject jdObj,INumberScalar model)
-  {
-     if (jdObj instanceof JDSwingObject)
-     {
-	JComponent atkObj = ((JDSwingObject) jdObj).getComponent();
+  private void addNumberScalarAttribute(JDObject jdObj, INumberScalar model) {
 
-	if (atkObj instanceof SimpleScalarViewer)
-	{
-	  ((SimpleScalarViewer) atkObj).setModel(model);
-	  ((SimpleScalarViewer) atkObj).setHasToolTip(true);
-	  allAttributes.add(model);
-	}
-	else 
-	   if (atkObj instanceof NumberScalarWheelEditor)
-	   {
-	      ((NumberScalarWheelEditor) atkObj).setModel(model);
-	      allAttributes.add(model);
-	      model.addSetErrorListener(errPopup);
-	   }
-	   else
-	      if (atkObj instanceof NumberScalarComboEditor)
-	      {
-		 String valList = jdObj.getExtendedParam("valueList");
-		 if (valList != null)
-		 {
-		    if (valList.length() != 0)
-		    {
-		       double [] possVals=parsePossNumberValues(valList);
-		       if (possVals != null)
-		          if (possVals.length != 0)
-			     model.setPossibleValues(possVals);
-		    }
-		 }
-        	 ((NumberScalarComboEditor) atkObj).setNumberModel(model);
-        	 allAttributes.add(model);
-        	 model.addSetErrorListener(errPopup);
-	      }
-	      else
-	      {
-		System.out.println(atkObj.getClass().getName() + " does not accept INumberScalar model");
-	      }
-     }
-     else
-     {
-	// Default behavior for JDBar,JDSlider and JDObject value (dyno).
-	mouseifyAttribute(jdObj);
-	String attName = model.getName();
-	System.out.println("connecting to a NumberScalar attribute : " + attName);
-	allAttributes.add(model);
-	model.addNumberScalarListener(this);
-	stashComponent(model.getName(), jdObj);
-     }
+    if (jdObj instanceof JDSwingObject)
+    {
+      JComponent atkObj = ((JDSwingObject) jdObj).getComponent();
 
-     if (errorHistWind != null)
-	model.addErrorListener(errorHistWind);
+      if (atkObj instanceof SimpleScalarViewer)
+      {
+        ((SimpleScalarViewer) atkObj).setModel(model);
+        ((SimpleScalarViewer) atkObj).setHasToolTip(true);
+        allAttributes.add(model);
+      }
+      else if (atkObj instanceof DigitalNumberScalarViewer)
+      {
+        ((DigitalNumberScalarViewer) atkObj).setModel(model);
+        ((DigitalNumberScalarViewer) atkObj).setHasToolTip(true);
+        allAttributes.add(model);
+      }
+      else if (atkObj instanceof NumberScalarWheelEditor)
+      {
+        ((NumberScalarWheelEditor) atkObj).setModel(model);
+        allAttributes.add(model);
+        model.addSetErrorListener(errPopup);
+      }
+      else if (atkObj instanceof NumberScalarComboEditor)
+      {
+        String valList = jdObj.getExtendedParam("valueList");
+        if (valList != null)
+        {
+          if (valList.length() != 0)
+          {
+            double[] possVals = parsePossNumberValues(valList);
+            if (possVals != null)
+              if (possVals.length != 0)
+                model.setPossibleValues(possVals);
+          }
+        }
+        ((NumberScalarComboEditor) atkObj).setNumberModel(model);
+        allAttributes.add(model);
+        model.addSetErrorListener(errPopup);
+      } else {
+        System.out.println(atkObj.getClass().getName() + " does not accept INumberScalar model");
+      }
+    }
+    else
+    {
+      // Default behavior for JDBar,JDSlider and JDObject value (dyno).
+      mouseifyAttribute(jdObj);
+      String attName = model.getName();
+      System.out.println("connecting to a NumberScalar attribute : " + attName);
+      allAttributes.add(model);
+      model.addNumberScalarListener(this);
+      stashComponent(model.getName(), jdObj);
+    }
+
+    if (errorHistWind != null)
+      model.addErrorListener(errorHistWind);
   }
 
 

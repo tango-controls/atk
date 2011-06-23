@@ -46,6 +46,7 @@ public class JDrawableList {
       drawableList.add("fr.esrf.tangoatk.widget.attribute.StringScalarComboEditor");
       drawableList.add("fr.esrf.tangoatk.widget.attribute.EnumScalarComboEditor");
       drawableList.add("fr.esrf.tangoatk.widget.attribute.SimpleEnumScalarViewer");
+      drawableList.add("fr.esrf.tangoatk.widget.attribute.DigitalNumberScalarViewer");
 
       inited=true;
     }

@@ -49,7 +49,8 @@ ALL = $(TARGET)/UIManagerHelper.class       \
       $(TARGET)/EditableTableRowModel.class \
       $(TARGET)/EditableJTableRow.class \
       $(TARGET)/J3DTrendListener.class \
-      $(TARGET)/J3DTrend.class
+      $(TARGET)/J3DTrend.class \
+      $(TARGET)/DigitalNumberViewer.class
       
 
 all: gutils uchart itlk utils ujdraw ujgl3dchart icons beaninfo
