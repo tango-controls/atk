@@ -63,6 +63,9 @@ public class SimpleStateViewer extends JSmoothLabel implements IDevStateScalarLi
     // For backward compatibility with fr.esrf.tangoatk.widget.device.SimpleStateViewer
     private IDeviceApplication     application;
     private IDevicePopUp           popUp = SingletonStatusViewer.getInstance();
+
+    private boolean          hasToolTip=true;
+    private boolean          stateInTooltip=true;
     
     /**
     * Contructs a SimpleStateViewer.
@@ -102,6 +105,27 @@ public class SimpleStateViewer extends JSmoothLabel implements IDevStateScalarLi
             popUp.setVisible(true);
         }
     }
+    /**
+     * <code>setHasToolTip</code> display or not a tooltip for this viewer
+     *
+     * @param b If True the attribute full name will be displayed as tooltip for the viewer
+     */
+    public void setHasToolTip(boolean b)
+    {
+
+        if (hasToolTip == b)
+        {
+            return;
+        }
+
+        hasToolTip = b;
+
+        if (!hasToolTip)
+        {
+            setToolTipText(null);
+            return;
+        }
+    }
 
     /**
     * <code>setModel</code> sets the model of this viewer.
@@ -119,8 +143,9 @@ public class SimpleStateViewer extends JSmoothLabel implements IDevStateScalarLi
         if (!stateAtt.areAttPropertiesLoaded())
            stateAtt.loadAttProperties();
         
-        model.addDevStateScalarListener(this);         
-        setToolTipText(model.getDevice().getName());
+        model.addDevStateScalarListener(this);
+        if (hasToolTip)
+           setToolTipText(model.getDevice().getName());
         model.refresh();
     }
 
@@ -131,7 +156,10 @@ public class SimpleStateViewer extends JSmoothLabel implements IDevStateScalarLi
             model.removeDevStateScalarListener(this);
             model = null;
             setState(IDevice.UNKNOWN);
-            setToolTipText("no device");        
+            if (hasToolTip)
+               setToolTipText("no device");
+            else
+               setToolTipText(null);
         }
     }
 
@@ -156,12 +184,16 @@ public class SimpleStateViewer extends JSmoothLabel implements IDevStateScalarLi
         if (model != null)
         {
             setBackground(ATKConstant.getColor4State(currentState, model.getInvertedOpenClose(), model.getInvertedInsertExtract()));
-            setToolTipText(model.getDevice().getName() + " : " + currentState);
+            if ((hasToolTip) && (stateInTooltip))
+               setToolTipText(model.getDevice().getName() + " : " + currentState);
         }
         else
         {
             setBackground(ATKConstant.getColor4State(state));
-            setToolTipText("");
+            if (hasToolTip)
+                setToolTipText("");
+            else
+                setToolTipText(null);
         }
     }
 
