@@ -25,7 +25,6 @@ package fr.esrf.tangoatk.widget.attribute;
 
 import fr.esrf.tangoatk.core.AttributeStateEvent;
 import fr.esrf.tangoatk.core.DevStateScalarEvent;
-import fr.esrf.tangoatk.core.Device;
 import fr.esrf.tangoatk.core.ErrorEvent;
 import fr.esrf.tangoatk.core.IDevStateScalar;
 import fr.esrf.tangoatk.core.IDevStateScalarListener;
@@ -54,18 +53,18 @@ import javax.swing.JFrame;
 public class SimpleStateViewer extends JSmoothLabel implements IDevStateScalarListener
 {
 
-    private IDevStateScalar   model=null;
+    protected IDevStateScalar   model=null;
     private String            currentState = "UNKNOWN";
     /*private String            currentText = "";
     private boolean           externalSetText = false;*/
-    private boolean           stateClickable = true;
+    protected boolean           stateClickable = true;
 
     // For backward compatibility with fr.esrf.tangoatk.widget.device.SimpleStateViewer
     private IDeviceApplication     application;
     private IDevicePopUp           popUp = SingletonStatusViewer.getInstance();
 
-    private boolean          hasToolTip=true;
-    private boolean          stateInTooltip=true;
+    protected boolean          hasToolTip=true;
+    protected boolean          stateInTooltip=true;
     
     /**
     * Contructs a SimpleStateViewer.
@@ -79,6 +78,7 @@ public class SimpleStateViewer extends JSmoothLabel implements IDevStateScalarLi
         addMouseListener(
                 new java.awt.event.MouseAdapter()
                 {
+                  @Override
                   public void mouseClicked(java.awt.event.MouseEvent evt)
                   {
                     stateViewerMouseClicked(evt);
@@ -86,7 +86,7 @@ public class SimpleStateViewer extends JSmoothLabel implements IDevStateScalarLi
                 });
     }
 
-    private void stateViewerMouseClicked(java.awt.event.MouseEvent evt)
+    protected void stateViewerMouseClicked(java.awt.event.MouseEvent evt)
     {
         if (!stateClickable) return;
         if (model == null) return;
@@ -290,6 +290,7 @@ public class SimpleStateViewer extends JSmoothLabel implements IDevStateScalarLi
        mainFrame.addWindowListener(
 	       new java.awt.event.WindowAdapter()
 			  {
+                              @Override
 			      public void windowActivated(java.awt.event.WindowEvent evt)
 			      {
 				 // To be sure that the refresher (an independente thread)
