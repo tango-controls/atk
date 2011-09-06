@@ -3220,8 +3220,11 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
     chart.getY1Axis().addDataView(v);
 
-    v.add(0,2.147483647E9);
-    v.add(1,2.147483647E9);
+    v.add(0,0.29);
+    v.add(1,0.12);
+    v.add(2,0.05);
+    v.add(3,-0.15);
+    v.add(4,0.2);
 
     // -----------------------------------------------------------------
 
