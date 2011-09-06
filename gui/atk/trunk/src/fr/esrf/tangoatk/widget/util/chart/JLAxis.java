@@ -1388,24 +1388,40 @@ public class JLAxis implements java.io.Serializable {
         min -= 0.999;
       }
 
-      double prec = computeLowTen(max - min);
+      if( scale==LOG_SCALE ) {
 
-      // Avoid unlabeled axis when log scale
-      if( scale==LOG_SCALE && prec<1.0 )
-        prec=1.0;
+        double prec = computeLowTen(max - min);
 
-      //System.out.println("ComputeAutoScale: Prec= " + prec );
+        // Avoid unlabeled axis when log scale
+        if( prec<1.0 ) prec=1.0;
 
-      if (min < 0)
-        min = ((long) (min / prec) - 1) * prec;
-      else
-        min = (long) (min / prec) * prec;
+        if (min < 0)
+          min = ((long) (min / prec) - 1) * prec;
+        else
+          min = (long) (min / prec) * prec;
 
 
-      if (max < 0)
-        max = (long) (max / prec) * prec;
-      else
-        max = ((long) (max / prec) + 1) * prec;
+        if (max < 0)
+          max = (long) (max / prec) * prec;
+        else
+          max = ((long) (max / prec) + 1) * prec;
+
+      } else {
+
+        double prec = computeLowTen(max - min);
+        double prec10 = prec/10;
+
+        if (min < 0)
+          min = ((long) (min / prec10) - 1) * prec10;
+        else
+          min = (long) (min / prec10) * prec10;
+
+        if (max < 0)
+          max = (long) (max / prec10) * prec10;
+        else
+          max = ((long) (max / prec10) + 1) * prec10;
+        
+      }
 
       //System.out.println("ComputeAutoScale: " + min + "," + max );
 
