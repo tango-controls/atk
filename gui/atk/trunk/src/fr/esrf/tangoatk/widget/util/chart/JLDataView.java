@@ -204,6 +204,7 @@ public class JLDataView implements java.io.Serializable {
   private double smoothSigma = 0.5;
   private int smoothExtrapolation = SMOOTH_EXT_LINEAR;
   private int mathFunction = MATH_NONE;
+  private boolean drawOnNaN = false;
 
   // A boolean to know whether data is supposed to be sorted on x
   protected boolean xDataSorted = true;
@@ -886,6 +887,18 @@ public class JLDataView implements java.io.Serializable {
    */
   public void setMarker(int m) {
     markerType = m;
+  }
+
+  /**
+   * In Bar chart mode, draw a bar up to the yAxis maximum on a NaN value
+   * @param drawOnNaN
+   */
+  public void setDrawOnNaN(boolean drawOnNaN) {
+    this.drawOnNaN = drawOnNaN;
+  }
+  
+  public boolean isDrawOnNaN() {
+    return drawOnNaN;
   }
 
   /**
