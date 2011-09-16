@@ -60,6 +60,8 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
     /* The bean properties */
     private Color            defaultBarChartColor = ATKConstant.getColor4State(IDevice.UNKNOWN);
     private int              barChartFillMethod = JLDataView.METHOD_FILL_FROM_BOTTOM;
+    private long             lastForcedUpdateTime = System.currentTimeMillis() - 60000;
+    private boolean          drawOnNaN = false;
 
     public NumberSpectrumStateBarChartViewer()
     {
@@ -130,6 +132,18 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
             dvy.setFillMethod(fillMethod);
             barChartFillMethod = dvy.getFillMethod();
         }
+    }
+
+    public boolean getDrawOnNaN()
+    {
+        drawOnNaN = dvy.isDrawOnNaN();
+        return (drawOnNaN);
+    }
+
+    public void setDrawOnNaN(boolean don)
+    {
+        dvy.setDrawOnNaN(don);
+        drawOnNaN = don;
     }
 
     /**<code>getModel</code> Gets the numberspectrum model.
@@ -408,6 +422,20 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
             }
             currentStates = dsse.getValue().clone();
             repaint();
+            return;
+        }
+
+        long  now = System.currentTimeMillis();
+
+        if ((now - lastForcedUpdateTime) > 10000)
+        {
+            for (int i=0; i<states.length; i++)
+            {
+                dvy.setBarFillColorAt(i, ATKConstant.getColor4State(states[i]));
+                currentStates[i] = states[i];
+            }
+            repaint();
+            lastForcedUpdateTime = now;
             return;
         }
 
