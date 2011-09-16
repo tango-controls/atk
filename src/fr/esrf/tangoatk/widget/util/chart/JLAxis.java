@@ -2432,9 +2432,17 @@ public class JLAxis implements java.io.Serializable {
       if (pattern != null) g2.setPaint(pattern);
       else                 g2.setColor(background);
       if (y > y0) {
-        g.fillRect(x - barWidth / 2, y0, barWidth, y-y0);
+        if( y-y0==0 ) {
+          g.fillRect(x - barWidth / 2, y0, barWidth, 1);
+        } else {
+          g.fillRect(x - barWidth / 2, y0, barWidth, y-y0);
+        }
       } else {
-        g.fillRect(x - barWidth / 2, y, barWidth, (y0 - y));
+        if( y-y0==0 ) {
+          g.fillRect(x - barWidth / 2, y, barWidth, 1);
+        } else {
+          g.fillRect(x - barWidth / 2, y, barWidth, y0-y);
+        }
       }
     }
 
@@ -2804,6 +2812,33 @@ public class JLAxis implements java.io.Serializable {
 
             l = l.next;
             idx++;
+          }
+
+          if( Double.isNaN(vt) ) {
+
+            if( v.isDrawOnNaN() ) {
+
+              if (sx == LOG_SCALE)
+                xratio = (Math.log(l.x) / ln10 - minx) / (maxx - minx) * lx;
+              else
+                xratio = (l.x - minx) / (maxx - minx) * lx;
+
+              yratio = -ly;
+
+              // Saturate
+              if (xratio < -32000) xratio = -32000;
+              if (xratio > 32000) xratio = 32000;
+              if (yratio < -32000) yratio = -32000;
+              if (yratio > 32000) yratio = 32000;
+
+              int xb = (int) (xratio) + xOrg;
+              int yb = (int) (yratio) + yOrg;
+              
+              // Draw bar
+              paintDataViewBar(g2, v, barWidth, bs, fPattern, y0, xb, yb, idx);
+
+            }
+
           }
 
         }
