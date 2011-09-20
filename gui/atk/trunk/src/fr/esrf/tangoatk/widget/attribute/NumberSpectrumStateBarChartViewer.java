@@ -384,6 +384,18 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
         return ret;
     }
 
+    /**
+     * Sets an affine tranform to the X axis. This allows to transform
+     * spectra index displayed on X axis.
+     * @param a0
+     * @param a1
+     */
+    public void setXAxisAffineTransform(double a0, double a1)
+    {
+        A0 = a0;
+        A1 = a1;
+    }
+
 
 
     public void spectrumChange(NumberSpectrumEvent nse)
