@@ -41,11 +41,12 @@ import javax.swing.tree.*;
  * @author  pons
  */
 
-class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalarListener,PropertyChangeListener {
+class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalarListener,IBooleanScalarListener, PropertyChangeListener {
 
   // Local declaration
   private String devname = "";
   private INumberScalar model;
+  private IBooleanScalar modelb;
   private int selected;
   private JLDataView data;
   private JLDataView minAlarmData;
@@ -67,6 +68,7 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
     // Root node
     this.devname = "Trend";
     this.model = null;
+    this.modelb = null;
     data = null;
     chart = g;
   }
@@ -77,6 +79,7 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
     this.devname = name;
     data = null;
     this.model = null;
+    this.modelb = null;
     chart = g;
   }
 
@@ -86,6 +89,7 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
     // Attribute node
     this.devname = name;
     this.model = model;
+    this.modelb = null;
     this.selected = selection;
     this.showMinAlarm = false;
     this.showMaxAlarm = false;
@@ -126,41 +130,98 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
 
   }
 
+  // Construct an attribute node (model cannot be null !!)
+  public TrendSelectionNode(Trend g, String name, IBooleanScalar model, int selection, Color c) {
+
+    // Attribute node
+    this.devname = name;
+    this.model = null;
+    this.modelb = model;
+    this.selected = selection;
+    this.showMinAlarm = false;
+    this.showMaxAlarm = false;
+    chart = g;
+
+    data = new JLDataView();
+    data.setColor(c);
+    data.setMarkerColor(c);
+
+    minAlarmData = null;
+    maxAlarmData = null;
+
+    // Register attribute
+    modelb.addBooleanScalarListener(this);
+
+    // Register on property change
+    modelb.getProperty("label").addPresentationListener(this);
+    modelb.getProperty("unit").addPresentationListener(this);
+    modelb.getProperty("format").addPresentationListener(this);
+
+  }
+  
   // Refresh node after a property change
   public void refreshNode() {
 
     String name;
-    data.setUnit(model.getUnit());
-    data.setUserFormat(model.getFormat());
 
-    // Set the chart label
-    if(model.getLabel().length()>0 && !model.getLabel().equalsIgnoreCase("not specified")) {
-      if( chart.displayDeviceNames() ) {
-        name = devname + "/" + model.getLabel();
-        data.setName(name);
-        minAlarmData.setName(name + " [Min alarm]");
-        maxAlarmData.setName(name + " [Max alarm]");
+    if (model != null) {
+
+      data.setUnit(model.getUnit());
+      data.setUserFormat(model.getFormat());
+
+      // Set the chart label
+      if (model.getLabel().length() > 0 && !model.getLabel().equalsIgnoreCase("not specified")) {
+        if (chart.displayDeviceNames()) {
+          name = devname + "/" + model.getLabel();
+          data.setName(name);
+          minAlarmData.setName(name + " [Min alarm]");
+          maxAlarmData.setName(name + " [Max alarm]");
+        } else {
+          name = model.getLabel();
+          data.setName(name);
+          minAlarmData.setName(name + " [Min alarm]");
+          maxAlarmData.setName(name + " [Max alarm]");
+        }
       } else {
-        name = model.getLabel();
+        name = model.getName();
         data.setName(name);
         minAlarmData.setName(name + " [Min alarm]");
         maxAlarmData.setName(name + " [Max alarm]");
       }
-    } else {
-      name = model.getName();
-      data.setName(name);
-      minAlarmData.setName(name + " [Min alarm]");
-      maxAlarmData.setName(name + " [Max alarm]");
+
+      minAlarm = model.getMinAlarm();
+      maxAlarm = model.getMaxAlarm();
+
     }
-    
-    minAlarm = model.getMinAlarm();
-    maxAlarm = model.getMaxAlarm();
+
+    if( modelb != null ) {
+
+      data.setUnit(modelb.getUnit());
+      data.setUserFormat(modelb.getFormat());
+
+      // Set the chart label
+      if (modelb.getLabel().length() > 0 && !modelb.getLabel().equalsIgnoreCase("not specified")) {
+        if (chart.displayDeviceNames()) {
+          name = devname + "/" + modelb.getLabel();
+          data.setName(name);
+        } else {
+          name = modelb.getLabel();
+          data.setName(name);
+        }
+      } else {
+        name = modelb.getName();
+        data.setName(name);
+      }
+
+    }
 
   }
 
+  
+
   public void propertyChange(PropertyChangeEvent evt) {
 
-    if (model != null) {
+    if (model != null || modelb != null) {
       refreshNode();
       chart.refreshNode(this);
     }
@@ -175,28 +236,36 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
 
   public void showMinAlarm() {
 
-    showMinAlarm = true;
-    switch (selected) {
-      case Trend.SEL_Y1:
-        chart.getChart().getY1Axis().addDataView(minAlarmData);
-        break;
-      case Trend.SEL_Y2:
-        chart.getChart().getY2Axis().addDataView(minAlarmData);
-        break;
+    if (model != null) {
+
+      showMinAlarm = true;
+      switch (selected) {
+        case Trend.SEL_Y1:
+          chart.getChart().getY1Axis().addDataView(minAlarmData);
+          break;
+        case Trend.SEL_Y2:
+          chart.getChart().getY2Axis().addDataView(minAlarmData);
+          break;
+      }
+
     }
 
   }
 
   public void hideMinAlarm() {
 
-    showMinAlarm = false;
-    switch (selected) {
-      case Trend.SEL_Y1:
-        chart.getChart().getY1Axis().removeDataView(minAlarmData);
-        break;
-      case Trend.SEL_Y2:
-        chart.getChart().getY2Axis().removeDataView(minAlarmData);
-        break;
+    if (model != null) {
+
+      showMinAlarm = false;
+      switch (selected) {
+        case Trend.SEL_Y1:
+          chart.getChart().getY1Axis().removeDataView(minAlarmData);
+          break;
+        case Trend.SEL_Y2:
+          chart.getChart().getY2Axis().removeDataView(minAlarmData);
+          break;
+      }
+
     }
 
   }
@@ -207,28 +276,36 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
 
   public void showMaxAlarm() {
 
-    showMaxAlarm = true;
-    switch (selected) {
-      case Trend.SEL_Y1:
-        chart.getChart().getY1Axis().addDataView(maxAlarmData);
-        break;
-      case Trend.SEL_Y2:
-        chart.getChart().getY2Axis().addDataView(maxAlarmData);
-        break;
+    if (model != null) {
+
+      showMaxAlarm = true;
+      switch (selected) {
+        case Trend.SEL_Y1:
+          chart.getChart().getY1Axis().addDataView(maxAlarmData);
+          break;
+        case Trend.SEL_Y2:
+          chart.getChart().getY2Axis().addDataView(maxAlarmData);
+          break;
+      }
+
     }
 
   }
 
   public void hideMaxAlarm() {
 
-    showMaxAlarm = false;
-    switch (selected) {
-      case Trend.SEL_Y1:
-        chart.getChart().getY1Axis().removeDataView(maxAlarmData);
-        break;
-      case Trend.SEL_Y2:
-        chart.getChart().getY2Axis().removeDataView(maxAlarmData);
-        break;
+    if (model != null) {
+
+      showMaxAlarm = false;
+      switch (selected) {
+        case Trend.SEL_Y1:
+          chart.getChart().getY1Axis().removeDataView(maxAlarmData);
+          break;
+        case Trend.SEL_Y2:
+          chart.getChart().getY2Axis().removeDataView(maxAlarmData);
+          break;
+      }
+
     }
 
   }
@@ -316,13 +393,21 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
   // *****************************************************************************************************************
   // Return true when tree node is a Leaf
   public boolean isLeaf() {
-    return (model != null);
+    return (model != null || modelb != null);
   }
 
   // *****************************************************************************************************************
   // Return the model
   public INumberScalar getModel() {
     return model;
+  }
+
+  public IBooleanScalar getBooleanModel() {
+    return modelb;
+  }
+
+  public boolean hasModel() {
+    return (model!=null) || (modelb!=null);
   }
 
   // *****************************************************************************************************************
@@ -415,6 +500,35 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
     return nn;
   }
 
+  public TrendSelectionNode addItem(Trend g, IBooleanScalar model, Color c) {
+
+    int i = 0;
+    int nb = getChildCount();
+
+    boolean found = false;
+    String attname = model.getName();
+    String devname = attname.substring(0, attname.lastIndexOf('/'));
+
+    //Look fo devname
+    while (i < nb && !found) {
+      found = (devname.equals(getChild(i).toString()));
+      if (!found) i++;
+    }
+
+    TrendSelectionNode nn = new TrendSelectionNode(g, devname, model, Trend.SEL_NONE, c);
+
+    if (found) {
+      // add the attribute
+      getChild(i).add(nn);
+    } else {
+      TrendSelectionNode n = new TrendSelectionNode(g, devname);
+      add(n);
+      n.add(nn);
+    }
+
+    return nn;
+  }
+
   // *****************************************************************************************************************
   // Return all selectable items in a vector
   public Vector getSelectableItems() {
@@ -453,6 +567,8 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
   public String getModelName() {
     if (model != null)
       return model.getName();
+    else if ( modelb != null )
+      return modelb.getName();
     else
       return "";
   }
@@ -467,6 +583,12 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
       model.getProperty("format").removePresentationListener(this);
       model.getProperty("min_alarm").removePresentationListener(this);
       model.getProperty("max_alarm").removePresentationListener(this);
+    }
+    if( modelb!=null ) {
+      modelb.removeBooleanScalarListener(this);
+      modelb.getProperty("label").removePresentationListener(this);
+      modelb.getProperty("unit").removePresentationListener(this);
+      modelb.getProperty("format").removePresentationListener(this);
     }
     data = null;
     minAlarmData = null;
@@ -530,6 +652,39 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
     
   }
 
+  public void booleanScalarChange(BooleanScalarEvent evt) {
+
+    if( modelb==null )
+      return;
+
+    // Add data to the dataView
+    boolean ok = true;
+    DataList lv = data.getLastValue();
+
+    double x = (double) evt.getTimeStamp();
+    double y = evt.getValue()?1.0:0.0;
+
+    if (lv != null) ok = (lv.x != x) || (lv.y != y);
+
+    if (ok) {
+
+      if (chart.getChart().getXAxis().getPercentScrollback() == 0.0) {
+
+        // No percent scrollback, keep the default behavior
+        data.add((double) evt.getTimeStamp(), y);
+        chart.getChart().garbageData(data);
+
+      } else {
+
+        // percent scrollback
+        chart.getChart().addData(data,(double) evt.getTimeStamp(), y);
+
+      }
+
+    }
+
+  }
+
   public void errorChange(ErrorEvent evt) {
 
     if (model == null)
@@ -583,6 +738,11 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
         return model.getLabel();
       else
         return model.getNameSansDevice();
+    } else if (modelb!=null) {
+      if(modelb.getLabel().length()>0 && !modelb.getLabel().equalsIgnoreCase("not specified"))
+        return modelb.getLabel();
+      else
+        return modelb.getNameSansDevice();
     } else {
       return devname;
     }

@@ -66,6 +66,8 @@ public class DeviceFinder extends JPanel {
   public final static int MODE_ATTRIBUTE_STRING_SCALAR = 6;
   /** Select all number spectrum attributes */
   public final static int MODE_ATTRIBUTE_NUMBER_SPECTRUM = 7;
+  /** Select all number spectrum attributes */
+  public final static int MODE_ATTRIBUTE_NUMBER_BOOLEAN_SCALAR = 8;
 
   static Database  db;
   JTree            tree;
@@ -134,6 +136,7 @@ public class DeviceFinder extends JPanel {
           case MODE_ATTRIBUTE_STRING_SCALAR:
           case MODE_COMMAND:
           case MODE_ATTRIBUTE_NUMBER_SPECTRUM:
+          case MODE_ATTRIBUTE_NUMBER_BOOLEAN_SCALAR:
             if (pth.length == 5) {
               name = pth[1] + "/" + pth[2] + "/" + pth[3] + "/" + pth[4];
               completePath.add(name);
@@ -398,6 +401,32 @@ class MemberNode extends Node {
             for(int i=0;i<cmdList.length;i++)
               add(new EntityNode(mode,cmdList[i].cmd_name));
             break;
+          case DeviceFinder.MODE_ATTRIBUTE_NUMBER_BOOLEAN_SCALAR:
+            AttributeInfo[] ainb = ds.get_attribute_info();
+            for(int i=0;i<ainb.length;i++) {
+              // Add boolean
+              if(ainb[i].data_format.value() == AttrDataFormat._SCALAR && ainb[i].data_type == TangoConst.Tango_DEV_BOOLEAN)
+                add(new EntityNode(mode,ainb[i].name));
+
+              // Add number scalar
+              if(ainb[i].data_format.value() == AttrDataFormat._SCALAR)
+                switch(ainb[i].data_type)
+                {
+                    case TangoConst.Tango_DEV_CHAR:
+                    case TangoConst.Tango_DEV_UCHAR:
+                    case TangoConst.Tango_DEV_SHORT:
+                    case TangoConst.Tango_DEV_USHORT:
+                    case TangoConst.Tango_DEV_LONG:
+                    case TangoConst.Tango_DEV_ULONG:
+                    case TangoConst.Tango_DEV_FLOAT:
+                    case TangoConst.Tango_DEV_DOUBLE:
+                        add(new EntityNode(mode,ainb[i].name));
+                        break;
+                }
+            }
+            ainb = null;
+            break;
+
         }
       } catch (ConnectionException e) {
         ErrorPane.showErrorMessage(null,devName,e);
@@ -484,6 +513,7 @@ class TreeNodeRenderer extends DefaultTreeCellRenderer {
         case DeviceFinder.MODE_ATTRIBUTE_NUMBER_SCALAR:
         case DeviceFinder.MODE_ATTRIBUTE_NUMBER_SPECTRUM:
         case DeviceFinder.MODE_ATTRIBUTE_STRING_SCALAR:
+        case DeviceFinder.MODE_ATTRIBUTE_NUMBER_BOOLEAN_SCALAR:
           setIcon(atticon);
           break;
       }

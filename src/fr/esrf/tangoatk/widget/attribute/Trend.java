@@ -437,7 +437,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
         TreePath[] selPaths = mainTree.getSelectionPaths();
         for (int i = 0; i < selPaths.length; i++) {
           TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
-          if (selNode.getModel() != null && selNode.getSelected() != SEL_Y1) {
+          if (selNode.hasModel() && selNode.getSelected() != SEL_Y1) {
             selNode.setSelected(SEL_Y1);
           }
         }
@@ -451,7 +451,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
         TreePath[] selPaths = mainTree.getSelectionPaths();
         for (int i = 0; i < selPaths.length; i++) {
           TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
-          if (selNode.getModel() != null && selNode.getSelected() != SEL_Y2) {
+          if (selNode.hasModel() && selNode.getSelected() != SEL_Y2) {
             selNode.setSelected(SEL_Y2);
           }
         }
@@ -465,7 +465,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
         TreePath[] selPaths = mainTree.getSelectionPaths();
         for (int i = 0; i < selPaths.length; i++) {
           TrendSelectionNode selNode = (TrendSelectionNode) selPaths[i].getLastPathComponent();
-          if (selNode.getModel() != null && selNode.getSelected() != SEL_NONE) {
+          if (selNode.hasModel() && selNode.getSelected() != SEL_NONE) {
             selNode.setSelected(SEL_NONE);
           }
         }
@@ -511,8 +511,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     optionMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         TrendSelectionNode selNode = (TrendSelectionNode) mainTree.getSelectionPath().getLastPathComponent();
-        INumberScalar m = selNode.getModel();
-        if (m != null) {
+        if (selNode.hasModel()) {
           selNode.showOptions();
         }
       }
@@ -521,7 +520,8 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     attOptionMenuItem.addActionListener(new java.awt.event.ActionListener() {
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         TrendSelectionNode selNode = (TrendSelectionNode) mainTree.getSelectionPath().getLastPathComponent();
-        INumberScalar m = selNode.getModel();
+        IAttribute m = selNode.getModel();
+        if(m==null) m = selNode.getBooleanModel();
         if (m != null) {
           if(propFrame==null)
             propFrame = new SimplePropertyFrame();
@@ -791,10 +791,10 @@ public void setTimePrecision(int timePrecision) {
       // Check if we have a single device
       int sz = attList.size();
       if( sz>1 ) {
-        INumberScalar s = (INumberScalar)attList.get(0);
+        IAttribute s = (IAttribute)attList.get(0);
         String dName = s.getDevice().getName();
         for(i=1;i<sz && singleDevice;i++) {
-          s = (INumberScalar)attList.get(i);
+          s = (IAttribute)attList.get(i);
           singleDevice=dName.equalsIgnoreCase(s.getDevice().getName());
         }
       }
@@ -862,10 +862,17 @@ public void setTimePrecision(int timePrecision) {
     int j;
     if (list != null) {
       for (i = 0; i < list.size(); i++) {
+
         if ( list.get(i) instanceof INumberScalar ) {
           j = i;
           lastAdded = rootNode.addItem( this, (INumberScalar) list.get(j), defaultColor[j % defaultColor.length] );
         }
+
+        if( list.get(i) instanceof IBooleanScalar ) {
+          j = i;
+          lastAdded = rootNode.addItem( this, (IBooleanScalar) list.get(j), defaultColor[j % defaultColor.length] );
+        }
+
       }
     }
 
@@ -890,7 +897,7 @@ public void setTimePrecision(int timePrecision) {
             if (selPaths != null && selPaths.length > 0) {
               if (selPaths.length == 1) {
                 TrendSelectionNode selNode = (TrendSelectionNode) selPaths[0].getLastPathComponent();
-                if (selNode.getModel() != null) {
+                if (selNode.hasModel()) {
                   addXMenuItem.setEnabled(selNode.getSelected() != SEL_X);
                   addY1MenuItem.setEnabled(selNode.getSelected() != SEL_Y1);
                   addY2MenuItem.setEnabled(selNode.getSelected() != SEL_Y2);
@@ -977,6 +984,7 @@ public void setTimePrecision(int timePrecision) {
    */
   public void addAttribute(String name) {
     INumberScalar scalar;
+    IBooleanScalar bscalar;
     AttributePolledList alist;
 
     // Add the attribute in the list
@@ -991,9 +999,17 @@ public void setTimePrecision(int timePrecision) {
         alist.startRefresher();
       } else {
         if (attList.get(name)==null) {
-	        scalar = (INumberScalar) attList.add(name);
-	        int i = attList.size();
-	        lastAdded = rootNode.addItem(this, scalar, defaultColor[i % defaultColor.length]);
+          IAttribute att = (IAttribute) attList.add(name);
+          int i = attList.size();
+
+          if( att instanceof IBooleanScalar ) {
+	          bscalar = (IBooleanScalar) attList.add(name);
+	          lastAdded = rootNode.addItem(this, bscalar, defaultColor[i % defaultColor.length]);
+          } else {
+            scalar = (INumberScalar) attList.add(name);
+            lastAdded = rootNode.addItem(this, scalar, defaultColor[i % defaultColor.length]);
+          }
+
 	        mainTreeModel = new DefaultTreeModel(rootNode);
 	        mainTree.setModel(mainTreeModel);
         }
@@ -1200,7 +1216,10 @@ public void setTimePrecision(int timePrecision) {
         if (entity instanceof fr.esrf.tangoatk.core.INumberScalar) {
           return true;
         }
-        System.out.println(entity.getName() + "not imported (only NumberScalar!)");
+        if (entity instanceof fr.esrf.tangoatk.core.IBooleanScalar) {
+          return true;
+        }        
+        System.out.println(entity.getName() + " not imported (only NumberScalar or BooleanScalar!)");
         return false;
       }
     });
@@ -1988,7 +2007,7 @@ class ConfigPanel extends JDialog implements ActionListener {
     setTitle("Add new attribute");
     JPanel innerPanel = new JPanel();
     innerPanel.setLayout(new BorderLayout());
-    finder = new DeviceFinder(DeviceFinder.MODE_ATTRIBUTE_NUMBER_SCALAR);
+    finder = new DeviceFinder(DeviceFinder.MODE_ATTRIBUTE_NUMBER_BOOLEAN_SCALAR);
     innerPanel.add(finder,BorderLayout.CENTER);
 
     addBtn = new JButton("Add selected attribute(s)");
