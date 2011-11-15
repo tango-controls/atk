@@ -28,8 +28,8 @@ BEANINFO= StringScalarViewerBeanInfo.java            \
 	  NumberSpectrumItemTrendBeanInfo.java \
 	  DevStateSpectrumViewerBeanInfo.java \
           SimpleStateViewerBeanInfo.java	\
-	  NumberSpectrumStateBarChartViewerBeanInfo.java    \
-
+	  NumberSpectrumStateBarChartViewerBeanInfo.java \
+          SimpleEnumScalarViewerBeanInfo.java            \
 
 include ../../../../../../.make-include
 
