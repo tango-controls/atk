@@ -88,3 +88,6 @@ Java-Bean: True
 Name: fr/esrf/tangoatk/widget/attribute/NumberSpectrumStateBarChartViewer.class
 Java-Bean: True
 
+Name: fr/esrf/tangoatk/widget/attribute/SimpleEnumScalarViewer.class
+Java-Bean: True
+
