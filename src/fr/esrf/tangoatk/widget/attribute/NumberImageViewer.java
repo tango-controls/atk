@@ -286,6 +286,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
                           "statusLineVisible",
                           "gradientVisible",
                           "bestFit",
+                          "zoom",
                           "xAxis",
                           "yAxis"
                           };
@@ -675,6 +676,8 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       return "Displays the right gradient scale";
     } else if (name.equalsIgnoreCase("bestFit")) {
       return "Displays the image using the whole color range";
+    } else if (name.equalsIgnoreCase("zoom")) {
+      return "zoom factor: 0=800%, 1=400%, 2=200%, 3=100%, 4=50%, 5=25%, 6=12.5%";
     } else if (name.equalsIgnoreCase("xAxis")) {
       return JLAxis.getHelpString();
     } else if (name.equalsIgnoreCase("yAxis")) {
@@ -743,6 +746,24 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
         return false;
       }
 
+    } else if (name.equalsIgnoreCase("zoom")) {
+
+      int sz=0;
+
+      try {
+        sz = Integer.parseInt(value);
+      } catch (NumberFormatException e) {
+        showJdrawError(popupErr,"zoom","Wrong number syntax.");
+        return false;
+      }
+
+      if( sz>=0 && sz<=6 ) {
+        setZoom(sz);
+      } else {
+        showJdrawError(popupErr,"zoom","Invalid value: 0 to 6 allowed.");
+        return false;
+      }
+
     } else if (name.equalsIgnoreCase("xAxis")) {
 
       // Handle a 'bug' in CFFileReader parsing
@@ -783,6 +804,8 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       return (isGradientVisible())?"true":"false";
     } else if(name.equalsIgnoreCase("bestFit")) {
       return (isBestFit())?"true":"false";
+    } else if(name.equalsIgnoreCase("zoom")) {
+      return Integer.toString(getZoom());
     } else if(name.equalsIgnoreCase("xAxis")) {
       return getXAxis().getConfiguration("x");
     } else if(name.equalsIgnoreCase("yAxis")) {
@@ -795,7 +818,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
   private void showJdrawError(boolean popup,String paramName,String message) {
     if(popup)
-      JOptionPane.showMessageDialog(null, "NumberSpectrumViewer: "+paramName+" incorrect.\n" + message,
+      JOptionPane.showMessageDialog(null, "NumberImageViewer: "+paramName+" incorrect.\n" + message,
                                     "Error",JOptionPane.ERROR_MESSAGE);
   }
 
