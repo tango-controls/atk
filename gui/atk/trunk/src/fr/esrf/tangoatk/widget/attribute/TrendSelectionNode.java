@@ -115,7 +115,7 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
       //System.out.println(name + ":Reading "+history.length+ " values");
       for (int i = 0; i < history.length; i++)
         data.add(history[i].getTimestamp(), history[i].getValue());
-      chart.getChart().garbageData(data);
+      //chart.getChart().garbageData(data);
     }
 
     // Register attribute
