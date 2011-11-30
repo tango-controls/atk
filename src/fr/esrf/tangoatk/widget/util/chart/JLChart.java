@@ -3008,8 +3008,10 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     //Get the last value
     if (v.getDataLength() > 0) lv = v.getLastValue();
 
-    if( Double.isNaN(lv.y) ) {
-      lv = null;
+    if( lv!=null ) {
+      if( Double.isNaN(lv.y) ) {
+        lv = null;
+      }
     }
 
     //Add data
