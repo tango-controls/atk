@@ -51,7 +51,7 @@ import fr.esrf.tangoatk.widget.util.chart.*;
  */
 
 /** A class to monitor multiple scalar attributes. */
-public class Trend extends JPanel implements IControlee, ActionListener, IJLChartActionListener, IRefresherListener {
+public class Trend extends JPanel implements IControlee, ActionListener, IJLChartActionListener, IRefresherListener, IListStateListener {
 
   // Constant
 
@@ -92,10 +92,10 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
 
   protected JButton optionButton;
   protected JMenuItem optionMenuI;
-  protected JButton stopButton;
-  protected JMenuItem stopMenuI;
-  protected JButton startButton;
-  protected JMenuItem startMenuI;
+  protected JButton startStopButton;
+  protected ImageIcon startIcon;
+  protected ImageIcon stopIcon;
+  protected JMenuItem startStopMenuI;
   protected JButton loadButton;
   protected JMenuItem loadMenuI;
   protected JButton saveButton;
@@ -159,15 +159,10 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
   protected Map buttonMap;
   
   /**
-   * Corresponds to the button "start monitoring"
+   * Corresponds to the button "start/stop monitoring"
    */
-  public static final String start  = "START";
-  
-  /**
-   * Corresponds to the button "stop monitoring"
-   */
-  public static final String stop   = "STOP";
-  
+  public static final String startStop  = "STARTSTOP";
+
   /**
    * Corresponds to the button "Save configuration"
    */
@@ -256,13 +251,13 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     optionButton.setToolTipText("Global settings");
     optionMenuI = new JMenuItem("Global settings");
 
-    stopButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_stop.gif")));
-    stopButton.setToolTipText("Stop monitoring");
-    stopMenuI = new JMenuItem("Stop monitoring");
+    stopIcon = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_stop.gif"));
+    startIcon = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_start.gif"));
 
-    startButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_start.gif")));
-    startButton.setToolTipText("Start monitoring");
-    startMenuI = new JMenuItem("Start monitoring");
+    startStopButton = new JButton(startIcon);
+    startStopButton.setToolTipText("Start monitoring");
+    startStopMenuI = new JMenuItem("Start monitoring");
+    startStopMenuI.addActionListener(this);
 
     loadButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_load.gif")));
     loadButton.setToolTipText("Load configuration");
@@ -305,10 +300,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     optionMenuI.addActionListener(this);
     zoomButton.addActionListener(this);
     zoomMenuI.addActionListener(this);
-    stopButton.addActionListener(this);
-    stopMenuI.addActionListener(this);
-    startButton.addActionListener(this);
-    startMenuI.addActionListener(this);
+    startStopButton.addActionListener(this);
     timeButton.addActionListener(this);
     timeMenuI.addActionListener(this);
     cfgButton.addActionListener(this);
@@ -324,8 +316,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     theToolBar.add(saveButton);
     theToolBar.add(optionButton);
     theToolBar.add(zoomButton);
-    theToolBar.add(startButton);
-    theToolBar.add(stopButton);
+    theToolBar.add(startStopButton);
     theToolBar.add(timeButton);
     theToolBar.add(cfgButton);
     theToolBar.add(resetButton);
@@ -334,8 +325,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     buttonMap.put(save,saveButton);
     buttonMap.put(option,optionButton);
     buttonMap.put(zoom,zoomButton);
-    buttonMap.put(start,startButton);
-    buttonMap.put(stop,stopButton);
+    buttonMap.put(startStop,startStopButton);
     buttonMap.put(time,timeButton);
     buttonMap.put(config,cfgButton);
     buttonMap.put(reset,resetButton);
@@ -344,8 +334,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     toolMenu.add(saveMenuI);
     toolMenu.add(optionMenuI);
     toolMenu.add(zoomMenuI);
-    toolMenu.add(startMenuI);
-    toolMenu.add(stopMenuI);
+    toolMenu.add(startStopMenuI);
     toolMenu.add(timeMenuI);
     toolMenu.add(cfgMenuI);
     toolMenu.add(resetMenuI);
@@ -571,8 +560,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     panelToolBar.add(saveButton);
     panelToolBar.add(optionButton);
     panelToolBar.add(zoomButton);
-    panelToolBar.add(startButton);
-    panelToolBar.add(stopButton);
+    panelToolBar.add(startStopButton);
     panelToolBar.add(timeButton);
     panelToolBar.add(cfgButton);
     panelToolBar.add(resetButton);
@@ -600,10 +588,14 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     Object o = evt.getSource();
     if (o == optionButton || o == optionMenuI) {
       optionButtonActionPerformed();
-    } else if (o == stopButton || o == stopMenuI) {
-      attList.stopRefresher();
-    } else if (o == startButton || o == startMenuI) {
-      attList.startRefresher();
+    } else if (o == startStopButton || o == startStopMenuI) {
+      if( attList!=null ) {
+        if( attList.isRefresherStarted() ) {
+          attList.stopRefresher();
+        } else {
+          attList.startRefresher();
+        }
+      }
     } else if (o == loadButton || o == loadMenuI) {
       loadButtonActionPerformed();
     } else if (o == saveButton || o == saveMenuI) {
@@ -722,6 +714,15 @@ public void setTimePrecision(int timePrecision) {
 
   }
 
+  // -------------------------------------------------------------
+  // ListState listener
+  // -------------------------------------------------------------
+  public void stateChange(int state) {
+
+    updateStartStopButton();
+
+  }
+
   /**
    * Sets or unset the offline mode (data are updated but not painted)
    * @param mode Offline mode
@@ -806,6 +807,20 @@ public void setTimePrecision(int timePrecision) {
     }
   }
 
+  private void updateStartStopButton() {
+
+    if( attList.isRefresherStarted() ) {
+      startStopButton.setIcon(stopIcon);
+      startStopButton.setToolTipText("Stop monitoring");
+      startStopMenuI.setText("Stop monitoring");
+    } else {
+      startStopButton.setIcon(startIcon);
+      startStopButton.setToolTipText("Start monitoring");
+      startStopMenuI.setText("Start monitoring");
+    }
+
+  }
+
   /**
    * Free any allocated resource and stop refreshing.
    * The internal attribute list is released if it has
@@ -834,6 +849,7 @@ public void setTimePrecision(int timePrecision) {
     {
         attList.removeErrorListener(errWin);
         attList.removeRefresherListener(this);
+        attList.removeListStateListener(this);
     }
 
     if( rootNode!=null ) {
@@ -970,9 +986,11 @@ public void setTimePrecision(int timePrecision) {
     attList = list;
     if(attList!=null) {
       attList.addRefresherListener(this);
+      attList.addListStateListener(this);
       attList.addErrorListener(errWin);
     }
 
+    updateStartStopButton();
     updateModel();
   }
 

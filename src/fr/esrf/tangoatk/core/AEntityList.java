@@ -36,11 +36,15 @@ public abstract class AEntityList extends javax.swing.DefaultListModel
                 implements IEntityCollection, ComboBoxModel, IEntityList 
 {
 
+  public final static int REFRESHER_STARTED = 1;
+  public final static int REFRESHER_STOPPED = 2;
+
   protected int refreshInterval = 1000;
   protected AEntityFactory factory;
   protected Refresher refresher = null;
   protected List<IErrorListener> errorListeners = new Vector<IErrorListener> ();
   protected List<IRefresherListener> refresherListeners = new Vector<IRefresherListener> ();
+  protected List<IListStateListener> listStateListeners = new Vector<IListStateListener> ();
   protected List<ISetErrorListener> setErrorListeners = new Vector<ISetErrorListener> ();
   protected IEntity selectedItem;
   
@@ -138,6 +142,7 @@ public abstract class AEntityList extends javax.swing.DefaultListModel
     }
     refresher = null;
     refresherStarted = false;
+    fireListStateChangeEvent();
   }
 
 
@@ -155,10 +160,8 @@ public abstract class AEntityList extends javax.swing.DefaultListModel
 
     refresher.addRefreshee(this).start();
     refresherStarted = true;
+    fireListStateChangeEvent();
   }
-
-
-
 
 /* (non-Javadoc)
  * @see fr.esrf.tangoatk.core.IEntityList#setRefresher(fr.esrf.tangoatk.core.Refresher)
@@ -457,6 +460,55 @@ public IEntity add(String name) throws ConnectionException
         System.out.println("AEntityList.fireRefresherStepEvent() Exception caught ------------------------------");
         e.printStackTrace();
         System.out.println("AEntityList.fireRefresherStepEvent()------------------------------------------------");
+
+      }
+    }
+
+  }
+
+  /* (non-Javadoc)
+   * @see fr.esrf.tangoatk.core.IEntityList#addListStateListener(fr.esrf.tangoatk.core.IListstateListener)
+   */
+  public void addListStateListener(IListStateListener l) {
+    if( !listStateListeners.contains(l) )
+      listStateListeners.add(l);
+  }
+
+  /* (non-Javadoc)
+   * @see fr.esrf.tangoatk.core.IEntityList#removeListStateListener(fr.esrf.tangoatk.core.IListStateListener)
+   */
+  public void removeListStateListener(IListStateListener l) {
+    if(listStateListeners != null)
+      listStateListeners.remove(l);
+  }
+
+  /* (non-Javadoc)
+   * @see fr.esrf.tangoatk.core.IEntityList#clearListStateListener()
+   */
+  public void clearListStateListener() {
+    listStateListeners.clear();
+  }
+
+  protected void fireListStateChangeEvent() {
+
+    int s = listStateListeners.size();
+
+    for(int i=0;i<s;i++) {
+
+      IListStateListener a = listStateListeners.get(i);
+      try {
+
+        if( refresherStarted ) {
+          a.stateChange(REFRESHER_STARTED);
+        } else {
+          a.stateChange(REFRESHER_STOPPED);          
+        }
+
+      } catch (Exception e) {
+
+        System.out.println("AEntityList.fireListStateChangeEvent() Exception caught ------------------------------");
+        e.printStackTrace();
+        System.out.println("AEntityList.fireListStateChangeEvent()------------------------------------------------");
 
       }
     }

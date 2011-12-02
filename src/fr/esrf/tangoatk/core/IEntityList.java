@@ -124,7 +124,16 @@ public interface IEntityList {
 
 	public abstract void removeRefresherListener(IRefresherListener l);
 
-	public abstract void clearRefresherListener();
+  /**
+   * Add a listener on the refresher state. Listeners are triggered
+   * each time startRefresher or stopRefresher is called.
+   * @param l ListState listener
+   */
+  public abstract void addListStateListener(IListStateListener l);
+
+  public abstract void removeListStateListener(IListStateListener l);
+
+	public abstract void clearListStateListener();
 
 	public abstract String getVersion();
 
