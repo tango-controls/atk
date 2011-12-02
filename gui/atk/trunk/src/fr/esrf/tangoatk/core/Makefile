@@ -58,6 +58,7 @@ INTERFACES = $(TARGET)/INumber.class   \
         $(TARGET)/IStringSpectrum.class \
         $(TARGET)/IStringSpectrumListener.class \
 	$(TARGET)/IRefresherListener.class \
+	$(TARGET)/IListStateListener.class \
         $(TARGET)/IBooleanImage.class \
         $(TARGET)/IBooleanSpectrum.class \
         $(TARGET)/IBooleanScalar.class \
