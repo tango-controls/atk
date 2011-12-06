@@ -809,14 +809,16 @@ public void setTimePrecision(int timePrecision) {
 
   private void updateStartStopButton() {
 
-    if( attList.isRefresherStarted() ) {
-      startStopButton.setIcon(stopIcon);
-      startStopButton.setToolTipText("Stop monitoring");
-      startStopMenuI.setText("Stop monitoring");
-    } else {
-      startStopButton.setIcon(startIcon);
-      startStopButton.setToolTipText("Start monitoring");
-      startStopMenuI.setText("Start monitoring");
+    if( attList!=null ) {
+      if( attList.isRefresherStarted() ) {
+        startStopButton.setIcon(stopIcon);
+        startStopButton.setToolTipText("Stop monitoring");
+        startStopMenuI.setText("Stop monitoring");
+      } else {
+        startStopButton.setIcon(startIcon);
+        startStopButton.setToolTipText("Start monitoring");
+        startStopMenuI.setText("Start monitoring");
+      }
     }
 
   }
