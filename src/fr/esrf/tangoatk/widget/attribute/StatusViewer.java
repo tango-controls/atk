@@ -211,8 +211,10 @@ public class StatusViewer extends javax.swing.JPanel implements IStringScalarLis
       }
       else if (s.equals(status.getText())) 
         return;
-      else
+      else {
         status.setText(s);
+        status.setCaretPosition(0);
+      }
     }
 	
     private void attStateChange(String state)
