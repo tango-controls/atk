@@ -27,18 +27,10 @@ all: util core widget
 atk-release:
 ifdef ATK-VERSION
 	@echo "You are building the ATK version : $(ATK-VERSION)"
-	($(CVSSF) tag $(ATK-RELEASE) configure		\
-                                .make-include.in	\
-                               configure.in	\
-                               Makefile &&		\
-	 (cd lib &&                                     \
-	 $(CVSSF) tag $(ATK-RELEASE) printf.jar jep.jar jepext.jar ij.jar jogl.jar gluegen-rt.jar ) && \
-	 (cd src/fr/esrf/tangoatk/ &&			\
-         $(CVSSF) tag -R $(ATK-RELEASE) core) &&        \
-         (cd src/fr/esrf/tangoatk/ &&			\
-         $(CVSSF) tag $(ATK-RELEASE) util)) &&		\
-	 (cd src/fr/esrf/tangoatk/ &&			\
-         $(CVSSF) tag -R $(ATK-RELEASE) widget)
+	(svn copy \
+	https://tango-cs.svn.sourceforge.net/svnroot/tango-cs/gui/atk/trunk \
+	https://tango-cs.svn.sourceforge.net/svnroot/tango-cs/gui/atk/tags/$(ATK-RELEASE) \
+	-m "Tagging the atk project.")
 else
 	@echo "Sorry you cannot perform atk-release; ATK_RELDIR should be set!"
 endif
