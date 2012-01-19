@@ -65,7 +65,7 @@ public class ATKConstant {
     stateMap.put(IDevice.STANDBY, new java.awt.Color(255, 255, 0));   // Yellow
     stateMap.put(IDevice.FAULT, new java.awt.Color(255, 0, 0));       // Red
     stateMap.put(IDevice.INIT, new java.awt.Color(204, 204, 122));    // Beige
-    stateMap.put(IDevice.RUNNING, new java.awt.Color(128, 160, 255)); // Light Blue
+    stateMap.put(IDevice.RUNNING, new java.awt.Color(0, 125, 0)); // Dark Green
     stateMap.put(IDevice.ALARM, new java.awt.Color(255, 140, 0));     // Orange
     stateMap.put(IDevice.DISABLE, new java.awt.Color(255, 0, 255));   // Magenta
     stateMap.put(IDevice.UNKNOWN, new java.awt.Color(155, 155, 155)); // Grey
@@ -93,7 +93,7 @@ public class ATKConstant {
     stateLightMap.put( IDevice.STANDBY, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/icons/ledYellow.gif")) );   // Yellow
     stateLightMap.put( IDevice.FAULT, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/icons/ledRed.gif")) );        // Red
     stateLightMap.put( IDevice.INIT, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/icons/ledBrownGray.gif")) );   // Beige
-    stateLightMap.put( IDevice.RUNNING, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/icons/ledBlue.gif")) );     // Light Blue
+    stateLightMap.put( IDevice.RUNNING, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/icons/ledDarkGreen.gif")) );     // Dark Green
     stateLightMap.put( IDevice.ALARM, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/icons/ledDarkOrange.gif")) ); // Orange
     stateLightMap.put( IDevice.DISABLE, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/icons/ledPink.gif")) );     // Magenta
     stateLightMap.put( IDevice.UNKNOWN, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/icons/ledGray.gif")) );     // Gray
