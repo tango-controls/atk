@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<HTML lang="en"><HEAD>
+<TITLE>Source Code: ItlkNetViewer.java</TITLE>
+<STYLE>
+body {
+    background: ivory;
+    color: black;
+}
+DIV.description {
+    color: maroon;
+    margin-top: -0.4cm;
+}
+SPAN.linenumber {
+    color: maroon;
+}
+SPAN.string {
+    color: #008080;
+}
+SPAN.comment {
+    color: green;
+}
+SPAN.keyword {
+    color: blue;
+    font-weight: bold;
+}
+SPAN.userkeyword {
+    color: purple;
+    font-weight: bold;
+}
+</STYLE>
+</HEAD><BODY>
+<H2>ItlkNetViewer.java</H2>
+<PRE>
+
+<SPAN class="keyword">import</SPAN> fr.esrf.tangoatk.widget.util.interlock.NetEditor;
+<SPAN class="keyword">import</SPAN> javax.swing.*;
+<SPAN class="keyword">import</SPAN> java.io.IOException;
+
+<SPAN class="comment">/** A class which override the ItlkNetEditor to build an Interlock Simulator viewer */</SPAN>
+<SPAN class="keyword">public</SPAN> <SPAN class="keyword">class</SPAN> ItlkNetViewer <SPAN class="keyword">extends</SPAN> ItlkNetEditor {
+
+  <SPAN class="keyword">public</SPAN> ItlkNetViewer(JFrame parent) {
+
+    <SPAN class="keyword">super</SPAN>(parent);
+    setEditable(<SPAN class="keyword">false</SPAN>);
+
+  }
+
+  <SPAN class="comment">/** Overload load file to check the root */</SPAN>
+  <SPAN class="keyword">public</SPAN> <SPAN class="keyword">void</SPAN> loadFile(String fileName) <SPAN class="keyword">throws</SPAN> IOException {
+
+    <SPAN class="keyword">super</SPAN>.loadFile(fileName);
+    <SPAN class="keyword">if</SPAN>( getRoot()==<SPAN class="keyword">null</SPAN> ) {
+      clearObjects();
+      <SPAN class="keyword">throw</SPAN> <SPAN class="keyword">new</SPAN> IOException(<SPAN class="string">"No VCC found in this net file."</SPAN>);
+    }
+
+  }
+
+}
+</PRE>
+</BODY></HTML>
