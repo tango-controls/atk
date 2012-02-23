@@ -75,6 +75,22 @@ public class ATKException extends Exception {
     }
   }
 
+  /**
+   * Constructs an ATK exception from a Tango DevErros error stack with a message.
+   * @param e Tango exception
+   */
+  public ATKException(String s, DevError[] errs) {
+    // Copy the stack trace
+    super(s);
+    source=this;
+
+    if(errs!=null) {
+      errors = errs;
+    } else {
+      System.out.println("ATKException.ATKException() : Cannot handle ATKException with null error stack.");
+    }
+  }
+
   /*
    * Constructs an ATK exception from a Java exception.
    */
