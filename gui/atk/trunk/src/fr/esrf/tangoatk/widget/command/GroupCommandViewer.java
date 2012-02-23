@@ -22,9 +22,13 @@
  
 package fr.esrf.tangoatk.widget.command;
 
-import fr.esrf.tangoatk.core.*;
-import fr.esrf.tangoatk.core.command.VoidVoidCommand;
 
+import fr.esrf.tangoatk.core.DeviceFactory;
+import fr.esrf.tangoatk.core.EndGroupExecutionEvent;
+import fr.esrf.tangoatk.core.ErrorEvent;
+import fr.esrf.tangoatk.core.ICommandGroup;
+import fr.esrf.tangoatk.core.IEndGroupExecutionListener;
+import fr.esrf.tangoatk.core.command.VoidVoidCommandGroup;
 import java.awt.event.*;
 import javax.swing.*;
 
@@ -34,7 +38,7 @@ import javax.swing.*;
 public class GroupCommandViewer extends JButton implements IEndGroupExecutionListener
 {
 
-  protected   ICommandGroup   model;
+  protected   ICommandGroup   cmdgModel;
   private     String          buttonLabel = "Not Specified";
 
 
@@ -73,10 +77,10 @@ public class GroupCommandViewer extends JButton implements IEndGroupExecutionLis
 
   protected void executeButtonActionPerformed(ActionEvent actionevent) {
 
-    if (model != null)
+    if (cmdgModel != null)
     {
       setEnabled(false);
-      model.execute();
+      cmdgModel.execute();
     }
 
   }
@@ -92,41 +96,40 @@ public class GroupCommandViewer extends JButton implements IEndGroupExecutionLis
   }
 
   public void setModel(ICommandGroup cmdg)
-  {
-
-    if (model != null)
-    {
-        model.removeEndGroupExecutionListener(this);
-	
-	if ( buttonLabel.equalsIgnoreCase("Not Specified") )
-           setText("command-group");
-        model = null;
-    }
+  {    
+    clearModel();
     
-    if (cmdg == null)
-       return;
+    if (cmdg == null) return;
        
-    if (cmdg.size() <= 0)
-       return;
+    if (cmdg.size() <= 0) return;
        
-    if (!(cmdg instanceof CommandGroup))
-       return;
+    if (!(cmdg instanceof VoidVoidCommandGroup)) return;
        
-    model = cmdg;
-    model.addEndGroupExecutionListener(this);
+    cmdgModel = cmdg;
+    cmdgModel.addEndGroupExecutionListener(this);
     
     if (! buttonLabel.equalsIgnoreCase("Not Specified") )
     {
-      setText("command-group");
+      setText(buttonLabel);
       return;
     }
+
+    String  cmdname = cmdg.getCmdName();
+    if (cmdname != null)
+        setText(cmdname);
     
-    
-    IEntity   firstCmd = (IEntity) ((AEntityList) model).get(0);
-    
-    if (firstCmd != null)
+  }
+
+  public void clearModel()
+  {
+
+    if (cmdgModel != null)
     {
-       setText(firstCmd.getNameSansDevice());
+        cmdgModel.removeEndGroupExecutionListener(this);
+
+	if ( buttonLabel.equalsIgnoreCase("Not Specified") )
+           setText("command-group");
+        cmdgModel = null;
     }
 
   }
@@ -134,7 +137,7 @@ public class GroupCommandViewer extends JButton implements IEndGroupExecutionLis
 
   public static void main(String [] args)
   {
-     ICommandGroup        cmdg = new CommandGroup();
+     ICommandGroup        cmdg = new VoidVoidCommandGroup();
 
      GroupCommandViewer   gcv = new GroupCommandViewer();
 
