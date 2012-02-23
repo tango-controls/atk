@@ -43,7 +43,7 @@ package fr.esrf.tangoatk.core;
 public interface ICommandGroup extends IEntityCollection
 {
     /* overrides the setFilter method of EntityList */
-    public void setFilter(IEntityFilter filter);
+    public String getCmdName();
 
     public void addEndGroupExecutionListener(IEndGroupExecutionListener l);
 
