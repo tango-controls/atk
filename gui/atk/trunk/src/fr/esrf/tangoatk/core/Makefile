@@ -127,6 +127,7 @@ LISTS = $(TARGET)/DeviceItem.class \
 	$(TARGET)/AttributePolledList.class \
 	$(TARGET)/CommandList.class \
         $(TARGET)/CommandGroup.class \
+	$(TARGET)/command/VoidVoidCommandGroup.class \
 
 PRE = $(INTERFACES) $(ABSTRACTS) $(DEVICE) $(ERRORHANDLER) \
       $(EXCEPTIONS) $(EVENTS)  $(PROPERTIES) 
