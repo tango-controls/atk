@@ -28,7 +28,7 @@ ALL = $(TARGET)/VoidCommandHelper.class    \
       $(TARGET)/ACommand.class             \
       $(TARGET)/ACommandHelper.class       \
       $(TARGET)/CommandFactory.class       \
-      $(TARGET)/VoidVoidCommandGroup.class       \
+#      $(TARGET)/VoidVoidCommandGroup.class       \
 
 all: $(ALL)
 	$(J)
