@@ -41,6 +41,10 @@ public class CommandExecuteException extends ATKException {
 	super(s);
     }
 
+    public CommandExecuteException(String s, DevError[] errs) {
+        super(s, errs);
+    }
+
     public String getVersion() {
 	return "$Id$";
     }
