@@ -29,6 +29,7 @@
 
 package fr.esrf.tangoatk.core;
 
+import fr.esrf.tangoatk.core.command.ACommand;
 import fr.esrf.tangoatk.core.command.CommandFactory;
 import fr.esrf.tangoatk.core.command.VoidVoidCommand;
 import java.util.List;
@@ -44,6 +45,12 @@ import java.util.List;
  * 
  * {@link CommandList}
  */
+
+/**
+ * @deprecated  As of release ATKCore-4.3.1 and higher, please use instead fr.esrf.tangoatk.core.command.VoidVoidCommandGroup
+ */
+
+@Deprecated
 public class CommandGroup extends CommandList implements ICommandGroup
 {
     protected EventSupport propChanges;
@@ -111,6 +118,17 @@ public class CommandGroup extends CommandList implements ICommandGroup
 	    
     }
 
+    public String getCmdName()
+    {
+        String cmd = null;
+        if (this.getSize() > 0)
+        {
+            ACommand  acmd = (ACommand) (this.get(0));
+            if (acmd != null)
+                cmd = acmd.getNameSansDevice();
+        }
+        return cmd;
+    }
 
     public String getVersion() {
 	return "$Id $";
