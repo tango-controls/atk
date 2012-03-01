@@ -49,6 +49,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.*;
 
 import java.lang.reflect.Constructor;
@@ -501,8 +503,56 @@ public class TangoSynopticHandler extends JDrawEditor
 // not needed : automatically started in dFac class      dFac.startRefresher();
    }
 
+    private void clearAllPanels()
+    {
+        Iterator<PanelItem> it = panelList.iterator();
+        while (it.hasNext())
+        {
+            PanelItem pi = it.next();
+            removePanel(pi);
+        }
+        panelList.clear();
+        panelList = new Vector<PanelItem> ();
+    }
+
+   private void removeAllListeners()
+   {
+       if (allAttributes == null) return;
+       if (allAttributes.isEmpty()) return;
+       for (int i=0; i<allAttributes.size(); i++)
+       {
+           Object  obj = allAttributes.get(i);
+           if (obj instanceof IDevStateScalar)
+           {
+               IDevStateScalar idss = (IDevStateScalar) obj;
+               idss.removeDevStateScalarListener(this);
+               continue;
+           }
+           if (obj instanceof INumberScalar)
+           {
+               INumberScalar ins = (INumberScalar) obj;
+               ins.removeNumberScalarListener(this);
+               continue;
+           }
+           if (obj instanceof IBooleanScalar)
+           {
+               IBooleanScalar ibs = (IBooleanScalar) obj;
+               ibs.removeBooleanScalarListener(this);
+               continue;
+           }
+           if (obj instanceof IDevStateSpectrum)
+           {
+               IDevStateSpectrum idss = (IDevStateSpectrum) obj;
+               idss.removeDevStateSpectrumListener(this);
+               continue;
+           }
+       }
+   }
+
    public void clearSynopticFileModel()
    {
+       removeAllListeners();
+       clearAllPanels();
        if (allAttributes != null)
        {
            allAttributes.stopRefresher();
@@ -1201,6 +1251,20 @@ public class TangoSynopticHandler extends JDrawEditor
     }
     else
         return null;
+  }
+
+  private void removePanel(PanelItem  pi)
+  {
+      Window pw = pi.parent;
+      if(pw!=null)
+      {
+          pw.removeWindowListener(this);
+          if (pw instanceof JFrame)
+          {
+              JFrame jf = (JFrame) pw;
+              pw.getToolkit().getSystemEventQueue().postEvent(new WindowEvent(pw, WindowEvent.WINDOW_CLOSING));
+          }
+      }
   }
 
   public void windowClosed(WindowEvent e) {
