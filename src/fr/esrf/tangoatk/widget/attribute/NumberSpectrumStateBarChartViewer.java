@@ -12,14 +12,13 @@ import fr.esrf.tangoatk.core.ErrorEvent;
 import fr.esrf.tangoatk.core.IDevStateSpectrum;
 import fr.esrf.tangoatk.core.IDevStateSpectrumListener;
 import fr.esrf.tangoatk.core.IDevice;
-import fr.esrf.tangoatk.core.INumberScalar;
-import fr.esrf.tangoatk.core.INumberScalarListener;
 import fr.esrf.tangoatk.core.INumberSpectrum;
 import fr.esrf.tangoatk.core.ISpectrumListener;
 import fr.esrf.tangoatk.core.IStringSpectrum;
 import fr.esrf.tangoatk.core.IStringSpectrumListener;
 import fr.esrf.tangoatk.core.NumberScalarEvent;
 import fr.esrf.tangoatk.core.NumberSpectrumEvent;
+import fr.esrf.tangoatk.core.Property;
 import fr.esrf.tangoatk.core.StringSpectrumEvent;
 import fr.esrf.tangoatk.widget.util.ATKConstant;
 import fr.esrf.tangoatk.widget.util.chart.ColorItem;
@@ -30,6 +29,8 @@ import fr.esrf.tangoatk.widget.util.chart.JLChartEvent;
 import fr.esrf.tangoatk.widget.util.chart.JLDataView;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Vector;
 import javax.swing.JFrame;
 
@@ -40,13 +41,13 @@ import javax.swing.JFrame;
 public class NumberSpectrumStateBarChartViewer extends JLChart
         implements IJLChartListener,
                    ISpectrumListener, IDevStateSpectrumListener,
-                   IStringSpectrumListener, INumberScalarListener
+                   IStringSpectrumListener,
+                   PropertyChangeListener
 {
 
     private INumberSpectrum numberModel = null;
     private IDevStateSpectrum stateModel = null;
     private IStringSpectrum   nameModel = null;
-    private INumberScalar     minAlarmModel = null, maxAlarmModel = null;
     
     protected JLDataView dvy = null;
     protected JLDataView minAlarmDv = null, maxAlarmDv = null;
@@ -62,6 +63,16 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
     private int              barChartFillMethod = JLDataView.METHOD_FILL_FROM_BOTTOM;
     private long             lastForcedUpdateTime = System.currentTimeMillis() - 60000;
     private boolean          drawOnNaN = false;
+    private boolean          minAlarmVisible = false;
+    private boolean          maxAlarmVisible = false;
+
+    private Color            minAlarmColor = ATKConstant.getColor4State(IDevice.ALARM);
+    private Color            maxAlarmColor = ATKConstant.getColor4State(IDevice.ALARM);
+    private int              minAlarmStyle = JLDataView.STYLE_SOLID;
+    private int              maxAlarmStyle = JLDataView.STYLE_SOLID;
+
+    private Double           minAlarmValue = null;
+    private Double           maxAlarmValue = null;
 
     public NumberSpectrumStateBarChartViewer()
     {
@@ -85,16 +96,18 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
 
         minAlarmDv = new JLDataView();
         minAlarmDv.setName("Min Alarm");
-        minAlarmDv.setStyle(JLDataView.STYLE_LONG_DASH);
+        minAlarmDv.setStyle(minAlarmStyle);
         //minAlarmDv.setLineWidth(2);
-        minAlarmDv.setColor(Color.BLACK);
+        minAlarmDv.setColor(minAlarmColor);
+        minAlarmDv.setLabelVisible(false);
         //getY1Axis().addDataView(minAlarmDv);
 
         maxAlarmDv = new JLDataView();
         maxAlarmDv.setName("Max Alarm");
-        maxAlarmDv.setStyle(JLDataView.STYLE_LONG_DASH);
+        maxAlarmDv.setStyle(maxAlarmStyle);
         //maxAlarmDv.setLineWidth(2);
-        maxAlarmDv.setColor(Color.BLACK);
+        maxAlarmDv.setColor(maxAlarmColor);
+        maxAlarmDv.setLabelVisible(false);
         //getY1Axis().addDataView(maxAlarmDv);
 
         setJLChartListener(this);
@@ -146,6 +159,78 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
         drawOnNaN = don;
     }
 
+    public boolean getMinAlarmVisible()
+    {
+        return (minAlarmVisible);
+    }
+
+    public void setMinAlarmVisible(boolean vis)
+    {
+        if (minAlarmVisible != vis)
+        {
+            changeMinAlarmVisiblity(vis);
+        }
+        minAlarmVisible = vis;
+    }
+
+    public boolean getMaxAlarmVisible()
+    {
+        return (maxAlarmVisible);
+    }
+
+    public void setMaxAlarmVisible(boolean vis)
+    {
+        if (maxAlarmVisible != vis)
+        {
+            changeMaxAlarmVisiblity(vis);
+        }
+       maxAlarmVisible = vis;
+    }
+
+    public Color getMinAlarmColor()
+    {
+        return (minAlarmColor);
+    }
+
+    public void setMinAlarmColor(Color macol)
+    {
+        minAlarmDv.setColor(macol);
+        minAlarmColor = macol;
+    }
+
+    public Color getMaxAlarmColor()
+    {
+        return (maxAlarmColor);
+    }
+
+    public void setMaxAlarmColor(Color macol)
+    {
+        maxAlarmDv.setColor(macol);
+        maxAlarmColor = macol;
+    }
+
+    public int getMinAlarmStyle()
+    {
+        return (minAlarmStyle);
+    }
+
+    public void setMinAlarmStyle(int maStyle)
+    {
+        minAlarmDv.setStyle(maStyle);
+        minAlarmStyle = maStyle;
+    }
+
+    public int getMaxAlarmStyle()
+    {
+        return (maxAlarmStyle);
+    }
+
+    public void setMaxAlarmStyle(int maStyle)
+    {
+        maxAlarmDv.setStyle(maStyle);
+        maxAlarmStyle = maStyle;
+    }
+
     /**<code>getModel</code> Gets the numberspectrum model.
      * @returns the numberspectrum model.
      */
@@ -173,11 +258,27 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
         dvy.setUnit(ins.getUnit());
         dvy.setName(ins.getName());
 
+        double minAlarm = numberModel.getMinAlarm();
+        if (Double.isNaN(minAlarm))
+            minAlarmValue = null;
+        else
+            minAlarmValue = new Double(minAlarm);
+
+        double maxAlarm = numberModel.getMaxAlarm();
+        if (Double.isNaN(maxAlarm))
+            maxAlarmValue = null;
+        else
+            maxAlarmValue = new Double(maxAlarm);
+
         numberModel.addSpectrumListener(this);
+        numberModel.refresh();
         if (pf != null)
         {
             pf.setModel(numberModel);
         }
+
+        numberModel.getProperty("min_alarm").addPresentationListener(this);
+        numberModel.getProperty("max_alarm").addPresentationListener(this);
 
         repaint();
     }
@@ -193,7 +294,13 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
             {
                 pf.setModel(null);
             }
+            setMinAlarmVisible(false);
+            setMaxAlarmVisible(false);
+            numberModel.getProperty("min_alarm").removePresentationListener(this);
+            numberModel.getProperty("max_alarm").removePresentationListener(this);
             numberModel = null;
+            minAlarmValue = null;
+            maxAlarmValue = null;
         }
         setToolTipText(null);
     }
@@ -273,61 +380,37 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
         }
     }
 
-
-    /**<code>setMinAlarmModel</code> Set the min alarm numberScalar model.
-     * @param ins  the number scalar attribute whose value is the minimum for the alarm threshold
-     */
-    public void setMinAlarmModel(INumberScalar ins)
+    void changeMinAlarmVisiblity(boolean   vis)
     {
-        clearMinAlarmModel();
-        if (ins == null) return;
-
-        getY1Axis().addDataView(minAlarmDv);
-        minAlarmModel = ins;
-        minAlarmModel.addNumberScalarListener(this);
-        repaint();
-    }
-
-    /**<code>clearMinAlarmModel</code> removes the min alarm numberScalar model.
-     */
-    public void clearMinAlarmModel()
-    {
-        if (minAlarmModel != null)
+        if (vis == false)
         {
             minAlarmDv.reset();
-            minAlarmModel.removeNumberScalarListener(this);
-            minAlarmModel = null;
             getY1Axis().removeDataView(minAlarmDv);
             repaint();
         }
+        else
+        {
+            if (numberModel == null) return;
+            if (minAlarmValue == null) return;
+            getY1Axis().addDataView(minAlarmDv);
+            refreshAlarmDv(minAlarmDv, minAlarmValue.doubleValue());
+        }
     }
 
-
-    /**<code>setMaxAlarmModel</code> Set the max alarm numberScalar model.
-     * @param ins  the number scalar attribute whose value is the maximum for the alarm threshold
-     */
-    public void setMaxAlarmModel(INumberScalar ins)
+    void changeMaxAlarmVisiblity(boolean   vis)
     {
-        clearMaxAlarmModel();
-        if (ins == null) return;
-
-        getY1Axis().addDataView(maxAlarmDv);
-        maxAlarmModel = ins;
-        maxAlarmModel.addNumberScalarListener(this);
-        repaint();
-    }
-
-    /**<code>clearMaxAlarmModel</code> removes the max alarm numberScalar model.
-     */
-    public void clearMaxAlarmModel()
-    {
-        if (maxAlarmModel != null)
+        if (vis == false)
         {
             maxAlarmDv.reset();
-            maxAlarmModel.removeNumberScalarListener(this);
-            maxAlarmModel = null;
             getY1Axis().removeDataView(maxAlarmDv);
             repaint();
+        }
+        else
+        {
+            if (numberModel == null) return;
+            if (maxAlarmValue == null) return;
+            getY1Axis().addDataView(maxAlarmDv);
+            refreshAlarmDv(maxAlarmDv, maxAlarmValue.doubleValue());
         }
     }
 
@@ -471,19 +554,6 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
         }
     }
 
-    public void numberScalarChange(NumberScalarEvent evt)
-    {
-        if (evt.getSource() == minAlarmModel)
-        {
-           refreshAlarmDv(minAlarmDv, evt.getValue());
-           return;
-        }
-        if (evt.getSource() == maxAlarmModel)
-        {
-           refreshAlarmDv(maxAlarmDv, evt.getValue());
-           return;
-        }
-    }
 
     public void refreshAlarmDv (JLDataView alarmDv, double alarmValue)
     {
@@ -524,22 +594,47 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
             repaint();
             return;
         }
+    }
 
-        if (errEvt.getSource() == minAlarmModel) //source is the min alarm
+
+    public void propertyChange(PropertyChangeEvent evt)
+    {
+        Property src = (Property) evt.getSource();
+
+        if (numberModel != null)
         {
-            // Clear the min alarm data view
-            minAlarmDv.reset();
-            repaint();
-            return;
+            if (src.getName().equalsIgnoreCase("min_alarm"))
+            {
+                double minAlarm = numberModel.getMinAlarm();
+                if (Double.isNaN(minAlarm))
+                {
+                    minAlarmValue = null;
+                    changeMinAlarmVisiblity(false);
+                }
+                else
+                {
+                    minAlarmValue = new Double(minAlarm);
+                    if (minAlarmVisible) changeMinAlarmVisiblity(true);
+                }
+                return;
+            }
+
+            if (src.getName().equalsIgnoreCase("max_alarm"))
+            {
+                double maxAlarm = numberModel.getMaxAlarm();
+                if (Double.isNaN(maxAlarm))
+                {
+                    maxAlarmValue = null;
+                    changeMaxAlarmVisiblity(false);
+                }
+                else
+                {
+                    maxAlarmValue = new Double(maxAlarm);
+                    if (maxAlarmVisible) changeMaxAlarmVisiblity(true);
+                }
+            }
         }
 
-        if (errEvt.getSource() == maxAlarmModel) //source is the max alarm
-        {
-            // Clear the max alarm data view
-            maxAlarmDv.reset();
-            repaint();
-            return;
-        }
     }
 
     /**
@@ -556,14 +651,16 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
             nssbcv.setBarChartFillMethod(JLDataView.METHOD_FILL_FROM_ZERO);
             nssbcv.getXAxis().setGridVisible(true);
             nssbcv.getY1Axis().setGridVisible(true);
-            nssbcv.getY1Axis().setName("Inst Loss Rate ( ne/s )");
+            nssbcv.getY1Axis().setName("Neutron Dose Rate");
 
-            INumberSpectrum      ins = (INumberSpectrum) attl.add("sr/beamlossMch/test/Beamloss");
+            INumberSpectrum      ins = (INumberSpectrum) attl.add("sr/neutron/all/Dose");
             nssbcv.setModel(ins);
-            IDevStateSpectrum      idss = (IDevStateSpectrum) attl.add("sr/beamlossMch/test/SubDevicesStates");
+            IDevStateSpectrum      idss = (IDevStateSpectrum) attl.add("sr/neutron/all/SubDevicesStates");
             nssbcv.setModel(idss);
-            IStringSpectrum      iss = (IStringSpectrum) attl.add("sr/beamlossMch/test/SubDevicesNames");
+            IStringSpectrum      iss = (IStringSpectrum) attl.add("sr/neutron/all/SubDevicesNames");
             nssbcv.setModel(iss);
+
+            nssbcv.setMaxAlarmVisible(true);
 
 
             nssbcv.setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());
