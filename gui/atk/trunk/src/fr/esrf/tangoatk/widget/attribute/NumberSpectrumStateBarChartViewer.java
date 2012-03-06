@@ -257,21 +257,34 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
         dvy.setUserFormat(format);
         dvy.setUnit(ins.getUnit());
         dvy.setName(ins.getName());
+        
+        numberModel.addSpectrumListener(this);
+        numberModel.refresh();
 
         double minAlarm = numberModel.getMinAlarm();
         if (Double.isNaN(minAlarm))
+        {
             minAlarmValue = null;
+            changeMinAlarmVisiblity(false);
+        }
         else
+        {
             minAlarmValue = new Double(minAlarm);
-
+            if (minAlarmVisible) changeMinAlarmVisiblity(true);
+        }
+            
         double maxAlarm = numberModel.getMaxAlarm();
         if (Double.isNaN(maxAlarm))
+        {
             maxAlarmValue = null;
+            changeMaxAlarmVisiblity(false);
+        }
         else
+        {
             maxAlarmValue = new Double(maxAlarm);
+            if (maxAlarmVisible) changeMaxAlarmVisiblity(true);
+        }
 
-        numberModel.addSpectrumListener(this);
-        numberModel.refresh();
         if (pf != null)
         {
             pf.setModel(numberModel);
@@ -653,14 +666,14 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
             nssbcv.getY1Axis().setGridVisible(true);
             nssbcv.getY1Axis().setName("Neutron Dose Rate");
 
+            nssbcv.setMaxAlarmVisible(true);
+
             INumberSpectrum      ins = (INumberSpectrum) attl.add("sr/neutron/all/Dose");
             nssbcv.setModel(ins);
             IDevStateSpectrum      idss = (IDevStateSpectrum) attl.add("sr/neutron/all/SubDevicesStates");
             nssbcv.setModel(idss);
             IStringSpectrum      iss = (IStringSpectrum) attl.add("sr/neutron/all/SubDevicesNames");
             nssbcv.setModel(iss);
-
-            nssbcv.setMaxAlarmVisible(true);
 
 
             nssbcv.setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());
