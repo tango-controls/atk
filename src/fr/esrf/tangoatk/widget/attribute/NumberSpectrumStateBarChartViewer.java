@@ -168,7 +168,7 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
     {
         if (minAlarmVisible != vis)
         {
-            changeMinAlarmVisiblity(vis);
+            changeMinAlarmVisibility(vis);
         }
         minAlarmVisible = vis;
     }
@@ -182,7 +182,7 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
     {
         if (maxAlarmVisible != vis)
         {
-            changeMaxAlarmVisiblity(vis);
+            changeMaxAlarmVisibility(vis);
         }
        maxAlarmVisible = vis;
     }
@@ -265,24 +265,24 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
         if (Double.isNaN(minAlarm))
         {
             minAlarmValue = null;
-            changeMinAlarmVisiblity(false);
+            changeMinAlarmVisibility(false);
         }
         else
         {
             minAlarmValue = new Double(minAlarm);
-            if (minAlarmVisible) changeMinAlarmVisiblity(true);
+            if (minAlarmVisible) changeMinAlarmVisibility(true);
         }
             
         double maxAlarm = numberModel.getMaxAlarm();
         if (Double.isNaN(maxAlarm))
         {
             maxAlarmValue = null;
-            changeMaxAlarmVisiblity(false);
+            changeMaxAlarmVisibility(false);
         }
         else
         {
             maxAlarmValue = new Double(maxAlarm);
-            if (maxAlarmVisible) changeMaxAlarmVisiblity(true);
+            if (maxAlarmVisible) changeMaxAlarmVisibility(true);
         }
 
         if (pf != null)
@@ -393,7 +393,7 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
         }
     }
 
-    void changeMinAlarmVisiblity(boolean   vis)
+    void changeMinAlarmVisibility(boolean   vis)
     {
         if (vis == false)
         {
@@ -410,7 +410,7 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
         }
     }
 
-    void changeMaxAlarmVisiblity(boolean   vis)
+    void changeMaxAlarmVisibility(boolean   vis)
     {
         if (vis == false)
         {
@@ -622,12 +622,12 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
                 if (Double.isNaN(minAlarm))
                 {
                     minAlarmValue = null;
-                    changeMinAlarmVisiblity(false);
+                    changeMinAlarmVisibility(false);
                 }
                 else
                 {
                     minAlarmValue = new Double(minAlarm);
-                    if (minAlarmVisible) changeMinAlarmVisiblity(true);
+                    if (minAlarmVisible) changeMinAlarmVisibility(true);
                 }
                 return;
             }
@@ -638,12 +638,12 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
                 if (Double.isNaN(maxAlarm))
                 {
                     maxAlarmValue = null;
-                    changeMaxAlarmVisiblity(false);
+                    changeMaxAlarmVisibility(false);
                 }
                 else
                 {
                     maxAlarmValue = new Double(maxAlarm);
-                    if (maxAlarmVisible) changeMaxAlarmVisiblity(true);
+                    if (maxAlarmVisible) changeMaxAlarmVisibility(true);
                 }
             }
         }
