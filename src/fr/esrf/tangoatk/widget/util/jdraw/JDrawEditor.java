@@ -144,6 +144,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   private JSeparator sep3;
   private JSeparator sep4;
   private JSeparator sep5;
+  private JSeparator sep6;
 
   private JMenuItem infoMenuItem;
 
@@ -154,6 +155,8 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
   private JMenuItem zoomInMenuItem;
   private JMenuItem zoomOutMenuItem;
+
+  private JMenuItem createATKPExtension;
 
   private JMenuItem groupMenuItem;
   private JMenuItem ungroupMenuItem;
@@ -2335,6 +2338,16 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
       zoomIn();
     } else if (src == zoomOutMenuItem) {
       zoomOut();
+    } else if (src == createATKPExtension) {
+
+      for(int i=0;i<selObjects.size();i++) {
+        JDObject o = (JDObject)selObjects.get(i);
+        if( o.getExtendedParamIndex("className")==-1 ) {
+          o.addExtension("className");
+          o.setExtendedParam("className","atkpanel.MainPanel");
+        }
+      }
+
     } else if (src == editShapeMenuItem) {
       if(selObjects.size()>0) {
         selSummits = new int[0];
@@ -3098,6 +3111,9 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     zoomOutMenuItem = new JMenuItem("Zoom out");
     zoomOutMenuItem.addActionListener(this);
 
+    createATKPExtension = new JMenuItem("Add ATKPanel ext");
+    createATKPExtension.addActionListener(this);
+
     objMenu.add(infoMenuItem);
     sep1 = new JSeparator();
     objMenu.add(sep1);
@@ -3123,6 +3139,9 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     objMenu.add(sep5);
     objMenu.add(zoomInMenuItem);
     objMenu.add(zoomOutMenuItem);
+    sep6 = new JSeparator();
+    objMenu.add(sep6);
+    objMenu.add(createATKPExtension);
 
     // Polyline menu
     polyMenu = new JPopupMenu();
