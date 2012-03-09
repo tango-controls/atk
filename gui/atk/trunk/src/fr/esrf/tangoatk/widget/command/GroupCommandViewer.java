@@ -29,6 +29,8 @@ import fr.esrf.tangoatk.core.ErrorEvent;
 import fr.esrf.tangoatk.core.ICommandGroup;
 import fr.esrf.tangoatk.core.IEndGroupExecutionListener;
 import fr.esrf.tangoatk.core.command.VoidVoidCommandGroup;
+import java.awt.Component;
+import java.awt.HeadlessException;
 import java.awt.event.*;
 import javax.swing.*;
 
@@ -38,152 +40,224 @@ import javax.swing.*;
 public class GroupCommandViewer extends JButton implements IEndGroupExecutionListener
 {
 
-  protected   ICommandGroup   cmdgModel;
-  private     String          buttonLabel = "Not Specified";
+    protected ICommandGroup cmdgModel;
+    private String buttonLabel = "Not Specified";
+    private boolean hasConfirmation = true;
 
+    protected Component confirmDialParent = null;
+    protected String confirmTitle = "Command Execute Confirm Window";
+    protected String confirmMessage = "Do you really want to execute this command?\n";
 
-  public GroupCommandViewer() {
-
-    setText("command-group");
-    addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        executeButtonActionPerformed(evt);
-      }
-    });
-
-  }
-  
-  public void setButtonLabel (String  lab)
-  {
-     if (lab == null)
-     {
-         buttonLabel = "Not Specified";
-	 return;
-     }
-     if (lab.length() <= 0)
-     {
-         buttonLabel = "Not Specified";
-	 return;
-     }
-     
-     buttonLabel = lab;
-     setText(lab);
-  }
-  
-  public String getButtonLabel ()
-  {
-     return(buttonLabel);
-  }
-
-  protected void executeButtonActionPerformed(ActionEvent actionevent) {
-
-    if (cmdgModel != null)
+    public GroupCommandViewer()
     {
-      setEnabled(false);
-      cmdgModel.execute();
+        setText("command-group");
+        addActionListener(new java.awt.event.ActionListener()
+        {
+
+            public void actionPerformed(java.awt.event.ActionEvent evt)
+            {
+                executeButtonActionPerformed(evt);
+            }
+        });
+
     }
 
-  }
-
-  public void endGroupExecution(EndGroupExecutionEvent evt)
-  {
-      //System.out.println("GroupCommandViewer : endGroupExecution called.");
-      setEnabled(true);
-  }
-
-  public void errorChange(ErrorEvent errorevent)
-  {
-  }
-
-  public void setModel(ICommandGroup cmdg)
-  {    
-    clearModel();
-    
-    if (cmdg == null) return;
-       
-    if (cmdg.size() <= 0) return;
-       
-    if (!(cmdg instanceof VoidVoidCommandGroup)) return;
-       
-    cmdgModel = cmdg;
-    cmdgModel.addEndGroupExecutionListener(this);
-    
-    if (! buttonLabel.equalsIgnoreCase("Not Specified") )
+    public void setButtonLabel(String lab)
     {
-      setText(buttonLabel);
-      return;
+        if (lab == null)
+        {
+            buttonLabel = "Not Specified";
+            return;
+        }
+        if (lab.length() <= 0)
+        {
+            buttonLabel = "Not Specified";
+            return;
+        }
+
+        buttonLabel = lab;
+        setText(lab);
     }
 
-    String  cmdname = cmdg.getCmdName();
-    if (cmdname != null)
-        setText(cmdname);
-    
-  }
-
-  public void clearModel()
-  {
-
-    if (cmdgModel != null)
+    public String getButtonLabel()
     {
-        cmdgModel.removeEndGroupExecutionListener(this);
-
-	if ( buttonLabel.equalsIgnoreCase("Not Specified") )
-           setText("command-group");
-        cmdgModel = null;
+        return (buttonLabel);
     }
 
-  }
+    public boolean getHasConfirmation()
+    {
+        return hasConfirmation;
+    }
 
+    public void setHasConfirmation(boolean conf)
+    {
+        hasConfirmation = conf;
+    }
 
-  public static void main(String [] args)
-  {
-     ICommandGroup        cmdg = new VoidVoidCommandGroup();
+    public Component getConfirmDialParent()
+    {
+        return confirmDialParent;
+    }
 
-     GroupCommandViewer   gcv = new GroupCommandViewer();
+    public void setConfirmDialParent(Component  parent)
+    {
+        confirmDialParent = parent;
+    }
 
-     try 
-     {
-	cmdg.add("tl2/ps-c1/cv0/Reset");
-	cmdg.add("tl2/ps-c1/cv1/Reset");
-	cmdg.add("tl2/ps-c1/cv2/Reset");
-	cmdg.add("tl2/ps-c1/cv3/Reset");
-	cmdg.add("tl2/ps-c1/cv4/Reset");
-	cmdg.add("tl2/ps-c1/cv5/Reset");
-	cmdg.add("tl2/ps-c1/cv6/Reset");
-	cmdg.add("tl2/ps-c1/cv7/Reset");
-	cmdg.add("tl2/ps-c1/cv8/Reset");
-	cmdg.add("tl2/ps-c1/cv9/Reset");
-	cmdg.add("tl2/ps-c1/ch1/Reset");
-	cmdg.add("tl2/ps-c1/ch2/Reset");
-	cmdg.add("tl2/ps-c1/ch3/Reset");
-	cmdg.add("tl2/ps-c1/ch4/Reset");
-	cmdg.add("tl2/ps-c1/ch5/Reset");
-	cmdg.add("tl2/ps-c1/ch6/Reset");
-	cmdg.add("tl2/ps-c1/ch7/Reset");
-	cmdg.add("tl2/ps-c1/ch8/Reset");	
-	gcv.setModel(cmdg);
+    public String getConfirmTitle()
+    {
+        return confirmTitle;
+    }
 
-     } 
-     catch (Exception e)
-     {
-	//System.out.println(e);
-	//System.exit(-1);
-     } // end of try-catch
+    public void setConfirmTitle(String title)
+    {
+        confirmTitle = title;
+    }
 
-DeviceFactory.getInstance().setTraceMode(DeviceFactory.TRACE_COMMAND);
-     javax.swing.JFrame f = new javax.swing.JFrame();
-     f.getContentPane().setLayout(new java.awt.GridBagLayout());
-     java.awt.GridBagConstraints                 gbc;
-     gbc = new java.awt.GridBagConstraints();
-     gbc.gridx = 0; gbc.gridy = 0;
-     gbc.fill = java.awt.GridBagConstraints.BOTH;
-     gbc.insets = new java.awt.Insets(0, 0, 0, 5);
-     gbc.weightx = 1.0;
-     gbc.weighty = 1.0;
-     f.getContentPane().add(gcv, gbc);
-     f.pack();
-     f.setVisible(true);
-  }
+    public String getConfirmMessage()
+    {
+        return confirmMessage;
+    }
 
+    public void setConfirmMessage(String msg)
+    {
+        confirmMessage = msg;
+    }
 
+    protected void executeButtonActionPerformed(ActionEvent actionevent)
+    {
+        if (cmdgModel == null) return;
+
+        if (hasConfirmation)
+        {
+            int userAnswer;
+            userAnswer = JOptionPane.NO_OPTION;
+            try
+            {
+                userAnswer = JOptionPane.showConfirmDialog(confirmDialParent, confirmMessage,
+                        confirmTitle, JOptionPane.YES_NO_OPTION);
+            }
+            catch (HeadlessException hex) {}
+
+            if (userAnswer != JOptionPane.YES_OPTION) return;
+        }
+
+        cmdgModel.execute();
+    }
+
+    public void endGroupExecution(EndGroupExecutionEvent evt)
+    {
+        //System.out.println("GroupCommandViewer : endGroupExecution called.");
+        setEnabled(true);
+    }
+
+    public void errorChange(ErrorEvent errorevent)
+    {
+    }
+
+    public void setModel(ICommandGroup cmdg)
+    {
+        clearModel();
+
+        if (cmdg == null)
+        {
+            return;
+        }
+
+        if (cmdg.size() <= 0)
+        {
+            return;
+        }
+
+        if (!(cmdg instanceof VoidVoidCommandGroup))
+        {
+            return;
+        }
+
+        cmdgModel = cmdg;
+        cmdgModel.addEndGroupExecutionListener(this);
+
+        if (!buttonLabel.equalsIgnoreCase("Not Specified"))
+        {
+            setText(buttonLabel);
+            return;
+        }
+
+        String cmdname = cmdg.getCmdName();
+        if (cmdname != null)
+        {
+            setText(cmdname);
+        }
+
+    }
+
+    public void clearModel()
+    {
+
+        if (cmdgModel != null)
+        {
+            cmdgModel.removeEndGroupExecutionListener(this);
+
+            if (buttonLabel.equalsIgnoreCase("Not Specified"))
+            {
+                setText("command-group");
+            }
+            cmdgModel = null;
+        }
+
+    }
+
+    public static void main(String[] args)
+    {
+        ICommandGroup cmdg = new VoidVoidCommandGroup();
+
+        GroupCommandViewer gcv = new GroupCommandViewer();
+        gcv.setConfirmMessage("Do you really want to reset all TL2 magnets?");
+        
+//        gcv.setHasConfirmation(false);
+
+        try
+        {
+            cmdg.add("tl2/ps-c1/cv0/Reset");
+            cmdg.add("tl2/ps-c1/cv1/Reset");
+            cmdg.add("tl2/ps-c1/cv2/Reset");
+            cmdg.add("tl2/ps-c1/cv3/Reset");
+            cmdg.add("tl2/ps-c1/cv4/Reset");
+            cmdg.add("tl2/ps-c1/cv5/Reset");
+            cmdg.add("tl2/ps-c1/cv6/Reset");
+            cmdg.add("tl2/ps-c1/cv7/Reset");
+            cmdg.add("tl2/ps-c1/cv8/Reset");
+            cmdg.add("tl2/ps-c1/cv9/Reset");
+            cmdg.add("tl2/ps-c1/ch1/Reset");
+            cmdg.add("tl2/ps-c1/ch2/Reset");
+            cmdg.add("tl2/ps-c1/ch3/Reset");
+            cmdg.add("tl2/ps-c1/ch4/Reset");
+            cmdg.add("tl2/ps-c1/ch5/Reset");
+            cmdg.add("tl2/ps-c1/ch6/Reset");
+            cmdg.add("tl2/ps-c1/ch7/Reset");
+            cmdg.add("tl2/ps-c1/ch8/Reset");
+            gcv.setModel(cmdg);
+
+        }
+        catch (Exception e)
+        {
+            //System.out.println(e);
+            //System.exit(-1);
+        } // end of try-catch
+
+        DeviceFactory.getInstance().setTraceMode(DeviceFactory.TRACE_COMMAND);
+        javax.swing.JFrame f = new javax.swing.JFrame();
+        f.getContentPane().setLayout(new java.awt.GridBagLayout());
+        java.awt.GridBagConstraints gbc;
+        gbc = new java.awt.GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.fill = java.awt.GridBagConstraints.BOTH;
+        gbc.insets = new java.awt.Insets(0, 0, 0, 5);
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        f.getContentPane().add(gcv, gbc);
+        f.pack();
+        f.setVisible(true);
+    }
 }
