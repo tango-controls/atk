@@ -97,7 +97,7 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
         minAlarmDv = new JLDataView();
         minAlarmDv.setName("Min Alarm");
         minAlarmDv.setStyle(minAlarmStyle);
-        //minAlarmDv.setLineWidth(2);
+        minAlarmDv.setLineWidth(2);
         minAlarmDv.setColor(minAlarmColor);
         minAlarmDv.setLabelVisible(false);
         //getY1Axis().addDataView(minAlarmDv);
@@ -105,7 +105,7 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
         maxAlarmDv = new JLDataView();
         maxAlarmDv.setName("Max Alarm");
         maxAlarmDv.setStyle(maxAlarmStyle);
-        //maxAlarmDv.setLineWidth(2);
+        maxAlarmDv.setLineWidth(2);
         maxAlarmDv.setColor(maxAlarmColor);
         maxAlarmDv.setLabelVisible(false);
         //getY1Axis().addDataView(maxAlarmDv);
@@ -666,6 +666,7 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
             nssbcv.getY1Axis().setGridVisible(true);
             nssbcv.getY1Axis().setName("Neutron Dose Rate");
 
+            nssbcv.setMaxAlarmColor(Color.red);
             nssbcv.setMaxAlarmVisible(true);
 
             INumberSpectrum      ins = (INumberSpectrum) attl.add("sr/neutron/all/Dose");
