@@ -1875,7 +1875,7 @@ invoqex.printStackTrace();
      return c;
   }
 
-  private void addAttribute(JDObject jddg, String s) {
+  protected void addAttribute(JDObject jddg, String s) {
     IAttribute att = null;
 
     try {
