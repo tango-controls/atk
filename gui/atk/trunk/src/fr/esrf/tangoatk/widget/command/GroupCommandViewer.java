@@ -212,32 +212,15 @@ public class GroupCommandViewer extends JButton implements IEndGroupExecutionLis
         ICommandGroup cmdg = new VoidVoidCommandGroup();
 
         GroupCommandViewer gcv = new GroupCommandViewer();
-        gcv.setConfirmMessage("Do you really want to reset all TL2 magnets?");
+        gcv.setConfirmMessage("Do you really want to execute On?");
         
 //        gcv.setHasConfirmation(false);
 
         try
         {
-            cmdg.add("tl2/ps-c1/cv0/Reset");
-            cmdg.add("tl2/ps-c1/cv1/Reset");
-            cmdg.add("tl2/ps-c1/cv2/Reset");
-            cmdg.add("tl2/ps-c1/cv3/Reset");
-            cmdg.add("tl2/ps-c1/cv4/Reset");
-            cmdg.add("tl2/ps-c1/cv5/Reset");
-            cmdg.add("tl2/ps-c1/cv6/Reset");
-            cmdg.add("tl2/ps-c1/cv7/Reset");
-            cmdg.add("tl2/ps-c1/cv8/Reset");
-            cmdg.add("tl2/ps-c1/cv9/Reset");
-            cmdg.add("tl2/ps-c1/ch1/Reset");
-            cmdg.add("tl2/ps-c1/ch2/Reset");
-            cmdg.add("tl2/ps-c1/ch3/Reset");
-            cmdg.add("tl2/ps-c1/ch4/Reset");
-            cmdg.add("tl2/ps-c1/ch5/Reset");
-            cmdg.add("tl2/ps-c1/ch6/Reset");
-            cmdg.add("tl2/ps-c1/ch7/Reset");
-            cmdg.add("tl2/ps-c1/ch8/Reset");
+            cmdg.add("jlp/test/1/On");
+            cmdg.add("jlp/test/2/On");
             gcv.setModel(cmdg);
-
         }
         catch (Exception e)
         {
