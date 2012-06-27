@@ -30,6 +30,7 @@ BEANINFO= StringScalarViewerBeanInfo.java            \
           SimpleStateViewerBeanInfo.java	\
 	  NumberSpectrumStateBarChartViewerBeanInfo.java \
           SimpleEnumScalarViewerBeanInfo.java            \
+          NumberSpectrumTrend3DViewerBeanInfo.java \
 
 include ../../../../../../.make-include
 
