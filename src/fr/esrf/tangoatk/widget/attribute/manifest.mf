@@ -91,3 +91,6 @@ Java-Bean: True
 Name: fr/esrf/tangoatk/widget/attribute/SimpleEnumScalarViewer.class
 Java-Bean: True
 
+Name: fr/esrf/tangoatk/widget/attribute/NumberSpectrumTrend3DViewer.class
+Java-Bean: True
+
