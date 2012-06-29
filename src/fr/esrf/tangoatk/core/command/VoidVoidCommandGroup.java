@@ -146,14 +146,14 @@ public class VoidVoidCommandGroup extends CommandList implements ICommandGroup
         GroupCmdReplyList   replies=null;
 
 
-        DeviceFactory.getInstance().trace(DeviceFactory.TRACE_COMMAND, "VoidVoidCommandGroup.execute()  ", t0);
-
         if (uniqueCmdName == null) return;
         if (devGroup == null) return;
         if (devGroup.get_size(false) <= 0) return;
         try
         {
-            replies = devGroup.command_inout(uniqueCmdName, false);
+            replies = devGroup.command_inout(uniqueCmdName, true);
+            DeviceFactory.getInstance().trace(DeviceFactory.TRACE_COMMAND, "VoidVoidCommandGroup.execute()  ", t0);
+            t0 = System.currentTimeMillis();
             if (replies.has_failed())
             {
                 //System.out.print("CommandGroup.execute() : devGroup.command_inout has failed");
@@ -162,7 +162,7 @@ public class VoidVoidCommandGroup extends CommandList implements ICommandGroup
                     GroupCmdReply reply = (GroupCmdReply) replies.get(i);
                     if (reply.has_failed())
                     {
-                        IEntity ie = this.get(reply.dev_name() + uniqueCmdName);
+                        IEntity ie = this.get(reply.dev_name() + "/" + uniqueCmdName);
                         if (ie != null)
                         {
                             ACommand acmd = (ACommand) ie;
@@ -173,15 +173,61 @@ public class VoidVoidCommandGroup extends CommandList implements ICommandGroup
                     }
                 }
             }
+            // For performance reasons do a test before building trace string
+            if ( (DeviceFactory.getInstance().getTraceMode() & DeviceFactory.TRACE_COMMAND) != 0)
+            {
+                String str = buildRepliesTrace(replies);
+                DeviceFactory.getInstance().trace(DeviceFactory.TRACE_COMMAND, "VoidVoidCommandGroup replies trace :  " + str, t0);
+            }
         }
         catch (Exception ex)
         {
         }
 
-	long  t1 = System.currentTimeMillis();
-        DeviceFactory.getInstance().trace(DeviceFactory.TRACE_COMMAND, "VoidVoidCommandGroup.execute()  end of loop", t1);
+        DeviceFactory.getInstance().trace(DeviceFactory.TRACE_COMMAND, "VoidVoidCommandGroup.execute()  end of loop", t0);
 
         publishEndExecution(null);
+    }
+
+    private String buildRepliesTrace(GroupCmdReplyList rep)
+    {
+        String  str;
+
+        if (rep == null)
+        {
+            str ="ReplyList is null\n";
+            return str;
+        }
+
+        if (rep.size() <= 0)
+        {
+            str ="ReplyList is empty\n";
+            return str;
+        }
+
+        str = "Nb replies = "+rep.size()+" \n";
+
+        if (rep.has_failed())
+            str = str + "At least one reply has failed\n";
+        else
+            str = str + "All replies successful\n";
+        for (int i=0; i<rep.size(); i++)
+        {
+            GroupCmdReply reply = (GroupCmdReply) rep.get(i);
+            str = str+reply.dev_name()+" ";
+            if (reply.has_failed())
+                str = str + "has failed ";
+            else
+                str = str + "successfull ";
+            IEntity ie = this.get(reply.dev_name() + "/" + uniqueCmdName);
+            if (ie == null)
+                str = str + "  Cannot get IEntity ";
+            else
+                str = str  + "  IEntity = " + ie.getName();
+            str = str + "\n";
+        }
+
+        return str;
     }
 
     private CommandExecuteException buildCmdException(String msg, GroupCmdReply reply)
@@ -218,6 +264,37 @@ public class VoidVoidCommandGroup extends CommandList implements ICommandGroup
 
     public String getVersion() {
 	return "$Id $";
+    }
+
+    public String toString()
+    {
+        String   str = null;
+
+        if (uniqueCmdName == null)
+            str = "CmdName = none\n";
+        else
+            str = "CmdName = "+uniqueCmdName+"\n";
+
+        if (devGroup == null)
+        {
+            str = str+"DeviceGroup = none\n";
+            return str;
+        }
+        if (devGroup.get_size(true) <= 0)
+        {
+            str = str+"DeviceGroup = empty\n";
+            return str;
+        }
+        str = str+"DeviceGroup = \n";
+        String[] devNames = devGroup.get_device_list(true);
+
+        for (int i=0; i<devNames.length; i++)
+        {
+            str = str+devNames[i]+"\n";
+        }
+
+        return str;
+
     }
 
     /**
