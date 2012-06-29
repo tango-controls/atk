@@ -613,6 +613,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       if (model != null) {
         modelName = model.getName();
         modelUnit = model.getUnit();
+        format = model.getFormat();
       }
 
       if (xCursor < 0) {
