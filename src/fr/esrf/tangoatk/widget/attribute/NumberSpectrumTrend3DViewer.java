@@ -837,6 +837,32 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
   }
 
+  /**
+   * Scrolls the image to the right
+   */
+  public void scrollToRight() {
+    JScrollBar bar = trendView.getHorizontalScrollBar();
+    int p = bar.getMaximum();
+    bar.setValue(p);
+  }
+
+  /**
+   * Scrolls the image to the left
+   */
+  public void scrollToLeft() {
+    JScrollBar bar = trendView.getHorizontalScrollBar();
+    int p = bar.getMinimum();
+    bar.setValue(p);
+  }
+
+  /**
+   * Sets the trend backgroudn color
+   * @param bg Background color
+   */
+  public void setTrendBackground(Color bg) {
+    trend.setBackground(bg);
+  }
+
   // ------------------------------------------------------------------------
   // Action listener
   // ------------------------------------------------------------------------
@@ -2104,7 +2130,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       nstv.setZMinimum(-0.5);
       nstv.setZMaximum(0.5);
       attributeList.startRefresher();
-      
+
       JFrame f = new JFrame();
       JMenuBar menuBar = new JMenuBar();
       JMenu menu = new JMenu("Test");
@@ -2121,13 +2147,28 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
           nstv.clearStatusLabel();
         }
       });
+      JMenuItem scrollRightMenuItem = new JMenuItem("Scroll to right");
+      scrollRightMenuItem.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          nstv.scrollToRight();
+        }
+      });
+      JMenuItem scrollLeftMenuItem = new JMenuItem("Scroll to left");
+      scrollLeftMenuItem.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          nstv.scrollToLeft();
+        }
+      });
       menu.add(clearMenuItem);
       menu.add(cursorMenuItem);
+      menu.add(scrollRightMenuItem);
+      menu.add(scrollLeftMenuItem);
       f.setJMenuBar(menuBar);
 
       f.setContentPane(nstv);
       f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       ATKGraphicsUtils.centerFrameOnScreen(f);
+      f.setSize(new Dimension(600,400));
       f.setVisible( true );
 
     } catch (Exception e) {

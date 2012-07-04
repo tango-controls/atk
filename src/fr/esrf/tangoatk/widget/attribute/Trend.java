@@ -2043,7 +2043,7 @@ class ConfigPanel extends JDialog implements ActionListener {
     setContentPane(innerPanel);
 
   }
-
+  
   public void actionPerformed(ActionEvent e) {
 
     Object src = e.getSource();
@@ -2062,5 +2062,6 @@ class ConfigPanel extends JDialog implements ActionListener {
     ATKGraphicsUtils.centerDialog(this);
     setVisible(true);
   }
+
   
 }

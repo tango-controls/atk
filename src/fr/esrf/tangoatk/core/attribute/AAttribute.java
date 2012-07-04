@@ -995,5 +995,3 @@ public abstract class AAttribute implements IAttribute,
     
 
 }
-
-
