@@ -293,8 +293,10 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   public static final int MENU_DATASAVE  = 3;
   /* print graph menu item */
   public static final int MENU_PRINT     = 4;
-  /* Statistics menu */
+  /* Statistics menu item */
   public static final int MENU_STAT      = 5;
+  /* Load data file menu item */
+  public static final int MENU_DATALOAD  = 6;
 
   /* Date Format recognized by loadDataFile() */
   public static final String US_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
@@ -323,6 +325,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   protected JPopupMenu chartMenu;
   private JMenuItem optionMenuItem;
   private JMenuItem saveFileMenuItem;
+  private JMenuItem loadFileMenuItem;
   private JMenuItem zoomBackMenuItem;
   private JMenuItem printMenuItem;
   private JSeparator sepMenuItem;
@@ -449,6 +452,9 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     saveFileMenuItem = new JMenuItem("Save data File");
     saveFileMenuItem.addActionListener(this);
 
+    loadFileMenuItem = new JMenuItem("Load data File");
+    loadFileMenuItem.addActionListener(this);
+
     tableMenu = new JMenu("Show table");
     tableAllMenuItem = new JMenuItem("All");
     tableAllMenuItem.addActionListener(this);
@@ -486,6 +492,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     chartMenu.add(statMenu);
     chartMenu.add(new JSeparator());
     chartMenu.add(saveFileMenuItem);
+    chartMenu.add(loadFileMenuItem);
     chartMenu.add(printMenuItem);
     chartMenu.add(saveSnapshotMenuItem);
     chartMenu.add(precisionMenuItem);
@@ -1236,6 +1243,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
    * @see #MENU_DATASAVE
    * @see #MENU_PRINT
    * @see #MENU_STAT
+   * @see #MENU_DATALOAD
    */
   public void removeMenuItem(int menu) {
 
@@ -1263,6 +1271,9 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
        /* Statistics menu */
      case MENU_STAT:
        chartMenu.remove(statMenu);
+       break;
+     case MENU_DATALOAD:
+       chartMenu.remove(loadFileMenuItem);
        break;
     }
   }
@@ -2131,6 +2142,8 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
       showTableAll();
     } else if (src == statAllMenuItem) {
        showStatAll();
+    } else if (src == loadFileMenuItem) {
+      readFile();
     } else if (src == saveFileMenuItem) {
 
         int ok = JOptionPane.YES_OPTION;
@@ -3187,7 +3200,23 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
       if (correspondingIndex == -1) return null;
       return userActionMenuItem[correspondingIndex];
   }
-  
+
+  private void readFile() {
+
+    int ok = JOptionPane.YES_OPTION;
+    JFileChooser chooser = new JFileChooser(lastDataFileLocation);
+    chooser.setDialogTitle("Load Graph Data (Text file with TAB separated fields)");
+    int returnVal = chooser.showSaveDialog(this);
+
+    if (returnVal == JFileChooser.APPROVE_OPTION) {
+
+      loadDataFile(chooser.getSelectedFile().getAbsolutePath());
+
+    }
+
+  }
+
+
   //****************************************
   // Debug stuff
 
@@ -3228,6 +3257,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     v.add(-0.6,255.0);
 
     // ---------------------------------------------
+    e.setName("Error");
     e.setMarker(JLDataView.MARKER_HORIZ_LINE);
     e.setColor(Color.DARK_GRAY);
     e.add(-0.85,265);
