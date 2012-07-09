@@ -4173,7 +4173,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   private BufferedImage getSelectionImage() {
 
     Rectangle r = imagePanel.getSelectionRect();
-    if( r!=null ) {
+    if( r!=null && ((r.width*r.height)!=0) ) {
 
       BufferedImage newImage = new BufferedImage(r.width,r.height,BufferedImage.TYPE_INT_RGB);
       Graphics2D g2 = newImage.createGraphics();
@@ -4634,3 +4634,4 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   }
 
 }
+
