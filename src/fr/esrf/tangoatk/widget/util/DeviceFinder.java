@@ -66,8 +66,10 @@ public class DeviceFinder extends JPanel {
   public final static int MODE_ATTRIBUTE_STRING_SCALAR = 6;
   /** Select all number spectrum attributes */
   public final static int MODE_ATTRIBUTE_NUMBER_SPECTRUM = 7;
-  /** Select all number spectrum attributes */
+  /** Select all number scalar and boolean scalar attributes */
   public final static int MODE_ATTRIBUTE_NUMBER_BOOLEAN_SCALAR = 8;
+  /** Select all number scalar and boolean scalar attributes and spectrum item */
+  public final static int MODE_ATTRIBUTE_NUMBER_BOOLEAN_SPECTRUM_SCALAR = 9;
 
   static Database  db;
   JTree            tree;
@@ -120,36 +122,23 @@ public class DeviceFinder extends JPanel {
       for (int i = 0; i < p.length; i++) {
 
         Object[] pth = p[i].getPath();
-        String name = "";
+        Node lastNode = (Node) pth[pth.length - 1];
 
-        switch (mode) {
-          case MODE_DEVICE:
-            if (pth.length == 4) {
-              name = pth[1] + "/" + pth[2] + "/" + pth[3];
-              completePath.add(name);
-            }
-            break;
-          case MODE_ATTRIBUTE:
-          case MODE_ATTRIBUTE_SCALAR:
-          case MODE_ATTRIBUTE_BOOLEAN_SCALAR:
-          case MODE_ATTRIBUTE_NUMBER_SCALAR:
-          case MODE_ATTRIBUTE_STRING_SCALAR:
-          case MODE_COMMAND:
-          case MODE_ATTRIBUTE_NUMBER_SPECTRUM:
-          case MODE_ATTRIBUTE_NUMBER_BOOLEAN_SCALAR:
-            if (pth.length == 5) {
-              name = pth[1] + "/" + pth[2] + "/" + pth[3] + "/" + pth[4];
-              completePath.add(name);
-            }
-            break;
+        if (lastNode.isLeaf()) {
+          StringBuffer str = new StringBuffer();
+          for (int j = 1; j < pth.length; j++) {
+            str.append(pth[j]);
+            if (j != pth.length - 1) str.append('/');
+          }
+          completePath.add(str.toString());
         }
 
       }
     }
 
     String[] ret = new String[completePath.size()];
-    for(int i=0;i<completePath.size();i++)
-      ret[i] = (String)completePath.get(i);
+    for (int i = 0; i < completePath.size(); i++)
+      ret[i] = (String) completePath.get(i);
     return ret;
 
   }
@@ -175,7 +164,7 @@ public class DeviceFinder extends JPanel {
   /** test function */
   public static void main(String[] args) {
 
-    final DeviceFinder df = new DeviceFinder(MODE_ATTRIBUTE_NUMBER_SPECTRUM);
+    final DeviceFinder df = new DeviceFinder(MODE_DEVICE);
     df.setSelectionModel(TreeSelectionModel.SINGLE_TREE_SELECTION);
 
     JFrame f = new JFrame();
@@ -427,6 +416,50 @@ class MemberNode extends Node {
             ainb = null;
             break;
 
+          case DeviceFinder.MODE_ATTRIBUTE_NUMBER_BOOLEAN_SPECTRUM_SCALAR:
+            AttributeInfo[] ainbs = ds.get_attribute_info();
+            for(int i=0;i<ainbs.length;i++) {
+              // Add boolean
+              if(ainbs[i].data_format.value() == AttrDataFormat._SCALAR && ainbs[i].data_type == TangoConst.Tango_DEV_BOOLEAN)
+                add(new EntityNode(mode,ainbs[i].name));
+
+              // Add number scalar
+              if(ainbs[i].data_format.value() == AttrDataFormat._SCALAR)
+                switch(ainbs[i].data_type)
+                {
+                    case TangoConst.Tango_DEV_CHAR:
+                    case TangoConst.Tango_DEV_UCHAR:
+                    case TangoConst.Tango_DEV_SHORT:
+                    case TangoConst.Tango_DEV_USHORT:
+                    case TangoConst.Tango_DEV_LONG:
+                    case TangoConst.Tango_DEV_ULONG:
+                    case TangoConst.Tango_DEV_FLOAT:
+                    case TangoConst.Tango_DEV_DOUBLE:
+                        add(new EntityNode(mode,ainbs[i].name));
+                        break;
+                }
+
+              // Add spectrum (each item seen as scalar)
+              if(ainbs[i].data_format.value() == AttrDataFormat._SPECTRUM)
+                switch(ainbs[i].data_type)
+                {
+                    case TangoConst.Tango_DEV_CHAR:
+                    case TangoConst.Tango_DEV_UCHAR:
+                    case TangoConst.Tango_DEV_SHORT:
+                    case TangoConst.Tango_DEV_USHORT:
+                    case TangoConst.Tango_DEV_LONG:
+                    case TangoConst.Tango_DEV_ULONG:
+                    case TangoConst.Tango_DEV_FLOAT:
+                    case TangoConst.Tango_DEV_DOUBLE:                        
+                        add(new SpectrumItemNode(mode,ainbs[i].name,ainbs[i].max_dim_x));
+                        break;
+                }
+
+
+            }
+            ainb = null;
+            break;
+
         }
       } catch (ConnectionException e) {
         ErrorPane.showErrorMessage(null,devName,e);
@@ -441,6 +474,35 @@ class MemberNode extends Node {
 
   public String toString() {
     return member;
+  }
+
+}
+
+// ---------------------------------------------------------------
+
+class SpectrumItemNode extends Node {
+
+  private String attName;
+  private int itemNumber;
+
+  SpectrumItemNode(int mode,String attribute,int itemNumber) {
+    this.mode = mode;
+    this.attName = attribute;
+    this.itemNumber = itemNumber;
+  }
+
+  void populateNode() throws DevFailed {
+    for(int i=0;i<itemNumber;i++) {
+      add(new EntityNode(mode,Integer.toString(i)));
+    }
+  }
+
+  public boolean isLeaf() {
+    return false;
+  }
+
+  public String toString() {
+    return attName;
   }
 
 }
@@ -514,6 +576,7 @@ class TreeNodeRenderer extends DefaultTreeCellRenderer {
         case DeviceFinder.MODE_ATTRIBUTE_NUMBER_SPECTRUM:
         case DeviceFinder.MODE_ATTRIBUTE_STRING_SCALAR:
         case DeviceFinder.MODE_ATTRIBUTE_NUMBER_BOOLEAN_SCALAR:
+        case DeviceFinder.MODE_ATTRIBUTE_NUMBER_BOOLEAN_SPECTRUM_SCALAR:
           setIcon(atticon);
           break;
       }
