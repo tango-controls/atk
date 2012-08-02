@@ -4634,4 +4634,3 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   }
 
 }
-

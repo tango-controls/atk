@@ -511,6 +511,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
         TrendSelectionNode selNode = (TrendSelectionNode) mainTree.getSelectionPath().getLastPathComponent();
         IAttribute m = selNode.getModel();
         if(m==null) m = selNode.getBooleanModel();
+        if(m==null) m = selNode.getSpectrumModel();
         if (m != null) {
           if(propFrame==null)
             propFrame = new SimplePropertyFrame();
@@ -840,6 +841,14 @@ public void setTimePrecision(int timePrecision) {
    * @param list a <code>AttributePolledList</code> value
    */
   public void setModel(AttributePolledList list) {
+
+    // Cannot contains spectrum item attribute
+    setModel(list,null);
+
+  }
+
+  private void setModel(AttributePolledList list,Vector<SpectrumItem> sIdx) {
+
     int i;
 
     // Free old allocated resource ----------------------------------------------------
@@ -877,18 +886,24 @@ public void setTimePrecision(int timePrecision) {
 
     // Create the selection tree -------------------------------------------------------
     rootNode = new TrendSelectionNode(this);
-    int j;
     if (list != null) {
       for (i = 0; i < list.size(); i++) {
 
         if ( list.get(i) instanceof INumberScalar ) {
-          j = i;
-          lastAdded = rootNode.addItem( this, (INumberScalar) list.get(j), defaultColor[j % defaultColor.length] );
+          lastAdded = rootNode.addItem( this, (INumberScalar) list.get(i), defaultColor[i % defaultColor.length] );
         }
 
         if( list.get(i) instanceof IBooleanScalar ) {
-          j = i;
-          lastAdded = rootNode.addItem( this, (IBooleanScalar) list.get(j), defaultColor[j % defaultColor.length] );
+          lastAdded = rootNode.addItem( this, (IBooleanScalar) list.get(i), defaultColor[i % defaultColor.length] );
+        }
+
+        if( list.get(i) instanceof INumberSpectrum ) {
+          if( sIdx!=null ) {
+            for(int j=0;j<sIdx.get(i).items.size();j++) {
+              int idx = sIdx.get(i).items.get(j);
+              lastAdded = rootNode.addItem( this, (INumberSpectrum) list.get(i), idx, defaultColor[i % defaultColor.length] );
+            }
+          }
         }
 
       }
@@ -996,6 +1011,27 @@ public void setTimePrecision(int timePrecision) {
     updateModel();
   }
 
+  // Return last field as int in case of 5 fields name (spectrum attribute with index)
+  // domain/family/mender/attname/index
+  private int getIndex(String attName) {
+
+    String[] splitted = attName.split("/");
+    if( splitted.length==5 ) {
+      try {
+        return Integer.parseInt(splitted[4]);
+      } catch ( NumberFormatException e ) {}
+    }
+
+    return -1;
+
+  }
+
+  private String getAttName(String attName) {
+
+    return attName.substring(0, attName.lastIndexOf('/'));
+
+  }
+
   /**
    * <code>addAttribute</code> will add the INumberScalar to the
    * Trend. Additional calls to addAttribute will add more INumberScalars
@@ -1003,26 +1039,44 @@ public void setTimePrecision(int timePrecision) {
    * @param name Attribute name
    */
   public void addAttribute(String name) {
+
     INumberScalar scalar;
     IBooleanScalar bscalar;
+    INumberSpectrum nscalar;
     AttributePolledList alist;
+
+    int sIdx = getIndex(name);
+    if( sIdx>=0 ) name = getAttName(name);
 
     // Add the attribute in the list
     try {
 
       if (attList == null) {
+
+        // New model
         alist = new AttributePolledList();
         alist.add(name);
-        setModel(alist);
+        SpectrumItem it = new SpectrumItem(name);
+        it.addItem(sIdx);
+        Vector<SpectrumItem> itv = new Vector<SpectrumItem>();
+        itv.add(it);
+        setModel(alist, itv);
         lastCreatedList = alist;
         alist.setRefreshInterval(1000);
         alist.startRefresher();
+
       } else {
+
+        // Model already exists ?
         if (attList.get(name)==null) {
+
           IAttribute att = (IAttribute) attList.add(name);
           int i = attList.size();
 
-          if( att instanceof IBooleanScalar ) {
+          if( att instanceof INumberSpectrum ) {
+            nscalar = (INumberSpectrum) attList.add(name);
+            lastAdded = rootNode.addItem(this, nscalar, sIdx, defaultColor[i % defaultColor.length]);
+          } else if( att instanceof IBooleanScalar ) {
 	          bscalar = (IBooleanScalar) attList.add(name);
 	          lastAdded = rootNode.addItem(this, bscalar, defaultColor[i % defaultColor.length]);
           } else {
@@ -1032,7 +1086,26 @@ public void setTimePrecision(int timePrecision) {
 
 	        mainTreeModel = new DefaultTreeModel(rootNode);
 	        mainTree.setModel(mainTreeModel);
+
+        } else {
+
+          // May be a spectrum attribute
+          if( sIdx>=0 ) {
+
+            IEntity att = attList.get(name);
+            if( (att instanceof INumberSpectrum) ) {
+
+              int i = attList.size();
+              lastAdded = rootNode.addItem(this, (INumberSpectrum)att, sIdx, defaultColor[i % defaultColor.length]);
+              mainTreeModel = new DefaultTreeModel(rootNode);
+     	        mainTree.setModel(mainTreeModel);
+
+            }
+
+          }
+
         }
+
       }
 
       TreePath np = new TreePath(lastAdded.getPath());
@@ -1231,15 +1304,18 @@ public void setTimePrecision(int timePrecision) {
 
     //Create a new Attribute List
     AttributePolledList alist = new AttributePolledList();
-    alist.setFilter(new fr.esrf.tangoatk.core.IEntityFilter() {
-      public boolean keep(fr.esrf.tangoatk.core.IEntity entity) {
-        if (entity instanceof fr.esrf.tangoatk.core.INumberScalar) {
+    alist.setFilter(new IEntityFilter() {
+      public boolean keep(IEntity entity) {
+        if (entity instanceof INumberScalar) {
           return true;
         }
-        if (entity instanceof fr.esrf.tangoatk.core.IBooleanScalar) {
+        if (entity instanceof IBooleanScalar) {
           return true;
         }        
-        System.out.println(entity.getName() + " not imported (only NumberScalar or BooleanScalar!)");
+        if (entity instanceof INumberSpectrum) {
+          return true;
+        }
+        System.out.println(entity.getName() + " not imported (only NumberScalar, BooleanScalar or NumberSpectrum!)");
         return false;
       }
     });
@@ -1257,6 +1333,8 @@ public void setTimePrecision(int timePrecision) {
       }
 
       // Build attribute list
+      Vector<SpectrumItem> spectrumIDS = new Vector<SpectrumItem>();
+
       for (i = 0; i < nbDv; i++) {
 
         p = f.getParam("dv" + i + "_name");
@@ -1266,7 +1344,40 @@ public void setTimePrecision(int timePrecision) {
         }
 
         try {
-          alist.add(p.get(0).toString());
+
+          String attName = p.get(0).toString();
+          int sIdx = getIndex(attName);
+          if(sIdx>=0) attName = getAttName(attName);
+          IEntity entity = alist.get(attName);
+
+          if( entity==null ) {
+
+            alist.add(attName);
+            SpectrumItem it = new SpectrumItem(attName);
+            it.addItem(sIdx);
+            spectrumIDS.add(it);
+
+          } else {
+
+            if( entity instanceof INumberSpectrum ) {
+
+              boolean found = false;
+              int j=0;
+              while(!found && j<spectrumIDS.size()) {
+                found = spectrumIDS.get(j).attName.equalsIgnoreCase(attName);
+                if(!found) j++;
+              }
+              if( !found ) {
+                // should never happen
+                System.out.println("Trend.applySettings() Invalid attribute name " + attName);
+              } else {
+                spectrumIDS.get(j).addItem(sIdx);
+              }
+
+            }
+
+          }
+
         } catch (Exception e) {
           errBuff += (e.getMessage() + "\n");
         }
@@ -1283,6 +1394,7 @@ public void setTimePrecision(int timePrecision) {
       //We have the attList
       //Set the devicePropertyModel
       if (nbDv > 0) {
+
         if (attList != null) {
           innerPanel.remove(treeView);
           treeView = null;
@@ -1300,7 +1412,7 @@ public void setTimePrecision(int timePrecision) {
         alist.setRefreshInterval(refreshInterval);
 
         alist.startRefresher();
-        setModel(alist);
+        setModel(alist,spectrumIDS);
         lastCreatedList = alist;
 
       }
@@ -2003,6 +2115,22 @@ public void setTimePrecision(int timePrecision) {
 
 }
 
+class SpectrumItem {
+
+  Vector<Integer> items;
+  String attName;
+
+  public SpectrumItem(String attName) {
+    this.attName = attName;
+    items = new Vector<Integer>();
+  }
+
+  public void addItem(int i) {
+    items.add(i);
+  }
+
+}
+
 class ConfigPanel extends JDialog implements ActionListener {
 
   private JButton      addBtn;
@@ -2027,7 +2155,7 @@ class ConfigPanel extends JDialog implements ActionListener {
     setTitle("Add new attribute");
     JPanel innerPanel = new JPanel();
     innerPanel.setLayout(new BorderLayout());
-    finder = new DeviceFinder(DeviceFinder.MODE_ATTRIBUTE_NUMBER_BOOLEAN_SCALAR);
+    finder = new DeviceFinder(DeviceFinder.MODE_ATTRIBUTE_NUMBER_BOOLEAN_SPECTRUM_SCALAR);
     innerPanel.add(finder,BorderLayout.CENTER);
 
     addBtn = new JButton("Add selected attribute(s)");

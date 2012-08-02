@@ -41,12 +41,14 @@ import javax.swing.tree.*;
  * @author  pons
  */
 
-class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalarListener,IBooleanScalarListener, PropertyChangeListener {
+class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalarListener,IBooleanScalarListener,ISpectrumListener,PropertyChangeListener {
 
   // Local declaration
   private String devname = "";
   private INumberScalar model;
   private IBooleanScalar modelb;
+  private INumberSpectrum models;
+  private int spectrumIdx;
   private int selected;
   private JLDataView data;
   private JLDataView minAlarmData;
@@ -69,6 +71,7 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
     this.devname = "Trend";
     this.model = null;
     this.modelb = null;
+    this.models = null;
     data = null;
     chart = g;
   }
@@ -80,16 +83,18 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
     data = null;
     this.model = null;
     this.modelb = null;
+    this.models = null;
     chart = g;
   }
 
-  // Construct an attribute node (model cannot be null !!)
+  // Construct an number scalar attribute node (model cannot be null !!)
   public TrendSelectionNode(Trend g, String name, INumberScalar model, int selection, Color c) {
 
     // Attribute node
     this.devname = name;
     this.model = model;
     this.modelb = null;
+    this.models = null;
     this.selected = selection;
     this.showMinAlarm = false;
     this.showMaxAlarm = false;
@@ -130,13 +135,14 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
 
   }
 
-  // Construct an attribute node (model cannot be null !!)
+  // Construct a boolean scalar attribute node (model cannot be null !!)
   public TrendSelectionNode(Trend g, String name, IBooleanScalar model, int selection, Color c) {
 
     // Attribute node
     this.devname = name;
     this.model = null;
     this.modelb = model;
+    this.models = null;
     this.selected = selection;
     this.showMinAlarm = false;
     this.showMaxAlarm = false;
@@ -158,7 +164,38 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
     modelb.getProperty("format").addPresentationListener(this);
 
   }
-  
+
+  // Construct a spectrum attribute node (model cannot be null !!)
+  public TrendSelectionNode(Trend g, String name, INumberSpectrum model, int sIdx, int selection, Color c) {
+
+    // Attribute node
+    this.devname = name;
+    this.model = null;
+    this.modelb = null;
+    this.models = model;
+    this.spectrumIdx = sIdx;
+    this.selected = selection;
+    this.showMinAlarm = false;
+    this.showMaxAlarm = false;
+    chart = g;
+
+    data = new JLDataView();
+    data.setColor(c);
+    data.setMarkerColor(c);
+
+    minAlarmData = null;
+    maxAlarmData = null;
+
+    // Register attribute
+    models.addSpectrumListener(this);
+
+    // Register on property change
+    models.getProperty("label").addPresentationListener(this);
+    models.getProperty("unit").addPresentationListener(this);
+    models.getProperty("format").addPresentationListener(this);
+
+  }
+
   // Refresh node after a property change
   public void refreshNode() {
 
@@ -211,6 +248,27 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
       } else {
         name = modelb.getName();
         data.setName(name);
+      }
+
+    }
+
+    if( models != null ) {
+
+      data.setUnit(models.getUnit());
+      data.setUserFormat(models.getFormat());
+
+      // Set the chart label
+      if (models.getLabel().length() > 0 && !models.getLabel().equalsIgnoreCase("not specified")) {
+        if (chart.displayDeviceNames()) {
+          name = devname + "/" + models.getLabel();
+          data.setName(name + " (" + Integer.toString(spectrumIdx) + ")");
+        } else {
+          name = models.getLabel();
+          data.setName(name + " (" + Integer.toString(spectrumIdx) + ")");
+        }
+      } else {
+        name = models.getName();
+        data.setName(name + " (" + Integer.toString(spectrumIdx) + ")");
       }
 
     }
@@ -393,7 +451,7 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
   // *****************************************************************************************************************
   // Return true when tree node is a Leaf
   public boolean isLeaf() {
-    return (model != null || modelb != null);
+    return (model != null || modelb != null || models!=null);
   }
 
   // *****************************************************************************************************************
@@ -406,8 +464,12 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
     return modelb;
   }
 
+  public INumberSpectrum getSpectrumModel() {
+    return models;
+  }
+
   public boolean hasModel() {
-    return (model!=null) || (modelb!=null);
+    return (model!=null) || (modelb!=null) || (models!=null);
   }
 
   // *****************************************************************************************************************
@@ -529,6 +591,35 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
     return nn;
   }
 
+  public TrendSelectionNode addItem(Trend g, INumberSpectrum model, int sIdx,Color c) {
+
+    int i = 0;
+    int nb = getChildCount();
+
+    boolean found = false;
+    String attname = model.getName();
+    String devname = attname.substring(0, attname.lastIndexOf('/'));
+
+    //Look fo devname
+    while (i < nb && !found) {
+      found = (devname.equals(getChild(i).toString()));
+      if (!found) i++;
+    }
+
+    TrendSelectionNode nn = new TrendSelectionNode(g, devname, model, sIdx,Trend.SEL_NONE, c);
+
+    if (found) {
+      // add the attribute
+      getChild(i).add(nn);
+    } else {
+      TrendSelectionNode n = new TrendSelectionNode(g, devname);
+      add(n);
+      n.add(nn);
+    }
+
+    return nn;
+  }
+
   // *****************************************************************************************************************
   // Return all selectable items in a vector
   public Vector getSelectableItems() {
@@ -569,6 +660,8 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
       return model.getName();
     else if ( modelb != null )
       return modelb.getName();
+    else if ( models != null )
+      return models.getName()+"/"+Integer.toString(spectrumIdx);
     else
       return "";
   }
@@ -576,6 +669,7 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
   // *****************************************************************************************************************
   // Unregister the node
   public void clearModel() {
+
     if( model!=null ) {
       model.removeNumberScalarListener(this);
       model.getProperty("label").removePresentationListener(this);
@@ -590,10 +684,19 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
       modelb.getProperty("unit").removePresentationListener(this);
       modelb.getProperty("format").removePresentationListener(this);
     }
+    if( models!=null ) {
+      models.removeSpectrumListener(this);
+      models.getProperty("label").removePresentationListener(this);
+      models.getProperty("unit").removePresentationListener(this);
+      models.getProperty("format").removePresentationListener(this);
+    }
     data = null;
     minAlarmData = null;
     maxAlarmData = null;
     model = null;
+    modelb = null;
+    models = null;
+
   }
 
 
@@ -685,6 +788,44 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
 
   }
 
+  public void spectrumChange(NumberSpectrumEvent evt) {
+
+    if( models==null )
+      return;
+
+    // Add data to the dataView
+    boolean ok = true;
+    DataList lv = data.getLastValue();
+
+    double x = (double) evt.getTimeStamp();
+    int lgth = evt.getValue().length;
+    double y;
+    if( spectrumIdx>=0 && spectrumIdx<lgth )
+      y = evt.getValue()[spectrumIdx];
+    else
+      y = Double.NaN;
+
+    if (lv != null) ok = (lv.x != x) || (lv.y != y);
+
+    if (ok) {
+
+      if (chart.getChart().getXAxis().getPercentScrollback() == 0.0) {
+
+        // No percent scrollback, keep the default behavior
+        data.add((double) evt.getTimeStamp(), y);
+        chart.getChart().garbageData(data);
+
+      } else {
+
+        // percent scrollback
+        chart.getChart().addData(data,(double) evt.getTimeStamp(), y);
+
+      }
+
+    }
+
+  }
+
   public void errorChange(ErrorEvent evt) {
 
     if (model == null)
@@ -743,6 +884,11 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
         return modelb.getLabel();
       else
         return modelb.getNameSansDevice();
+    } else if (models!=null) {
+      if(models.getLabel().length()>0 && !models.getLabel().equalsIgnoreCase("not specified"))
+        return models.getLabel() + " (" + Integer.toString(spectrumIdx) + ")";
+      else
+        return models.getNameSansDevice() + " (" + Integer.toString(spectrumIdx) + ")";
     } else {
       return devname;
     }
