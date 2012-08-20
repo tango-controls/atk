@@ -4,6 +4,7 @@
  */
 package fr.esrf.tangoatk.widget.util;
 
+import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.JFileChooser;
@@ -77,13 +78,14 @@ public class RestrictedFolderJFileChooser extends JFileChooser
         return folderCanonicalPath;
     }
 
-    public File showDialog(String approveButtonText )
+    public File showDialog(Component parent, String approveButtonText, String acceptedFolder)
     {
         int       dialReturn;
         File      selectedFile = null;
         String    selectedFilePath = null;
 
-        dialReturn = super.showDialog(this, approveButtonText);
+        setCurrentDirectory(new File(initFolder));
+        dialReturn = super.showDialog(parent, approveButtonText);
 
         if (dialReturn != JFileChooser.APPROVE_OPTION)
         {
@@ -105,74 +107,24 @@ public class RestrictedFolderJFileChooser extends JFileChooser
             return null;
         }
 
-        boolean  wellLocated = isInAutorizedFolders(selectedFilePath);
+        boolean wellLocated;
+        String  msg;
+
+        if (acceptedFolder == null)
+        {
+            wellLocated = isInAutorizedFolders(selectedFilePath);
+            msg = getAutorizedFolderHint();
+        }
+        else
+        {
+            wellLocated = isInSpecifiedFolder(selectedFilePath, acceptedFolder);
+            msg = "The file should be located inside "+acceptedFolder+" \n ";
+        }
 
         if (wellLocated == false)
         {
-            String  msg = getAutorizedFolderHint();
             javax.swing.JOptionPane.showMessageDialog(
-                    null, "The selected file is not inside the authorized root folder(s).\n\n"
-                    + msg,
-                    approveButtonText+" aborted.\n",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
-
-        return selectedFile;
-    }
-
-
-    private boolean isInAutorizedFolders(String fPath)
-    {
-        if (autorizedCanonicalFolders == null) return true;
-        if (autorizedCanonicalFolders.length <= 0) return true;
-
-        for (int i=0; i<autorizedCanonicalFolders.length; i++)
-        {
-            if (fPath.startsWith(autorizedCanonicalFolders[i]))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public File showDialog(String approveButtonText, String acceptedFolder)
-    {
-        int       dialReturn;
-        File      selectedFile = null;
-        String    selectedFilePath = null;
-
-        dialReturn = super.showDialog(this, approveButtonText);
-
-        if (dialReturn != JFileChooser.APPROVE_OPTION)
-        {
-            return null;
-        }
-
-        selectedFile = this.getSelectedFile();
-        try
-        {
-            selectedFilePath = selectedFile.getCanonicalPath();
-        }
-        catch (IOException ioex)
-        {
-            javax.swing.JOptionPane.showMessageDialog(
-                    null, "Failed to get the canonical path of the selected file.\n\n"
-                    + ioex + "\n\n\n",
-                    approveButtonText+" aborted.\n",
-                    javax.swing.JOptionPane.ERROR_MESSAGE);
-            return null;
-        }
-
-        boolean  wellLocated = isInSpecifiedFolder(selectedFilePath, acceptedFolder);
-
-        if (wellLocated == false)
-        {
-            String  msg = "The file should be located inside "+acceptedFolder+" \n ";
-            javax.swing.JOptionPane.showMessageDialog(
-                    null, "The selected file is not inside the authorized root folder.\n\n"
+                    null, "The selected file is not inside the authorized root folder(s)\n\n"
                     + msg,
                     approveButtonText+" aborted.\n",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
@@ -200,6 +152,23 @@ public class RestrictedFolderJFileChooser extends JFileChooser
             return true;
         else
             return false;
+    }
+
+
+    private boolean isInAutorizedFolders(String fPath)
+    {
+        if (autorizedCanonicalFolders == null) return true;
+        if (autorizedCanonicalFolders.length <= 0) return true;
+
+        for (int i=0; i<autorizedCanonicalFolders.length; i++)
+        {
+            if (fPath.startsWith(autorizedCanonicalFolders[i]))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 
