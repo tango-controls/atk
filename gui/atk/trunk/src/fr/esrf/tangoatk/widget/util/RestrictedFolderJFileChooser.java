@@ -77,7 +77,7 @@ public class RestrictedFolderJFileChooser extends JFileChooser
         return folderCanonicalPath;
     }
 
-    public File showDialog(JFileChooser jfc, String approveButtonText )
+    public File showDialog(String approveButtonText )
     {
         int       dialReturn;
         File      selectedFile = null;
@@ -90,7 +90,7 @@ public class RestrictedFolderJFileChooser extends JFileChooser
             return null;
         }
 
-        selectedFile = jfc.getSelectedFile();
+        selectedFile = this.getSelectedFile();
         try
         {
             selectedFilePath = selectedFile.getCanonicalPath();
@@ -138,7 +138,7 @@ public class RestrictedFolderJFileChooser extends JFileChooser
         return false;
     }
 
-    public File showDialog(JFileChooser jfc, String approveButtonText, String acceptedFolder)
+    public File showDialog(String approveButtonText, String acceptedFolder)
     {
         int       dialReturn;
         File      selectedFile = null;
@@ -151,7 +151,7 @@ public class RestrictedFolderJFileChooser extends JFileChooser
             return null;
         }
 
-        selectedFile = jfc.getSelectedFile();
+        selectedFile = this.getSelectedFile();
         try
         {
             selectedFilePath = selectedFile.getCanonicalPath();
