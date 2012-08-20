@@ -100,10 +100,11 @@ public class RestrictedFolderJFileChooser extends JFileChooser
         catch (IOException ioex)
         {
             javax.swing.JOptionPane.showMessageDialog(
-                    this, "Failed to get the canonical path of the selected file.\n\n"
+                    parent, "Failed to get the canonical path of the selected file.\n\n"
                     + ioex + "\n\n\n",
                     approveButtonText+" aborted.\n",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
+
             return null;
         }
 
@@ -124,7 +125,7 @@ public class RestrictedFolderJFileChooser extends JFileChooser
         if (wellLocated == false)
         {
             javax.swing.JOptionPane.showMessageDialog(
-                    this, "The selected file is not inside the authorized root folder(s)\n\n"
+                    parent, "The selected file is not inside the authorized root folder(s)\n\n"
                     + msg,
                     approveButtonText+" aborted.\n",
                     javax.swing.JOptionPane.ERROR_MESSAGE);
