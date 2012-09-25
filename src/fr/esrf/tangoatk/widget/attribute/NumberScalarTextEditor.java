@@ -145,10 +145,18 @@ public class NumberScalarTextEditor extends JTextField
           set = model.getNumberScalarSetPoint();
 
         String  strValue = getDisplayString(set);
-        if (!lastSet.equals(strValue))
+        if (lastSet == null)
         {
             setText(strValue);
             lastSet = strValue;
+        }
+        else
+        {
+            if (!lastSet.equals(strValue))
+            {
+                setText(strValue);
+                lastSet = strValue;
+            }
         }
     }
 
@@ -190,6 +198,7 @@ public class NumberScalarTextEditor extends JTextField
         }
         catch (NumberFormatException nfe)
         {
+            lastSet = null;
             model.refresh();
         }
     }
