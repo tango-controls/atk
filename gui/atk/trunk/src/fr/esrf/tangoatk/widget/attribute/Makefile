@@ -31,6 +31,7 @@ BEANINFO= StringScalarViewerBeanInfo.java            \
 	  NumberSpectrumStateBarChartViewerBeanInfo.java \
           SimpleEnumScalarViewerBeanInfo.java            \
           NumberSpectrumTrend3DViewerBeanInfo.java \
+	  NumberScalarTextEditorBeanInfo.java \
 
 include ../../../../../../.make-include
 
@@ -103,7 +104,8 @@ ALL =	$(TARGET)/IAttributeViewer.class            \
 	$(TARGET)/SimpleStateViewer.class           \
 	$(TARGET)/NumberSpectrumTrend3DViewer.class \
 	$(TARGET)/NumberSpectrumStateBarChartViewer.class \
-   	$(TARGET)/DigitalNumberScalarViewer.class
+   	$(TARGET)/DigitalNumberScalarViewer.class \
+   	$(TARGET)/NumberScalarTextEditor.class
 
 #	$(TARGET)/AttributeBarChart.class
 
