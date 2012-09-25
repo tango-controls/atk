@@ -118,7 +118,7 @@ public class NumberScalarTextEditor extends JTextField
             {
                 if (format.indexOf('%') == -1)
                 {
-                    dispStr = String.format("%.1f", value);
+                    dispStr = String.format("%.2f", value);
                 }
                 else
                 {
@@ -128,7 +128,7 @@ public class NumberScalarTextEditor extends JTextField
             }
             catch (Exception e)
             {
-                dispStr = String.format("%.1f", value);
+                dispStr = String.format("%.2f", value);
             }
         }
 
@@ -145,7 +145,11 @@ public class NumberScalarTextEditor extends JTextField
           set = model.getNumberScalarSetPoint();
 
         String  strValue = getDisplayString(set);
-        setText(strValue);
+        if (!lastSet.equals(strValue))
+        {
+            setText(strValue);
+            lastSet = strValue;
+        }
     }
 
     public void errorChange(ErrorEvent e)
