@@ -187,8 +187,6 @@ public class NumberScalarTextEditor extends JTextField
 
     private void textInsertActionPerformed(java.awt.event.ActionEvent evt)
     {
-        //lastSet = this.getText();
-        //avoiding NullPointerException
         if (model == null) return;
         String  valStr = this.getText();
         try
