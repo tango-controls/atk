@@ -1,0 +1,10 @@
+#!/bin/sh
+rm -f *.class
+JAVALIB=/segfs/tango/lib/java;
+MYLIB=/users/pons/atk/lib;
+#CLASSPATH=$JAVALIB/TangORB.jar:$JAVALIB/ATKCore.jar:$JAVALIB/ATKWidget.jar:.
+CLASSPATH=$JAVALIB/TangORB.jar:$MYLIB:.
+export CLASSPATH
+echo $CLASSPATH
+echo   Compiling ...
+javac -deprecation ChartExample$1.java

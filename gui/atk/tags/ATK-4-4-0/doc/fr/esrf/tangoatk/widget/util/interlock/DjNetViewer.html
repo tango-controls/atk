@@ -1,0 +1,249 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<HTML lang="en"><HEAD>
+<TITLE>Source Code: DjNetViewer.java</TITLE>
+<STYLE>
+body {
+    background: ivory;
+    color: black;
+}
+DIV.description {
+    color: maroon;
+    margin-top: -0.4cm;
+}
+SPAN.linenumber {
+    color: maroon;
+}
+SPAN.string {
+    color: #008080;
+}
+SPAN.comment {
+    color: green;
+}
+SPAN.keyword {
+    color: blue;
+    font-weight: bold;
+}
+SPAN.userkeyword {
+    color: purple;
+    font-weight: bold;
+}
+</STYLE>
+</HEAD><BODY>
+<H2>DjNetViewer.java</H2>
+<PRE>
+<SPAN class="comment">/** An application example that uses the NetEditor */</SPAN>
+
+<SPAN class="keyword">import</SPAN> fr.esrf.tangoatk.widget.util.interlock.NetEditor;
+<SPAN class="keyword">import</SPAN> fr.esrf.tangoatk.widget.util.interlock.NetObject;
+<SPAN class="keyword">import</SPAN> fr.esrf.tangoatk.widget.util.interlock.NetEditorListener;
+
+<SPAN class="keyword">import</SPAN> javax.swing.*;
+<SPAN class="keyword">import</SPAN> java.awt.*;
+<SPAN class="keyword">import</SPAN> java.awt.event.MouseEvent;
+<SPAN class="keyword">import</SPAN> java.util.Vector;
+<SPAN class="keyword">import</SPAN> java.io.IOException;
+
+<SPAN class="keyword">public</SPAN> <SPAN class="keyword">class</SPAN> DjNetViewer <SPAN class="keyword">extends</SPAN> NetEditor <SPAN class="keyword">implements</SPAN> NetEditorListener {
+
+  <SPAN class="comment">/** An inner class to handle special data needed to evaluate the Dijkstra algorithm */</SPAN>
+  <SPAN class="keyword">class</SPAN> DijkstraInfo {
+    <SPAN class="keyword">double</SPAN>     dist;  <SPAN class="comment">// Distance to source
+</SPAN>    NetObject  pred;  <SPAN class="comment">// Previous bubble (Used to draw the shortest path)
+</SPAN>  }
+
+  NetObject[]  bubbles;    <SPAN class="comment">// Graph node
+</SPAN>  <SPAN class="keyword">int</SPAN>          nbBubble;   <SPAN class="comment">// Node number
+</SPAN>  NetObject    theSource=<SPAN class="keyword">null</SPAN>;  <SPAN class="comment">// Source bubble
+</SPAN>  NetObject    theDest=<SPAN class="keyword">null</SPAN>;    <SPAN class="comment">// Destination bubble
+</SPAN>
+  DjNetViewer(JFrame parent) {
+
+    <SPAN class="keyword">super</SPAN>(parent);
+    setEditable(<SPAN class="keyword">false</SPAN>);
+    setMoveableBubble(<SPAN class="keyword">true</SPAN>);
+    addEditorListener(<SPAN class="keyword">this</SPAN>);
+
+  }
+
+  <SPAN class="keyword">public</SPAN> <SPAN class="keyword">void</SPAN> loadFile(String fileName) <SPAN class="keyword">throws</SPAN> IOException {
+
+    <SPAN class="keyword">super</SPAN>.loadFile(fileName);
+
+    <SPAN class="comment">// Init Graph structure
+</SPAN>    bubbles = <SPAN class="keyword">new</SPAN> NetObject[getNetObjectNumber()];
+    nbBubble = 0;
+    <SPAN class="comment">// Extract bubble object from the net file
+</SPAN>    <SPAN class="keyword">for</SPAN> (<SPAN class="keyword">int</SPAN> i = 0; i &lt; getNetObjectNumber(); i++) {
+      <SPAN class="keyword">if</SPAN> (getNetObjectAt(i).getType() == NetObject.OBJECT_BUBBLE) {
+        bubbles[nbBubble] = getNetObjectAt(i);
+        <SPAN class="comment">// We use a DijkstraInfo object as userValue to compute shortest way
+</SPAN>        bubbles[nbBubble].setUserValue(<SPAN class="keyword">new</SPAN> DijkstraInfo());
+        nbBubble++;
+      }
+    }
+    theSource = bubbles[0];
+    theDest = bubbles[nbBubble - 1];
+    computeDijkstra();
+
+  }
+
+  <SPAN class="comment">/** Customized link paiting */</SPAN>
+  <SPAN class="keyword">public</SPAN> <SPAN class="keyword">void</SPAN> paintLinks(Graphics2D g2) {
+
+    <SPAN class="comment">// Paint all links
+</SPAN>    <SPAN class="keyword">super</SPAN>.paintLinks(g2);
+
+    <SPAN class="comment">// Paint the shortest path
+</SPAN>    <SPAN class="keyword">if</SPAN> (theDest != <SPAN class="keyword">null</SPAN>) {
+      NetObject dst = theDest;
+      g2.setColor(Color.ORANGE);
+      <SPAN class="keyword">while</SPAN> (getDI(dst).pred != <SPAN class="keyword">null</SPAN>) {
+        getDI(dst).pred.paintLink(g2, dst, <SPAN class="keyword">true</SPAN>);
+        dst = getDI(dst).pred;
+      }
+    }
+
+  }
+
+  <SPAN class="comment">/** Returns the distance in pixel between 2 NetObjects */</SPAN>
+  <SPAN class="keyword">private</SPAN> <SPAN class="keyword">double</SPAN> distance(NetObject n1,NetObject n2) {
+    <SPAN class="keyword">double</SPAN> x = ( n2.getXOrigin() - n1.getXOrigin() );
+    <SPAN class="keyword">double</SPAN> y = ( n2.getYOrigin() - n1.getYOrigin() );
+    <SPAN class="keyword">return</SPAN> Math.sqrt(x*x+y*y);
+  }
+
+  <SPAN class="comment">/** Helper function to retreive the DijkstraInfo struct of the specified NetObject */</SPAN>
+  <SPAN class="keyword">private</SPAN> DijkstraInfo getDI(NetObject o) {
+    <SPAN class="keyword">return</SPAN> (DijkstraInfo)o.getUserValue();
+  }
+
+  <SPAN class="comment">/** Initialise direct distance, predecessor and the start set S */</SPAN>
+  <SPAN class="keyword">private</SPAN> Vector initDijkstra() {
+
+    Vector S = <SPAN class="keyword">new</SPAN> Vector();
+
+    <SPAN class="keyword">for</SPAN>(<SPAN class="keyword">int</SPAN> i=0;i&lt;nbBubble;i++) {
+      <SPAN class="keyword">if</SPAN>( theSource.isParentOf(bubbles[i]) ) {
+        getDI(bubbles[i]).dist = distance(theSource,bubbles[i]);
+        getDI(bubbles[i]).pred = theSource;
+      } <SPAN class="keyword">else</SPAN> {
+        getDI(bubbles[i]).dist = Double.POSITIVE_INFINITY;
+        getDI(bubbles[i]).pred = <SPAN class="keyword">null</SPAN>;
+      }
+      S.add(bubbles[i]);
+    }
+
+    getDI(theSource).dist = 0.0;
+    S.remove(theSource);
+
+    <SPAN class="keyword">return</SPAN> S;
+
+  }
+
+  <SPAN class="comment">/** Compute Dijkstra minimun distance from the source */</SPAN>
+  <SPAN class="keyword">private</SPAN> <SPAN class="keyword">void</SPAN> computeDijkstra() {
+
+    <SPAN class="keyword">int</SPAN> i;
+    NetObject s;
+    <SPAN class="keyword">double</SPAN> minDist;
+
+    Vector S = initDijkstra();
+
+    <SPAN class="keyword">do</SPAN> {
+
+      <SPAN class="comment">// Select the minimun distance whithin undone node (S set)
+</SPAN>      <SPAN class="keyword">for</SPAN>( minDist = Double.POSITIVE_INFINITY , s = <SPAN class="keyword">null</SPAN> , i=0 ; i &lt; S.size() ; i++ ) {
+        NetObject toDo = (NetObject)S.get(i);
+        <SPAN class="keyword">if</SPAN>(getDI(toDo).dist &lt; minDist) {
+          s = toDo;
+          minDist = getDI(toDo).dist;
+        }
+      }
+
+      <SPAN class="comment">// Update the S set and outgoing link distance
+</SPAN>      <SPAN class="keyword">if</SPAN>(s!=<SPAN class="keyword">null</SPAN>) {
+        S.remove(s);
+        <SPAN class="keyword">for</SPAN>(i=0;i &lt; s.getChildrenNumber();i++) {
+          NetObject t = s.getChildAt(i);
+          <SPAN class="keyword">double</SPAN> d = distance(s,t);
+          <SPAN class="keyword">if</SPAN>( getDI(s).dist + d &lt; getDI(t).dist ) {
+            getDI(t).dist = getDI(s).dist + d;
+            getDI(t).pred = s;
+          }
+        }
+      }
+
+    } <SPAN class="keyword">while</SPAN>(s!=<SPAN class="keyword">null</SPAN>);
+
+    updateBubble();
+
+  }
+
+  <SPAN class="comment">/** Update bubble accroding to Dijkstra result */</SPAN>
+  <SPAN class="keyword">private</SPAN> <SPAN class="keyword">void</SPAN> updateBubble() {
+
+    <SPAN class="keyword">for</SPAN>(<SPAN class="keyword">int</SPAN> i=0;i &lt; nbBubble;i++) {
+
+      <SPAN class="keyword">if</SPAN>( bubbles[i].equals(theSource) )
+        bubbles[i].setColor(Color.BLUE);
+      <SPAN class="keyword">else</SPAN> <SPAN class="keyword">if</SPAN> ( bubbles[i].equals(theDest) )
+        bubbles[i].setColor(Color.CYAN);
+      <SPAN class="keyword">else</SPAN>
+        bubbles[i].setColor(Color.GRAY);
+
+      <SPAN class="keyword">double</SPAN> d = getDI(bubbles[i]).dist;
+
+      <SPAN class="keyword">if</SPAN>( d==Double.POSITIVE_INFINITY ) {
+        <SPAN class="comment">// Non reachable node
+</SPAN>        bubbles[i].setColor(Color.RED);
+        bubbles[i].setCenterLabel(<SPAN class="string">"No"</SPAN>);
+      } <SPAN class="keyword">else</SPAN> {
+        bubbles[i].setCenterLabel(Integer.toString((<SPAN class="keyword">int</SPAN>)d));
+      }
+
+    }
+    repaint();
+
+  }
+
+  <SPAN class="comment">// -------------------------------------------------------------------
+</SPAN>  <SPAN class="comment">// The Editor listener
+</SPAN>  <SPAN class="comment">// -------------------------------------------------------------------
+</SPAN>  <SPAN class="keyword">public</SPAN> <SPAN class="keyword">void</SPAN> valueChanged(NetEditor src) {
+
+    <SPAN class="keyword">if</SPAN>( nbBubble&gt;0 ) {
+      <SPAN class="comment">// Update graph when moving a bubble
+</SPAN>      computeDijkstra();
+    }
+
+  }
+
+  <SPAN class="keyword">public</SPAN> <SPAN class="keyword">void</SPAN> objectClicked(NetEditor src,NetObject obj,MouseEvent e) {
+
+    <SPAN class="comment">// Filter bubble
+</SPAN>    <SPAN class="keyword">if</SPAN>( obj.getType()!=NetObject.OBJECT_BUBBLE )
+      <SPAN class="keyword">return</SPAN>;
+
+    <SPAN class="comment">// Set source
+</SPAN>    <SPAN class="keyword">if</SPAN>( e.getButton()==MouseEvent.BUTTON1 ) {
+      theSource = obj;
+      computeDijkstra();
+    }
+
+    <SPAN class="comment">// Set destination
+</SPAN>    <SPAN class="keyword">if</SPAN>( e.getButton()==MouseEvent.BUTTON3 ) {
+      theDest = obj;
+      computeDijkstra();
+    }
+
+  }
+
+  <SPAN class="keyword">public</SPAN> <SPAN class="keyword">void</SPAN> linkClicked(NetEditor src,NetObject obj,<SPAN class="keyword">int</SPAN> childIdx,MouseEvent e) {}
+
+  <SPAN class="keyword">public</SPAN> <SPAN class="keyword">void</SPAN> sizeChanged(NetEditor src,Dimension d) {}
+
+  <SPAN class="keyword">public</SPAN> <SPAN class="keyword">void</SPAN> cancelCreate(NetEditor src) {}
+
+}
+</PRE>
+</BODY></HTML>
