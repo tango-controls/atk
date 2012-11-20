@@ -30,9 +30,13 @@ package fr.esrf.tangoatk.widget.util;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 
-class SplashPanel extends JComponent {
+class SplashPanel extends JComponent implements MouseListener {
 
   // Default image
   protected final static String defaultImgLocation = "/fr/esrf/tangoatk/widget/util/splash.jpg";
@@ -51,6 +55,7 @@ class SplashPanel extends JComponent {
   private Dimension imgSize;
   private ImageIcon img;
   private Color textForeground;
+  private JButton exitButton;
 
   // Splah panel constructor
   public SplashPanel() {
@@ -115,6 +120,11 @@ class SplashPanel extends JComponent {
     }
     progress.setDoubleBuffered(false);
 
+    exitButton = new JButton("x");
+    exitButton.setFont(new java.awt.Font("Dialog", Font.PLAIN, 10));
+    exitButton.setMargin(new Insets(0, 0, 0, 0));
+    exitButton.setDoubleBuffered(false);
+
     setPreferredSize(imgSize);
     setMinimumSize(imgSize);
     setMaximumSize(imgSize);
@@ -123,6 +133,7 @@ class SplashPanel extends JComponent {
     message.setSize(imgSize.width - 10, 18);
     progress.setSize(imgSize.width - 10, 21);
     copyright.setSize(imgSize.width - 10, 15);
+    exitButton.setSize(15,15);
 
     // Update the whole double buffer
     ddBuffer = new BufferedImage(imgSize.width, imgSize.height, BufferedImage.TYPE_INT_RGB);
@@ -132,9 +143,25 @@ class SplashPanel extends JComponent {
     paintComponent(g, progress, 5, imgSize.height - 55);
     paintComponent(g, copyright, 5, imgSize.height - 75);
     paintComponent(g, title, 5, imgSize.height - 95);
+    paintComponent(g, exitButton, imgSize.width - 20, 5);
     g.dispose();
 
+    addMouseListener(this);
+
   }
+
+  public void mouseClicked(MouseEvent e) {};
+  public void mousePressed(MouseEvent e) {
+    int x = e.getX();
+    int y = e.getY();
+    if( x>imgSize.width-20 && x<imgSize.width-5 && y>5 && y<20 ) {
+      System.exit(0);
+    }
+  };
+  public void mouseReleased(MouseEvent e) {};
+  public void mouseEntered(MouseEvent e) {};
+  public void mouseExited(MouseEvent e) {};
+
 
   private void paintComponent(Graphics g, Component c, int x, int y) {
     g.translate(x, y);
