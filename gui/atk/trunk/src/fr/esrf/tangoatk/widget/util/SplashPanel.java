@@ -155,7 +155,7 @@ class SplashPanel extends JComponent implements MouseListener {
     int x = e.getX();
     int y = e.getY();
     if( x>imgSize.width-20 && x<imgSize.width-5 && y>5 && y<20 ) {
-      System.exit(0);
+      Runtime.getRuntime().halt(0);
     }
   };
   public void mouseReleased(MouseEvent e) {};
