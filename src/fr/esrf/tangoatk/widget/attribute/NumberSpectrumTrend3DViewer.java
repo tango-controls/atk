@@ -544,6 +544,48 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   }
 
   /**
+   * Returns horizontal position of the cursor (data coordinates)
+   * -1 is returned if there is no cursor.
+   */
+  public int getXCursor() {
+
+    int x = trend.getXCursor();
+    if(x<0) return -1;
+
+    int xData;
+
+    if(hZoom>=1) {
+      xData = historyLength - x/hZoom - 1;
+    } else {
+      xData = historyLength - x*(-hZoom) - 1;
+    }
+
+    return xData;
+
+  }
+
+  /**
+   * Returns vertical position of the cursor (data coordinates)
+   * -1 is returned if there is no cursor.
+   */
+  public int getYCursor() {
+
+    int y = trend.getYCursor();
+    if(y<0) return -1;
+
+    int yData;
+
+    if( vZoom>=1 ) {
+      yData = y/vZoom;
+    } else {
+      yData = y*(-vZoom);
+    }
+
+    return yData;
+
+  }
+
+  /**
    * Return the value at (x,y) position. NaN is returned if no data.
    * @param x X coordinates (in image coordinates)
    * @param y Y coordinates (in image coordinates)
@@ -2147,6 +2189,13 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
           nstv.clearStatusLabel();
         }
       });
+      JMenuItem cursorCMenuItem = new JMenuItem("Cursor coordinates");
+      cursorCMenuItem.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          System.out.println("X = " + nstv.getXCursor());
+          System.out.println("Y = " + nstv.getYCursor());
+        }
+      });
       JMenuItem scrollRightMenuItem = new JMenuItem("Scroll to right");
       scrollRightMenuItem.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -2161,6 +2210,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       });
       menu.add(clearMenuItem);
       menu.add(cursorMenuItem);
+      menu.add(cursorCMenuItem);
       menu.add(scrollRightMenuItem);
       menu.add(scrollLeftMenuItem);
       f.setJMenuBar(menuBar);

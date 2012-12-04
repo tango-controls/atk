@@ -50,8 +50,8 @@ public class J3DTrend extends JComponent implements MouseListener, MouseMotionLi
 
   // Cursor
   private boolean cursorEnabled;
-  private int     xCursor;
-  private int     yCursor;
+  private int     xCursor=-1;
+  private int     yCursor=-1;
   private int     xCursorInc;
   private int     yCursorInc;
 
