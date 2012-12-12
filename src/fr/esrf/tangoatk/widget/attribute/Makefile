@@ -105,7 +105,8 @@ ALL =	$(TARGET)/IAttributeViewer.class            \
 	$(TARGET)/NumberSpectrumTrend3DViewer.class \
 	$(TARGET)/NumberSpectrumStateBarChartViewer.class \
    	$(TARGET)/DigitalNumberScalarViewer.class \
-   	$(TARGET)/NumberScalarTextEditor.class
+   	$(TARGET)/NumberScalarTextEditor.class \
+	$(TARGET)/ScalarLevelMeterViewer.class
 
 #	$(TARGET)/AttributeBarChart.class
 
