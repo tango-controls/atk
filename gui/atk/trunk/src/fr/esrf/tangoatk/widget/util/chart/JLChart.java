@@ -3033,6 +3033,9 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     // Does not repaint if zoom drag
     if (zoomDrag) return;
 
+    // Does not paint if not visible
+    if(!isVisible()) return;
+
     if (xAxis.isXY()) {
       // Perform full update in XY
       repaint();
