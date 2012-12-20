@@ -96,3 +96,5 @@ Java-Bean: True
 
 Name: fr/esrf/tangoatk/widget/attribute/NumberScalarTextEditor.class
 Java-Bean: True
+
+zzz
