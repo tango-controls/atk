@@ -422,6 +422,10 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
             format = null;
           }
 
+          if( format!=null ) {
+            format.setFitting(isBestFit,minFit,maxFit);
+          }
+
         }
 
       }
@@ -1309,13 +1313,15 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
       ok = false;
     }
 
-    ok = format.setFitting(isBestFit,minFit,maxFit);
-    if( !ok ) {
-      JOptionPane.showMessageDialog(null, "Invalid fitting parameters\nRestoring default", "Error", JOptionPane.ERROR_MESSAGE);
-      format.setFitting(true,0.0,100.0);
-      minFit=0.0;
-      maxFit=100.0;
-      isBestFit = true;
+    if( format!=null ) {
+      ok = format.setFitting(isBestFit,minFit,maxFit);
+      if( !ok ) {
+        JOptionPane.showMessageDialog(null, "Invalid fitting parameters\nRestoring default", "Error", JOptionPane.ERROR_MESSAGE);
+        format.setFitting(true,0.0,100.0);
+        minFit=0.0;
+        maxFit=100.0;
+        isBestFit = true;
+      }
     }
 
   }
@@ -2140,7 +2146,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
       //theAtt = (IRawImage) attributeList.add("et/jpeg/01/TheImage");
       //theAtt = (IRawImage) attributeList.add("et/jpeg/01/AnotherImage");
       //theAtt = (IRawImage) attributeList.add("et/jpeg/01/YetAnother");
-      theAtt = (IRawImage) attributeList.add("et/jpeg/01/TheRGBAattr");
+      theAtt = (IRawImage) attributeList.add("sr/d-ccd/c12/jpegimage");
       d.setModel(theAtt);
 
     } catch (Exception e) {
