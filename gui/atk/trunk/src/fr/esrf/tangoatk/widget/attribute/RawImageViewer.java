@@ -428,21 +428,22 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
         }
 
-      }
-
-      if(format!=null) {
-        try {
-          format.setData(rawData);
-        } catch( IOException e ) {
-          errorString = e.getMessage();
-          imagePanel.setImage(null);
-          freePopup();
-          imageView.revalidate();
+        if(format!=null) {
+          try {
+            format.setData(rawData);
+          } catch( IOException e ) {
+            errorString = e.getMessage();
+            imagePanel.setImage(null);
+            freePopup();
+            imageView.revalidate();
+          }
         }
+
+        computeAutoZoom();
+        convertImage();
+        refreshComponents();
+
       }
-      computeAutoZoom();
-      convertImage();
-      refreshComponents();
 
     }
 
@@ -2133,8 +2134,9 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
     final RawImageViewer d = new RawImageViewer();
 
     d.setCrossCursor(true);
+    d.setBestFit(true);
 
-    fr.esrf.tangoatk.core.AttributeList attributeList =
+    final fr.esrf.tangoatk.core.AttributeList attributeList =
         new fr.esrf.tangoatk.core.AttributeList();
     final ErrorHistory errWin = new ErrorHistory();
     attributeList.addErrorListener(errWin);
@@ -2146,7 +2148,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
       //theAtt = (IRawImage) attributeList.add("et/jpeg/01/TheImage");
       //theAtt = (IRawImage) attributeList.add("et/jpeg/01/AnotherImage");
       //theAtt = (IRawImage) attributeList.add("et/jpeg/01/YetAnother");
-      theAtt = (IRawImage) attributeList.add("sr/d-ccd/c12/jpegimage");
+      theAtt = (IRawImage) attributeList.add("sr/d-ccd/id25-a/jpegimage");
       d.setModel(theAtt);
 
     } catch (Exception e) {
@@ -2173,6 +2175,25 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
       }
     });
     panel.add(diagBtn);
+    JButton chMdoelBtn = new JButton("Change model");
+    chMdoelBtn.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+
+        try {
+
+          IRawImage theAtt;
+          theAtt = (IRawImage) attributeList.add("sr/d-ccd/d9-a/jpegimage");
+          d.setModel(theAtt);
+
+        } catch (Exception ex) {
+
+          ex.printStackTrace();
+
+        }
+
+      }
+    });
+    panel.add(chMdoelBtn);
 
     f.getContentPane().add(panel, BorderLayout.SOUTH);
 
