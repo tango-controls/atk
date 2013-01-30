@@ -3,23 +3,23 @@
  *			European Synchrotron Radiation Facility
  *			BP 220, Grenoble 38043
  *			FRANCE
- * 
+ *
  *  This file is part of Tango.
- * 
+ *
  *  Tango is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Lesser General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
- *  
+ *
  *  Tango is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 /*
  * Trend.java
  *
@@ -157,7 +157,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
   static final java.text.SimpleDateFormat genFormat = new java.text.SimpleDateFormat("EEE dd/MM/yy HH:mm:ss");
 
   protected Map buttonMap;
-  
+
   /**
    * Corresponds to the button "start/stop monitoring"
    */
@@ -167,26 +167,26 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
    * Corresponds to the button "Save configuration"
    */
   public static final String save   = "SAVE";
-  
-  
+
+
   /**
    * Corresponds to the button "Load configuration"
    */
   public static final String load   = "LOAD";
-  
-  
+
+
   /**
    * Corresponds to the button "Zoom"
    */
   public static final String zoom   = "ZOOM";
-  
-  
+
+
   /**
    * Corresponds to the button "Set rfresh interval"
    */
   public static final String time   = "TIME";
-  
-  
+
+
   /**
    * Corresponds to the button "Global settings"
    */
@@ -201,25 +201,25 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
    * Corresponds to the button "Reset trend"
    */
   public static final String reset = "RESET";
-  
+
   private int timePrecision = 0;
 
   protected int minRefreshInterval = 0;
-  
-  //Seperate Trend management   
+
+  //Seperate Trend management
   private boolean manageIntervalTrend = false;
-  
+
   private long currentTime = 0;
-  private long oldCurrentTime = 0; 
- 
+  private long oldCurrentTime = 0;
+
   protected JToolBar panelToolBarTrend;
-  protected JToolBar panelToolBar;    
+  protected JToolBar panelToolBar;
   protected JButton timeButtonTrend;
   protected JButton refreshButton;
-  protected JMenuItem timeMenuTrendI; 
+  protected JMenuItem timeMenuTrendI;
   protected JMenuItem refreshMenuI;
-  
-  protected int minRefreshTrendInterval = 0;  
+
+  protected int minRefreshTrendInterval = 0;
   private int refreshIntervalTrend = 1000;
 
   protected boolean offLineMode = false;
@@ -243,7 +243,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
   public Trend() {
 
     buttonMap = new HashMap();
-      
+
     theToolBar = new JToolBar();
     toolMenu = new JPopupMenu();
 
@@ -389,7 +389,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     treeMenu.add(showMaxAlarmMenuItem);
     treeMenu.add(optionMenuItem);
     treeMenu.add(attOptionMenuItem);
-    
+
     setManageIntervalTrend();
     if(manageIntervalTrend)
         initTrendRefresher();
@@ -510,6 +510,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
       public void actionPerformed(java.awt.event.ActionEvent evt) {
         TrendSelectionNode selNode = (TrendSelectionNode) mainTree.getSelectionPath().getLastPathComponent();
         IAttribute m = selNode.getModel();
+        if(m==null) m = selNode.getEnumModel();
         if(m==null) m = selNode.getBooleanModel();
         if(m==null) m = selNode.getSpectrumModel();
         if (m != null) {
@@ -536,27 +537,27 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     theGraph.repaint();
     mainTreeModel.nodeChanged(n);
   }
-  
+
   private void initTrendRefresher()
   {
   	panelToolBar = new JToolBar();
     panelToolBarTrend = new JToolBar();
-    
+
     timeButtonTrend = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_refresh_time.png")));
     timeButtonTrend.setToolTipText("Set refresh interval Trend");
     timeMenuTrendI = new JMenuItem("Set refresh interval Trend");
-    	
+
     refreshButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_refresh.png")));
     refreshButton.setToolTipText("Refresh trend");
     refreshMenuI = new JMenuItem("Refresh trend");
-    	
+
     timeButtonTrend.addActionListener(this);
-    timeMenuTrendI.addActionListener(this);    	
+    timeMenuTrendI.addActionListener(this);
     refreshButton.addActionListener(this);
-    	
+
     panelToolBar.setFloatable(false);
     panelToolBarTrend.setFloatable(false);
-    
+
     panelToolBar.add(loadButton);
     panelToolBar.add(saveButton);
     panelToolBar.add(optionButton);
@@ -567,18 +568,18 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     panelToolBar.add(resetButton);
     panelToolBarTrend.add(timeButtonTrend);
     panelToolBarTrend.add(refreshButton);
-          
+
     theToolBar.setLayout(new BorderLayout());
     theToolBar.add(panelToolBar,BorderLayout.WEST);
-    
+
     JPanel jPanel = new JPanel();
     jPanel.setLayout(new BorderLayout());
     jPanel.add(panelToolBarTrend,BorderLayout.CENTER);
     theToolBar.add(jPanel,BorderLayout.EAST);
-    
+
     buttonMap.put(reset,refreshButton);
     toolMenu.add(timeMenuTrendI);
-    
+
   }
 
   // -------------------------------------------------------------
@@ -633,7 +634,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
       setOffLineMode(offLineButton.isSelected());
     } else if (o == showErrorMenuI) {
       ATKGraphicsUtils.centerFrameOnScreen(errWin);
-      errWin.setVisible(true);      
+      errWin.setVisible(true);
     } else if (o == showDiagMenuI) {
       fr.esrf.tangoatk.widget.util.ATKDiagnostic.showDiagnostic();
     }
@@ -756,7 +757,7 @@ public void setTimePrecision(int timePrecision) {
     }
 
   }
-  
+
   private void setRefreshIntervalTrend() {
         int old_it = getRefreshIntervalTrend();
         String i = JOptionPane.showInputDialog(this, "Enter refresh interval Trend (ms)", new Integer(old_it));
@@ -777,7 +778,7 @@ public void setTimePrecision(int timePrecision) {
                         "\nThe value must be greater and multiple than the refresh interval Values " +
                         attList.getRefreshInterval(), "Error", JOptionPane.ERROR_MESSAGE);
             }else{
-                setRefreshIntervalTrend(it);               
+                setRefreshIntervalTrend(it);
             }
           } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(parent, "Invalid number !", "Error", JOptionPane.ERROR_MESSAGE);
@@ -878,7 +879,7 @@ public void setTimePrecision(int timePrecision) {
       lastCreatedList.clear();
       lastCreatedList=null;
     }
-    
+
     if( treeView != null ) {
       innerPanel.remove(treeView);
       treeView=null;
@@ -895,6 +896,10 @@ public void setTimePrecision(int timePrecision) {
 
         if( list.get(i) instanceof IBooleanScalar ) {
           lastAdded = rootNode.addItem( this, (IBooleanScalar) list.get(i), defaultColor[i % defaultColor.length] );
+        }
+
+        if( list.get(i) instanceof IEnumScalar ) {
+          lastAdded = rootNode.addItem( this, (IEnumScalar) list.get(i), defaultColor[i % defaultColor.length] );
         }
 
         if( list.get(i) instanceof INumberSpectrum ) {
@@ -1041,6 +1046,7 @@ public void setTimePrecision(int timePrecision) {
   public void addAttribute(String name) {
 
     INumberScalar scalar;
+    IEnumScalar escalar;
     IBooleanScalar bscalar;
     INumberSpectrum nscalar;
     AttributePolledList alist;
@@ -1079,6 +1085,9 @@ public void setTimePrecision(int timePrecision) {
           } else if( att instanceof IBooleanScalar ) {
 	          bscalar = (IBooleanScalar) attList.add(name);
 	          lastAdded = rootNode.addItem(this, bscalar, defaultColor[i % defaultColor.length]);
+          } else if( att instanceof IEnumScalar ) {
+	          escalar = (IEnumScalar) attList.add(name);
+	          lastAdded = rootNode.addItem(this, escalar, defaultColor[i % defaultColor.length]);
           } else {
             scalar = (INumberScalar) attList.add(name);
             lastAdded = rootNode.addItem(this, scalar, defaultColor[i % defaultColor.length]);
@@ -1309,13 +1318,16 @@ public void setTimePrecision(int timePrecision) {
         if (entity instanceof INumberScalar) {
           return true;
         }
+        if (entity instanceof IEnumScalar) {
+          return true;
+        }
         if (entity instanceof IBooleanScalar) {
           return true;
-        }        
+        }
         if (entity instanceof INumberSpectrum) {
           return true;
         }
-        System.out.println(entity.getName() + " not imported (only NumberScalar, BooleanScalar or NumberSpectrum!)");
+        System.out.println(entity.getName() + " not imported (only NumberScalar, EnumScalar, BooleanScalar or NumberSpectrum!)");
         return false;
       }
     });
@@ -1754,7 +1766,7 @@ public void setTimePrecision(int timePrecision) {
   public void ok() {
     getRootPane().getParent().setVisible(false);
   }
-  
+
   /**
    * Disables the button corresponding to the string
    */
@@ -1762,7 +1774,7 @@ public void setTimePrecision(int timePrecision) {
       JButton b = (JButton)buttonMap.get(buttonName);
       if (b!=null) b.setEnabled(false);
   }
-  
+
   /**
    * Enables the button corresponding to the string
    */
@@ -1774,7 +1786,7 @@ public void setTimePrecision(int timePrecision) {
   /**
    * Adds an attribute to an axis of this trend (or removes the attribute from
    * axis).
-   * 
+   *
    * @param attributeName
    *            The name of the attribute
    * @param axisSelection
@@ -1797,11 +1809,11 @@ public void setTimePrecision(int timePrecision) {
           {
               if (getModel() == null)
               {
-                 addAttribute(attributeName); 
+                 addAttribute(attributeName);
               }
               else if (getModel().get(attributeName) == null)
               {
-                  addAttribute(attributeName); 
+                  addAttribute(attributeName);
               }
           }
           catch(ClassCastException e)
@@ -1817,7 +1829,7 @@ public void setTimePrecision(int timePrecision) {
       while (!present && i < dv.size())
       {
           attributeNode = (TrendSelectionNode) dv.get( i );
-          present = ( (attributeNode != null) 
+          present = ( (attributeNode != null)
                       && (attributeNode.getModel() != null)
                       && (attributeNode.getModel().getName().equals(attributeName))
                 );
@@ -1834,7 +1846,7 @@ public void setTimePrecision(int timePrecision) {
                   while (!found && j < dv.size())
                     {
                         nodeSetToX = (TrendSelectionNode) dv.get( j );
-                        found = ( (nodeSetToX != null) 
+                        found = ( (nodeSetToX != null)
                                   && (nodeSetToX.getSelected() == SEL_X)
                                 );
                         if (!found) j++;
@@ -1855,7 +1867,7 @@ public void setTimePrecision(int timePrecision) {
   /**
    * Adds an attribute to an axis of this trend (or removes the attribute from
    * axis).
-   * 
+   *
    * @param attribute
    *            The attribute
    * @param axisSelection
@@ -1891,7 +1903,7 @@ public void setTimePrecision(int timePrecision) {
       while (!present && i < dv.size())
       {
           attributeNode = (TrendSelectionNode) dv.get( i );
-          present = ( (attributeNode != null) 
+          present = ( (attributeNode != null)
                       && (attributeNode.getModel() != null)
                       && (attributeNode.getModel().getName().equals(attribute.getName()))
                 );
@@ -1908,7 +1920,7 @@ public void setTimePrecision(int timePrecision) {
                   while (!found && j < dv.size())
                     {
                         nodeSetToX = (TrendSelectionNode) dv.get( j );
-                        found = ( (nodeSetToX != null) 
+                        found = ( (nodeSetToX != null)
                                   && (nodeSetToX.getSelected() == SEL_X)
                                 );
                         if (!found) j++;
@@ -1953,7 +1965,7 @@ public void setTimePrecision(int timePrecision) {
       while (!present && i < dv.size())
       {
           attributeNode = (TrendSelectionNode) dv.get( i );
-          present = ( (attributeNode != null) 
+          present = ( (attributeNode != null)
                       && (attributeNode.getModel() != null)
                       && (attributeNode.getModel().getName().equals(attributeName))
                     );
@@ -1982,7 +1994,7 @@ public void setTimePrecision(int timePrecision) {
       while (!present && i < dv.size())
       {
           attributeNode = (TrendSelectionNode) dv.get( i );
-          present = ( (attributeNode != null) 
+          present = ( (attributeNode != null)
                       && (attributeNode.getModel() != null)
                       && (attributeNode.getModel().getName().equals(attributeName))
                     );
@@ -2031,7 +2043,7 @@ public void setTimePrecision(int timePrecision) {
     }
 
   }
-  
+
     protected int getMinRefreshTrendInterval() {
         return minRefreshTrendInterval;
       }
@@ -2041,8 +2053,8 @@ public void setTimePrecision(int timePrecision) {
         if (attList != null && getRefreshIntervalTrend() < minRefreshTrendInterval) {
           setRefreshIntervalTrend(minRefreshTrendInterval);
         }
-      }     
-     
+      }
+
   	public int getRefreshIntervalTrend() {
         return refreshIntervalTrend;
     }
@@ -2060,7 +2072,7 @@ public void setTimePrecision(int timePrecision) {
             if(tmpUrl != null)
                 manageIntervalTrend = true;
     }
-    
+
   	public void refreshTrend() {
           theGraph.repaint();
     }
@@ -2171,7 +2183,7 @@ class ConfigPanel extends JDialog implements ActionListener {
     setContentPane(innerPanel);
 
   }
-  
+
   public void actionPerformed(ActionEvent e) {
 
     Object src = e.getSource();
@@ -2191,5 +2203,5 @@ class ConfigPanel extends JDialog implements ActionListener {
     setVisible(true);
   }
 
-  
+
 }
