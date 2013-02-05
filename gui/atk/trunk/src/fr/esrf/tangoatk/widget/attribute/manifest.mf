@@ -97,3 +97,9 @@ Java-Bean: True
 Name: fr/esrf/tangoatk/widget/attribute/NumberScalarTextEditor.class
 Java-Bean: True
 
+Name: fr/esrf/tangoatk/widget/attribute/BooleanSpectrumViewer.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/attribute/DevStateScalarComboEditor.class
+Java-Bean: True
+
