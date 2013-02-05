@@ -315,50 +315,12 @@ public class SimpleStateViewer extends JSmoothLabel implements IDevStateScalarLi
           sstv.setHorizontalAlignment(JSmoothLabel.CENTER_ALIGNMENT);
           //sstv.setSizingBehavior(JSmoothLabel.MATRIX_BEHAVIOR);
           sstv.setStateClickable(false);
-          attState = (IDevStateScalar) attList.add("sr/d-mfdbk/horizontal/State");
+          attState = (IDevStateScalar) attList.add("dev/test/10/State_attr_rw");
 	  sstv.setModel(attState);
-	  sstv.setText("Horizontal");
+	  sstv.setText("    ");
           gdbc.gridx = 0;
           gdbc.gridy = 0;
-          jp.add(sstv, gdbc);
-          
-          sstv = new SimpleStateViewer();
-          sstv.setFont(large_font);
-          //sstv.setBorder(new javax.swing.border.EtchedBorder(new java.awt.Color(204, 204, 204), java.awt.Color.gray));
-          sstv.setHorizontalAlignment(JSmoothLabel.CENTER_ALIGNMENT);
-          //sstv.setSizingBehavior(JSmoothLabel.MATRIX_BEHAVIOR);
-          sstv.setStateClickable(false);
-          attState = (IDevStateScalar) attList.add("sr/d-mfdbk/vertical/State");
-	  sstv.setModel(attState);
-	  sstv.setText("Vertical");
-          gdbc.gridx = 1;
-          gdbc.gridy = 0;
-          jp.add(sstv, gdbc);
-          
-          sstv = new SimpleStateViewer();
-          sstv.setFont(large_font);
-          sstv.setBorder(new javax.swing.border.EtchedBorder(new java.awt.Color(204, 204, 204), java.awt.Color.gray));
-          sstv.setHorizontalAlignment(JSmoothLabel.CENTER_ALIGNMENT);
-          //sstv.setSizingBehavior(JSmoothLabel.MATRIX_BEHAVIOR);
-          attState = (IDevStateScalar) attList.add("sr/d-gfdbk/horizontal/State");
-	  sstv.setModel(attState);
-	  sstv.setText("Horizontal");
-          gdbc.gridx = 0;
-          gdbc.gridy = 1;
-          jp.add(sstv, gdbc);
-          
-          sstv = new SimpleStateViewer();
-          sstv.setFont(large_font);
-          sstv.setBorder(new javax.swing.border.EtchedBorder(new java.awt.Color(204, 204, 204), java.awt.Color.gray));
-          sstv.setHorizontalAlignment(JSmoothLabel.CENTER_ALIGNMENT);
-          //sstv.setSizingBehavior(JSmoothLabel.MATRIX_BEHAVIOR);
-          attState = (IDevStateScalar) attList.add("sr/d-gfdbk/vertical/State");
-	  sstv.setModel(attState);
-	  sstv.setText("Vertical");
-          gdbc.gridx = 1;
-          gdbc.gridy = 1;
-          jp.add(sstv, gdbc);
-          
+          jp.add(sstv, gdbc);         
        }
        catch (Exception ex)
        {
@@ -366,7 +328,7 @@ public class SimpleStateViewer extends JSmoothLabel implements IDevStateScalarLi
 	  System.exit(-1);
        }
 				     
-
+       mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
        mainFrame.setContentPane(jp);
        mainFrame.pack();
 
