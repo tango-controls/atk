@@ -32,15 +32,25 @@
  */
 package fr.esrf.tangoatk.widget.attribute;
  
-import javax.swing.*;
-import java.util.Vector;
-import java.awt.Color;
+import fr.esrf.tangoatk.core.IAttribute;
+import fr.esrf.tangoatk.core.IBooleanScalar;
+import fr.esrf.tangoatk.core.IDevStateScalar;
+import fr.esrf.tangoatk.core.IEnumScalar;
+import fr.esrf.tangoatk.core.INumberScalar;
+import fr.esrf.tangoatk.core.IStringScalar;
 
-import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.widget.util.JSmoothLabel;
 import fr.esrf.tangoatk.widget.util.JAutoScrolledText;
 import fr.esrf.tangoatk.widget.util.JAutoScrolledTextListener;
 import fr.esrf.tangoatk.widget.properties.LabelViewer;
+
+
+import java.util.Vector;
+import java.awt.Color;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+
 
 public class ScalarListViewer extends javax.swing.JPanel
              implements JAutoScrolledTextListener
@@ -145,7 +155,8 @@ public class ScalarListViewer extends javax.swing.JPanel
 	   if (     (elem instanceof INumberScalar)
 	        ||  (elem instanceof IStringScalar)
 		||  (elem instanceof IBooleanScalar)
-		||  (elem instanceof IEnumScalar) )
+		||  (elem instanceof IEnumScalar) 
+                ||  (elem instanceof IDevStateScalar))
 	   {
 	      containsScalarAtt = true;
 	      break;
@@ -173,16 +184,19 @@ public class ScalarListViewer extends javax.swing.JPanel
        IStringScalar                   iss;
        IBooleanScalar                  ibs;
        IEnumScalar                     ies;
+       IDevStateScalar                 idss;
        LabelViewer                     scalarLabel=null;
        SimpleScalarViewer              ssViewer=null;
        BooleanScalarCheckBoxViewer     bsViewer=null;
        SimpleEnumScalarViewer          esViewer=null;
+       SimpleStateViewer               stateViewer=null;
        NumberScalarWheelEditor         wheelSetter=null;
        NumberScalarComboEditor         nComboSetter=null;
        StringScalarEditor              stringSetter=null;
        StringScalarComboEditor         sComboSetter=null;
        BooleanScalarComboEditor        bComboSetter=null;
        EnumScalarComboEditor           eComboSetter=null;
+       DevStateScalarComboEditor       stateComboSetter=null;
        JButton                         propertyButton=null;
 
 
@@ -199,6 +213,7 @@ public class ScalarListViewer extends javax.swing.JPanel
 	     iss = null;
 	     ibs = null;
 	     ies = null;
+             idss = null;
 	     iatt = listModel.get(indRow);
 	     if (iatt instanceof INumberScalar)
 	     {
@@ -213,8 +228,11 @@ public class ScalarListViewer extends javax.swing.JPanel
 		   else
 	              if (iatt instanceof IEnumScalar)
 	        	 ies = (IEnumScalar) iatt;
+                      else
+                          if (iatt instanceof IDevStateScalar)
+                              idss = (IDevStateScalar) iatt;
 		
-	     if ( (ins != null) || (iss != null) || (ibs != null) || (ies != null) ) // if attribute model found
+	     if ( (ins != null) || (iss != null) || (ibs != null) || (ies != null) || (idss != null) ) // if attribute model found
 	     {
 	        // remove this model from all viewers
 	        scalarLabel = scalarLabels.get(indRow);
@@ -238,6 +256,13 @@ public class ScalarListViewer extends javax.swing.JPanel
 			 esViewer = (SimpleEnumScalarViewer) jcomp;
 			 esViewer.clearModel();
 		      }
+                      else
+                         if (jcomp instanceof SimpleStateViewer)
+                         {
+                            stateViewer = (SimpleStateViewer) jcomp;
+                            stateViewer.clearModel();
+                         }
+                          
 		
 		
 		jcomp = scalarSetters.get(indRow);
@@ -296,6 +321,14 @@ public class ScalarListViewer extends javax.swing.JPanel
 	                		 if (ies.isWritable())
 					    eComboSetter.setEnumModel(null);
 				  }
+                                  else
+                                     if (jcomp instanceof DevStateScalarComboEditor)
+                                     {
+                                        stateComboSetter = (DevStateScalarComboEditor) jcomp;
+                                        if (idss != null)
+                                            if (idss.isWritable())
+                                               stateComboSetter.clearModel();
+                                     }
 			       }
 			    }
 			 }
@@ -361,7 +394,8 @@ public class ScalarListViewer extends javax.swing.JPanel
 		   {
 		      if (   (viewer instanceof SimpleScalarViewer)
 			  || (viewer instanceof BooleanScalarCheckBoxViewer)
-			  || (viewer instanceof SimpleEnumScalarViewer) )
+			  || (viewer instanceof SimpleEnumScalarViewer)
+                          || (viewer instanceof SimpleStateViewer) )
 		      {
 			  viewer.setFont(theFont);
 		      }
@@ -375,7 +409,8 @@ public class ScalarListViewer extends javax.swing.JPanel
 			  || (setter instanceof StringScalarEditor)
 			  || (setter instanceof StringScalarComboEditor)
 			  || (setter instanceof BooleanScalarComboEditor)
-			  || (setter instanceof EnumScalarComboEditor) )
+			  || (setter instanceof EnumScalarComboEditor)
+                          || (setter instanceof DevStateScalarComboEditor) )
 		      {
 			  setter.setFont(theFont);
 		      }
@@ -475,7 +510,8 @@ public class ScalarListViewer extends javax.swing.JPanel
 		       || (setter instanceof StringScalarEditor)
 		       || (setter instanceof StringScalarComboEditor)
 		       || (setter instanceof BooleanScalarComboEditor)
-		       || (setter instanceof EnumScalarComboEditor) )
+		       || (setter instanceof EnumScalarComboEditor)
+                       || (setter instanceof DevStateScalarComboEditor) )
 		   {
 		       setter.setVisible(setterVisible);
 		   }
@@ -520,7 +556,8 @@ public class ScalarListViewer extends javax.swing.JPanel
                         || (comp instanceof StringScalarEditor)
                         || (comp instanceof StringScalarComboEditor)
                         || (comp instanceof BooleanScalarComboEditor)
-                        || (comp instanceof EnumScalarComboEditor) )
+                        || (comp instanceof EnumScalarComboEditor)
+                        || (comp instanceof DevStateScalarComboEditor) )
                     {
                         comp.setEnabled(setterEnabled);
                     }
@@ -916,18 +953,24 @@ public class ScalarListViewer extends javax.swing.JPanel
 	IStringScalar                   iss;
 	IBooleanScalar                  ibs;
 	IEnumScalar                     ies;
+        IDevStateScalar                 idss;
         java.awt.GridBagConstraints     gridBagConstraints;
 	
 	LabelViewer                     scalarLabel=null;
+        
 	SimpleScalarViewer              ssViewer=null;
 	BooleanScalarCheckBoxViewer     boolViewer=null;
-	BooleanScalarComboEditor        boolComboSetter=null;
 	SimpleEnumScalarViewer          enumViewer=null;
-	EnumScalarComboEditor           enumComboSetter=null;
+        SimpleStateViewer               stateViewer=null;
+        
 	NumberScalarWheelEditor         wheelSetter=null;
 	NumberScalarComboEditor         comboSetter=null;
 	StringScalarEditor              stringSetter=null;
 	StringScalarComboEditor         stringComboSetter=null;
+	BooleanScalarComboEditor        boolComboSetter=null;
+	EnumScalarComboEditor           enumComboSetter=null;
+        DevStateScalarComboEditor       stateComboSetter=null;
+        
 	JComponent                      jcomp=null;
 	JComponent                      viewer=null;
 	JComponent                      setter=null;
@@ -959,23 +1002,30 @@ public class ScalarListViewer extends javax.swing.JPanel
 	   enumViewer=null;
            enumComboSetter = null;
 	   ssViewer=null;
+           stateViewer=null;
+           
            wheelSetter = null;
            comboSetter = null;
 	   setter = null;
 	   stringSetter = null;
            stringComboSetter = null;
+           enumComboSetter=null;
+           stateComboSetter=null;
+           
            propertyButton = null;
 	   
 	   elem = scalarList.getElementAt(idx);
 	   if (    (elem instanceof INumberScalar)
-	        || (elem instanceof IStringScalar)
 		|| (elem instanceof IBooleanScalar)
-		|| (elem instanceof IEnumScalar))
+		|| (elem instanceof IEnumScalar)
+		|| (elem instanceof IDevStateScalar)
+	        || (elem instanceof IStringScalar)  )
 	   {
 	      ins = null;
 	      iss = null;
 	      ibs = null;
 	      ies = null;
+              idss = null;
 	      
 	      // Create setter
 	      if (elem instanceof INumberScalar)
@@ -1080,54 +1130,76 @@ public class ScalarListViewer extends javax.swing.JPanel
 		       }
 		       scalarSetters.add(setter);
 		    }
-		    else //IStringScalar
-		    {
-                       ssViewer = new SimpleScalarViewer();
-		       java.awt.Insets  marge = ssViewer.getMargin();
-		       marge.left = marge.left + 2;
-		       marge.right = marge.right + 2;
-		       ssViewer.setMargin(marge);
-		       viewer = ssViewer;
-	               iss = (IStringScalar) elem;
-		       issHasValueList = false;
-		       if (iss.getPossibleValues() != null)
-			  if (iss.getPossibleValues().length > 0)
-		              issHasValueList = true;
-		       if (issHasValueList)
-		       {
-         		  stringComboSetter = new StringScalarComboEditor();
-        		  stringComboSetter.setFont(theFont);
-        		  //stringComboSetter.setBackground(getBackground());
-                          stringComboSetter.setEnabled(setterEnabled);
-			  if (iss.isWritable())
-			  {
-			     stringComboSetter.setStringModel(iss);
-                             stringComboSetter.setVisible(setterVisible);
-			  }
-			  else
-			     stringComboSetter.setVisible(false);
+                    else
+                        if (elem instanceof IDevStateScalar)
+                        {
+                           idss = (IDevStateScalar) elem;
+                           stateViewer = new SimpleStateViewer();
+                           viewer = stateViewer;
+                           if (idss.isWritable())
+                           {
+                              stateComboSetter = new DevStateScalarComboEditor();
+                              stateComboSetter.setFont(theFont);
+                              stateComboSetter.setBackground(getBackground());
+                              stateComboSetter.setStateModel(idss);
+                              stateComboSetter.setVisible(setterVisible);
+                              stateComboSetter.setEnabled(setterEnabled);
+                              setter = stateComboSetter;
+                           }
+                           else
+                           {
+                              setter = null;
+                           }
+                           scalarSetters.add(setter);
+                        }
+                        else //IStringScalar
+                        {
+                           ssViewer = new SimpleScalarViewer();
+                           java.awt.Insets  marge = ssViewer.getMargin();
+                           marge.left = marge.left + 2;
+                           marge.right = marge.right + 2;
+                           ssViewer.setMargin(marge);
+                           viewer = ssViewer;
+                           iss = (IStringScalar) elem;
+                           issHasValueList = false;
+                           if (iss.getPossibleValues() != null)
+                              if (iss.getPossibleValues().length > 0)
+                                  issHasValueList = true;
+                           if (issHasValueList)
+                           {
+                              stringComboSetter = new StringScalarComboEditor();
+                              stringComboSetter.setFont(theFont);
+                              //stringComboSetter.setBackground(getBackground());
+                              stringComboSetter.setEnabled(setterEnabled);
+                              if (iss.isWritable())
+                              {
+                                 stringComboSetter.setStringModel(iss);
+                                 stringComboSetter.setVisible(setterVisible);
+                              }
+                              else
+                                 stringComboSetter.setVisible(false);
 
-	        	  scalarSetters.add(stringComboSetter);
-			  setter = stringComboSetter;
-		       }
-		       else
-		       {
-         		  stringSetter = new StringScalarEditor();
-        		  stringSetter.setFont(theFont);
-                          stringSetter.setEnabled(setterEnabled);
-        		  //stringSetter.setBackground(getBackground());
-			  if (iss.isWritable())
-			  {
-			     stringSetter.setModel(iss);
-                             stringSetter.setVisible(setterVisible);
-			  }
-			  else
-			     stringSetter.setVisible(false);
+                              scalarSetters.add(stringComboSetter);
+                              setter = stringComboSetter;
+                           }
+                           else
+                           {
+                              stringSetter = new StringScalarEditor();
+                              stringSetter.setFont(theFont);
+                              stringSetter.setEnabled(setterEnabled);
+                              //stringSetter.setBackground(getBackground());
+                              if (iss.isWritable())
+                              {
+                                 stringSetter.setModel(iss);
+                                 stringSetter.setVisible(setterVisible);
+                              }
+                              else
+                                 stringSetter.setVisible(false);
 
-	        	  scalarSetters.add(stringSetter);
-			  setter = stringSetter;
-		       }
-		    }
+                              scalarSetters.add(stringSetter);
+                              setter = stringSetter;
+                           }
+                        }
 	      
               scalarLabel = new LabelViewer();
               propertyButton = new javax.swing.JButton();
@@ -1149,6 +1221,9 @@ public class ScalarListViewer extends javax.swing.JPanel
 		    else
 	               if (ies != null)
 	        	  scalarLabel.setModel(ies);
+		       else
+	                  if (idss != null)
+	        	     scalarLabel.setModel(idss);
 	      	 
 
 	      // Set the Viewer properties
@@ -1182,7 +1257,7 @@ public class ScalarListViewer extends javax.swing.JPanel
 		 else
 	            ssViewer.setModel(iss);
 	      }
-	      else // should be a BooleanScalarCheckBoxViewer or SimpleEnumScalarViewer
+	      else // should be a BooleanScalarCheckBoxViewer or SimpleEnumScalarViewer or SimpleStateViewer
 	      {
 	         if (boolViewer != null)
 		 {
@@ -1194,7 +1269,7 @@ public class ScalarListViewer extends javax.swing.JPanel
 		     boolViewer.setAttModel(ibs);
         	     boolViewer.setBackground(getBackground());
 		 }
-		 else // should a SimpleEnumScalarViewer
+		 else // should a SimpleEnumScalarViewer or SimpleStateViewer
 		 {
 	            if (enumViewer != null)
 		    {
@@ -1221,6 +1296,16 @@ public class ScalarListViewer extends javax.swing.JPanel
 	        	enumViewer.addTextListener(this);		 
 			enumViewer.setModel(ies);
 		    }
+                    else
+                    {
+                        if (stateViewer != null)
+                        {
+                            stateViewer.setFont(theFont);
+                            stateViewer.setText("    ");
+                            stateViewer.setStateClickable(false);
+                            stateViewer.setModel(idss);
+                        }                        
+                    }
 		 }
 	      }
 	         
@@ -1257,6 +1342,9 @@ public class ScalarListViewer extends javax.swing.JPanel
 		    else
 	               if (ies != null)
 			  ies.refresh();
+                       else
+                           if (idss != null)
+                               idss.refresh();
 		
 	      // Compute the height of the "highest" element of the CURRENT row
 	      // apply vertical margin to the viewer and setters if needed
@@ -1291,7 +1379,13 @@ public class ScalarListViewer extends javax.swing.JPanel
               gridBagConstraints = new java.awt.GridBagConstraints();
               gridBagConstraints.gridx = 1;
               gridBagConstraints.gridy = viewerRow;
-              gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+              if (viewer instanceof SimpleStateViewer)
+              {
+                  gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+              }
+              else
+                  gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+              
               gridBagConstraints.insets = new java.awt.Insets(2,3,2,1);
               add(viewer, gridBagConstraints);
 	      
@@ -1325,6 +1419,12 @@ public class ScalarListViewer extends javax.swing.JPanel
            		     gridBagConstraints.insets = new java.awt.Insets(2,3,2,1);
                    	     add(setter, gridBagConstraints);
    			  }
+                          else
+                             if (idss != null)
+                             {
+                                 gridBagConstraints.insets = new java.awt.Insets(2,3,2,1);
+                                 add(setter, gridBagConstraints);
+                             }
    	      }
 	      
               gridBagConstraints = new java.awt.GridBagConstraints();
@@ -1345,6 +1445,10 @@ public class ScalarListViewer extends javax.swing.JPanel
 		    else
 		       if (ies != null)
 			  listModel.add(ies);
+                       else
+                          if (idss != null)
+                             listModel.add(idss);
+              
 	      scalarLabels.add(scalarLabel);
 	      scalarViewers.add(viewer);
 	      scalarPropButtons.add(propertyButton);
@@ -1521,33 +1625,11 @@ public class ScalarListViewer extends javax.swing.JPanel
        // Connect to a list of scalar attributes
        try
        {
-       
-	  //attn = (INumberScalar) attList.add("sy/d-tm/profile/Average");
-          //attn = (INumberScalar) attList.add("sy/d-tm/profile/ShakerStrength");
-          //attn = (INumberScalar) attList.add("sy/d-tm/profile/SpectrumIndex");
-          //attstr = (IStringScalar) attList.add("sy/d-tm/profile/MeasurementPlane");
-          //attstr = (IStringScalar) attList.add("sy/d-tm/profile/ShakerMode");
-	  //attbool = (IBooleanScalar) attList.add("sy/d-tm/profile/Complement");
-	  //attcomp = attbool;
-          //if (attcomp != null) System.out.println("attcomp != null");
-	  //attbool = (IBooleanScalar) attList.add("sy/d-tm/profile/ReferenceSubstraction");
-	  //attrefsubst = attbool;
-  	  //scalarlv.setCheckBoxStrings(attcomp, "comp", null);
-	  //scalarlv.setCheckBoxStrings(attrefsubst, "Pulsed", "W Noise");
-     
-       
-	  //attn = (INumberScalar) attList.add("jlp/test/1/att_un");
-          //attn = (INumberScalar) attList.add("jlp/test/1/att_deux");
-          //attn = (INumberScalar) attList.add("jlp/test/1/att_trois");
-          //attn = (INumberScalar) attList.add("jlp/test/1/att_quatre");
-          //attstr = (IStringScalar) attList.add("jlp/test/1/att_cinq");
-	  //attbool = (IBooleanScalar) attList.add("jlp/test/1/Att_boolean");
-          //attn = (INumberScalar) attList.add("jlp/test/1/att_six");
-          //attEnum = (IEnumScalar) attList.add("jlp/test/1/att_six");
-          //iatt = (IAttribute) attList.add("jlp/test/1/att_six");
-          
-          iatt = (IAttribute) attList.add("//orion:10000/elin/master/op/CT_Current");
-          iatt = (IAttribute) attList.add("elin/master/op/CT_Current");
+          iatt = (IAttribute) attList.add("dev/test/10/ULong_attr_rw");
+          iatt = (IAttribute) attList.add("dev/test/10/String_attr");
+          iatt = (IAttribute) attList.add("dev/test/10/Boolean_attr");
+          iatt = (IAttribute) attList.add("dev/test/10/Short_attr_rw");
+          iatt = (IAttribute) attList.add("dev/test/10/State_attr_rw");
 
 	  scalarlv.setModel(attList);
 	  
@@ -1560,6 +1642,7 @@ public class ScalarListViewer extends javax.swing.JPanel
        }
        
        mainFrame = new JFrame();
+       mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
        
        mainFrame.addWindowListener(
 	       new java.awt.event.WindowAdapter()
