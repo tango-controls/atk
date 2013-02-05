@@ -34,15 +34,22 @@ import fr.esrf.Tango.*;
 import fr.esrf.TangoApi.*;
 import java.beans.*;
 
-public interface IBooleanSpectrum extends IAttribute {
-
-    public void addBooleanSpectrumListener(IBooleanSpectrumListener l) ;
+public interface IBooleanSpectrum extends IAttribute
+{
+    public static final String BOOLEAN_LABELS = "BooleanLabels";
     
-    public void removeBooleanSpectrumListener(IBooleanSpectrumListener l) ;
+    
+    public void addBooleanSpectrumListener(IBooleanSpectrumListener l);
+
+    public void removeBooleanSpectrumListener(IBooleanSpectrumListener l);
 
     public boolean[] getValue();
+
     public boolean[] getSetPoint();
 
-    public void setValue(boolean[] b) throws AttributeSetException;
+    public boolean[] getDeviceValue();
 
+    public String[] getBooleanLabels();
+
+    public void setValue(boolean[] b) throws AttributeSetException;
 }
