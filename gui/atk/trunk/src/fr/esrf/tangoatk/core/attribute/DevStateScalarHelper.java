@@ -32,30 +32,36 @@ package fr.esrf.tangoatk.core.attribute;
 
 
 
-import fr.esrf.tangoatk.core.*;
 
 import fr.esrf.Tango.DevFailed;
+import fr.esrf.Tango.DevState;
+import fr.esrf.TangoApi.DeviceAttribute;
+
+import fr.esrf.tangoatk.core.EventSupport;
+import fr.esrf.tangoatk.core.IAttribute;
+import fr.esrf.tangoatk.core.IDevStateScalar;
+import fr.esrf.tangoatk.core.IDevStateScalarListener;
 
 class DevStateScalarHelper implements java.io.Serializable
 {
     AAttribute attribute;
     EventSupport propChanges;
 
-    public DevStateScalarHelper(AAttribute attribute)
+    public DevStateScalarHelper(AAttribute att)
     {
-      init(attribute);
+      init(att);
     }
 
-    void init(AAttribute attribute)
+    void init(AAttribute att)
     {
-      setAttribute(attribute);
-      propChanges = attribute.getPropChanges();
+      setAttribute(att);
+      propChanges = att.getPropChanges();
     }
 
 
-    public void setAttribute(AAttribute attribute)
+    public void setAttribute(AAttribute att)
     {
-      this.attribute = attribute;
+      this.attribute = att;
     }
 
     public IAttribute getAttribute()
@@ -82,10 +88,10 @@ class DevStateScalarHelper implements java.io.Serializable
     }
 
 
-    String extract() throws DevFailed
-    {
-      return Device.toString(attribute.getAttribute().extractState());
-    }
+//    String extract() throws DevFailed
+//    {
+//      return Device.toString(attribute.getAttribute().extractState());
+//    }
 
 
     void addDevStateScalarListener(IDevStateScalarListener l)
@@ -99,6 +105,26 @@ class DevStateScalarHelper implements java.io.Serializable
 	propChanges.removeDevStateScalarListener(l);
     }
 
+
+
+    public String getDevStateScalarSetPoint(DeviceAttribute devAtt) throws DevFailed
+    {
+
+	DevState[]  ds_arr=null;
+        String      stateSetPoint = null;
+
+	ds_arr = devAtt.extractDevStateArray();
+      
+	if (ds_arr == null)
+	   return null;
+	
+	if (ds_arr.length < 2)
+	   return null;
+
+        stateSetPoint = fr.esrf.tangoatk.core.Device.toString(ds_arr[1]);
+
+        return stateSetPoint;
+    }
 
     public String getVersion() {
 	return "$Id$";

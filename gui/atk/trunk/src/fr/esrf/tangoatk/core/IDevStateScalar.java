@@ -49,4 +49,10 @@ public interface IDevStateScalar extends IAttribute
   
     public boolean getInvertedInsertExtract();
     
+    public String getSetPoint();
+
+    public String getDeviceSetPoint();
+
+    public void setValue(String  stateValue);
+    
 }

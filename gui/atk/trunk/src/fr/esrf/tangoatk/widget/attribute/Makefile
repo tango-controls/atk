@@ -33,6 +33,7 @@ BEANINFO= StringScalarViewerBeanInfo.java            \
           NumberSpectrumTrend3DViewerBeanInfo.java \
 	  NumberScalarTextEditorBeanInfo.java \
 	  BooleanSpectrumViewerBeanInfo.java \
+	  DevStateScalarComboEditorBeanInfo.java \
 
 include ../../../../../../.make-include
 
@@ -108,7 +109,8 @@ ALL =	$(TARGET)/IAttributeViewer.class            \
    	$(TARGET)/DigitalNumberScalarViewer.class \
    	$(TARGET)/NumberScalarTextEditor.class \
 	$(TARGET)/ScalarLevelMeterViewer.class \
-	$(TARGET)/BooleanSpectrumViewer.class
+	$(TARGET)/BooleanSpectrumViewer.class \
+	$(TARGET)/DevStateScalarComboEditor.class
 
 #	$(TARGET)/AttributeBarChart.class
 
