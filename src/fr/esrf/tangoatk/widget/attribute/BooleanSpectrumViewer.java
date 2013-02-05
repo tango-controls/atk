@@ -229,9 +229,9 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
      
    /**
     * Returns the current displayMode
-    * @see #setdisplayMode
+    * @see #setDisplayMode
     */
-    public int getdisplayMode()
+    public int getDisplayMode()
     {
          return displayMode;
     }
@@ -239,9 +239,9 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
    /**
     * Sets the current displayMode. This property should be set before the call to setModel()
     * @param dispMode : one of the values : DISPLAY_ICON, DISPLAY_TEXT, DISPLAY_ICON_TEXT
-    * @see #getToolTipMode
+    * @see #getDisplayMode
     */
-    public void setdisplayMode(int  dispMode)
+    public void setDisplayMode(int  dispMode)
     {
         if (dispMode == displayMode)
 	   return;
