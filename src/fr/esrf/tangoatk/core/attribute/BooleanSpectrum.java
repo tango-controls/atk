@@ -42,9 +42,11 @@ public class BooleanSpectrum extends AAttribute
   BooleanSpectrumHelper   spectrumHelper;
   boolean[]               spectrumValue = null;
   boolean[]               spectrumSetPointValue = null;
+  String[]                booleanLabels;
 
   public BooleanSpectrum()
   {
+    booleanLabels = null;
     spectrumHelper = new BooleanSpectrumHelper(this);
   }
 
@@ -61,7 +63,48 @@ public class BooleanSpectrum extends AAttribute
       return spectrumSetPointValue;
   }
 
+    public boolean[] getDeviceValue()
+    {
+        DeviceAttribute att;
+        try
+        {
+            try
+            {
+                // Read the attribute from device cache (readValueFromNetwork)
+                att = readValueFromNetwork();
+                if (att == null)
+                {
+                    return null;
+                }
 
+                // Retreive the read value for the attribute
+                spectrumValue = spectrumHelper.getBooleanSpectrumValue(att);
+                // Retreive the setPoint value for the attribute
+                spectrumSetPointValue = spectrumHelper.getBooleanSpectrumSetPoint(att);
+
+            } catch (DevFailed e)
+            {
+                spectrumValue = null;
+                spectrumSetPointValue = null;
+
+                // Fire error event
+                readAttError(e.getMessage(), new AttributeReadException(e));
+            }
+        } catch (Exception e)
+        {
+            // Code failure
+            spectrumValue = null;
+            spectrumSetPointValue = null;
+
+            System.out.println("BooleanSpectrum.refregetDeviceValuesh() Exception caught ------------------------------");
+            e.printStackTrace();
+            System.out.println("BooleanSpectrum.getDeviceValue()------------------------------------------------");
+        }
+
+        return spectrumValue;
+    }
+
+  
   public void setValue(boolean[] bArray)
   {
     try
@@ -359,26 +402,72 @@ public class BooleanSpectrum extends AAttribute
       }
       
   }
+    
+    
+    public String[] getBooleanLabels()
+    {
+        return booleanLabels;
+    }
+    
 
+    @Override
+    public void loadAttProperties()
+    {
+        DbAttribute dbAtt = null;
+        DbDatum propDbDatum = null;
 
-  private void trace(int level,String msg,long time)
-  {
-    DeviceFactory.getInstance().trace(level,msg,time);
-  }
-  
-  
-  
+        String[] booleanLbls = null;
 
-  public String getVersion() {
-    return "$Id$";
-  }
+        try
+        {
+            attPropertiesLoaded = true;
+            dbAtt = this.getDevice().get_attribute_property(this.getNameSansDevice());
+            if (dbAtt == null)
+            {
+                return;
+            }
 
-  private void readObject(java.io.ObjectInputStream in)
-    throws java.io.IOException, ClassNotFoundException {
-    System.out.print("Loading attribute ");
-    in.defaultReadObject();
-    serializeInit();
-  }
+            // Check if the labels for elements of array are defined through the attribute property
+            if (!dbAtt.is_empty(IBooleanSpectrum.BOOLEAN_LABELS))
+            {
+                //System.out.println("Found " + IDevStateSpectrum.STATE_LABELS + " property for "+this.getNameSansDevice());
+                propDbDatum = dbAtt.datum(IBooleanSpectrum.BOOLEAN_LABELS);
+                if (propDbDatum != null)
+                {
+                    if (!propDbDatum.is_empty())
+                    {
+                        booleanLbls = propDbDatum.extractStringArray();
+                    }
+                }
+                if ((booleanLbls != null) && (booleanLbls.length > 0))
+                {
+                    booleanLabels = booleanLbls;
+                }
+            }
+        } 
+        catch (Exception ex)
+        {
+            System.out.println("get_attribute_property(" + this.getName() + ") thrown exception");
+            ex.printStackTrace();
+        }
+    }
 
+    private void trace(int level, String msg, long time)
+    {
+        DeviceFactory.getInstance().trace(level, msg, time);
+    }
+
+    public String getVersion()
+    {
+        return "$Id$";
+    }
+
+    private void readObject(java.io.ObjectInputStream in)
+            throws java.io.IOException, ClassNotFoundException
+    {
+        System.out.print("Loading attribute ");
+        in.defaultReadObject();
+        serializeInit();
+    }
 
 }
