@@ -90,11 +90,11 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
     public BooleanSpectrumViewer()
     {
         if (TRUE_ICON == null)
-            TRUE_ICON = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/icons/true.jpg"));
+            TRUE_ICON = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/icons/true.png"));
         if (FALSE_ICON == null)
-            FALSE_ICON = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/icons/false.jpg"));
+            FALSE_ICON = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/icons/false.png"));
         if (ERROR_ICON == null)
-            ERROR_ICON = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/icons/unknown.jpg"));
+            ERROR_ICON = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/icons/unknown.png"));
         
         model = null;
 	modelBooleanLabels = null;
