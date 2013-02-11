@@ -81,6 +81,14 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
     private int                 displayMode;
     private int                 toolTipMode;
     
+    private ImageIcon           trueIcon = null;
+    private ImageIcon           falseIcon = null;
+    private ImageIcon           errorIcon = null;
+    private String              trueLabel = null;
+    private String              falseLabel = null;
+    private String              errorLabel = null;
+    
+    
     private IBooleanSpectrum    model;
     String[]                    modelBooleanLabels;
     String                      modelLabel;
@@ -96,6 +104,14 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
         if (ERROR_ICON == null)
             ERROR_ICON = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/icons/unknown.png"));
         
+        trueIcon = TRUE_ICON;
+        falseIcon = FALSE_ICON;
+        errorIcon = ERROR_ICON;
+        
+        trueLabel = TRUE_LABEL;
+        falseLabel = FALSE_LABEL;
+        errorLabel = ERROR_LABEL;
+        
         model = null;
 	modelBooleanLabels = null;
 	modelLabel = null;
@@ -106,6 +122,91 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
         setLayout(new java.awt.GridBagLayout());
 	
 	setVisible(false);
+    }
+    
+    
+
+    
+    public ImageIcon getTrueIcon()
+    {
+        return trueIcon;
+    }
+    
+    public void setTrueIcon(ImageIcon ticon)
+    {
+        if ((ticon == falseIcon) || (ticon == errorIcon)) return; // true and false icons should be different
+        trueIcon = ticon;
+    }
+    
+    
+    
+    public ImageIcon getFalseIcon()
+    {
+        return falseIcon;
+    }
+    
+    public void setFalseIcon(ImageIcon ficon)
+    {
+        if ((ficon == trueIcon) || (ficon == errorIcon)) return; // true and false icons should be different
+        falseIcon = ficon;
+    }
+    
+    
+    
+    public ImageIcon getErrorIcon()
+    {
+        return errorIcon;
+    }
+    
+    public void setErrorIcon(ImageIcon eicon)
+    {
+        if ((eicon == falseIcon) || (eicon == trueIcon)) return; // true and false icons should be different
+        errorIcon = eicon;
+    }
+    
+    
+    
+    public String getTrueLabel()
+    {
+        return trueLabel;
+    }
+    
+    public void setTrueLabel(String tl)
+    {
+        if (tl == null) return;
+        if ((tl.equalsIgnoreCase(falseLabel)) || (tl.equalsIgnoreCase(errorLabel))) return; // true and false labels should be different
+        
+        trueLabel = tl;
+    }
+    
+    
+    
+    public String getFalseLabel()
+    {
+        return falseLabel;
+    }
+    
+    public void setFalseLabel(String fl)
+    {
+        if (fl == null) return;
+        if ((fl.equalsIgnoreCase(trueLabel)) || (fl.equalsIgnoreCase(errorLabel))) return; // true and false labels should be different
+        
+        falseLabel = fl;
+    }
+    
+    
+    
+    public String getErrorLabel()
+    {
+        return errorLabel;
+    }
+    
+    public void setErrorLabel(String el)
+    {
+        if (el == null) return;
+        if ((el.equalsIgnoreCase(falseLabel)) || (el.equalsIgnoreCase(trueLabel))) return; // true and false labels should be different
+        
+        errorLabel = el;
     }
     
     
@@ -403,13 +504,13 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
         {
             if (value)
             {
-                valueLabel.setIcon(TRUE_ICON);
-                valueLabel.setText(TRUE_LABEL);
+                valueLabel.setIcon(trueIcon);
+                valueLabel.setText(trueLabel);
             }
             else
             {
-                valueLabel.setIcon(FALSE_ICON);
-                valueLabel.setText(FALSE_LABEL);
+                valueLabel.setIcon(falseIcon);
+                valueLabel.setText(falseLabel);
             }
             return;
         }
@@ -418,10 +519,10 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
         {
             valueLabel.setText("");
             if (value)
-                valueLabel.setIcon(TRUE_ICON);
+                valueLabel.setIcon(trueIcon);
                 
             else
-                valueLabel.setIcon(FALSE_ICON);
+                valueLabel.setIcon(falseIcon);
             return;
         }
 
@@ -429,9 +530,9 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
         {
             valueLabel.setIcon(null);
             if (value)
-                valueLabel.setText(TRUE_LABEL);
+                valueLabel.setText(trueLabel);
             else
-                valueLabel.setText(FALSE_LABEL);
+                valueLabel.setText(falseLabel);
             return;
         }
     }
@@ -499,22 +600,22 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
     {
         if (displayMode == DISPLAY_ICON_TEXT)
         {
-            valueLabel.setIcon(ERROR_ICON);
-            valueLabel.setText(ERROR_LABEL);
+            valueLabel.setIcon(errorIcon);
+            valueLabel.setText(errorLabel);
             return;
         }
 
         if (displayMode == DISPLAY_ICON)
         {
             valueLabel.setText("");
-            valueLabel.setIcon(ERROR_ICON);
+            valueLabel.setIcon(errorIcon);
             return;
         }
 
         if (displayMode == DISPLAY_TEXT)
         {
             valueLabel.setIcon(null);
-            valueLabel.setText(ERROR_LABEL);
+            valueLabel.setText(errorLabel);
         }
     }
     
@@ -525,9 +626,9 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
         
         String ttip;
         if (toolTipMode == TOOLTIP_VALUE)
-            ttip = ERROR_LABEL;
+            ttip = errorLabel;
         else
-            ttip = model.getName()+ "["+index+"] = " + ERROR_LABEL;
+            ttip = model.getName()+ "["+index+"] = " + errorLabel;
 
         if (labelJLabels != null)
         {
