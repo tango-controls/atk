@@ -379,8 +379,8 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
     
     private void removeComponents()
     {
-       labelJLabels.removeAllElements();
-       valueJLabels.removeAllElements();
+       if (labelJLabels != null) labelJLabels.removeAllElements();
+       if (valueJLabels != null) valueJLabels.removeAllElements();
        this.removeAll();
        labelJLabels = null;
        valueJLabels = null;
