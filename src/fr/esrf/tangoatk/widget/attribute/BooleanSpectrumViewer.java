@@ -400,6 +400,7 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
         this.setLayout(new java.awt.GridBagLayout());
         
         booleanValueElements = model.getDeviceValue();
+        if (booleanValueElements == null) return;
 	if (booleanValueElements.length <= 0) return;
 	
 	labelJLabels = new Vector<JLabel> ();
@@ -709,7 +710,7 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
        // Connect to a BooleanSpectrum attribute
        try
        {       
-	  booleanSpectAtt = (IBooleanSpectrum) attList.add("dev/test/10/Boolean_spec_attr");
+	  booleanSpectAtt = (IBooleanSpectrum) attList.add("id-carr/td13/gap/limitswitches");
 	  bsv.setModel(booleanSpectAtt);
 	  
        }
