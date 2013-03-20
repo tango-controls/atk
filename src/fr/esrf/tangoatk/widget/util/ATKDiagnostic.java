@@ -167,7 +167,7 @@ class DeviceTableModel extends AbstractTableModel {
 class AttributeTableModel extends AbstractTableModel {
 
   private AAttribute[] allAttributes = new AAttribute[0];
-  private static final String[] colNames = {"Attribute name","Event enabled","Listeners","","Polling count","Change count","Periodic count"};
+  private static final String[] colNames = {"Attribute name","Event enabled","Listeners","","Polling","Change","Periodic","Config"};
 
   public AttributeTableModel() {
     refresh();
@@ -221,6 +221,8 @@ class AttributeTableModel extends AbstractTableModel {
         return Long.toString(allAttributes[rowIndex].getChangeCount());
       case 6:
         return Long.toString(allAttributes[rowIndex].getPeriodicCount());
+      case 7:
+        return Long.toString(allAttributes[rowIndex].getConfigCount());
     }
     return "";
   }
