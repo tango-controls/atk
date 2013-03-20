@@ -31,10 +31,7 @@ import fr.esrf.tangoatk.core.attribute.ANumber;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentAdapter;
+import java.awt.event.*;
 import java.util.Map;
 
 /**
@@ -337,7 +334,6 @@ public class SimplePropertyFrame extends JDialog {
       String v = minText.getText();
       if (propertyReset(v)) {
         p.setValue("NaN");
-        p.setSpecified(false);
       } else {
         try {
           Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
@@ -353,7 +349,6 @@ public class SimplePropertyFrame extends JDialog {
       v = maxText.getText();
       if (propertyReset(v)) {
         p.setValue("NaN");
-        p.setSpecified(false);
       } else {
         try {
           Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
@@ -369,7 +364,6 @@ public class SimplePropertyFrame extends JDialog {
       v = alminText.getText();
       if (propertyReset(v)) {
         p.setValue("NaN");
-        p.setSpecified(false);
       } else {
         try {
           Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
@@ -385,7 +379,6 @@ public class SimplePropertyFrame extends JDialog {
       v = almaxText.getText();
       if (propertyReset(v)) {
         p.setValue("NaN");
-        p.setSpecified(false);
       } else {
         try {
           Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
@@ -401,7 +394,6 @@ public class SimplePropertyFrame extends JDialog {
       v = minWarningText.getText();
       if (propertyReset(v)) {
         p.setValue("NaN");
-        p.setSpecified(false);
       } else {
         try {
           Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
@@ -417,7 +409,6 @@ public class SimplePropertyFrame extends JDialog {
       v = maxWarningText.getText();
       if (propertyReset(v)) {
         p.setValue("NaN");
-        p.setSpecified(false);
       } else {
         try {
           Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
@@ -433,7 +424,6 @@ public class SimplePropertyFrame extends JDialog {
       v = deltaTText.getText();
       if (propertyReset(v)) {
         p.setValue("NaN");
-        p.setSpecified(false);
       } else {
         try {
           Double d = new Double(v);
@@ -449,7 +439,6 @@ public class SimplePropertyFrame extends JDialog {
       v = deltaValText.getText();
       if (propertyReset(v)) {
         p.setValue("NaN");
-        p.setSpecified(false);
       } else {
         try {
           Double d = new Double( aNbModel.getValueInDeviceUnit(Double.parseDouble(v)) );
@@ -793,15 +782,19 @@ public class SimplePropertyFrame extends JDialog {
 
   }
 
+
   // Main function
   static public void main(String[] args) {
+
     final SimplePropertyFrame pf = new SimplePropertyFrame();
+    IAttribute testModel=null;
 
     fr.esrf.tangoatk.core.AttributeList attributeList = new
       fr.esrf.tangoatk.core.AttributeList();
 
     try {
-      pf.setModel((IAttribute) attributeList.add("sr/d-fuse/c04-2/interlock_state"));
+      testModel = (IAttribute) attributeList.add("sr/d-fuse/c04-2/interlock_state");
+      pf.setModel(testModel);
     } catch (Exception e) {
       System.out.println("attributeList.add() failed with " + e.getMessage());
       e.printStackTrace();

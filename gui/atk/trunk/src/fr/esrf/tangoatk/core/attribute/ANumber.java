@@ -138,7 +138,9 @@ public abstract class ANumber extends AAttribute
 
 	try 
 	{
-	   setMinValue(new Double(config.min_value).doubleValue(), true);
+     double d = new Double(config.min_value).doubleValue();
+	   setMinValue(d, true);
+     if(Double.isNaN(d)) getProperty("min_value").setSpecified(false);
 	} 
 	catch (NumberFormatException e)
 	{
@@ -148,7 +150,9 @@ public abstract class ANumber extends AAttribute
 
 	try
 	{
-	   setMaxValue(new Double(config.max_value).doubleValue(), true);
+     double d = new Double(config.max_value).doubleValue();
+	   setMaxValue(d, true);
+     if(Double.isNaN(d)) getProperty("max_value").setSpecified(false);
 	} 
 	catch (NumberFormatException e)
 	{
@@ -158,10 +162,14 @@ public abstract class ANumber extends AAttribute
 
 	try
 	{
-	   if(config.alarms!=null)
-             setMinAlarm(new Double(config.alarms.min_alarm).doubleValue(), true);
-	   else
-             setMinAlarm(new Double(config.min_alarm).doubleValue(), true);
+     double d;
+	   if(config.alarms!=null) {
+       d = new Double(config.alarms.min_alarm).doubleValue();
+     } else {
+       d = new Double(config.min_alarm).doubleValue();
+     }
+     setMinAlarm(d, true);
+     if(Double.isNaN(d)) getProperty("min_alarm").setSpecified(false);
 	}
 	catch (NumberFormatException e)
 	{
@@ -171,11 +179,15 @@ public abstract class ANumber extends AAttribute
 
 	try
 	{
-	   if(config.alarms!=null)
-             setMaxAlarm(new Double(config.alarms.max_alarm).doubleValue(), true);
-	   else
-             setMaxAlarm(new Double(config.max_alarm).doubleValue(), true);
-	} 
+     double d;
+	   if(config.alarms!=null) {
+       d = new Double(config.alarms.max_alarm).doubleValue();
+     } else {
+       d = new Double(config.max_alarm).doubleValue();
+     }
+     setMaxAlarm(d, true);
+     if(Double.isNaN(d)) getProperty("max_alarm").setSpecified(false);
+	}
 	catch (NumberFormatException e)
 	{
 	   setMaxAlarm(Double.NaN, true);
@@ -184,8 +196,11 @@ public abstract class ANumber extends AAttribute
 
 	try
 	{
-	   if(config.alarms!=null)
-             setMinWarning(new Double(config.alarms.min_warning).doubleValue(), true);
+	   if(config.alarms!=null) {
+       double d = new Double(config.alarms.min_warning).doubleValue();
+       setMinWarning(d, true);
+       if(Double.isNaN(d)) getProperty("min_warning").setSpecified(false);
+     }
 	}
 	catch (NumberFormatException e)
 	{
@@ -195,8 +210,11 @@ public abstract class ANumber extends AAttribute
 
 	try
 	{
-	   if(config.alarms!=null)
-             setMaxWarning(new Double(config.alarms.max_warning).doubleValue(), true);
+	   if(config.alarms!=null) {
+       double d = new Double(config.alarms.max_warning).doubleValue();
+       setMaxWarning(d, true);
+       if(Double.isNaN(d)) getProperty("max_warning").setSpecified(false);
+     }
 	}
 	catch (NumberFormatException e)
 	{
@@ -206,8 +224,11 @@ public abstract class ANumber extends AAttribute
 
 	try
 	{
-	   if(config.alarms!=null)
-             setDeltaT(new Double(config.alarms.delta_t).doubleValue(), true);
+	   if(config.alarms!=null) {
+       double d = new Double(config.alarms.delta_t).doubleValue();
+       setDeltaT(d, true);
+       if(Double.isNaN(d)) getProperty("delta_t").setSpecified(false);
+     }
 	}
 	catch (NumberFormatException e)
 	{
@@ -217,8 +238,11 @@ public abstract class ANumber extends AAttribute
 
 	try
 	{
-	   if(config.alarms!=null)
-             setDeltaVal(new Double(config.alarms.delta_val).doubleValue(), true);
+	   if(config.alarms!=null) {
+       double d = new Double(config.alarms.delta_val).doubleValue();
+       setDeltaVal(d, true);
+       if(Double.isNaN(d)) getProperty("delta_val").setSpecified(false);
+     }
 	}
 	catch (NumberFormatException e)
 	{

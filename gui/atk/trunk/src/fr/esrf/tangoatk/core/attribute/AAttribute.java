@@ -62,6 +62,7 @@ public abstract class AAttribute implements IAttribute,
   protected long refreshCount = 0;
   protected long changeCount = 0;
   protected long periodicCount = 0;
+  protected long configCount = 0;
   protected DevFailed eventError = null; // Event subscription error
 
   private  boolean  hasEvents=false;
@@ -225,7 +226,7 @@ public abstract class AAttribute implements IAttribute,
   // Implement the method of ITangoAttConfigListener
   public void attConfig(TangoAttConfigEvent  evt)
   {
-      periodicCount++;
+      configCount++;
       AttributeInfoEx     attInfo=null;
       long t0 = System.currentTimeMillis();
 
@@ -288,6 +289,10 @@ public abstract class AAttribute implements IAttribute,
   public long getPeriodicCount()
   {
       return periodicCount;
+  }
+
+  public long getConfigCount() {
+      return configCount;
   }
 
   /**
