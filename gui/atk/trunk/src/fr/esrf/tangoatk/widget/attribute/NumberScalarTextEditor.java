@@ -30,7 +30,6 @@
  */
 package fr.esrf.tangoatk.widget.attribute;
 
-import com.braju.format.Format;
 import fr.esrf.tangoatk.core.NumberScalarEvent;
 import java.awt.Insets;
 
@@ -42,6 +41,8 @@ import fr.esrf.tangoatk.core.ErrorEvent;
 import fr.esrf.tangoatk.core.INumberScalar;
 import fr.esrf.tangoatk.core.INumberScalarListener;
 import fr.esrf.tangoatk.core.Property;
+import fr.esrf.tangoatk.widget.util.ATKFormat;
+
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -122,8 +123,7 @@ public class NumberScalarTextEditor extends JTextField
                 }
                 else
                 {
-                    Object[] o = { attDouble };
-                    dispStr = Format.sprintf(format, o);
+                    dispStr = ATKFormat.format(format, attDouble);
                 }
             }
             catch (Exception e)

@@ -41,8 +41,6 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 
-import com.braju.format.Format;
-
 
 /**
  * A high level class to display a TANGO image following Tango DEV_ENCODED specification
@@ -2041,8 +2039,8 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
       retString += "Maximum: " + Double.toString(curSelMax) + "\n";
     }
 
-    retString += "Average: " + Format.sprintf("%.2f",new Double[]{avgD}) + "\n";
-    retString += "Std deviation: " + Format.sprintf("%.2f",new Double[]{stdD}) + "\n";
+    retString += "Average: " + String.format("%.2f",avgD) + "\n";
+    retString += "Std deviation: " + String.format("%.2f",stdD) + "\n";
 
 
     return retString;

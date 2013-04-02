@@ -21,7 +21,6 @@
  */
 package fr.esrf.tangoatk.widget.util.jgl3dchart;
 
-import com.braju.format.Format;
 import javax.media.opengl.GL;
 import java.awt.*;
 import java.util.Vector;
@@ -401,7 +400,7 @@ public class JGL3DAxis {
 
     Object o[] = {new Double(a), new Integer(e)};
 
-    return Format.sprintf(f, o);
+    return String.format(f,a,e);
   }
 
   private String toScientificInt(double d) {
@@ -431,9 +430,7 @@ public class JGL3DAxis {
 
     if (d < 0) a = -a;
 
-    Object o[] = {new Integer((int)Math.rint(a)), new Integer(e)};
-
-    return Format.sprintf(f, o);
+    return String.format(f,(int)Math.rint(a),e);
 
   }
 
@@ -502,24 +499,22 @@ public class JGL3DAxis {
       case DECINT_FORMAT:
       case HEXINT_FORMAT:
       case BININT_FORMAT:
-        Object[] o2 = {new Integer((int) (Math.abs(vt)+0.5))};
         if (vt < 0.0)
-          return "-" + Format.sprintf(labelFomats[labelFormat], o2);
+          return "-" + String.format(labelFomats[labelFormat],(int) (Math.abs(vt)+0.5) );
         else
-          return Format.sprintf(labelFomats[labelFormat], o2);
+          return String.format(labelFomats[labelFormat], (int) (Math.abs(vt)+0.5));
 
       case TIME_FORMAT:
 
         int sec = (int) (Math.abs(vt));
-        Object[] o3 = {
-          new Integer(sec / 3600),
-          new Integer((sec % 3600) / 60),
-          new Integer(sec % 60)};
+        int h = sec / 3600;
+        int m = (sec % 3600) / 60;
+        int s = sec % 60;
 
         if (vt < 0.0)
-          return "-" + Format.sprintf(labelFomats[labelFormat], o3);
+          return "-" + String.format(labelFomats[labelFormat], h,m,s);
         else
-          return Format.sprintf(labelFomats[labelFormat], o3);
+          return String.format(labelFomats[labelFormat], h,m,s);
 
       default:
 
@@ -537,7 +532,7 @@ public class JGL3DAxis {
             return suppressZero(Double.toString(vt));
           } else {
             String dFormat = "%." + nbDigit + "f";
-            return suppressZero(Format.sprintf(dFormat,new Object[]{new Double(vt)}));
+            return suppressZero(String.format(dFormat,vt));
           }
 
         }

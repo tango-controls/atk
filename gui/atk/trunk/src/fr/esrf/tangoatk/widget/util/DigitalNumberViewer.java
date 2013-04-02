@@ -1,7 +1,5 @@
 package fr.esrf.tangoatk.widget.util;
 
-import com.braju.format.Format;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -400,7 +398,7 @@ public class DigitalNumberViewer extends JComponent {
     if( Double.isNaN(value) ) {
       return "-----";
     } else {
-      return Format.sprintf(format, new Object[] { new Double(value) });
+      return ATKFormat.format(format, value);
     }
   }
 

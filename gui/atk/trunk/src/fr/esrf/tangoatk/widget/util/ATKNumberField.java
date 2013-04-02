@@ -38,7 +38,6 @@ import java.awt.event.*;
 import java.awt.font.*;
 import javax.swing.plaf.*;
 import fr.esrf.tangoatk.core.*;
-import com.braju.format.Format;
 import fr.esrf.TangoDs.AttrManip;
 
 /**
@@ -64,9 +63,7 @@ public class ATKNumberField extends ATKField {
      * @param d a <code>Number</code> value
      */
     public void setText(Number d) {
-	
-	Object[] o = {d};
-	
+
 	if (userFormat != null) {
 	    insertOK = true;
 	    super.setText(userFormat.format(d));
@@ -78,7 +75,7 @@ public class ATKNumberField extends ATKField {
 	    super.setText(AttrManip.format(format, d.doubleValue()));
 	    return;
 	}
-	super.setText(Format.sprintf(format, o));
+	super.setText(ATKFormat.format(format, d.doubleValue()));
     }
     
     /**

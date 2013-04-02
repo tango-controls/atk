@@ -24,7 +24,6 @@ package fr.esrf.tangoatk.widget.image;
 
 import fr.esrf.tangoatk.widget.util.chart.*;
 import fr.esrf.tangoatk.widget.util.JTableRow;
-import com.braju.format.Format;
 
 import javax.swing.*;
 import java.awt.*;

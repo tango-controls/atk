@@ -28,8 +28,7 @@
 
 package fr.esrf.tangoatk.widget.util.chart;
 
-
-import com.braju.format.Format;
+import fr.esrf.tangoatk.widget.util.ATKFormat;
 
 import java.util.*;
 import java.awt.*;
@@ -1679,84 +1678,18 @@ public class JLDataView implements java.io.Serializable {
    * @param format Format (C style)
    */
   public void setUserFormat(String format) {
-    if( format != null && format.length() > 0 && isValidFormat(format) ) {
+    if( format != null && format.length() > 0 ) {
       userFormat = format;
-    }
-    else {
+    } else {
       StringBuffer errorBuffer = new StringBuffer();
       errorBuffer.append("JLDataView.setUserFormat(String format): ");
       errorBuffer.append(format);
       errorBuffer.append(" is not a valid format !");
       System.err.println( errorBuffer.toString() );
       errorBuffer = null;
-
       userFormat = null;
     }
   }
-
-  /**
-   * Tests whether a given format is valid or not
-   * 
-   * @param format
-   *            the format to tests
-   * @return a boolean value : <code>true</code> if the format is valid,
-   *         <code>false</code> otherwise.
-   */
-  public boolean isValidFormat (String format) {
-    if ( format.indexOf("%") == 0
-         && format.lastIndexOf("%") == format.indexOf("%") ) {
-      if ( format.indexOf(".") == -1 ) {
-        // case %xd
-        try {
-          int x = Integer.parseInt(
-                  format.substring( 1, format.length() - 1 )
-          );
-          if (x > 0) {
-            return true;
-          }
-          else return false;
-        }
-        catch (Exception e) {
-          return false;
-        }
-      }
-      else {
-        if ( format.indexOf(".") == format.lastIndexOf(".") ) {
-          if ( ( (format.toLowerCase().indexOf("f") == format.length() - 1)
-                 && (format.toLowerCase().indexOf("f") > 0)
-               )
-               || ( (format.toLowerCase().indexOf("e") == format.length() - 1)
-                    && (format.toLowerCase().indexOf("e") > 0)
-                  )
-             ) {
-            // case %x.yf, %x.ye
-            try {
-              int x = Integer.parseInt(
-                      format.substring( 1, format.indexOf(".") )
-              );
-              int y = Integer.parseInt(
-                      format.substring(
-                              format.indexOf(".") + 1,
-                              format.length() - 1
-                      )
-              );
-              if ( x > y && x > 0 && y >= 0 ) {
-                return true;
-              }
-              else return false;
-            }
-            catch (Exception e) {
-              return false;
-            }
-          }
-          else return false;
-        }
-        else return false;
-      }
-    }
-    else return false;
-  }
-
   /**
    * Returns the current user format (null when none).
    */
@@ -1787,17 +1720,7 @@ public class JLDataView implements java.io.Serializable {
 
     if(userFormat != null) {
 
-      Object o[] = { new Double(v) };
-      String value = Double.toString(v);
-      try
-      {
-          value = Format.sprintf(userFormat, o);
-      }
-      catch(Exception e)
-      {
-          value = Double.toString(v);
-      }
-      return value;
+      return ATKFormat.format(userFormat,v);
 
     } else if (parentAxis==null) {
 

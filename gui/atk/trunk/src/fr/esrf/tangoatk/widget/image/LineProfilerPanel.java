@@ -34,8 +34,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import com.braju.format.Format;
-
+import fr.esrf.tangoatk.widget.util.ATKFormat;
 import fr.esrf.tangoatk.widget.util.JTableRow;
 import fr.esrf.tangoatk.widget.util.chart.DataList;
 import fr.esrf.tangoatk.widget.util.chart.IJLChartListener;
@@ -218,9 +217,9 @@ public class LineProfilerPanel extends JPanel implements IJLChartListener, Actio
         maxText.setCaretPosition(0);
         Double avgD = new Double(avg);
         Double stdD = new Double(std);
-        avgText.setText(Format.sprintf("%.2f",new Double[]{avgD}));
+        avgText.setText(String.format("%.2f",avgD));
         avgText.setCaretPosition(0);
-        stdText.setText(Format.sprintf("%.2f",new Double[]{stdD}));
+        stdText.setText(String.format("%.2f",stdD));
         stdText.setCaretPosition(0);
 
       } else {
@@ -265,9 +264,9 @@ public class LineProfilerPanel extends JPanel implements IJLChartListener, Actio
       maxText.setCaretPosition(0);
       Double avgD = new Double(avg);
       Double stdD = new Double(std);
-      avgText.setText(Format.sprintf("%.2f",new Double[]{avgD}));
+      avgText.setText(String.format("%.2f",avgD));
       avgText.setCaretPosition(0);
-      stdText.setText(Format.sprintf("%.2f",new Double[]{stdD}));
+      stdText.setText(String.format("%.2f",stdD));
       stdText.setCaretPosition(0);
 
     } else {
@@ -303,8 +302,7 @@ public class LineProfilerPanel extends JPanel implements IJLChartListener, Actio
       ret[0] = theGraph.getXAxis().getName() + " = " + evt.getTransformedXValue();
 
       if( userFormat.length()>0 ) {
-        Object[] o = {evt.getTransformedYValue()};
-        ret[1] = theGraph.getY1Axis().getName() + " = " + Format.sprintf(userFormat, o);
+        ret[1] = theGraph.getY1Axis().getName() + " = " + ATKFormat.format(userFormat, evt.getTransformedYValue());
       } else {
         ret[1] = theGraph.getY1Axis().getName() + " = " + evt.getTransformedYValue();
       }

@@ -35,8 +35,6 @@ import javax.swing.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import com.braju.format.Format;
-
 // Inner class to handle label info
 
 class LabelInfo implements java.io.Serializable {
@@ -1074,9 +1072,8 @@ public class JLAxis implements java.io.Serializable {
 
     if (d < 0) a = -a;
 
-    Object o[] = {new Double(a), new Integer(e)};
+    return String.format(f,a,e);
 
-    return Format.sprintf(f, o);
   }
 
   public String toScientificInt(double d) {
@@ -1106,9 +1103,7 @@ public class JLAxis implements java.io.Serializable {
 
     if (d < 0) a = -a;
 
-    Object o[] = {new Integer((int)Math.rint(a)), new Integer(e)};
-
-    return Format.sprintf(f, o);
+    return String.format(f, (int)Math.rint(a),e);
 
   }
 
@@ -1249,24 +1244,22 @@ public class JLAxis implements java.io.Serializable {
       case DECINT_FORMAT:
       case HEXINT_FORMAT:
       case BININT_FORMAT:
-        Object[] o2 = {new Integer((int) (Math.abs(vt)+0.5))};
         if (vt < 0.0)
-          return "-" + Format.sprintf(labelFomats[labelFormat], o2);
+          return "-" + String.format(labelFomats[labelFormat], (int) (Math.abs(vt)+0.5));
         else
-          return Format.sprintf(labelFomats[labelFormat], o2);
+          return String.format(labelFomats[labelFormat], (int) (Math.abs(vt)+0.5));
 
       case TIME_FORMAT:
 
         int sec = (int) (Math.abs(vt));
-        Object[] o3 = {
-          new Integer(sec / 3600),
-          new Integer((sec % 3600) / 60),
-          new Integer(sec % 60)};
+        int h = sec / 3600;
+        int m = (sec % 3600) / 60;
+        int s = (sec % 60);
 
         if (vt < 0.0)
-          return "-" + Format.sprintf(labelFomats[labelFormat], o3);
+          return "-" + String.format(labelFomats[labelFormat], h,m,s);
         else
-          return Format.sprintf(labelFomats[labelFormat], o3);
+          return String.format(labelFomats[labelFormat], h,m,s);
 
       case DATE_FORMAT:
         SimpleDateFormat format = new SimpleDateFormat(dateFormat);
@@ -1289,7 +1282,7 @@ public class JLAxis implements java.io.Serializable {
             return suppressZero(Double.toString(vt));
           } else {
             String dFormat = "%." + nbDigit + "f";
-            return suppressZero(Format.sprintf(dFormat,new Object[]{new Double(vt)}));
+            return suppressZero(String.format(dFormat,vt));
           }
 
         }
