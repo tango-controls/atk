@@ -4,7 +4,6 @@
  */
 package fr.esrf.tangoatk.widget.attribute;
 
-import com.braju.format.Format;
 import fr.esrf.tangoatk.core.AttributeList;
 import fr.esrf.tangoatk.core.AttributeStateEvent;
 import fr.esrf.tangoatk.core.DevStateSpectrumEvent;
@@ -21,6 +20,7 @@ import fr.esrf.tangoatk.core.NumberSpectrumEvent;
 import fr.esrf.tangoatk.core.Property;
 import fr.esrf.tangoatk.core.StringSpectrumEvent;
 import fr.esrf.tangoatk.widget.util.ATKConstant;
+import fr.esrf.tangoatk.widget.util.ATKFormat;
 import fr.esrf.tangoatk.widget.util.chart.ColorItem;
 import fr.esrf.tangoatk.widget.util.chart.IJLChartListener;
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
@@ -450,8 +450,7 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
             indX = 1;
             if (format != null)
             {
-                Object[] o = {new Double(evt.getTransformedYValue())};
-                yValue = Format.sprintf(format, o) + " " + numberModel.getUnit();
+                yValue = ATKFormat.format(format, evt.getTransformedYValue()) + " " + numberModel.getUnit();
             }
             else
             {

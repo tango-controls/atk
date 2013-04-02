@@ -22,7 +22,6 @@
 
 package fr.esrf.tangoatk.widget.attribute;
 
-import com.braju.format.Format;
 import fr.esrf.tangoatk.core.ISpectrumListener;
 import fr.esrf.tangoatk.core.INumberSpectrum;
 import fr.esrf.tangoatk.core.INumberSpectrumHistory;
@@ -706,8 +705,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
             String value;
             if (format.length() > 0) {
-              Object[] o = {val};
-              value = Format.sprintf(format, o);
+              value = ATKFormat.format(format, val);
             } else {
               value = Double.toString(val);
             }
@@ -979,8 +977,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       double val = evt.getTransformedYValue();
       String value;
       if (format.length() > 0) {
-        Object[] o = {val};
-        value = Format.sprintf(format, o);
+        value = ATKFormat.format(format, val);
       } else {
         value = Double.toString(val);
       }

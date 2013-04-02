@@ -33,8 +33,9 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.core.attribute.NumberScalar;
+import fr.esrf.tangoatk.widget.util.ATKFormat;
+
 import javax.swing.*;
-import com.braju.format.Format;
 
 
 /**
@@ -201,30 +202,28 @@ public class NumberScalarProgressBar extends javax.swing.JProgressBar
 	Double attDouble = new Double(val);
 	String dispStr;
 
-	Object[] o = {attDouble};
-
 	try
 	{
 	   if (nsDispFormat == null)
 	   {
-              dispStr = Format.sprintf("%3.0f", o);
+              dispStr = String.format("%3.0f", attDouble);
 	      return dispStr;
 	   }
 
 	   if (nsDispFormat.equalsIgnoreCase("Not Specified"))
 	   {
-              dispStr = Format.sprintf("%3.0f", o);
+              dispStr = String.format("%3.0f", attDouble);
 	      return dispStr;
 	   }
 
 	   if (nsDispFormat.indexOf('%') < 0)
 	   {
-              dispStr = Format.sprintf("%3.0f", o);
+              dispStr = String.format("%3.0f", attDouble);
 	      return dispStr;
 	   }
 	   else
 	   {
-              dispStr = Format.sprintf(nsDispFormat, o);
+              dispStr = ATKFormat.format(nsDispFormat, attDouble);
 	      return dispStr;
 	   }
 	}

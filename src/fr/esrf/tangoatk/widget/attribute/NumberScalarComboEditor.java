@@ -35,10 +35,10 @@ import java.util.*;
 
 import javax.swing.*;
 
+import fr.esrf.tangoatk.widget.util.ATKFormat;
 import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
 
 import fr.esrf.tangoatk.core.*;
-import com.braju.format.Format;
 import fr.esrf.TangoDs.AttrManip;
 
 
@@ -125,9 +125,7 @@ public class NumberScalarComboEditor extends JComboBox
        modelFormat = numberModel.getProperty("format").getPresentation();
        modelUnit = numberModel.getProperty("unit").getPresentation();
 	     
-       Double     invalidOptDble = new Double(0.0);
-       Object[]   invalidOptArr = {invalidOptDble};
-       invalidOpt = Format.sprintf(modelFormat, invalidOptArr);
+       invalidOpt = ATKFormat.format(modelFormat, 0.0);
        invalidOpt = invalidOpt.replace('0', '?');
        
        // Update the comboBox model
@@ -148,9 +146,7 @@ public class NumberScalarComboEditor extends JComboBox
                    strOpt = AttrManip.format(modelFormat, valList[index]);
 		else
 		{
-	           dblOpt = new Double(valList[index]);
-                   Object[]   optArr = {dblOpt};
-		   strOpt = Format.sprintf(modelFormat, optArr);
+		   strOpt = ATKFormat.format(modelFormat, valList[index]);
 		}
 		if (unitVisible)
 		   newOptions[index+1] = new String(strOpt + " " + numberModel.getUnit());
@@ -210,9 +206,7 @@ public class NumberScalarComboEditor extends JComboBox
        if (numberModel == null)
           return;
 	     
-       Double     invalidOptDble = new Double(0.0);
-       Object[]   invalidOptArr = {invalidOptDble};
-       invalidOpt = Format.sprintf(modelFormat, invalidOptArr);
+       invalidOpt = ATKFormat.format(modelFormat, 0.0);
        invalidOpt = invalidOpt.replace('0', '?');
        
        // Update the comboBox model
@@ -233,9 +227,7 @@ public class NumberScalarComboEditor extends JComboBox
                    strOpt = AttrManip.format(modelFormat, valList[index]);
 		else
 		{
-	           dblOpt = new Double(valList[index]);
-                   Object[]   optArr = {dblOpt};
-		   strOpt = Format.sprintf(modelFormat, optArr);
+		   strOpt = ATKFormat.format(modelFormat, valList[index]);
 		}
 		if (newUnitVisible)
 		   newOptions[index+1] = new String(strOpt + " " + numberModel.getUnit());

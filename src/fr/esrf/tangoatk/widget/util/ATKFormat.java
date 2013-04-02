@@ -23,6 +23,8 @@
 
 package fr.esrf.tangoatk.widget.util;
 
+import java.util.IllegalFormatException;
+
 /**
  * A Base class for atk formatting.
  */
@@ -47,6 +49,30 @@ public class ATKFormat {
    */
   public String format(Object obj) {
     return obj.toString();
+  }
+
+  /**
+   * Format a double
+   * @param format C like format
+   * @param value Value to be formatted
+   */
+  public static String format(String format,double value) {
+
+    String retValue;
+
+    try {
+      retValue = String.format(format,value);
+    } catch (IllegalFormatException e1) {
+      // We may have a %d in the format
+      try {
+        retValue = String.format(format,(int)value);
+      } catch (IllegalFormatException e2) {
+        retValue = Double.toString(value);
+      }
+    }
+
+    return retValue;
+
   }
 
   /**

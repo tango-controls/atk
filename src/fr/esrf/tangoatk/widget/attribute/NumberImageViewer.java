@@ -72,23 +72,12 @@ import javax.swing.JTextField;
 import javax.swing.event.EventListenerList;
 import javax.swing.filechooser.FileFilter;
 
-import com.braju.format.Format;
-
 import fr.esrf.TangoDs.AttrManip;
 import fr.esrf.tangoatk.core.IImageListener;
 import fr.esrf.tangoatk.core.INumberImage;
 import fr.esrf.tangoatk.widget.image.LineProfilerViewer;
 import fr.esrf.tangoatk.widget.properties.LabelViewer;
-import fr.esrf.tangoatk.widget.util.ATKConstant;
-import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
-import fr.esrf.tangoatk.widget.util.ErrorHistory;
-import fr.esrf.tangoatk.widget.util.Gradient;
-import fr.esrf.tangoatk.widget.util.JGradientEditor;
-import fr.esrf.tangoatk.widget.util.JGradientViewer;
-import fr.esrf.tangoatk.widget.util.JImage;
-import fr.esrf.tangoatk.widget.util.JSmoothLabel;
-import fr.esrf.tangoatk.widget.util.JTableRow;
-import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
+import fr.esrf.tangoatk.widget.util.*;
 import fr.esrf.tangoatk.widget.util.chart.AxisPanel;
 import fr.esrf.tangoatk.widget.util.chart.CfFileReader;
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
@@ -1856,8 +1845,8 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
     Double avgD = new Double(avg);
     Double stdD = new Double(std);
-    avgLabel.setText("Average: " + Format.sprintf("%.2f",new Double[]{avgD}) +
-                     "  Std deviation: " + Format.sprintf("%.2f",new Double[]{stdD}));
+    avgLabel.setText("Average: " + String.format("%.2f",avgD) +
+                     "  Std deviation: " + String.format("%.2f",stdD));
 
     if (curSelMin <= curSelMax)
       rangeLabel.setText("Range: " + Double.toString(curSelMin) +
@@ -2768,18 +2757,17 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
       } else {
 
-        Double[] tmp = new Double[1];
         String[][] d = new String[r.height][r.width];
         for (int j = 0; j < r.height; j++)
           for (int i = 0; i < r.width; i++) {
-            tmp[0] = new Double(doubleValues[r.y + j][r.x + i]);
-            if (Double.isNaN(doubleValues[r.y + j][r.x + i]) || Double.isInfinite(doubleValues[r.y + j][r.x + i]))
+            double tmp = doubleValues[r.y + j][r.x + i];
+            if (Double.isNaN(tmp) || Double.isInfinite(tmp))
             {
-              d[j][i] = tmp[0].toString();
+              d[j][i] = Double.toString(tmp);
             }
             else
             {
-              d[j][i] = Format.sprintf(attFormat, tmp);
+              d[j][i] = ATKFormat.format(attFormat, tmp);
             }
           }
         tablePanel.setData(d, r.x, r.y);

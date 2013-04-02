@@ -22,6 +22,7 @@
  
 package fr.esrf.tangoatk.widget.attribute;
 
+import fr.esrf.tangoatk.widget.util.*;
 import ij.gui.Line;
 import ij.gui.Roi;
 
@@ -79,26 +80,12 @@ import javax.swing.JTextField;
 import javax.swing.event.EventListenerList;
 import javax.swing.filechooser.FileFilter;
 
-import com.braju.format.Format;
-
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.TangoDs.AttrManip;
 import fr.esrf.tangoatk.core.IImageListener;
 import fr.esrf.tangoatk.core.INumberImage;
 import fr.esrf.tangoatk.widget.image.LineProfilerViewer;
 import fr.esrf.tangoatk.widget.properties.LabelViewer;
-import fr.esrf.tangoatk.widget.util.ATKConstant;
-import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
-import fr.esrf.tangoatk.widget.util.AdvancedImagePlus;
-import fr.esrf.tangoatk.widget.util.ErrorHistory;
-import fr.esrf.tangoatk.widget.util.Gradient;
-import fr.esrf.tangoatk.widget.util.JGradientEditor;
-import fr.esrf.tangoatk.widget.util.JGradientViewer;
-import fr.esrf.tangoatk.widget.util.JImage;
-import fr.esrf.tangoatk.widget.util.JImageJ;
-import fr.esrf.tangoatk.widget.util.JSmoothLabel;
-import fr.esrf.tangoatk.widget.util.JTableRow;
-import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
 import fr.esrf.tangoatk.widget.util.chart.AxisPanel;
 import fr.esrf.tangoatk.widget.util.chart.CfFileReader;
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
@@ -1441,8 +1428,8 @@ protected INumberImage model;
 
     Double avgD = new Double(avg);
     Double stdD = new Double(std);
-    avgLabel.setText("Average: " + Format.sprintf("%.2f",new Double[]{avgD}) +
-                     "  Std deviation: " + Format.sprintf("%.2f",new Double[]{stdD}));
+    avgLabel.setText("Average: " + String.format("%.2f",avgD) +
+                     "  Std deviation: " + String.format("%.2f",stdD));
 
     if (curSelMin <= curSelMax)
       rangeLabel.setText("Range: " + Double.toString(curSelMin) +
@@ -2485,7 +2472,7 @@ protected INumberImage model;
       }
     }
     String attFormat = null;
-    Double[] tmp = new Double[1];
+    double tmp;
     if (model!=null) {
         attFormat = model.getFormat();
     }
@@ -2497,16 +2484,12 @@ protected INumberImage model;
             for (int i = 0; i < roiBounds.width; i++) {
               if ( roi == null
                    || roi.contains(roiBounds.x + i, roiBounds.y + j) ) {
-                tmp[0] = new Double(
-                        doubleValues[roiBounds.y + j][roiBounds.x + i]
-                );
-                if ( tmp[0].isNaN() || tmp[0].isInfinite() ) {
-                  stringData[j][i] = tmp[0].toString();
+                tmp = doubleValues[roiBounds.y + j][roiBounds.x + i];
+                if ( Double.isNaN(tmp) || Double.isInfinite(tmp) ) {
+                  stringData[j][i] = Double.toString(tmp);
                 }
                 else {
-                  stringData[j][i] = AttrManip.format(
-                          attFormat, tmp[0].doubleValue()
-                  );
+                  stringData[j][i] = AttrManip.format(attFormat, tmp);
                 }
               }
             }
@@ -2516,14 +2499,12 @@ protected INumberImage model;
           // fill top rectangle
           for (int i = 0; i < imageBounds.width; i++) {
             for (int j = 0; j < roiBounds.y; j++) {
-              tmp[0] = new Double(doubleValues[j][i]);
-              if ( tmp[0].isNaN() || tmp[0].isInfinite() ) {
-                stringData[j][i] = tmp[0].toString();
+              tmp = doubleValues[j][i];
+              if ( Double.isNaN(tmp) || Double.isInfinite(tmp) ) {
+                stringData[j][i] = Double.toString(tmp);
               }
               else {
-                stringData[j][i] = AttrManip.format(
-                        attFormat, tmp[0].doubleValue()
-                );
+                stringData[j][i] = AttrManip.format(attFormat, tmp);
               }
             }
           }
@@ -2532,14 +2513,12 @@ protected INumberImage model;
             for ( int j = roiBounds.y + roiBounds.height;
                   j < imageBounds.height;
                   j++ ) {
-              tmp[0] = new Double(doubleValues[j][i]);
-              if ( tmp[0].isNaN() || tmp[0].isInfinite() ) {
-                stringData[j][i] = tmp[0].toString();
+              tmp = doubleValues[j][i];
+              if ( Double.isNaN(tmp) || Double.isInfinite(tmp) ) {
+                stringData[j][i] = Double.toString(tmp);
               }
               else {
-                stringData[j][i] = AttrManip.format(
-                        attFormat, tmp[0].doubleValue()
-                );
+                stringData[j][i] = AttrManip.format(attFormat, tmp);
               }
             }
           }
@@ -2548,14 +2527,12 @@ protected INumberImage model;
             for ( int j = roiBounds.y;
                   j < roiBounds.y + roiBounds.height;
                   j++ ) {
-              tmp[0] = new Double(doubleValues[j][i]);
-              if ( tmp[0].isNaN() || tmp[0].isInfinite() ) {
-                stringData[j][i] = tmp[0].toString();
+              tmp = doubleValues[j][i];
+              if ( Double.isNaN(tmp) || Double.isInfinite(tmp) ) {
+                stringData[j][i] = Double.toString(tmp);
               }
               else {
-                stringData[j][i] = AttrManip.format(
-                        attFormat, tmp[0].doubleValue()
-                );
+                stringData[j][i] = AttrManip.format(attFormat, tmp);
               }
             }
           }
@@ -2566,14 +2543,12 @@ protected INumberImage model;
             for ( int j = roiBounds.y;
                   j < roiBounds.y + roiBounds.height;
                   j++ ) {
-              tmp[0] = new Double(doubleValues[j][i]);
-              if ( tmp[0].isNaN() || tmp[0].isInfinite() ) {
-                stringData[j][i] = tmp[0].toString();
+              tmp = doubleValues[j][i];
+              if ( Double.isNaN(tmp) || Double.isInfinite(tmp) ) {
+                stringData[j][i] = Double.toString(tmp);
               }
               else {
-                stringData[j][i] = AttrManip.format(
-                        attFormat, tmp[0].doubleValue()
-                );
+                stringData[j][i] = AttrManip.format(attFormat, tmp);
               }
             }
           }
@@ -2583,14 +2558,12 @@ protected INumberImage model;
               int x = roiBounds.x + i;
               int y = roiBounds.y + j;
               if ( !roi.contains(x, y) ) {
-                tmp[0] = new Double( doubleValues[y][x] );
-                if ( tmp[0].isNaN() || tmp[0].isInfinite() ) {
-                  stringData[y][x] = tmp[0].toString();
+                tmp = doubleValues[y][x];
+                if ( Double.isNaN(tmp) || Double.isInfinite(tmp) ) {
+                  stringData[y][x] = Double.toString(tmp);
                 }
                 else {
-                  stringData[y][x] = AttrManip.format(
-                          attFormat, tmp[0].doubleValue()
-                  );
+                  stringData[y][x] = AttrManip.format(attFormat, tmp);
                 }
               }
             }
@@ -2605,14 +2578,12 @@ protected INumberImage model;
             for (int i = 0; i < roiBounds.width; i++) {
               if ( roi == null
                    || roi.contains(roiBounds.x + i, roiBounds.y + j) ) {
-                tmp[0] = new Double(
-                        doubleValues[roiBounds.y + j][roiBounds.x + i]
-                );
-                if ( tmp[0].isNaN() || tmp[0].isInfinite() ) {
-                  stringData[j][i] = tmp[0].toString();
+                tmp = doubleValues[roiBounds.y + j][roiBounds.x + i];
+                if ( Double.isNaN(tmp) || Double.isInfinite(tmp) ) {
+                  stringData[j][i] = Double.toString(tmp);
                 }
                 else {
-                  stringData[j][i] = Format.sprintf(attFormat, tmp);
+                  stringData[j][i] = ATKFormat.format(attFormat, tmp);
                 }
               }
             }
@@ -2622,12 +2593,12 @@ protected INumberImage model;
           // fill top rectangle
           for (int i = 0; i < imageBounds.width; i++) {
             for (int j = 0; j < roiBounds.y; j++) {
-              tmp[0] = new Double(doubleValues[j][i]);
-              if ( tmp[0].isNaN() || tmp[0].isInfinite() ) {
-                stringData[j][i] = tmp[0].toString();
+              tmp = doubleValues[j][i];
+              if ( Double.isNaN(tmp) || Double.isInfinite(tmp) ) {
+                stringData[j][i] = Double.toString(tmp);
               }
               else {
-                stringData[j][i] = Format.sprintf(attFormat, tmp);
+                stringData[j][i] = ATKFormat.format(attFormat, tmp);
               }
             }
           }
@@ -2636,12 +2607,12 @@ protected INumberImage model;
             for ( int j = roiBounds.y + roiBounds.height;
                   j < imageBounds.height;
                   j++ ) {
-              tmp[0] = new Double(doubleValues[j][i]);
-              if ( tmp[0].isNaN() || tmp[0].isInfinite() ) {
-                stringData[j][i] = tmp[0].toString();
+              tmp = doubleValues[j][i];
+              if ( Double.isNaN(tmp) || Double.isInfinite(tmp) ) {
+                stringData[j][i] = Double.toString(tmp);
               }
               else {
-                stringData[j][i] = Format.sprintf(attFormat, tmp);
+                stringData[j][i] = ATKFormat.format(attFormat, tmp);
               }
             }
           }
@@ -2650,12 +2621,12 @@ protected INumberImage model;
             for ( int j = roiBounds.y;
                   j < roiBounds.y + roiBounds.height;
                   j++ ) {
-              tmp[0] = new Double(doubleValues[j][i]);
-              if ( tmp[0].isNaN() || tmp[0].isInfinite() ) {
-                stringData[j][i] = tmp[0].toString();
+              tmp = doubleValues[j][i];
+              if ( Double.isNaN(tmp) || Double.isInfinite(tmp) ) {
+                stringData[j][i] = Double.toString(tmp);
               }
               else {
-                stringData[j][i] = Format.sprintf(attFormat, tmp);
+                stringData[j][i] = ATKFormat.format(attFormat, tmp);
               }
             }
           }
@@ -2666,12 +2637,12 @@ protected INumberImage model;
             for ( int j = roiBounds.y;
                   j < roiBounds.y + roiBounds.height;
                   j++ ) {
-              tmp[0] = new Double(doubleValues[j][i]);
-              if ( tmp[0].isNaN() || tmp[0].isInfinite() ) {
-                stringData[j][i] = tmp[0].toString();
+              tmp = doubleValues[j][i];
+              if ( Double.isNaN(tmp) || Double.isInfinite(tmp) ) {
+                stringData[j][i] = Double.toString(tmp);
               }
               else {
-                stringData[j][i] = Format.sprintf(attFormat, tmp);
+                stringData[j][i] = ATKFormat.format(attFormat, tmp);
               }
             }
           }
@@ -2681,12 +2652,12 @@ protected INumberImage model;
               int x = roiBounds.x + i;
               int y = roiBounds.y + j;
               if ( !roi.contains(x, y) ) {
-                tmp[0] = new Double( doubleValues[y][x] );
-                if ( tmp[0].isNaN() || tmp[0].isInfinite() ) {
-                  stringData[y][x] = tmp[0].toString();
+                tmp = doubleValues[y][x];
+                if ( Double.isNaN(tmp) || Double.isInfinite(tmp) ) {
+                  stringData[y][x] = Double.toString(tmp);
                 }
                 else {
-                  stringData[y][x] = Format.sprintf(attFormat, tmp);
+                  stringData[y][x] = ATKFormat.format(attFormat, tmp);
                 }
               }
             }
@@ -2765,7 +2736,6 @@ protected INumberImage model;
       } // end if (innerRoi)...else
 
     } // end if ( attFormat!=null && attFormat.length() > 0 )...else
-    tmp = null;
     if (innerRoi) {
       tablePanel.setData(stringData, roiBounds.x, roiBounds.y);
     }

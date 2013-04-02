@@ -34,13 +34,13 @@ import java.util.*;
 import java.awt.*;
 
 import fr.esrf.tangoatk.widget.util.ATKConstant;
+import fr.esrf.tangoatk.widget.util.ATKFormat;
 import fr.esrf.tangoatk.widget.util.chart.*;
 import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
 import fr.esrf.tangoatk.core.IAttribute;
 import fr.esrf.tangoatk.core.INumberSpectrum;
 import fr.esrf.tangoatk.core.ISpectrumListener;
 import fr.esrf.TangoDs.AttrManip;
-import com.braju.format.Format;
 import fr.esrf.tangoatk.core.INumberScalar;
 import fr.esrf.tangoatk.core.INumberScalarListener;
 
@@ -384,8 +384,7 @@ public class NumberSpectrumViewer extends AdvancedJLChart
       } else if (format.indexOf('%') == -1) {
         yValue = AttrManip.format(format, e.getTransformedYValue());
       } else {
-        Object[] o = {new Double(e.getTransformedYValue())};
-        yValue = Format.sprintf(format, o);
+        yValue = ATKFormat.format(format, e.getTransformedYValue());
       }
 
       ret = new String[3];

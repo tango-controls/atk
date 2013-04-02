@@ -53,8 +53,6 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.event.EventListenerList;
 
-import com.braju.format.Format;
-
 /** A WheelSwitch editor. */
 public class WheelSwitch extends JComponent {
 
@@ -222,16 +220,14 @@ public class WheelSwitch extends JComponent {
             double newValue = near(dval1) * Math.pow(10, dval2);
             Double tempDouble = new Double(Double.NaN);
             try {
-                Double [] tab = new Double [1];
-                tab[0] = new Double (newValue);
                 if (isGoodFormat())
                 {
-                    String valFormated = Format.sprintf(format, tab);
+                    String valFormated = ATKFormat.format(format, newValue);
                     tempDouble = Double.valueOf(valFormated);
                 }
                 else
                 {
-                    tempDouble = tab[0];
+                    tempDouble = new Double(newValue);
                 }
             }
             catch(Exception e) {
@@ -447,7 +443,7 @@ public class WheelSwitch extends JComponent {
 
                 // scientific format
                 if (format.indexOf('e') != -1) {
-                    String temp = Format.sprintf(format, new Object[] { new Double(value) });
+                    String temp = ATKFormat.format(format, value);
                     if (temp != null) {
                         reformat(temp, a-b, b);
                     }
@@ -699,7 +695,7 @@ public class WheelSwitch extends JComponent {
         String valueFormated;
         if (isGoodFormat())
         {
-            valueFormated = Format.sprintf(format, new Object[] { new Double(value) });
+            valueFormated = ATKFormat.format(format, value);
         }
         else
         {
@@ -717,7 +713,12 @@ public class WheelSwitch extends JComponent {
             if (format.indexOf('d') != -1) {
                 intPart = valueFormated;
             } else {
-                intPart = valueFormated.substring(0, valueFormated.indexOf('.'));
+              int idx = valueFormated.indexOf('.');
+              if( idx>=0 ) {
+                intPart = valueFormated.substring(0, idx);
+              } else {
+                intPart = valueFormated;
+              }
             }
 
           if (pos < intNumber) {
@@ -906,8 +907,8 @@ public class WheelSwitch extends JComponent {
             return null;
         }
         else {
-            String displayVal = Format.sprintf(format, new Object[] { new Double(value) });
-            if (displayVal != null) {
+            String displayVal = ATKFormat.format(format, value);
+            if (!Double.isNaN(value) && displayVal != null) {
                 displayVal = displayVal.toLowerCase();
                 return Double.valueOf(displayVal.substring(displayVal.indexOf('e') + 1));
             }
@@ -923,8 +924,8 @@ public class WheelSwitch extends JComponent {
             return new Double(value);
         }
         else {
-            String displayVal = Format.sprintf(format, new Object[] { new Double(value) });
-            if (displayVal != null) {
+            String displayVal = ATKFormat.format(format, value);
+            if (!Double.isNaN(value) && displayVal != null) {
                 displayVal = displayVal.toLowerCase();
                 return Double.valueOf(displayVal.substring(0,displayVal.indexOf('e')));
             }
@@ -995,7 +996,7 @@ public class WheelSwitch extends JComponent {
                 //value = newValue;
                 setValue(newValue);
                 if (format.indexOf('e') > 0) {
-                    reformat(Format.sprintf(format, new Object[] { new Double(value) }), intNumber, fracNumber);
+                    reformat(ATKFormat.format(format, value), intNumber, fracNumber);
                 }
             }
             fireValueChange();
@@ -1047,7 +1048,7 @@ public class WheelSwitch extends JComponent {
                 //value = newValue;
                 setValue(newValue);
                 if (format.indexOf('e') > 0) {
-                    reformat(Format.sprintf(format, new Object[] { new Double(value) }), intNumber, fracNumber);
+                    reformat(ATKFormat.format(format, value), intNumber, fracNumber);
                 }  
             }
             fireValueChange();

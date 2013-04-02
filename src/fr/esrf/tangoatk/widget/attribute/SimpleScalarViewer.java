@@ -31,7 +31,6 @@ import fr.esrf.tangoatk.widget.util.*;
 import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
 import fr.esrf.tangoatk.core.*;
 
-import com.braju.format.Format;
 import fr.esrf.TangoDs.AttrManip;
 
 /** A light weigth viewer which display a scalar attribute (String or Number) and its unit.
@@ -294,13 +293,11 @@ public class SimpleScalarViewer extends JAutoScrolledText
       } else {
         try {
           if (userFormat.length() > 0) {
-            Object[] o = {attDouble};
-            dispStr = Format.sprintf(userFormat, o);
+            dispStr = ATKFormat.format(userFormat, attDouble);
           } else if (format.indexOf('%') == -1) {
             dispStr = AttrManip.format(format, evt.getValue());
           } else {
-            Object[] o = {attDouble};
-            dispStr = Format.sprintf(format, o);
+            dispStr = ATKFormat.format(format, attDouble);
           }
         } catch (Exception e) {
           return "Exception while formating";

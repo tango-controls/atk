@@ -12,7 +12,6 @@ ALL = $(TARGET)/UIManagerHelper.class       \
       $(TARGET)/IApplicable.class           \
       $(TARGET)/IHelpful.class              \
       $(TARGET)/DeviceFinder.class          \
-      $(TARGET)/ATKFormat.class             \
       $(TARGET)/ErrorPopup.class            \
       $(TARGET)/ErrorPane.class             \
       $(TARGET)/ATKFrame.class              \
@@ -61,6 +60,7 @@ utils: $(ALL)
 
 gutils:	$(TARGET)/ATKGraphicsUtils.class \
         $(TARGET)/ATKConstant.class      \
+        $(TARGET)/ATKFormat.class        \
         $(TARGET)/JSmoothLabel.class     \
 	$(TARGET)/TableRowModel.class    \
         $(TARGET)/JTableRow.class        \

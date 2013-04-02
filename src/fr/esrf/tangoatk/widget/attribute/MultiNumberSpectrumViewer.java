@@ -37,7 +37,6 @@ import fr.esrf.tangoatk.widget.util.chart.*;
 import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.TangoDs.AttrManip;
-import com.braju.format.Format;
 
 /**
  * A class to display several spectrum attributes in the same chart. The MultipleNumberSpectrumViewer
