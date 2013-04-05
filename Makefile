@@ -83,16 +83,15 @@ jar: core-jar  widget-jar
 
 core-jar: core-manifest
 	@(cd lib &&                             \
-	 $(JAR) xf printf.jar &&      \
 	 $(JAR) xf jep.jar &&   \
 	 $(JAR) xf jepext.jar &&   \
 	 $(JAR) xf ij.jar &&   \
 	 $(JAR) xf jogl.jar &&   \
 	 $(JAR) xf gluegen-rt.jar &&   \
          if [ -e $(COREMANIFEST) ]; then       \
-            $(JAR) cmf $(COREMANIFEST) ATKCore-$(ATK-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util com/braju org/lsmp org/nfunk ij com/sun javax/media; \
+            $(JAR) cmf $(COREMANIFEST) ATKCore-$(ATK-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util org/lsmp org/nfunk ij com/sun javax/media; \
          else                                           \
-            $(JAR) cf ATKCore-$(ATK-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util com/braju org/lsmp org/nfunk ij com/sun javax/media;                   \
+            $(JAR) cf ATKCore-$(ATK-VERSION).jar fr/esrf/tangoatk/core fr/esrf/tangoatk/util org/lsmp org/nfunk ij com/sun javax/media;                   \
          fi)
 	$(call verifyjar,/tmp/core/jar,ATKCore-$(ATK-VERSION))
 	@(rm -rf /tmp/core)
