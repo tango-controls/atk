@@ -1,0 +1,9 @@
+name = BooleanScalarComboEditor
+package = fr.esrf.tangoatk.widget.attribute
+
+properties = attModel
+
+ICON_COLOR_16x16 = AttComboBox.gif
+ICON_MONO_16x16 = AttComboBox.gif
+ICON_MONO_32x32 = AttComboBox.gif
+ICON_COLOR_32x32 = AttComboBox.gif

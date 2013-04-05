@@ -1,0 +1,3 @@
+name =  IconNumberScalarViewer
+package = fr.esrf.tangoatk.widget.attribute 
+properties icons, model
