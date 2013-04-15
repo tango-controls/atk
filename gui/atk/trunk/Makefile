@@ -1,6 +1,6 @@
 include .make-include
 
-# dont forget to edit $(ATK_RELDIR)/* files
+# do not forget to edit $(ATK_RELDIR)/* files
 # to set the major and minor releases and set the build number to zero
 ifdef ATK_RELDIR
 ATK-MAJOR := $(shell cat $(ATK_RELDIR)/MAJOR)
