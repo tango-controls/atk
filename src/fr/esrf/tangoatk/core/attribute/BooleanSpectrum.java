@@ -238,6 +238,7 @@ public class BooleanSpectrum extends AAttribute
   public void periodic (TangoPeriodicEvent evt) 
   {
       periodicCount++;
+      if(evt.isZmqEvent()) eventType=2; else eventType=1;
       DeviceAttribute     da=null;
       long t0 = System.currentTimeMillis();
       
@@ -325,6 +326,7 @@ public class BooleanSpectrum extends AAttribute
   {
       changeCount++;
       DeviceAttribute     da=null;
+      if(evt.isZmqEvent()) eventType=2; else eventType=1;
       long t0 = System.currentTimeMillis();
       
       trace(DeviceFactory.TRACE_CHANGE_EVENT, "BooleanSpectrum.change method called for " + getName(), t0);

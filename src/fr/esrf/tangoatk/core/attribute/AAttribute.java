@@ -63,6 +63,7 @@ public abstract class AAttribute implements IAttribute,
   protected long changeCount = 0;
   protected long periodicCount = 0;
   protected long configCount = 0;
+  protected int eventType = 0;
   protected DevFailed eventError = null; // Event subscription error
 
   private  boolean  hasEvents=false;
@@ -284,6 +285,11 @@ public abstract class AAttribute implements IAttribute,
   public long getChangeCount()
   {
       return changeCount;
+  }
+
+  public int getEventType()
+  {
+      return eventType;
   }
 
   public long getPeriodicCount()

@@ -167,7 +167,8 @@ class DeviceTableModel extends AbstractTableModel {
 class AttributeTableModel extends AbstractTableModel {
 
   private AAttribute[] allAttributes = new AAttribute[0];
-  private static final String[] colNames = {"Attribute name","Event enabled","Listeners","","Polling","Change","Periodic","Config"};
+  private static final String[] colNames = {"Attribute name","Event enabled","Event src","Listeners","","Polling","Change","Periodic","Config"};
+  private static String[] evtType = {"Unknown" , "notifd" , "zmq"};
 
   public AttributeTableModel() {
     refresh();
@@ -194,7 +195,7 @@ class AttributeTableModel extends AbstractTableModel {
   }
 
   public Class getColumnClass(int columnIndex) {
-    if(columnIndex==3)
+    if(columnIndex==4)
       return JButton.class;
     else
       return String.class;
@@ -211,17 +212,19 @@ class AttributeTableModel extends AbstractTableModel {
       case 1:
         return Boolean.toString(allAttributes[rowIndex].hasEvents());
       case 2:
-        return Integer.toString(allAttributes[rowIndex].getPropChanges().getListenerCount());
+        return evtType[allAttributes[rowIndex].getEventType()];
       case 3:
+        return Integer.toString(allAttributes[rowIndex].getPropChanges().getListenerCount());
+      case 4:
         // Details button
         return "";
-      case 4:
-        return Long.toString(allAttributes[rowIndex].getRefreshCount());
       case 5:
-        return Long.toString(allAttributes[rowIndex].getChangeCount());
+        return Long.toString(allAttributes[rowIndex].getRefreshCount());
       case 6:
-        return Long.toString(allAttributes[rowIndex].getPeriodicCount());
+        return Long.toString(allAttributes[rowIndex].getChangeCount());
       case 7:
+        return Long.toString(allAttributes[rowIndex].getPeriodicCount());
+      case 8:
         return Long.toString(allAttributes[rowIndex].getConfigCount());
     }
     return "";
@@ -382,7 +385,7 @@ class DiagPanel extends JFrame implements ActionListener,MouseListener {
     deviceTable.getColumnModel().getColumn(4).setMaxWidth(25);
     deviceTable.addMouseListener(this);
     JScrollPane deviceView = new JScrollPane(deviceTable);
-    deviceView.setPreferredSize(new Dimension(600,400));
+    deviceView.setPreferredSize(new Dimension(700,400));
     devicePanel.add(deviceView,BorderLayout.CENTER);
     JPanel dFacPanel = new JPanel();
     dFacPanel.setLayout(null);
@@ -427,7 +430,7 @@ class DiagPanel extends JFrame implements ActionListener,MouseListener {
     attributeTable = new JTable(attributeModel);
     attributeTable.setDefaultRenderer(JButton.class,new MyCellRenderer());
     attributeTable.getColumnModel().getColumn(0).setPreferredWidth(150);
-    attributeTable.getColumnModel().getColumn(3).setMaxWidth(25);
+    attributeTable.getColumnModel().getColumn(4).setMaxWidth(25);
     attributeTable.addMouseListener(this);
     JScrollPane attributeView = new JScrollPane(attributeTable);
     attributePanel.add(attributeView,BorderLayout.CENTER);
@@ -544,7 +547,7 @@ class DiagPanel extends JFrame implements ActionListener,MouseListener {
         String err = attributeModel.getAttribute(sRow).getSubscriptionError();
         attributeEvtText.setText(err);
       }
-      if(sCol==3) {
+      if(sCol==4) {
         AAttribute a = attributeModel.getAttribute(sRow);
         String info = a.getPropChanges().getListenerInfo();
         JOptionPane.showMessageDialog(this,info,"Listeners registered for "+a.getName(),JOptionPane.INFORMATION_MESSAGE);
