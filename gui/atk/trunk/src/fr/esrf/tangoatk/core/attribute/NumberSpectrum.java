@@ -321,6 +321,7 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
   public void periodic (TangoPeriodicEvent evt) 
   {
       periodicCount++;
+      if(evt.isZmqEvent()) eventType=2; else eventType=1;
       DeviceAttribute     da=null;
       long t0 = System.currentTimeMillis();
       
@@ -418,6 +419,7 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
   public void change (TangoChangeEvent evt) 
   {
       changeCount++;
+      if(evt.isZmqEvent()) eventType=2; else eventType=1;
       DeviceAttribute     da=null;
       long t0 = System.currentTimeMillis();
       

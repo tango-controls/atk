@@ -163,6 +163,7 @@ public class RawImage extends AAttribute
   // Implement the method of ITangoPeriodicListener
   public void periodic(TangoPeriodicEvent evt) {
     periodicCount++;
+    if(evt.isZmqEvent()) eventType=2; else eventType=1;
     DeviceAttribute da = null;
     long t0 = System.currentTimeMillis();
 
@@ -229,6 +230,7 @@ public class RawImage extends AAttribute
   // Implement the method of ITangoChangeListener
   public void change(TangoChangeEvent evt) {
     changeCount++;
+    if(evt.isZmqEvent()) eventType=2; else eventType=1;
     DeviceAttribute da = null;
     long t0 = System.currentTimeMillis();
 
