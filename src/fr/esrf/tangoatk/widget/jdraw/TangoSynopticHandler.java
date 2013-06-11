@@ -180,7 +180,9 @@ public class TangoSynopticHandler extends JDrawEditor
 
    private    Vector<PanelItem>               panelList = new Vector<PanelItem> ();
 
-
+   private    SynopticProgressListener        progressListener;
+   private    int                             itemNumber;
+   private    int                             loadedItem;
 
    // The HashMap for Dynamic Objects in  Jdraw (isProgrammed() = true)
    // This hashmap allows to convert an Atk State to the "numeric" value to be
@@ -229,6 +231,10 @@ public class TangoSynopticHandler extends JDrawEditor
       
       errPopup = ErrorPopup.getInstance();
       allAttributes = new AttributeList();
+
+     progressListener = null;
+     itemNumber = 0;
+
    }
 
 
@@ -333,6 +339,13 @@ public class TangoSynopticHandler extends JDrawEditor
       setSynopticFileName(jdFileName);
    }
 
+  /**
+   * Sets tje loading progress listener
+   * @param p Handle to the progress listener
+   */
+   public void setProgressListener(SynopticProgressListener p) {
+     progressListener = p;
+   }
 
 /**
  * Returns the current Tooltip Mode
@@ -587,6 +600,10 @@ public class TangoSynopticHandler extends JDrawEditor
     */
    protected void parseJdrawComponents()
    {
+
+      if(progressListener!=null) countJdrawComponents();
+      loadedItem = 0;
+
       for (int i = 0; i < getObjectNumber(); i++)
       {
 	 JDObject jdObj = getObjectAt(i);
@@ -595,6 +612,7 @@ public class TangoSynopticHandler extends JDrawEditor
 	 if (isDevice(s))
 	 {
 	    addDevice(jdObj, s);
+      itemLoaded();
 	 }
 	 else
 	 {
@@ -605,18 +623,21 @@ public class TangoSynopticHandler extends JDrawEditor
 	    if (isAttribute(s))
 	    {
                addAttribute(jdObj, s);
+               itemLoaded();
 	    }
             else
             {
                if (isSpectrumAttElement(s))
                {
                   addSpectrumAttElement(jdObj, s);
+                  itemLoaded();
                }
                else
                {
                   if (isCommand(s))
                   {
                     addCommand(jdObj, s);
+                    itemLoaded();
                   }
                   else //System.out.println(s+" is not an attribute, nor a command, nor a device; ignored.");
                   {
@@ -631,9 +652,51 @@ public class TangoSynopticHandler extends JDrawEditor
 	 }
       } /* for */
    }
-   
-   
-   private void addShellCmdButton(JDObject  jdo)
+
+
+  private void itemLoaded() {
+
+    if( progressListener!=null ) {
+      loadedItem++;
+      double p = (double)loadedItem / (double)itemNumber;
+      progressListener.progress(p);
+    }
+
+  }
+
+  /**
+   * Count number of item connected to a Tango object
+   */
+  private void countJdrawComponents() {
+
+    itemNumber = 0;
+
+    for (int i = 0; i < getObjectNumber(); i++) {
+
+      JDObject jdObj = getObjectAt(i);
+      String s = jdObj.getName();
+
+      if (isDeviceSyntax(s)) {
+        itemNumber++;
+      } else {
+        if (isAttributeSyntax(s)) {
+          itemNumber++;
+        } else {
+          if (isSpectrumAttElementSyntax(s)) {
+            itemNumber++;
+          } else {
+            if (isCommandSyntax(s)) {
+              itemNumber++;
+            }
+          }
+        }
+      }
+
+    } /* for */
+
+  }
+
+  private void addShellCmdButton(JDObject  jdo)
    {
       String shellCmd = jdo.getExtendedParam("shellCommand");
       if (shellCmd == null) return;
@@ -722,6 +785,42 @@ public class TangoSynopticHandler extends JDrawEditor
        }
    }
 
+   private boolean isAttributeSyntax(String s) {
+
+     String     attDevName, attName;
+     int        lastSlash;
+     boolean    isdev;
+
+     lastSlash = s.lastIndexOf("/");
+
+     if ( (lastSlash <= 0) || (lastSlash >= s.length()) )
+        return false;
+
+     try
+     {
+         attDevName = s.substring(0, lastSlash);
+         isdev = isDeviceSyntax(attDevName);
+         if (isdev == false)
+         {
+           return false;
+         }
+
+         attName = s.substring(lastSlash, s.length());
+
+         if( Pattern.matches("/[a-zA-Z_0-9[-]]+", attName) )
+         {
+             return true;
+         }
+     }
+     catch (IndexOutOfBoundsException ex)
+     {
+         return false;
+     }
+
+     return false;
+
+   }
+
   /**
    * Return true only if the given name matches a Tango attribute name followed by [index].
     * <p>Spectrum Attribute element allowed syntax ( Can be preceded by tango: ):<p>
@@ -776,6 +875,48 @@ public class TangoSynopticHandler extends JDrawEditor
        }
    }
 
+  private boolean isSpectrumAttElementSyntax(String s) {
+
+    String attDevName, attName;
+    int lastSlash;
+    boolean isdev;
+
+    lastSlash = s.lastIndexOf("/");
+
+    if ((lastSlash <= 0) || (lastSlash >= s.length()))
+      return false;
+
+    try {
+
+      attDevName = s.substring(0, lastSlash);
+
+      isdev = isDevice(attDevName);
+
+      if (isdev == false)
+        return false;
+
+      attName = s.substring(lastSlash, s.length());
+
+      boolean attPattern;
+
+      attPattern = Pattern.matches("/[a-zA-Z_0-9[-]]+\\[[0-9]+\\]", attName);
+
+      if (attPattern == true) //Is an element of a spectrum attribute
+      {
+        int leftBracket = s.lastIndexOf("[");
+        if ((leftBracket > 0) || (leftBracket < s.length())) {
+          return true;
+        }
+      }
+
+      return false;
+
+    } catch (IndexOutOfBoundsException ex) {
+      return false;
+    }
+
+  }
+
   /**
    * Return true only if the given name matches a Tango command name.
    * <p>Command name allowed syntax ( Can be preceded by tango: ):<p>
@@ -822,6 +963,41 @@ public class TangoSynopticHandler extends JDrawEditor
        }
    }
 
+  private boolean isCommandSyntax(String s) {
+
+    String cmdDevName, cmdName;
+    int lastSlash;
+    boolean isdev;
+
+    lastSlash = s.lastIndexOf("/");
+
+    if ((lastSlash <= 0) || (lastSlash >= s.length()))
+      return false;
+
+    try {
+      cmdDevName = s.substring(0, lastSlash);
+
+      isdev = isDevice(cmdDevName);
+
+      if (isdev == false)
+        return false;
+
+      cmdName = s.substring(lastSlash, s.length());
+
+      if (Pattern.matches("/[a-zA-Z_0-9[-]]+", cmdName)) {
+        return true;
+      }
+
+    } catch (IndexOutOfBoundsException ex) {
+
+      return false;
+
+    }
+
+    return false;
+
+  }
+
   /**
    * Return true only if the given name matches a Tango device name.
    * <p>Device name allowed syntax ( Can be preceded by tango: ):<p>
@@ -842,6 +1018,12 @@ public class TangoSynopticHandler extends JDrawEditor
        return dFac.isDevice(devName);
 
    }
+
+  private boolean isDeviceSyntax(String devName) {
+
+    return isDeviceName(devName);
+
+  }
 
   /**
    * Return true if the given name has a correct tango syntax.
