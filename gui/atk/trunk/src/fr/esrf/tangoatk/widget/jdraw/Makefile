@@ -3,7 +3,8 @@ BEANINFO =	SynopticFileViewerBeanInfo.java
 include ../../../../../../.make-include
 
 
-ALL = $(TARGET)/TangoSynopticHandler.class \
+ALL = $(TARGET)/SynopticProgressListener.class \
+      $(TARGET)/TangoSynopticHandler.class \
       $(TARGET)/SynopticFileViewer.class \
       $(TARGET)/DeviceSynopticViewer.class \
       $(TARGET)/DeviceSynopticFrame.class \
