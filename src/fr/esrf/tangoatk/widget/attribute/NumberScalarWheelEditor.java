@@ -250,17 +250,15 @@ public class NumberScalarWheelEditor extends WheelSwitch
     try {
 
       nsv.setFont(new java.awt.Font("Lucida Bright", java.awt.Font.BOLD, 22));
-      final INumberScalar attr = (INumberScalar) attributeList.add("jlp/test/1/att_trois");
+      final INumberScalar attr = (INumberScalar) attributeList.add("id16na/beamviewer/bpm2/ExposureTime");
       nsv.setModel(attr);
       nsv2.setModel(attr);
-      attributeList.setRefreshInterval(10000);
+      attributeList.setRefreshInterval(1000);
       attributeList.startRefresher();
 
     } catch (ConnectionException e) {
-      ErrorPane.showErrorMessage(f,"jlp/test/1/att_trois",e);
+      ErrorPane.showErrorMessage(f,"id16na/beamviewer/bpm2",e);
     } // end of try-catch
-
-
 
     f.getContentPane().setLayout(new java.awt.GridBagLayout());
     gridBagConstraints = new java.awt.GridBagConstraints();

@@ -45,6 +45,9 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -73,6 +76,7 @@ public class WheelSwitch extends JComponent {
     private EventListenerList listenerList; // list of WheelSwitch listeners
     private String format = "%5.2f";
     private boolean editable; // Edition
+    private char decimalSeparator = '.';
 
     // Arrow buttons
     private JArrowButton buttons_up[];
@@ -111,6 +115,12 @@ public class WheelSwitch extends JComponent {
         editValue = "";
 
         listenerList = new EventListenerList();
+
+        try {
+          DecimalFormat format=(DecimalFormat)DecimalFormat.getInstance();
+          DecimalFormatSymbols symbols=format.getDecimalFormatSymbols();
+          decimalSeparator=symbols.getDecimalSeparator();
+        } catch(Exception e) {}
 
         addComponentListener(new ComponentListener() {
             public void componentHidden(ComponentEvent e) {
@@ -685,103 +695,100 @@ public class WheelSwitch extends JComponent {
         return Math.rint(d * r) / r;
     }
 
-    //Return the digit at the specified position
-    private String getDigit(int pos) {
+  //Return the digit at the specified position
+  private String getDigit(int pos) {
 
-        if (Double.isNaN(value)) {
-            return "X";
-        }
-
-        String valueFormated;
-        if (isGoodFormat())
-        {
-            valueFormated = ATKFormat.format(format, value);
-        }
-        else
-        {
-            valueFormated = Double.toString(value);
-        }
-        if (valueFormated == null) {
-            return "X";
-        }
-        else {
-            valueFormated = valueFormated.toLowerCase();
-            valueFormated = valueFormated.replaceAll("\\-", "");
-            valueFormated = valueFormated.replaceAll("\\+", "");
-            valueFormated = valueFormated.replaceAll(" ", "");
-            String intPart = "";
-            if (format.indexOf('d') != -1) {
-                intPart = valueFormated;
-            } else {
-              int idx = valueFormated.indexOf('.');
-              if( idx>=0 ) {
-                intPart = valueFormated.substring(0, idx);
-              } else {
-                intPart = valueFormated;
-              }
-            }
-
-          if (pos < intNumber) {
-
-            // integer part
-            if (intPart.length() < intNumber) {
-              if (pos < intNumber - intPart.length()) {
-                return "0";
-              } else {
-                return intPart.substring(pos + intPart.length() - intNumber, pos + 1 + intPart.length() - intNumber);
-              }
-            } else if(intPart.length()==intNumber) {
-                return intPart.substring(pos, pos + 1);
-            } else {
-                // Here, intPart.length() > intNumber
-                int over = intPart.length() - intNumber;
-                return intPart.substring(pos+over, pos+over + 1);
-            }
-
-          } else if (pos < intNumber + fracNumber) {
-
-            // Decimal part
-            return valueFormated.substring(pos + 1 + intPart.length() - intNumber, pos + 2 + intPart.length() - intNumber);
-
-          } else {
-
-            // Exponential part
-            int e = valueFormated.indexOf('e');
-            return valueFormated.substring(pos + e + 1 - intNumber - fracNumber, pos + e + 2 - intNumber - fracNumber);
-
-          }
-        }
-        /*double tmp = value;
-        if (tmp < 0) {
-            tmp = -tmp;
-        }
-
-        if (pos >= 0) {
-            // Integer part
-            tmp = tmp / Math.pow(10.0, pos);
-        }
-        else {
-
-            // Decimal part
-            // Round to nearest int
-            // Value must be rounded to desirec prec see near()
-            tmp += (0.5 / Math.pow(10.0, fracNumber));
-            int f = (int) tmp;
-            tmp = tmp - f;
-            tmp = tmp * Math.pow(10.0, -pos);
-
-        }
-
-        if (tmp > 1e9) {
-            int m = (int) (tmp / 1e7);
-            tmp = tmp - m * 1e7;
-        }
-        Integer is = new Integer((int) (tmp) % 10);
-        return is.toString();*/
-
+    if (Double.isNaN(value)) {
+      return "X";
     }
 
-    // Paint the component
+    String valueFormated;
+    if (isGoodFormat()) {
+      valueFormated = ATKFormat.format(format, value);
+    } else {
+      valueFormated = Double.toString(value);
+    }
+    if (valueFormated == null) {
+      return "X";
+    } else {
+      valueFormated = valueFormated.toLowerCase();
+      valueFormated = valueFormated.replaceAll("\\-", "");
+      valueFormated = valueFormated.replaceAll("\\+", "");
+      valueFormated = valueFormated.replaceAll(" ", "");
+      String intPart = "";
+
+      if (format.indexOf('d') != -1) {
+        intPart = valueFormated;
+      } else {
+        int idx = valueFormated.indexOf(decimalSeparator);
+        if (idx >= 0) {
+          intPart = valueFormated.substring(0, idx);
+        } else {
+          intPart = valueFormated;
+        }
+      }
+
+      if (pos < intNumber) {
+
+        // integer part
+        if (intPart.length() < intNumber) {
+          if (pos < intNumber - intPart.length()) {
+            return "0";
+          } else {
+            return intPart.substring(pos + intPart.length() - intNumber, pos + 1 + intPart.length() - intNumber);
+          }
+        } else if (intPart.length() == intNumber) {
+          return intPart.substring(pos, pos + 1);
+        } else {
+          // Here, intPart.length() > intNumber
+          int over = intPart.length() - intNumber;
+          return intPart.substring(pos + over, pos + over + 1);
+        }
+
+      } else if (pos < intNumber + fracNumber) {
+
+        // Decimal part
+        return valueFormated.substring(pos + 1 + intPart.length() - intNumber, pos + 2 + intPart.length() - intNumber);
+
+      } else {
+
+        // Exponential part
+        int e = valueFormated.indexOf('e');
+        return valueFormated.substring(pos + e + 1 - intNumber - fracNumber, pos + e + 2 - intNumber - fracNumber);
+
+      }
+    }
+    /*double tmp = value;
+   if (tmp < 0) {
+       tmp = -tmp;
+   }
+
+   if (pos >= 0) {
+       // Integer part
+       tmp = tmp / Math.pow(10.0, pos);
+   }
+   else {
+
+       // Decimal part
+       // Round to nearest int
+       // Value must be rounded to desirec prec see near()
+       tmp += (0.5 / Math.pow(10.0, fracNumber));
+       int f = (int) tmp;
+       tmp = tmp - f;
+       tmp = tmp * Math.pow(10.0, -pos);
+
+   }
+
+   if (tmp > 1e9) {
+       int m = (int) (tmp / 1e7);
+       tmp = tmp - m * 1e7;
+   }
+   Integer is = new Integer((int) (tmp) % 10);
+   return is.toString();*/
+
+  }
+
+  // Paint the component
     protected void paintComponent(Graphics g) {
 
         int w = getWidth();
@@ -1096,7 +1103,7 @@ public class WheelSwitch extends JComponent {
             }
         }
 
-        if ((c >= '0' && c <= '9') || c == '.' || c == '-') {
+        if ((c >= '0' && c <= '9') || c == decimalSeparator || c == '-') {
             editValue += c;
             editMode = true;
             repaint();
