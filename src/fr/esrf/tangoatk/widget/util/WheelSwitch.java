@@ -417,6 +417,12 @@ public class WheelSwitch extends JComponent {
       }
     }
 
+    public void setFormat(String aformat) {
+
+      setFormat(aformat,null);
+
+    }
+
     /**
      * Set the format as C format (only "%x.yf" or "%xd" is supported). This
      * will change the button configuration.
@@ -424,14 +430,18 @@ public class WheelSwitch extends JComponent {
      * @param aformat
      *            New wheelswitch format.
      */
-    public void setFormat(String aformat) {
+    public void setFormat(String aformat,String attName) {
         String oldFormat = format;
         double oldValue = value;
         // format validation
         format = aformat;
         if (!isGoodFormat())
         {
-            System.out.println("WheelSwitch: Invalid format \"" + format + "\": use %x.yf, %x.yF, %x.ye, %x.yE, %xd or %xD");
+            if( attName!=null ) {
+              System.out.println("WheelSwitch: Invalid format \"" + format + "\" for " + attName + ": use %x.yf, %x.yF, %x.ye, %x.yE, %xd or %xD");
+            } else {
+              System.out.println("WheelSwitch: Invalid format \"" + format + "\": use %x.yf, %x.yF, %x.ye, %x.yE, %xd or %xD");
+            }
             // comment next lines if you don't want to format the value
             format = oldFormat;
             System.out.println("==> WheelSwitch: format used instead: " + format);
@@ -459,7 +469,11 @@ public class WheelSwitch extends JComponent {
                     }
                     else {
                         // should never happen (due to isGoodFormat() test)
-                        System.out.println("WheelSwitch: Invalid format \"" + format + "\": use %x.yf, %x.yF, %x.ye, %x.yE, %xd or %xD");
+                        if( attName!=null ) {
+                          System.out.println("WheelSwitch: Invalid format \"" + format + "\" for " + attName + ": use %x.yf, %x.yF, %x.ye, %x.yE, %xd or %xD");
+                        } else {
+                          System.out.println("WheelSwitch: Invalid format \"" + format + "\": use %x.yf, %x.yF, %x.ye, %x.yE, %xd or %xD");
+                        }
                         format = oldFormat;
                         value = oldValue;
                     }
@@ -478,7 +492,11 @@ public class WheelSwitch extends JComponent {
         }
         catch (NumberFormatException n) {
             // should never happen (due to isGoodFormat() test)
-            System.out.println("WheelSwitch: Invalid format \"" + format + "\": use %x.yf, %x.yF, %x.ye, %x.yE, %xd or %xD");
+            if( attName!=null ) {
+              System.out.println("WheelSwitch: Invalid format \"" + format + "\" for " + attName + ": use %x.yf, %x.yF, %x.ye, %x.yE, %xd or %xD");
+            } else {
+              System.out.println("WheelSwitch: Invalid format \"" + format + "\": use %x.yf, %x.yF, %x.ye, %x.yE, %xd or %xD");
+            }
             format = oldFormat;
             value = oldValue;
         }
