@@ -64,7 +64,7 @@ public class NumberScalarViewer extends WheelSwitch implements INumberScalarList
     model.addNumberScalarListener(this);
     model.getProperty("format").addPresentationListener(this);
 
-    setFormat(model.getProperty("format").getPresentation());
+    setFormat(model.getProperty("format").getPresentation(),model.getName());
     model.refresh();
     double d = model.getNumberScalarValue();
     setValue(d);
@@ -89,7 +89,7 @@ public class NumberScalarViewer extends WheelSwitch implements INumberScalarList
     Property src = (Property) evt.getSource();
     if (model != null) {
       if (src.getName().equalsIgnoreCase("format")) {
-        setFormat(src.getValue().toString());
+        setFormat(src.getValue().toString(),model.getName());
         model.refresh();
       }
     }

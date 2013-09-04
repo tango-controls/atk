@@ -78,7 +78,7 @@ public class NumberScalarWheelEditor extends WheelSwitch
     model.addNumberScalarListener(this);
     model.getProperty("format").addPresentationListener(this);
 
-    setFormat(model.getProperty("format").getPresentation());
+    setFormat(model.getProperty("format").getPresentation(),model.getName());
     
     ANumber   an=null;
     if (model instanceof ANumber)
@@ -229,7 +229,7 @@ public class NumberScalarWheelEditor extends WheelSwitch
     Property src = (Property) evt.getSource();
     if (model != null) {
       if (src.getName().equalsIgnoreCase("format")) {
-        setFormat(src.getValue().toString());
+        setFormat(src.getValue().toString(),model.getName());
         model.refresh();
       }
     }
