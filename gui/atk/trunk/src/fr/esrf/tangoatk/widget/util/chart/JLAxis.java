@@ -32,6 +32,8 @@ import java.awt.*;
 import java.awt.font.*;
 import java.awt.geom.*;
 import javax.swing.*;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -213,6 +215,9 @@ public class JLAxis implements java.io.Serializable {
   private double[] userLabelPos = null;
 
   private String dateFormat = US_DATE_FORMAT;
+
+  private char decimalSeparator = '.';
+
   //Global
   static final java.util.GregorianCalendar calendar = new java.util.GregorianCalendar();
   static final java.text.SimpleDateFormat genFormat = new java.text.SimpleDateFormat("dd/MM/yy HH:mm:ss.SSS");
@@ -278,6 +283,7 @@ public class JLAxis implements java.io.Serializable {
    * @see JLAxis#setPosition
    */
   public JLAxis(JComponent parent, int orientation) {
+
     labels = new Vector<LabelInfo>();
     labelFont = new Font("Dialog", Font.PLAIN, 11);
     labelColor = Color.black;
@@ -303,6 +309,13 @@ public class JLAxis implements java.io.Serializable {
     fontOverWidth = 0;
     minTickStep = 50.0;
     fitXAxisToDisplayDuration = true;
+
+    try {
+      DecimalFormat format=(DecimalFormat)DecimalFormat.getInstance();
+      DecimalFormatSymbols symbols=format.getDecimalFormatSymbols();
+      decimalSeparator=symbols.getDecimalSeparator();
+    } catch(Exception e) {}
+
   }
 
   /**
@@ -1185,7 +1198,7 @@ public class JLAxis implements java.io.Serializable {
    */
   private String suppressZero(String n) {
 
-    boolean hasDecimal = n.indexOf('.') != -1;
+    boolean hasDecimal = n.indexOf(decimalSeparator) != -1;
 
     if(hasDecimal) {
 
@@ -1195,7 +1208,7 @@ public class JLAxis implements java.io.Serializable {
         str.deleteCharAt(i);
         i--;
       }
-      if(str.charAt(i)=='.') {
+      if(str.charAt(i)==decimalSeparator) {
         // Remove unwanted decimal
         str.deleteCharAt(i);
       }
