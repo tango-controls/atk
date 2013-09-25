@@ -116,11 +116,13 @@ public class WheelSwitch extends JComponent {
 
         listenerList = new EventListenerList();
 
+        /* Removed because the followings calls ignore the local JVM setting made by Locale.setDefault()
         try {
           DecimalFormat format=(DecimalFormat)DecimalFormat.getInstance();
           DecimalFormatSymbols symbols=format.getDecimalFormatSymbols();
           decimalSeparator=symbols.getDecimalSeparator();
         } catch(Exception e) {}
+        */
 
         addComponentListener(new ComponentListener() {
             public void componentHidden(ComponentEvent e) {

@@ -22,6 +22,7 @@
  
 package fr.esrf.tangoatk.widget.util;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.HashMap;
 import java.awt.*;
@@ -98,6 +99,8 @@ public class ATKConstant {
     stateLightMap.put( IDevice.DISABLE, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/icons/ledPink.gif")) );     // Magenta
     stateLightMap.put( IDevice.UNKNOWN, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/icons/ledGray.gif")) );     // Gray
 
+    Locale.setDefault(Locale.US);
+
   }
 
   /**
@@ -132,7 +135,7 @@ public class ATKConstant {
                 return getColor4State(IDevice.EXTRACT);
             if (state.equalsIgnoreCase(IDevice.EXTRACT))
                 return getColor4State(IDevice.INSERT);
-        }      
+        }
         return getColor4State(state);
   }
 
