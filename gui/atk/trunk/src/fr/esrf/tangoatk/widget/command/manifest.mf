@@ -4,10 +4,7 @@ Java-Bean: True
 Name: fr/esrf/tangoatk/widget/command/CommandComboViewer.class
 Java-Bean: True
 
-Name: fr/esrf/tangoatk/widget/command/CommandButtonViewer.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/command/OnOffSwitchCommandViewer.class
+Name: fr/esrf/tangoatk/widget/command/SimpleCommandViewer.class
 Java-Bean: True
 
 Name: fr/esrf/tangoatk/widget/command/OnOffCheckBoxCommandViewer.class

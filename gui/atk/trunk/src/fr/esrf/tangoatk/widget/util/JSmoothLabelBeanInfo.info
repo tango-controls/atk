@@ -3,7 +3,5 @@ package fr.esrf.tangoatk.widget.util
 
 properties = text
 
-ICON_COLOR_16x16 = StringScalarViewer.gif
-ICON_MONO_16x16 = StringScalarViewer.gif
-ICON_MONO_32x32 = StringScalarViewer.gif
-ICON_COLOR_32x32 = StringScalarViewer.gif
+ICON_COLOR_16x16 = jsmoothlabel.gif
+ICON_COLOR_32x32 = jsmoothlabel32.gif

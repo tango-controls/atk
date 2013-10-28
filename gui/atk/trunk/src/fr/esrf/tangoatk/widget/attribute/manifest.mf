@@ -103,3 +103,9 @@ Java-Bean: True
 Name: fr/esrf/tangoatk/widget/attribute/DevStateScalarComboEditor.class
 Java-Bean: True
 
+Name: fr/esrf/tangoatk/widget/attribute/NumberImageViewer.class
+Java-Bean: True
+
+Name: fr/esrf/tangoatk/widget/attribute/RawImageViewer.class
+Java-Bean: True
+

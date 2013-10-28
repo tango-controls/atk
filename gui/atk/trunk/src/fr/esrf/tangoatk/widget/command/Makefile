@@ -1,7 +1,6 @@
 BEANINFO = VoidVoidCommandViewerBeanInfo.java \
 	   CommandComboViewerBeanInfo.java \
-	   CommandButtonViewerBeanInfo.java \
-	   OnOffSwitchCommandViewerBeanInfo.java \
+	   SimpleCommandViewerBeanInfo.java \
 	   OnOffCheckBoxCommandViewerBeanInfo.java \
 	   OptionComboCommandViewerBeanInfo.java \
 	   ConfirmCommandViewerBeanInfo.java \

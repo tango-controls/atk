@@ -1,4 +1,4 @@
-BEANINFO =	SynopticFileViewerBeanInfo.java 
+BEANINFO =	SynopticFileViewerBeanInfo.java
 
 include ../../../../../../.make-include
 

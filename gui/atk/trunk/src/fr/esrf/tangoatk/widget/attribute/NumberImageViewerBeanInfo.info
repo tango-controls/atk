@@ -1,0 +1,7 @@
+name = NumberImageViewer
+package fr.esrf.tangoatk.widget.attribute
+
+properties = zoom
+
+ICON_COLOR_16x16 = NumberImageViewer.gif
+ICON_COLOR_32x32 = NumberImageViewer32.gif
