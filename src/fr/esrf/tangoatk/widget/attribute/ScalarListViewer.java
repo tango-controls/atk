@@ -1625,11 +1625,10 @@ public class ScalarListViewer extends javax.swing.JPanel
        // Connect to a list of scalar attributes
        try
        {
-          iatt = (IAttribute) attList.add("dev/test/10/ULong_attr_rw");
-          iatt = (IAttribute) attList.add("dev/test/10/String_attr");
-          iatt = (IAttribute) attList.add("dev/test/10/Boolean_attr");
-          iatt = (IAttribute) attList.add("dev/test/10/Short_attr_rw");
-          iatt = (IAttribute) attList.add("dev/test/10/State_attr_rw");
+          iatt = (IAttribute) attList.add("jlp/test/1/att_un");
+          iatt = (IAttribute) attList.add("jlp/test/1/att_deux");
+          iatt = (IAttribute) attList.add("jlp/test/1/att_trois");
+          iatt = (IAttribute) attList.add("jlp/test/1/att_quatre");
 
 	  scalarlv.setModel(attList);
 	  

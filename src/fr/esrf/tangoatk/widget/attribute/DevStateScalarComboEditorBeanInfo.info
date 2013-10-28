@@ -4,6 +4,4 @@ package = fr.esrf.tangoatk.widget.attribute
 properties = stateModel
 
 ICON_COLOR_16x16 = AttComboBox.gif
-ICON_MONO_16x16 = AttComboBox.gif
-ICON_MONO_32x32 = AttComboBox.gif
-ICON_COLOR_32x32 = AttComboBox.gif
+ICON_COLOR_32x32 = DevStateScalarComboEditor32.gif

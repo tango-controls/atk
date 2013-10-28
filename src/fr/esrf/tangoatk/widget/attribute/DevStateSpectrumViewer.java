@@ -78,7 +78,7 @@ public class DevStateSpectrumViewer extends javax.swing.JPanel
 	toolTipMode = TOOLTIP_ATTNAME;
         setLayout(new java.awt.GridBagLayout());
 	
-	setVisible(false);
+	//setVisible(false);
     }
     
     
@@ -522,7 +522,7 @@ public class DevStateSpectrumViewer extends javax.swing.JPanel
        // Connect to a devStateSpectrum attribute
        try
        {       
-	  stateSpectAtt = (IDevStateSpectrum) attList.add("sy/rf-trawrapper/tra0/SubDevicesStates");
+	  stateSpectAtt = (IDevStateSpectrum) attList.add("sr/rf-cavi/cav56/SubDevicesStates");
 	  dssv.setModel(stateSpectAtt);
 	  
        }

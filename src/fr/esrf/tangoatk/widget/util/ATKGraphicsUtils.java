@@ -45,10 +45,14 @@ public class ATKGraphicsUtils {
   static public Dimension measureString(String s,Font f) {
 
     init();
-    Rectangle2D bounds = f.getStringBounds(s, frc);
-    int w = (int)(bounds.getWidth()+0.5);
-    int h = (int)(bounds.getHeight()+0.5);
-    return new Dimension(w,h);
+    if( f!=null && s!=null ) {
+      Rectangle2D bounds = f.getStringBounds(s, frc);
+      int w = (int)(bounds.getWidth()+0.5);
+      int h = (int)(bounds.getHeight()+0.5);
+      return new Dimension(w,h);
+    } else {
+      return new Dimension(0,0);
+    }
 
   }
   
