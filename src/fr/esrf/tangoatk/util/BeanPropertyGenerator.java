@@ -32,7 +32,7 @@
 
 package fr.esrf.tangoatk.util;
 
-import fr.esrf.tangoatk.widget.util.ATKFormat;
+import java.util.IllegalFormatException;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -198,7 +198,7 @@ public class BeanPropertyGenerator {
         out.println("");
         out.print("    ");
       }
-      out.print("0x"+ATKFormat.format("%X",rgbArray[i]));
+      out.print("0x"+format("%X",rgbArray[i]));
       if(i<nbData-1) out.print(",");
 
     }
@@ -442,6 +442,17 @@ public class BeanPropertyGenerator {
 
   }
 
+  private String format(String f,int value) {
+
+    try {
+      return String.format(f,value);
+    } catch(IllegalFormatException e) {
+      System.out.println("BeanPropertyGenerator.java: Warning, "+e.getMessage());
+      return Integer.toHexString(value);
+    }
+    
+  }
+
   private static String makeInfoName(String javaName) throws IOException {
 
     int idx = javaName.lastIndexOf('.');
@@ -450,7 +461,7 @@ public class BeanPropertyGenerator {
     return javaName.substring(0, idx) + ".info";
 
   }
-
+  
   public static void main(String[] args) {
 
     String infoName="";
