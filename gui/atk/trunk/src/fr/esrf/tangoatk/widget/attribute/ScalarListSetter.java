@@ -104,7 +104,7 @@ public class ScalarListSetter extends javax.swing.JPanel
 	booleanSetterType = BOOLEAN_DEFAULT_SETTER;
         setLayout(new java.awt.GridBagLayout());
 	
-	setVisible(false);
+	//setVisible(false);
     }
     
     
@@ -159,7 +159,9 @@ public class ScalarListSetter extends javax.swing.JPanel
 	
     }
     
-    
+    public void clearModel() {
+      setModel(null);
+    }
     
     
     protected void removeComponents()
