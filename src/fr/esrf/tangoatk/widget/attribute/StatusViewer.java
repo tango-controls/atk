@@ -109,6 +109,10 @@ public class StatusViewer extends javax.swing.JPanel implements IStringScalarLis
 	       setBorder(new javax.swing.border.TitledBorder(model.getDevice().getName()));
 	}
     }
+  
+    public void clearModel() {
+      setModel(null);
+    }
 
     /**
      * <code>getModel</code> gets the model of this statusViewer.
