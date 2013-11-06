@@ -479,7 +479,11 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     // Update controls
     selectionChanged();
     valueChanged();
+
+    // Check clipboard
+    JDClipboard.getInstance().load(false);
     clipboardChanged();
+
   }
 
   /** Sets the player of this EditorFrame. (for the play mode) */
