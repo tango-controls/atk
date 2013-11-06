@@ -422,6 +422,9 @@ public class JDrawEditorPanel extends JPanel implements ActionListener,JDrawEdit
     treeSplitPane.setLeftComponent(null);
     add(treeSplitPane, BorderLayout.CENTER);
 
+    JDClipboard.getInstance().addChangeListener(this);
+    JDClipboard.getInstance().check();
+
   }
 
   // ----------------------------------------------------
@@ -443,9 +446,6 @@ public class JDrawEditorPanel extends JPanel implements ActionListener,JDrawEdit
     selectionChanged();
     valueChanged();
 
-    // Check clipboard
-    JDClipboard.getInstance().load(false);
-    clipboardChanged();
   }
 
   /** Sets the player of this EditorFrame. (for the play mode) */
@@ -715,7 +715,7 @@ public class JDrawEditorPanel extends JPanel implements ActionListener,JDrawEdit
   }
 
   public void clipboardChanged() {
-    int sz=theEditor.getClipboardLength();
+    int sz=JDClipboard.getInstance().size();
     editToolPasteBtn.setEnabled(sz>0);
     editPasteMenuItem.setEnabled(sz>0);
   }
@@ -868,6 +868,12 @@ public class JDrawEditorPanel extends JPanel implements ActionListener,JDrawEdit
 
   }
 
+  public void onActivate() {
+
+    JDClipboard.getInstance().check();
+
+  }
+
   public static void main(String[] args) {
 
     final JDrawEditor ed = new JDrawEditor(JDrawEditor.MODE_EDIT);
@@ -889,6 +895,7 @@ public class JDrawEditorPanel extends JPanel implements ActionListener,JDrawEdit
     f.setContentPane(jdp);
     f.setTitle("JDraw Editor Panel");
     ATKGraphicsUtils.centerFrameOnScreen(f);
+    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     f.setVisible(true);
 
   }

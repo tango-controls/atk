@@ -460,6 +460,9 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     sPane.setLeftComponent(deviceTree);
     setContentPane(sPane);
 
+    JDClipboard.getInstance().addChangeListener(this);
+    JDClipboard.getInstance().check();
+
   }
 
   // ----------------------------------------------------
@@ -467,6 +470,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
   // ----------------------------------------------------
   /** Sets the editor of this EditorFrame. */
   public void setEditor(JDrawEditor editor) {
+
     theEditor = editor;
     theEditor.setStatusLabel(statusLabel);
     theEditor.setStatus("");
@@ -479,10 +483,6 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     // Update controls
     selectionChanged();
     valueChanged();
-
-    // Check clipboard
-    JDClipboard.getInstance().load(false);
-    clipboardChanged();
 
   }
 
@@ -748,7 +748,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
   }
 
   public void clipboardChanged() {
-    int sz=theEditor.getClipboardLength();
+    int sz=JDClipboard.getInstance().size();
     editToolPasteBtn.setEnabled(sz>0);
     editPasteMenuItem.setEnabled(sz>0);
   }
@@ -914,13 +914,17 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
       if(rep==JOptionPane.YES_OPTION)
         theEditor.instantSave(".");
     }
-    if(rep!=JOptionPane.CANCEL_OPTION)
+    if(rep!=JOptionPane.CANCEL_OPTION) {
       System.exit(0);
+    }
   }
 
   protected void processWindowEvent(WindowEvent e) {
       if (e.getID() == WindowEvent.WINDOW_CLOSING) {
         exitApp();
+      } else if( e.getID() == WindowEvent.WINDOW_ACTIVATED ){
+        JDClipboard.getInstance().check();
+        super.processWindowEvent(e);
       } else {
         super.processWindowEvent(e);
       }

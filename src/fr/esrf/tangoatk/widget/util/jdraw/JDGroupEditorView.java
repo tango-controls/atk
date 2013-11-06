@@ -244,7 +244,10 @@ class JDGroupEditorView extends JComponent implements JDrawEditorListener,Action
     // Update controls
     selectionChanged();
     valueChanged();
-    clipboardChanged();
+
+    JDClipboard.getInstance().addChangeListener(this);
+    JDClipboard.getInstance().check();
+
   }
 
   // ---------------------------------------------------------
@@ -262,7 +265,7 @@ class JDGroupEditorView extends JComponent implements JDrawEditorListener,Action
 
     editCutMenuItem.setEnabled(sz>0);
     editCopyMenuItem.setEnabled(sz>0);
-    editPasteMenuItem.setEnabled(theEditor.getClipboardLength()>0);
+    editPasteMenuItem.setEnabled(JDClipboard.getInstance().size()>0);
     editDeleteMenuItem.setEnabled(sz>0);
     editSelectAllMenuItem.setEnabled(sz<theEditor.getObjectNumber());
     editSelectNoneMenuItem.setEnabled(sz>0);
@@ -287,7 +290,7 @@ class JDGroupEditorView extends JComponent implements JDrawEditorListener,Action
   }
 
   public void clipboardChanged() {
-    int sz=theEditor.getClipboardLength();
+    int sz=JDClipboard.getInstance().size();
     editPasteMenuItem.setEnabled(sz>0);
   }
 

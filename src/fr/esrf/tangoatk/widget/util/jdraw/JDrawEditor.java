@@ -27,6 +27,8 @@ package fr.esrf.tangoatk.widget.util.jdraw;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.FlavorEvent;
+import java.awt.datatransfer.FlavorListener;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.*;
@@ -509,13 +511,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     return selObjects.size();
   }
 
-  /** Get number of object inside the clipboard */
-  public int getClipboardLength() {
-    if(mode==MODE_PLAY) return 0;
-    if(mode==MODE_LIB) return 0;
-    return clipboard.size();
-  }
-
   /** Shows the property window */
   public void showPropertyWindow() {
     if(mode==MODE_PLAY) return;
@@ -605,10 +600,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
    * @param objs Objects to add
    */
   void addObjectToClipboard(Vector objs) {
-    clipboard.clear();
-    clipboard.addObjects(objs);
-    clipboard.commit();
-    fireClipboardChange();
+    clipboard.send(objs);
   }
 
   /** Copy selection to clipboard */
@@ -624,11 +616,12 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   * @param y Up left corner y coordinate
   */
   public void pasteClipboard(int x, int y, boolean fromOrigin) {
+
     if(mode==MODE_PLAY) return;
     if(mode==MODE_LIB) return;
 
-    clipboard.load(true);
-    if(clipboard.size()==0) return;
+    if(clipboard.size()==0)
+      return;
 
     unselectAll(false);
     int tx = x;
@@ -685,17 +678,13 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     if(mode==MODE_PLAY) return;
     if(mode==MODE_LIB) return;
     if(selObjects.size()==0) return;
-    clipboard.clear();
     objects.removeAll(selObjects);
-    clipboard.clear();
-    clipboard.addObjects(selObjects);
-    clipboard.commit();
+    clipboard.send(selObjects);
     repaint(buildRepaintRect(selObjects));
     selObjects.clear();
     editedPolyline = null;
-    setNeedToSave(true,"Cut");
+    setNeedToSave(true, "Cut");
     fireSelectionChange();
-    fireClipboardChange();
 
   }
 
