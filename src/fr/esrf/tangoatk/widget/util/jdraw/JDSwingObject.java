@@ -28,7 +28,6 @@ package fr.esrf.tangoatk.widget.util.jdraw;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 
@@ -428,27 +427,26 @@ public class JDSwingObject extends JDRectangular {
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
-  void saveObject(FileWriter f, int level) throws IOException {
+  void recordObject(StringBuffer to_write, int level) {
 
-    String decal = saveObjectHeader(f, level);
-    String to_write;
+    StringBuffer decal = recordObjectHeader(to_write, level);
 
-    to_write = decal + "className:\"" + className + "\"\n";
-    f.write(to_write, 0, to_write.length());
+    to_write.append(decal).append("className:\"").append(className).append("\"\n");
 
     if (theFont.getName() != JDLabel.fontDefault.getName() ||
         theFont.getStyle() != JDLabel.fontDefault.getStyle() ||
         theFont.getSize() != JDLabel.fontDefault.getSize()) {
-      to_write = decal + "font:\"" + theFont.getName() + "\"," + theFont.getStyle() + "," + theFont.getSize() + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("font:\"");
+      to_write.append(theFont.getName()).append("\",");
+      to_write.append(theFont.getStyle()).append(",");
+      to_write.append(theFont.getSize()).append("\n");
     }
 
     if (border != borderDefault) {
-      to_write = decal + "border:" + border + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("border:").append(border).append("\n");
     }
 
-    closeObjectHeader(f, level);
+    closeObjectHeader(to_write, level);
 
   }
 

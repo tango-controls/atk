@@ -28,7 +28,6 @@ package fr.esrf.tangoatk.widget.util.jdraw;
 import java.awt.*;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.io.FileWriter;
 import java.io.IOException;
 
 /** JDraw Polyline graphic object.
@@ -432,23 +431,19 @@ public class JDPolyline extends JDObject implements JDRotatable {
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
-  void saveObject(FileWriter f, int level) throws IOException {
+  void recordObject(StringBuffer to_write, int level) {
 
-    String decal = saveObjectHeader(f, level);
-
-    String to_write;
+    StringBuffer decal = recordObjectHeader(to_write, level);
 
     if (step != stepDefault) {
-      to_write = decal + "step:" + step + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("step:").append(step).append("\n");
     }
 
     if (isClosed != isClosedDefault) {
-      to_write = decal + "isClosed:" + isClosed + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("isClosed:").append(isClosed).append("\n");
     }
 
-    closeObjectHeader(f, level);
+    closeObjectHeader(to_write, level);
 
   }
 

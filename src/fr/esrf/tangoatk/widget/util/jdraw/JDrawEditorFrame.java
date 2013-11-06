@@ -87,7 +87,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
   /** Views->Play menu item. */
   public  JMenuItem viewsPlayMenuItem;
   /** Views->Tango Synoptic menu item. */
-  public  JMenuItem viewsTangoSynopticMenuItem;  
+  public  JMenuItem viewsTangoSynopticMenuItem;
   /** Views->Object properties menu item. */
   public  JMenuItem viewsOptionMenuItem;
   /** Views->Browse menu item. */
@@ -188,7 +188,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
   private JMenuBar    theMenu;
   private String      APP_RELEASE;
   private JSplitPane  splitPane;
-  
+
   private JButton[] libButton;
   private JComboBox libCombo;
   private JDLibraryViewer[] libViewer;
@@ -280,7 +280,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     editToolBar.add(editToolAlignLeftBtn);
     editToolBar.add(editToolAlignBottomBtn);
     editToolBar.add(editToolAlignRightBtn);
-    
+
     editToolBar.setOrientation(JToolBar.HORIZONTAL);
     editorPanel.add(editToolBar,BorderLayout.NORTH);
     // -------------------------------------
@@ -665,7 +665,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
         }
       }
     } else if (src == toolsFitToGraph) {
-      theEditor.computePreferredSize();      
+      theEditor.computePreferredSize();
     } else if( src==libCombo) {
 	    if ( libCombo.getSelectedIndex()>libViewer.length) {
 		    String fullFileName;
@@ -677,7 +677,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
 			    fullFileName = f.getAbsolutePath();
 		    } else {
 			return;
-		    }	
+		    }
 		    JDLibraryViewer noLib = new JDLibraryViewer(fullFileName,theEditor,false);
 		    noLib.setTitle("JDraw library: "+fullFileName);
 		    final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -689,7 +689,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
 			    (noLib.getPreferredSize().height<screenSize.height?noLib.getPreferredSize().height:screenSize.width));
 		    noLib.setVisible(true);
 		    libCombo.setSelectedIndex(0);
-		    return;		    
+		    return;
 	    } else if ( libCombo.getSelectedIndex()>0 ) {
 		    libViewer[libCombo.getSelectedIndex()-1].setVisible(true);
 		    libCombo.setSelectedIndex(0);
@@ -868,11 +868,11 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
           theSynopticAppli.stopSimpleSynopticAppli();
           theSynopticAppli=null;
       }
-      
+
       theEditor.instantSave(".");
       String  fileName = theEditor.getFileName();
       if ((fileName == null) || (fileName.length() == 0)) return;
-      
+
       java.io.File  f = new java.io.File(fileName);
       String        absolutePathName = null;
       try
@@ -883,10 +883,10 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
       {
           return;
       }
-      
+
       if ((absolutePathName==null) || (absolutePathName.length()==0))
           return;
-      
+
       theSynopticAppli = new SimpleSynopticAppli(absolutePathName);
       theSynopticAppli.addWindowListener(
             new java.awt.event.WindowAdapter()
@@ -899,7 +899,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
             });
   }
 
- 
+
   /** Ask to save if some modifications are still unsaved then exit the application. Called
    * when the file exit menu is selected or when the frame is closed */
   public void exitApp() {
@@ -943,7 +943,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     final JDrawEditor ed = new JDrawEditor(JDrawEditor.MODE_EDIT);
     final JDrawEditor py = new JDrawEditor(JDrawEditor.MODE_PLAY);
     final JDrawEditorFrame jde = new JDrawEditorFrame();
-    jde.setAppTitle("JDraw Editor 1.13");
+    jde.setAppTitle("JDraw Editor 1.14");
     jde.setEditor(ed);
     jde.setPlayer(py);
     jde.setLibraries(null);

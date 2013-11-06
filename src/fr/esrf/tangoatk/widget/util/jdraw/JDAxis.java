@@ -27,7 +27,6 @@ import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 
 import java.awt.*;
 import java.awt.font.FontRenderContext;
-import java.io.FileWriter;
 import java.io.IOException;
 
 /** JDraw Axis graphic object. JDAxis allows to build easily sizeable gauges, it supports
@@ -553,69 +552,61 @@ public class JDAxis extends JDRectangular {
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
-  void saveObject(FileWriter f, int level) throws IOException {
 
-    String decal = saveObjectHeader(f, level);
-    String to_write;
+  void recordObject(StringBuffer to_write,int level) {
+
+    StringBuffer decal = recordObjectHeader(to_write, level);
 
      if (theFont.getName() != JDLabel.fontDefault.getName() ||
         theFont.getStyle() != JDLabel.fontDefault.getStyle() ||
         theFont.getSize() != JDLabel.fontDefault.getSize()) {
-      to_write = decal + "font:\"" + theFont.getName() + "\"," + theFont.getStyle() + "," + theFont.getSize() + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("font:\"");
+      to_write.append(theFont.getName()).append("\",");
+      to_write.append(theFont.getStyle()).append(",");
+      to_write.append(theFont.getSize()).append("\n");
     }
 
     if (tickCentered != tickCenteredDefault) {
-      to_write = decal + "tickCentered:" + tickCentered + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("tickCentered:").append(tickCentered).append("\n");
     }
 
     if (inverted != invertedDefault) {
-      to_write = decal + "inverted:" + inverted + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("inverted:").append(inverted).append("\n");
     }
 
     if (tickSpacing != tickSpacingDefault) {
-      to_write = decal + "tickSpacing:" + tickSpacing + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("tickSpacing:").append(tickSpacing).append("\n");
     }
 
     if (tickLength != tickLengthDefault) {
-      to_write = decal + "tickLength:" + tickLength + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("tickLength:").append(tickLength).append("\n");
     }
 
     if (max != maxDefault) {
-      to_write = decal + "max:" + max + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("max:").append(max).append("\n");
     }
 
     if (min != minDefault) {
-      to_write = decal + "min:" + min + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("min:").append(min).append("\n");
     }
 
     if (labelPos != labelPosDefault) {
-      to_write = decal + "labelPos:" + labelPos + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("labelPos:").append(labelPos).append("\n");
     }
 
     if (orientation != orientationDefault) {
-      to_write = decal + "orientation:" + orientation + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("orientation:").append(orientation).append("\n");
     }
 
     if (scale != scaleDefault) {
-      to_write = decal + "scale:" + scale + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("scale:").append(scale).append("\n");
     }
 
     if (format != formatDefault) {
-      to_write = decal + "format:" + format + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("format:").append(format).append("\n");
     }
 
-    closeObjectHeader(f, level);
+    closeObjectHeader(to_write, level);
 
   }
 

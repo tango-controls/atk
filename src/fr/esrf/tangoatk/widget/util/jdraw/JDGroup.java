@@ -779,23 +779,21 @@ public class JDGroup extends JDRectangular {
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
-  void saveObject(FileWriter f, int level) throws IOException {
+  void recordObject(StringBuffer to_write, int level) {
 
     // Do not save empty group
     if (children.size() > 0) {
 
-      String decal = saveObjectHeader(f, level);
+      StringBuffer decal = recordObjectHeader(to_write, level);
 
-      String to_write = decal + "children: {\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("children: {\n");
 
       for (int i = 0; i < children.size(); i++)
-        ((JDObject) children.get(i)).saveObject(f, level + 2);
+        ((JDObject) children.get(i)).recordObject(to_write, level + 2);
 
-      to_write = decal + "}\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("}\n");
 
-      closeObjectHeader(f, level);
+      closeObjectHeader(to_write, level);
 
     }
 

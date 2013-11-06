@@ -30,7 +30,6 @@ import java.awt.image.BufferedImage;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.Point2D;
-import java.io.FileWriter;
 import java.io.IOException;
 
 /** JDraw Label graphic object.
@@ -572,53 +571,50 @@ public class JDLabel extends JDRectangular {
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
-  void saveObject(FileWriter f, int level) throws IOException {
+  void recordObject(StringBuffer to_write, int level) {
 
-    String decal = saveObjectHeader(f, level);
-    String to_write;
+    StringBuffer decal = recordObjectHeader(to_write, level);
 
     if (theFont.getName() != fontDefault.getName() ||
         theFont.getStyle() != fontDefault.getStyle() ||
         theFont.getSize() != fontDefault.getSize()) {
-      to_write = decal + "font:\"" + theFont.getName() + "\"," + theFont.getStyle() + "," + theFont.getSize() + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("font:\"");
+      to_write.append(theFont.getName()).append("\",");
+      to_write.append(theFont.getStyle()).append(",");
+      to_write.append(theFont.getSize()).append("\n");
     }
 
     if (!theText.equals(textDefault)) {
       int i;
       String lines[] = theText.split("\n");
-      to_write = decal + "text:";
+      to_write.append(decal).append("text:");
       for (i = 0; i < lines.length; i++) {
         if (i == 0) {
-          to_write += "\"" + lines[i] + "\"";
+          to_write.append("\"").append(lines[i]).append("\"");
         } else {
-          to_write += decal + "     \"" + lines[i] + "\"";
+          to_write.append(decal).append("     \"").append(lines[i]).append("\"");
         }
         if (i == lines.length - 1) {
-          to_write += "\n";
+          to_write.append("\n");
         } else {
-          to_write += ",\n";
+          to_write.append(",\n");
         }
       }
-      f.write(to_write, 0, to_write.length());
     }
 
     if (hAlignment != hAlignmentDefault) {
-      to_write = decal + "hAlignment:" + hAlignment + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("hAlignment:").append(hAlignment).append("\n");
     }
 
     if (vAlignment != vAlignmentDefault) {
-      to_write = decal + "vAlignment:" + vAlignment + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("vAlignment:").append(vAlignment).append("\n");
     }
 
     if (textOrientation != textOrientationDefault) {
-      to_write = decal + "textOrientation:" + textOrientation + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("textOrientation:").append(textOrientation).append("\n");
     }
 
-    closeObjectHeader(f, level);
+    closeObjectHeader(to_write, level);
 
   }
 

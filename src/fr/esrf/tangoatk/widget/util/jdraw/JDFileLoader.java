@@ -22,9 +22,7 @@
  
 package fr.esrf.tangoatk.widget.util.jdraw;
 
-import java.io.InputStreamReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.awt.*;
 
@@ -56,7 +54,6 @@ public class JDFileLoader {
 
   private String word;
   private String version;
-  //FileReader f;
   InputStreamReader f;
 
   // Global param section
@@ -80,6 +77,18 @@ public class JDFileLoader {
    */
   public JDFileLoader(InputStreamReader insr) {
     f = insr;
+    CrtLine = 1;
+    CurrentChar = ' ';
+  }
+
+  /**
+   * Construct a JDFileLoader.
+   * @param str File to be read.
+   * @see #parseFile
+   */
+  public JDFileLoader(String str) {
+    ByteArrayInputStream bis = new ByteArrayInputStream(str.getBytes());
+    f = new InputStreamReader(bis);
     CrtLine = 1;
     CurrentChar = ' ';
   }

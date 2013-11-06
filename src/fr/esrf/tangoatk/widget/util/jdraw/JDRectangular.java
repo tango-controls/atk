@@ -28,8 +28,6 @@
 package fr.esrf.tangoatk.widget.util.jdraw;
 
 import java.awt.*;
-import java.io.FileWriter;
-import java.io.IOException;
 
 /**
  * JDraw Rectanglar graphic object (All object having a rectangular sizing behavior)
@@ -172,13 +170,11 @@ public abstract class JDRectangular extends JDObject {
     summit[7].y = (summit[0].y + summit[6].y)/2.0;
   }
 
-  void saveSummit(FileWriter f, String decal) throws IOException {
+  void recordSummit(StringBuffer to_write, StringBuffer decal)  {
 
-    String to_write;
-    to_write = decal + "summit:";
-    to_write += roundDouble(summit[0].x) + "," + roundDouble(summit[0].y) + ",";
-    to_write += roundDouble(summit[4].x) + "," + roundDouble(summit[4].y) + "\n";
-    f.write(to_write, 0, to_write.length());
+    to_write.append(decal).append("summit:");
+    to_write.append(roundDouble(summit[0].x)).append(",").append(roundDouble(summit[0].y)).append(",");
+    to_write.append(roundDouble(summit[4].x)).append(",").append(roundDouble(summit[4].y)).append("\n");
 
   }
 

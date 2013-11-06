@@ -25,7 +25,6 @@ package fr.esrf.tangoatk.widget.util.jdraw;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Vector;
 
@@ -917,7 +916,7 @@ public abstract class JDObject {
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
-  abstract void saveObject(FileWriter f, int level) throws IOException;
+  abstract void recordObject(StringBuffer to_write, int level);
 
   void loadDefaultPropery(JDFileLoader f, String propName) throws IOException {
 
@@ -1120,229 +1119,206 @@ public abstract class JDObject {
     return ret;
   }
 
-  private void saveMapper(FileWriter f,String name,JDValueProgram vm,String decal) throws IOException {
+  private void recordMapper(StringBuffer to_write, String name, JDValueProgram vm, StringBuffer decal) {
 
-    String to_write;
-
-    to_write = decal + name + ":{\n";
-    f.write(to_write);
-    vm.saveObject(f,decal+"  ");
-    to_write = decal + "}\n";
-    f.write(to_write);
+    to_write.append(decal).append(name).append(":{\n");
+    vm.recordObject(to_write, decal);
+    to_write.append(decal).append("}\n");
 
   }
 
-  private void saveExtensions(FileWriter f,String decal) throws IOException {
-
-    String to_write;
+  private void recordExtensions(StringBuffer to_write, StringBuffer decal) {
 
     int sz = getExtendedParamNumber();
     if( sz>0 ) {
       int i,j;
 
-      to_write = decal + "extensions:{\n";
-      f.write(to_write);
+      to_write.append(decal).append("extensions:{\n");
 
       for (i = 0; i < sz; i++) {
 
         // Write extension name
+        String extName;
+
         if( extParamName[i].indexOf(' ')>0 ) {
-          to_write = decal + "  \"" + extParamName[i] + "\":";
+          extName = decal + "  \"" + extParamName[i] + "\":";
         } else {
-          to_write = decal + "  " + extParamName[i] + ":";
+          extName = decal + "  " + extParamName[i] + ":";
         }
+        to_write.append(extName);
 
         // Write extension value
-        String decal2 = "";
+        StringBuffer decal2 = new StringBuffer();
         String[] vals = JDUtils.makeStringArray(extParamValue[i]);
-        for(j=0;j<to_write.length();j++) decal2 += " ";
+        for(j=0;j<extName.length();j++) decal2.append(" ");
 
         for(j=0;j<vals.length;j++) {
-          if(j>0) to_write = decal2;
-          to_write += "\"";
-          to_write += vals[j];
-          to_write += "\"";
-          if(j<vals.length-1) to_write += ",";
-          to_write += "\n";
-          f.write(to_write);
+          if(j>0) to_write.append(decal2);
+          to_write.append("\"");
+          to_write.append(vals[j]);
+          to_write.append("\"");
+          if(j<vals.length-1) to_write.append(",");
+          to_write.append("\n");
         }
 
       }
 
-      to_write = decal + "}\n";
-      f.write(to_write);
+      to_write.append(decal).append("}\n");
 
     }
 
   }
 
-  void saveSummit(FileWriter f, String decal) throws IOException {
+  void recordSummit(StringBuffer to_write, StringBuffer decal) {
 
-    String to_write;
     int i;
 
-    to_write = decal + "summit:";
+    to_write.append(decal).append("summit:");
     for (i = 0; i < summit.length; i++) {
       if (i != summit.length - 1) {
-        to_write += roundDouble(summit[i].x) + "," + roundDouble(summit[i].y) + ",";
+        to_write.append(roundDouble(summit[i].x)).append(",").append(roundDouble(summit[i].y)).append(",");
       } else {
-        to_write += roundDouble(summit[i].x) + "," + roundDouble(summit[i].y) + "\n";
+        to_write.append(roundDouble(summit[i].x)).append(",").append(roundDouble(summit[i].y)).append("\n");
       }
     }
-    f.write(to_write, 0, to_write.length());
 
   }
-  
-  String saveObjectHeader(FileWriter f, int level) throws IOException {
 
-    String to_write;
-    String decal = "";
-    int i;
-    for (i = 0; i < level; i++) decal += "  ";
+  StringBuffer recordObjectHeader(StringBuffer to_write,int level) {
 
-    to_write = decal + toString() + " {\n";
-    f.write(to_write, 0, to_write.length());
-    decal += "  ";
+    StringBuffer decal = new StringBuffer();
+    for (int i = 0; i < level; i++) decal.append("  ");
 
-    saveSummit(f,decal);
+    to_write.append(decal).append(toString()).append(" {\n");
+    decal.append("  ");
 
-    to_write = decal + "origin:" + roundDouble(origin.x) + "," + roundDouble(origin.y) + "\n";
-    f.write(to_write, 0, to_write.length());
+    recordSummit(to_write, decal);
+
+    to_write.append(decal).append("origin:");
+    to_write.append(roundDouble(origin.x)).append(",");
+    to_write.append(roundDouble(origin.y)).append("\n");
 
     if (foreground.getRGB() != foregroundDefault.getRGB()) {
-      to_write = decal + "foreground:" + foreground.getRed() + "," + foreground.getGreen() + "," + foreground.getBlue() + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("foreground:");
+      to_write.append(foreground.getRed()).append(",");
+      to_write.append(foreground.getGreen()).append(",");
+      to_write.append(foreground.getBlue()).append("\n");
     }
 
     if (background.getRGB() != backgroundDefault.getRGB()) {
-      to_write = decal + "background:" + background.getRed() + "," + background.getGreen() + "," + background.getBlue() + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("background:");
+      to_write.append(background.getRed()).append(",");
+      to_write.append(background.getGreen()).append(",");
+      to_write.append(background.getBlue()).append("\n");
     }
 
     if (fillStyle != fillStyleDefault) {
-      to_write = decal + "fillStyle:" + fillStyle + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("fillStyle:").append(fillStyle).append("\n");
     }
 
     if (lineWidth != lineWidthDefault) {
-      to_write = decal + "lineWidth:" + lineWidth + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("lineWidth:").append(lineWidth).append("\n");
     }
 
     if( antiAlias != antiAliasDefault ) {
-      to_write = decal + "antiAlias:" + antiAlias + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("antiAlias:").append(antiAlias).append("\n");
     }
 
     if (lineStyle != lineStyleDefault) {
-      to_write = decal + "lineStyle:" + lineStyle + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("lineStyle:").append(lineStyle).append("\n");
     }
 
     if (isShadowed != isShadowedDefault) {
-      to_write = decal + "isShadowed:" + isShadowed + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("isShadowed:").append(isShadowed).append("\n");
     }
 
     if (invertShadow != invertShadowDefault) {
-      to_write = decal + "invertShadow:" + invertShadow + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("invertShadow:").append(invertShadow).append("\n");
     }
 
     if (shadowThickness != shadowThicknessDefault) {
-      to_write = decal + "shadowThickness:" + shadowThickness + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("shadowThickness:").append(shadowThickness).append("\n");
     }
 
     if (visible != visibleDefault) {
-      to_write = decal + "visible:" + visible + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("visible:").append(visible).append("\n");
     }
 
     if( minValue != minValueDefault ) {
-      to_write = decal + "minvalue:" + minValue + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("minvalue:").append(minValue).append("\n");
     }
 
     if( maxValue != maxValueDefault ) {
-      to_write = decal + "maxvalue:" + maxValue + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("maxvalue:").append(maxValue).append("\n");
     }
 
     if( initValue != initValueDefault ) {
-      to_write = decal + "initvalue:" + initValue + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("initvalue:").append(initValue).append("\n");
     }
 
     if( userValue != userValueDefault ) {
-      to_write = decal + "uservalue:" + userValue + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("uservalue:").append(userValue).append("\n");
     }
 
     if( valueChangeMode != valueChangeModeDefault ) {
-      to_write = decal + "valuechangemode:" + valueChangeMode + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("valuechangemode:").append(valueChangeMode).append("\n");
     }
 
     if (!name.equals(nameDefault)) {
-      to_write = decal + "name:\"" + name + "\"\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("name:\"").append(name).append("\"\n");
     }
 
     if( gradientX1 != gradientX1default ) {
-      to_write = decal + "gradX1:" + gradientX1 + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("gradX1:").append(gradientX1).append("\n");
     }
 
     if( gradientX2 != gradientX2default ) {
-      to_write = decal + "gradX2:" + gradientX2 + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("gradX2:").append(gradientX2).append("\n");
     }
 
     if( gradientY1 != gradientY1default ) {
-      to_write = decal + "gradY1:" + gradientY1 + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("gradY1:").append(gradientY1).append("\n");
     }
 
     if( gradientY2 != gradientY2default ) {
-      to_write = decal + "gradY2:" + gradientY2 + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("gradY2:").append(gradientY2).append("\n");
     }
 
     if (gradientCyclic != gradientCyclicdefault) {
-      to_write = decal + "gradCyclic:" + gradientCyclic + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("gradCyclic:").append(gradientCyclic).append("\n");
     }
 
     if (gradientC1.getRGB() != gradientC1default.getRGB()) {
-      to_write = decal + "gradC1:" + gradientC1.getRed() + "," + gradientC1.getGreen() + "," + gradientC1.getBlue() + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("gradC1:");
+      to_write.append(gradientC1.getRed()).append(",");
+      to_write.append(gradientC1.getGreen()).append(",");
+      to_write.append(gradientC1.getBlue()).append("\n");
     }
 
     if (gradientC2.getRGB() != gradientC2default.getRGB()) {
-      to_write = decal + "gradC2:" + gradientC2.getRed() + "," + gradientC2.getGreen() + "," + gradientC2.getBlue() + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("gradC2:");
+      to_write.append(gradientC2.getRed()).append(",");
+      to_write.append(gradientC2.getGreen()).append(",");
+      to_write.append(gradientC2.getBlue()).append("\n");
     }
 
-    saveExtensions(f,decal);
-    if(hasBackgroundMapper()) saveMapper(f,"backgroundmapper",backgroundMapper,decal);
-    if(hasForegroundMapper()) saveMapper(f,"foregroundmapper",foregroundMapper,decal);
-    if(hasVisibilityMapper()) saveMapper(f,"visibilitymapper",visibilityMapper,decal);
-    if(hasInvertShadowMapper()) saveMapper(f,"invertshadowmapper",invertShadowMapper,decal);
-    if(hasHTranslationMapper()) saveMapper(f,"htranslationmapper",hTranslationMapper,decal);
-    if(hasVTranslationMapper()) saveMapper(f,"vtranslationmapper",vTranslationMapper,decal);
+    recordExtensions(to_write, decal);
+    if(hasBackgroundMapper()) recordMapper(to_write, "backgroundmapper", backgroundMapper, decal);
+    if(hasForegroundMapper()) recordMapper(to_write, "foregroundmapper", foregroundMapper, decal);
+    if(hasVisibilityMapper()) recordMapper(to_write, "visibilitymapper", visibilityMapper, decal);
+    if(hasInvertShadowMapper()) recordMapper(to_write, "invertshadowmapper", invertShadowMapper, decal);
+    if(hasHTranslationMapper()) recordMapper(to_write, "htranslationmapper", hTranslationMapper, decal);
+    if(hasVTranslationMapper()) recordMapper(to_write, "vtranslationmapper", vTranslationMapper, decal);
 
     return decal;
   }
 
-  void closeObjectHeader(FileWriter f, int level) throws IOException {
+  void closeObjectHeader(StringBuffer to_write, int level) {
 
-    String to_write;
-    String decal = "";
-    for (int i = 0; i < level; i++) decal += "  ";
+    StringBuffer decal = new StringBuffer();
+    for (int i = 0; i < level; i++) decal.append("  ");
 
-    to_write = decal + "}\n";
-    f.write(to_write, 0, to_write.length());
+    to_write.append(decal).append("}\n");
 
   }
 

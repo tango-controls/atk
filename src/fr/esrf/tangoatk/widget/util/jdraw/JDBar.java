@@ -25,7 +25,6 @@ package fr.esrf.tangoatk.widget.util.jdraw;
 import java.awt.geom.Point2D;
 import java.awt.*;
 import java.io.IOException;
-import java.io.FileWriter;
 
 /** JDraw Bar graphic object.
  */
@@ -348,36 +347,31 @@ public class JDBar extends JDRectangular {
   // -----------------------------------------------------------
   // Configuration management
   // -----------------------------------------------------------
-  void saveObject(FileWriter f,int level) throws IOException {
+  void recordObject(StringBuffer to_write,int level) {
 
-    String decal = saveObjectHeader(f,level);
+    StringBuffer decal = recordObjectHeader(to_write,level);
 
     if(min!=minDefault) {
-      String to_write = decal + "minBar:" + min + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("minBar:").append(min).append("\n");
     }
 
     if(max!=maxDefault) {
-      String to_write = decal + "maxBar:" + max + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("maxBar:").append(max).append("\n");
     }
 
     if(value!=valueDefault) {
-      String to_write = decal + "valueBar:" + value + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("valueBar:").append(value).append("\n");
     }
 
     if(orientation!=orientationDefault) {
-      String to_write = decal + "orientation:" + orientation + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("orientation:").append(orientation).append("\n");
     }
 
     if (outLineVisible != outLineVisibleDefault) {
-      String to_write = decal + "outLineVisible:" + outLineVisible + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("outLineVisible:").append(outLineVisible).append("\n");
     }
 
-    closeObjectHeader(f,level);
+    closeObjectHeader(to_write,level);
 
   }
 
