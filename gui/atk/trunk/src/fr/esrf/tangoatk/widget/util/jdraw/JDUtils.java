@@ -29,12 +29,9 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
+import java.awt.event.*;
 import java.util.Vector;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ComponentListener;
-import java.awt.event.ComponentEvent;
 
 class JDUtils {
 
@@ -381,6 +378,11 @@ class JDUtils {
     propDlg.setContentPane(gEdit);
     propDlg.setTitle("Group Editor [" + g.getName() + "]");
     propDlg.setResizable(true);
+    propDlg.addWindowListener(new WindowAdapter() {
+      public void windowActivated(WindowEvent e) {
+        JDClipboard.getInstance().check();
+      }
+    });
     ATKGraphicsUtils.centerDialog(propDlg);
     propDlg.setVisible(true);
     propDlg.dispose();

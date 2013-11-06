@@ -34,13 +34,14 @@ public class JDClipboard {
 
   private Vector objects;
   Clipboard clipboard;
+  private Vector clipboardListener;
 
   static JDClipboard theClipboard = null;
-
 
   private JDClipboard() {
 
     objects = new Vector();
+    clipboardListener = new Vector();
     clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 
   }
@@ -53,45 +54,42 @@ public class JDClipboard {
 
   }
 
-  void clear() {
+  public void addChangeListener(JDrawEditorListener l) {
+    if(!clipboardListener.contains(l)) clipboardListener.add(l);
+  }
 
-    objects.clear();
+  public void flavorsChanged(FlavorEvent e) {
+    check();
+  }
 
+  public void check() {
+    load(true);
+    for(int i=0;i<clipboardListener.size();i++)
+      ((JDrawEditorListener)clipboardListener.get(i)).clipboardChanged();
   }
 
   int size() {
-
     return objects.size();
-
   }
 
-  void addObjects(Vector objs) {
-
-    objects.addAll(objs);
-
-  }
-
-  void addObject(JDObject obj) {
-
-    objects.add(obj);
-
-  }
-
-  void commit() {
+  void send(Vector objs) {
 
     StringBuffer to_save = new StringBuffer();
 
     to_save.append("JDFile v11 {\n");
-    for(int i=0;i<objects.size();i++)
-      ((JDObject)objects.get(i)).recordObject(to_save,1);
+    for(int i=0;i<objs.size();i++)
+      ((JDObject)objs.get(i)).recordObject(to_save,1);
     to_save.append("}\n");
 
     StringSelection str = new StringSelection(to_save.toString());
     clipboard.setContents(str, null);
 
+    objects.clear();
+    objects.addAll(objs);
+
   }
 
-  void load(boolean showError) {
+  private void load(boolean showError) {
 
     objects.clear();
 
@@ -106,10 +104,12 @@ public class JDClipboard {
     } catch (UnsupportedFlavorException e1) {
       if(showError)
         JOptionPane.showMessageDialog(null, "Invalid clipboard content.\n" + e1.getMessage());
+      System.out.println(e1.getMessage());
       return;
     } catch (IOException e2) {
       if(showError)
         JOptionPane.showMessageDialog(null, "Invalid clipboard content.\n" + e2.getMessage());
+      System.out.println(e2.getMessage());
       return;
     }
 
