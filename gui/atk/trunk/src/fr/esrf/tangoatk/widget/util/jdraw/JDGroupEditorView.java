@@ -241,9 +241,6 @@ class JDGroupEditorView extends JComponent implements JDrawEditorListener,Action
 
     add(menuBar,BorderLayout.NORTH);
 
-    // Copy clipboard
-    theEditor.setClipboard(invoker.getClipboardObjects());
-
     // Update controls
     selectionChanged();
     valueChanged();
@@ -312,8 +309,7 @@ class JDGroupEditorView extends JComponent implements JDrawEditorListener,Action
     } else if (src==editCopyMenuItem) {
       theEditor.copySelection();
     } else if (src==editPasteMenuItem) {
-      Point p = JDUtils.getTopLeftCorner(theEditor.getClipboardObjects());
-      theEditor.pasteClipboard(p.x+30, p.y+30);
+      theEditor.pasteClipboard(30,30,false);
     } else if (src==editDeleteMenuItem) {
       theEditor.deleteSelection();
     } else if (src==editSelectAllMenuItem) {
@@ -322,8 +318,6 @@ class JDGroupEditorView extends JComponent implements JDrawEditorListener,Action
       theEditor.unselectAll();
     } else if (src==exitMenuItem) {
       ATKGraphicsUtils.getWindowForComponent(this).setVisible(false);
-      invoker.setClipboard(theEditor.getClipboardObjects());
-      invoker.fireClipboardChange();
     } else if (src==viewsOptionMenuItem) {
       theEditor.showPropertyWindow();
     } else if (src == viewsGroupEditMenuItem) {

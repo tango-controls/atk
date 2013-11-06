@@ -26,7 +26,6 @@
 package fr.esrf.tangoatk.widget.util.jdraw;
 
 import java.awt.geom.Point2D;
-import java.io.FileWriter;
 import java.io.IOException;
 
 /** JDraw Rectangle graphic object.
@@ -211,10 +210,10 @@ public class JDRectangle extends JDRectangular implements JDPolyConvert {
   // -----------------------------------------------------------
   // Configuration management
   // -----------------------------------------------------------
-  void saveObject(FileWriter f,int level) throws IOException {
+  void recordObject(StringBuffer to_write,int level) {
 
-    saveObjectHeader(f,level);
-    closeObjectHeader(f,level);
+    recordObjectHeader(to_write,level);
+    closeObjectHeader(to_write,level);
 
   }
 

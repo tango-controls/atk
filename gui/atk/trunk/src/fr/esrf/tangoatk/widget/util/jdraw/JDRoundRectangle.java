@@ -29,7 +29,6 @@ package fr.esrf.tangoatk.widget.util.jdraw;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
-import java.io.FileWriter;
 import java.io.IOException;
 
 /** JDraw Rectangle graphic object.
@@ -294,23 +293,19 @@ public class JDRoundRectangle extends JDRectangular implements JDPolyConvert {
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
-  void saveObject(FileWriter f, int level) throws IOException {
+  void recordObject(StringBuffer to_write, int level) {
 
-    String decal = saveObjectHeader(f, level);
-
-    String to_write;
+    StringBuffer decal = recordObjectHeader(to_write, level);
 
     if (step != stepDefault) {
-      to_write = decal + "step:" + step + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("step:").append(step).append("\n");
     }
 
     if (cornerWidth != cornerWidthDefault) {
-      to_write = decal + "cornerWidth:" + cornerWidth + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("cornerWidth:").append(cornerWidth).append("\n");
     }
 
-    closeObjectHeader(f, level);
+    closeObjectHeader(to_write, level);
 
   }
 

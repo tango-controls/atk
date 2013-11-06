@@ -66,8 +66,11 @@ ALL = $(TARGET)/GraphicsUtils.class \
 	$(TARGET)/UndoPattern.class \
 	$(TARGET)/JDNode.class \
 	$(TARGET)/JDEntityNode.class \
-	$(TARGET)/JDDeviceTree.class
-#	$(TARGET)/JDrawEditorFrame.class \
+	$(TARGET)/JDDeviceTree.class \
+	$(TARGET)/JDClipboard.class
+
+#	$(TARGET)/JDrawEditorPanel.class \  # Done in fr.esrf.tangoatk.widget.jdraw (for the tango synoptic handler)
+#	$(TARGET)/JDrawEditorFrame.class \  # Done in fr.esrf.tangoatk.widget.jdraw (for the tango synoptic handler)
 
 all: gifs utils
 

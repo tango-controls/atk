@@ -25,7 +25,6 @@ package fr.esrf.tangoatk.widget.util.jdraw;
 import java.awt.geom.Point2D;
 import java.awt.*;
 import java.io.IOException;
-import java.io.FileWriter;
 import java.util.Vector;
 
 /** JDraw Slider graphic object.
@@ -373,35 +372,30 @@ public class JDSlider extends JDRectangular {
   // -----------------------------------------------------------
   // Configuration management
   // -----------------------------------------------------------
-  void saveObject(FileWriter f,int level) throws IOException {
+  void recordObject(StringBuffer to_write,int level) {
 
-    String decal = saveObjectHeader(f,level);
+    StringBuffer decal = recordObjectHeader(to_write,level);
 
     if(min!=minDefault) {
-      String to_write = decal + "minSlider:" + min + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("minSlider:").append(min).append("\n");
     }
 
     if(max!=maxDefault) {
-      String to_write = decal + "maxSlider:" + max + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("maxSlider:").append(max).append("\n");
     }
 
     if(value!=valueDefault) {
-      String to_write = decal + "valueSlider:" + value + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("valueSlider:").append(value).append("\n");
     }
 
     if(orientation!=orientationDefault) {
-      String to_write = decal + "orientation:" + orientation + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("orientation:").append(orientation).append("\n");
     }
 
-    String to_write = decal + "cursor:\n";
-    f.write(to_write, 0, to_write.length());
-    cursor.saveObject(f, level+2);
+    to_write.append(decal).append("cursor:\n");
+    cursor.recordObject(to_write, level+2);
 
-    closeObjectHeader(f,level);
+    closeObjectHeader(to_write,level);
 
   }
 

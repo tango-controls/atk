@@ -89,7 +89,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
   // Private declaration
   private Vector objects;
-  private Vector clipboard;
+  private JDClipboard clipboard;
   private Vector undo;
   private int undoPos;
   private int curObject;
@@ -251,7 +251,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
     switch(mode) {
       case MODE_EDIT:
-        clipboard = new Vector();
+        clipboard = JDClipboard.getInstance();
         tmpPoints = new Vector();
         undo = new Vector();
         clearUndo();
@@ -259,7 +259,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
         break;
       case MODE_EDIT_GROUP:
         tmpPoints = new Vector();
-        clipboard = new Vector();
+        clipboard = JDClipboard.getInstance();
         createContextualMenu();
         break;
       case MODE_LIB:
@@ -402,16 +402,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   /** Used for read only purpose , vector should not be modified by this way. */
   public Vector getSelectedObjects() {
     return selObjects;
-  }
-
-  /** Used for read only purpose , vector should not be modified by this way. */
-  public Vector getClipboardObjects() {
-    return clipboard;
-  }
-
-  void setClipboard(Vector objects) {
-    clipboard.clear();
-    clipboard.addAll(objects);
   }
 
   /** Unselect all object */
@@ -616,8 +606,8 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
    */
   void addObjectToClipboard(Vector objs) {
     clipboard.clear();
-    for (int i = 0; i < objs.size(); i++)
-      clipboard.add(((JDObject)objs.get(i)).copy(0,0));
+    clipboard.addObjects(objs);
+    clipboard.commit();
     fireClipboardChange();
   }
 
@@ -633,15 +623,21 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   * @param x Up left corner x coordinate
   * @param y Up left corner y coordinate
   */
-  public void pasteClipboard(int x, int y) {
+  public void pasteClipboard(int x, int y, boolean fromOrigin) {
     if(mode==MODE_PLAY) return;
     if(mode==MODE_LIB) return;
+
+    clipboard.load(true);
     if(clipboard.size()==0) return;
 
     unselectAll(false);
-    Point org = JDUtils.getTopLeftCorner(clipboard);
-    int tx=x - org.x;
-    int ty=y - org.y;
+    int tx = x;
+    int ty = y;
+    if( fromOrigin ) {
+      Point org = JDUtils.getTopLeftCorner(clipboard.getObjects());
+      tx -= org.x;
+      ty -= org.y;
+    }
 
     if( alignToGrid ) {
       tx = ((tx + GRID_SIZE / 2) / GRID_SIZE) * GRID_SIZE;
@@ -650,7 +646,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
     boolean hasSwing=false;
     for (int i = 0; i < clipboard.size(); i++) {
-      JDObject n = ((JDObject) clipboard.get(i)).copy(tx,ty);
+      JDObject n = clipboard.get(i).copy(tx, ty);
       hasSwing = (n instanceof JDSwingObject) || hasSwing;
       objects.add(n);
       selObjects.add(n);
@@ -691,7 +687,9 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     if(selObjects.size()==0) return;
     clipboard.clear();
     objects.removeAll(selObjects);
-    clipboard.addAll(selObjects);
+    clipboard.clear();
+    clipboard.addObjects(selObjects);
+    clipboard.commit();
     repaint(buildRepaintRect(selObjects));
     selObjects.clear();
     editedPolyline = null;
@@ -767,16 +765,26 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
       fileName = fName + ".jdw";
     }
 
+    // Create the file into a string buffer
+    StringBuffer to_save = new StringBuffer();
+    to_save.append("JDFile v11 {\n");
+    to_save.append("  Global {\n");
+    if(getBackground().getRGB()!=defaultBackground.getRGB()) {
+      to_save.append("    background:");
+      to_save.append(getBackground().getRed()).append(",");
+      to_save.append(getBackground().getGreen()).append(",");
+      to_save.append(getBackground().getBlue());
+      to_save.append("\n");
+    }
+    to_save.append("  }\n");
+    for (int i = 0; i < objects.size(); i++)
+      ((JDObject) objects.get(i)).recordObject(to_save, 1);
+    to_save.append("}\n");
+
+    // Save it
     FileWriter fw = new FileWriter(fileName);
     try {
-      fw.write("JDFile v11 {\n");
-      fw.write("  Global {\n");
-      if(getBackground().getRGB()!=defaultBackground.getRGB())
-        fw.write("background:" + getBackground().getRed() + "," + getBackground().getGreen() + "," + getBackground().getBlue());
-      fw.write("  }\n");
-      for (int i = 0; i < objects.size(); i++)
-        ((JDObject) objects.get(i)).saveObject(fw, 1);
-      fw.write("}\n");
+      fw.write(to_save.toString(),0,to_save.length());
       fw.close();
     } catch (IOException e) {
       fw.close();
@@ -797,7 +805,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
         JOptionPane.showMessageDialog(this, "Error during saving file.\n" + e.getMessage());
       }
     } else {
-      showSaveDialog(defaultDir);
+      if(defaultDir!=null) showSaveDialog(defaultDir);
     }
 
   }
@@ -2317,7 +2325,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     } else if (src == copyMenuItem) {
       copySelection();
     } else if (src == pasteMenuItem) {
-      pasteClipboard(lastX, lastY);
+      pasteClipboard(lastX, lastY, true);
     } else if (src == cutMenuItem) {
       cutSelection();
     } else if (src == deleteMenuItem) {
@@ -3336,7 +3344,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
       case CREATE_CLIPBOARD:
         creationMode = 0;
-        pasteClipboard(ex, ey);
+        pasteClipboard(ex, ey, true);
         fireCreationDone();
         return true;
 

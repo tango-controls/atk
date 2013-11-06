@@ -24,7 +24,6 @@ package fr.esrf.tangoatk.widget.util.jdraw;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
-import java.io.FileWriter;
 import java.io.IOException;
 
 /** JDraw Ellipse graphic object.
@@ -315,31 +314,27 @@ public class JDEllipse extends JDRectangular implements JDPolyConvert {
     updateShape();
   }
 
-  void saveObject(FileWriter f,int level) throws IOException {
+  void recordObject(StringBuffer to_write,int level) {
 
-    String decal = saveObjectHeader(f,level);
+    StringBuffer decal = recordObjectHeader(to_write,level);
 
     if(step!=stepDefault) {
-      String to_write = decal + "step:" + step + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("step:").append(step).append("\n");
     }
 
     if(angleStart!=angleStartDefault) {
-      String to_write = decal + "angle_start:" + angleStart + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("angle_start:").append(angleStart).append("\n");
     }
 
     if(angleExtent!=angleExtentDefault) {
-      String to_write = decal + "angle_extent:" + angleExtent + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("angle_extent:").append(angleExtent).append("\n");
     }
 
     if(arcType!=arcTypeDefault) {
-      String to_write = decal + "arc_type:" + arcType + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("arc_type:").append(arcType).append("\n");
     }
 
-    closeObjectHeader(f,level);
+    closeObjectHeader(to_write,level);
   }
 
   // -----------------------------------------------------------

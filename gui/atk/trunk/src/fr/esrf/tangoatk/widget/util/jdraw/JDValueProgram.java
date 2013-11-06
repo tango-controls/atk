@@ -25,7 +25,6 @@ package fr.esrf.tangoatk.widget.util.jdraw;
 
 import java.util.Vector;
 import java.awt.*;
-import java.io.FileWriter;
 import java.io.IOException;
 
 /* ------------ mapEntry classes ---------------------------*/
@@ -365,30 +364,23 @@ public class JDValueProgram {
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
-  public void saveObject(FileWriter f, String decal) throws IOException {
+  public void recordObject(StringBuffer to_write, StringBuffer decal) {
 
-
-    String to_write;
     int i;
 
-    to_write = decal + "mapping_type:"    + type + "\n";
-    f.write(to_write);
-    to_write = decal + "mode:"    + mode + "\n";
-    f.write(to_write);
-    to_write = decal + "default:" + getDefaultMapping() + "\n";
-    f.write(to_write);
+    to_write.append("  ").append(decal).append("mapping_type:").append(type).append("\n");
+    to_write.append("  ").append(decal).append("mode:").append(mode).append("\n");
+    to_write.append("  ").append(decal).append("default:").append(getDefaultMapping()).append("\n");
     switch( mode ) {
       case MAP_BY_VALUE:
         for(i=0;i<getEntryNumber();i++) {
-          to_write = decal + "map:" + getCompleteValue(i) + "," + getMapping(i) + "\n";
-          f.write(to_write);
+          to_write.append("  ").append(decal).append("map:");
+          to_write.append(getCompleteValue(i)).append(",").append(getMapping(i)).append("\n");
         }
         break;
       case MAP_LINEAR:
-        to_write = decal + "lmin:" + getMinLinearMapping() + "\n";
-        f.write(to_write);
-        to_write = decal + "lmax:" + getMaxLinearMapping() + "\n";
-        f.write(to_write);
+        to_write.append("  ").append(decal).append("lmin:").append(getMinLinearMapping()).append("\n");
+        to_write.append("  ").append(decal).append("lmax:").append(getMaxLinearMapping()).append("\n");
         break;
     }
 

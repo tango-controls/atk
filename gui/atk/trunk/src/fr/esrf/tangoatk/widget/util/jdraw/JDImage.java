@@ -30,7 +30,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.File;
 import java.io.InputStream;
@@ -294,13 +293,11 @@ public class JDImage extends JDRectangular {
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
-  void saveObject(FileWriter f, int level) throws IOException {
+  void recordObject(StringBuffer to_write, int level) {
 
-    String decal = saveObjectHeader(f, level);
-    String to_write;
-    to_write = decal + "file_name:\"" + fileName + "\"\n";
-    f.write(to_write, 0, to_write.length());
-    closeObjectHeader(f, level);
+    StringBuffer decal = recordObjectHeader(to_write, level);
+    to_write.append(decal).append("file_name:\"").append(fileName).append("\"\n");
+    closeObjectHeader(to_write, level);
 
   }
 

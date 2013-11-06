@@ -27,7 +27,6 @@ package fr.esrf.tangoatk.widget.util.jdraw;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
-import java.io.FileWriter;
 import java.io.IOException;
 
 /** JDraw Line graphic object.
@@ -304,23 +303,19 @@ public class JDLine extends JDObject implements JDRotatable {
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
-  void saveObject(FileWriter f, int level) throws IOException {
+  void recordObject(StringBuffer to_write, int level) {
 
-    String decal = saveObjectHeader(f, level);
-
-    String to_write;
+    StringBuffer decal = recordObjectHeader(to_write, level);
 
     if (arrowWidth != arrowWidthDefault) {
-      to_write = decal + "arrowWidth:" + arrowWidth + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("arrowWidth:").append(arrowWidth).append("\n");
     }
 
     if (arrowMode != arrowModeDefault) {
-      to_write = decal + "arrowMode:" + arrowMode + "\n";
-      f.write(to_write, 0, to_write.length());
+      to_write.append(decal).append("arrowMode:").append(arrowMode).append("\n");
     }
 
-    closeObjectHeader(f, level);
+    closeObjectHeader(to_write, level);
 
   }
 
