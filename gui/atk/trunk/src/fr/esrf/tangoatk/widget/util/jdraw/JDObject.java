@@ -196,9 +196,11 @@ public abstract class JDObject {
   void initDefault() {
 
     // normalize light vector
-    double n = Math.sqrt(lightx * lightx + lighty * lighty);
-    lightx = lightx / n;
-    lighty = lighty / n;
+    //double n = Math.sqrt(lightx * lightx + lighty * lighty);
+    //lightx = lightx / n;
+    //lighty = lighty / n;
+    lightx = 0.707106781186;
+    lighty = 0.707106781186;
     sBoundRect = new Rectangle();
 
     foreground = foregroundDefault;
