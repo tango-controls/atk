@@ -1597,6 +1597,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
       genFormatUS = null;
 
       reset(false);
+      setDisplayDuration(maxTime-minTime);
 
       for (int i = 0; i < views.length; i++) {
         getY1Axis().addDataView(views[i]);
@@ -1604,13 +1605,6 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
       getXAxis().setAnnotation(annotationType);
 
-      if ( getY1Axis().getViews().isEmpty()
-                && getY2Axis().getViews().isEmpty()
-                && getXAxis().getViews().isEmpty() ) {
-          getXAxis().setAutoScale( false );
-          getXAxis().setMinimum( minTime );
-          getXAxis().setMaximum( maxTime );
-      }
 
       repaint();
       defaultColor = null;
