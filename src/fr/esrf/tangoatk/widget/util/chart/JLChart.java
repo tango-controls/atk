@@ -3191,7 +3191,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     int ok = JOptionPane.YES_OPTION;
     JFileChooser chooser = new JFileChooser(lastDataFileLocation);
     chooser.setDialogTitle("Load Graph Data (Text file with TAB separated fields)");
-    int returnVal = chooser.showSaveDialog(this);
+    int returnVal = chooser.showOpenDialog(this);
 
     if (returnVal == JFileChooser.APPROVE_OPTION) {
 
