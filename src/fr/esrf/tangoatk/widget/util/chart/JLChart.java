@@ -63,6 +63,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Vector;
 import javax.imageio.ImageIO;
 import javax.swing.Box;
@@ -1461,156 +1462,139 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
    * Loads a data file and add the corresponding data to Y1 axis
    * @param fileName the full path of the data file
    */
+
   public void loadDataFile(String fileName) {
-    try
-    {
-        File dataFile = new File(fileName);
-        BufferedReader reader = new BufferedReader(new FileReader(dataFile));
-        String line = "";
-        line = reader.readLine();
-        if ("".equals(line.trim())) throw new Exception();
-        String[] parsedLine = line.split("\t");
-        int annotationType = -1;
-        if ( "Time (s)".equals(parsedLine[0].trim()) )
-        {
-            annotationType = JLAxis.TIME_ANNO;
-        }
-        else if ( "Index".equals(parsedLine[0].trim()) )
-        {
-            annotationType = JLAxis.VALUE_ANNO;
-        }
-        else {
-            reader.close();
-            reader = null;
-            dataFile = null;
-            line = null;
-            parsedLine = null;
-            throw new Exception("Failed to read X Axis annotation type");
-        }
 
-        Vector<JLDataView>  existingViews = new Vector<JLDataView>();
-        if (xAxis.isXY()) existingViews.addAll(xAxis.getViews());
-        existingViews.addAll(y1Axis.getViews());
-        existingViews.addAll(y2Axis.getViews());
-        if (existingViews.size() != 0 && annotationType != getXAxis().getAnnotation()) {
-            existingViews.clear();
-            existingViews = null;
-            String warning = "Loading this file will change X Axis annotation type.\n"
-                           + "Your component may not work any more.\n"
-                           + "Are you sure to load this file ?";
-            int choice = JOptionPane.showConfirmDialog(
-                    this,
-                    warning,
-                    "Risk of breaking component",
-                    JOptionPane.WARNING_MESSAGE
-            );
-            if (choice != JOptionPane.OK_OPTION) {
-                reader.close();
-                reader = null;
-                dataFile = null;
-                line = null;
-                parsedLine = null;
-                return;
-            }
-        }
+    try {
 
-        lastDataFileLocation = dataFile.getParentFile().getAbsolutePath();
-        int viewCount = parsedLine.length - 1;
-        if (viewCount < 0) throw new Exception();
-        JLDataView[] views = new JLDataView[viewCount];
-        Color[] defaultColor = {
-            Color.red,
-            Color.blue,
-            Color.cyan,
-            Color.green,
-            Color.magenta,
-            Color.orange,
-            Color.pink,
-            Color.yellow,
-            Color.black
-        };
-        for (int i = 0; i < views.length; i++)
-        {
-          views[i] = new JLDataView();
-          views[i].setName(parsedLine[i+1].trim());
-          views[i].setLineWidth(1);
-          views[i].setColor(defaultColor[i % defaultColor.length]);
-          views[i].setStyle(JLDataView.STYLE_SOLID);
-          views[i].setViewType(JLDataView.TYPE_LINE);
-          views[i].setMarkerSize(5);
-          views[i].setMarker(JLDataView.MARKER_BOX);
-          views[i].setMarkerColor(views[i].getColor());
-        }
-
-        double time = 0;
-//        double minTime = Double.MAX_VALUE, maxTime = -Double.MAX_VALUE;
-
-        SimpleDateFormat genFormatFR = new SimpleDateFormat(FR_DATE_FORMAT);
-        SimpleDateFormat genFormatUS = new SimpleDateFormat(US_DATE_FORMAT);
-        while(true)
-        {
-          line = reader.readLine();
-          if (line == null)
-          {
-            break;
-          }
-          parsedLine = line.split("\t");
-          if (parsedLine.length - 1 != viewCount) throw new Exception();
-          if (annotationType == JLAxis.TIME_ANNO) {
-            try
-            {
-              time = Double.parseDouble(parsedLine[0]) * 1000;
-            }
-            catch(NumberFormatException e)
-            {
-              if ( parsedLine[0].indexOf(".") == -1 ) {
-                parsedLine[0] = parsedLine[0] + ( ".000" );
-              }
-              if ( parsedLine[0].indexOf("-") != 4 )
-              {
-                genFormatFR.parse(parsedLine[0]);
-                time = genFormatFR.getCalendar().getTimeInMillis();
-              }
-              else
-              {
-                genFormatUS.parse(parsedLine[0]);
-                time = genFormatUS.getCalendar().getTimeInMillis();
-              }
-            }
-          }
-          else {
-            try {
-              time = Double.parseDouble(parsedLine[0]);
-            }
-            catch (NumberFormatException nfe) {
-              continue; // error on this line, try to read the other ones
-            }
-          }
-//          if (time > maxTime) maxTime = time;
-//          if (time < minTime) minTime = time;
-          for (int i = 0; i < views.length; i++)
-          {
-            try
-            {
-              views[i].add(time, Double.parseDouble(parsedLine[i+1]));
-            }
-            catch(NumberFormatException nfe)
-            {
-              if ( "null".equalsIgnoreCase(parsedLine[i+1].trim()) ) {
-                // case null
-                views[i].add(time, JLDataView.NAN_FOR_NULL);
-              }
-              else continue;// no data at this time
-            }
-          }
-        }
+      int curLine = 0;
+      File dataFile = new File(fileName);
+      BufferedReader reader = new BufferedReader(new FileReader(dataFile));
+      String line = "";
+      line = reader.readLine();curLine++;
+      if ("".equals(line.trim())) throw new Exception("Empty file");
+      String[] parsedLine = line.split("\t");
+      int annotationType = -1;
+      if ("Time (s)".equals(parsedLine[0].trim())) {
+        annotationType = JLAxis.TIME_ANNO;
+      } else if ("Index".equals(parsedLine[0].trim())) {
+        annotationType = JLAxis.VALUE_ANNO;
+      } else {
         reader.close();
         reader = null;
         dataFile = null;
         line = null;
         parsedLine = null;
-        genFormatFR = null;
-        genFormatUS = null;
+        throw new Exception("Failed to read X Axis annotation type");
+      }
+
+      Vector<JLDataView> existingViews = new Vector<JLDataView>();
+      if (xAxis.isXY()) existingViews.addAll(xAxis.getViews());
+      existingViews.addAll(y1Axis.getViews());
+      existingViews.addAll(y2Axis.getViews());
+      if (existingViews.size() != 0 && annotationType != getXAxis().getAnnotation()) {
+        existingViews.clear();
+        existingViews = null;
+        String warning = "Loading this file will change X Axis annotation type.\n"
+                + "Your component may not work any more.\n"
+                + "Are you sure to load this file ?";
+        int choice = JOptionPane.showConfirmDialog(
+                this,
+                warning,
+                "Risk of breaking component",
+                JOptionPane.WARNING_MESSAGE
+        );
+        if (choice != JOptionPane.OK_OPTION) {
+          reader.close();
+          reader = null;
+          dataFile = null;
+          line = null;
+          parsedLine = null;
+          return;
+        }
+      }
+
+      lastDataFileLocation = dataFile.getParentFile().getAbsolutePath();
+      int viewCount = parsedLine.length - 1;
+      if (viewCount < 0) throw new Exception();
+      JLDataView[] views = new JLDataView[viewCount];
+      Color[] defaultColor = {
+              Color.red,
+              Color.blue,
+              Color.cyan,
+              Color.green,
+              Color.magenta,
+              Color.orange,
+              Color.pink,
+              Color.yellow,
+              Color.black
+      };
+      for (int i = 0; i < views.length; i++) {
+        views[i] = new JLDataView();
+        views[i].setName(parsedLine[i + 1].trim());
+        views[i].setLineWidth(1);
+        views[i].setColor(defaultColor[i % defaultColor.length]);
+        views[i].setStyle(JLDataView.STYLE_SOLID);
+        views[i].setViewType(JLDataView.TYPE_LINE);
+        views[i].setMarkerSize(5);
+        views[i].setMarker(JLDataView.MARKER_BOX);
+        views[i].setMarkerColor(views[i].getColor());
+      }
+
+      double time = 0;
+//        double minTime = Double.MAX_VALUE, maxTime = -Double.MAX_VALUE;
+
+      SimpleDateFormat genFormatFR = new SimpleDateFormat(FR_DATE_FORMAT);
+      SimpleDateFormat genFormatUS = new SimpleDateFormat(US_DATE_FORMAT);
+      while (true) {
+        line = reader.readLine();curLine++;
+        if (line == null) {
+          break;
+        }
+        parsedLine = line.split("\t",-1);
+        if (parsedLine.length - 1 < viewCount) throw new Exception("Unexpected number of field at line " + curLine);
+        if (annotationType == JLAxis.TIME_ANNO) {
+          try {
+            time = Double.parseDouble(parsedLine[0]) * 1000;
+          } catch (NumberFormatException e) {
+            if (parsedLine[0].indexOf(".") == -1) {
+              parsedLine[0] = parsedLine[0] + (".000");
+            }
+            if (parsedLine[0].indexOf("-") != 4) {
+              genFormatFR.parse(parsedLine[0]);
+              time = genFormatFR.getCalendar().getTimeInMillis();
+            } else {
+              genFormatUS.parse(parsedLine[0]);
+              time = genFormatUS.getCalendar().getTimeInMillis();
+            }
+          }
+        } else {
+          try {
+            time = Double.parseDouble(parsedLine[0]);
+          } catch (NumberFormatException nfe) {
+            continue; // error on this line, try to read the other ones
+          }
+        }
+//          if (time > maxTime) maxTime = time;
+//          if (time < minTime) minTime = time;
+        for (int i = 0; i < views.length; i++) {
+          try {
+            views[i].add(time, Double.parseDouble(parsedLine[i + 1]));
+          } catch (NumberFormatException nfe) {
+            if ("null".equalsIgnoreCase(parsedLine[i + 1].trim())) {
+              // case null
+              views[i].add(time, JLDataView.NAN_FOR_NULL);
+            } else continue;// no data at this time
+          }
+        }
+      }
+      reader.close();
+      reader = null;
+      dataFile = null;
+      line = null;
+      parsedLine = null;
+      genFormatFR = null;
+      genFormatUS = null;
 
 //        if ( getY1Axis().getViews().isEmpty()
 //                && getY2Axis().getViews().isEmpty()
@@ -1619,18 +1603,19 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 //          getXAxis().setMinimum( minTime );
 //          getXAxis().setMaximum( maxTime );
 //        }
-        for (int i = 0; i < views.length; i++)
-        {
-          getY1Axis().addDataView(views[i]);
-        }
-        getXAxis().setAnnotation(annotationType);
-        repaint();
-        defaultColor = null;
+
+      reset(false);
+      for (int i = 0; i < views.length; i++) {
+        getY1Axis().addDataView(views[i]);
+      }
+      getXAxis().setAnnotation(annotationType);
+      repaint();
+      defaultColor = null;
+    } catch (Exception e) {
+      e.printStackTrace();
+      JOptionPane.showMessageDialog(this, "Failed to load file: " + fileName + "\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
-    catch (Exception e)
-    {
-        JOptionPane.showMessageDialog(this, "Failed to load file: "+ fileName, "Error", JOptionPane.ERROR_MESSAGE);
-    }
+
   }
 
   // Refresh a JTable containing data of a single dataView when the tableDialog is visible
@@ -3229,6 +3214,8 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     final JLChart chart = new JLChart();
     final JLDataView v = new JLDataView();
     final JLDataView e = new JLDataView();
+
+    Locale.setDefault(Locale.US);
 
     // Initialise chart properties
     chart.setHeaderFont(new Font("Times", Font.BOLD, 18));
