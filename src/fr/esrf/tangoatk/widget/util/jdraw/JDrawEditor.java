@@ -879,6 +879,8 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     } else {
 
       //JDRAW files
+      long t0 = System.currentTimeMillis();
+
       JDFileLoader fl = new JDFileLoader(fr);
       try {
         objs = fl.parseFile();
@@ -887,6 +889,10 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
         fr.close();
         throw e;
       }
+
+      long t1 = System.currentTimeMillis();
+      System.out.println("Loading takes:" + (t1-t0) + "ms");
+
       applyGlobalOption(fl);
 
     }

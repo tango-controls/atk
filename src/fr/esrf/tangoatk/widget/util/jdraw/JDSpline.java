@@ -206,7 +206,7 @@ public class JDSpline extends JDPolyline implements JDPolyConvert {
       if (ptsy[i] > maxy) maxy = ptsy[i];
     }
 
-    boundRect = new Rectangle((int)minx, (int)miny, (int)(maxx - minx) + 1, (int)(maxy - miny) + 1);
+    boundRect.setRect((int)minx, (int)miny, (int)(maxx - minx) + 1, (int)(maxy - miny) + 1);
 
   }
 
