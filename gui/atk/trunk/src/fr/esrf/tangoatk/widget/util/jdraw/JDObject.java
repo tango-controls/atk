@@ -651,7 +651,7 @@ public abstract class JDObject {
       if (summit[i].y > maxy) maxy = summit[i].y;
     }
 
-    boundRect = new Rectangle((int) minx, (int) miny, (int) (maxx - minx) + 1, (int) (maxy - miny) + 1);
+    boundRect.setRect((int) minx, (int) miny, (int) (maxx - minx) + 1, (int) (maxy - miny) + 1);
 
   }
 

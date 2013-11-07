@@ -282,7 +282,7 @@ public class JDEllipse extends JDRectangular implements JDPolyConvert {
     width = maxx - minx;
     height = maxy - miny;
 
-    boundRect = new Rectangle((int) minx, (int) miny, (int) (maxx - minx) + 1, (int) (maxy - miny) + 1);
+    boundRect.setRect((int) minx, (int) miny, (int) (maxx - minx) + 1, (int) (maxy - miny) + 1);
 
   }
 
