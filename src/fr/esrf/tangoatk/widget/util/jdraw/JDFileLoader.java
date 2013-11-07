@@ -48,13 +48,27 @@ public class JDFileLoader {
     "'}'"
   };
 
+  static final String COMA_STR = ",";
+  static final String COLON_STR = ":";
+  static final String OPENBRACE_STR = "{";
+  static final String CLOSEBRACE_STR = "}";
+
+  static final int MAX_BUFFER_SIZE = 65536;   // 64Ko reading buffer
+  static final int MAX_STRING_LENGTH = 4095;  // Maximum string length
+
   private int CrtLine;
   private int StartLine;
   private char CurrentChar;
 
+  private char[] loadingBuffer = null;
+  private int bufferIdx;
+  private int bufferSize;
+
   private String word;
   private String version;
   InputStreamReader f;
+
+  private char[] tmpWord = new char[MAX_STRING_LENGTH+1];
 
   // Global param section
   Color globalBackground = JDrawEditor.defaultBackground;
@@ -68,6 +82,9 @@ public class JDFileLoader {
     f = fr;
     CrtLine = 1;
     CurrentChar = ' ';
+    loadingBuffer = new char[MAX_BUFFER_SIZE];
+    bufferIdx = 0;
+    bufferSize = 0;
   }
   
   /**
@@ -96,13 +113,43 @@ public class JDFileLoader {
   // ****************************************************
   // read the next character in the file
   // ****************************************************
+  private void refill_buffer() throws IOException {
+
+    if( bufferIdx>=bufferSize ) {
+      bufferSize = f.read(loadingBuffer);
+      bufferIdx = 0;
+    }
+
+  }
+
+
   private void read_char() throws IOException {
 
-    if (f.ready())
-      CurrentChar = (char) f.read();
-    else
-      CurrentChar = 0;
+    if (loadingBuffer != null) {
+
+      // Use loading buffer
+      refill_buffer();
+
+      if (bufferSize <= 0) {
+        CurrentChar = 0;
+      } else {
+        CurrentChar = loadingBuffer[bufferIdx];
+        bufferIdx++;
+      }
+
+    } else {
+
+      // Simple reading
+      if (!f.ready()) {
+        CurrentChar = 0;
+      } else {
+        CurrentChar = (char) f.read();
+      }
+
+    }
+
     if (CurrentChar == '\n') CrtLine++;
+
   }
 
   // ****************************************************
@@ -118,50 +165,64 @@ public class JDFileLoader {
   // ****************************************************
   private String read_word() throws IOException {
 
-    StringBuffer ret_word = new StringBuffer();
-
     /* Jump space */
     jump_space();
 
     StartLine = CrtLine;
 
     /* Treat special character */
-    if (CurrentChar == ':' || CurrentChar == '{' || CurrentChar == '}' ||
-            CurrentChar == ',') {
-      ret_word.append(CurrentChar);
+    if( CurrentChar == ',' ) {
       read_char();
-      return ret_word.toString();
+      return COMA_STR;
     }
+
+    if( CurrentChar == ':' ) {
+      read_char();
+      return COLON_STR;
+    }
+
+    if( CurrentChar == '{' ) {
+      read_char();
+      return OPENBRACE_STR;
+    }
+
+    if( CurrentChar == '}' ) {
+      read_char();
+      return CLOSEBRACE_STR;
+    }
+
+    int wIdx=0;
 
     /* Treat string */
     if (CurrentChar == '"') {
-      ret_word.append(CurrentChar);
+      tmpWord[wIdx++]=CurrentChar;
       read_char();
-      while (CurrentChar != '"' && CurrentChar != 0 && CurrentChar != '\n') {
-        ret_word.append(CurrentChar);
+      while (CurrentChar != '"' && CurrentChar != 0 && CurrentChar != '\n' && wIdx<MAX_STRING_LENGTH) {
+        tmpWord[wIdx++]=CurrentChar;
         read_char();
       }
-      if (CurrentChar == 0 || CurrentChar == '\n') {
+      if (CurrentChar == 0 || CurrentChar == '\n' || wIdx>=MAX_STRING_LENGTH) {
         IOException e = new IOException("String too long at line " + StartLine);
         throw e;
       }
-      ret_word.append(CurrentChar);
+      tmpWord[wIdx++]=CurrentChar;
       read_char();
-      return ret_word.toString();
+      return new String(tmpWord,0,wIdx);
     }
 
     /* Treat other word */
     while (CurrentChar > 32 && CurrentChar != ':' && CurrentChar != '{'
-            && CurrentChar != '}' && CurrentChar != ',') {
-      ret_word.append(CurrentChar);
+            && CurrentChar != '}' && CurrentChar != ',' && wIdx<MAX_STRING_LENGTH) {
+      tmpWord[wIdx++]=CurrentChar;
       read_char();
     }
 
-    if (ret_word.length() == 0) {
+    if (wIdx == 0) {
       return null;
     }
 
-    return ret_word.toString();
+    return new String(tmpWord,0,wIdx);
+
   }
 
   // ****************************************************
@@ -178,18 +239,16 @@ public class JDFileLoader {
 
   private int class_lex(String word) {
 
-    /* exepction */
-
+    /* Exception */
     if (word == null) return 0;
     if (word.length() == 0) return STRING;
     if (word.charAt(0)=='\"') return STRING;
 
     /* Special character */
-
-    if (word.equals(",")) return COMA;
-    if (word.equals(":")) return COLON;
-    if (word.equals("{")) return OPENBRACE;
-    if (word.equals("}")) return CLOSEBRACE;
+    if (word.equals(COMA_STR)) return COMA;
+    if (word.equals(COLON_STR)) return COLON;
+    if (word.equals(OPENBRACE_STR)) return OPENBRACE;
+    if (word.equals(CLOSEBRACE_STR)) return CLOSEBRACE;
     if (isNumber(word))   return NUMBER;
 
     return STRING;

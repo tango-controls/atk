@@ -58,12 +58,8 @@ public class JDClipboard {
     if(!clipboardListener.contains(l)) clipboardListener.add(l);
   }
 
-  public void flavorsChanged(FlavorEvent e) {
-    check();
-  }
-
   public void check() {
-    load(true);
+    load(false);
     for(int i=0;i<clipboardListener.size();i++)
       ((JDrawEditorListener)clipboardListener.get(i)).clipboardChanged();
   }
@@ -84,8 +80,8 @@ public class JDClipboard {
     StringSelection str = new StringSelection(to_save.toString());
     clipboard.setContents(str, null);
 
-    objects.clear();
-    objects.addAll(objs);
+    //  Reload the clipboard
+    check();
 
   }
 

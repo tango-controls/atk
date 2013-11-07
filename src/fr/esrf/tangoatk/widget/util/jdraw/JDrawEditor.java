@@ -887,7 +887,6 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
         fr.close();
         throw e;
       }
-
       applyGlobalOption(fl);
 
     }
