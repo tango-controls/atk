@@ -1542,7 +1542,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
       }
 
       double time = 0;
-//        double minTime = Double.MAX_VALUE, maxTime = -Double.MAX_VALUE;
+      double minTime = Double.MAX_VALUE, maxTime = -Double.MAX_VALUE;
 
       SimpleDateFormat genFormatFR = new SimpleDateFormat(FR_DATE_FORMAT);
       SimpleDateFormat genFormatUS = new SimpleDateFormat(US_DATE_FORMAT);
@@ -1575,8 +1575,8 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
             continue; // error on this line, try to read the other ones
           }
         }
-//          if (time > maxTime) maxTime = time;
-//          if (time < minTime) minTime = time;
+        if (time > maxTime) maxTime = time;
+        if (time < minTime) minTime = time;
         for (int i = 0; i < views.length; i++) {
           try {
             views[i].add(time, Double.parseDouble(parsedLine[i + 1]));
@@ -1596,19 +1596,22 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
       genFormatFR = null;
       genFormatUS = null;
 
-//        if ( getY1Axis().getViews().isEmpty()
-//                && getY2Axis().getViews().isEmpty()
-//                && getXAxis().getViews().isEmpty() ) {
-//          getXAxis().setAutoScale( false );
-//          getXAxis().setMinimum( minTime );
-//          getXAxis().setMaximum( maxTime );
-//        }
-
       reset(false);
+
       for (int i = 0; i < views.length; i++) {
         getY1Axis().addDataView(views[i]);
       }
+
       getXAxis().setAnnotation(annotationType);
+
+      if ( getY1Axis().getViews().isEmpty()
+                && getY2Axis().getViews().isEmpty()
+                && getXAxis().getViews().isEmpty() ) {
+          getXAxis().setAutoScale( false );
+          getXAxis().setMinimum( minTime );
+          getXAxis().setMaximum( maxTime );
+      }
+
       repaint();
       defaultColor = null;
     } catch (Exception e) {
