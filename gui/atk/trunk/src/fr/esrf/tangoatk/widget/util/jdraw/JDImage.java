@@ -385,14 +385,75 @@ public class JDImage extends JDRectangular {
         if( fileName.startsWith("jar:")) {
           // Load from resource
           InputStream stream = getClass().getResourceAsStream(fileName.substring(4));
-          theImage = ImageIO.read(stream);
+
+          if(stream==null) {
+
+            if( getParent()==null ) {
+
+              // should not happen
+              theImage = defaultImage.getImage();
+              imgWidth = defaultImage.getIconWidth();
+              imgHeight = defaultImage.getIconHeight();
+              System.out.println("JDImage.setParent() Warning " + fileName + " load failed : parent is null");
+              return;
+
+            }
+
+            // Try to load from disk using the root paths
+            boolean loaded = false;
+
+            String[] paths = getParent().getRootPaths();
+
+            if( paths!=null ) {
+
+              String relPath = fileName.substring(4);
+              if(relPath.startsWith("/")) relPath = relPath.substring(1);
+
+              int i = 0;
+
+              while(!loaded && i<paths.length) {
+
+                File in = new File(paths[i]+relPath);
+                if( in.exists() ) {
+                  try {
+                    theImage = ImageIO.read(in);
+                    imgWidth = ((BufferedImage)theImage).getWidth();
+                    imgHeight = ((BufferedImage)theImage).getHeight();
+                    updateShape();
+                    loaded = true;
+                  } catch(IOException e) {
+                  }
+                }
+
+                i++;
+
+              }
+
+            }
+
+            if(!loaded) {
+
+              theImage = defaultImage.getImage();
+              imgWidth = defaultImage.getIconWidth();
+              imgHeight = defaultImage.getIconHeight();
+              System.out.println("JDImage.setParent() Warning " + fileName + " load failed : resource not found");
+
+            }
+
+          } else {
+            // Resource has been found
+            theImage = ImageIO.read(stream);
+            imgWidth = ((BufferedImage)theImage).getWidth();
+            imgHeight = ((BufferedImage)theImage).getHeight();
+          }
+
         } else {
           // Load form disk
           File in = new File(fileName);
           theImage = ImageIO.read(in);
+          imgWidth = ((BufferedImage)theImage).getWidth();
+          imgHeight = ((BufferedImage)theImage).getHeight();
         }
-        imgWidth = ((BufferedImage)theImage).getWidth();
-        imgHeight = ((BufferedImage)theImage).getHeight();
 
       } catch (IOException e) {
         // Load failure

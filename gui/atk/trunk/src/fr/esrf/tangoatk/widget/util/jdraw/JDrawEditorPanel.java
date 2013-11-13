@@ -862,12 +862,6 @@ public class JDrawEditorPanel extends JPanel implements ActionListener,JDrawEdit
             });
   }
 
-  public void save() {
-
-    theEditor.instantSave(null);
-
-  }
-
   public void onActivate() {
 
     JDClipboard.getInstance().check();

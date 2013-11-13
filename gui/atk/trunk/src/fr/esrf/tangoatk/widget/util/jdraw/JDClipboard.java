@@ -78,7 +78,12 @@ public class JDClipboard {
     to_save.append("}\n");
 
     StringSelection str = new StringSelection(to_save.toString());
-    clipboard.setContents(str, null);
+    try {
+      clipboard.setContents(str, null);
+    } catch (IllegalStateException e1) {
+      System.out.println("JDClipboard.send() : " + e1.getMessage());
+      return;
+    }
 
     //  Reload the clipboard
     check();
@@ -87,9 +92,18 @@ public class JDClipboard {
 
   private void load(boolean showError) {
 
+    Transferable contents;
+
     objects.clear();
 
-    Transferable contents = clipboard.getContents(null);
+    try {
+      contents = clipboard.getContents(null);
+    } catch (IllegalStateException e1) {
+      if (showError)
+        JOptionPane.showMessageDialog(null, "Clipboard not available.\n" + e1.getMessage());
+      System.out.println(e1.getMessage());
+      return;
+    }
 
     boolean hasTransferableText = (contents != null) && contents.isDataFlavorSupported(DataFlavor.stringFlavor);
     if( !hasTransferableText ) return;
@@ -97,15 +111,15 @@ public class JDClipboard {
     String str;
     try {
       str = (String)contents.getTransferData(DataFlavor.stringFlavor);
-    } catch (UnsupportedFlavorException e1) {
-      if(showError)
-        JOptionPane.showMessageDialog(null, "Invalid clipboard content.\n" + e1.getMessage());
-      System.out.println(e1.getMessage());
-      return;
-    } catch (IOException e2) {
+    } catch (UnsupportedFlavorException e2) {
       if(showError)
         JOptionPane.showMessageDialog(null, "Invalid clipboard content.\n" + e2.getMessage());
       System.out.println(e2.getMessage());
+      return;
+    } catch (IOException e3) {
+      if(showError)
+        JOptionPane.showMessageDialog(null, "Invalid clipboard content.\n" + e3.getMessage());
+      System.out.println(e3.getMessage());
       return;
     }
 

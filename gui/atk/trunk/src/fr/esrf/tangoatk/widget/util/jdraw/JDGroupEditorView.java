@@ -105,6 +105,7 @@ class JDGroupEditorView extends JComponent implements JDrawEditorListener,Action
     int gSize = jc.getGridSize();
     theEditor.setTranslation(round(-r.x + margin,gSize) ,round(-r.y + margin,gSize));
     theEditor.setPreferredSize(new Dimension(r.width+2*margin,r.height+2*margin));
+    theEditor.setRootPaths(jc.getRootPaths());
 
     for(i=0;i<g.getChildrenNumber();i++)
       theEditor.addObject(g.getChildAt(i));

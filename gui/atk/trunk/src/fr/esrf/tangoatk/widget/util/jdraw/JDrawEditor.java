@@ -139,6 +139,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   private JLabel statusLabel = null;
   private String currentStatus = "";
   private DropTarget dropTarget;
+  private String[] rootPaths = null;
 
   // ------- Object Contextual menu ----------------
   private JSeparator sep1;
@@ -640,6 +641,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     boolean hasSwing=false;
     for (int i = 0; i < clipboard.size(); i++) {
       JDObject n = clipboard.get(i).copy(tx, ty);
+      n.setParent(this);
       hasSwing = (n instanceof JDSwingObject) || hasSwing;
       objects.add(n);
       selObjects.add(n);
@@ -754,21 +756,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
       fileName = fName + ".jdw";
     }
 
-    // Create the file into a string buffer
-    StringBuffer to_save = new StringBuffer();
-    to_save.append("JDFile v11 {\n");
-    to_save.append("  Global {\n");
-    if(getBackground().getRGB()!=defaultBackground.getRGB()) {
-      to_save.append("    background:");
-      to_save.append(getBackground().getRed()).append(",");
-      to_save.append(getBackground().getGreen()).append(",");
-      to_save.append(getBackground().getBlue());
-      to_save.append("\n");
-    }
-    to_save.append("  }\n");
-    for (int i = 0; i < objects.size(); i++)
-      ((JDObject) objects.get(i)).recordObject(to_save, 1);
-    to_save.append("}\n");
+    StringBuffer to_save = getSaveString();
 
     // Save it
     FileWriter fw = new FileWriter(fileName);
@@ -781,6 +769,34 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     }
     lastFileName = fileName;
     setNeedToSave(false,"Save");
+
+  }
+
+  public StringBuffer getSaveString() {
+
+    // Create the file into a string buffer
+    StringBuffer to_save = new StringBuffer();
+
+    to_save.append("JDFile v11 {\n");
+
+    // Global section
+    to_save.append("  Global {\n");
+    if(getBackground().getRGB()!=defaultBackground.getRGB()) {
+      to_save.append("    background:");
+      to_save.append(getBackground().getRed()).append(",");
+      to_save.append(getBackground().getGreen()).append(",");
+      to_save.append(getBackground().getBlue());
+      to_save.append("\n");
+    }
+    to_save.append("  }\n");
+
+    // Objects
+    for (int i = 0; i < objects.size(); i++)
+      ((JDObject) objects.get(i)).recordObject(to_save, 1);
+
+    to_save.append("}\n");
+
+    return to_save;
 
   }
 
@@ -830,13 +846,25 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
       editedPolyline = null;
       objects = objs;
       for(int i=0;i<objects.size();i++)
-	((JDObject)objects.get(i)).setParent(this);
+	      ((JDObject)objects.get(i)).setParent(this);
 
       initPlayer();
 
       computePreferredSize();
       repaintLater();
 
+  }
+
+  /**
+   * CLASSPATH used for loading image (for netbeans plugins)
+   * @param paths List of path used for searching image
+   */
+  public void setRootPaths(String[] paths)  {
+    rootPaths = paths;
+  }
+
+  public String[] getRootPaths() {
+    return rootPaths;
   }
 
   /** Load a jdraw grpahics file into the editor
@@ -1541,6 +1569,13 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
    */
   public void setStatusLabel(JLabel label) {
     statusLabel = label;
+  }
+
+  /**
+   * Returns true if the clipboard contains valid data
+   */
+  public boolean canPaste() {
+    return clipboard.size() > 0;
   }
 
 // -----------------------------------------------------
@@ -2505,6 +2540,13 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     }
   }
 
+  /**
+   * Reset need to save bit to false
+   */
+  public void resetNeedToSave() {
+    setNeedToSave(false,"");
+  }
+
 // -----------------------------------------------------
 // Private stuff
 // -----------------------------------------------------
@@ -3022,6 +3064,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     //Rebuild form backup
     objects = ((UndoBuffer)undo.get(pos)).rebuild();
     //System.out.println("Rebuild backup #" + pos);
+    for(int i=0;i<objects.size();i++) ((JDObject)objects.get(i)).setParent(this);
 
     //Repaint
     repaint();
