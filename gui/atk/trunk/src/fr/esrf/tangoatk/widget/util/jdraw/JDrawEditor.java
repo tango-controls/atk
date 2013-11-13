@@ -874,9 +874,19 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
    * @see JDrawEditorListener#valueChanged
    */
   public void loadFile(String fileName) throws IOException {
+    loadFile(fileName,true);
+  }
+
+  /** Load a jdraw grpahics file into the editor
+   * Trigger valueChanged() if a file is selected to be loaded.
+   * @param fileName File name
+   * @param clearUndoBuffer true to clear the undo buffer
+   * @throws IOException Exception containing error message when failed.
+   * @see JDrawEditorListener#valueChanged
+   */
+  public void loadFile(String fileName,boolean clearUndoBuffer) throws IOException {
 
     Vector objs;
-
 
     FileReader fr = new FileReader(fileName);
 
@@ -929,7 +939,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     lastFileName = fileName;
 
     if(mode!=MODE_PLAY) {
-      clearUndo();
+      if(clearUndoBuffer) clearUndo();
       setNeedToSave(false,"Load");
       fireSelectionChange();
     } else {
