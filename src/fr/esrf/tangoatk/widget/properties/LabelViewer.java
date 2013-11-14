@@ -50,6 +50,12 @@ public class LabelViewer extends JSmoothLabel implements PropertyChangeListener 
 	 setText(a.getLabel());
       }
   }
+
+  public void clearModel() {
+
+    setModel(null);
+
+  }
   
   public IAttribute getModel()
   {
