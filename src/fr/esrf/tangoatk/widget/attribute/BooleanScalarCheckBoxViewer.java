@@ -24,9 +24,9 @@
 // Created:       2005-02-14 18:15:00, poncet
 // By:            <poncet@esrf.fr>
 //
-// $Id$
 //
 // Description:
+
 package fr.esrf.tangoatk.widget.attribute;
 
 
@@ -309,7 +309,7 @@ public class BooleanScalarCheckBoxViewer extends JCheckBox
          attModel.setValue(false);
       }
   }
-
+  
   // ---------------------------------------------------
   // IBooleanScalarListener listener
   // ---------------------------------------------------
