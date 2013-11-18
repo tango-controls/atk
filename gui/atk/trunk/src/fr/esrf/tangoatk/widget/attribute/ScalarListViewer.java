@@ -1379,7 +1379,7 @@ public class ScalarListViewer extends javax.swing.JPanel
               gridBagConstraints = new java.awt.GridBagConstraints();
               gridBagConstraints.gridx = 1;
               gridBagConstraints.gridy = viewerRow;
-              if (viewer instanceof SimpleStateViewer)
+              if ( (viewer instanceof SimpleStateViewer) || (viewer instanceof BooleanScalarCheckBoxViewer) )
               {
                   gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
               }
@@ -1625,10 +1625,10 @@ public class ScalarListViewer extends javax.swing.JPanel
        // Connect to a list of scalar attributes
        try
        {
-          iatt = (IAttribute) attList.add("jlp/test/1/att_un");
-          iatt = (IAttribute) attList.add("jlp/test/1/att_deux");
-          iatt = (IAttribute) attList.add("jlp/test/1/att_trois");
-          iatt = (IAttribute) attList.add("jlp/test/1/att_quatre");
+          iatt = (IAttribute) attList.add("sys/tg_test/1/double_scalar");
+          iatt = (IAttribute) attList.add("sys/tg_test/1/string_scalar");
+          iatt = (IAttribute) attList.add("sys/tg_test/1/boolean_scalar");
+          iatt = (IAttribute) attList.add("sys/tg_test/1/short_scalar");
 
 	  scalarlv.setModel(attList);
 	  
