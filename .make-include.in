@@ -37,7 +37,7 @@ J = @if [ -f .targets ]; then \
 
 beaninfo:
 	$(JAVA) $(PGENERATOR) $(BEANINFO)
-	@if [ "x$(BEANINFO)" == "x" ]; then           \
+	@if [ "x$(BEANINFO)" = "x" ]; then           \
 	  files="";                                   \
 	else                                          \
 	  files="$(BEANINFO)";                        \
@@ -47,7 +47,7 @@ beaninfo:
 
 manifest.mf: .force
 	rm manifest.mf ;                                                     \
-        if [ "x$(BEANINFO)" == "x" ]; then                                   \
+        if [ "x$(BEANINFO)" = "x" ]; then                                   \
 	   files="";                                                         \
   	   touch .manifest.mf;                                               \
         else                                                                 \
