@@ -163,6 +163,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
   private JMenuItem groupMenuItem;
   private JMenuItem ungroupMenuItem;
+  private JMenuItem editGroupMenuItem;
 
   private JMenuItem editShapeMenuItem;
   private JMenuItem connectShapeMenuItem;
@@ -2376,6 +2377,8 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
       groupSelection();
     } else if (src == ungroupMenuItem) {
       ungroupSelection();
+    } else if (src == editGroupMenuItem) {
+      showGroupEditorWindow();
     } else if (src == zoomInMenuItem) {
       zoomIn();
     } else if (src == zoomOutMenuItem) {
@@ -2778,9 +2781,11 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 	
 	      groupMenuItem.setVisible((sz > 0));
 	      if (sz == 1) {
-		ungroupMenuItem.setVisible(p instanceof JDGroup);
+		      ungroupMenuItem.setVisible(p instanceof JDGroup);
+          editGroupMenuItem.setVisible(p instanceof JDGroup);
 	      } else {
-		ungroupMenuItem.setVisible(false);
+		      ungroupMenuItem.setVisible(false);
+          editGroupMenuItem.setVisible(false);
 	      }
 	
 	      raiseMenuItem.setVisible((sz == 1));
@@ -3155,6 +3160,8 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     ungroupMenuItem = new JMenuItem("Ungroup");
     ungroupMenuItem.addActionListener(this);
 
+    editGroupMenuItem = new JMenuItem("Edit group");
+    editGroupMenuItem.addActionListener(this);
 
     zoomInMenuItem = new JMenuItem("Zoom in");
     zoomInMenuItem.addActionListener(this);
@@ -3175,6 +3182,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     objMenu.add(sep4);
     objMenu.add(groupMenuItem);
     objMenu.add(ungroupMenuItem);
+    objMenu.add(editGroupMenuItem);
     sep3 = new JSeparator();
     objMenu.add(sep3);
     objMenu.add(editShapeMenuItem);
