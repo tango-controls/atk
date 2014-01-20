@@ -371,6 +371,104 @@ public class ATKGraphicsUtils {
 
   }
 
+  
+  /**
+   * Position the given frame at the requested location  on screen. The frame is not displayed
+   * after a call to this function, a call to setVisible() is needed.
+   * @param fr Frame to be positioned.
+   */
+  public static void positionFrameOnScreen(Frame fr, int posx, int posy) {
+
+    Rectangle r = new Rectangle(0,0,screenSize.width,screenSize.height);
+    fr.pack();
+
+    // Center
+    int xe,ye,wx,wy;
+    wx = fr.getPreferredSize().width;
+    if(wx>screenSize.width) wx = screenSize.width;
+    wy = fr.getPreferredSize().height;
+    if(wy>screenSize.height) wy = screenSize.height;
+    
+    if ((posx+wx) > screenSize.width)
+    {
+        xe = screenSize.width - wx;
+        if (xe < 0) xe = 0;
+    }
+    else
+        xe = posx;
+    
+    if ((posy+wy) > screenSize.height)
+    {
+        ye = screenSize.height - wy;
+        if (ye < 0) ye = 0;
+    }
+    else
+        ye = posy;
+
+    
+    // Set bounds
+    fr.setBounds(xe, ye, wx, wy);
+
+  }
+
+  private static int[] parseWindowPosition(String str)
+  {
+      if (str == null) return null;
+      if (str.length() == 0) return null;
+      
+      String[] posStrs = str.split(",");
+      if (posStrs == null) return null;
+      if (posStrs.length != 2) return null;
+      
+      int posX = -1;
+      int posY = -1;      
+      try
+      {
+          posX = Integer.parseInt(posStrs[0]);
+      }
+      catch (NumberFormatException nfe)
+      {
+          return null;
+      }
+      try
+      {
+          posY = Integer.parseInt(posStrs[1]);
+      }
+      catch (NumberFormatException nfe)
+      {
+          return null;
+      }
+      
+      if ((posX >= 0) && (posY >= 0))
+      {
+          int[]  wPos = new int[2];
+          wPos[0] = posX;
+          wPos[1] = posY;
+          return wPos;
+      }
+      
+      return null;
+  }
+  
+  public static int[] getWindowPosFromArgs(String args[])
+  {
+        if (args.length <= 0) return null;
+
+        for (int i=0; i<args.length; i++)
+        {
+            if (args[i].equalsIgnoreCase("-wpos"))
+            {
+                if (i == args.length-1) return null;
+                i++;
+                String wposStr = args[i];
+                int[]   windowPos = parseWindowPosition(wposStr);
+                return windowPos;
+            }
+        }        
+        return null;      
+  }
+  
+  
   static private void init() {
 
     // Init static
