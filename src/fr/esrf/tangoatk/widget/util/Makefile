@@ -8,6 +8,7 @@ ALL = $(TARGET)/UIManagerHelper.class       \
       $(TARGET)/ATKMenuBar.class            \
       $(TARGET)/Splash.class                \
       $(TARGET)/SplashPanel.class           \
+      $(TARGET)/SplashTimer.class           \
       $(TARGET)/IControlee.class            \
       $(TARGET)/IApplicable.class           \
       $(TARGET)/IHelpful.class              \
