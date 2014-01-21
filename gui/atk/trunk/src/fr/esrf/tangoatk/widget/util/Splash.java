@@ -36,7 +36,7 @@ public class Splash extends JWindow {
 
   JFileChooser f;
 
-  private SplashPanel splashPanel;
+  protected SplashPanel splashPanel;
 
   /** Creates and displays an ATK splash panel using the default ATK splash image. */
   public Splash() {
@@ -72,7 +72,7 @@ public class Splash extends JWindow {
     initComponents(splashImage,textColor,newBar);
   }
 
-  private void initComponents(ImageIcon icon,Color textColor,JSmoothProgressBar newBar) {
+  protected void initComponents(ImageIcon icon,Color textColor,JSmoothProgressBar newBar) {
 
     setBackground(new Color(100,110,140));
 
