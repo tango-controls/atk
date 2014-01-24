@@ -35,7 +35,8 @@ BEANINFO= StringScalarViewerBeanInfo.java            \
 	  BooleanSpectrumViewerBeanInfo.java \
 	  DevStateScalarComboEditorBeanInfo.java \
 	  NumberImageViewerBeanInfo.java \
-	  RawImageViewerBeanInfo.java
+	  RawImageViewerBeanInfo.java \
+	  ScalarLevelMeterViewerBeanInfo.java
 
 include ../../../../../../.make-include
 
