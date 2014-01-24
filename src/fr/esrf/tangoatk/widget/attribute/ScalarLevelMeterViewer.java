@@ -72,12 +72,16 @@ public class ScalarLevelMeterViewer extends JComponent implements INumberScalarL
   public void setDrawGradient(boolean draw) {
     this.drawGradient = draw;
   }
+
   /**
    * Sets the minimum of the level meter
    * @param min Minimum value
    */
   public void setMin(double min) {
     this.min = min;
+  }
+  public double getMin() {
+    return this.min;
   }
 
   /**
@@ -86,6 +90,9 @@ public class ScalarLevelMeterViewer extends JComponent implements INumberScalarL
    */
   public void setMax(double max) {
     this.max = max;
+  }
+  public double getMax() {
+    return this.max;
   }
 
   /**
