@@ -431,7 +431,7 @@ public class TangoSynopticHandler extends JDrawEditor
    *  method allows to load a synoptic which is not necessarily a file on disk. This
    *  method is particularly used when the synoptic jdraw file is pakaged into the
    *  application jarfile and cannot be accessed as a separate file on the disk.
-   * @param InputStreamReader inp An InputStreamReader should be created by the application and passed to this method
+   * @param  inp An InputStreamReader should be created by the application and passed to this method
    * @throws IOException Exception when the inputStream cannot be accessed.
    * @throws MissingResourceException when the "jdraw" inputStream cannot be parsed.
    */    
@@ -2438,77 +2438,109 @@ invoqex.printStackTrace();
      }
 
    }
-   
-   private void manageStateChange(String entityName, String state, Object sourceEntity)
-   {
-     //long before, after, duree;
-     //before = System.currentTimeMillis();
 
-     // Update and test the "cashed" state
-     List<String> stateStatusCash = null;
+  /**
+   * Update background color of disabled objects, it restore the state color if the JDObject
+   * is no longer disabled.
+   * @param disabledColor
+   */
+  public void refreshDisabled(Color disabledColor) {
 
-     stateStatusCash = stateCashHash.get(entityName);
-     if (stateStatusCash != null)
-     {
-	String stateCash = null;
-	try
-	{
-           stateCash = stateStatusCash.get(STATE_INDEX);
-           if (stateCash != null)
-	   {
-             if (stateCash.equals(state))
-               return;
-           }
+    for (int i = 0; i < getObjectNumber(); i++) {
 
-           stateCash = new String(state);
-           stateStatusCash.set(STATE_INDEX, stateCash);
-           stateCashHash.put(entityName, stateStatusCash);
-	} 
-	catch (IndexOutOfBoundsException iob)
-	{
-	}
-     }
+      JDObject jdObj = getObjectAt(i);
 
-     // Here we are sure that the new state is different from the "cashed" state
-     // System.out.println("State has changed for " + entityName + " : " + state);
-     JDObject jdObj;
+      if (!jdObj.isDisabled()) {
 
-     List<JDObject> list = jdHash.get(entityName);
-     if (list == null)
-       return;
-
-     int nbJdObjs = list.size();
-     int i;
-
-     for (i = 0; i < nbJdObjs; i++)
-     {
-	jdObj = list.get(i);
-	if (jdObj.isProgrammed())
-	{
-           jdObj.setValue(getDynoState(state));
-           jdObj.refresh();
-	} 
-	else // not a Dyno
-        {
-           if (sourceEntity instanceof IDevice)
-           {
-               IDevice dev = (IDevice) sourceEntity;
-               changeJDobjColor(jdObj, ATKConstant.getColor4State(state, dev.getInvertedOpenClose(), dev.getInvertedInsertExtract()));
-           }
-           else
-               if (sourceEntity instanceof IDevStateScalar)
-               {
-                   IDevStateScalar  stateAtt = (IDevStateScalar) sourceEntity;
-                   changeJDobjColor(jdObj, ATKConstant.getColor4State(state, stateAtt.getInvertedOpenClose(), stateAtt.getInvertedInsertExtract()));
-               }
-               else
-                  changeJDobjColor(jdObj, ATKConstant.getColor4State(state));
+        // Restore color stored in the state map
+        String objName = jdObj.getName();
+        List<String> stateStatusCash = stateCashHash.get(objName);
+        if (stateStatusCash != null) {
+          try {
+            String stateCash = stateStatusCash.get(STATE_INDEX);
+            if (stateCash != null) {
+              changeJDobjColor(jdObj, ATKConstant.getColor4State(stateCash));
+            }
+          } catch (IndexOutOfBoundsException iob) {
+          }
         }
-     }
-   }
+
+      } else {
+
+        // Apply disabled color
+        changeJDobjColor(jdObj,disabledColor);
+
+      }
+
+    }
+
+  }
+
+  private void manageStateChange(String entityName, String state, Object sourceEntity) {
+
+    //long before, after, duree;
+    //before = System.currentTimeMillis();
+
+    // Update and test the "cashed" state
+    List<String> stateStatusCash = null;
+
+    stateStatusCash = stateCashHash.get(entityName);
+    if (stateStatusCash != null) {
+      String stateCash = null;
+      try {
+        stateCash = stateStatusCash.get(STATE_INDEX);
+        if (stateCash != null) {
+          if (stateCash.equals(state))
+            return;
+        }
+
+        stateCash = new String(state);
+        stateStatusCash.set(STATE_INDEX, stateCash);
+        stateCashHash.put(entityName, stateStatusCash);
+      } catch (IndexOutOfBoundsException iob) {
+      }
+    }
+
+    // Here we are sure that the new state is different from the "cashed" state
+    // System.out.println("State has changed for " + entityName + " : " + state);
+    JDObject jdObj;
+
+    List<JDObject> list = jdHash.get(entityName);
+    if (list == null)
+      return;
+
+    int nbJdObjs = list.size();
+    int i;
+
+    for (i = 0; i < nbJdObjs; i++) {
+
+      jdObj = list.get(i);
+
+      // If object is disabled we do nothing
+      if (!jdObj.isDisabled()) {
+
+        if (jdObj.isProgrammed()) {
+          jdObj.setValue(getDynoState(state));
+          jdObj.refresh();
+        } else // not a Dyno
+        {
+          if (sourceEntity instanceof IDevice) {
+            IDevice dev = (IDevice) sourceEntity;
+            changeJDobjColor(jdObj, ATKConstant.getColor4State(state, dev.getInvertedOpenClose(), dev.getInvertedInsertExtract()));
+          } else if (sourceEntity instanceof IDevStateScalar) {
+            IDevStateScalar stateAtt = (IDevStateScalar) sourceEntity;
+            changeJDobjColor(jdObj, ATKConstant.getColor4State(state, stateAtt.getInvertedOpenClose(), stateAtt.getInvertedInsertExtract()));
+          } else
+            changeJDobjColor(jdObj, ATKConstant.getColor4State(state));
+        }
+
+      }
+
+    }
+  }
 
 
-   // Interface IDevStateScalarListener (Listen on attribute state change)
+  // Interface IDevStateScalarListener (Listen on attribute state change)
    public void devStateScalarChange(DevStateScalarEvent event) {
 
      IDevStateScalar src = (IDevStateScalar)event.getSource();
