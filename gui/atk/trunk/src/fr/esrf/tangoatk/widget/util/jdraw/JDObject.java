@@ -189,6 +189,7 @@ public abstract class JDObject {
   // Extensions
   String[] extParamValue=null;      // Extension param values
   String[] extParamName=null;       // Extension param names
+  boolean  isDisabled=false;        // Disabled flag (for external use)
 
   // -----------------------------------------------------------
   // Initialisation stuff
@@ -2508,6 +2509,17 @@ public abstract class JDObject {
   /** returns true if this parameters is fixed and cannot be removed. */
   public boolean isFixedExtendedParam(String name) {
     return false;
+  }
+
+
+  /** returns disabled state (external usage) */
+  public boolean isDisabled() {
+    return isDisabled;
+  }
+
+  /** sets disabled state (external usage) */
+  public void setDisabled(boolean disabled) {
+    isDisabled = disabled;
   }
 
 }
