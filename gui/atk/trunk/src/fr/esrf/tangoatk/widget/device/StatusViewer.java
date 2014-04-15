@@ -23,9 +23,13 @@
 
 package fr.esrf.tangoatk.widget.device;
 
+import fr.esrf.Tango.DevFailed;
+import fr.esrf.tangoatk.core.Device;
 import fr.esrf.tangoatk.core.StatusEvent;
 import fr.esrf.tangoatk.core.ErrorEvent;
 import fr.esrf.tangoatk.core.IDevice;
+import fr.esrf.tangoatk.widget.util.ATKDiagnostic;
+import fr.esrf.tangoatk.widget.util.ErrorPane;
 import fr.esrf.tangoatk.widget.util.UIManagerHelper;
 import fr.esrf.tangoatk.widget.util.IControlee;
 
@@ -148,5 +152,24 @@ Modified by F. Poncet  on 22/septembre/2003
   private javax.swing.JScrollPane jScrollPane1;
   private javax.swing.JTextArea status;
   // End of variables declaration//GEN-END:variables
+
+  public static void main(String[] args) {
+
+    JFrame f = new JFrame();
+    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    StatusViewer sv = new StatusViewer();
+    Device d=null;
+    try {
+      d = new Device("taco:sr/rf-foc/tra3-1");
+    } catch(DevFailed e) {
+      ErrorPane.showErrorMessage(null,"taco:sr/rf-foc/tra3-1",e);
+      System.exit(0);
+    }
+    sv.setModel(d);
+    f.setContentPane(sv);
+    f.setVisible(true);
+    ATKDiagnostic.showDiagnostic();
+
+  }
 
 }
