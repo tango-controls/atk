@@ -435,6 +435,12 @@ public class WheelSwitch extends JComponent {
     public void setFormat(String aformat,String attName) {
         String oldFormat = format;
         double oldValue = value;
+
+        if(aformat.equals("%d")) {
+          // Default to %5d
+          aformat = "%5d";
+        }
+
         // format validation
         format = aformat;
         if (!isGoodFormat())
