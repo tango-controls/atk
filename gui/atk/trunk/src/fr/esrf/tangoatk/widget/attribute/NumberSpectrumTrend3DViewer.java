@@ -34,6 +34,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Date;
 
 
@@ -52,7 +55,7 @@ class TrendData {
 public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrumListener, ActionListener, MouseListener, J3DTrendListener, IJLChartListener {
 
   static final java.util.GregorianCalendar calendar = new java.util.GregorianCalendar();
-  static final java.text.SimpleDateFormat genFormat = new java.text.SimpleDateFormat("dd/MM/yy HH:mm:ss");
+  static final java.text.SimpleDateFormat genFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
   protected INumberSpectrum model = null;
   private TrendData[]       data;
@@ -83,10 +86,12 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   private boolean           logScale=false;
   private int               zoomScroll;
   private String            format;
+  private File              currentFile=null;
 
   // Contextual menu
   private boolean           showingMenu;
   protected JPopupMenu      popupMenu;
+  protected JMenuItem       saveFileMenuItem;
   protected JMenuItem       settingsMenuItem;
   protected JMenuItem       hProfileMenuItem;
   protected JMenuItem       vProfileMenuItem;
@@ -185,6 +190,10 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
     settingsMenuItem = new JMenuItem("Settings");
     settingsMenuItem.addActionListener(this);
     popupMenu.add(settingsMenuItem);
+    popupMenu.add(new JSeparator());
+    saveFileMenuItem = new JMenuItem("Save data");
+    saveFileMenuItem.addActionListener(this);
+    popupMenu.add(saveFileMenuItem);
     buildImage();
 
   }
@@ -664,9 +673,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
         if (time == 0) {
           statusLabel.setText(modelName + "  | no data at marker position");
         } else {
-          calendar.setTimeInMillis(time);
-          Date date = calendar.getTime();
-          String timeStr = genFormat.format(date);
+          String timeStr = buildTime(time);
           double val = getValueAt(xCursor, yCursor);
 
           if (Double.isNaN(val)) {
@@ -913,6 +920,8 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
     if( src==settingsMenuItem ) {
       showSettings();
+    } else if ( src==saveFileMenuItem ) {
+      saveDataFile();
     } else if ( src==propButton ) {
       showPropertyFrame();
     } else if ( src==autoScaleCheck ) {
@@ -970,9 +979,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       ret = new String[2];
 
       long time = (long)evt.getTransformedXValue();
-      calendar.setTimeInMillis(time);
-      Date date = calendar.getTime();
-      ret[0] = genFormat.format(date);
+      ret[0] = buildTime(time);
 
       double val = evt.getTransformedYValue();
       String value;
@@ -1134,9 +1141,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
     if(xData>=0 && xData<historyLength) {
       if( data[xData] != null ) {
 
-        calendar.setTimeInMillis(data[xData].time);
-        Date date = calendar.getTime();
-        String timeStr = genFormat.format(date);
+        String timeStr = buildTime(data[xData].time);
         title += " at " + timeStr;
 
         for(int i=0;i<rdimy;i++) {
@@ -2122,6 +2127,77 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
     trend.setImage(lastImg,rdimx,rdimy);
     trendView.getViewport().revalidate();
     revalidate();
+
+  }
+
+  public void saveDataFile() {
+
+    JFileChooser fc = new JFileChooser(".");
+    if(currentFile!=null)
+      fc.setSelectedFile(currentFile);
+    int status = fc.showSaveDialog(this);
+    if(status==JFileChooser.APPROVE_OPTION) {
+      currentFile = fc.getSelectedFile();
+      try {
+        FileWriter f = new FileWriter(currentFile);
+        f.write( makeTabbedString() );
+        f.close();
+      } catch (IOException ex) {
+        JOptionPane.showMessageDialog(this,ex,"Error while saving data",JOptionPane.ERROR_MESSAGE);
+      }
+    }
+
+  }
+
+  private String buildTime(long time) {
+
+    calendar.setTimeInMillis(time);
+    Date date = calendar.getTime();
+    return genFormat.format(date);
+
+  }
+
+  private String getStringValueAt(int x,int y) {
+
+    if(y<data[x].values.length) {
+      double val = data[x].values[y];
+      if (format.length() > 0) {
+        return ATKFormat.format(format, val);
+      } else {
+        return Double.toString(val);
+      }
+    } else
+      return " ";
+
+  }
+
+  protected String makeTabbedString() {
+
+    StringBuffer str = new StringBuffer();
+    int nbCol = data.length;
+    int nbRow = 0;
+
+    // Compute nbRow
+    for(int i=0;i<data.length;i++)
+      if(data[i].values.length>nbRow) nbRow = data[i].values.length;
+
+    // Write date
+    for(int i=0;i<nbCol;i++) {
+      str.append(buildTime(data[i].time));
+      str.append("\t");
+    }
+    str.append("\n");
+
+    // Write data
+    for(int i=0;i<nbRow;i++) {
+      for(int j=0;j<nbCol;j++) {
+        str.append( getStringValueAt(j,i) );
+        str.append("\t");
+      }
+      str.append("\n");
+    }
+
+    return str.toString();
 
   }
 
