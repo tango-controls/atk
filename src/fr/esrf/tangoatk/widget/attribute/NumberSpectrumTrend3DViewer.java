@@ -2133,17 +2133,21 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   public void saveDataFile() {
 
     JFileChooser fc = new JFileChooser(".");
-    if(currentFile!=null)
+    JCheckBox transposeCheck = new JCheckBox("Transpose data");
+    transposeCheck.setFont(ATKConstant.labelFont);
+    transposeCheck.setSelected(true);
+    fc.setAccessory(transposeCheck);
+    if (currentFile != null)
       fc.setSelectedFile(currentFile);
     int status = fc.showSaveDialog(this);
-    if(status==JFileChooser.APPROVE_OPTION) {
+    if (status == JFileChooser.APPROVE_OPTION) {
       currentFile = fc.getSelectedFile();
       try {
         FileWriter f = new FileWriter(currentFile);
-        f.write( makeTabbedString() );
+        f.write(makeTabbedString(transposeCheck.isSelected()));
         f.close();
       } catch (IOException ex) {
-        JOptionPane.showMessageDialog(this,ex,"Error while saving data",JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, ex, "Error while saving data", JOptionPane.ERROR_MESSAGE);
       }
     }
 
@@ -2171,7 +2175,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
   }
 
-  protected String makeTabbedString() {
+  protected String makeTabbedString(boolean transpose) {
 
     StringBuffer str = new StringBuffer();
     int nbCol = data.length;
@@ -2181,20 +2185,36 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
     for(int i=0;i<data.length;i++)
       if(data[i].values.length>nbRow) nbRow = data[i].values.length;
 
-    // Write date
-    for(int i=0;i<nbCol;i++) {
-      str.append(buildTime(data[i].time));
-      str.append("\t");
-    }
-    str.append("\n");
+    if( transpose ) {
 
-    // Write data
-    for(int i=0;i<nbRow;i++) {
-      for(int j=0;j<nbCol;j++) {
-        str.append( getStringValueAt(j,i) );
+      for(int j=nbCol-1;j>=0;j--) {
+        str.append(buildTime(data[j].time));
+        str.append("\t");
+        for(int i=0;i<nbRow;i++) {
+          str.append( getStringValueAt(j,i) );
+          str.append("\t");
+        }
+        str.append("\n");
+      }
+
+    } else {
+
+      // Write date
+      for(int i=nbCol-1;i>=0;i--) {
+        str.append(buildTime(data[i].time));
         str.append("\t");
       }
       str.append("\n");
+
+      // Write data
+      for(int i=0;i<nbRow;i++) {
+        for(int j=nbCol-1;j>=0;j--) {
+          str.append( getStringValueAt(j,i) );
+          str.append("\t");
+        }
+        str.append("\n");
+      }
+
     }
 
     return str.toString();
