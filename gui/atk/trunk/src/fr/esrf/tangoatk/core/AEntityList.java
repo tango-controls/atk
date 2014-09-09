@@ -120,6 +120,8 @@ public abstract class AEntityList extends javax.swing.DefaultListModel
       }
     }
 
+    fireRefresherStepEvent();
+
   }
 
 
