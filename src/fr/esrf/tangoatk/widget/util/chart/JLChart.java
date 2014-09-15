@@ -188,7 +188,7 @@ class TabbedLine {
     for (int i = 0; i < dl.length; i++) {
       if (dl[i] != null) {
 //        if (dl[i].x == t0) {
-          if ( (dl[i].x >= t0 - precision) && (dl[i].x <= t0 + precision) ) {
+        if ( (dl[i].x >= t0 - precision) && (dl[i].x <= t0 + precision) ) {
           ret.append(Double.toString(dl[i].y) + "\t");
           dl[i] = dl[i].next;
         } else {
@@ -321,6 +321,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   private Color chartBackground;
 
   private double displayDuration;
+  private double oldDisplayDuration = Double.NaN;
   protected double maxDisplayDuration;
 
   protected JPopupMenu chartMenu;
@@ -1227,7 +1228,12 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
    * Exit zoom mode.
    */
   public void exitZoom() {
-    xAxis.unzoom();
+    if( !Double.isNaN(oldDisplayDuration) ) {
+      setDisplayDuration(oldDisplayDuration);
+      oldDisplayDuration = Double.NaN;
+    } else {
+      xAxis.unzoom();
+    }
     y1Axis.unzoom();
     y2Axis.unzoom();
     zoomDragAllowed = false;
@@ -2663,9 +2669,25 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     if (zoomDrag) {
       Rectangle r = buildRect(zoomX, zoomY, e.getX(), e.getY());
       zoomDrag = false;
-      xAxis.zoom(r.x, r.x + r.width);
+
+      if( xAxis.canApplyTimeSpan(r.x, r.x + r.width) ) {
+        Rectangle br = xAxis.getBoundRect();
+        double ratio = (double)r.width/(double)br.width;
+        if(ratio<1.0) {
+          if(Double.isNaN(oldDisplayDuration)) oldDisplayDuration = displayDuration;
+          double newDuration = ratio * (xAxis.getMax()-xAxis.getMin());
+          setDisplayDuration(newDuration);
+        }
+      } else {
+        xAxis.zoom(r.x, r.x + r.width);
+      }
       y1Axis.zoom(r.y, r.y + r.height);
       y2Axis.zoom(r.y, r.y + r.height);
+      if( zoomDragAllowed ) {
+        zoomDragAllowed = false;
+        setCursor(Cursor.getDefaultCursor());
+      }
+
     }
     ipanelVisible = false;
     repaint();
@@ -2696,7 +2718,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
       if (msi.found) {
         Graphics g = getGraphics();
-        showPanel(g, msi);
+        showPanel(g, msi, e);
         g.dispose();
         return;
       }
@@ -2878,6 +2900,10 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
    * @see JLAxis#searchNearest
    */
   public void showPanel(Graphics g, SearchInfo si) {
+    showPanel(g,si,null);
+  }
+
+  public void showPanel(Graphics g, SearchInfo si,MouseEvent scrEvent) {
 
     Graphics2D g2 = (Graphics2D) g;
     Rectangle2D bounds;
@@ -2900,7 +2926,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     if (listener != null) {
 
       // Call user listener
-      JLChartEvent w = new JLChartEvent(this, si);
+      JLChartEvent w = new JLChartEvent(this, si, scrEvent);
       str = listener.clickOnChart(w);
 
     }

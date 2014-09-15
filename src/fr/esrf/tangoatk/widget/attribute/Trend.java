@@ -603,10 +603,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     } else if (o == saveButton || o == saveMenuI) {
       saveButtonActionPerformed();
     } else if (o == zoomButton || o == zoomMenuI) {
-      if (!theGraph.isZoomed())
-        theGraph.enterZoom();
-      else
-        theGraph.exitZoom();
+      theGraph.enterZoom();
     } else if (o == timeButton || o == timeMenuI) {
       setRefreshInterval();
     } else if (o == cfgButton || o == cfgMenuI) {

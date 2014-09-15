@@ -19,104 +19,128 @@
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with Tango.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 // JLChartEvent.java
 // 
 // Description:       
 
 package fr.esrf.tangoatk.widget.util.chart;
+
+import java.awt.event.MouseEvent;
 import java.util.EventObject;
 
-/**   Event sent when when the user click on the graph */
+/**
+ * Event sent when when the user click on the graph
+ */
 public class JLChartEvent extends EventObject {
 
-    public SearchInfo searchResult;
-    
-    public JLChartEvent(Object source,SearchInfo si) {
-	super(source);
-	searchResult = si;
-    }
+  public SearchInfo searchResult;
+  MouseEvent srcEvent;
 
-    public void setSource(Object source) {
-	this.source = source;
-    }
-    
-    public String getVersion() {
-	return "$Id$";
-    }
+  public JLChartEvent(Object source, SearchInfo si,MouseEvent srcEvent) {
+    super(source);
+    searchResult = si;
+    this.srcEvent = srcEvent;
+  }
 
-    public Object clone() {
-	return new JLChartEvent(source, searchResult);
-    }
+  public JLChartEvent(Object source, SearchInfo si) {
+    this(source,si,null);
+  }
 
-   /**
-    * Gets the x value pixel coordinates
-    * @return X value
-    */
-    public double getX() {
-      return searchResult.x;
-    }
+  public void setSource(Object source) {
+    this.source = source;
+  }
 
-    /**
-     * Gets the y value pixel coordinates
-     * @return Y value
-     */
-    public double getY() {
-      return searchResult.y;
-    }
+  public String getVersion() {
+    return "$Id$";
+  }
 
-   /**
-    * Gets the x value (original value)
-    * @return X value
-    */
-    public double getXValue() {
-      if( searchResult.xdataView!=null )
-        return searchResult.xvalue.y;
-      else
-        return searchResult.value.x;
-    }
+  public Object clone() {
+    return new JLChartEvent(source, searchResult);
+  }
 
-    /**
-     * Gets the y value (original value)
-     * @return Original Y value
-     */
-    public double getYValue() {
-      return searchResult.value.y;
-    }
+  /**
+   * Return the mouse event that has triggered this event, if any. Null otherwise.
+   * @return
+   */
+  public MouseEvent getMouseEvent() {
+    return srcEvent;
+  }
 
-    /**
-     * Gets the x transformed value (through the A0,A1,A2 polynomial transform)
-     * Does not make conversion in normal monitoring mode (not XY)
-     */
-    public double getTransformedXValue() {
-      if( searchResult.xdataView!=null )
-        return searchResult.xdataView.getTransformedValue(searchResult.xvalue.y);
-      else
-        return searchResult.value.x;
-    }
+  /**
+   * Gets the x value pixel coordinates
+   *
+   * @return X value
+   */
+  public double getX() {
+    return searchResult.x;
+  }
 
-    /**
-     * Gets the y transformed value (through the A0,A1,A2 polynomial transform)
-     */
-    public double getTransformedYValue() {
-      return searchResult.dataView.getTransformedValue(searchResult.value.y);
-    }
-    
-   /**
-    * Gets the index of the clicked point in the dataView.
-    * Works only with normal mode. (not XY)
-    * @return index
-    */
-    public int getDataViewIndex() {
-        return searchResult.clickIdx;
-    }
+  /**
+   * Gets the y value pixel coordinates
+   *
+   * @return Y value
+   */
+  public double getY() {
+    return searchResult.y;
+  }
 
-   /**
-    * Gets the dataView that contains the clicked point.
-    * @return DataView
-    */
-    public JLDataView getDataView() {
-      return searchResult.dataView;
-    }
+  /**
+   * Gets the x value (original value)
+   *
+   * @return X value
+   */
+  public double getXValue() {
+    if (searchResult.xdataView != null)
+      return searchResult.xvalue.y;
+    else
+      return searchResult.value.x;
+  }
+
+  /**
+   * Gets the y value (original value)
+   *
+   * @return Original Y value
+   */
+  public double getYValue() {
+    return searchResult.value.y;
+  }
+
+  /**
+   * Gets the x transformed value (through the A0,A1,A2 polynomial transform)
+   * Does not make conversion in normal monitoring mode (not XY)
+   */
+  public double getTransformedXValue() {
+    if (searchResult.xdataView != null)
+      return searchResult.xdataView.getTransformedValue(searchResult.xvalue.y);
+    else
+      return searchResult.value.x;
+  }
+
+  /**
+   * Gets the y transformed value (through the A0,A1,A2 polynomial transform)
+   */
+  public double getTransformedYValue() {
+    return searchResult.dataView.getTransformedValue(searchResult.value.y);
+  }
+
+  /**
+   * Gets the index of the clicked point in the dataView.
+   * Works only with normal mode. (not XY)
+   *
+   * @return index
+   */
+  public int getDataViewIndex() {
+    return searchResult.clickIdx;
+  }
+
+  /**
+   * Gets the dataView that contains the clicked point.
+   *
+   * @return DataView
+   */
+  public JLDataView getDataView() {
+    return searchResult.dataView;
+  }
 
 }
