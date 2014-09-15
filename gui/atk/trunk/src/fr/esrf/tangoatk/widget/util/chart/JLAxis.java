@@ -32,8 +32,6 @@ import java.awt.*;
 import java.awt.font.*;
 import java.awt.geom.*;
 import javax.swing.*;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -191,7 +189,7 @@ public class JLAxis implements java.io.Serializable {
   private boolean subGridVisible;
   private int gridStyle;
   private Rectangle boundRect;
-  private boolean lastAutoScate;
+  private boolean lastAutoScale;
   private boolean isZoomed;
   private double percentScrollback;
   private double axisDuration = Double.POSITIVE_INFINITY;
@@ -625,6 +623,7 @@ public class JLAxis implements java.io.Serializable {
    */
   public void setAutoScale(boolean b) {
     autoScale = b;
+    lastAutoScale = b;
   }
 
   /** Gets the scale mdoe for this axis.
@@ -701,21 +700,35 @@ public class JLAxis implements java.io.Serializable {
     return subTickTimeAnno;
   }
 
+  public boolean canApplyTimeSpan(int x1, int x2) {
+
+    if( !isZoomed && isHorizontal() && annotation==TIME_ANNO && scale!=LOG_SCALE ) {
+      if( x2 > boundRect.x + boundRect.width ) {
+        return true;
+      }
+    }
+
+    return false;
+
+  }
+
   /** Zoom axis.
    * @param x1 New minimum value for this axis
    * @param x2 New maximum value for this axis
+   * @return true whether the axis is horizontal and the zoom is clipped on the right, false otherwise
    * @see JLAxis#isZoomed
    * @see JLAxis#unzoom
    */
   public void zoom(int x1, int x2) {
 
-    if (!isZoomed) lastAutoScate = autoScale;
+    if (!isZoomed) lastAutoScale = autoScale;
 
     if (isHorizontal()) {
 
       // Clip
       if (x1 < boundRect.x) x1 = boundRect.x;
-      if (x2 > (boundRect.x + boundRect.width)) x2 = boundRect.x + boundRect.width;
+      if (x2 > (boundRect.x + boundRect.width))
+        x2 = boundRect.x + boundRect.width;
 
       // Too small zoom
       if ((x2 - x1) < 10) return;
@@ -767,8 +780,8 @@ public class JLAxis implements java.io.Serializable {
    * @see JLAxis#unzoom
    */
   public void unzoom() {
-    autoScale = lastAutoScate;
-    if (!lastAutoScate) {
+    autoScale = lastAutoScale;
+    if (!lastAutoScale) {
       setMinimum(getMinimum());
       setMaximum(getMaximum());
     }
