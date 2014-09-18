@@ -868,6 +868,14 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
   }
 
+  /**
+   * Returns the image panel
+   * @return Image panel
+   */
+  public JImage getImagePanel() {
+    return imagePanel;
+  }
+
   // ----------------------------------------------------------
   // Action Listener
   // ----------------------------------------------------------
@@ -1264,7 +1272,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
   }
 
-  private void showSettings() {
+  public void showSettings() {
 
     constructSettingsPanel();
 

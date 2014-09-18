@@ -37,6 +37,7 @@ ALL = $(TARGET)/UIManagerHelper.class       \
       $(TARGET)/Gradient.class              \
       $(TARGET)/JGradientViewer.class       \
       $(TARGET)/JGradientEditor.class       \
+      $(TARGET)/MarkerListener.class        \
       $(TARGET)/JImage.class                \
       $(TARGET)/ThreeStateSwitch.class      \
       $(TARGET)/JSmoothDelayDialog.class    \
