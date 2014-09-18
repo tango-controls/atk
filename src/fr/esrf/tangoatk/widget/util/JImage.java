@@ -25,6 +25,7 @@ package fr.esrf.tangoatk.widget.util;
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
 
 import javax.swing.*;
+import javax.swing.event.EventListenerList;
 import java.awt.image.BufferedImage;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -55,10 +56,11 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
   public final static int HORIZONTAL_BOTTOM = 2;
 
   // Markers
-  protected final static int MARKER_CROSS = 1;
-  protected final static int MARKER_RECT  = 2;
-  protected final static int MARKER_VLINE = 3;
-  protected final static int MARKER_HLINE = 4;
+  protected final static int MARKER_CROSS    = 1;
+  protected final static int MARKER_RECT     = 2;
+  protected final static int MARKER_VLINE    = 3;
+  protected final static int MARKER_HLINE    = 4;
+  protected final static int MARKER_MOVABLE  = 5;
 
   protected BufferedImage theImage = null;
   protected Insets margin;
@@ -69,8 +71,11 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
   protected boolean selectionEnabled;
   protected int mode;             // 0=Line 1=Rectangle
   protected boolean isDragging;
+  protected boolean isDraggingMovable;
   protected int dragCorner;       // 0 = Top,Left 1 = Top,Right 3 = Bottom,Right 4 = Bottom,left
   protected int cornerWidth = 10; // Must be multiple of 2
+  protected int dragMovableMarkerCorner;
+  protected int movableMarkerId;
   protected int x1 = -1;          // Current Image selection
   protected int y1 = -1;
   protected int x2 = -1;
@@ -115,9 +120,12 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
     xOrg = 5;
     yOrg = 5;
     mode = MODE_RECT;
+    dragMovableMarkerCorner = 0;
+    dragCorner = 0;
     verticalPosition   = VERTICAL_CENTER;
     horizontalPosition = HORIZONTAL_CENTER;
     isDragging = false;
+    isDraggingMovable = false;
     selectionEnabled = true;
     addMouseMotionListener(this);
     addMouseListener(this);
@@ -465,6 +473,30 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
     return markers.size() - 1;
   }
 
+  public int addMovableMarker(int x, int y, int width, int height, Color c, int lineWidth) {
+    if (markers == null) markers = new Vector<Marker>();
+    markers.add(new Marker(MARKER_MOVABLE, new Rectangle(x, y, width, height), c, lineWidth));
+    repaint();
+    return markers.size() - 1;
+  }
+
+  /**
+   * Adds a rectangle marker
+   * @param x X topleft corner coordinate
+   * @param y Y topleft corner coordinate
+   * @param width Rectangle width
+   * @param height Rectangle hieght
+   * @param c Marker Color
+   * @param lineWidth lineWidth
+   * @return Marker id
+   */
+  public int addRectangleMarker(int x, int y, int width, int height, Color c, int lineWidth) {
+    if (markers == null) markers = new Vector<Marker>();
+    markers.add(new Marker(MARKER_RECT, new Rectangle(x, y, width, height), c, lineWidth));
+    repaint();
+    return markers.size() - 1;
+  }
+
   /**
    * Adds a rectangle marker
    * @param x X topleft corner coordinate
@@ -475,10 +507,7 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
    * @return Marker id
    */
   public int addRectangleMarker(int x, int y, int width, int height, Color c) {
-    if (markers == null) markers = new Vector<Marker>();
-    markers.add(new Marker(MARKER_RECT, new Rectangle(x, y, width, height), c));
-    repaint();
-    return markers.size() - 1;
+    return addRectangleMarker(x,y,width,height,c,1);
   }
 
   /**
@@ -516,7 +545,7 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
    * @param nHeight Rectangle height (ignored when CROSS Marker, LINE Marker)
    */
   public void setMarkerPos(int id, int x, int y, int nWidth, int nHeight) {
-    if (markers != null) {
+    if (markers != null && !isDraggingMovable) {
       if (id >= 0 && id < markers.size()) {
         Marker m = (Marker) markers.get(id);
         m.markerRect.setBounds(x, y, nWidth, nHeight);
@@ -600,6 +629,18 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
   public void setSelectionColor (Color selectionColor) {
     this.selectionColor = selectionColor;
     repaint();
+  }
+
+  public void addMarkerListener(MarkerListener l) {
+    listenerList.add(MarkerListener.class, l);
+  }
+
+  /**
+   * Remove the specified ROI Listener
+   * @param l ROI listener
+   */
+  public void removeMarkerListener(MarkerListener l) {
+    listenerList.remove(MarkerListener.class, l);
   }
 
   // -------------------------------------------------------
@@ -871,7 +912,13 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
       int i;
       for (i = 0; i < markers.size(); i++) {
         Marker m = (Marker) markers.get(i);
+
+        Graphics2D g2 = (Graphics2D)g;
+        Stroke old = g2.getStroke();
+        BasicStroke bs = new BasicStroke(m.lineWidth);
         g.setColor(m.markerColor);
+        g2.setStroke(bs);
+
         int x = (int) ((double) m.markerRect.x * markerScaleFactor);
         int y = (int) ((double) m.markerRect.y * markerScaleFactor);
         int w = (int) ((double) m.markerRect.width * markerScaleFactor);
@@ -895,6 +942,37 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
               g.drawRect(x, y, w, h);
               break;
 
+            case MARKER_MOVABLE:
+
+              g.drawRect(x, y, w, h);
+              g2.setStroke(old);
+
+              // Draw corners
+              Rectangle c = new Rectangle(0, 0, cornerWidth, cornerWidth);
+              c.translate( x - cornerWidth / 2, y - cornerWidth / 2 );
+              int w2l = w/2;
+              int w2r = w-w2l;
+              int h2u = h/2;
+              int h2d = h-h2u;
+              g2.drawRect( c.x, c.y, c.width, c.height );
+              c.translate( w2l, 0 );
+              g2.drawRect( c.x, c.y, c.width, c.height );
+              c.translate( w2r, 0 );
+              g2.drawRect( c.x, c.y, c.width, c.height );
+              c.translate( 0, h2u );
+              g2.drawRect( c.x, c.y, c.width, c.height );
+              c.translate( 0, h2d );
+              g2.drawRect( c.x, c.y, c.width, c.height );
+              c.translate( -w2r, 0 );
+              g2.drawRect( c.x, c.y, c.width, c.height );
+              c.translate( -w2l, 0 );
+              g2.drawRect( c.x, c.y, c.width, c.height );
+              c.translate( 0, -h2d );
+              g2.drawRect( c.x, c.y, c.width, c.height );
+              c.translate( w / 2, 0 );
+              g2.drawRect( c.x, c.y, c.width, c.height );
+              break;
+
             case MARKER_VLINE:
               g.drawLine(x, 0, x, theImage.getHeight());
               break;
@@ -905,6 +983,8 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
 
           }
         }
+
+        g2.setStroke(old);
 
       }
     }
@@ -955,6 +1035,42 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
       if (cornerMatch(x, y, xc, yc)) return 5;
     }
     return 0;
+  }
+
+  protected int findMovableCorner(int x,int y) {
+
+    boolean found = false;
+
+    int i=0;
+    while(!found && i<markers.size()) {
+      Marker m = markers.get(i);
+      if(m.type==MARKER_MOVABLE) {
+
+        int x1 = m.markerRect.x;
+        int y1 = m.markerRect.y;
+        int x2 = m.markerRect.x+m.markerRect.width;
+        int y2 = m.markerRect.y+m.markerRect.height;
+        int xc = (x2 + x1) / 2;
+        int yc = (y2 + y1) / 2;
+
+        if (cornerMatch(x, y, x1, y1)) return 1 + i*10;
+        if (cornerMatch(x, y, x2, y1)) return 2 + i*10;
+        if (cornerMatch(x, y, x2, y2)) return 3 + i*10;
+        if (cornerMatch(x, y, x1, y2)) return 4 + i*10;
+
+        if (cornerMatch(x, y, xc, y1)) return 5 + i*10;
+        if (cornerMatch(x, y, x2, yc)) return 6 + i*10;
+        if (cornerMatch(x, y, xc, y2)) return 7 + i*10;
+        if (cornerMatch(x, y, x1, yc)) return 8 + i*10;
+
+        if (cornerMatch(x, y, xc, yc)) return 9 + i*10;
+
+      }
+      i++;
+    }
+
+    return 0;
+
   }
 
   protected Rectangle buildSelectionRect() {
@@ -1057,6 +1173,124 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
 
   }
 
+  private void moveMarker(Marker m,int x,int y) {
+
+    Dimension d = getImageSize();
+
+    if(x<0) x=0;
+    if(y<0) y=0;
+    if(x>d.width-1) x=d.width-1;
+    if(y>d.height-1) y=d.height-1;
+
+    int mx1 = m.markerRect.x;
+    int my1 = m.markerRect.y;
+    int mx2 = m.markerRect.x + m.markerRect.width - 1;
+    int my2 = m.markerRect.y + m.markerRect.height -1;
+
+    switch( dragMovableMarkerCorner ) {
+
+      case 1: // Top,Left
+        if(x>mx2) x=mx2;
+        if(y>my2) y=my2;
+        m.markerRect.setBounds(x,y,mx2-x+1,my2-y+1);
+        repaint();
+        break;
+
+      case 2: // Top,Right
+        if(x<mx1) x=mx1;
+        if(y>my2) y=my2;
+        m.markerRect.setBounds(mx1,y,x-mx1+1,my2-y+1);
+        repaint();
+        break;
+
+      case 3: // Bottom,Right
+        if(x<mx1) x=mx1;
+        if(y<my1) y=my1;
+        m.markerRect.setBounds(mx1,my1,x-mx1+1,y-my1+1);
+        repaint();
+        break;
+
+      case 4: // Bottom,Left
+        if(x>mx2) x=mx2;
+        if(y<my1) y=my1;
+        m.markerRect.setBounds(x,my1,mx2-x+1,y-my1+1);
+        repaint();
+        break;
+
+      case 5: // North
+        if(y>my2) y=my2;
+        m.markerRect.setBounds(mx1,y,mx2-mx1+1,my2-y+1);
+        repaint();
+        break;
+
+      case 6: // East
+        if(x<mx1) x=mx1;
+        m.markerRect.setBounds(mx1,my1,x-mx1+1,my2-my1+1);
+        repaint();
+        break;
+
+      case 7: // South
+        if(y<my1) y=my1;
+        m.markerRect.setBounds(mx1,my1,mx2-mx1+1,y-my1+1);
+        repaint();
+        break;
+
+      case 8: // West
+        if(x>mx2) x=mx2;
+        m.markerRect.setBounds(x,my1,mx2-x+1,my2-my1+1);
+        repaint();
+        break;
+
+      case 9: // Center
+        int tx = x-(mx1+m.markerRect.width/2);
+        int ty = y-(my1+m.markerRect.height/2);
+        if(mx1+tx<0) tx = -mx1;
+        if(my1+ty<0) ty = -my1;
+        if(mx2+tx>d.width-1) tx = d.width-1-mx2;
+        if(my2+ty>d.height-1) ty = d.height-1-my2;
+        m.markerRect.setBounds(mx1+tx,my1+ty,m.markerRect.width,m.markerRect.height);
+        repaint();
+        break;
+
+    }
+
+  }
+
+  private boolean hasMovableMarker() {
+
+    boolean found = false;
+    int i = 0;
+
+    if( markers==null )
+      return false;
+
+    while(!found && i<markers.size()) {
+      found = markers.get(i).type == MARKER_MOVABLE;
+      i++;
+    }
+
+    return found;
+
+  }
+
+  public void fireMarkerSelection(int markerId) {
+
+    MarkerListener[] list = listenerList.getListeners(MarkerListener.class);
+    for (int i = 0; i < list.length; i++) list[i].clickOnMarker(this,markerId);
+
+  }
+
+  public void fireMarkerMoved(int markerId,Marker m) {
+
+    MarkerListener[] list = listenerList.getListeners(MarkerListener.class);
+    for (int i = 0; i < list.length; i++) list[i].markerMoved(this,markerId,
+        m.markerRect.x,
+        m.markerRect.y,
+        m.markerRect.x+m.markerRect.width-1,
+        m.markerRect.y+m.markerRect.height-1);
+
+  }
+
   protected void alignSelection() {
 
     if (snapToGrid && hasSelection()) {
@@ -1101,17 +1335,18 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
 
   public void mouseDragged(MouseEvent e) {
 
+    int nx = e.getX() - xOrg - yAxisWidth;
+    int ny = e.getY() - yOrg - xAxisUpMargin;
+
     if(crossCursor) {
-      xCursor = e.getX() - xOrg - yAxisWidth;
-      yCursor = e.getY() - yOrg - xAxisUpMargin;
+      xCursor = nx;
+      yCursor = ny;
       repaint();
     }
 
     if (isDragging) {
 
       Rectangle oldSel = buildSelectionRect();
-      int nx = e.getX() - xOrg - yAxisWidth;
-      int ny = e.getY() - yOrg - xAxisUpMargin;
 
       // Clip
       Dimension d = getImageSize();
@@ -1186,14 +1421,63 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
 
     }
 
+    if( isDraggingMovable ) {
+
+       Marker m = markers.get(movableMarkerId);
+       moveMarker(m,nx,ny);
+
+    }
+
   }
 
   public void mouseMoved(MouseEvent e) {
+
+    int xImg = e.getX() - xOrg - yAxisWidth;
+    int yImg = e.getY() - yOrg - xAxisUpMargin;
+
     if(crossCursor) {
-      xCursor = e.getX() - xOrg - yAxisWidth;
-      yCursor = e.getY() - yOrg - xAxisUpMargin;
+      xCursor = xImg;
+      yCursor = yImg;
       repaint();
     }
+
+    if( hasMovableMarker() ) {
+
+      int cType = findMovableCorner(xImg,yImg) % 10;
+      switch (cType) {
+        case 1:
+          setCursor(Cursor.getPredefinedCursor(Cursor.NW_RESIZE_CURSOR));
+          break;
+        case 2:
+          setCursor(Cursor.getPredefinedCursor(Cursor.NE_RESIZE_CURSOR));
+          break;
+        case 3:
+          setCursor(Cursor.getPredefinedCursor(Cursor.SE_RESIZE_CURSOR));
+          break;
+        case 4:
+          setCursor(Cursor.getPredefinedCursor(Cursor.SW_RESIZE_CURSOR));
+          break;
+        case 5:
+          setCursor(Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR));
+          break;
+        case 6:
+          setCursor(Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR));
+          break;
+        case 7:
+          setCursor(Cursor.getPredefinedCursor(Cursor.S_RESIZE_CURSOR));
+          break;
+        case 8:
+          setCursor(Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR));
+          break;
+        case 9:
+          setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+          break;
+        default:
+          setCursor(Cursor.getDefaultCursor());
+      }
+
+    }
+
   }
 
   public void mouseEntered(MouseEvent e) {
@@ -1212,16 +1496,24 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
 
   public void mouseReleased(MouseEvent e) {
     isDragging = false;
+    if(isDraggingMovable) {
+      Marker m = markers.get(movableMarkerId);
+      if(m.hasMoved()) fireMarkerMoved(movableMarkerId,m);
+      isDraggingMovable = false;
+    }
     repaint();
   }
 
   public void mousePressed(MouseEvent e) {
 
     if (e.getButton() == MouseEvent.BUTTON1) {
+
       grabFocus();
 
       int x = e.getX() - xOrg - yAxisWidth;
       int y = e.getY() - yOrg - xAxisUpMargin;
+
+      // Default selection management
 
       if (selectionEnabled) {
 
@@ -1253,7 +1545,23 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
         Rectangle oldSel = buildSelectionRect();
         alignSelection();
         repaintBoundingRect(oldSel);
+
         isDragging = true;
+
+      }
+
+      // Movable marker
+
+      if( hasMovableMarker() ) {
+
+        int c = findMovableCorner(x,y);
+        dragMovableMarkerCorner = c % 10;
+        movableMarkerId = c / 10;
+        if(c!=0) {
+          fireMarkerSelection(movableMarkerId);
+          markers.get(movableMarkerId).save();
+          isDraggingMovable = true;
+        }
 
       }
 
@@ -1344,36 +1652,73 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
   }
 
   public static void main (String[] args) {
+
       JFrame frame = new JFrame();
       frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
       JImage image = new JImage();
       BufferedImage img = new BufferedImage(800, 600, BufferedImage.TYPE_INT_RGB);
       image.setImage( img );
+      image.setSelectionEnabled(false);
+      image.addMovableMarker(10, 10, 200, 200, Color.RED, 2);
+      image.addMovableMarker(300,10,200,200,Color.GREEN,2);
       image.mode = MODE_CROSS;
       image.setSelectionColor( Color.GREEN );
       frame.setContentPane( image );
       frame.pack();
       frame.setVisible( true );
+
   }
 
 }
 
 class Marker {
 
-  int type;
+  int       type;
+  int       lineWidth;
   Rectangle markerRect;
-  Color markerColor;
+  Rectangle oldRect;
+  Color     markerColor;
 
   Marker(int _type, int x, int y, Color _markerColor) {
+    this(_type,x,y,_markerColor,1);
+  }
+
+  Marker(int _type, int x, int y, Color _markerColor, int _lineWidth) {
     type = _type;
     markerRect = new Rectangle(x, y, 0, 0);
+    oldRect = new Rectangle(x, y, 0, 0);
     markerColor = _markerColor;
+    lineWidth = _lineWidth;
   }
 
   Marker(int _type, Rectangle rect, Color _markerColor) {
+    this(_type,rect,_markerColor,1);
+  }
+
+  Marker(int _type, Rectangle rect, Color _markerColor, int _lineWidth) {
     type = _type;
     markerRect = rect;
+    oldRect = new Rectangle(rect);
     markerColor = _markerColor;
+    lineWidth = _lineWidth;
+  }
+
+  void save() {
+    oldRect.setBounds(markerRect);
+  }
+
+  boolean hasMoved() {
+    return !oldRect.equals(markerRect);
+  }
+
+  public String toString() {
+
+    return "M" + type + " (" +
+        markerRect.x + "," +
+        markerRect.y + "," +
+        markerRect.width + "," +
+        markerRect.height + ")";
+
   }
 
 }
