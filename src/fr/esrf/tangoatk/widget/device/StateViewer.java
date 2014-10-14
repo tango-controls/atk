@@ -163,6 +163,7 @@ public class StateViewer extends javax.swing.JPanel
               dev.loadDevProperties();
           }
     }
+    device.addStateListener(this);
     setState(device.getState());
     if (!externalSetText)
       textLabel.setText(device.getName());
