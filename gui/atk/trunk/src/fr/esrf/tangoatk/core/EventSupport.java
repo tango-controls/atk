@@ -251,6 +251,17 @@ public class EventSupport implements Serializable
     }
 
     public void fireStatusEvent(Object source, String status) {
+// 
+//        final Object src = source;
+//        final String statusStr = status;
+//        final long  ts = System.currentTimeMillis();
+//        java.awt.EventQueue.invokeLater(new Runnable()
+//        {
+//            public void run()
+//            {
+//                fireStatusEvent(src, statusStr, ts);
+//            }
+//        });
     fireStatusEvent(source, status, System.currentTimeMillis());
     }
 
@@ -288,6 +299,17 @@ public class EventSupport implements Serializable
     }
 
     public void fireStateEvent(Device source, String state) {
+// 
+//        final Device src = source;
+//        final String stateStr = state;
+//        final long  ts = System.currentTimeMillis();
+//        java.awt.EventQueue.invokeLater(new Runnable()
+//        {
+//            public void run()
+//            {
+//                fireStateEvent(src, stateStr, ts);
+//            }
+//        });
     fireStateEvent(source, state, System.currentTimeMillis());
     }
 
