@@ -23,6 +23,7 @@
 /** A panel for value to JDraw object property mapping */
 package fr.esrf.tangoatk.widget.util.jdraw;
 
+import fr.esrf.TangoDs.TangoConst;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 
 import javax.swing.*;
@@ -177,6 +178,7 @@ class JDValueMappingPanel extends JPanel implements ActionListener {
 
   private JButton       newEntryBtn;
   private JButton       removeEntryBtn;
+  private JButton       tangoStateBtn;
 
   private JButton       applyBtn;
   private JButton       cancelBtn;
@@ -272,6 +274,14 @@ class JDValueMappingPanel extends JPanel implements ActionListener {
     removeEntryBtn.addActionListener(this);
     removeEntryBtn.setBounds(100, 285, 80, 25);
     tablePanel.add(removeEntryBtn);
+
+    tangoStateBtn = new JButton("Tango States");
+    tangoStateBtn.setFont(JDUtils.labelFont);
+    tangoStateBtn.setMargin(new Insets(0, 0, 0, 0));
+    tangoStateBtn.setForeground(Color.BLACK);
+    tangoStateBtn.addActionListener(this);
+    tangoStateBtn.setBounds(190, 285, 95, 25);
+    tablePanel.add(tangoStateBtn);
 
     tablePanel.setBounds(5,75,295,320);
     add(tablePanel);
@@ -390,6 +400,14 @@ class JDValueMappingPanel extends JPanel implements ActionListener {
         hasChanged=true;
       }
       updateRows();
+
+    } else if (src==tangoStateBtn) {
+
+      String msg = new String();
+      for(int i=0;i< TangoConst.Tango_DevStateName.length;i++) {
+        msg += Integer.toString(i) + " : " + TangoConst.Tango_DevStateName[i] + "\n";
+      }
+      JOptionPane.showMessageDialog(this,msg,"Values of tango states",JOptionPane.INFORMATION_MESSAGE);
 
     } else if ( src==defaultValueBtn ) {
 
