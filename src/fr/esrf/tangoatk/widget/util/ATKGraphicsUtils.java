@@ -112,12 +112,12 @@ public class ATKGraphicsUtils {
     ye = r.y + (r.height - wy) / 2;
 
     // Saturate
-    if( xe<0 ) xe=0;
-    if( ye<0 ) ye=0;
     if( (xe+wx) > screenSize.width )
       xe = screenSize.width - wx;
     if( (ye+wy) > screenSize.height )
       ye = screenSize.height - wy;
+    if( xe<0 ) xe=0;
+    if( ye<0 ) ye=0;
 
     // Set bounds
     dlg.setBounds(xe, ye, wx, wy);
@@ -153,12 +153,12 @@ public class ATKGraphicsUtils {
     ye = r.y + (r.height - wy) / 2;
 
     // Saturate
-    if( xe<0 ) xe=0;
-    if( ye<0 ) ye=0;
     if( (xe+wx) > screenSize.width )
       xe = screenSize.width - wx;
     if( (ye+wy) > screenSize.height )
       ye = screenSize.height - wy;
+    if( xe<0 ) xe=0;
+    if( ye<0 ) ye=0;
 
     // Set bounds
     dlg.setBounds(xe, ye, wx, wy);
@@ -222,12 +222,12 @@ public class ATKGraphicsUtils {
     ye = r.y + (r.height - wy) / 2;
 
     // Saturate
-    if( xe<0 ) xe=0;
-    if( ye<0 ) ye=0;
     if( (xe+wx) > screenSize.width )
       xe = screenSize.width - wx;
     if( (ye+wy) > screenSize.height )
       ye = screenSize.height - wy;
+    if( xe<0 ) xe=0;
+    if( ye<0 ) ye=0;
 
     // Set bounds
     fr.setBounds(xe, ye, wx, wy);
