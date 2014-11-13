@@ -34,6 +34,7 @@ import fr.esrf.tangoatk.core.command.VoidVoidCommand;
 import fr.esrf.tangoatk.core.command.InvalidCommand;
 
 import java.awt.event.ActionListener;
+import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 /**
@@ -53,9 +54,11 @@ public class CommandComboViewer extends JComboBox
     private boolean       cancelButtonVisible;    
     private boolean       deviceButtonVisible;
     private boolean       descriptionVisible;
+    private boolean       keyboardActive = false;
 
 
     private CommandList   commandList=null;
+    private JComboBox.KeySelectionManager  superKeyManager;
        
     
     /** Creates new CommandComboViewer */
@@ -63,6 +66,16 @@ public class CommandComboViewer extends JComboBox
    {
        commandList=null;
        this.addActionListener(this);
+       JComboBox.KeySelectionManager manager = new JComboBox.KeySelectionManager() 
+                                       {
+                                           public int selectionForKey(char aKey, ComboBoxModel aModel)
+                                           {
+                                               int sel = commandSelectionForKey(aKey, aModel);
+                                               return sel;
+                                           }
+                                       };
+       superKeyManager = this.getKeySelectionManager();
+       this.setKeySelectionManager(manager);
    }
 
    protected void commandsActionPerformed(java.awt.event.ActionEvent evt)
@@ -117,7 +130,7 @@ public class CommandComboViewer extends JComboBox
    @Override
    public void actionPerformed(java.awt.event.ActionEvent e)
    {
-         commandsActionPerformed(e);
+       commandsActionPerformed(e);
    }
 
     
@@ -221,7 +234,33 @@ public class CommandComboViewer extends JComboBox
     public void setDescriptionVisible(boolean  v) {
 	this.descriptionVisible = v;
     }
+    
+    /**
+     * Get the value of keyboardActive.
+     * @return value of keyboardActive.
+     */
+    public boolean isKeyboardActive() {
+	return keyboardActive;
+    }
+    
+    /**
+     * Set the value of keyboardActive.
+     * @param v  Value to assign to keyboardActive.
+     */
+    public void setKeyboardActive(boolean  v) {
+	this.keyboardActive = v;
+    }
 
+ 
+    private int commandSelectionForKey(char aKey, ComboBoxModel aModel)
+    {
+        if (this.keyboardActive)
+        {
+            return superKeyManager.selectionForKey(aKey, aModel);
+        }
+        
+        return -1;
+    }
     
     public static void main (String[] args)
     {
@@ -231,14 +270,17 @@ public class CommandComboViewer extends JComboBox
         CommandList               clist = new CommandList();
         try
         {
-	  clist.add("fp/test/1/*");
+            clist.add("fp/test/1/*");
+//            clist.add("ID/PowerT/banc/*");
         }
         catch (Exception ex)
         {
           System.out.println("Cannot connect to fp/test/1/*");
+//          System.out.println("Cannot connect to ID/PowerT/banc/*");
 	  System.exit(-1);
         }
 	
+//        ccv.setKeyboardActive(true);
 	ccv.setModel(clist);
 	f.getContentPane().add(ccv);
 	f.pack();
