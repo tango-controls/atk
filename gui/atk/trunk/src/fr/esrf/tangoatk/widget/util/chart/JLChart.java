@@ -1622,19 +1622,17 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   }
 
   // Refresh a JTable containing data of a single dataView when the tableDialog is visible
-  public void refreshTableSingle(JLDataView v)
-  {
-     if ( preferDialog )
-     {
-	if ( tableDialog == null ) return;
-	if ( !tableDialog.isVisible() ) return;
-     }
-     else
-     {
-	if ( theTable == null ) return;
-	if ( !theTable.isVisible() ) return;
-     }
-     updateTableDataSingle( v );
+  public void refreshTableSingle(JLDataView v) {
+
+    if (preferDialog) {
+      if (tableDialog == null) return;
+      if (!tableDialog.isVisible()) return;
+    } else {
+      if (theTable == null) return;
+      if (!theTable.isVisible()) return;
+    }
+    updateTableDataSingle(v);
+
   }
 
   private void updateTableDataSingle (JLDataView v) {
@@ -3006,11 +3004,15 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
     int nb = 0;
 
-    if (displayDuration != Double.POSITIVE_INFINITY) {
+    if( !Double.isNaN(oldDisplayDuration) ) {
+      if(oldDisplayDuration != Double.POSITIVE_INFINITY)
+        nb = v.garbagePointTime(oldDisplayDuration);
+    } else if (displayDuration != Double.POSITIVE_INFINITY) {
       nb = v.garbagePointTime(displayDuration);
     }
 
     return nb;
+
   }
 
   /**
