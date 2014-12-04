@@ -129,7 +129,6 @@ public class SimplePropertyFrame extends JDialog {
 
     addComponentListener(new ComponentAdapter() {
       public void componentHidden(ComponentEvent evt) {
-        System.out.println("Free ref");
         setModel(null);
         dispose();
       }
