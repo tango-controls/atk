@@ -42,6 +42,7 @@ public class DevStateScalar extends AAttribute
   DevStateScalarHelper   devStateHelper;
   String                 devStateValue = null;
   String                 setPointValue = null;
+  DevState               devStateValueRaw = null;
   boolean                invertOpenClose = false;
   boolean                invertInsertExtract = false;
 
@@ -66,15 +67,19 @@ public class DevStateScalar extends AAttribute
   {
      return devStateValue;
   }
-  
+
+  public DevState getDevState() {
+    return  devStateValueRaw;
+  };
   
   public String getDeviceValue()
   {
       String readVal;
       try
       {
-	  readVal = fr.esrf.tangoatk.core.Device.toString(readValueFromNetwork().extractState());
-	  devStateValue = readVal;
+        devStateValueRaw = readValueFromNetwork().extractState();
+	      readVal = fr.esrf.tangoatk.core.Device.toString(devStateValueRaw);
+	      devStateValue = readVal;
       }
       catch (DevFailed e)
       {
@@ -176,7 +181,8 @@ public class DevStateScalar extends AAttribute
 	      if (att == null) return;
 	      
 	      // Retreive the read value for the attribute
-	      devStateValue = fr.esrf.tangoatk.core.Device.toString(att.extractState());
+        devStateValueRaw = att.extractState();
+	      devStateValue = fr.esrf.tangoatk.core.Device.toString(devStateValueRaw);
 	      
 	      // Retreive the set point for the attribute
 	      setPointValue = devStateHelper.getDevStateScalarSetPoint(att);
@@ -219,7 +225,8 @@ public class DevStateScalar extends AAttribute
           timeStamp = attValue.getTimeValMillisSec();
 
 	      // Retreive the read value for the attribute
-	      devStateValue = fr.esrf.tangoatk.core.Device.toString(attValue.extractState());
+        devStateValueRaw = attValue.extractState();
+	      devStateValue = fr.esrf.tangoatk.core.Device.toString(devStateValueRaw);
 
 	      // Retreive the set point for the attribute
 	      setPointValue = devStateHelper.getDevStateScalarSetPoint(attValue);
@@ -331,7 +338,8 @@ public class DevStateScalar extends AAttribute
               attribute = da;
               timeStamp = da.getTimeValMillisSec();
               // Retreive the read value for the attribute
-              devStateValue = fr.esrf.tangoatk.core.Device.toString(da.extractState());
+              devStateValueRaw = da.extractState();
+              devStateValue = fr.esrf.tangoatk.core.Device.toString(devStateValueRaw);
 	      // Retreive the set point for the attribute
 	      setPointValue = devStateHelper.getDevStateScalarSetPoint(da);	      
               // Fire valueChanged
@@ -412,7 +420,8 @@ public class DevStateScalar extends AAttribute
               attribute = da;
               timeStamp = da.getTimeValMillisSec();
               // Retreive the read value for the attribute
-              devStateValue = fr.esrf.tangoatk.core.Device.toString(da.extractState());
+              devStateValueRaw = da.extractState();
+              devStateValue = fr.esrf.tangoatk.core.Device.toString(devStateValueRaw);
 	      // Retreive the set point for the attribute
 	      setPointValue = devStateHelper.getDevStateScalarSetPoint(da);	      
               // Fire valueChanged

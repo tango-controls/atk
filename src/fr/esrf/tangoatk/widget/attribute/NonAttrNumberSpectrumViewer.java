@@ -121,7 +121,7 @@ public class NonAttrNumberSpectrumViewer extends JLChart implements
         current_model_number = 0;
     }
 
-    protected String[] buildPanelString (SearchInfo si)
+    public String[] buildPanelString (SearchInfo si)
     {
         String[] str = new String[4];
         str[0] = si.dataView.getExtendedName() + " " + si.axis.getAxeName();

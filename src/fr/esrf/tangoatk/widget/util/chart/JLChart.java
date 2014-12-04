@@ -2863,7 +2863,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     showPanel(g, lastSearch);
   }
 
-  protected String[] buildPanelString(SearchInfo si) {
+  public String[] buildPanelString(SearchInfo si) {
 
     String[] str = null;
 

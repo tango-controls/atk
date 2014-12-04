@@ -41,6 +41,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import fr.esrf.Tango.DevState;
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.widget.util.*;
 import fr.esrf.tangoatk.widget.util.chart.*;
@@ -51,7 +52,7 @@ import fr.esrf.tangoatk.widget.util.chart.*;
  */
 
 /** A class to monitor multiple scalar attributes. */
-public class Trend extends JPanel implements IControlee, ActionListener, IJLChartActionListener, IRefresherListener, IListStateListener {
+public class Trend extends JPanel implements IControlee, ActionListener, IJLChartActionListener, IRefresherListener, IListStateListener, IJLChartListener {
 
   // Constant
 
@@ -359,6 +360,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     theGraph.addUserAction("View errors");
     theGraph.addUserAction("Diagnostic");
     theGraph.addJLChartActionListener(this);
+    theGraph.setJLChartListener(this);
     // Commented revision 1.43 modifications :
     // refuse displayDuration greater than 1 day, in order to limit memory use
     //theGraph.setMaxDisplayDuration(24 * 60 * 60 * 1000);
@@ -512,6 +514,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
         IAttribute m = selNode.getModel();
         if(m==null) m = selNode.getEnumModel();
         if(m==null) m = selNode.getBooleanModel();
+        if(m==null) m = selNode.getDevStateModel();
         if(m==null) m = selNode.getSpectrumModel();
         if (m != null) {
           if(propFrame==null)
@@ -530,6 +533,27 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     add(dateLabel,BorderLayout.SOUTH);
 
     errWin = new ErrorHistory();
+
+  }
+
+  public String[] clickOnChart(JLChartEvent e) {
+
+    TrendSelectionNode node = getNodeForDataView(e.searchResult.dataView);
+
+    // Special handling for DevState
+    if( node!=null ) {
+      if( node.getDevStateModel() != null ) {
+        int state = (int)( e.searchResult.value.y+0.5 );
+        String[] str = new String[3];
+        str[0] = e.searchResult.dataView.getExtendedName() + " " + e.searchResult.axis.getAxeName();
+        str[1] = "Time= " + JLAxis.formatTimeValue(e.searchResult.value.x);
+        str[2] = "Y= " + state + "(" + fr.esrf.tangoatk.core.Device.toString(DevState.from_int(state)) + ")";
+        return str;
+      }
+    }
+
+    // Default behavior
+    return theGraph.buildPanelString(e.searchResult);
 
   }
 
@@ -895,6 +919,10 @@ public void setTimePrecision(int timePrecision) {
           lastAdded = rootNode.addItem( this, (IBooleanScalar) list.get(i), defaultColor[i % defaultColor.length] );
         }
 
+        if( list.get(i) instanceof IDevStateScalar ) {
+          lastAdded = rootNode.addItem( this, (IDevStateScalar) list.get(i), defaultColor[i % defaultColor.length] );
+        }
+
         if( list.get(i) instanceof IEnumScalar ) {
           lastAdded = rootNode.addItem( this, (IEnumScalar) list.get(i), defaultColor[i % defaultColor.length] );
         }
@@ -1045,6 +1073,7 @@ public void setTimePrecision(int timePrecision) {
     INumberScalar scalar;
     IEnumScalar escalar;
     IBooleanScalar bscalar;
+    IDevStateScalar stscalar;
     INumberSpectrum nscalar;
     AttributePolledList alist;
 
@@ -1082,6 +1111,9 @@ public void setTimePrecision(int timePrecision) {
           } else if( att instanceof IBooleanScalar ) {
 	          bscalar = (IBooleanScalar) attList.add(name);
 	          lastAdded = rootNode.addItem(this, bscalar, defaultColor[i % defaultColor.length]);
+          } else if( att instanceof IDevStateScalar ) {
+            stscalar = (IDevStateScalar) attList.add(name);
+            lastAdded = rootNode.addItem(this, stscalar, defaultColor[i % defaultColor.length]);
           } else if( att instanceof IEnumScalar ) {
 	          escalar = (IEnumScalar) attList.add(name);
 	          lastAdded = rootNode.addItem(this, escalar, defaultColor[i % defaultColor.length]);
@@ -1319,6 +1351,9 @@ public void setTimePrecision(int timePrecision) {
           return true;
         }
         if (entity instanceof IBooleanScalar) {
+          return true;
+        }
+        if (entity instanceof IDevStateScalar) {
           return true;
         }
         if (entity instanceof INumberSpectrum) {
@@ -1975,6 +2010,24 @@ public void setTimePrecision(int timePrecision) {
       return selectedAxis;
   }
 
+  private TrendSelectionNode getNodeForDataView(JLDataView dv) {
+
+    Vector<TrendSelectionNode> nodes = rootNode.getSelectableItems();
+    int i = 0;
+    boolean found = false;
+
+    while(!found && i<nodes.size()) {
+      found = nodes.get(i).getData() == dv;
+      if(!found) i++;
+    }
+
+    if( found )
+      return nodes.get(i);
+    else
+      return null;
+
+  }
+
   /**
    * Returns the dataview associated with an attribute (null if no dataview is associated with the attribute)
    * @param attributeName The name of the attribute
@@ -2164,7 +2217,7 @@ class ConfigPanel extends JDialog implements ActionListener {
     setTitle("Add new attribute");
     JPanel innerPanel = new JPanel();
     innerPanel.setLayout(new BorderLayout());
-    finder = new DeviceFinder(DeviceFinder.MODE_ATTRIBUTE_NUMBER_BOOLEAN_SPECTRUM_SCALAR);
+    finder = new DeviceFinder(DeviceFinder.MODE_ATTRIBUTE_NUMBER_BOOLEAN_STATE_SPECTRUM_SCALAR);
     innerPanel.add(finder,BorderLayout.CENTER);
 
     addBtn = new JButton("Add selected attribute(s)");
