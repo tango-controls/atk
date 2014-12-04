@@ -671,7 +671,7 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
         setPaintAxisFirst(false);
     }
 
-    protected String[] buildPanelString(SearchInfo si) {
+    public String[] buildPanelString(SearchInfo si) {
        // System.out.println("buildPanelString");
         if(!isChartOnXAxis())
         {

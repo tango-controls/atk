@@ -42,7 +42,9 @@ public interface IDevStateScalar extends IAttribute
     public void removeDevStateScalarListener(IDevStateScalarListener l) ;
 
     public String getValue();
-    
+
+    public DevState getDevState();
+
     public String getDeviceValue();
     
     public boolean getInvertedOpenClose();

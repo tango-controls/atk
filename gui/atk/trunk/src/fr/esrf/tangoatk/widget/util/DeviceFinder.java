@@ -70,6 +70,8 @@ public class DeviceFinder extends JPanel {
   public final static int MODE_ATTRIBUTE_NUMBER_BOOLEAN_SCALAR = 8;
   /** Select all number scalar and boolean scalar attributes and spectrum item */
   public final static int MODE_ATTRIBUTE_NUMBER_BOOLEAN_SPECTRUM_SCALAR = 9;
+  /** Select all number scalar, boolean scalar and state scale attributes and spectrum item */
+  public final static int MODE_ATTRIBUTE_NUMBER_BOOLEAN_STATE_SPECTRUM_SCALAR = 10;
 
   static Database  db;
   JTree            tree;
@@ -316,11 +318,13 @@ class MemberNode extends Node {
       try {
         Device ds = DeviceFactory.getInstance().getDevice(devName);
         switch(mode) {
+
           case DeviceFinder.MODE_ATTRIBUTE:
             String[] attList = ds.get_attribute_list();
             for(int i=0;i<attList.length;i++)
               add(new EntityNode(mode,attList[i]));
             break;
+
           case DeviceFinder.MODE_ATTRIBUTE_SCALAR:
               AttributeInfo[] ai = ds.get_attribute_info();
               for(int i=0;i<ai.length;i++) {
@@ -329,6 +333,7 @@ class MemberNode extends Node {
               }
               ai = null;
               break;
+
           case DeviceFinder.MODE_ATTRIBUTE_BOOLEAN_SCALAR:
               AttributeInfo[] aib = ds.get_attribute_info();
               for(int i=0;i<aib.length;i++) {
@@ -337,6 +342,7 @@ class MemberNode extends Node {
               }
               aib = null;
               break;
+
           case DeviceFinder.MODE_ATTRIBUTE_NUMBER_SCALAR:
               AttributeInfo[] ain = ds.get_attribute_info();
               for(int i=0;i<ain.length;i++) {
@@ -357,6 +363,7 @@ class MemberNode extends Node {
               }
               ain = null;
               break;
+
           case DeviceFinder.MODE_ATTRIBUTE_NUMBER_SPECTRUM:
               AttributeInfo[] aisp = ds.get_attribute_info();
               for(int i=0;i<aisp.length;i++) {
@@ -377,6 +384,7 @@ class MemberNode extends Node {
               }
               ain = null;
               break;
+
           case DeviceFinder.MODE_ATTRIBUTE_STRING_SCALAR:
             AttributeInfo[] ais = ds.get_attribute_info();
             for(int i=0;i<ais.length;i++) {
@@ -385,11 +393,13 @@ class MemberNode extends Node {
             }
             ais = null;
             break;
+
           case DeviceFinder.MODE_COMMAND:
             CommandInfo[] cmdList = ds.command_list_query();
             for(int i=0;i<cmdList.length;i++)
               add(new EntityNode(mode,cmdList[i].cmd_name));
             break;
+
           case DeviceFinder.MODE_ATTRIBUTE_NUMBER_BOOLEAN_SCALAR:
             AttributeInfo[] ainb = ds.get_attribute_info();
             for(int i=0;i<ainb.length;i++) {
@@ -419,9 +429,6 @@ class MemberNode extends Node {
           case DeviceFinder.MODE_ATTRIBUTE_NUMBER_BOOLEAN_SPECTRUM_SCALAR:
             AttributeInfo[] ainbs = ds.get_attribute_info();
             for(int i=0;i<ainbs.length;i++) {
-              // Add boolean
-              if(ainbs[i].data_format.value() == AttrDataFormat._SCALAR && ainbs[i].data_type == TangoConst.Tango_DEV_BOOLEAN)
-                add(new EntityNode(mode,ainbs[i].name));
 
               // Add number scalar
               if(ainbs[i].data_format.value() == AttrDataFormat._SCALAR)
@@ -435,6 +442,7 @@ class MemberNode extends Node {
                     case TangoConst.Tango_DEV_ULONG:
                     case TangoConst.Tango_DEV_FLOAT:
                     case TangoConst.Tango_DEV_DOUBLE:
+                    case TangoConst.Tango_DEV_BOOLEAN:
                         add(new EntityNode(mode,ainbs[i].name));
                         break;
                 }
@@ -457,7 +465,50 @@ class MemberNode extends Node {
 
 
             }
-            ainb = null;
+            ainbs = null;
+            break;
+
+          case DeviceFinder.MODE_ATTRIBUTE_NUMBER_BOOLEAN_STATE_SPECTRUM_SCALAR:
+            AttributeInfo[] ainbss = ds.get_attribute_info();
+            for(int i=0;i<ainbss.length;i++) {
+
+              // Add number scalar
+              if(ainbss[i].data_format.value() == AttrDataFormat._SCALAR)
+                switch(ainbss[i].data_type)
+                {
+                  case TangoConst.Tango_DEV_CHAR:
+                  case TangoConst.Tango_DEV_UCHAR:
+                  case TangoConst.Tango_DEV_SHORT:
+                  case TangoConst.Tango_DEV_USHORT:
+                  case TangoConst.Tango_DEV_LONG:
+                  case TangoConst.Tango_DEV_ULONG:
+                  case TangoConst.Tango_DEV_FLOAT:
+                  case TangoConst.Tango_DEV_DOUBLE:
+                  case TangoConst.Tango_DEV_BOOLEAN:
+                  case TangoConst.Tango_DEV_STATE:
+                    add(new EntityNode(mode,ainbss[i].name));
+                    break;
+                }
+
+              // Add spectrum (each item seen as scalar)
+              if(ainbss[i].data_format.value() == AttrDataFormat._SPECTRUM)
+                switch(ainbss[i].data_type)
+                {
+                  case TangoConst.Tango_DEV_CHAR:
+                  case TangoConst.Tango_DEV_UCHAR:
+                  case TangoConst.Tango_DEV_SHORT:
+                  case TangoConst.Tango_DEV_USHORT:
+                  case TangoConst.Tango_DEV_LONG:
+                  case TangoConst.Tango_DEV_ULONG:
+                  case TangoConst.Tango_DEV_FLOAT:
+                  case TangoConst.Tango_DEV_DOUBLE:
+                    add(new SpectrumItemNode(mode,ainbss[i].name,ainbss[i].max_dim_x));
+                    break;
+                }
+
+
+            }
+            ainbss = null;
             break;
 
         }

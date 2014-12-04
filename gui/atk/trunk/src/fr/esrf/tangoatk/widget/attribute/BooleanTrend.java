@@ -1792,7 +1792,7 @@ class BooleanChart extends JLChart
         super();
     }
 
-    protected String[] buildPanelString(SearchInfo si) {
+    public String[] buildPanelString(SearchInfo si) {
 
       String[] str = null;
 
