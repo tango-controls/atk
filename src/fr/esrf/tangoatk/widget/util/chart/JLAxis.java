@@ -2529,6 +2529,8 @@ public class JLAxis implements java.io.Serializable {
     boolean isXY = xAxis.isXY();
     JLDataView vx = null;
 
+    long t0 = System.currentTimeMillis();
+
     //-------- Clipping
 
     int xClip = xOrg + 1;
@@ -2552,6 +2554,9 @@ public class JLAxis implements java.io.Serializable {
         paintDataViewNormal(g, v, xAxis, xOrg, yOrg);
 
     } // End (for k<nbView)
+
+    long t1 = System.currentTimeMillis();
+    System.out.println("Paint time = " + (t1-t0) + " ms");
 
   }
 
@@ -2696,6 +2701,7 @@ public class JLAxis implements java.io.Serializable {
                                      int yOrg,
                                      int[] pointX,
                                      int[] pointY) {
+
 
     if (nb > 1 && v.getViewType() == JLDataView.TYPE_LINE) {
 
