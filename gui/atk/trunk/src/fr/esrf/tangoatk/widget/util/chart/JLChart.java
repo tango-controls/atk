@@ -3237,67 +3237,36 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
     final JFrame f = new JFrame();
     final JLChart chart = new JLChart();
-    final JLDataView v = new JLDataView();
-    final JLDataView e = new JLDataView();
+    final JLDataView[] v;
 
     Locale.setDefault(Locale.US);
 
-    // Initialise chart properties
-    chart.setHeaderFont(new Font("Times", Font.BOLD, 18));
-    chart.setLabelFont(new Font("Times", Font.BOLD, 12));
-    chart.setHeader("Test DataView");
 
     // Initialise axis properties
-
-    chart.getXAxis().setName("Values");
+    chart.getXAxis().setName("X");
     chart.getXAxis().setAnnotation(JLAxis.VALUE_ANNO);
     chart.getXAxis().setPercentScrollback(0.0);
     chart.getXAxis().setAutoScale(true);
 
-    chart.getY1Axis().setName("Counts");
+    chart.getY1Axis().setName("Y");
     chart.getY1Axis().setAutoScale(true);
 
-    chart.getY1Axis().addDataView(v);
-    chart.getY1Axis().addDataView(e);
+    chart.setLabelVisible(false);
 
     // ---------------------------------------------
-    v.setMarker(JLDataView.MARKER_CIRCLE);    
-    v.setColor(Color.BLUE);
-    v.setName("Data");
-    v.add(-0.85,250.0);
-    v.add(-0.8,253.0);
-    v.add(-0.75,259.0);
-    v.add(-0.7,252.0);
-    v.add(-0.65,257.0);
-    v.add(-0.6,255.0);
 
-    // ---------------------------------------------
-    e.setName("Error");
-    e.setMarker(JLDataView.MARKER_HORIZ_LINE);
-    e.setColor(Color.DARK_GRAY);
-    e.add(-0.85,265);
-    e.add(-0.85,235);
-    e.add(-0.85,Double.NaN);
+    int NB_PTS = 1000;
+    int NB_CURVE = 1000;
 
-    e.add(-0.8,268);
-    e.add(-0.8,237);
-    e.add(-0.8,Double.NaN);
+    v = new JLDataView[NB_CURVE];
 
-    e.add(-0.75,275);
-    e.add(-0.75,245);
-    e.add(-0.75,Double.NaN);
-
-    e.add(-0.7,270);
-    e.add(-0.7,240);
-    e.add(-0.7,Double.NaN);
-
-    e.add(-0.65,268);
-    e.add(-0.65,245);
-    e.add(-0.65,Double.NaN);
-
-    e.add(-0.6,263);
-    e.add(-0.6,244);
-    e.add(-0.6,Double.NaN);
+    for(int j=0;j<NB_CURVE;j++) {
+      v[j] = new JLDataView();
+      for(int i=0;i<NB_PTS;i++) {
+        v[j].add((double)i,Math.random()*10.0);
+      }
+      chart.getY1Axis().addDataView(v[j]);
+    }
 
     // -----------------------------------------------------------------
 

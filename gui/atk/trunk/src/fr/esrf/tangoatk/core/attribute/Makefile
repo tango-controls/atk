@@ -12,10 +12,12 @@ ALL = $(TARGET)/ANumber.class \
       $(TARGET)/ANumberScalarHelper.class \
       $(TARGET)/DoubleScalarHelper.class \
       $(TARGET)/LongScalarHelper.class \
+      $(TARGET)/Long64ScalarHelper.class \
       $(TARGET)/ShortScalarHelper.class \
       $(TARGET)/UShortScalarHelper.class \
       $(TARGET)/DoubleSpectrumHelper.class \
       $(TARGET)/LongSpectrumHelper.class \
+      $(TARGET)/Long64SpectrumHelper.class \
       $(TARGET)/ShortSpectrumHelper.class \
       $(TARGET)/UShortSpectrumHelper.class \
       $(TARGET)/DoubleImageHelper.class \
@@ -56,7 +58,9 @@ ALL = $(TARGET)/ANumber.class \
       $(TARGET)/DevStateSpectrumHelper.class \
       $(TARGET)/DevStateSpectrum.class \
       $(TARGET)/ULongScalarHelper.class \
+      $(TARGET)/ULong64ScalarHelper.class \
       $(TARGET)/ULongSpectrumHelper.class \
+      $(TARGET)/ULong64SpectrumHelper.class \
       $(TARGET)/ULongImageHelper.class \
 
 

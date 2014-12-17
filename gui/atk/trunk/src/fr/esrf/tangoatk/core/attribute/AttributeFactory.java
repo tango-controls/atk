@@ -576,6 +576,12 @@ public class AttributeFactory extends AEntityFactory {
       case Tango_DEV_ULONG:
             ns.setNumberHelper(new ULongScalarHelper(ns));
             break;
+      case Tango_DEV_LONG64:
+        ns.setNumberHelper(new Long64ScalarHelper(ns));
+        break;
+      case Tango_DEV_ULONG64:
+        ns.setNumberHelper(new ULong64ScalarHelper(ns));
+        break;
       case Tango_DEV_BOOLEAN:
             bs = new BooleanScalar();
             return bs;
@@ -641,6 +647,12 @@ public class AttributeFactory extends AEntityFactory {
         return ns;
       case Tango_DEV_ULONG:
         ns.setNumberHelper(new ULongSpectrumHelper(ns));
+        return ns;
+      case Tango_DEV_LONG64:
+        ns.setNumberHelper(new Long64SpectrumHelper(ns));
+        return ns;
+      case Tango_DEV_ULONG64:
+        ns.setNumberHelper(new ULong64SpectrumHelper(ns));
         return ns;
       case Tango_DEV_STRING:
         ss = new StringSpectrum();
