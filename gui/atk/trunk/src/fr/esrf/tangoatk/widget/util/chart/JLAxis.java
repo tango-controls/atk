@@ -2529,7 +2529,7 @@ public class JLAxis implements java.io.Serializable {
     boolean isXY = xAxis.isXY();
     JLDataView vx = null;
 
-    long t0 = System.currentTimeMillis();
+    //long t0 = System.currentTimeMillis();
 
     //-------- Clipping
 
@@ -2555,8 +2555,8 @@ public class JLAxis implements java.io.Serializable {
 
     } // End (for k<nbView)
 
-    long t1 = System.currentTimeMillis();
-    System.out.println("Paint time = " + (t1-t0) + " ms");
+    //long t1 = System.currentTimeMillis();
+    //System.out.println("Paint time = " + (t1-t0) + " ms");
 
   }
 
