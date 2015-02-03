@@ -414,8 +414,10 @@ public abstract class ACommand implements ICommand {
  	case	Tango_DEV_DOUBLE:		
 	case	Tango_DEV_USHORT:		
 	case	Tango_DEV_ULONG:
-	case	Tango_DEV_LONG:			    
-	case	Tango_DEV_STRING:
+	case	Tango_DEV_LONG:
+    case	Tango_DEV_ULONG64:
+    case	Tango_DEV_LONG64:
+    case	Tango_DEV_STRING:
         case    Tango_DEV_STATE:
 	    return true;
 	default:
@@ -431,7 +433,9 @@ public abstract class ACommand implements ICommand {
 	case	Tango_DEVVAR_USHORTARRAY:		
 	case	Tango_DEVVAR_ULONGARRAY:
 	case	Tango_DEVVAR_LONGARRAY:
-	case	Tango_DEVVAR_CHARARRAY:		
+    case	Tango_DEVVAR_ULONG64ARRAY:
+    case	Tango_DEVVAR_LONG64ARRAY:
+	case	Tango_DEVVAR_CHARARRAY:
 	case	Tango_DEVVAR_STRINGARRAY:
 	    return true;
 	default:

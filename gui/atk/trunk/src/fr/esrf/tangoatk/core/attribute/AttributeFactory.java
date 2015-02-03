@@ -710,6 +710,12 @@ public class AttributeFactory extends AEntityFactory {
       case Tango_DEV_ULONG:
         nimg.setNumberHelper(new ULongImageHelper(nimg));
         return nimg;
+      case Tango_DEV_LONG64:
+        nimg.setNumberHelper(new Long64ImageHelper(nimg));
+        return nimg;
+      case Tango_DEV_ULONG64:
+        nimg.setNumberHelper(new ULong64ImageHelper(nimg));
+        return nimg;
       case Tango_DEV_BOOLEAN:
         bi = new BooleanImage();
         return bi;
