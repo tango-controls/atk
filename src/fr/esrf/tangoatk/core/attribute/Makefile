@@ -22,6 +22,7 @@ ALL = $(TARGET)/ANumber.class \
       $(TARGET)/UShortSpectrumHelper.class \
       $(TARGET)/DoubleImageHelper.class \
       $(TARGET)/LongImageHelper.class \
+      $(TARGET)/Long64ImageHelper.class \
       $(TARGET)/ShortImageHelper.class \
       $(TARGET)/UShortImageHelper.class \
       $(TARGET)/StringAttributeHelper.class \
@@ -62,6 +63,7 @@ ALL = $(TARGET)/ANumber.class \
       $(TARGET)/ULongSpectrumHelper.class \
       $(TARGET)/ULong64SpectrumHelper.class \
       $(TARGET)/ULongImageHelper.class \
+      $(TARGET)/ULong64ImageHelper.class \
 
 
 all: $(ALL)

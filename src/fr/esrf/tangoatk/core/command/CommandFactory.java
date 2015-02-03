@@ -188,7 +188,7 @@ public class CommandFactory extends AEntityFactory {
   private ACommand getCommandOfType(String devName,CommandInfo info) {
 
     if (info == null) {
-      System.out.println( "Warning, DeviceFactory.getCommandOfType(): null CommandInfo pointer got from " + devName);
+      System.out.println( "Warning, CommandFactory.getCommandOfType(): null CommandInfo pointer got from " + devName);
       return new InvalidCommand();
     }
 
@@ -278,7 +278,7 @@ public class CommandFactory extends AEntityFactory {
       }
     }
 
-    System.out.println( "DeviceFactory.getCommandOfType() : Warning, Unsupported type for command "
+    System.out.println( "CommandFactory.getCommandOfType() : Warning, Unsupported type for command "
                         + devName + " " + name + "(in type="+inType+",out type="+outType+")" );
 
     return new InvalidCommand();
