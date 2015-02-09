@@ -45,14 +45,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -270,7 +263,7 @@ class TabbedLine {
  * @author JL Pons
  */
 
-public class JLChart extends JComponent implements MouseListener, MouseMotionListener, ActionListener {
+public class JLChart extends JComponent implements MouseWheelListener, MouseListener, MouseMotionListener, ActionListener {
 
   // constant
   /** Place label at the bottom of the chart */
@@ -350,6 +343,8 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   private String[] userAction;
 
   private boolean zoomDrag;
+  private boolean translateDragStart;
+  private boolean translateDrag;
   private boolean zoomDragAllowed;
   private int zoomX;
   private int zoomY;
@@ -444,6 +439,8 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
     labelRect = new Vector<LabelRect>();
     zoomDrag = false;
+    translateDragStart = false;
+    translateDrag = false;
     zoomDragAllowed = false;
 
     chartMenu = new JPopupMenu();
@@ -508,6 +505,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
     //Set up listeners
     addMouseListener(this);
+    addMouseWheelListener(this);
     addMouseMotionListener(this);
 
     listener = null;
@@ -2631,10 +2629,35 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
 
   // ************************************************************************
   // Mouse Listener
+
+  public void mouseWheelMoved(MouseWheelEvent evt) {
+
+    int nbStep = evt.getWheelRotation();
+    if( !zoomDrag ) {
+
+      double ratio = Math.pow(0.9,(double)-nbStep);
+      xAxis.zoom(ratio);
+      if(!evt.isControlDown()) {
+        y1Axis.zoom(ratio);
+        y2Axis.zoom(ratio);
+      }
+
+      if( zoomDragAllowed ) {
+        zoomDragAllowed = false;
+        setCursor(Cursor.getDefaultCursor());
+      }
+
+      repaint();
+
+    }
+
+  }
+
   public void mouseClicked(MouseEvent e) {
   }
 
   public void mouseDragged(MouseEvent e) {
+
     if (zoomDrag) {
 
       // Clear old rectangle
@@ -2652,6 +2675,35 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
       repaint(r);
 
     }
+
+    if( translateDragStart ) {
+
+      int tx = e.getX() - lastX;
+      int ty = e.getY() - lastY;
+      int dist = tx*tx + ty*ty;
+      if( dist>3 ) {
+        // We have move a bit, start translation
+        setCursor(new Cursor(Cursor.HAND_CURSOR));
+        translateDrag = true;
+        translateDragStart = false;
+      }
+
+    }
+
+    if( translateDrag ) {
+
+      int tx = e.getX() - lastX;
+      int ty = e.getY() - lastY;
+      xAxis.translate(-tx);
+      y1Axis.translate(ty);
+      y2Axis.translate(ty);
+      lastX = e.getX();
+      lastY = e.getY();
+      repaint();
+
+    }
+
+
   }
 
   public void mouseMoved(MouseEvent e) {
@@ -2664,7 +2716,9 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
   }
 
   public void mouseReleased(MouseEvent e) {
+
     if (zoomDrag) {
+
       Rectangle r = buildRect(zoomX, zoomY, e.getX(), e.getY());
       zoomDrag = false;
 
@@ -2687,6 +2741,13 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
       }
 
     }
+
+    if( translateDrag ) {
+      translateDrag = false;
+      setCursor(Cursor.getDefaultCursor());
+    }
+
+    translateDragStart = false;
     ipanelVisible = false;
     repaint();
   }
@@ -2696,15 +2757,18 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     // Left button click
     if (e.getButton() == MouseEvent.BUTTON1) {
 
+      lastX = e.getX();
+      lastY = e.getY();
+
       // Zoom management
       if (e.isControlDown() || zoomDragAllowed) {
         zoomDrag = true;
         zoomX = e.getX();
         zoomY = e.getY();
-        lastX = e.getX();
-        lastY = e.getY();
         return;
       }
+
+      translateDragStart = true;
 
       SearchInfo si;
       SearchInfo msi = null;
@@ -3256,7 +3320,7 @@ public class JLChart extends JComponent implements MouseListener, MouseMotionLis
     // ---------------------------------------------
 
     int NB_PTS = 1000;
-    int NB_CURVE = 1000;
+    int NB_CURVE = 1;
 
     v = new JLDataView[NB_CURVE];
 
