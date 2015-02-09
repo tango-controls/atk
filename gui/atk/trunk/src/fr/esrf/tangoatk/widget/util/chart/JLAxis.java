@@ -715,7 +715,6 @@ public class JLAxis implements java.io.Serializable {
   /** Zoom axis.
    * @param x1 New minimum value for this axis
    * @param x2 New maximum value for this axis
-   * @return true whether the axis is horizontal and the zoom is clipped on the right, false otherwise
    * @see JLAxis#isZoomed
    * @see JLAxis#unzoom
    */
@@ -767,6 +766,65 @@ public class JLAxis implements java.io.Serializable {
 
       min = nmin;
       max = nmax;
+
+    }
+
+    autoScale = false;
+    isZoomed = true;
+
+  }
+
+  /** Zoom axis.
+   * @param r ratio
+   * @see JLAxis#isZoomed
+   * @see JLAxis#unzoom
+   */
+  public void zoom(double r) {
+
+    if (!isZoomed) lastAutoScale = autoScale;
+
+    // Compute new min and max
+    double span = (max-min)/2.0;
+    double middle = min + span;
+    double nmin = middle - span*r;
+    double nmax = middle + span*r;
+
+    // Too small zoom
+    double difference = nmax - nmin;
+    if (difference < 1E-13) return;
+
+    min = nmin;
+    max = nmax;
+
+    autoScale = false;
+    isZoomed = true;
+
+  }
+
+  /** Translatet axis.
+   * @param x translation
+   * @see JLAxis#isZoomed
+   * @see JLAxis#unzoom
+   */
+  public void translate(int x) {
+
+    if(boundRect.width==0 || boundRect.height==0)
+      return;
+
+    if (!isZoomed) lastAutoScale = autoScale;
+
+    // Compute new min and max
+    if (isHorizontal()) {
+
+      double t = ((double)x / (double)boundRect.width) * (max-min);
+      min = min + t;
+      max = max + t;
+
+    } else {
+
+      double t = ((double)x / (double)boundRect.height) * (max-min);
+      min = min + t;
+      max = max + t;
 
     }
 
