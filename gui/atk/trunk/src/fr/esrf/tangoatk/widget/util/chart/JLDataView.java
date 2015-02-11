@@ -30,6 +30,8 @@ package fr.esrf.tangoatk.widget.util.chart;
 
 import fr.esrf.tangoatk.widget.util.ATKFormat;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.util.*;
 import java.awt.*;
 import java.awt.geom.Point2D;
@@ -204,6 +206,7 @@ public class JLDataView implements java.io.Serializable {
   private int smoothExtrapolation = SMOOTH_EXT_LINEAR;
   private int mathFunction = MATH_NONE;
   private boolean drawOnNaN = false;
+  private Vector<ChangeListener> listeners = null;
 
   // A boolean to know whether data is supposed to be sorted on x
   protected boolean xDataSorted = true;
@@ -278,6 +281,7 @@ public class JLDataView implements java.io.Serializable {
    */
   public void setViewType(int s) {
     type = s;
+    fireStateChange();
   }
 
   /**
@@ -307,6 +311,7 @@ public class JLDataView implements java.io.Serializable {
 
   public void setFillStyle(int b) {
     fillStyle = b;
+    fireStateChange();
   }
 
   /**
@@ -328,6 +333,7 @@ public class JLDataView implements java.io.Serializable {
 
   public void setFillMethod(int m) {
     fillMethod = m;
+    fireStateChange();
   }
 
   /**
@@ -346,6 +352,7 @@ public class JLDataView implements java.io.Serializable {
    */
   public void setFillColor(Color c) {
     fillColor = c;
+    fireStateChange();
   }
 
   /**
@@ -432,6 +439,7 @@ public class JLDataView implements java.io.Serializable {
    */
   public void setColor(Color c) {
     lineColor = c;
+    fireStateChange();
   }
 
   /**
@@ -490,6 +498,7 @@ public class JLDataView implements java.io.Serializable {
    */
   public void setLabelVisible(boolean b) {
     labelVisible=b;
+    fireStateChange();
   }
 
   /** Returns true when the label is visible.
@@ -505,6 +514,7 @@ public class JLDataView implements java.io.Serializable {
 
   public void setLabelColor (Color labelColor) {
     this.labelColor = labelColor;
+    fireStateChange();
   }
 
   /* ----------------------------- Interpolation config --------------------------------- */
@@ -522,6 +532,7 @@ public class JLDataView implements java.io.Serializable {
   public void setInterpolationMethod(int method) {
     interpMethod = method;
     commitChange();
+    fireStateChange();
   }
 
   /**
@@ -541,6 +552,7 @@ public class JLDataView implements java.io.Serializable {
     if(step<2) step=2;
     interpStep = step;
     updateFilters();
+    fireStateChange();
   }
 
   /**
@@ -560,6 +572,7 @@ public class JLDataView implements java.io.Serializable {
     if(tension>1.0) tension=1.0;
     interpTension = tension;
     updateFilters();
+    fireStateChange();
   }
 
   /**
@@ -578,6 +591,7 @@ public class JLDataView implements java.io.Serializable {
   public void setHermiteBias(double bias) {
     interpBias = bias;
     updateFilters();
+    fireStateChange();
   }
 
   /**
@@ -601,6 +615,7 @@ public class JLDataView implements java.io.Serializable {
     smoothMethod = method;
     updateSmoothCoefs();
     commitChange();
+    fireStateChange();
   }
 
   /**
@@ -620,6 +635,7 @@ public class JLDataView implements java.io.Serializable {
     if(smoothNeighbor<3) smoothNeighbor=3;
     updateSmoothCoefs();
     updateFilters();
+    fireStateChange();
   }
 
   /**
@@ -639,6 +655,7 @@ public class JLDataView implements java.io.Serializable {
     smoothSigma = sigma;
     updateSmoothCoefs();
     commitChange();
+    fireStateChange();
   }
 
   /**
@@ -659,6 +676,7 @@ public class JLDataView implements java.io.Serializable {
   public void setSmoothingExtrapolation(int extMode) {
     smoothExtrapolation = extMode;
     updateFilters();
+    fireStateChange();
   }
 
   /**
@@ -685,6 +703,7 @@ public class JLDataView implements java.io.Serializable {
     updateFilters();
     if(function==MATH_NONE)
       computeDataBounds();
+    fireStateChange();
   }
 
   /**
@@ -705,6 +724,7 @@ public class JLDataView implements java.io.Serializable {
    */
   public void setBarWidth(int w) {
     barWidth = w;
+    fireStateChange();
   }
 
   /**
@@ -723,6 +743,7 @@ public class JLDataView implements java.io.Serializable {
    */
   public void setMarkerColor(Color c) {
     markerColor = c;
+    fireStateChange();
   }
 
   /**
@@ -746,6 +767,7 @@ public class JLDataView implements java.io.Serializable {
    */
   public void setStyle(int c) {
     lineStyle = c;
+    fireStateChange();
   }
 
   /**
@@ -764,6 +786,7 @@ public class JLDataView implements java.io.Serializable {
    */
   public void setMarkerSize(int c) {
     markerSize = c;
+    fireStateChange();
   }
 
   /**
@@ -791,6 +814,7 @@ public class JLDataView implements java.io.Serializable {
    */
   public void setLineWidth(int c) {
     lineWidth = c;
+    fireStateChange();
   }
 
   /**
@@ -800,6 +824,7 @@ public class JLDataView implements java.io.Serializable {
    */
   public void setName(String s) {
     name = s;
+    fireStateChange();
   }
 
   /**
@@ -818,6 +843,7 @@ public class JLDataView implements java.io.Serializable {
    */
   public void setUnit(String s) {
     unit = s;
+    fireStateChange();
   }
 
   /**
@@ -886,6 +912,7 @@ public class JLDataView implements java.io.Serializable {
    */
   public void setMarker(int m) {
     markerType = m;
+    fireStateChange();
   }
 
   /**
@@ -935,6 +962,7 @@ public class JLDataView implements java.io.Serializable {
    */
   public void setA0(double d) {
     A0 = d;
+    fireStateChange();
   }
 
   /**
@@ -945,6 +973,7 @@ public class JLDataView implements java.io.Serializable {
    */
   public void setA1(double d) {
     A1 = d;
+    fireStateChange();
   }
 
   /**
@@ -955,6 +984,7 @@ public class JLDataView implements java.io.Serializable {
    */
   public void setA2(double d) {
     A2 = d;
+    fireStateChange();
   }
 
   /**
@@ -1690,6 +1720,35 @@ public class JLDataView implements java.io.Serializable {
       userFormat = null;
     }
   }
+
+  /**
+   * Add a listener to this dataview, triggered when a setting change.
+   * @param l ChangeListener
+   */
+  public void addChangeListener(ChangeListener l) {
+    if(listeners==null)
+      listeners = new Vector<ChangeListener>();
+    listeners.add(l);
+  }
+
+  public void removeChangeListener(ChangeListener l) {
+    if(listeners!=null)
+      listeners.remove(l);
+  }
+
+  public void clearChangeListener() {
+    if(listeners!=null)
+      listeners.clear();
+  }
+
+  private void fireStateChange() {
+    if(listeners!=null) {
+      ChangeEvent evt = new ChangeEvent(this);
+      for(int i=0;i<listeners.size();i++)
+        listeners.get(i).stateChanged(evt);
+    }
+  }
+
   /**
    * Returns the current user format (null when none).
    */

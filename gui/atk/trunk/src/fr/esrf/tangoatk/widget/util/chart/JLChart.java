@@ -3216,7 +3216,8 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
     reset(true);
   }
 
-  protected void reset(boolean showConfirmDialog) {
+  public void reset(boolean showConfirmDialog) {
+
     Vector<JLDataView> existingViews = new Vector<JLDataView>();
     if (xAxis.isXY()) existingViews.addAll(xAxis.getViews());
     existingViews.addAll(y1Axis.getViews());
