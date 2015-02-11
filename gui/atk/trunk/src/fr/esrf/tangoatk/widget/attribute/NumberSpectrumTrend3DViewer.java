@@ -219,6 +219,14 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   }
 
   /**
+   * Returns 3D trend components
+   * @return 3D trend viewer
+   */
+  public J3DTrend getTrend() {
+    return trend;
+  }
+
+  /**
    * Returns the horizontal axis length in pixel.
    * @return Horizontal axis length
    */
