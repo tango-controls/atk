@@ -460,7 +460,7 @@ public class StaticChartMathExpression extends AdvancedJLChart
         }
     }
 
-    protected void reset (boolean showConfirmDialog) {
+    public void reset (boolean showConfirmDialog) {
         super.reset(showConfirmDialog);
         expressionMap.clear();
     }
