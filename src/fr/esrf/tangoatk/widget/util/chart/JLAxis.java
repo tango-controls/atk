@@ -712,6 +712,22 @@ public class JLAxis implements java.io.Serializable {
 
   }
 
+  /** Enter zoom mode and set min and max
+   * @param min New minimum value for this axis
+   * @param max New maximum value for this axis
+   * @see JLAxis#isZoomed
+   * @see JLAxis#unzoom
+   */
+  public void directZoom(double min, double max) {
+
+    if (!isZoomed) lastAutoScale = autoScale;
+    this.min = min;
+    this.max = max;
+    autoScale = false;
+    isZoomed = true;
+
+  }
+
   /** Zoom axis.
    * @param x1 New minimum value for this axis
    * @param x2 New maximum value for this axis
