@@ -2681,7 +2681,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
       int tx = e.getX() - lastX;
       int ty = e.getY() - lastY;
       int dist = tx*tx + ty*ty;
-      if( dist>3 ) {
+      if( dist>16 ) {
         // We have move a bit, start translation
         setCursor(new Cursor(Cursor.HAND_CURSOR));
         translateDrag = true;
