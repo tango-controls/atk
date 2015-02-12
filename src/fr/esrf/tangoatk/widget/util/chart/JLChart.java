@@ -2637,7 +2637,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
 
       double ratio = Math.pow(0.9,(double)-nbStep);
       xAxis.zoom(ratio);
-      if(!evt.isControlDown()) {
+      if(! (evt.isControlDown() || evt.isShiftDown()) ) {
         y1Axis.zoom(ratio);
         y2Axis.zoom(ratio);
       }
