@@ -59,6 +59,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
   protected INumberSpectrum model = null;
   private TrendData[]       data;
+  private TrendData[]       derivativeData;
   private J3DTrend          trend;
   private JScrollPane       trendView;
   private int               historyLength;
@@ -84,6 +85,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   private String            generalName=" ";
   private String            unitName="";
   private boolean           logScale=false;
+  private boolean           showDerivative=false;
   private int               zoomScroll;
   private String            format;
   private File              currentFile=null;
@@ -116,6 +118,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   private JButton         okButton;
   private JButton         cancelButton;
   private JCheckBox       logScaleCheck;
+  private JCheckBox       derivativeCheck;
   private JTextField      formatText;
 
   protected SimplePropertyFrame propDialog = null;
@@ -138,6 +141,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
     // Initialise default parameters
     historyLength = 0;
     setHistoryLength(800);
+    derivativeData = null;
     zAutoScale = true;
     zMin = 0.0;
     zMax = 100.0;
@@ -214,6 +218,8 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       }
       data = newData;
       historyLength = length;
+
+      if( showDerivative ) buildDerivative();
     }
 
   }
@@ -258,6 +264,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
           newData[i] = null;
         }
         this.data = newData;
+        if(showDerivative) buildDerivative();
         buildImage();
         return;
 
@@ -281,6 +288,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       }
       this.data = newData;
       historyLength = nbData;
+      if(showDerivative) buildDerivative();
       buildImage();
 
     }
@@ -360,6 +368,26 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
     synchronized (this) {
       this.logScale = logScale;
+    }
+
+  }
+
+  /**
+   * Return true if the viewer display derivative data, false otherwise
+   */
+  public boolean isShowDerivative() {
+    return logScale;
+  }
+
+  /**
+   * Set the viewer in linear or log scale for the colormap
+   * @param show Display derivative data
+   */
+  public void setShowDerivative(boolean show) {
+
+    synchronized (this) {
+      this.showDerivative = show;
+      if(show) buildDerivative();
     }
 
   }
@@ -964,6 +992,8 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       applyVerticalZoomOut();
     } else if ( src==logScaleCheck ) {
       applyLogScale();
+    } else if ( src==derivativeCheck ) {
+      applyDerivative();
     } else if ( src==formatText ) {
       applyFormat();
     }
@@ -1053,6 +1083,14 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
         }
       }
       data[0] = vals;
+
+      if(showDerivative) {
+        TrendData dvals = new TrendData();
+        dvals.time = evt.getTimeStamp();
+        derivativeData[0] = dvals;
+        calcD(0);
+      }
+
       buildImage();
       repaint();
 
@@ -1085,6 +1123,14 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
         }
       }
       data[0] = vals;
+
+      if(showDerivative) {
+        TrendData dvals = new TrendData();
+        dvals.time = evt.getTimeStamp();
+        derivativeData[0] = dvals;
+        calcD(0);
+      }
+
       buildImage();
       repaint();
 
@@ -1404,6 +1450,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
     setZoomCombo(vZoomCombo,vZoom);
     setZoomCombo(hZoomCombo,hZoom);
     logScaleCheck.setSelected(logScale);
+    derivativeCheck.setSelected(showDerivative);
     formatText.setText(format);
 
   }
@@ -1513,6 +1560,17 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
     synchronized (this) {
       logScale = logScaleCheck.isSelected();
+      buildImage();
+    }
+    repaint();
+
+  }
+
+  private void applyDerivative() {
+
+    synchronized (this) {
+      showDerivative = derivativeCheck.isSelected();
+      buildDerivative();
       buildImage();
     }
     repaint();
@@ -1802,10 +1860,17 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
       logScaleCheck = new JCheckBox("Display log values");
       logScaleCheck.setFont(ATKConstant.labelFont);
-      logScaleCheck.setBounds(5, 200, 200, 20);
+      logScaleCheck.setBounds(5, 200, 150, 20);
       logScaleCheck.setToolTipText("Display log values");
       logScaleCheck.addActionListener(this);
       settingsPanel.add(logScaleCheck);
+
+      derivativeCheck = new JCheckBox("Display derivative");
+      derivativeCheck.setFont(ATKConstant.labelFont);
+      derivativeCheck.setBounds(155, 200, 150, 20);
+      derivativeCheck.setToolTipText("Display derivative");
+      derivativeCheck.addActionListener(this);
+      settingsPanel.add(derivativeCheck);
 
       JLabel formatLabel = new JLabel("Format");
       formatLabel.setFont(ATKConstant.labelFont);
@@ -1873,6 +1938,11 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
     for(int i=historyLength-1;i>0;i--)
       data[i] = data[i-1];
 
+    if(showDerivative) {
+      for(int i=historyLength-1;i>0;i--)
+        derivativeData[i] = derivativeData[i-1];
+    }
+
   }
 
   private double computeHighTen(double d) {
@@ -1885,7 +1955,62 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
     return Math.pow(10.0, p);
   }
 
+  private int getDataLength(TrendData d) {
+
+     if(d==null) return 0;
+     if(d.values==null) return 0;
+     return d.values.length;
+
+  }
+
+  private void calcD(int i) {
+
+    int l0 = getDataLength(data[i]);
+    int l1 = getDataLength(data[i+1]);
+    int m = (l1>l0)?l1:l0;
+
+    derivativeData[i].values = new double[m];
+    for(int j=0;j<m;j++) {
+      derivativeData[i].values[j] =
+          (data[i].values[j] - data[i+1].values[j]) /
+              ((double)(data[i].time - data[i+1].time)/1000.0);
+    }
+
+  }
+
+  private void buildDerivative() {
+
+    derivativeData = new TrendData[historyLength];
+
+    for(int i=0;i<historyLength-1;i++) {
+
+      if( data[i]!=null && data[i+1]!=null ) {
+
+        derivativeData[i] = new TrendData();
+        derivativeData[i].time = data[i].time;
+        calcD(i);
+
+      } else {
+
+        derivativeData[i] = null;
+
+      }
+
+    }
+
+    derivativeData[historyLength-1] = null;
+
+  }
+
   private void buildImage() {
+
+    TrendData[] source = null;
+
+    if(showDerivative) {
+      source = derivativeData;
+    } else {
+      source = data;
+    }
 
     // Compute ymax, zmax and zmin
     int ymax=0;
@@ -1897,16 +2022,16 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       min = zMin;
     }
     for(int i=0;i<historyLength;i++) {
-      if(data[i]!=null && data[i].values!=null) {
+      if(source[i]!=null && source[i].values!=null) {
 
-        if(data[i].values.length>ymax) ymax=data[i].values.length;
+        if(source[i].values.length>ymax) ymax=source[i].values.length;
 
         if( zAutoScale ) {
-          for(int j=0;j<data[i].values.length;j++) {
+          for(int j=0;j<source[i].values.length;j++) {
             if (logScale) {
 
-              if(!Double.isNaN(data[i].values[j]) && data[i].values[j]>0) {
-                double v = data[i].values[j];
+              if(!Double.isNaN(source[i].values[j]) && source[i].values[j]>0) {
+                double v = source[i].values[j];
                 if (v < min) min = v;
                 if (v > max) max = v;
                 zRangeOK = true;
@@ -1914,7 +2039,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
             } else {
 
-              double v = data[i].values[j];
+              double v = source[i].values[j];
               if (!Double.isNaN(v)) {
                 if (v < min) min = v;
                 if (v > max) max = v;
@@ -2005,20 +2130,20 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
           for (int i = 0; i < rdimx; i++) {
             int xpos = (rdimx - i - 1);
-            if (data[i] == null) {
+            if (source[i] == null) {
               for (int i2 = 0; i2 < hZoom; i2++) rgb[hZoom * xpos + i2] = rgbNaN;
             } else {
-              if (j >= data[i].values.length) {
+              if (j >= source[i].values.length) {
                 for (int i2 = 0; i2 < hZoom; i2++) rgb[hZoom * xpos + i2] = rgbNaN;
               } else {
-                if (Double.isNaN(data[i].values[j])) {
+                if (Double.isNaN(source[i].values[j])) {
                   for (int i2 = 0; i2 < hZoom; i2++) rgb[hZoom * xpos + i2] = rgbNaN;
                 } else {
                   double c;
                   if (logScale)
-                    c = ((Math.log10(data[i].values[j]) - min) / (max - min)) * 65536.0;
+                    c = ((Math.log10(source[i].values[j]) - min) / (max - min)) * 65536.0;
                   else
-                    c = ((data[i].values[j] - min) / (max - min)) * 65536.0;
+                    c = ((source[i].values[j] - min) / (max - min)) * 65536.0;
                   if (c < 0.0) c = 0.0;
                   if (c > 65535.0) c = 65535.0;
                   for (int i2 = 0; i2 < hZoom; i2++) rgb[hZoom * xpos + i2] = gColormap[(int) c];
@@ -2038,20 +2163,20 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
           for (int i = 0; i < rdimx; i+=(-hZoom)) {
             int xpos = (rdimx - i - 1)/(-hZoom);
-            if (data[i] == null) {
+            if (source[i] == null) {
               if(xpos<dimx) rgb[xpos] = rgbNaN;
             } else {
-              if (j >= data[i].values.length) {
+              if (j >= source[i].values.length) {
                 if(xpos<dimx) rgb[xpos] = rgbNaN;
               } else {
-                if (Double.isNaN(data[i].values[j])) {
+                if (Double.isNaN(source[i].values[j])) {
                   if(xpos<dimx) rgb[xpos] = rgbNaN;
                 } else {
                   double c;
                   if (logScale)
-                    c = ((Math.log10(data[i].values[j]) - min) / (max - min)) * 65536.0;
+                    c = ((Math.log10(source[i].values[j]) - min) / (max - min)) * 65536.0;
                   else
-                    c = ((data[i].values[j] - min) / (max - min)) * 65536.0;
+                    c = ((source[i].values[j] - min) / (max - min)) * 65536.0;
                   if (c < 0.0) c = 0.0;
                   if (c > 65535.0) c = 65535.0;
                   if(xpos<dimx) rgb[xpos] = gColormap[(int) c];
@@ -2071,20 +2196,20 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
           for (int i = 0; i < rdimx; i++) {
             int xpos = (rdimx - i - 1);
-            if (data[i] == null) {
+            if (source[i] == null) {
               for (int i2 = 0; i2 < hZoom; i2++) rgb[hZoom * xpos + i2] = rgbNaN;
             } else {
-              if (j >= data[i].values.length) {
+              if (j >= source[i].values.length) {
                 for (int i2 = 0; i2 < hZoom; i2++) rgb[hZoom * xpos + i2] = rgbNaN;
               } else {
-                if (Double.isNaN(data[i].values[j])) {
+                if (Double.isNaN(source[i].values[j])) {
                   for (int i2 = 0; i2 < hZoom; i2++) rgb[hZoom * xpos + i2] = rgbNaN;
                 } else {
                   double c;
                   if (logScale)
-                    c = ((Math.log10(data[i].values[j]) - min) / (max - min)) * 65536.0;
+                    c = ((Math.log10(source[i].values[j]) - min) / (max - min)) * 65536.0;
                   else
-                    c = ((data[i].values[j] - min) / (max - min)) * 65536.0;
+                    c = ((source[i].values[j] - min) / (max - min)) * 65536.0;
                   if (c < 0.0) c = 0.0;
                   if (c > 65535.0) c = 65535.0;
                   for (int i2 = 0; i2 < hZoom; i2++) rgb[hZoom * xpos + i2] = gColormap[(int) c];
@@ -2103,20 +2228,20 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
           for (int i = 0; i < rdimx; i+=(-hZoom)) {
             int xpos = (rdimx - i - 1)/(-hZoom);
-            if (data[i] == null) {
+            if (source[i] == null) {
               if(xpos<dimx) rgb[xpos] = rgbNaN;
             } else {
-              if (j >= data[i].values.length) {
+              if (j >= source[i].values.length) {
                 if(xpos<dimx) rgb[xpos] = rgbNaN;
               } else {
-                if (Double.isNaN(data[i].values[j])) {
+                if (Double.isNaN(source[i].values[j])) {
                   if(xpos<dimx) rgb[xpos] = rgbNaN;
                 } else {
                   double c;
                   if (logScale)
-                    c = ((Math.log10(data[i].values[j]) - min) / (max - min)) * 65536.0;
+                    c = ((Math.log10(source[i].values[j]) - min) / (max - min)) * 65536.0;
                   else
-                    c = ((data[i].values[j] - min) / (max - min)) * 65536.0;
+                    c = ((source[i].values[j] - min) / (max - min)) * 65536.0;
                   if (c < 0.0) c = 0.0;
                   if (c > 65535.0) c = 65535.0;
                   if(xpos<dimx) rgb[xpos] = gColormap[(int) c];
@@ -2238,6 +2363,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       final NumberSpectrumTrend3DViewer nstv = new NumberSpectrumTrend3DViewer();
 
       nstv.readPollingHistory(true);
+      nstv.setShowDerivative(true);
 
       /*
       int nbData = 1000;
