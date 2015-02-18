@@ -376,7 +376,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
    * Return true if the viewer display derivative data, false otherwise
    */
   public boolean isShowDerivative() {
-    return logScale;
+    return showDerivative;
   }
 
   /**
