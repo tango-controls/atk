@@ -1967,7 +1967,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
     int l0 = getDataLength(data[i]);
     int l1 = getDataLength(data[i+1]);
-    int m = (l1>l0)?l1:l0;
+    int m = (l1>l0)?l0:l1;
 
     derivativeData[i].values = new double[m];
     for(int j=0;j<m;j++) {
