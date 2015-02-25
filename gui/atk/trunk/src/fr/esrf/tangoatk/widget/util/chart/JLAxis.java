@@ -206,6 +206,7 @@ public class JLAxis implements java.io.Serializable {
   private int subTickStep; // 0 => NONE , -1 => Log step , 1.. => Linear step
   private int subTickTimeAnno=0; // Number of sub tick interval in TIME_ANNO
   private boolean fitXAxisToDisplayDuration;
+  private int vLabelWidth=0;
   
   private boolean zeroAlwaysVisible = false;
   private boolean  autoLabeling = true;
@@ -1311,6 +1312,23 @@ public class JLAxis implements java.io.Serializable {
   }
 
   /**
+   * Overrides the calculated vertical label width
+   * Use this to align several charts vertically
+   * @param width label width
+   */
+  public void setVLabelWidth(int width) {
+    vLabelWidth = width;
+  }
+
+  /**
+   * Returns the vertical label width
+   * @see JLAxis#setVLabelWidth
+   */
+  public int getVLabelWidth() {
+    return vLabelWidth;
+  }
+
+  /**
    * Returns a representation of the double acording to the format
    * @param vt double to convert
    * @param prec Desired precision (Pass 0 to not perform prec rounding).
@@ -1748,9 +1766,11 @@ public class JLAxis implements java.io.Serializable {
 
     fontOverWidth = max_width/2+1;
 
-    if (!isHorizontal())
-      csize = new Dimension(max_width + getLabelFontDimension(frc), desiredHeight);
-    else
+    if (!isHorizontal()) {
+      int w = max_width + getLabelFontDimension(frc);
+      if( vLabelWidth>w ) w = vLabelWidth;
+      csize = new Dimension(w, desiredHeight);
+    } else
       csize = new Dimension(desiredWidth, max_height);
 
   }

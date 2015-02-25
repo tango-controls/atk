@@ -112,3 +112,6 @@ Java-Bean: True
 Name: fr/esrf/tangoatk/widget/attribute/ScalarLevelMeterViewer.class
 Java-Bean: True
 
+Name: fr/esrf/tangoatk/widget/attribute/EnumScalarComboEditor.class
+Java-Bean: True
+
