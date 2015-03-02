@@ -28,8 +28,8 @@ atk-release:
 ifdef ATK-VERSION
 	@echo "You are building the ATK version : $(ATK-VERSION)"
 	(svn copy \
-	https://tango-cs.svn.sourceforge.net/svnroot/tango-cs/gui/atk/trunk \
-	https://tango-cs.svn.sourceforge.net/svnroot/tango-cs/gui/atk/tags/$(ATK-RELEASE) \
+	https://svn.code.sf.net/p/tango-cs/code/gui/atk/trunk \
+	https://svn.code.sf.net/p/tango-cs/code/gui/atk/tags/$(ATK-RELEASE) \
 	-m "Tagging the atk project.")
 else
 	@echo "Sorry you cannot perform atk-release; ATK_RELDIR should be set!"
