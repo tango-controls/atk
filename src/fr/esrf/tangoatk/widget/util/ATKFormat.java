@@ -63,9 +63,9 @@ public class ATKFormat {
     try {
       retValue = String.format(format,value);
     } catch (IllegalFormatException e1) {
-      // We may have a %d in the format
+      // We may have a %d or a %x in the format
       try {
-        retValue = String.format(format,(long)value);
+        retValue = String.format(format,new Long((long)value));
       } catch (IllegalFormatException e2) {
         retValue = Double.toString(value);
       }
