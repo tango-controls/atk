@@ -1,0 +1,7 @@
+name = BooleanScalarSetPanel
+package fr.esrf.tangoatk.widget.attribute
+
+properties = labelVisible
+
+ICON_COLOR_16x16 = AttBooleanSetPanel.gif
+ICON_COLOR_32x32 = AttBooleanSetPanel32.gif

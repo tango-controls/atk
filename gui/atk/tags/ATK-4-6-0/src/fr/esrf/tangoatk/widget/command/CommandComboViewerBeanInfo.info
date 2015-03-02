@@ -1,0 +1,7 @@
+name =  CommandComboViewer
+package = fr.esrf.tangoatk.widget.command 
+
+properties = model, font, background, foreground, infoButtonVisible, deviceButtonVisible, descriptionVisible, cancelButtonVisible, keyboardActive
+
+ICON_COLOR_16x16 = ../attribute/AttComboBox.gif
+ICON_COLOR_32x32 = CommandComboViewer32.gif

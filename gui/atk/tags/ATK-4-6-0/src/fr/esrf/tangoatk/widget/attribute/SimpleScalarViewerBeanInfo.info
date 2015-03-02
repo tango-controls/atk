@@ -1,0 +1,7 @@
+name = SimpleScalarViewer
+package fr.esrf.tangoatk.widget.attribute
+
+properties = unitVisible, hasToolTip, qualityInTooltip
+ICON_COLOR_16x16 = NumberScalarViewer.gif
+ICON_COLOR_32x32 = NumberScalarViewer32.gif
+

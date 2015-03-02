@@ -1,0 +1,6 @@
+name = EnumScalarSetPanel
+package fr.esrf.tangoatk.widget.attribute
+
+properties = labelVisible
+ICON_COLOR_16x16 = AttEnumScalarSetPanel.gif
+ICON_COLOR_32x32 = AttEnumScalarSetPanel32.gif

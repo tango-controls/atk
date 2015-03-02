@@ -1,0 +1,6 @@
+name = NumberSpectrumTrend3DViewer
+package fr.esrf.tangoatk.widget.attribute
+
+properties = historyLength
+ICON_COLOR_16x16 = NumberSpectrumTrend3D.gif
+ICON_COLOR_32x32 = NumberSpectrumTrend3D32.gif

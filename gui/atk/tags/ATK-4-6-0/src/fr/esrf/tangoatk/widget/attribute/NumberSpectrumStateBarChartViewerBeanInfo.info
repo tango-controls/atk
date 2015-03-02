@@ -1,0 +1,6 @@
+name = NumberSpectrumStateBarChartViewer
+package fr.esrf.tangoatk.widget.attribute
+
+properties = defaultBarChartColor, barChartFillMethod, drawOnNaN, minAlarmVisible, maxAlarmVisible, minAlarmColor, maxAlarmColor
+ICON_COLOR_16x16 = NumberSpectrumStateBarChart.gif
+ICON_COLOR_32x32 = NumberSpectrumStateBarChart32.gif

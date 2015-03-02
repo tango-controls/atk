@@ -1,0 +1,7 @@
+name = BooleanSpectrumViewer
+package fr.esrf.tangoatk.widget.attribute
+
+properties = globalFont, booleanLabelVisible, displayMode, toolTipMode, model
+
+ICON_COLOR_16x16 = AttBooleanSpectrum.gif
+ICON_COLOR_32x32 = AttBooleanSpectrum32.gif

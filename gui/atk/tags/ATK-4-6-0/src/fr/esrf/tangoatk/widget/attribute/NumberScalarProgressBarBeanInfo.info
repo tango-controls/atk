@@ -1,0 +1,6 @@
+name = NumberScalarProgressBar
+package fr.esrf.tangoatk.widget.attribute
+
+properties = nsModel, min, max, printVal
+ICON_COLOR_16x16 = NumberScalarProgressBar.gif
+ICON_COLOR_32x32 = NumberScalarProgressBar32.gif
