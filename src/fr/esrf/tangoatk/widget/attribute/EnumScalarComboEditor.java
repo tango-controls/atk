@@ -43,6 +43,8 @@ import javax.swing.*;
 
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 
 /**
@@ -52,7 +54,7 @@ import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
  * @author  poncet
  */
 public class EnumScalarComboEditor extends JComboBox 
-                                     implements ActionListener, IEnumScalarListener, JDrawable
+                                     implements ActionListener, IEnumScalarListener, JDrawable, PropertyChangeListener
 {
 
     private DefaultComboBoxModel     comboModel=null;
@@ -147,6 +149,12 @@ public class EnumScalarComboEditor extends JComboBox
 
        // Register new listener
        enumModel.addEnumScalarListener(this);
+            
+       Property p;
+       p = enumModel.getProperty("enum_label");
+       if (p != null)
+          p.addPresentationListener(this);
+
        enumModel.refresh();
     }
 
@@ -304,6 +312,42 @@ public class EnumScalarComboEditor extends JComboBox
   public String getExtendedParam(String name) {
     return "";
   }
+  
+  
+  public void propertyChange(PropertyChangeEvent evt)
+  {
+        Property src = (Property) evt.getSource();
+        if (src == null) return;
+        
+        if (src.getName().equalsIgnoreCase("enum_label"))
+        {
+            if (src instanceof StringArrayProperty)
+            {
+                StringArrayProperty sap = (StringArrayProperty) src;
+                String[] newEnums = sap.getStringArrayValue();
+                updateEnumLabels(newEnums);
+            }
+        }
+  }
+
+    
+    private void updateEnumLabels (String[] enums)
+    {
+       // Update the comboBox model
+       if (enums == null) return;
+       if (enums.length < 1) return;
+       String[] newOptions = new String[enums.length];
+       
+       System.arraycopy(enums, 0, newOptions, 0, enums.length);
+      
+       optionList = newOptions;
+       comboModel = new DefaultComboBoxModel(optionList);
+       this.setModel(comboModel);
+
+       changeCurrentSelection(-1); //No item selected
+    }
+
+
 
 
     public static void main(String[] args)
@@ -315,7 +359,9 @@ public class EnumScalarComboEditor extends JComboBox
          JFrame                                 mainFrame = null;
 	 try
 	 {
-            ie = attList.add("jlp/test/1/Att_six");
+//            ie = attList.add("jlp/test/1/Att_six");
+//            ie = attList.add("//orion:10000/sy/ps-rips-master/plc/DipoleGrid");
+            ie = attList.add("//acudebian7:10000/dev/test/10/enum_attr_rw");
 
 	    if (ie instanceof IEnumScalar)
 	    {

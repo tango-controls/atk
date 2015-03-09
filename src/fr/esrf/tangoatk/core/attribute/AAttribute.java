@@ -37,6 +37,7 @@ import fr.esrf.Tango.AttrWriteType;
 import fr.esrf.Tango.AttrQuality;
 import fr.esrf.TangoApi.*;
 import fr.esrf.TangoApi.events.*;
+import static fr.esrf.TangoDs.TangoConst.Tango_DEV_ENUM;
 import fr.esrf.tangoatk.util.AtkTimer;
 
 public abstract class AAttribute implements IAttribute, 
@@ -356,6 +357,12 @@ public abstract class AAttribute implements IAttribute,
       case Tango_DEV_ULONG:
         retval.append("ULong");
         break;
+      case Tango_DEV_LONG64:
+        retval.append("Long64");
+        break;
+      case Tango_DEV_ULONG64:
+        retval.append("ULong64");
+        break;
       case Tango_DEV_STRING:
         retval.append("String");
         break;
@@ -364,6 +371,9 @@ public abstract class AAttribute implements IAttribute,
         break;
       case Tango_DEV_FLOAT:
         retval.append("Float");
+        break;
+      case Tango_DEV_ENUM:
+        retval.append("Enum");
         break;
     }
 
@@ -475,6 +485,19 @@ public abstract class AAttribute implements IAttribute,
       if(config.alarms!=null)
         config.alarms.delta_val = property.getStringValue();
     }
+    
+      if (config.data_type == Tango_DEV_ENUM)
+      {
+          property = getProperty("enum_label");
+          if (property != null && property.isSpecified())
+          {
+              if (property instanceof StringArrayProperty)
+              {
+                  StringArrayProperty saProp = (StringArrayProperty) property;
+                  config.enum_label = saProp.getStringArrayValue();
+              }
+          }
+      }
 
     try {
       device.storeInfo(config);
@@ -680,6 +703,10 @@ public abstract class AAttribute implements IAttribute,
 	      std_unit = 1.0;
       }
       setProperty("standard_unit", new Double(std_unit), false);
+      if (config.data_type == Tango_DEV_ENUM)
+      {
+          propertyStorage.setProperty(this, "enum_label", config.enum_label, true);
+      }
 
       timer.endTimer(Thread.currentThread());
   }

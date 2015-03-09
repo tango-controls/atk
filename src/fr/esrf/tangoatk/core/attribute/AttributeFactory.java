@@ -34,6 +34,7 @@ import fr.esrf.Tango.DevFailed;
 import fr.esrf.Tango.AttrDataFormat;
 import fr.esrf.TangoApi.DbAttribute;
 import fr.esrf.TangoApi.AttributeInfoEx;
+import static fr.esrf.TangoDs.TangoConst.Tango_DEV_ENUM;
 
 /**
  * <code>AttributeFactory</code> is an extension of {@link AEntityFactory}
@@ -454,7 +455,7 @@ public class AttributeFactory extends AEntityFactory {
     }
 
 
-  private EnumScalar getEnumScalar(Device device,AttributeInfoEx config)
+  private EnumScalar getEnumScalarFromTangoDevShort(Device device,AttributeInfoEx config)
   {
      String         name = config.name;
      DbAttribute    dbAtt=null;
@@ -523,6 +524,37 @@ public class AttributeFactory extends AEntityFactory {
   }
 
 
+  private EnumScalar getTangoEnumScalar(AttributeInfoEx config)
+  {
+     String[]       enumLabs =null;
+     EnumScalar     ens = null;
+     
+     enumLabs = config.enum_label;
+
+     if (enumLabs == null) return null;
+
+     if (enumLabs.length <= 1) return null;
+
+     ens = new EnumScalar(enumLabs);
+     return ens;
+  }
+
+  private EnumSpectrum getTangoEnumSpectrum(AttributeInfoEx config)
+  {
+     String[]       enumLabs =null;
+     EnumSpectrum     ens = null;
+     
+     enumLabs = config.enum_label;
+
+     if (enumLabs == null) return null;
+
+     if (enumLabs.length <= 1) return null;
+
+     ens = new EnumSpectrum(enumLabs);
+     return ens;
+  }
+
+
   /**
    * <code>getScalar</code> figures out what kind of scalar is to be
    * created. This is done by looking at AttributeInfo.data_type
@@ -552,7 +584,7 @@ public class AttributeFactory extends AEntityFactory {
             ns.setNumberHelper(new UCharScalarHelper(ns));
             return ns;
       case Tango_DEV_SHORT:
-            ens = getEnumScalar(device, config);
+            ens = getEnumScalarFromTangoDevShort(device, config);
             if (ens != null)
             {
                ens.setEnumHelper(new EnumScalarHelper(ens));
@@ -600,6 +632,15 @@ public class AttributeFactory extends AEntityFactory {
                                ") : Unsupported DevEncoded attribute. Try to set the format attribute property to 'RawImage'.");
                return new InvalidAttribute();               
            }
+      case Tango_DEV_ENUM:
+            ens = getTangoEnumScalar(config);
+            if (ens == null) // failed to instantiate correctly Enum
+            {
+                System.out.println("Warning, Tango_DEV_ENUM, AttributeFactory.getTangoEnumScalar(" + device.getName() + "/" + name + ") : Failed ");
+                return new InvalidAttribute();
+            }
+            ens.setEnumHelper(new EnumScalarHelper(ens));
+            return ens;
 
       default:
             System.out.println("Warning, AttributeFactory.getScalar(" + device.getName() + "/" + name +
@@ -625,6 +666,7 @@ public class AttributeFactory extends AEntityFactory {
     StringSpectrum ss = null;
     BooleanSpectrum bs = null;
     DevStateSpectrum dss = null;
+    EnumSpectrum     ens = null;
 
     switch (dataType) {
       case Tango_DEV_UCHAR:
@@ -663,6 +705,15 @@ public class AttributeFactory extends AEntityFactory {
       case Tango_DEV_STATE:
         dss = new DevStateSpectrum();
         return dss;
+      case Tango_DEV_ENUM:
+            ens = getTangoEnumSpectrum(config);
+            if (ens == null) // failed to instantiate correctly Enum Spectrum
+            {
+                System.out.println("Warning, Tango_DEV_ENUM, AttributeFactory.getTangoEnumSpectrum(" + device.getName() + "/" + name + ") : Failed ");
+                return new InvalidAttribute();
+            }
+            ens.setEnumSpectrumHelper(new EnumSpectrumHelper(ens));
+            return ens;
       default:
         System.out.println("Warning, AttributeFactory.getSpectrum(" + device.getName() + "/" + name +
                            ") : Unsupported data type [" + dataType +"]");

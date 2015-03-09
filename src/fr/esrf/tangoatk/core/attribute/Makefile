@@ -54,6 +54,8 @@ ALL = $(TARGET)/ANumber.class \
       $(TARGET)/RawImage.class \
       $(TARGET)/EnumScalarHelper.class \
       $(TARGET)/EnumScalar.class \
+      $(TARGET)/EnumSpectrumHelper.class \
+      $(TARGET)/EnumSpectrum.class \
       $(TARGET)/StringImageHelper.class \
       $(TARGET)/StringImage.class \
       $(TARGET)/DevStateSpectrumHelper.class \

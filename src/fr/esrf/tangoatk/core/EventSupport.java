@@ -67,6 +67,7 @@ public class EventSupport implements Serializable
     protected EndGroupExecutionEvent endGroupExecEvent = null;
     protected RawImageEvent rawImageEvent = null;
     protected EnumScalarEvent enumScalarEvent = null;
+    protected EnumSpectrumEvent enumSpectrumEvent = null;
     protected StringImageEvent strImageEvent = null;
     protected DevStateSpectrumEvent devStateSpectrumEvent = null;
 
@@ -948,6 +949,53 @@ public class EventSupport implements Serializable
         // Free memory in the Event Structure
         //enumScalarEvent.setSource(null);
         //enumScalarEvent.setValue(null);
+    }
+
+
+    // Added support for EnumSpectrum Tango attributes March 2015
+
+    public synchronized void addEnumSpectrumListener(IEnumSpectrumListener l) {
+    listenerList.add(IEnumSpectrumListener.class, l);
+    addErrorListener(l);
+    }
+
+    public synchronized void removeEnumSpectrumListener(IEnumSpectrumListener l) {
+    listenerList.remove(IEnumSpectrumListener.class, l);
+    removeErrorListener(l);
+    }
+
+    public void fireEnumSpectrumEvent(IEnumSpectrum source, String[] value, long timeStamp)
+    {
+        // Guaranteed to return a non-null array
+        Object[] listeners = listenerList.getListenerList();
+
+        // Lazily create the event
+        if (enumSpectrumEvent == null)
+          enumSpectrumEvent = new EnumSpectrumEvent(source, value, timeStamp);
+        else
+        {
+          enumSpectrumEvent.setSource(source);
+          enumSpectrumEvent.setValue(value);
+          enumSpectrumEvent.setTimeStamp(timeStamp);
+        }
+
+        // Process the listeners last to first, notifying
+        // those that are interested in this event
+        WeakReference<EventListener> weakRef;
+        for (int i = listeners.length - 2; i >= 0; i -= 2)
+        {
+          if (listeners[i] == IEnumSpectrumListener.class)
+          {
+              weakRef = (WeakReference)listeners[i + 1];
+              if(weakRef.get()!=null)
+                      ((IEnumSpectrumListener) weakRef.get()).enumSpectrumChange(enumSpectrumEvent);
+              else
+                      listenerList.remove(i);
+          }
+        }
+        // Free memory in the Event Structure
+        //enumSpectrumEvent.setSource(null);
+        //enumSpectrumEvent.setValue(null);
     }
 
 

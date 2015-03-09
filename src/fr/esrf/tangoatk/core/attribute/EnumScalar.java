@@ -35,54 +35,62 @@ import fr.esrf.tangoatk.core.*;
 import fr.esrf.Tango.*;
 import fr.esrf.TangoApi.*;
 import fr.esrf.TangoApi.events.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 /**
- * Enumerated scalar attributes (missing in Tango) are mapped in EnumScalar class
- * of ATK. In order to use them the device server attribute should be of type Dev_SHORT
- * or Dev_USHORT and should have a property called "EnumLabels" defined. This property should 
- * contain the list of all "enumerated" labels separated by "\n" (new line, return).
- * By convention the first label in the list is associated to the value zero and the
- * following labels are associated to the values increasing by 1 each time.
+ * Enumerated scalar attributes are mapped in EnumScalar class of ATK.
  * 
- * If the attribute property "EnumSetExclusion" is defined, it will be used to
- * exclude from the values authorized for writeAttribute some of the enumerated
- * labels defined in EnumLabels property. EnumSetExclusion is used to restrict
- * the authorized values for set to a subset of values defined in EnumLabels.
+ *           - either Tango attribute is a Dev_SHORT scalar : in this case Atk will map the
+ *             Dev_SHORT attribute to a EnumScalar ATK object if an attribute property
+ *             named "EnumLabels" can be found in the database for that Dev_SHORT attribute.
+ *             In addition, the EnumSetExclusion can be used to restrict the authorized
+ *             values for " write" to a subset of values defined in EnumLabels.
+ *           - or Tango attribute is a Dev_Enum scalar : the Tango Enum data type exists since Tango Release 9
  * @author  poncet
  */
 
-public class EnumScalar extends AAttribute implements IEnumScalar
+public class EnumScalar extends AAttribute implements IEnumScalar, PropertyChangeListener
 {
 
   EnumScalarHelper              enumHelper=null;
   String                        scalarValue = null;
   String                        setPointValue = null;
   private String[]              enumLabels = null;
-  private String[]              enmuSetExcludeLabels = null;
   private String[]              enumSetLabels = null;
 
+
+
+  public EnumScalar(String[] enums)
+  {
+      enumLabels=enums;
+      enumSetLabels = enumLabels;
+  }
 
 
   public EnumScalar(String[] enums, String[] setEnumExclusion)
   {
       enumLabels=enums;
-      enmuSetExcludeLabels=setEnumExclusion;
-      
-      if (enmuSetExcludeLabels != null)
-         setEnumSetLabels();
+      if (setEnumExclusion != null)
+          if (setEnumExclusion.length >= 1)
+             setEnumSetLabels(setEnumExclusion);
 
       if ( enumSetLabels == null)
          enumSetLabels = enumLabels;
-/* Debug trace ... 
-      if ( enumSetLabels != null)
-      {
-          for (int i=0; i<enumSetLabels.length; i++)
-	      System.out.println("enumSetLabels["+i+"]="+enumSetLabels[i]);
-      }
-      */
+  }
+
+
+  @Override
+  protected void init(fr.esrf.tangoatk.core.Device d, String name, AttributeInfoEx config, boolean doEvent)
+  {
+      super.init(d, name, config, doEvent);
+      Property p = null;
+      p = this.getProperty("enum_label");
+      if (p != null)
+          p.addPresentationListener(this);
   }
   
-  private void setEnumSetLabels()
+  private void setEnumSetLabels(String[] enmuSetExcludeLabels)
   {
       int    nbSetLabs, indSetLabel;
       
@@ -648,6 +656,31 @@ public class EnumScalar extends AAttribute implements IEnumScalar
     in.defaultReadObject();
     serializeInit();
   }
+
+  
+    // Interface java.beans.PropertyChangeListener
+    public void propertyChange(PropertyChangeEvent evt)
+    {
+        Property src = (Property) evt.getSource();
+        if (src == null) return;
+        
+        if (src.getName().equalsIgnoreCase("enum_label"))
+        {
+            if (src instanceof StringArrayProperty)
+            {
+                StringArrayProperty sap = (StringArrayProperty) src;
+                String[] newEnums = sap.getStringArrayValue();
+                updateEnumLabels(newEnums);
+            }
+        }
+    }
+    
+    private void updateEnumLabels (String[] enums)
+    {
+        if (enums == null) return;
+        enumLabels = enums;
+        enumSetLabels = enums;
+    }
 
 
 }

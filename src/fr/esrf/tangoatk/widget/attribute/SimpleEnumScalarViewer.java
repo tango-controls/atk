@@ -145,7 +145,7 @@ public class SimpleEnumScalarViewer extends JAutoScrolledText
          model.refresh();
       }
    }
-   
+
    /**
    * Clears all model and listener attached to the component
    */
@@ -369,7 +369,7 @@ public class SimpleEnumScalarViewer extends JAutoScrolledText
       JOptionPane.showMessageDialog(null, "SimpleScalarViewer: "+paramName+" incorrect.\n" + message,
                                     "Error",JOptionPane.ERROR_MESSAGE);
   }
-
+  
 
   /**
    * Test function
@@ -383,7 +383,10 @@ public class SimpleEnumScalarViewer extends JAutoScrolledText
     SimpleEnumScalarViewer     sesv = new SimpleEnumScalarViewer();
     IEnumScalar                enumeration;
     
-    enumeration = (IEnumScalar) attributeList.add("jlp/test/1/Att_six");
+//    enumeration = (IEnumScalar) attributeList.add("jlp/test/1/Att_six");
+//    enumeration = (IEnumScalar) attributeList.add("//orion:10000/sy/ps-rips-master/plc/DipoleGrid");
+//    enumeration = (IEnumScalar) attributeList.add("//acudebian7:10000/dev/test/10/enum_attr_rw");
+    enumeration = (IEnumScalar) attributeList.add("//acudebian7:10000/dev/test/10/DynEnum_attr");
     sesv.setHasToolTip(true);
     sesv.setModel(enumeration);
     sesv.setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());
