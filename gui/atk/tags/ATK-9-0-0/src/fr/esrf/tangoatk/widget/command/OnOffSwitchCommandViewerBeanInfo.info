@@ -1,0 +1,6 @@
+name =  OnOffSwitchCommandViewer
+package = fr.esrf.tangoatk.widget.command
+
+properties = model
+
+ICON_COLOR_16x16 = OnOffSwitchCommandViewer.gif

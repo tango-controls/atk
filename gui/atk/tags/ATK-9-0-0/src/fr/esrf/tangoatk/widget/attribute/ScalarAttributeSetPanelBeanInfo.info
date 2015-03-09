@@ -1,0 +1,6 @@
+name = ScalarAttributeSetPanel
+package fr.esrf.tangoatk.widget.attribute
+
+properties = labelVisible, unitVisible
+ICON_COLOR_16x16 = NumberScalarSetPanel.gif
+ICON_COLOR_32x32 = NumberScalarSetPanel32.gif

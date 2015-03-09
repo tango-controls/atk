@@ -1,0 +1,6 @@
+name = SimpleCommandViewer
+package = fr.esrf.tangoatk.widget.command
+
+properties = deviceButtonVisible, infoButtonVisible, descriptionVisible, inputVisible, outputVisible, model, infoButtonFont, deviceButtonFont, descriptionFont, inputFont, outputFont
+ICON_COLOR_16x16 = SimpleCommandViewer.gif
+ICON_COLOR_32x32 = SimpleCommandViewer32.gif

@@ -1,0 +1,6 @@
+name =  IconNumberScalarViewer
+package = fr.esrf.tangoatk.widget.attribute 
+properties icons, model
+
+ICON_COLOR_16x16 = AttIconNumberScalar.gif
+ICON_COLOR_32x32 = AttIconNumberScalar32.gif

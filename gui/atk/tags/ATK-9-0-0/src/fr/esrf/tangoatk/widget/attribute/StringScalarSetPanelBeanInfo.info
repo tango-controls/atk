@@ -1,0 +1,6 @@
+name = StringScalarSetPanel
+package fr.esrf.tangoatk.widget.attribute
+
+properties = labelVisible
+ICON_COLOR_16x16 = StringScalarSetPanel.gif
+ICON_COLOR_32x32 = StringScalarSetPanel32.gif

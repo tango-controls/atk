@@ -1,0 +1,4 @@
+name =  ScalarCommandInput
+package = fr.esrf.tangoatk.widget.command
+
+properties = model

@@ -1,0 +1,7 @@
+name = SynopticFileViewer
+package = fr.esrf.tangoatk.widget.jdraw
+
+properties = jdrawDir, jdrawFileName
+
+ICON_COLOR_16x16 = SynopticFileViewer.gif
+ICON_COLOR_32x32 = SynopticFileViewer32.gif

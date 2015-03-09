@@ -1,0 +1,7 @@
+name =  GroupCommandViewer
+package = fr.esrf.tangoatk.widget.command
+
+properties = buttonLabel, hasConfirmation, confirmTitle, confirmMessage
+
+ICON_COLOR_16x16 = GroupCommandViewer.gif
+ICON_COLOR_32x32 = GroupCommandViewer32.gif

@@ -1,0 +1,6 @@
+name = NumberScalarListViewer
+package fr.esrf.tangoatk.widget.attribute
+
+properties = theFont, labelVisible, setterVisible, propertyButtonVisible, unitVisible, arrowColor, toolTipDisplay
+ICON_COLOR_16x16 = NumberScalarList.gif
+ICON_COLOR_32x32 = NumberScalarList32.gif

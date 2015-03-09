@@ -1,0 +1,6 @@
+name = NumberScalarWheelEditor
+package fr.esrf.tangoatk.widget.attribute
+
+properties = model
+ICON_COLOR_16x16 = WheelSwitch.gif
+ICON_COLOR_32x32 = WheelSwitch32.gif

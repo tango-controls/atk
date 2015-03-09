@@ -1,0 +1,6 @@
+name = MultiNumberSpectrumViewer
+package fr.esrf.tangoatk.widget.attribute
+
+properties = defaultAxis
+ICON_COLOR_16x16 = MultiSpectrumViewer.gif
+ICON_COLOR_32x32 = MultiSpectrumViewer32.gif
