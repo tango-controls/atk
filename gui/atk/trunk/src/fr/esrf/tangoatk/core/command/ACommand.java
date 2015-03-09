@@ -415,9 +415,9 @@ public abstract class ACommand implements ICommand {
 	case	Tango_DEV_USHORT:		
 	case	Tango_DEV_ULONG:
 	case	Tango_DEV_LONG:
-    case	Tango_DEV_ULONG64:
-    case	Tango_DEV_LONG64:
-    case	Tango_DEV_STRING:
+        case	Tango_DEV_ULONG64:
+        case	Tango_DEV_LONG64:
+        case	Tango_DEV_STRING:
         case    Tango_DEV_STATE:
 	    return true;
 	default:

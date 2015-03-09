@@ -107,6 +107,8 @@ public class AttrDualSpectrum extends AttrFunctionSpectrum {
                     break;
                 case TangoConst.Tango_DEV_ULONG:
                 case TangoConst.Tango_DEV_LONG:
+                case TangoConst.Tango_DEV_LONG64:
+                case TangoConst.Tango_DEV_ULONG64:
                     int[] lval = dev_attr_x.extractLongArray();
                     if (lval == null) {
                         lval = new int[0];
@@ -171,6 +173,8 @@ public class AttrDualSpectrum extends AttrFunctionSpectrum {
                     break;
                 case TangoConst.Tango_DEV_ULONG:
                 case TangoConst.Tango_DEV_LONG:
+                case TangoConst.Tango_DEV_LONG64:
+                case TangoConst.Tango_DEV_ULONG64:
                     int[] lval = dev_attr_y.extractLongArray();
                     if (lval == null) {
                         lval = new int[0];

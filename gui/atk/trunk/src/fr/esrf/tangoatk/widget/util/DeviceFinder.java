@@ -355,6 +355,8 @@ class MemberNode extends Node {
                       case TangoConst.Tango_DEV_USHORT:
                       case TangoConst.Tango_DEV_LONG:
                       case TangoConst.Tango_DEV_ULONG:
+                      case TangoConst.Tango_DEV_LONG64:
+                      case TangoConst.Tango_DEV_ULONG64:
                       case TangoConst.Tango_DEV_FLOAT:
                       case TangoConst.Tango_DEV_DOUBLE:
                           add(new EntityNode(mode,ain[i].name));
@@ -376,6 +378,8 @@ class MemberNode extends Node {
                       case TangoConst.Tango_DEV_USHORT:
                       case TangoConst.Tango_DEV_LONG:
                       case TangoConst.Tango_DEV_ULONG:
+                      case TangoConst.Tango_DEV_LONG64:
+                      case TangoConst.Tango_DEV_ULONG64:
                       case TangoConst.Tango_DEV_FLOAT:
                       case TangoConst.Tango_DEV_DOUBLE:
                           add(new EntityNode(mode,aisp[i].name));
@@ -417,6 +421,8 @@ class MemberNode extends Node {
                     case TangoConst.Tango_DEV_USHORT:
                     case TangoConst.Tango_DEV_LONG:
                     case TangoConst.Tango_DEV_ULONG:
+                    case TangoConst.Tango_DEV_LONG64:
+                    case TangoConst.Tango_DEV_ULONG64:
                     case TangoConst.Tango_DEV_FLOAT:
                     case TangoConst.Tango_DEV_DOUBLE:
                         add(new EntityNode(mode,ainb[i].name));
@@ -440,6 +446,8 @@ class MemberNode extends Node {
                     case TangoConst.Tango_DEV_USHORT:
                     case TangoConst.Tango_DEV_LONG:
                     case TangoConst.Tango_DEV_ULONG:
+                    case TangoConst.Tango_DEV_LONG64:
+                    case TangoConst.Tango_DEV_ULONG64:
                     case TangoConst.Tango_DEV_FLOAT:
                     case TangoConst.Tango_DEV_DOUBLE:
                     case TangoConst.Tango_DEV_BOOLEAN:
@@ -455,6 +463,8 @@ class MemberNode extends Node {
                     case TangoConst.Tango_DEV_UCHAR:
                     case TangoConst.Tango_DEV_SHORT:
                     case TangoConst.Tango_DEV_USHORT:
+                    case TangoConst.Tango_DEV_LONG64:
+                    case TangoConst.Tango_DEV_ULONG64:
                     case TangoConst.Tango_DEV_LONG:
                     case TangoConst.Tango_DEV_ULONG:
                     case TangoConst.Tango_DEV_FLOAT:
@@ -482,6 +492,8 @@ class MemberNode extends Node {
                   case TangoConst.Tango_DEV_USHORT:
                   case TangoConst.Tango_DEV_LONG:
                   case TangoConst.Tango_DEV_ULONG:
+                  case TangoConst.Tango_DEV_LONG64:
+                  case TangoConst.Tango_DEV_ULONG64:
                   case TangoConst.Tango_DEV_FLOAT:
                   case TangoConst.Tango_DEV_DOUBLE:
                   case TangoConst.Tango_DEV_BOOLEAN:
@@ -500,6 +512,8 @@ class MemberNode extends Node {
                   case TangoConst.Tango_DEV_USHORT:
                   case TangoConst.Tango_DEV_LONG:
                   case TangoConst.Tango_DEV_ULONG:
+                  case TangoConst.Tango_DEV_LONG64:
+                  case TangoConst.Tango_DEV_ULONG64:
                   case TangoConst.Tango_DEV_FLOAT:
                   case TangoConst.Tango_DEV_DOUBLE:
                     add(new SpectrumItemNode(mode,ainbss[i].name,ainbss[i].max_dim_x));

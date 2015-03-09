@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import fr.esrf.tangoatk.util.AtkTimer;
+import java.util.ArrayList;
 
 public class PropertyStorage {
 	protected Map<String, Property> propertyMap;
@@ -58,6 +59,18 @@ public class PropertyStorage {
 			propertyMap.put(name, new NumberProperty(entity, name, value, editable));
 		else
 			p.setValue(value);
+	}
+
+	public void setProperty(IEntity entity, String name, String[] value, boolean editable) {
+		StringArrayProperty p = (StringArrayProperty) propertyMap.get(name);
+		if (p == null)
+                {
+                    p = new StringArrayProperty(entity, name, null, editable);
+                    p.setValueFromStringArray(value);
+		    propertyMap.put(name, p);
+                }
+                else
+		    p.setValueFromStringArray(value);
 	}
 
 	public void setProperty(IAttribute entity, String name, fr.esrf.Tango.AttrWriteType value, boolean editable) {
@@ -147,4 +160,17 @@ public class PropertyStorage {
 
 		    return Double.NaN;
 	 }	
+
+    public String[] getStringArrayProperty(String name)
+    {
+
+        StringArrayProperty p = (StringArrayProperty) getProperty(name);
+
+        if (p != null && p.isSpecified())
+        {
+            return (p.getStringArrayValue());
+        }
+
+        return null;
+    }
 }

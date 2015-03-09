@@ -73,6 +73,8 @@ INTERFACES = $(TARGET)/INumber.class   \
         $(TARGET)/IRawImageListener.class \
         $(TARGET)/IEnumScalar.class \
         $(TARGET)/IEnumScalarListener.class \
+        $(TARGET)/IEnumSpectrum.class \
+        $(TARGET)/IEnumSpectrumListener.class \
         $(TARGET)/IStringImage.class \
         $(TARGET)/IStringImageListener.class \
         $(TARGET)/IDevStateSpectrum.class \
@@ -84,6 +86,7 @@ INTERFACES = $(TARGET)/INumber.class   \
 PROPERTIES = $(TARGET)/Property.class \
              $(TARGET)/NumberProperty.class \
 	     $(TARGET)/StringProperty.class \
+	     $(TARGET)/StringArrayProperty.class \
 	     $(TARGET)/WritableProperty.class \
 	     $(TARGET)/FormatProperty.class \
 	     $(TARGET)/DisplayLevelProperty.class \
@@ -111,6 +114,7 @@ EVENTS =  $(TARGET)/AtkEventListenerList.class \
           $(TARGET)/EndGroupExecutionEvent.class \
           $(TARGET)/RawImageEvent.class \
           $(TARGET)/EnumScalarEvent.class \
+          $(TARGET)/EnumSpectrumEvent.class \
           $(TARGET)/StringImageEvent.class \
           $(TARGET)/DevStateSpectrumEvent.class \
 

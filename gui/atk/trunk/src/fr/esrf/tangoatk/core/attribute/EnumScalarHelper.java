@@ -68,7 +68,6 @@ public class EnumScalarHelper implements java.io.Serializable
     {
 	DeviceAttribute      da;
 	short                shortValue;
-	int                  ushortValue;
 
 	da = this.enumAtt.getAttribute();
 	if (da == null)
@@ -79,13 +78,7 @@ public class EnumScalarHelper implements java.io.Serializable
 	try
 	{
 	   shortValue=getShortValueForEnum(enumStr);
-	   if (((AAttribute) enumAtt).getTangoDataType() == AAttribute.Tango_DEV_USHORT)
-	   {
-	       ushortValue = (int) shortValue;
-               da.insert_us(ushortValue);
-	   }
-	   else
-	       da.insert(shortValue);
+           da.insert(shortValue);
 	}
 	catch (IllegalArgumentException ex)
 	{
@@ -152,8 +145,7 @@ public class EnumScalarHelper implements java.io.Serializable
     {
 	EnumScalar   ens;
 	String[]     enums=null;
-	int          indEnum;
-	short        shVal;
+	short        indEnum;
 	
 	if (enumVal == null)
 	   throw new IllegalArgumentException();
@@ -165,15 +157,14 @@ public class EnumScalarHelper implements java.io.Serializable
 	for (int i=0; i<enums.length; i++)
 	    if (enumVal.equals(enums[i]))
 	    {
-	       indEnum = i;
+	       indEnum = (short) i;
 	       break;
 	    }
 	    
-	if (indEnum < 0)
-	   throw new IllegalArgumentException();
+	if (indEnum >= enums.length)
+	   indEnum = -1;
 	   
-	shVal = (short) indEnum;
-	return shVal;
+	return indEnum;
     }
     
     String getEnumValueFromShort(short shortVal) throws IllegalArgumentException

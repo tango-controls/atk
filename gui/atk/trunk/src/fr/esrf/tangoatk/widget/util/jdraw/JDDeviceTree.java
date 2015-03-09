@@ -283,6 +283,8 @@ class MemberNode extends JDNode {
             case TangoConst.Tango_DEV_USHORT:
             case TangoConst.Tango_DEV_LONG:
             case TangoConst.Tango_DEV_ULONG:
+            case TangoConst.Tango_DEV_LONG64:
+            case TangoConst.Tango_DEV_ULONG64:
             case TangoConst.Tango_DEV_FLOAT:
             case TangoConst.Tango_DEV_DOUBLE:
               add(new JDEntityNode(JDDeviceTree.NODE_ATTRIBUTE, devName, "[number scalar]", ai[i].name));
@@ -307,6 +309,8 @@ class MemberNode extends JDNode {
             case TangoConst.Tango_DEV_USHORT:
             case TangoConst.Tango_DEV_LONG:
             case TangoConst.Tango_DEV_ULONG:
+            case TangoConst.Tango_DEV_LONG64:
+            case TangoConst.Tango_DEV_ULONG64:
             case TangoConst.Tango_DEV_FLOAT:
             case TangoConst.Tango_DEV_DOUBLE:
               add(new JDEntityNode(JDDeviceTree.NODE_ATTRIBUTE, devName, "[number spectrum]", ai[i].name));
@@ -331,6 +335,8 @@ class MemberNode extends JDNode {
             case TangoConst.Tango_DEV_USHORT:
             case TangoConst.Tango_DEV_LONG:
             case TangoConst.Tango_DEV_ULONG:
+            case TangoConst.Tango_DEV_LONG64:
+            case TangoConst.Tango_DEV_ULONG64:
             case TangoConst.Tango_DEV_FLOAT:
             case TangoConst.Tango_DEV_DOUBLE:
               add(new JDEntityNode(JDDeviceTree.NODE_ATTRIBUTE, devName, "[number image]", ai[i].name));
