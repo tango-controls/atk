@@ -387,9 +387,10 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
     synchronized (this) {
       this.showDerivative = show;
-      if(show) buildDerivative();
+      buildDerivative();
+      buildImage();
     }
-
+    repaint();
   }
 
   /**
@@ -1567,14 +1568,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   }
 
   private void applyDerivative() {
-
-    synchronized (this) {
-      showDerivative = derivativeCheck.isSelected();
-      buildDerivative();
-      buildImage();
-    }
-    repaint();
-
+    setShowDerivative(derivativeCheck.isSelected());
   }
 
   private void applyAutoScale() {
