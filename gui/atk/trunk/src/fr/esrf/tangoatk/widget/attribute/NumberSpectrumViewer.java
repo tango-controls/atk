@@ -124,6 +124,13 @@ public class NumberSpectrumViewer extends AdvancedJLChart
   /* Bean Property stuff */
 
   /**
+   * Returns the dataview which contains plotted data
+   */
+  public JLDataView getDataView() {
+    return dvy;
+  }
+
+  /**
    * Gets if the viewer should manage the X axis according to a min and max value.
    */
   public boolean getManageXaxis()
