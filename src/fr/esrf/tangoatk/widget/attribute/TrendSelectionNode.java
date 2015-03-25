@@ -1103,7 +1103,7 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
 
   public void errorChange(ErrorEvent evt) {
 
-    if (model == null)
+    if (!hasModel())
       return;
 
     // Add data to the dataView
