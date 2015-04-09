@@ -680,7 +680,7 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	      else
 		 nsLabel.setVisible(false);
 	      nsLabel.setModel(ins);
-		      
+
 	      if (insHasValueList)
 	      {
         	   comboSetter = new NumberScalarComboEditor();
@@ -690,15 +690,13 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 		   if (ins.isWritable())
 		   {
 		      comboSetter.setNumberModel(ins);
-		      if (setterVisible)
-        		 comboSetter.setVisible(true);
-		      else
-			 comboSetter.setVisible(false);
+        	      comboSetter.setVisible(setterVisible);
+                      setter = comboSetter;
 		   }
 		   else
-		      comboSetter.setVisible(false);
-	           nsSetters.add(comboSetter);
-		   setter = comboSetter;
+		      setter = null;
+                    
+                   nsSetters.add(setter);
 	      }
 	      else // NumberScalar has no possibleValues list
 	      {
@@ -707,16 +705,14 @@ public class NumberScalarListViewer extends javax.swing.JPanel
         	   wheelSetter.setBackground(getBackground());
 		   if (ins.isWritable())
 		   {
-		      wheelSetter.setModel(ins);
-		      if (setterVisible)
-        		 wheelSetter.setVisible(true);
-		      else
-			 wheelSetter.setVisible(false);
-		   }
-		   else
-		      wheelSetter.setVisible(false);
-	           nsSetters.add(wheelSetter);
-		   setter = wheelSetter;
+		       wheelSetter.setModel(ins);
+        	       wheelSetter.setVisible(setterVisible);
+                       setter = wheelSetter;
+		    }
+		    else
+		       setter = null;
+
+	            nsSetters.add(setter);
 	      }
 	 
               if (toolTipDisplay.equalsIgnoreCase(TOOLTIP_DISPLAY_ALL))
