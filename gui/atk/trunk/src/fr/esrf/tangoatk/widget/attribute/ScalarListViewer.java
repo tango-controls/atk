@@ -1048,34 +1048,46 @@ public class ScalarListViewer extends javax.swing.JPanel
         	    comboSetter.setFont(theFont);
         	    comboSetter.setBackground(getBackground());
 	            comboSetter.setUnitVisible(unitVisible);
-                    comboSetter.setEnabled(setterEnabled);
+//                    comboSetter.setEnabled(setterEnabled);
 		    if (ins.isWritable())
 		    {
 		       comboSetter.setNumberModel(ins);
         	       comboSetter.setVisible(setterVisible);
+                       comboSetter.setEnabled(setterEnabled);
+                       setter = comboSetter;
 		    }
 		    else
-		       comboSetter.setVisible(false);
-
-	            scalarSetters.add(comboSetter);
-		    setter = comboSetter;
+		       setter = null;
+                    
+                    scalarSetters.add(setter);
 		 }
 		 else
 		 {
          	    wheelSetter = new NumberScalarWheelEditor();
         	    wheelSetter.setFont(theFont);
         	    wheelSetter.setBackground(getBackground());
-                    wheelSetter.setEnabled(setterEnabled);
+//                    wheelSetter.setEnabled(setterEnabled);
+//		    if (ins.isWritable())
+//		    {
+//		       wheelSetter.setModel(ins);
+//        	       wheelSetter.setVisible(setterVisible);
+//		    }
+//		    else
+//		       wheelSetter.setVisible(false);
+//
+//	            scalarSetters.add(wheelSetter);
+//		    setter = wheelSetter;
 		    if (ins.isWritable())
 		    {
 		       wheelSetter.setModel(ins);
         	       wheelSetter.setVisible(setterVisible);
+                       wheelSetter.setEnabled(setterEnabled);
+                       setter = wheelSetter;
 		    }
 		    else
-		       wheelSetter.setVisible(false);
+		       setter = null;
 
-	            scalarSetters.add(wheelSetter);
-		    setter = wheelSetter;
+	            scalarSetters.add(setter);
 		 }
 	      }
 	      else
