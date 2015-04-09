@@ -642,6 +642,9 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	JButton                         propertyButton=null;
 	
 	int                             arrowHeight=0;
+	int                             maxRowElementHeight;
+	int                             currH;
+	int                             hMargin;
 	boolean                         insHasValueList;
 
 
@@ -762,13 +765,27 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	      
 	      viewer.addTextListener(this);
 
-              // Increase the height of viewers to the height of setters
-	      arrowHeight = (setter.getPreferredSize().height - viewer.getPreferredSize().height)/2;
-	      if (arrowHeight > 0)
-	         viewer.setMargin(
-		    new java.awt.Insets(arrowHeight+2, 5, arrowHeight+2, 5));
-
+	      // Compute the height of the "highest" element of the CURRENT row
+	      // apply vertical margin to the viewer and setters if needed
+	      maxRowElementHeight = 0;
+	      currH = nsLabel.getPreferredSize().height+4;
+	      if (currH > maxRowElementHeight)
+	         maxRowElementHeight = currH;
+		 
+	      currH = viewer.getPreferredSize().height+4;
+	      if (currH > maxRowElementHeight)
+	         maxRowElementHeight = currH;
 	      
+	      if (setter != null)
+	      {
+		 if (setter.isVisible())
+		 { 
+		    currH = setter.getPreferredSize().height+4;
+		    if (currH > maxRowElementHeight)
+	               maxRowElementHeight = currH;
+		 }
+	      }
+
 	      // Add all these viewers to the panel	      
               gridBagConstraints = new java.awt.GridBagConstraints();
               gridBagConstraints.gridx = 0;
@@ -784,12 +801,15 @@ public class NumberScalarListViewer extends javax.swing.JPanel
               gridBagConstraints.insets = new java.awt.Insets(1,2,1,1);
               add(viewer, gridBagConstraints);
 	      
-              gridBagConstraints = new java.awt.GridBagConstraints();
-              gridBagConstraints.gridx = 2;
-              gridBagConstraints.gridy = viewerRow;
-              gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-              gridBagConstraints.insets = new java.awt.Insets(1,1,1,1);
-              add(setter, gridBagConstraints);
+              if (setter != null)
+	      {
+                  gridBagConstraints = new java.awt.GridBagConstraints();
+                  gridBagConstraints.gridx = 2;
+                  gridBagConstraints.gridy = viewerRow;
+                  gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+                  gridBagConstraints.insets = new java.awt.Insets(1,1,1,1);
+                  add(setter, gridBagConstraints);
+              }
 	      
               gridBagConstraints = new java.awt.GridBagConstraints();
               gridBagConstraints.gridx = 3;
@@ -803,6 +823,24 @@ public class NumberScalarListViewer extends javax.swing.JPanel
 	      nsLabels.add(nsLabel);
 	      nsViewers.add(viewer);
 	      nsPropButtons.add(propertyButton);
+	      
+	      // Apply Vertical Margins if needed
+
+	      if (viewer instanceof SimpleScalarViewer)
+	      {
+	          SimpleScalarViewer  sv = (SimpleScalarViewer) viewer;
+		  currH = viewer.getPreferredSize().height;
+		  if (currH < maxRowElementHeight)
+	             hMargin = (maxRowElementHeight - currH) / 2;
+		  else
+		     hMargin = 0;
+		  java.awt.Insets  marge = sv.getMargin();
+		  marge.top = marge.top + hMargin;
+		  marge.bottom = marge.bottom + hMargin;
+		  marge.left = marge.left+2;
+		  marge.right = marge.right+2;
+		  sv.setMargin(marge);
+	      }
 	      
 	      viewerRow++;
 	   }

@@ -1048,7 +1048,6 @@ public class ScalarListViewer extends javax.swing.JPanel
         	    comboSetter.setFont(theFont);
         	    comboSetter.setBackground(getBackground());
 	            comboSetter.setUnitVisible(unitVisible);
-//                    comboSetter.setEnabled(setterEnabled);
 		    if (ins.isWritable())
 		    {
 		       comboSetter.setNumberModel(ins);
@@ -1066,17 +1065,6 @@ public class ScalarListViewer extends javax.swing.JPanel
          	    wheelSetter = new NumberScalarWheelEditor();
         	    wheelSetter.setFont(theFont);
         	    wheelSetter.setBackground(getBackground());
-//                    wheelSetter.setEnabled(setterEnabled);
-//		    if (ins.isWritable())
-//		    {
-//		       wheelSetter.setModel(ins);
-//        	       wheelSetter.setVisible(setterVisible);
-//		    }
-//		    else
-//		       wheelSetter.setVisible(false);
-//
-//	            scalarSetters.add(wheelSetter);
-//		    setter = wheelSetter;
 		    if (ins.isWritable())
 		    {
 		       wheelSetter.setModel(ins);
