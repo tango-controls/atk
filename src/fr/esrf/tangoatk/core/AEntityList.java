@@ -94,29 +94,23 @@ public abstract class AEntityList extends javax.swing.DefaultListModel
  * @see fr.esrf.tangoatk.core.IEntityList#refresh()
  */
   public void refresh() {
+
     IEntity ie = null;
     long t0 = System.currentTimeMillis();
 
     trace(DeviceFactory.TRACE_REFRESHER, "AEntityList.refresh()  ", t0);
     for (int i = 0; i < size(); i++) {
       ie = (IEntity) get(i);
-      if (!(ie.getDevice().doesEvent())) {
-        //System.out.println("AEntityList.refresh() : "+ie.getName()+" device event incompatible");
-        trace(DeviceFactory.TRACE_REFRESHER, "AEntityList.refresh() : device is not event compatible; will call refresh for " + ie.getName(), t0);
-        ie.refresh();
-      } else // device is event compatible
-      {
-        //System.out.println("AEntityList.refresh() : "+ie.getName()+" device event compatible");
-        if (ie instanceof IAttribute) {
-          IAttribute att = (IAttribute) ie;
-          if (!att.hasEvents()) // subscribe event for the attribute failed at initialization
-          {
-            //System.out.println("AEntityList.refresh() : "+att.getName()+" has not events");
-            trace(DeviceFactory.TRACE_REFRESHER, "AEntityList.refresh() : attribute has not subscribed event; will call refresh for " + ie.getName(), t0);
-            ie.refresh(); // do polling instead of events!
-          }
-          //trace(DeviceFactory.TRACE_REFRESHER, "AEntityList.refresh() : attribute has events; do nothing for "+ie.getName(), t0);
+      if (ie instanceof IAttribute) {
+        IAttribute att = (IAttribute) ie;
+        if (!att.hasEvents()) {
+          // subscribe event for the attribute failed at initialization
+          trace(DeviceFactory.TRACE_REFRESHER, "AEntityList.refresh() : attribute has not subscribed event; will call refresh for " + ie.getName(), t0);
+          // do polling instead of events!
+          ie.refresh();
         }
+      } else {
+        ie.refresh();
       }
     }
 
