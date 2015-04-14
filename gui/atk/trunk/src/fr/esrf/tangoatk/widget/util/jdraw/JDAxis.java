@@ -93,7 +93,7 @@ public class JDAxis extends JDRectangular {
 
   // Private vars
   private int     fAscent;
-  private JLAxis  theAxis;
+  protected JLAxis  theAxis;
 
   // -----------------------------------------------------------
   // Construction
