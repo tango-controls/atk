@@ -36,7 +36,7 @@ import fr.esrf.tangoatk.core.attribute.AttributeFactory;
 public class AttributeList extends AEntityList {
 
   protected Vector<DeviceItem> deviceList = new Vector<DeviceItem> ();
-  protected boolean forceRefresh = false;
+  protected boolean forceRefresh = true;
 
   // Centralizing variables to reduce memory consumption.
   protected DeviceAttribute[] att = null;
