@@ -439,6 +439,19 @@ public class WheelSwitch extends JComponent {
       String oldFormat = format;
       double oldValue = value;
 
+      String errStr = (attName==null)?"WheelSwitch: Invalid format \"" + aformat + "\"":
+          "WheelSwitch: Invalid format \"" + aformat + "\" for " + attName;
+      errStr += ": use %x.yf, %x.yF, %x.ye, %x.yE, %xd or %xD or %xX";
+
+      int pIdx = aformat.indexOf("%");
+      if(pIdx<0) {
+        System.out.println(errStr);
+        System.out.println("==> WheelSwitch: format used instead: " + format);
+        return;
+      } else {
+        aformat = aformat.substring(pIdx,aformat.length());
+      }
+
       if (aformat.equalsIgnoreCase("%d")) {
         // Default to %5d
         aformat = "%5d";
@@ -456,10 +469,6 @@ public class WheelSwitch extends JComponent {
 
       // format validation
       format = aformat;
-
-      String errStr = (attName==null)?"WheelSwitch: Invalid format \"" + format + "\"":
-                                      "WheelSwitch: Invalid format \"" + format + "\" for " + attName;
-      errStr += ": use %x.yf, %x.yF, %x.ye, %x.yE, %xd or %xD or %xX";
 
       if (!isGoodFormat()) {
         System.out.println(errStr);
@@ -1340,7 +1349,7 @@ public class WheelSwitch extends JComponent {
         });
 
         //hex format
-        ws4.setFormat("%7X");
+        ws4.setFormat("0x%7X");
         ws4.setButtonColor(new Color(100, 200, 160));
         ws4.setValue(0xA023);
         ws4.setFont(new Font("Lucida Bright", Font.BOLD, 12));
