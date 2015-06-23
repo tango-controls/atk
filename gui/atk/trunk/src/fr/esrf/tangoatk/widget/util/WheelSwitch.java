@@ -45,9 +45,6 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -85,6 +82,7 @@ public class WheelSwitch extends JComponent {
     private int selButton = 0;
     private Color buttonBackground;
     private Color selectionColor;
+    private String valueFormatted = null;
 
     /**
      * WheelSwitch constructor.
@@ -217,6 +215,7 @@ public class WheelSwitch extends JComponent {
      *            New WheelSwitch value.
      */
     public void setValue(double v) {
+
         double dval1 = 0;
         double dval2 = 0;
         value = v;
@@ -235,7 +234,10 @@ public class WheelSwitch extends JComponent {
                 if (isGoodFormat())
                 {
                     String valFormated = ATKFormat.format(format, newValue);
-                    tempDouble = Double.valueOf(valFormated);
+                    if(!isHexFormat(format))
+                      tempDouble = Double.valueOf(valFormated);
+                    else
+                      tempDouble = (double)Integer.parseInt(valFormated,16);
                 }
                 else
                 {
@@ -432,104 +434,106 @@ public class WheelSwitch extends JComponent {
      * @param aformat
      *            New wheelswitch format.
      */
-    public void setFormat(String aformat,String attName) {
-        String oldFormat = format;
-        double oldValue = value;
+    public void setFormat(String aformat, String attName) {
 
-        if(aformat.equals("%d")) {
-          // Default to %5d
-          aformat = "%5d";
-        }
+      String oldFormat = format;
+      double oldValue = value;
 
-        // format validation
-        format = aformat;
-        if (!isGoodFormat())
-        {
-            if( attName!=null ) {
-              System.out.println("WheelSwitch: Invalid format \"" + format + "\" for " + attName + ": use %x.yf, %x.yF, %x.ye, %x.yE, %xd or %xD");
-            } else {
-              System.out.println("WheelSwitch: Invalid format \"" + format + "\": use %x.yf, %x.yF, %x.ye, %x.yE, %xd or %xD");
-            }
-            // comment next lines if you don't want to format the value
-            format = oldFormat;
-            System.out.println("==> WheelSwitch: format used instead: " + format);
-            return;
-        }
+      if (aformat.equalsIgnoreCase("%d")) {
+        // Default to %5d
+        aformat = "%5d";
+      }
+
+      if (aformat.equals("%x")) {
+        // Default to %4x
+        aformat = "%4x";
+      }
+
+      if (aformat.equals("%X")) {
+        // Default to %4X
+        aformat = "%4X";
+      }
+
+      // format validation
+      format = aformat;
+
+      String errStr = (attName==null)?"WheelSwitch: Invalid format \"" + format + "\"":
+                                      "WheelSwitch: Invalid format \"" + format + "\" for " + attName;
+      errStr += ": use %x.yf, %x.yF, %x.ye, %x.yE, %xd or %xD or %xX";
+
+      if (!isGoodFormat()) {
+        System.out.println(errStr);
+        // comment next lines if you don't want to format the value
+        format = oldFormat;
+        System.out.println("==> WheelSwitch: format used instead: " + format);
+        return;
+      }
+
+      if(!isHexFormat(format))
         format = format.toLowerCase(); // to associate %x.ye with %x.yE
 
-        String f = format.replace('.', '_');
-        f = f.replace('%', '0');
-        f = f.substring(0, f.length() - 1);
+      String f = format.replace('.', '_');
+      f = f.replace('%', '0');
+      f = f.substring(0, f.length() - 1);
 
-        String[] s = f.split("_");
+      String[] s = f.split("_");
 
-        try {
+      try {
 
-            if (s.length == 2) {
-                int a = Integer.parseInt(s[0]);
-                int b = Integer.parseInt(s[1]);
+        if (s.length == 2) {
+          int a = Integer.parseInt(s[0]);
+          int b = Integer.parseInt(s[1]);
 
-                // scientific format
-                if (format.indexOf('e') != -1) {
-                    String temp = ATKFormat.format(format, value);
-                    if (temp != null) {
-                        reformat(temp, a-b, b);
-                    }
-                    else {
-                        // should never happen (due to isGoodFormat() test)
-                        if( attName!=null ) {
-                          System.out.println("WheelSwitch: Invalid format \"" + format + "\" for " + attName + ": use %x.yf, %x.yF, %x.ye, %x.yE, %xd or %xD");
-                        } else {
-                          System.out.println("WheelSwitch: Invalid format \"" + format + "\": use %x.yf, %x.yF, %x.ye, %x.yE, %xd or %xD");
-                        }
-                        format = oldFormat;
-                        value = oldValue;
-                    }
-                }
-                // float
-                else {
-                    setPrecision(a - b, b, 0);
-                }
-            }
-            // integer
-            else if (s.length == 1) {
-                int a = Integer.parseInt(s[0]);
-                setPrecision(a, 0, 0);
-            }
-
-        }
-        catch (NumberFormatException n) {
-            // should never happen (due to isGoodFormat() test)
-            if( attName!=null ) {
-              System.out.println("WheelSwitch: Invalid format \"" + format + "\" for " + attName + ": use %x.yf, %x.yF, %x.ye, %x.yE, %xd or %xD");
+          // scientific format
+          if (format.indexOf('e') != -1) {
+            String temp = ATKFormat.format(format, value);
+            if (temp != null) {
+              reformat(temp, a - b, b);
             } else {
-              System.out.println("WheelSwitch: Invalid format \"" + format + "\": use %x.yf, %x.yF, %x.ye, %x.yE, %xd or %xD");
+              // should never happen (due to isGoodFormat() test)
+              System.out.println(errStr);
+              format = oldFormat;
+              value = oldValue;
             }
-            format = oldFormat;
-            value = oldValue;
+          }
+          // float
+          else {
+            setPrecision(a - b, b, 0);
+          }
         }
+        // integer
+        else if (s.length == 1) {
+          int a = Integer.parseInt(s[0]);
+          setPrecision(a, 0, 0);
+        }
+
+      } catch (NumberFormatException n) {
+        // should never happen (due to isGoodFormat() test)
+        System.out.println(errStr);
+        format = oldFormat;
+        value = oldValue;
+      }
 
     }
 
-    /*
-     * This function is necessary to recalculate the number of digits for scientific format
-     */
-    private void reformat(String valFormated, int integerPart, int decimalPart) {
-        String valueFormated = valFormated.toLowerCase();
-        int e = valueFormated.indexOf('e');
-        int plus = valueFormated.lastIndexOf('+');
-        int moins = valueFormated.lastIndexOf('-');
-        if (plus > e) {
-            e = plus;
-        }
-        else if (moins > e) {
-            e = moins;
-        }
-        valueFormated = valueFormated.substring(e+1, valueFormated.length());
-        setPrecision(integerPart, decimalPart, valueFormated.length());
+  /*
+   * This function is necessary to recalculate the number of digits for scientific format
+   */
+  private void reformat(String valFormated, int integerPart, int decimalPart) {
+    String valueFormated = valFormated.toLowerCase();
+    int e = valueFormated.indexOf('e');
+    int plus = valueFormated.lastIndexOf('+');
+    int moins = valueFormated.lastIndexOf('-');
+    if (plus > e) {
+      e = plus;
+    } else if (moins > e) {
+      e = moins;
     }
-    
-    /**
+    valueFormated = valueFormated.substring(e + 1, valueFormated.length());
+    setPrecision(integerPart, decimalPart, valueFormated.length());
+  }
+
+  /**
      * Set the precision of this wheelswitch.
      * 
      * @param inb
@@ -577,8 +581,13 @@ public class WheelSwitch extends JComponent {
         }
 
         if (expNumber == 0) {
+          if(!isHexFormat(format)) {
             maxValue =  Math.pow(10, intNumber);
             minValue = -Math.pow(10, intNumber);
+          } else {
+            maxValue =  Math.pow(16, intNumber);
+            minValue = -Math.pow(16, intNumber);
+          }
         } else {
             maxValue =  Double.MAX_VALUE;
             minValue = -Double.MAX_VALUE;
@@ -695,7 +704,7 @@ public class WheelSwitch extends JComponent {
         if (dz == null) {
 
             String[] charSet = { "0", "1", "2", "3", "4", "5", "6", "7", "8",
-                    "9", "E", "+", "-", " " };
+                    "9", "E", "+", "-", " " , "A" , "B" , "C" , "D" , "E" , "F" };
 
             for (i = 0; i < charSet.length; i++) {
 
@@ -707,7 +716,7 @@ public class WheelSwitch extends JComponent {
 
             }
 
-            max_height = (int) ATKGraphicsUtils.getLineMetrics("0123456789E+- ",
+            max_height = (int) ATKGraphicsUtils.getLineMetrics("0123456789E+- ABCDEF",
                     getFont()).getAscent() + 1;
             dz = new Dimension(max_width, max_height);
 
@@ -721,200 +730,185 @@ public class WheelSwitch extends JComponent {
         return Math.rint(d * r) / r;
     }
 
-  //Return the digit at the specified position
-  private String getDigit(int pos) {
+  private void computeValueFormatted() {
 
     if (Double.isNaN(value)) {
-      return "X";
+      valueFormatted = "";
+      return;
     }
 
-    String valueFormated;
     if (isGoodFormat()) {
-      valueFormated = ATKFormat.format(format, value);
-    } else {
-      valueFormated = Double.toString(value);
-    }
-    if (valueFormated == null) {
-      return "X";
-    } else {
-      valueFormated = valueFormated.toLowerCase();
-      valueFormated = valueFormated.replaceAll("\\-", "");
-      valueFormated = valueFormated.replaceAll("\\+", "");
-      valueFormated = valueFormated.replaceAll(" ", "");
-      String intPart = "";
-
-      if (format.indexOf('d') != -1) {
-        intPart = valueFormated;
-      } else {
-        int idx = valueFormated.indexOf(decimalSeparator);
-        if (idx >= 0) {
-          intPart = valueFormated.substring(0, idx);
+      if(isHexFormat(format)) {
+        if(value<0) {
+          valueFormatted = "-"+ATKFormat.format(format, -value);
         } else {
-          intPart = valueFormated;
+          valueFormatted = ATKFormat.format(format, value);
         }
-      }
-
-      if (pos < intNumber) {
-
-        // integer part
-        if (intPart.length() < intNumber) {
-          if (pos < intNumber - intPart.length()) {
-            return "0";
-          } else {
-            return intPart.substring(pos + intPart.length() - intNumber, pos + 1 + intPart.length() - intNumber);
-          }
-        } else if (intPart.length() == intNumber) {
-          return intPart.substring(pos, pos + 1);
-        } else {
-          // Here, intPart.length() > intNumber
-          int over = intPart.length() - intNumber;
-          return intPart.substring(pos + over, pos + over + 1);
-        }
-
-      } else if (pos < intNumber + fracNumber) {
-
-        // Decimal part
-        return valueFormated.substring(pos + 1 + intPart.length() - intNumber, pos + 2 + intPart.length() - intNumber);
-
-      } else {
-
-        // Exponential part
-        int e = valueFormated.indexOf('e');
-        return valueFormated.substring(pos + e + 1 - intNumber - fracNumber, pos + e + 2 - intNumber - fracNumber);
-
-      }
+      } else
+        valueFormatted = ATKFormat.format(format, value);
+    } else {
+      valueFormatted = Double.toString(value);
     }
-    /*double tmp = value;
-   if (tmp < 0) {
-       tmp = -tmp;
-   }
 
-   if (pos >= 0) {
-       // Integer part
-       tmp = tmp / Math.pow(10.0, pos);
-   }
-   else {
+    if(!isHexFormat(format))
+      valueFormatted = valueFormatted.toLowerCase();
 
-       // Decimal part
-       // Round to nearest int
-       // Value must be rounded to desirec prec see near()
-       tmp += (0.5 / Math.pow(10.0, fracNumber));
-       int f = (int) tmp;
-       tmp = tmp - f;
-       tmp = tmp * Math.pow(10.0, -pos);
-
-   }
-
-   if (tmp > 1e9) {
-       int m = (int) (tmp / 1e7);
-       tmp = tmp - m * 1e7;
-   }
-   Integer is = new Integer((int) (tmp) % 10);
-   return is.toString();*/
+    valueFormatted = valueFormatted.replaceAll("\\-", "");
+    valueFormatted = valueFormatted.replaceAll("\\+", "");
+    valueFormatted = valueFormatted.replaceAll(" ", "");
 
   }
 
-  // Paint the component
-    protected void paintComponent(Graphics g) {
+  //Return the digit at the specified position
+  private char getDigit(int pos) {
 
-        int w = getWidth();
-        int h = getHeight();
+    if (Double.isNaN(value))
+      return 'X';
 
-        Graphics2D g2 = (Graphics2D) g;
-        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
-                RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+    String intPart = "";
 
-        g.setPaintMode();
+    if (format.indexOf('d') != -1 || isHexFormat(format) ) {
+      intPart = valueFormatted;
+    } else {
+      int idx = valueFormatted.indexOf(decimalSeparator);
+      if (idx >= 0) {
+        intPart = valueFormatted.substring(0, idx);
+      } else {
+        intPart = valueFormatted;
+      }
+    }
 
-        computeDigitSize();
+    if (pos < intNumber) {
 
-        if (isOpaque()) {
-            g.setColor(getBackground());
-            g.fillRect(0, 0, w, h);
+      // integer part
+      if (intPart.length() < intNumber) {
+        if (pos < intNumber - intPart.length()) {
+          return ' ';
+        } else {
+          return intPart.charAt(pos + intPart.length() - intNumber);
+          //return intPart.substring(pos + intPart.length() - intNumber, pos + 1 + intPart.length() - intNumber);
         }
+      } else if (intPart.length() == intNumber) {
+        return intPart.charAt(pos);
+      } else {
+        // Here, intPart.length() > intNumber
+        int over = intPart.length() - intNumber;
+        return intPart.charAt(pos + over);
+      }
 
-        g.setColor(getForeground());
-        g.setFont(getFont());
+    } else if (pos < intNumber + fracNumber) {
 
-        if (editMode) {
+      // Decimal part
+      return valueFormatted.charAt(pos + 1 + intPart.length() - intNumber);
 
-            FontMetrics fm = getFontMetrics(getFont());
-            Rectangle2D b = fm.getStringBounds(editValue, g);
-            int xpos = (w - (int) b.getWidth()) / 2;
-            g.drawString(editValue, xpos, off_y + dz.width + dz.height - 2);
+    } else {
 
-        }
-        else {
-
-            int ypos;
-            if(editable) {
-              ypos = off_y + dz.width + dz.height - 2;
-            } else {
-              ypos = off_y + dz.height - 2;
-            }
-            if (value < 0.0) {
-                g.drawString("-", off_x, ypos);
-            }
-            if (fracNumber > 0) {
-                g.drawString(".", off_x + (intNumber + 1) * dz.width + 2, ypos);
-            }
-            if (expNumber > 0) {
-                g.drawString("E", off_x + (intNumber + fracNumber + 2)
-                        * dz.width + 2, ypos);
-                String ePart = "" + getExpPart();
-                if (ePart != null) {
-                    String s = ePart.substring(0, 1);
-                    if (!"-".equals(s)) {
-                        s = "+";
-                    }
-                    g.drawString(s, off_x + (intNumber + fracNumber + 3)
-                            * dz.width + 2, ypos);
-                }
-            }
-
-            for (int i = 0; i < nbButton; i++) {
-                int xpos;
-                if (i < intNumber) {
-                    xpos = off_x + (i + 1) * dz.width;
-                }
-                else if (i < intNumber + fracNumber) {
-                    xpos = off_x + (i + 2) * dz.width;
-                }
-                else {
-                    xpos = off_x + (i + 4) * dz.width;
-                }
-
-                /*g.drawString(getDigit(intNumber - i - 1), xpos, off_y
-                        + dz.width + dz.height - 2);*/
-                g.drawString(getDigit(i), xpos, ypos);
-            }
-
-        }
-
-        // Draw the focus
-        if (hasFocus() && editable) {
-
-            Insets b;
-            if (hasBorder())
-                b = getInsets();
-            else
-                b = new Insets(1, 1, 1, 1);
-
-            g.setColor(defaultSelectionColor);
-            g.drawLine(b.left + 1, b.top + 1, w - b.right - 1, b.top + 1);
-            g.drawLine(w - b.right - 1, b.top + 1, w - b.right - 1, h
-                    - b.bottom - 1);
-            g.drawLine(w - b.right - 1, h - b.bottom - 1, b.left + 1, h
-                    - b.bottom - 1);
-            g.drawLine(b.left + 1, h - b.bottom - 1, b.left + 1, b.top + 1);
-
-        }
+      // Exponential part
+      int e = valueFormatted.indexOf('e');
+      return valueFormatted.charAt(pos + e + 1 - intNumber - fracNumber);
 
     }
 
-    /**
+  }
+
+
+  // Paint the component
+  protected void paintComponent(Graphics g) {
+
+    int w = getWidth();
+    int h = getHeight();
+
+    Graphics2D g2 = (Graphics2D) g;
+    g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+        RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
+        RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+
+    g.setPaintMode();
+
+    computeDigitSize();
+
+    if (isOpaque()) {
+      g.setColor(getBackground());
+      g.fillRect(0, 0, w, h);
+    }
+
+    g.setColor(getForeground());
+    g.setFont(getFont());
+
+    if (editMode) {
+
+      FontMetrics fm = getFontMetrics(getFont());
+      Rectangle2D b = fm.getStringBounds(editValue, g);
+      int xpos = (w - (int) b.getWidth()) / 2;
+      g.drawString(editValue, xpos, off_y + dz.width + dz.height - 2);
+
+    } else {
+
+      int ypos;
+      if (editable) {
+        ypos = off_y + dz.width + dz.height - 2;
+      } else {
+        ypos = off_y + dz.height - 2;
+      }
+      if (value < 0.0) {
+        g.drawString("-", off_x, ypos);
+      }
+      if (fracNumber > 0) {
+        g.drawString(".", off_x + (intNumber + 1) * dz.width + 2, ypos);
+      }
+      if (expNumber > 0) {
+        g.drawString("E", off_x + (intNumber + fracNumber + 2)
+            * dz.width + 2, ypos);
+        String ePart = "" + getExpPart();
+        String s = ePart.substring(0, 1);
+        if (!"-".equals(s)) {
+          s = "+";
+        }
+        g.drawString(s, off_x + (intNumber + fracNumber + 3)
+            * dz.width + 2, ypos);
+      }
+
+      computeValueFormatted();
+      char[] CH = new char[1];
+
+      for (int i = 0; i < nbButton; i++) {
+        int xpos;
+        if (i < intNumber) {
+          xpos = off_x + (i + 1) * dz.width;
+        } else if (i < intNumber + fracNumber) {
+          xpos = off_x + (i + 2) * dz.width;
+        } else {
+          xpos = off_x + (i + 4) * dz.width;
+        }
+        CH[0] = getDigit(i);
+        g.drawString(new String(CH), xpos, ypos);
+      }
+
+    }
+
+    // Draw the focus
+    if (hasFocus() && editable) {
+
+      Insets b;
+      if (hasBorder())
+        b = getInsets();
+      else
+        b = new Insets(1, 1, 1, 1);
+
+      g.setColor(defaultSelectionColor);
+      g.drawLine(b.left + 1, b.top + 1, w - b.right - 1, b.top + 1);
+      g.drawLine(w - b.right - 1, b.top + 1, w - b.right - 1, h
+          - b.bottom - 1);
+      g.drawLine(w - b.right - 1, h - b.bottom - 1, b.left + 1, h
+          - b.bottom - 1);
+      g.drawLine(b.left + 1, h - b.bottom - 1, b.left + 1, b.top + 1);
+
+    }
+
+  }
+
+  /**
      * Add the specified WheelSwitch Listener.
      * 
      * @param l
@@ -1010,11 +1004,11 @@ public class WheelSwitch extends JComponent {
         }
 
         if (idx < intNumber + fracNumber) {
-            dval1 = incrementeValue(dval1, idx, intNumber);
+            dval1 = incValue(dval1, idx, intNumber);
         }
         else {
             int idx2 = idx - intNumber - fracNumber;
-            dval2 = incrementeValue(dval2, idx2, expNumber);
+            dval2 = incValue(dval2, idx2, expNumber);
         }
 
 /*        System.out.println("near(dval1) : " + near(dval1));
@@ -1037,17 +1031,31 @@ public class WheelSwitch extends JComponent {
         updateButtonVisibility();
     }
 
-    private double incrementeValue(double val, int idx, int ref) {
-        double newValue = val + Math.pow(10, (ref - idx - 1));
-        return newValue;
-    }
+  private double incValue(double val, int idx, int ref) {
 
-    private double decrementeValue(double val, int idx, int ref) {
-        double newValue = val - Math.pow(10, (ref - idx - 1));
-        return newValue;
-    }
+    double newValue;
 
-    // Decrease value by 10^diz(idx)
+    if (!isHexFormat(format))
+      newValue = val + Math.pow(10, (ref - idx - 1));
+    else
+      newValue = val + Math.pow(16, (ref - idx - 1));
+
+    return newValue;
+  }
+
+  private double decValue(double val, int idx, int ref) {
+
+    double newValue;
+
+    if (!isHexFormat(format))
+      newValue = val - Math.pow(10, (ref - idx - 1));
+    else
+      newValue = val - Math.pow(16, (ref - idx - 1));
+
+    return newValue;
+  }
+
+  // Decrease value by 10^diz(idx)
     private void decreaseValue(int idx) {
 
         double dval1 = 0;
@@ -1061,14 +1069,14 @@ public class WheelSwitch extends JComponent {
             dval1 = value;
         }
         if (idx < intNumber + fracNumber) {
-            dval1 = decrementeValue(dval1, idx, intNumber);
+            dval1 = decValue(dval1, idx, intNumber);
         }
         else {
             int idx2 = idx - (intNumber + fracNumber);
-            dval2 = decrementeValue(dval2, idx2, expNumber);//PROBLEME : 1-->0.99999
+            dval2 = decValue(dval2, idx2, expNumber);//PROBLEME : 1-->0.99999
         }
 
-/*        System.out.println("near(dval1) : " + near(dval1));
+/*      System.out.println("near(dval1) : " + near(dval1));
         System.out.println("dval2 : " + dval2);
         System.out.println("Math.pow(10, dval2) : " + Math.pow(10, dval2));*/
         double newValue = near(dval1) * Math.pow(10, dval2);
@@ -1099,6 +1107,7 @@ public class WheelSwitch extends JComponent {
     private void processKey(KeyEvent e) {
 
         char c = e.getKeyChar();
+        c = Character.toUpperCase(c);
         int code = e.getKeyCode();
 
         // Button selection
@@ -1129,7 +1138,8 @@ public class WheelSwitch extends JComponent {
             }
         }
 
-        if ((c >= '0' && c <= '9') || c == decimalSeparator || c == '-') {
+        if ((c >= '0' && c <= '9') || c == decimalSeparator || c == '-' ||
+            (isHexFormat(format) && c>='A' && c<='F')) {
             editValue += c;
             editMode = true;
             repaint();
@@ -1160,7 +1170,15 @@ public class WheelSwitch extends JComponent {
         if (code == KeyEvent.VK_ENTER) {
             if (editMode) {
                 try {
-                    double newValue = Double.parseDouble(editValue);
+
+                    double newValue;
+
+                    if(isHexFormat(format)) {
+                      newValue = (double)Integer.parseInt(editValue,16);
+                    } else {
+                      newValue = Double.parseDouble(editValue);
+                    }
+
                     if ((newValue <= maxValue) && (newValue >= minValue)) {
                         value = newValue; // For a value entered manually, we don't want to round it
                         updateButtonVisibility();
@@ -1203,13 +1221,13 @@ public class WheelSwitch extends JComponent {
       // Update button visibility
       if(editable) {
 
-        // Dont affect button in scientific format
+        // Don't affect button in scientific format
         if (format.indexOf('e') == -1) {
 
           for(int i=0;i<nbButton;i++) {
-            val = incrementeValue(value, i, intNumber);
+            val = incValue(value, i, intNumber);
             buttons_up[i].setVisible(val<=maxValue);
-            val = decrementeValue(value, i, intNumber);
+            val = decValue(value, i, intNumber);
             buttons_down[i].setVisible(val>=minValue);
           }
 
@@ -1217,6 +1235,10 @@ public class WheelSwitch extends JComponent {
 
       }
 
+    }
+
+    private boolean isHexFormat(String f) {
+      return f.indexOf('x')!=-1 || f.indexOf('X')!=-1;
     }
 
     // Place the components
@@ -1317,10 +1339,10 @@ public class WheelSwitch extends JComponent {
             }
         });
 
-        //bad format
-        ws4.setFormat("%6.3s");
+        //hex format
+        ws4.setFormat("%7X");
         ws4.setButtonColor(new Color(100, 200, 160));
-        ws4.setValue(28.1);
+        ws4.setValue(0xA023);
         ws4.setFont(new Font("Lucida Bright", Font.BOLD, 12));
         ws4.setBorder(BorderFactory.createEtchedBorder());
         ws4.addWheelSwitchListener(new IWheelSwitchListener() {
@@ -1369,7 +1391,6 @@ public class WheelSwitch extends JComponent {
             }
         });
 
-        //f.getContentPane().setLayout(new GridLayout(3,1));
         f.getContentPane().setBackground(Color.white);
         f.getContentPane().setLayout(new FlowLayout());
         f.getContentPane().add(ws1);
