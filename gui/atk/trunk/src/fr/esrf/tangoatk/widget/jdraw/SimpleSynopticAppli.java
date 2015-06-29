@@ -28,11 +28,19 @@
 
 package fr.esrf.tangoatk.widget.jdraw;
 
+import fr.esrf.tangoatk.core.AttributeList;
+import fr.esrf.tangoatk.core.AttributePolledList;
+import fr.esrf.tangoatk.core.ConnectionException;
+import fr.esrf.tangoatk.core.IDevStateScalar;
+import fr.esrf.tangoatk.core.IEntity;
+import fr.esrf.tangoatk.core.IEntityFilter;
+import fr.esrf.tangoatk.core.INumberScalar;
+import fr.esrf.tangoatk.widget.attribute.Trend;
 import java.io.*;
 import java.util.*;
-import fr.esrf.tangoatk.widget.util.Splash;
 import fr.esrf.tangoatk.widget.util.ErrorHistory;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
+import fr.esrf.tangoatk.widget.util.SplashTimer;
 import fr.esrf.tangoatk.widget.util.jdraw.JDFileFilter;
 
 import javax.swing.*;
@@ -43,10 +51,15 @@ import javax.swing.*;
  */
 public class SimpleSynopticAppli extends javax.swing.JFrame {
 
-    private  final Splash        splash = new Splash();
+    private final SplashTimer       splash = new SplashTimer(10000, 200);  // progress during 10s with steps of 200ms
+    
     private  ErrorHistory        errorHistory;
     private  boolean	         standAlone = false;
     private  boolean             fileLoaded = false;
+    
+    private  AttributePolledList  numberAndState_scalar_atts; /* used in the global trend */
+    private  JFrame               trendFrame;
+    private  Trend                globalTrend=null;
 
     /** Creates new form SimpleSynopticAppli */
     public SimpleSynopticAppli()
@@ -55,10 +68,43 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
 	standAlone = false;
         errorHistory = new ErrorHistory();
 	splash.setTitle("SimpleSynopticAppli  ");
-	splash.setCopyright("(c) ESRF 2003-2009");
+	splash.setCopyright("(c) ESRF 2003-2015");
 	splash.setMessage("Loading synoptic ...");
 	splash.initProgress();
-        splash.setMaxProgress(5);
+        splash.setVisible(true);
+        
+        
+        numberAndState_scalar_atts = new fr.esrf.tangoatk.core.AttributePolledList();
+        numberAndState_scalar_atts.setFilter( new IEntityFilter () 
+                         {
+                            public boolean keep(IEntity entity)
+			    {
+                               if (    (entity instanceof INumberScalar)
+			            || (entity instanceof IDevStateScalar) )
+			       {
+                                 return true;
+                               }
+                               return false;
+                            }
+                         });
+	
+        trendFrame = new JFrame();
+	javax.swing.JPanel jpanel = new javax.swing.JPanel();
+        trendFrame.getContentPane().add(jpanel, java.awt.BorderLayout.CENTER);
+	jpanel.setPreferredSize(new java.awt.Dimension(600, 300));
+	jpanel.setLayout(new java.awt.GridBagLayout());
+
+        java.awt.GridBagConstraints trendGbc;
+        trendGbc = new java.awt.GridBagConstraints();
+        trendGbc.gridx = 0;
+        trendGbc.gridy = 0;
+        trendGbc.fill = java.awt.GridBagConstraints.BOTH;
+        trendGbc.weightx = 1.0;
+        trendGbc.weighty = 1.0;
+        globalTrend = new Trend(trendFrame);
+	jpanel.add(globalTrend, trendGbc);
+	trendFrame.pack();
+        
         initComponents();
     }
     
@@ -68,7 +114,6 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
         try
         {
             tangoSynopHandler.setSynopticFileName(jdrawFullFileName);
-            splash.progress(4);
             splash.setMessage("Synoptic file loaded ...");
             tangoSynopHandler.setToolTipMode(TangoSynopticHandler.TOOL_TIP_NAME);
 	    tangoSynopHandler.setAutoZoom(true);
@@ -111,6 +156,7 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
             splash.setVisible(false);
 	    return;
         }
+        setTrendAttributeList();
         splash.setVisible(false);
 	
 	fileLoaded = true;
@@ -123,7 +169,23 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
     {
 	this(jdrawFullFileName);	
 	standAlone = stand;
-     }
+    }
+    
+    private void setTrendAttributeList()
+    {
+        AttributeList  attl = tangoSynopHandler.getAttributeList();
+        
+        for (int i=0; i<attl.getSize(); i++)
+        {
+            IEntity ie = (IEntity) attl.get(i);
+            try
+            {
+                numberAndState_scalar_atts.add(ie.getName());
+            } 
+            catch (ConnectionException ex) {}
+        }
+        globalTrend.setModel(numberAndState_scalar_atts);
+    }
     
     /** This method is called from within the constructor to
      * initialize the form.
@@ -139,6 +201,7 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
         fileJMenu = new javax.swing.JMenu();
         quitJMenuItem = new javax.swing.JMenuItem();
         viewMenu = new javax.swing.JMenu();
+        trendMenuItem = new javax.swing.JMenuItem();
         errHistMenuItem = new javax.swing.JMenuItem();
         diagtMenuItem = new javax.swing.JMenuItem();
 
@@ -194,6 +257,19 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
 
         viewMenu.setText("View");
 	
+	trendMenuItem.setText("Numeric & State Trend ");
+	trendMenuItem.addActionListener(
+	     new java.awt.event.ActionListener()
+	         {
+		    public void actionPerformed(java.awt.event.ActionEvent evt)
+		    {
+		       viewTrendActionPerformed(evt);
+		    }
+		 });
+	viewMenu.add(trendMenuItem);
+
+        viewMenu.add(errHistMenuItem);
+	
         errHistMenuItem.setText("Error History ...");
         errHistMenuItem.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -218,6 +294,12 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
         pack();
     }//GEN-END:initComponents
 
+    private void viewTrendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewTrendActionPerformed
+        // Add your handling code here:
+	fr.esrf.tangoatk.widget.util.ATKGraphicsUtils.centerFrame(getRootPane(), trendFrame);
+        trendFrame.setVisible(true);
+    }//GEN-LAST:event_viewTrendActionPerformed
+
     private void errHistMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_errHistMenuItemActionPerformed
         // TODO add your handling code here:
 	errorHistory.setVisible(true);        
@@ -240,6 +322,9 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
 	else
 	{
 	   tangoSynopHandler.getAttributeList().stopRefresher();
+
+           if (globalTrend != null)
+              globalTrend.clearModel();
 	   this.dispose();
 	}
     }
@@ -302,6 +387,7 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem trendMenuItem;
     private javax.swing.JMenuItem errHistMenuItem;
     private javax.swing.JMenuItem diagtMenuItem;
     private javax.swing.JMenu fileJMenu;
