@@ -57,6 +57,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Random;
 import java.util.Vector;
 import javax.imageio.ImageIO;
 import javax.swing.Box;
@@ -2681,7 +2682,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
       int tx = e.getX() - lastX;
       int ty = e.getY() - lastY;
       int dist = tx*tx + ty*ty;
-      if( dist>25 ) {
+      if( dist>100 ) {
         // We have move a bit, start translation
         setCursor(new Cursor(Cursor.HAND_CURSOR));
         translateDrag = true;
@@ -3298,6 +3299,22 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
   //****************************************
   // Debug stuff
 
+  static double[] ranges = { 0.1,0.15 , 0.35,0.4 , 0.5,0.57 , 0.8,0.9 };
+  public static boolean isInRange(double x,int NB) {
+
+    int nbRange = ranges.length / 2;
+    double xR = x / (double)NB;
+    for(int i=0;i<nbRange;i++) {
+      double sx = ranges[2*i];
+      double ex = ranges[2*i+1];
+      if(xR>=sx && xR<=ex)
+        return false;
+    }
+
+    return true;
+
+  }
+
   public static void main(String args[]) {
 
     final JFrame f = new JFrame();
@@ -3320,15 +3337,19 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
 
     // ---------------------------------------------
 
-    int NB_PTS = 1000;
+    int NB_PTS = 50000;
     int NB_CURVE = 1;
+    Random rng = new Random(12345678);
 
     v = new JLDataView[NB_CURVE];
 
     for(int j=0;j<NB_CURVE;j++) {
       v[j] = new JLDataView();
+      v[j].setMarker(JLDataView.MARKER_NONE);
       for(int i=0;i<NB_PTS;i++) {
-        v[j].add((double)i,Math.random()*10.0);
+        double x = (double)i;
+        if(isInRange(x,NB_PTS))
+          v[j].add(x,rng.nextDouble()*10.0);
       }
       chart.getY1Axis().addDataView(v[j]);
     }
