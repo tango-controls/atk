@@ -317,8 +317,6 @@ public class GraphicsUtils {
 
   public static Paint createPatternForFilling(int style, Color c1,Color c2) {
 
-    int[] pattern = new int[16*16];
-
     if (!inited) init();
 
     switch (style) {
@@ -326,41 +324,68 @@ public class GraphicsUtils {
       case JLDataView.FILL_STYLE_SOLID:
         return c1;
       case JLDataView.FILL_STYLE_LARGE_RIGHT_HATCH:
+      {
+        int[] pattern = new int[16*16];
         fillPattern(h1,pattern, c1,c2);
         hatchPattern1.setRGB(0, 0, 16, 16, pattern, 0, 16);
         return hatchPaint1;
+      }
       case JLDataView.FILL_STYLE_LARGE_LEFT_HATCH:
+      {
+        int[] pattern = new int[16*16];
         fillPattern(h2, pattern, c1, c2);
         hatchPattern2.setRGB(0, 0, 16, 16, pattern, 0, 16);
         return hatchPaint2;
+      }
       case JLDataView.FILL_STYLE_LARGE_CROSS_HATCH:
+      {
+        int[] pattern = new int[16*16];
         fillPattern(h3, pattern, c1, c2);
         hatchPattern3.setRGB(0, 0, 16, 16, pattern, 0, 16);
         return hatchPaint3;
+      }
       case JLDataView.FILL_STYLE_SMALL_RIGHT_HATCH:
+      {
+        int[] pattern = new int[16*16];
         fillPattern(h4, pattern, c1, c2);
         hatchPattern4.setRGB(0, 0, 16, 16, pattern, 0, 16);
         return hatchPaint4;
+      }
       case JLDataView.FILL_STYLE_SMALL_LEFT_HATCH:
+      {
+        int[] pattern = new int[16*16];
         fillPattern(h5, pattern, c1, c2);
         hatchPattern5.setRGB(0, 0, 16, 16, pattern, 0, 16);
         return hatchPaint5;
+      }
       case JLDataView.FILL_STYLE_SMALL_CROSS_HATCH:
+      {
+        int[] pattern = new int[16*16];
         fillPattern(h6, pattern, c1, c2);
         hatchPattern6.setRGB(0, 0, 16, 16, pattern, 0, 16);
         return hatchPaint6;
+      }
       case JLDataView.FILL_STYLE_DOT_PATTERN_1:
+      {
+        int[] pattern = new int[16*16];
         fillPattern(h7, pattern, c1, c2);
         hatchPattern7.setRGB(0, 0, 16, 16, pattern, 0, 16);
         return hatchPaint7;
+      }
       case JLDataView.FILL_STYLE_DOT_PATTERN_2:
+      {
+        int[] pattern = new int[16*16];
         fillPattern(h8, pattern, c1, c2);
         hatchPattern8.setRGB(0, 0, 16, 16, pattern, 0, 16);
         return hatchPaint8;
+      }
       case JLDataView.FILL_STYLE_DOT_PATTERN_3:
+      {
+        int[] pattern = new int[16*16];
         fillPattern(h9, pattern, c1, c2);
         hatchPattern9.setRGB(0, 0, 16, 16, pattern, 0, 16);
         return hatchPaint9;
+      }
 
     }
     return null;

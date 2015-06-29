@@ -2650,7 +2650,8 @@ public class JLAxis implements java.io.Serializable {
     } // End (for k<nbView)
 
     //long t1 = System.currentTimeMillis();
-    //System.out.println("Paint time = " + (t1-t0) + " ms");
+    //if( nbView>0 )
+    //  System.out.println("Paint time = " + (t1-t0) + " ms");
 
   }
 
@@ -2722,24 +2723,22 @@ public class JLAxis implements java.io.Serializable {
     return bw;
   }
 
-  private void paintDataViewBar(Graphics2D g2,
-                                JLDataView v,
-                                int barWidth,
-                                BasicStroke bs,
-                                Paint fPattern,
-                                int y0,
-                                int x,
-                                int y,
-                                int idx) {
+  private void paintSingleBar(Graphics2D g2,
+                              JLDataView v,
+                              int barWidth,
+                              BasicStroke bs,
+                              Paint fPattern,
+                              int y0,
+                              int x,
+                              int y,
+                              int idx) {
 
-    if (v.getViewType() == JLDataView.TYPE_BAR) {
+    if (idx >= 0) {
 
-      if(idx>=0) {
+      Color fillColor = v.getBarFillColorAt(idx);
+      if (fillColor == null) {
 
-        Color fillColor = v.getBarFillColorAt(idx);
-        if( fillColor==null ) {
-
-          paintBar(g2,
+        paintBar(g2,
             fPattern,
             barWidth,
             v.getFillColor(),
@@ -2748,9 +2747,9 @@ public class JLAxis implements java.io.Serializable {
             x,
             y);
 
-        } else {
+      } else {
 
-          paintBar(g2,
+        paintBar(g2,
             null,
             barWidth,
             fillColor,
@@ -2759,11 +2758,11 @@ public class JLAxis implements java.io.Serializable {
             x,
             y);
 
-        }
+      }
 
-      } else {
+    } else {
 
-        paintBar(g2,
+      paintBar(g2,
           fPattern,
           barWidth,
           v.getFillColor(),
@@ -2772,29 +2771,27 @@ public class JLAxis implements java.io.Serializable {
           x,
           y);
 
-      }
+    }
 
-      // Draw bar border
-      if (v.getLineWidth() > 0) {
-        Stroke old = g2.getStroke();
-        if (bs != null) g2.setStroke(bs);
-        g2.setColor(v.getColor());
-        paintBarBorder(g2, barWidth, y0, x, y);
-        g2.setStroke(old);
-      }
-
+    // Draw bar border
+    if (v.getLineWidth() > 0) {
+      Stroke old = g2.getStroke();
+      if (bs != null) g2.setStroke(bs);
+      g2.setColor(v.getColor());
+      paintBarBorder(g2, barWidth, y0, x, y);
+      g2.setStroke(old);
     }
 
   }
 
-  private void paintDataViewPolyline(Graphics2D g2,
-                                     JLDataView v,
-                                     BasicStroke bs,
-                                     Paint fPattern,
-                                     int nb,
-                                     int yOrg,
-                                     int[] pointX,
-                                     int[] pointY) {
+  private void paintSegmentPolyline(Graphics2D g2,
+                                    JLDataView v,
+                                    BasicStroke bs,
+                                    Paint fPattern,
+                                    int nb,
+                                    int yOrg,
+                                    int[] pointX,
+                                    int[] pointY) {
 
 
     if (nb > 1 && v.getViewType() == JLDataView.TYPE_LINE) {
@@ -2826,157 +2823,450 @@ public class JLAxis implements java.io.Serializable {
 
   }
 
-  private void paintDataViewNormal(Graphics g, JLDataView v, JLAxis xAxis, int xOrg, int yOrg) {
+  private void paintDataViewBar(Graphics2D g2,BasicStroke bs,Paint fPattern,JLDataView v,DataList l,
+                                JLAxis xAxis, int xOrg, int yOrg,int y0,
+                                int xMin,int xMax,int yMin,int yMax,double iX,double iY) {
 
-    DataList l = v.getData();
-    int idx = 0;
+    int px=0, py=0;
+    double A0 = v.getA0();
+    double A1 = v.getA1();
+    double A2 = v.getA2();
+    boolean validX;
+    boolean validY;
+    boolean showMarker = v.getMarker() > JLDataView.MARKER_NONE;
+    boolean isNaN;
+    boolean isXLogScale = xAxis.getScale() == LOG_SCALE;
+    boolean isYLogScale = getScale() == LOG_SCALE;
+    double vt;
+    int nb=0;
+    double minx = xAxis.getMin();
+    double miny = min;
+    double ly = getLength();
+    double xratio;
+    double yratio;
 
-    if (l != null) {
+    int barWidth = computeBarWidth(v, xAxis);
+    boolean end = (l == null);
 
-      // Get some variables
+    while (!end) {
 
-      int nbPoint = v.getDataLength();
-      int pointX[] = new int[nbPoint];
-      int pointY[] = new int[nbPoint];
+      // Compute transform here for performance
+      double ly2 = l.y * l.y;
+      vt = A0 + A1 * l.y + A2 * ly2;
 
-      double minx,maxx,lx;
-      double miny,maxy,ly;
-      double xratio;
-      double yratio;
-      double vt;
-      double A0 = v.getA0();
-      double A1 = v.getA1();
-      double A2 = v.getA2();
-      int y0;
+      isNaN = Double.isNaN(vt);
+      validX = !isXLogScale || l.x > 1e-100;
+      validY = !isNaN && (!isYLogScale || vt > 1e-100);
 
-      minx = xAxis.getMin();
-      maxx = xAxis.getMax();
-      lx = xAxis.getLength();
-      int sx = xAxis.getScale();
+      if (validX) {
 
-      miny = min;
-      maxy = max;
-      ly = getLength();
+        if (isXLogScale)
+          xratio = (Math.log(l.x) / ln10 - minx) * iX;
+        else
+          xratio = (l.x - minx) * iX;
 
+        px = (int) ((xratio) + xOrg);
 
-      int j = 0;
-      boolean valid = true;
+        if (validY) {
 
-      // Set the stroke mode for dashed line
-
-      Graphics2D g2 = (Graphics2D) g;
-      BasicStroke bs = GraphicsUtils.createStrokeForLine(v.getLineWidth(), v.getStyle());
-
-      // Create the filling pattern
-      Paint fPattern = GraphicsUtils.createPatternForFilling(v.getFillStyle(), v.getFillColor(), v.getColor());
-
-      // Compute zero vertical offset
-      switch (v.getFillMethod()) {
-        case JLDataView.METHOD_FILL_FROM_TOP:
-          y0 = yOrg - (int) ly;
-          break;
-        case JLDataView.METHOD_FILL_FROM_ZERO:
-          if (scale == LOG_SCALE)
-            y0 = yOrg;
+          if (isYLogScale)
+            yratio = -(Math.log(vt) / ln10 - miny) * iY;
           else
-            y0 = (int) (miny / (maxy - miny) * ly) + yOrg;
-          break;
-        default:
-          y0 = yOrg;
-          break;
+            yratio = -(vt - miny) * iY;
+
+          py = (int) ((yratio) + yOrg);
+
+          // Draw bar
+          if (px >= xMin && px <= xMax) {
+            paintSingleBar(g2, v, barWidth, bs, fPattern, y0, px, py, nb);
+            // Draw marker
+            if (showMarker && py >= yMin && py <= yMax) {
+              g2.setColor(v.getMarkerColor());
+              paintMarker(g2, v.getMarker(), v.getMarkerSize(), px, py);
+            }
+          }
+
+        } else {
+
+          if (isNaN && v.isDrawOnNaN()) {
+
+            yratio = -ly;
+            py = (int) ((yratio) + yOrg);
+
+            // Draw bar
+            if (px >= xMin && px <= xMax)
+              paintSingleBar(g2, v, barWidth, bs, fPattern, y0, px, py, nb);
+
+          }
+
+        }
+
+        end = (l==null) || px>xMax;
+
+      } else {
+
+        end = (l==null);
+
       }
 
-      int barWidth = computeBarWidth(v, xAxis);
+      if(!end) l = l.next;
+      nb++;
 
-      while (l != null) {
+    }
 
-        while (valid && l != null) {
+  }
 
-          // Compute transform here for performance
-          vt = A0 + A1 * l.y + A2 * l.y * l.y;
-          valid = !Double.isNaN(vt) && (sx != LOG_SCALE || l.x > 1e-100)
-            && (scale != LOG_SCALE || vt > 1e-100);
+  private void PaintDataViewHighDensity(Graphics2D g2,BasicStroke bs,Paint fPattern,JLDataView v,DataList l,
+                                        JLAxis xAxis, int xOrg, int yOrg,int y0,
+                                        int xMin,int xMax,int yMin,int yMax,double iX,double iY) {
 
-          if (valid) {
 
-            if (sx == LOG_SCALE)
-              xratio = (Math.log(l.x) / ln10 - minx) / (maxx - minx) * lx;
-            else
-              xratio = (l.x - minx) / (maxx - minx) * lx;
+    double A0 = v.getA0();
+    double A1 = v.getA1();
+    double A2 = v.getA2();
+    boolean isXLogScale = xAxis.getScale() == LOG_SCALE;
+    boolean isYLogScale = getScale() == LOG_SCALE;
+    double xratio;
+    double yratio;
+    double minx = xAxis.getMin();
+    double miny = min;
+    boolean showMarker = v.getMarker() > JLDataView.MARKER_NONE;
 
-            if (scale == LOG_SCALE)
-              yratio = -(Math.log(vt) / ln10 - miny) / (maxy - miny) * ly;
-            else
-              yratio = -(vt - miny) / (maxy - miny) * ly;
+    int xDim = xMax-xMin+1;
 
-            // Saturate
-            if (xratio < -32000) xratio = -32000;
-            if (xratio > 32000) xratio = 32000;
-            if (yratio < -32000) yratio = -32000;
-            if (yratio > 32000) yratio = 32000;
+    int xin=Integer.MIN_VALUE,yin=0;
+    int xout=Integer.MIN_VALUE,yout=0;
 
-            if (j < nbPoint) {
-              pointX[j] = (int) (xratio) + xOrg;
-              pointY[j] = (int) (yratio) + yOrg;
+    int px,py;
 
-              // Draw marker
-              if (v.getMarker() > JLDataView.MARKER_NONE) {
-                g.setColor(v.getMarkerColor());
-                paintMarker(g, v.getMarker(), v.getMarkerSize(), pointX[j], pointY[j]);
-              }
+    int[] mins = new int[xDim];
+    int[] maxs = new int[xDim];
+    int[] hin = new int[xDim];
+    int[] hout = new int[xDim];
 
-              // Draw bar
-              paintDataViewBar(g2, v, barWidth, bs, fPattern, y0, pointX[j], pointY[j], idx);
+    for(int i=0;i<xDim;i++) {
+      mins[i] = Integer.MAX_VALUE;
+      maxs[i] = Integer.MIN_VALUE;
+      hin[i] = Integer.MIN_VALUE;
+      hout[i] = Integer.MIN_VALUE;
+    }
 
-              j++;
-            }
+    boolean isNaN;
+    boolean end = (l == null);
+    boolean valid = true;
+    double vt;
 
-            l = l.next;
-            idx++;
-          }
+    while (!end) {
 
-          if( Double.isNaN(vt) ) {
+      double ly2 = l.y * l.y;
+      vt = A0 + A1 * l.y + A2 * ly2;
+      isNaN = Double.isNaN(vt);
 
-            if( v.isDrawOnNaN() ) {
+      valid = !isNaN && (!isYLogScale || vt > 1e-100);
 
-              if (sx == LOG_SCALE)
-                xratio = (Math.log(l.x) / ln10 - minx) / (maxx - minx) * lx;
-              else
-                xratio = (l.x - minx) / (maxx - minx) * lx;
+      if (valid) {
 
-              yratio = -ly;
+        if (isXLogScale)
+          xratio = (Math.log(l.x) / ln10 - minx) * iX;
+        else
+          xratio = (l.x - minx) * iX;
 
-              // Saturate
-              if (xratio < -32000) xratio = -32000;
-              if (xratio > 32000) xratio = 32000;
-              if (yratio < -32000) yratio = -32000;
-              if (yratio > 32000) yratio = 32000;
+        if (isYLogScale)
+          yratio = -(Math.log(vt) / ln10 - miny) * iY;
+        else
+          yratio = -(vt - miny) * iY;
 
-              int xb = (int) (xratio) + xOrg;
-              int yb = (int) (yratio) + yOrg;
-              
-              // Draw bar
-              paintDataViewBar(g2, v, barWidth, bs, fPattern, y0, xb, yb, idx);
+        px = (int)xratio;
+        py = (int)yratio;
 
-            }
+        if(px<0) {
 
-          }
+          xin = px;
+          yin = py;
+
+        } else if (px>=xDim) {
+
+          xout = px;
+          yout = py;
+
+        } else {
+
+          if(hin[px]==Integer.MIN_VALUE)
+            hin[px]=py;
+
+          if(py>=maxs[px]) maxs[px]=py;
+          if(py<=mins[px]) mins[px]=py;
+
+          hout[px] = py;
 
         }
 
-        // Draw the polyline
-        paintDataViewPolyline(g2, v, bs, fPattern, j, y0, pointX, pointY);
+        // Draw marker
+        if (showMarker) {
+          if (py >= yMin && py <= yMax) {
+            g2.setColor(v.getMarkerColor());
+            paintMarker(g2, v.getMarker(), v.getMarkerSize(), px+ xOrg, py+ yOrg);
+          }
+        }
 
-        j = 0;
-        if (!valid) {
+        l = l.next;
+        end = (l == null) || px >= xDim;
+
+      } else {
+
+        l = l.next;
+        end = (l == null);
+
+      }
+
+    } // End (!end)
+
+    // Draw
+    if (v.getLineWidth() > 0) {
+
+      Stroke old = g2.getStroke();
+      if (bs != null) g2.setStroke(bs);
+      g2.setColor(v.getColor());
+
+      for (int i = 0; i < xDim; i++) {
+
+        if (mins[i] <= maxs[i]) {
+
+          // Draw entry point if any
+          if (xin != Integer.MIN_VALUE) {
+            g2.drawLine(xin + xOrg, yin + yOrg, i + xOrg, hin[i] + yOrg);
+          }
+
+          // Draw bar
+          g2.drawLine(i + xOrg, maxs[i] + yOrg, i + xOrg, mins[i] + yOrg);
+
+          xin = i;
+          yin = hout[i];
+
+        }
+
+      }
+
+      // Draw exit point if any
+      if (xout != Integer.MIN_VALUE) {
+        g2.drawLine(xin + xOrg, yin + yOrg, xout + xOrg, yout + yOrg);
+      }
+
+      g2.setStroke(old);
+
+    }
+
+
+  }
+
+  private void paintDataViewPolyline(Graphics2D g2,BasicStroke bs,Paint fPattern,JLDataView v,DataList l,
+                                     JLAxis xAxis, int xOrg, int yOrg,int y0,
+                                     int xMin,int xMax,int yMin,int yMax,double iX,double iY) {
+
+    int px=0, py=0;
+    double A0 = v.getA0();
+    double A1 = v.getA1();
+    double A2 = v.getA2();
+    boolean valid = true;
+    boolean showMarker = v.getMarker() > JLDataView.MARKER_NONE;
+    boolean isNaN;
+    boolean isXLogScale = xAxis.getScale() == LOG_SCALE;
+    boolean isYLogScale = getScale() == LOG_SCALE;
+    double vt;
+    int nb=0;
+    double minx = xAxis.getMin();
+    double miny = min;
+    double xratio;
+    double yratio;
+
+    // Extract visible part
+    int maxNbPoint = 1;
+    boolean found = false;
+    DataList f = l;
+    while (f != null && !found) {
+      if (isXLogScale)
+        xratio = (Math.log(f.x) / ln10 - minx) * iX;
+      else
+        xratio = (f.x - minx) * iX;
+      px = (int) ((xratio) + xOrg);
+      found = px > xMax;
+      if (!found) {
+        maxNbPoint++;
+        f = f.next;
+      }
+    }
+
+    // Determine whether doing the optimized rendering
+    double density = (double)maxNbPoint / (double)(xMax-xMin);
+    //System.out.println("Density="+density);
+    if(density>20.0) {
+      PaintDataViewHighDensity(g2,bs,fPattern,v,l,xAxis,xOrg,yOrg,y0,xMin,xMax,yMin,yMax,iX,iY);
+      return;
+    }
+
+    // Draw
+    int pointX[] = new int[maxNbPoint];
+    int pointY[] = new int[maxNbPoint];
+    boolean end = (l == null);
+
+    while (!end) {
+
+      double ly2 = l.y * l.y;
+
+      while (valid && !end) {
+
+        // Compute transform here for performance
+        vt = A0 + A1 * l.y + A2 * ly2;
+        isNaN = Double.isNaN(vt);
+
+        valid = !isNaN && (!isYLogScale || vt > 1e-100);
+
+        if (valid) {
+
+          if (isXLogScale)
+            xratio = (Math.log(l.x) / ln10 - minx) * iX;
+          else
+            xratio = (l.x - minx) * iX;
+
+          if (isYLogScale)
+            yratio = -(Math.log(vt) / ln10 - miny) * iY;
+          else
+            yratio = -(vt - miny) * iY;
+
+          px = (int) ((xratio) + xOrg);
+          py = (int) ((yratio) + yOrg);
+
+          pointX[nb] = px;
+          pointY[nb] = py;
+
+          // Draw marker
+          if (showMarker) {
+            if (py >= yMin && py <= yMax) {
+              g2.setColor(v.getMarkerColor());
+              paintMarker(g2, v.getMarker(), v.getMarkerSize(), pointX[nb], pointY[nb]);
+            }
+          }
+
+          nb++;
           l = l.next;
-          idx++;
-          valid = true;
+
+          end = (l==null) || px>xMax;
+
+        } else {
+
+          end = (l==null);
+
         }
 
-      } // End (while l!=null)
+      }
 
-    } // End (if l!=null)
+      // Draw the polyline
+      paintSegmentPolyline(g2, v, bs, fPattern, nb, y0, pointX, pointY);
+
+      nb = 0;
+      if (!end && !valid) {
+        // Jump invalid
+        l = l.next;
+        valid = true;
+      }
+
+    } // End (!end)
+
+
+  }
+
+  private void paintDataViewNormal(Graphics g, JLDataView v, JLAxis xAxis, int xOrg, int yOrg) {
+
+
+    double minx, maxx, lx;
+    double miny, maxy, ly;
+    double xratio;
+    int y0;
+    boolean validX;
+    DataList l = v.getData();
+
+    // Empty dataview
+    if (l == null)
+      return;
+
+    Graphics2D g2 = (Graphics2D) g;
+
+    // Get chart dimension
+    minx = xAxis.getMin();
+    maxx = xAxis.getMax();
+    lx = xAxis.getLength();
+    miny = min;
+    maxy = max;
+    ly = getLength();
+
+    // Scale
+    boolean isXLogScale = xAxis.getScale() == LOG_SCALE;
+    boolean isYLogScale = getScale() == LOG_SCALE;
+
+    // Set the stroke mode for dashed line
+    BasicStroke bs = GraphicsUtils.createStrokeForLine(v.getLineWidth(), v.getStyle());
+
+    // Create the filling pattern
+    Paint fPattern = GraphicsUtils.createPatternForFilling(v.getFillStyle(), v.getFillColor(), v.getColor());
+
+    // Compute zero vertical offset
+    switch (v.getFillMethod()) {
+      case JLDataView.METHOD_FILL_FROM_TOP:
+        y0 = yOrg - (int) ly;
+        break;
+      case JLDataView.METHOD_FILL_FROM_ZERO:
+        if (scale == LOG_SCALE)
+          y0 = yOrg;
+        else
+          y0 = (int) (miny / (maxy - miny) * ly) + yOrg;
+        break;
+      default:
+        y0 = yOrg;
+        break;
+    }
+
+    // Clipping coordinates
+    int xMin = xOrg + 1;
+    int xMax = xMin + xAxis.getLength() - 1;
+    int yMin = yOrg - getLength() + 1;
+    int yMax = yMin + getLength() - 1;
+
+    double iX = (1.0 / (maxx - minx)) * lx;
+    double iY = (1.0 / (maxy - miny)) * ly;
+    int px=0;
+
+    // Search first valid position
+    boolean found = false;
+    DataList prec = null;
+    while (l != null && !found) {
+      validX = !isXLogScale || l.x > 1e-100;
+      if (validX) {
+        if (isXLogScale)
+          xratio = (Math.log(l.x) / ln10 - minx) * iX;
+        else
+          xratio = (l.x - minx) * iX;
+        px = (int) ((xratio) + xOrg);
+        found = px>xMin;
+      }
+      if(!found) {
+        prec = l;
+        l=l.next;
+      }
+    }
+    if(prec!=null) l=prec;
+
+    // Nothing visible
+    if(l==null) return;
+
+    if (v.getViewType() == JLDataView.TYPE_BAR) {
+
+      paintDataViewBar(g2,bs,fPattern,v,l,xAxis,xOrg,yOrg,y0,xMin,xMax,yMin,yMax,iX,iY);
+
+    } else {
+
+      paintDataViewPolyline(g2, bs, fPattern, v, l, xAxis, xOrg, yOrg, y0, xMin, xMax, yMin, yMax, iX, iY);
+
+    }
 
   }
 
@@ -3045,6 +3335,7 @@ public class JLAxis implements java.io.Serializable {
       Paint fPattern = GraphicsUtils.createPatternForFilling(v.getFillStyle(), v.getFillColor(), v.getColor());
 
       int barWidth = computeBarWidth(v, xAxis);
+      boolean showBar = v.getViewType() == JLDataView.TYPE_BAR;
 
       while (l.isValid()) {
 
@@ -3089,7 +3380,8 @@ public class JLAxis implements java.io.Serializable {
               }
 
               // Draw bar
-              paintDataViewBar(g2, v, barWidth, bs, fPattern, y0, pointX[j], pointY[j], -1);
+              if( showBar )
+                paintSingleBar(g2, v, barWidth, bs, fPattern, y0, pointX[j], pointY[j], -1);
 
               j++;
             }
@@ -3100,7 +3392,7 @@ public class JLAxis implements java.io.Serializable {
         }
 
         // Draw the polyline
-        paintDataViewPolyline(g2, v, bs, fPattern, j, y0, pointX, pointY);
+        paintSegmentPolyline(g2, v, bs, fPattern, j, y0, pointX, pointY);
 
         j = 0;
         if (!valid) {
