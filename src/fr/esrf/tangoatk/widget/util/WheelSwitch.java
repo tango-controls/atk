@@ -1349,7 +1349,7 @@ public class WheelSwitch extends JComponent {
         });
 
         //hex format
-        ws4.setFormat("0x%7X");
+        ws4.setFormat("0x%08X");
         ws4.setButtonColor(new Color(100, 200, 160));
         ws4.setValue(0xA023);
         ws4.setFont(new Font("Lucida Bright", Font.BOLD, 12));
