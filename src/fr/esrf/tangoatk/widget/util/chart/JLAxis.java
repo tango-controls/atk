@@ -2901,15 +2901,16 @@ public class JLAxis implements java.io.Serializable {
 
         }
 
+        l = l.next;
         end = (l==null) || px>xMax;
 
       } else {
 
+        l = l.next;
         end = (l==null);
 
       }
 
-      if(!end) l = l.next;
       nb++;
 
     }
