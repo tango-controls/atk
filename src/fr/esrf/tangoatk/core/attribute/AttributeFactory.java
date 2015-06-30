@@ -291,10 +291,10 @@ public class AttributeFactory extends AEntityFactory {
     try {
       return (getAttribute(fqname)!=null);
     } catch (ConnectionException de) {
-      System.out.println("AttributeFactory.isAttribute(" + fqname + ") : " + de.getErrors()[0].desc);
+//      System.out.println("AttributeFactory.isAttribute(" + fqname + ") : " + de.getErrors()[0].desc);
       return false;
     } catch (DevFailed dfe) {
-      System.out.println("AttributeFactory.isAttribute(" + fqname + ") : " + dfe.errors[0].desc);
+//      System.out.println("AttributeFactory.isAttribute(" + fqname + ") : " + dfe.errors[0].desc);
       return false;
     } catch (Exception e) {
       // Unexpected exception
