@@ -89,7 +89,7 @@ public abstract class AEntityFactory implements TangoConst,
         db = ApiUtil.get_db_obj();
         try
         {
-          referenceName = db.get_alias_device(alias);
+          referenceName = db.get_device_from_alias(alias);
           if (referenceName == null || "".equals(referenceName) || alias.equals(referenceName))
           {
             //no device name found
@@ -111,10 +111,10 @@ public abstract class AEntityFactory implements TangoConst,
         db = ApiUtil.get_db_obj();
         try
         {
-          referenceName = db.get_alias_device(alias);
+          referenceName = db.get_device_from_alias(alias);
           if (referenceName == null || "".equals(referenceName) || alias.equals(referenceName))
           {
-            referenceName = db.get_attribute_alias(alias);
+            referenceName = db.get_attribute_from_alias(alias);
             if (referenceName == null || "".equals(referenceName) || alias.equals(referenceName))
             {
               //no attribute name found
@@ -137,7 +137,7 @@ public abstract class AEntityFactory implements TangoConst,
         {
           try
           {
-            referenceName = db.get_attribute_alias(alias);
+            referenceName = db.get_attribute_from_alias(alias);
             if (referenceName == null || "".equals(referenceName) || alias.equals(referenceName))
             {
               //no attribute name found
