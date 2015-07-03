@@ -3168,6 +3168,7 @@ public class JLAxis implements java.io.Serializable {
       if (!end && !valid) {
         // Jump invalid
         l = l.next;
+        end = (l==null);
         valid = true;
       }
 
