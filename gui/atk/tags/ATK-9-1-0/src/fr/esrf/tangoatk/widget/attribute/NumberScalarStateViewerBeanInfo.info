@@ -1,0 +1,7 @@
+name = NumberScalarStateViewer
+package = fr.esrf.tangoatk.widget.attribute
+
+properties = model
+
+ICON_COLOR_16x16 = NumberScalarState.gif
+ICON_COLOR_32x32 = NumberScalarState32.gif

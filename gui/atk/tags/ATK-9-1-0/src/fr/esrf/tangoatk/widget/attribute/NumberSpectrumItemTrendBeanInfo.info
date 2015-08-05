@@ -1,0 +1,6 @@
+name = NumberSpectrumItemTrend
+package fr.esrf.tangoatk.widget.attribute
+
+properties = plotAll
+ICON_COLOR_16x16 = NumberSpectrumTrend.gif
+ICON_COLOR_32x32 = NumberSpectrumTrend32.gif

@@ -1,0 +1,6 @@
+name = MultiScalarTableViewer
+package fr.esrf.tangoatk.widget.attribute
+
+properties = nbRows, nbColumns, columnIdents, rowIdents, alarmEnabled, unitVisible, panelBackground
+ICON_COLOR_16x16 = MultiScalarTable.gif
+ICON_COLOR_32x32 = MultiScalarTable32.gif

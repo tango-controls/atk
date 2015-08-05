@@ -1,0 +1,3 @@
+name = ATKNumberField
+package = fr.esrf.TangoATK.Widget.Util
+properties = value, model, wheelSwitchEnabled 

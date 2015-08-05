@@ -1,0 +1,6 @@
+name = UnitViewer
+package = fr.esrf.tangoatk.widget.properties
+
+properties = model
+ICON_COLOR_16x16 = UnitViewer.gif
+ICON_COLOR_32x32 = UnitViewer32.gif

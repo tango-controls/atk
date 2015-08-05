@@ -1,0 +1,7 @@
+name =  IconNumberSpectrumViewer
+package = fr.esrf.tangoatk.widget.attribute 
+properties = model, icons, invalidIcon, rows, columns, texts, colors
+
+ICON_COLOR_16x16 = AttIconNumberSpectrum.gif
+ICON_COLOR_32x32 = AttIconNumberSpectrum32.gif
+

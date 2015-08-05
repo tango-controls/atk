@@ -1,0 +1,7 @@
+name =  OnOffCheckBoxCommandViewer
+package = fr.esrf.tangoatk.widget.command
+
+properties = cmdModel
+
+ICON_COLOR_16x16 = OnOffCheckBoxCommandViewer.gif
+ICON_COLOR_32x32 = OnOffCheckBoxCommandViewer32.gif

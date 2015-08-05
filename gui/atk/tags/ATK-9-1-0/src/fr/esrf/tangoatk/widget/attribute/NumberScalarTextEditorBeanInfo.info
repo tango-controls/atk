@@ -1,0 +1,6 @@
+name = NumberScalarTextEditor
+package fr.esrf.tangoatk.widget.attribute
+
+properties = model
+ICON_COLOR_16x16 = NumberScalarTextEditor.gif
+ICON_COLOR_32x32 = NumberScalarTextEditor32.gif

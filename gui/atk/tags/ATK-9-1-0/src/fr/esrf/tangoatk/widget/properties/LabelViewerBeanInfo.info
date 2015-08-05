@@ -1,0 +1,6 @@
+name = LabelViewer
+package = fr.esrf.tangoatk.widget.properties
+
+properties = model
+ICON_COLOR_16x16 = LabelViewer.gif
+ICON_COLOR_32x32 = LabelViewer32.gif
