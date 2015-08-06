@@ -3666,16 +3666,17 @@ public class JLAxis implements java.io.Serializable {
    * @param yOrg Y origin for transformation (pixel space)
    * @param back Background color
    * @param oppositeVisible Oposite axis is visible.
+   * @param forcePaint force this axis to be painted
    *
    */
-  void paintAxis(Graphics g, FontRenderContext frc, int x0, int y0, JLAxis xAxis, int xOrg, int yOrg, Color back,boolean oppositeVisible) {
+  void paintAxis(Graphics g, FontRenderContext frc, int x0, int y0, JLAxis xAxis, int xOrg, int yOrg, Color back,boolean oppositeVisible,boolean forcePaint) {
 
     int la = 0;
     int tr = 0;
     Point p0 = null;
 
     // Do not paint vertical axis without data
-    if (!isHorizontal() && dataViews.size() == 0) return;
+    if (!forcePaint && !isHorizontal() && dataViews.size() == 0) return;
 
     // Do not paint when too small
     if (getLength() <= 1) {
