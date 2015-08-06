@@ -2560,12 +2560,17 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
     if (paintAxisFirst) {
 
       //Draw axes
-      y1Axis.paintAxis(g, frc, xOrgY1, yOrgY, xAxis, xOrg, yOrg, getBackground(),!y2Axis.isVisible() || y2Axis.getViewNumber()==0);
-      y2Axis.paintAxis(g, frc, xOrgY2, yOrgY, xAxis, xOrg, yOrg, getBackground(),!y1Axis.isVisible() || y1Axis.getViewNumber()==0);
+      if(views.size()==0) {
+        // No view, paint only Y1
+        y1Axis.paintAxis(g, frc, xOrgY1, yOrgY, xAxis, xOrg, yOrg, getBackground(),true,true);
+      } else {
+        y1Axis.paintAxis(g, frc, xOrgY1, yOrgY, xAxis, xOrg, yOrg, getBackground(),!y2Axis.isVisible() || y2Axis.getViewNumber()==0,false);
+        y2Axis.paintAxis(g, frc, xOrgY2, yOrgY, xAxis, xOrg, yOrg, getBackground(),!y1Axis.isVisible() || y1Axis.getViewNumber()==0,false);
+      }
       if( xAxis.getPosition()==JLAxis.HORIZONTAL_ORG2)
-        xAxis.paintAxis(g, frc, xOrg, yOrg, y2Axis, 0, 0, getBackground(),true);
+        xAxis.paintAxis(g, frc, xOrg, yOrg, y2Axis, 0, 0, getBackground(),true,false);
       else
-        xAxis.paintAxis(g, frc, xOrg, yOrg, y1Axis, 0, 0, getBackground(),true);
+        xAxis.paintAxis(g, frc, xOrg, yOrg, y1Axis, 0, 0, getBackground(),true,false);
 
       //Draw data
       Rectangle clipRect = g.getClipBounds();
@@ -2590,12 +2595,17 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
       }
 
       //Draw axes
-      y1Axis.paintAxis(g, frc, xOrgY1, yOrgY, xAxis, xOrg, yOrg, getBackground(),!y2Axis.isVisible() || y2Axis.getViewNumber()==0);
-      y2Axis.paintAxis(g, frc, xOrgY2, yOrgY, xAxis, xOrg, yOrg, getBackground(),!y1Axis.isVisible() || y1Axis.getViewNumber()==0);
+      if(views.size()==0) {
+        // No view, paint only Y1
+        y1Axis.paintAxis(g, frc, xOrgY1, yOrgY, xAxis, xOrg, yOrg, getBackground(),true,true);
+      } else {
+        y1Axis.paintAxis(g, frc, xOrgY1, yOrgY, xAxis, xOrg, yOrg, getBackground(),!y2Axis.isVisible() || y2Axis.getViewNumber()==0,false);
+        y2Axis.paintAxis(g, frc, xOrgY2, yOrgY, xAxis, xOrg, yOrg, getBackground(),!y1Axis.isVisible() || y1Axis.getViewNumber()==0,false);
+      }
       if (xAxis.getPosition() == JLAxis.HORIZONTAL_ORG2)
-        xAxis.paintAxis(g, frc, xOrg, yOrg, y2Axis, 0, 0, getBackground(),true);
+        xAxis.paintAxis(g, frc, xOrg, yOrg, y2Axis, 0, 0, getBackground(),true,false);
       else
-        xAxis.paintAxis(g, frc, xOrg, yOrg, y1Axis, 0, 0, getBackground(),true);
+        xAxis.paintAxis(g, frc, xOrg, yOrg, y1Axis, 0, 0, getBackground(),true,false);
 
     }
 

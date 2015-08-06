@@ -1870,6 +1870,14 @@ public class JLDataView implements java.io.Serializable {
   }
 
   /**
+   * Convenience function for removing this dataview from its axis (if any)
+   */
+  public void removeFromAxis() {
+    JLAxis v = getAxis();
+    if(v!=null) v.removeDataView(this);
+  }
+
+  /**
    * Applies merge sort on an array of double. If an associated array is given,
    * its elements are moved the same way as the array to sort.
    * 
