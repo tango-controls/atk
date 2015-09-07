@@ -31,6 +31,7 @@ import fr.esrf.tangoatk.widget.properties.LabelViewer;
 import fr.esrf.tangoatk.widget.image.LineProfilerViewer;
 
 import javax.swing.*;
+import javax.swing.event.EventListenerList;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -52,7 +53,8 @@ class TrendData {
 /**
  * A class to monitor a spectrum as a function of time using colormap for intensity.
  */
-public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrumListener, ActionListener, MouseListener, J3DTrendListener, IJLChartListener {
+public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrumListener, ActionListener, MouseListener,
+    J3DTrendListener, IJLChartListener, AdjustmentListener {
 
   static final java.util.GregorianCalendar calendar = new java.util.GregorianCalendar();
   static final java.text.SimpleDateFormat genFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -89,6 +91,9 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   private int               zoomScroll;
   private String            format;
   private File              currentFile=null;
+  private EventListenerList listenerList=new EventListenerList();
+  private int lastHScrollPos = 0;
+  private int lastVScrollPos = 0;
 
   // Contextual menu
   private boolean           showingMenu;
@@ -160,6 +165,8 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
     trend.setParent(this);
     trend.addMouseListener(this);
     trendView = new JScrollPane(trend);
+    trendView.getHorizontalScrollBar().addAdjustmentListener(this);
+    trendView.getVerticalScrollBar().addAdjustmentListener(this);
     add(trendView, BorderLayout.CENTER);
     gradientViewer = new JGradientViewer();
     gradientViewer.setGradient(gColor);
@@ -199,6 +206,35 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
     saveFileMenuItem.addActionListener(this);
     popupMenu.add(saveFileMenuItem);
     buildImage();
+
+  }
+
+  public void adjustmentValueChanged(AdjustmentEvent evt) {
+
+    Object src = evt.getSource();
+
+    if(evt.getAdjustmentType()!=AdjustmentEvent.UNIT_INCREMENT &&
+       evt.getAdjustmentType()!=AdjustmentEvent.UNIT_DECREMENT &&
+       evt.getAdjustmentType()!=AdjustmentEvent.BLOCK_INCREMENT &&
+       evt.getAdjustmentType()!=AdjustmentEvent.BLOCK_DECREMENT &&
+       evt.getAdjustmentType()!=AdjustmentEvent.TRACK
+        ) {
+      return;
+    }
+
+    if( src==trendView.getHorizontalScrollBar() ) {
+      int value = trendView.getHorizontalScrollBar().getValue();
+      if( lastHScrollPos!=value ) {
+        fireHScroolChange(value);
+        lastHScrollPos = value;
+      }
+    } else if (src==trendView.getVerticalScrollBar() ) {
+      int value = trendView.getVerticalScrollBar().getValue();
+      if( value!=lastVScrollPos ) {
+        fireVScroolChange(value);
+        lastVScrollPos = value;
+      }
+    }
 
   }
 
@@ -589,6 +625,84 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   }
 
   /**
+   * Add the given cursor listener
+   * @param l I3DTrendCursorListener
+   */
+  public void addCursorListener(I3DTrendCursorListener l) {
+    listenerList.add(I3DTrendCursorListener.class,  l);
+  }
+
+  /**
+   * Remove the given cursor listener
+   * @param l I3DTrendCursorListener
+   */
+  public void removeCursorListener(I3DTrendCursorListener l) {
+    listenerList.remove(I3DTrendCursorListener.class, l);
+  }
+
+  /**
+   * Add the given change listener
+   * @param l I3DTrendChangeListener
+   */
+  public void addChangeListener(I3DTrendChangeListener l) {
+    listenerList.add(I3DTrendChangeListener.class,  l);
+  }
+
+  /**
+   * Remove the given change listener
+   * @param l I3DTrendChangeListener
+   */
+  public void removeChangeListener(I3DTrendChangeListener l) {
+    listenerList.remove(I3DTrendChangeListener.class, l);
+  }
+
+   private void fireZoomChange() {
+     I3DTrendChangeListener[] list = (I3DTrendChangeListener[]) (listenerList.getListeners(I3DTrendChangeListener.class));
+    for (int i = 0; i < list.length; i++) list[i].zoomChanged(this, getHorizontalZoom(), getVerticalZoom());
+  }
+
+  private void fireVScroolChange(int value) {
+    I3DTrendChangeListener[] list = (I3DTrendChangeListener[]) (listenerList.getListeners(I3DTrendChangeListener.class));
+    for (int i = 0; i < list.length; i++) list[i].verticalScrollChanged(this, value);
+  }
+
+  private void fireHScroolChange(int value) {
+    I3DTrendChangeListener[] list = (I3DTrendChangeListener[]) (listenerList.getListeners(I3DTrendChangeListener.class));
+    for (int i = 0; i < list.length; i++) list[i].horinzontalScrollChanged(this,value);
+  }
+
+  private void fireCursorMove() {
+    I3DTrendCursorListener[] list = (I3DTrendCursorListener[]) (listenerList.getListeners(I3DTrendCursorListener.class));
+    for (int i = 0; i < list.length; i++) list[i].cursorMove(this, getXCursor(), getYCursor());
+  }
+
+  /**
+   * Sets the cursor position (data coordinates)
+   * @param x X cursor coordinates
+   * @param y Y cursor coordinates
+   */
+  public void setCursorPos(int x,int y) {
+
+    int xImg;
+    int yImg;
+
+    if(hZoom>=1) {
+      xImg = hZoom * (historyLength - (x + 1));
+    } else {
+      xImg =(historyLength - (x + 1))/(-hZoom);
+    }
+
+    if(vZoom>=1) {
+      yImg = vZoom * y;
+    } else {
+      yImg =y/(-vZoom);
+    }
+
+    trend.setCursor(xImg,yImg);
+
+  }
+
+  /**
    * Returns horizontal position of the cursor (data coordinates)
    * -1 is returned if there is no cursor.
    */
@@ -689,8 +803,9 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
    * click on the image.
    * @param xCursor x coordinates (referenced by the image)
    * @param yCursor y coordinates (referenced by the image)
+   * @param fireCursorChange Fire cursorChange event
    */
-  public void updateCursor(int xCursor, int yCursor) {
+  public void updateCursor(int xCursor, int yCursor,boolean fireCursorChange) {
 
     String modelName = generalName;
     String modelUnit = unitName;
@@ -805,6 +920,9 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
           buildHorizontalProfile();
 
     }
+
+    if(fireCursorChange)
+      fireCursorMove();
 
   }
 
@@ -937,6 +1055,24 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
     JScrollBar bar = trendView.getHorizontalScrollBar();
     int p = bar.getMinimum();
     bar.setValue(p);
+  }
+
+  /**
+   * Sets the horizontal scroll position
+   * @param pos Scrollbar position
+   */
+  public void setHorinzontalScrollPos(int pos) {
+    JScrollBar bar = trendView.getHorizontalScrollBar();
+    bar.setValue(pos);
+  }
+
+  /**
+   * Sets the vertical scroll position
+   * @param pos Scrollbar position
+   */
+  public void setVertitalScrollPos(int pos) {
+    JScrollBar bar = trendView.getVerticalScrollBar();
+    bar.setValue(pos);
   }
 
   /**
@@ -1599,6 +1735,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       buildImage();
     }
     repaint();
+    fireZoomChange();
   }
 
   private void applyVerticalZoom() {
@@ -1607,6 +1744,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       buildImage();
     }
     repaint();
+    fireZoomChange();
   }
 
   private void applyHorizontalZoomIn() {
@@ -1619,6 +1757,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
         buildImage();
       }
       repaint();
+      fireZoomChange();
     }
   }
 
@@ -1632,6 +1771,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
         buildImage();
       }
       repaint();
+      fireZoomChange();
     }
   }
 
@@ -1644,6 +1784,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
         buildImage();
       }
       repaint();
+      fireZoomChange();
     }
   }
 
@@ -1656,6 +1797,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
         buildImage();
       }
       repaint();
+      fireZoomChange();
     }
   }
 
