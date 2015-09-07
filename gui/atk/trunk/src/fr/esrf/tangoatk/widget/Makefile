@@ -141,6 +141,7 @@ manifest: attributes-manifest \
             command/manifest.mf         \
             attribute/manifest.mf       \
             util/manifest.mf       \
+            util/chart/manifest.mf       \
             properties/manifest.mf       \
             device/manifest.mf > manifest.mf ; \
 	    rm manifest.mf.tmp

@@ -47,6 +47,8 @@ public class J3DTrend extends JComponent implements MouseListener, MouseMotionLi
   protected JLAxis  yAxis;
   protected int     yAxisWidth;
   protected int     yAxisRightMargin;
+  protected boolean updateXRange=true;
+  protected boolean updateYRange=true;
 
   // Cursor
   private boolean cursorEnabled;
@@ -127,6 +129,22 @@ public class J3DTrend extends JComponent implements MouseListener, MouseMotionLi
   }
 
   /**
+   * Tell the viewer to update or not xAxis range.
+   * @param b True to enable updating range
+   */
+  public void updateXRange(boolean b) {
+    updateXRange = b;
+  }
+
+  /**
+   * Tell the viewer to update or not yAxis range.
+   * @param b True to enable updating range
+   */
+  public void updateYRange(boolean b) {
+    updateYRange = b;
+  }
+
+  /**
    * Sets the parent of this component
    * @param p NumberSpectrumTrend3DViewer parent
    */
@@ -188,10 +206,14 @@ public class J3DTrend extends JComponent implements MouseListener, MouseMotionLi
       lastImage.flush();
     lastImage = null;
 
-    yAxis.setMinimum(0);
-    yAxis.setMaximum(maxY);
-    xAxis.setMinimum(-maxX);
-    xAxis.setMaximum(0);
+    if(updateYRange) {
+      yAxis.setMinimum(0);
+      yAxis.setMaximum(maxY);
+    }
+    if(updateXRange) {
+      xAxis.setMinimum(-maxX);
+      xAxis.setMaximum(0);
+    }
 
   }
 
@@ -212,17 +234,28 @@ public class J3DTrend extends JComponent implements MouseListener, MouseMotionLi
   }
 
   /**
-   * Returns X coordinates of the cursor
+   * Returns X coordinate of the cursor
    */
   public int getXCursor() {
     return xCursor;
   }
 
   /**
-   * Returns Y coordinates of the cursor
+   * Returns Y coordinate of the cursor
    */
   public int getYCursor() {
     return yCursor;
+  }
+
+  /**
+   * Sets the cursor position
+   * @param x X coordinate of the cursor
+   * @param y Y coordinate of the cursor
+   */
+  public void setCursor(int x,int y) {
+    xCursor = x;
+    yCursor = y;
+    cursorMove(false);
   }
 
   /**
@@ -240,7 +273,7 @@ public class J3DTrend extends JComponent implements MouseListener, MouseMotionLi
   public void clearCursor() {
     xCursor = -1;
     yCursor = -1;
-    cursorMove();
+    cursorMove(false);
   }
 
   protected void paintAxis(Graphics g) {
@@ -293,10 +326,14 @@ public class J3DTrend extends JComponent implements MouseListener, MouseMotionLi
   }
 
   public void cursorMove() {
+    cursorMove(true);
+  }
+
+  public void cursorMove(boolean fireUpdate) {
 
     if (parent != null) {
-      if (isCursorInside()) parent.updateCursor(xCursor, yCursor);
-      else parent.updateCursor(-1, -1);
+      if (isCursorInside()) parent.updateCursor(xCursor, yCursor,fireUpdate);
+      else parent.updateCursor(-1, -1,fireUpdate);
     }
     repaint();
 

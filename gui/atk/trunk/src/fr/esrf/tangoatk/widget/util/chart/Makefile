@@ -1,3 +1,5 @@
+BEANINFO= JLChartBeanInfo.java
+
 include ../../../../../../../.make-include
 
 ALL = $(TARGET)/DataList.class            \
@@ -18,8 +20,8 @@ ALL = $(TARGET)/DataList.class            \
       $(TARGET)/GraphicsUtils.class \
       $(TARGET)/ColorItem.class \
       $(TARGET)/JLChartActionEvent.class
-      
-all: chart mathchart icons
+
+all: chart mathchart icons beaninfo
 
 jdoc: icons
 

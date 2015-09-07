@@ -1,0 +1,2 @@
+Name: fr/esrf/tangoatk/widget/util/chart/JLChart.class
+Java-Bean: True
