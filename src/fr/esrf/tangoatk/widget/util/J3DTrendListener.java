@@ -5,6 +5,6 @@ package fr.esrf.tangoatk.widget.util;
  */
 public interface J3DTrendListener {
 
-  public void updateCursor(int x,int y);
+  public void updateCursor(int x,int y,boolean fireCursorChange);
 
 }

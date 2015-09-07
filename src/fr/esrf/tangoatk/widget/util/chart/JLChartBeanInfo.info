@@ -1,0 +1,7 @@
+name = JLChart
+package fr.esrf.tangoatk.widget.util.chart
+
+properties = XAxisOnBottom,HeaderFont,Margin,ChartBackground,PaintAxisFirst,HeaderVisible,Header,DisplayDuration,HeaderColor,LabelVisible,LabelPlacement,LabelFont
+
+ICON_COLOR_16x16 = JLChart.gif
+ICON_COLOR_32x32 = JLChart32.gif

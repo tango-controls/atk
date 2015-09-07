@@ -823,6 +823,13 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
   }
 
   /**
+   * Returns true if the header is visible, false otherwise
+ a  */
+  public boolean isHeaderVisible() {
+    return headerVisible;
+  }
+
+  /**
    * Sets the header and displays it.
    * @param s Graph header
    * @see JLChart#getHeader
@@ -997,6 +1004,13 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
   public void setHeaderColor(Color c) {
     headerColor = c;
     setHeaderVisible(true);
+  }
+
+  /**
+   * Returns the header color
+   */
+  public Color getHeaderColor() {
+    return headerColor;
   }
 
   /**
