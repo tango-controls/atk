@@ -3002,14 +3002,6 @@ public class JLAxis implements java.io.Serializable {
 
         }
 
-        // Draw marker
-        if (showMarker) {
-          if (py >= yMin && py <= yMax) {
-            g2.setColor(v.getMarkerColor());
-            paintMarker(g2, v.getMarker(), v.getMarkerSize(), px+ xOrg, py+ yOrg);
-          }
-        }
-
         l = l.next;
         end = (l == null) || px >= xDim;
 
@@ -3033,7 +3025,7 @@ public class JLAxis implements java.io.Serializable {
 
         if (mins[i] <= maxs[i]) {
 
-          // Draw entry point if any
+          // Draw entry point (if any)
           if (xin != Integer.MIN_VALUE) {
             g2.drawLine(xin + xOrg, yin + yOrg, i + xOrg, hin[i] + yOrg);
           }
@@ -3048,12 +3040,37 @@ public class JLAxis implements java.io.Serializable {
 
       }
 
-      // Draw exit point if any
+      // Draw exit point (if any)
       if (xout != Integer.MIN_VALUE) {
         g2.drawLine(xin + xOrg, yin + yOrg, xout + xOrg, yout + yOrg);
       }
 
       g2.setStroke(old);
+
+    }
+
+    if (showMarker) {
+
+      for (int i = 0; i < xDim; i++) {
+
+        if (mins[i] <= maxs[i]) {
+
+          // Draw marker on the entry point (if any)
+          if (xin != Integer.MIN_VALUE) {
+            g2.drawLine(xin + xOrg, yin + yOrg, i + xOrg, hin[i] + yOrg);
+            // Draw marker on the entry point
+            if (yin + yOrg >= yMin && yin + yOrg <= yMax) {
+              g2.setColor(v.getMarkerColor());
+              paintMarker(g2, v.getMarker(), v.getMarkerSize(), xin + xOrg, yin + yOrg);
+            }
+          }
+
+        }
+
+        xin = i;
+        yin = hout[i];
+
+      }
 
     }
 
