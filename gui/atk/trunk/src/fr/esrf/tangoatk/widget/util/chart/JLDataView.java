@@ -207,6 +207,8 @@ public class JLDataView implements java.io.Serializable {
   private int mathFunction = MATH_NONE;
   private boolean drawOnNaN = false;
   private Vector<ChangeListener> listeners = null;
+  private double samplingFreq = Double.NaN;
+  private boolean removeAverage = false;
 
   // A boolean to know whether data is supposed to be sorted on x
   protected boolean xDataSorted = true;
@@ -2047,6 +2049,35 @@ public class JLDataView implements java.io.Serializable {
   }
 
   /**
+   * Remove average when calculating FFT
+   */
+  public void setRemoveAverage(boolean remove) {
+    removeAverage = remove;
+  }
+
+  /**
+   * Returns true if average is removed during FFT calculation
+   */
+  public boolean getRemoveAverage() {
+    return removeAverage;
+  }
+
+  /**
+   * Sets the smapling freqncy used for FFT calculation
+   * @param f Smapling frequnecy
+   */
+  public void setSamplingFrequency(double f) {
+    samplingFreq = f;
+  }
+
+  /**
+   * Get the smapling freqncy used for FFT calculation
+   */
+  public double getSamplingFrequency() {
+    return samplingFreq;
+  }
+
+  /**
    * Performs FFT of the input signal (Requires constant x intervals)
    * @param in Input signal
    * @param mode 0=>modulus 1=>argument
@@ -2063,12 +2094,20 @@ public class JLDataView implements java.io.Serializable {
     while(nbSample!=0) { nbSample = nbSample >> 1; p++; }
     nbSample = 1 << p;
 
+    double avg = 0.0;
+    if(removeAverage) {
+      // Compute average
+      for(i=0;i<in.length;i++)
+        avg += in[i].y;
+      avg = avg/(double)in.length;
+    }
+
     // Create initial array
     double[] real = new double[nbSample];
     double[] imag = new double[nbSample];
     for(i=0;i<in.length;i++) {
       idx = reverse(i,p);
-      real[idx] = in[i].y;
+      real[idx] = in[i].y-avg;
       imag[idx] = 0.0;
     }
     for(;i<nbSample;i++) {
@@ -2076,7 +2115,14 @@ public class JLDataView implements java.io.Serializable {
       real[idx] = 0.0;
       imag[idx] = 0.0;
     }
-    double fs = 1.0 / (in[1].x - in[0].x); // Sampling frequency
+    double fs;
+
+    if(Double.isNaN(samplingFreq) ) {
+      // Default sampling frequency (Assume x coordinates are in second)
+      fs = 1.0 / (in[1].x - in[0].x);
+    } else {
+      fs = samplingFreq;
+    }
 
     // Do the FFT
     int blockEnd = 1;
