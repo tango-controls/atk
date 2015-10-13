@@ -281,6 +281,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
    */
   public void clearData() {
     setData(null,null);
+    trend.clearCursor();
   }
 
   /**
@@ -625,6 +626,14 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   }
 
   /**
+   * Add the given NumberSpectrumTrend3DViewerListener
+   * @param l NumberSpectrumTrend3DViewerListener
+   */
+  public void addNumberSpectrumTrend3DViewerListener(NumberSpectrumTrend3DViewerListener l) {
+    listenerList.add(NumberSpectrumTrend3DViewerListener.class,  l);
+  }
+
+  /**
    * Add the given cursor listener
    * @param l I3DTrendCursorListener
    */
@@ -818,86 +827,117 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
         format = model.getFormat();
       }
 
-      if (xCursor < 0) {
-        statusLabel.setText(modelName);
-      } else {
-        long time = getTimeAt(xCursor);
-        if (time == 0) {
-          statusLabel.setText(modelName + "  | no data at marker position");
+      NumberSpectrumTrend3DViewerListener[] list = (NumberSpectrumTrend3DViewerListener[]) (listenerList.getListeners(NumberSpectrumTrend3DViewerListener.class));
+
+      if( list.length>0 ) {
+
+        // Call listener to get status string
+        int yIndex;
+        if (vZoom >= 1) {
+          yIndex = (int) ((yCursor / vZoom) * yGain + yOffset + 0.5);
         } else {
-          String timeStr = buildTime(time);
-          double val = getValueAt(xCursor, yCursor);
+          yIndex = (int) ((yCursor * (-vZoom)) * yGain + yOffset + 0.5);
+        }
 
-          if (Double.isNaN(val)) {
+        int xIndex;
+        if (hZoom >= 1) {
+          xIndex = historyLength - xCursor / hZoom - 1;
+        } else {
+          xIndex = historyLength - xCursor * (-hZoom) - 1;
+        }
 
-            if (vZoom >= 1) {
+        long time = getTimeAt(xCursor);
+        double val = getValueAt(xCursor, yCursor);
 
-              int yIndex = (int) ((yCursor / vZoom) * yGain + yOffset + 0.5);
-              if (yIndex >= 0 && yIndex < yIndexName.length) {
-                statusLabel.setText(modelName + "  | " + timeStr + " " +
-                        valueName + "=NaN at " + yName + "=" +
-                        yIndexName[yIndex] + " " + yUnit);
-              } else {
-                statusLabel.setText(modelName + "  | " + timeStr + " " +
-                        valueName + "=NaN at " + yName + "=" +
-                        ((yCursor / vZoom) * yGain + yOffset) + " " + yUnit);
-              }
+        String status = list[0].getStatusLabel(this,xIndex,yIndex,time,val);
+        statusLabel.setText(status);
 
-            } else {
+      } else {
 
-              int yIndex = (int) ((yCursor * (-vZoom)) * yGain + yOffset + 0.5);
-              if (yIndex >= 0 && yIndex < yIndexName.length) {
+        // Default behavior
 
-                statusLabel.setText(modelName + "  | " + timeStr + " " +
-                        valueName + "=NaN at " + yName + "=" +
-                        yIndexName[yIndex] + " " + yUnit);
-
-              } else {
-                statusLabel.setText(modelName + "  | " + timeStr + " " +
-                        valueName + "=NaN at " + yName + "=" +
-                        ((yCursor * (-vZoom)) * yGain + yOffset) + " " + yUnit);
-              }
-
-            }
-
+        if (xCursor < 0) {
+          statusLabel.setText(modelName);
+        } else {
+          long time = getTimeAt(xCursor);
+          if (time == 0) {
+            statusLabel.setText(modelName + "  | no data at marker position");
           } else {
+            String timeStr = buildTime(time);
+            double val = getValueAt(xCursor, yCursor);
 
-            String value;
-            if (format.length() > 0) {
-              value = ATKFormat.format(format, val);
-            } else {
-              value = Double.toString(val);
-            }
+            if (Double.isNaN(val)) {
 
-            if (vZoom >= 1) {
+              if (vZoom >= 1) {
 
-              int yIndex = (int) ((yCursor / vZoom) * yGain + yOffset + 0.5);
-              if (yIndex >= 0 && yIndex < yIndexName.length) {
-                statusLabel.setText(modelName + "  | " + timeStr + " " +
-                        valueName + "=" + value + " " + modelUnit + " at " + yName + "=" +
-                        yIndexName[yIndex] + " " + yUnit);
+                int yIndex = (int) ((yCursor / vZoom) * yGain + yOffset + 0.5);
+                if (yIndex >= 0 && yIndex < yIndexName.length) {
+                  statusLabel.setText(modelName + "  | " + timeStr + " " +
+                      valueName + "=NaN at " + yName + "=" +
+                      yIndexName[yIndex] + " " + yUnit);
+                } else {
+                  statusLabel.setText(modelName + "  | " + timeStr + " " +
+                      valueName + "=NaN at " + yName + "=" +
+                      ((yCursor / vZoom) * yGain + yOffset) + " " + yUnit);
+                }
 
               } else {
-                statusLabel.setText(modelName + "  | " + timeStr + " " +
-                        valueName + "=" + value + " " + modelUnit + " at " + yName + "=" +
-                        ((yCursor / vZoom) * yGain + yOffset) + " " + yUnit);
+
+                int yIndex = (int) ((yCursor * (-vZoom)) * yGain + yOffset + 0.5);
+                if (yIndex >= 0 && yIndex < yIndexName.length) {
+
+                  statusLabel.setText(modelName + "  | " + timeStr + " " +
+                      valueName + "=NaN at " + yName + "=" +
+                      yIndexName[yIndex] + " " + yUnit);
+
+                } else {
+                  statusLabel.setText(modelName + "  | " + timeStr + " " +
+                      valueName + "=NaN at " + yName + "=" +
+                      ((yCursor * (-vZoom)) * yGain + yOffset) + " " + yUnit);
+                }
 
               }
 
             } else {
 
-              int yIndex = (int) ((yCursor * (-vZoom)) * yGain + yOffset + 0.5);
-              if (yIndex >= 0 && yIndex < yIndexName.length) {
+              String value;
+              if (format.length() > 0) {
+                value = ATKFormat.format(format, val);
+              } else {
+                value = Double.toString(val);
+              }
 
-                statusLabel.setText(modelName + "  | " + timeStr + " " +
-                        valueName + "=" + value + " " + modelUnit + " at " + yName + "=" +
-                        yIndexName[yIndex] + " " + yUnit);
+              if (vZoom >= 1) {
+
+                int yIndex = (int) ((yCursor / vZoom) * yGain + yOffset + 0.5);
+                if (yIndex >= 0 && yIndex < yIndexName.length) {
+                  statusLabel.setText(modelName + "  | " + timeStr + " " +
+                      valueName + "=" + value + " " + modelUnit + " at " + yName + "=" +
+                      yIndexName[yIndex] + " " + yUnit);
+
+                } else {
+                  statusLabel.setText(modelName + "  | " + timeStr + " " +
+                      valueName + "=" + value + " " + modelUnit + " at " + yName + "=" +
+                      ((yCursor / vZoom) * yGain + yOffset) + " " + yUnit);
+
+                }
 
               } else {
 
-                statusLabel.setText(modelName + "  | " + timeStr + " " +
-                        valueName + "=" + value + " " + modelUnit + " at " + yName + "=" +
-                        ((yCursor * (-vZoom)) * yGain + yOffset) + " " + yUnit);
+                int yIndex = (int) ((yCursor * (-vZoom)) * yGain + yOffset + 0.5);
+                if (yIndex >= 0 && yIndex < yIndexName.length) {
+
+                  statusLabel.setText(modelName + "  | " + timeStr + " " +
+                      valueName + "=" + value + " " + modelUnit + " at " + yName + "=" +
+                      yIndexName[yIndex] + " " + yUnit);
+
+                } else {
+
+                  statusLabel.setText(modelName + "  | " + timeStr + " " +
+                      valueName + "=" + value + " " + modelUnit + " at " + yName + "=" +
+                      ((yCursor * (-vZoom)) * yGain + yOffset) + " " + yUnit);
+
+                }
 
               }
 

@@ -43,6 +43,7 @@ include ../../../../../../.make-include
 
 
 ALL =	$(TARGET)/IAttributeViewer.class            \
+  $(TARGET)/NumberSpectrumTrend3DViewerListener.class \
   $(TARGET)/I3DTrendChangeListener.class      \
   $(TARGET)/I3DTrendCursorListener.class      \
 	$(TARGET)/SimpleScalarViewer.class          \
