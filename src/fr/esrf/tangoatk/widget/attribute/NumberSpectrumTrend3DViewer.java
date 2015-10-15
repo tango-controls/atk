@@ -834,9 +834,9 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
         // Call listener to get status string
         int yIndex;
         if (vZoom >= 1) {
-          yIndex = (int) ((yCursor / vZoom) * yGain + yOffset + 0.5);
+          yIndex = (yCursor / vZoom);
         } else {
-          yIndex = (int) ((yCursor * (-vZoom)) * yGain + yOffset + 0.5);
+          yIndex = (yCursor * (-vZoom));
         }
 
         int xIndex;
@@ -849,7 +849,12 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
         long time = getTimeAt(xCursor);
         double val = getValueAt(xCursor, yCursor);
 
-        String status = list[0].getStatusLabel(this,xIndex,yIndex,time,val);
+        String status;
+        if( xCursor<0 | yCursor<0)
+          status = list[0].getStatusLabel(this,-1,-1,time,val);
+        else
+          status = list[0].getStatusLabel(this,xIndex,yIndex,time,val);
+
         statusLabel.setText(status);
 
       } else {
