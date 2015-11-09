@@ -279,8 +279,10 @@ public interface IAttribute extends IEntity
      * Setting this property to true means that the attribute should
      * not read nor distribute new values when its refresh is called
      */
+    @Deprecated
     public void setSkippingRefresh(boolean b);
 
+    @Deprecated
     public boolean isSkippingRefresh();
     
     /**
