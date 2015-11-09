@@ -102,7 +102,7 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
 
   public void refresh() {
 
-    if (skippingRefresh) return;
+//    if (skippingRefresh) return;
     refreshCount++;
     try {
 
@@ -149,7 +149,7 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
 
   public void dispatch(DeviceAttribute attValue) {
 
-    if (skippingRefresh) return;
+//    if (skippingRefresh) return;
     refreshCount++;
     try {
 

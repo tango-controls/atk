@@ -124,7 +124,7 @@ public class BooleanSpectrum extends AAttribute
       DeviceAttribute           att = null;
       
       
-      if (skippingRefresh) return;
+//      if (skippingRefresh) return;
       refreshCount++;
       try
       {
@@ -165,7 +165,7 @@ public class BooleanSpectrum extends AAttribute
   
   public void dispatch(DeviceAttribute attValue)
   {
-      if (skippingRefresh) return;
+//      if (skippingRefresh) return;
       refreshCount++;
       try
       {

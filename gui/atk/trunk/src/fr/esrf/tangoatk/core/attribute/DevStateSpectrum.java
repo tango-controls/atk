@@ -114,7 +114,7 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
       long                      t0 = System.currentTimeMillis();
 
 
-      if (skippingRefresh) return;
+//      if (skippingRefresh) return;
       refreshCount++;
       trace(DeviceFactory.TRACE_REFRESHER, "DevStateSpectrum.refresh() method called for " + getName(), t0);
       try
@@ -154,7 +154,7 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
 
     public void dispatch(DeviceAttribute attValue)
     {
-       if (skippingRefresh) return;
+//       if (skippingRefresh) return;
        refreshCount++;
        try
        {

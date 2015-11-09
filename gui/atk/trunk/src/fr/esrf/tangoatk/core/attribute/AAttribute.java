@@ -58,7 +58,7 @@ public abstract class AAttribute implements IAttribute,
   transient protected AtkTimer timer;
   protected String state = OK;
   protected long timeStamp;
-  protected boolean skippingRefresh = false;
+  @Deprecated protected boolean skippingRefresh = false;
   protected String alias;
   protected long refreshCount = 0;
   protected long changeCount = 0;
@@ -899,10 +899,12 @@ public abstract class AAttribute implements IAttribute,
     return getYDimension();
   }
 
+  @Deprecated
   public void setSkippingRefresh(boolean b) {
     skippingRefresh = b;
   }
 
+ @Deprecated 
   public boolean isSkippingRefresh() {
     return skippingRefresh;
   }

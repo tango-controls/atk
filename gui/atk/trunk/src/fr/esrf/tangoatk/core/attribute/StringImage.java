@@ -88,7 +88,7 @@ public class StringImage extends AAttribute implements IStringImage
       DeviceAttribute           att = null;
       
       
-      if (skippingRefresh) return;
+//      if (skippingRefresh) return;
 
       refreshCount++;
       try
@@ -122,7 +122,7 @@ public class StringImage extends AAttribute implements IStringImage
 
   public void dispatch(DeviceAttribute attValue) {
 
-    if (skippingRefresh) return;
+//    if (skippingRefresh) return;
     refreshCount++;
     try {
       try {

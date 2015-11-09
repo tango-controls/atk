@@ -85,7 +85,7 @@ public class StringSpectrum extends AAttribute
   {
     DeviceAttribute           da = null;
 
-    if (skippingRefresh) return;
+//    if (skippingRefresh) return;
     refreshCount++;
     try {
 
@@ -129,7 +129,7 @@ public class StringSpectrum extends AAttribute
 
   public void dispatch(DeviceAttribute attValue) {
 
-    if (skippingRefresh) return;
+//    if (skippingRefresh) return;
     refreshCount++;
     try {
 
