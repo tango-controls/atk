@@ -128,7 +128,7 @@ public class NumberScalar extends ANumber
       DeviceAttribute       att = null;
       long                  t0 = System.currentTimeMillis();
 
-      if (skippingRefresh) return;
+//      if (skippingRefresh) return;
       refreshCount++;
       trace(DeviceFactory.TRACE_REFRESHER, "NumberScalar.refresh() method called for " + getName(), t0);
       try
@@ -170,7 +170,7 @@ public class NumberScalar extends ANumber
 
   public void dispatch(DeviceAttribute attValue) {
 
-    if (skippingRefresh) return;
+//    if (skippingRefresh) return;
     refreshCount++;
 
     try {

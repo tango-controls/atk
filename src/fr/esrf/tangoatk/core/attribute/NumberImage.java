@@ -58,7 +58,7 @@ public class NumberImage extends ANumber implements INumberImage
 
   public void refresh() {
 
-    if (skippingRefresh) return;
+//    if (skippingRefresh) return;
     refreshCount++;
     try {
 
@@ -105,7 +105,7 @@ public class NumberImage extends ANumber implements INumberImage
   
   public void dispatch(DeviceAttribute attValue) {
 
-    if (skippingRefresh) return;
+//    if (skippingRefresh) return;
     refreshCount++;
     try {
 

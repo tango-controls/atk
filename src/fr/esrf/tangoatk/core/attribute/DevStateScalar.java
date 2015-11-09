@@ -156,7 +156,7 @@ public class DevStateScalar extends AAttribute
       long                      t0 = System.currentTimeMillis();
      
       
-      if (skippingRefresh) return;
+//      if (skippingRefresh) return;
 
       if (!isConnected())
           reconnectAtt();
@@ -211,7 +211,7 @@ public class DevStateScalar extends AAttribute
   
   public void dispatch(DeviceAttribute attValue)
   {
-      if (skippingRefresh) return;
+//      if (skippingRefresh) return;
       refreshCount++;
       try
       {

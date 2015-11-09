@@ -157,7 +157,7 @@ public class EnumSpectrum extends AAttribute implements IEnumSpectrum, PropertyC
       DeviceAttribute           att = null;
       long                      t0 = System.currentTimeMillis();
       
-      if (skippingRefresh) return;
+//      if (skippingRefresh) return;
       refreshCount++;
       trace(DeviceFactory.TRACE_REFRESHER, "EnumSpectrum.refresh() method called for " + getName(), t0);
       try
@@ -208,7 +208,7 @@ public class EnumSpectrum extends AAttribute implements IEnumSpectrum, PropertyC
   
   public void dispatch(DeviceAttribute attValue)
   {
-      if (skippingRefresh) return;
+//      if (skippingRefresh) return;
       refreshCount++;
       try
       {

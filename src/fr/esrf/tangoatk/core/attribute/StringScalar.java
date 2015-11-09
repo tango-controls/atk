@@ -90,7 +90,7 @@ public class StringScalar extends AAttribute
       DeviceAttribute           att = null;
       
       
-      if (skippingRefresh) return;
+//      if (skippingRefresh) return;
       refreshCount++;
       try
       {
@@ -133,7 +133,7 @@ public class StringScalar extends AAttribute
   public void dispatch(DeviceAttribute attValue)
   {
 
-      if (skippingRefresh) return;
+//      if (skippingRefresh) return;
       refreshCount++;
       try
       {
