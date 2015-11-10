@@ -121,8 +121,6 @@ vrun:
 attributes-manifest:
 	(cd attribute && $(MAKE) manifest.mf)
 
-device-manifest:
-	(cd device && $(MAKE) manifest.mf)
 
 command-manifest:
 	(cd command && $(MAKE) manifest.mf)
@@ -132,7 +130,6 @@ jdraw-manifest:
 
 
 manifest: attributes-manifest \
-          device-manifest     \
           command-manifest \
 	  jdraw-manifest
 	mv manifest.mf manifest.mf.tmp; \
@@ -142,7 +139,6 @@ manifest: attributes-manifest \
             attribute/manifest.mf       \
             util/manifest.mf       \
             util/chart/manifest.mf       \
-            properties/manifest.mf       \
-            device/manifest.mf > manifest.mf ; \
+            properties/manifest.mf > manifest.mf ;     \
 	    rm manifest.mf.tmp
 
