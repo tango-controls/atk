@@ -146,8 +146,8 @@ public class StateViewer extends javax.swing.JPanel
 	   textLabel.setText(model.getDevice().getName());
 
       valueLabel.setToolTipText(model.getDevice().getName());
-      //stateAtt.refresh();
-      setCurrentState(model.getDeviceValue());
+      stateAtt.refresh();
+//      setCurrentState(model.getDeviceValue());
   }
 
   /**
@@ -409,9 +409,9 @@ public class StateViewer extends javax.swing.JPanel
        // Connect to a list of number scalar attributes
        try
        {
-          attState = (IDevStateScalar) attList.add("fp/test/1/State");
+          attState = (IDevStateScalar) attList.add("sr/d-fofbcorrection/globalx/State");
 	  stv.setModel(attState);
-	  stv.setLabel("FP status");
+	  stv.setLabel("globalx status");
        }
        catch (Exception ex)
        {
