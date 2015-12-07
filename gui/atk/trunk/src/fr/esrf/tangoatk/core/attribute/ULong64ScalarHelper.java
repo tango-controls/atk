@@ -55,7 +55,7 @@ public class ULong64ScalarHelper extends ANumberScalarHelper {
     dUnitFactor = this.attribute.getDisplayUnitFactor();
 
     if (dUnitFactor == 1.0)
-      da.insert((long) d);
+      da.insert_u64((long) d);
     else {
       long di = (long) (d / dUnitFactor);
       da.insert_u64(di);
