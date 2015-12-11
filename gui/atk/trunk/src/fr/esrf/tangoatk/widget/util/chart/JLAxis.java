@@ -1430,7 +1430,14 @@ public class JLAxis implements java.io.Serializable {
     return Math.pow(10.0, p);
   }
 
-  void computeAutoScale() {
+  /**
+   * Expert usage. Used to compute auto scale values, only once, for the Axis which are not autoScaled
+   * How to use : axis.setAutoScale(true);
+   *              axis.setMinimum(pAxis.getMin());
+   *              axis.setMaximum(pAxis.getMax());
+   *              axis.setAutoScale(false);
+   */
+  public void computeAutoScale() {
 
     int i = 0;
     int sz = dataViews.size();
