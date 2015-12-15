@@ -47,6 +47,7 @@ import fr.esrf.tangoatk.widget.properties.LabelViewer;
 
 import java.util.Vector;
 import java.awt.Color;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -79,6 +80,7 @@ public class ScalarListViewer extends javax.swing.JPanel
     private Color            arrowColor;
     private String           toolTipDisplay;
     private boolean          setterEnabled;
+    private boolean          noBorder;
     
     /* Deprecated bean properties: the setter type is automatically selected
        according the valueList present or not. */
@@ -115,6 +117,7 @@ public class ScalarListViewer extends javax.swing.JPanel
 	propertyButtonVisible = true;
 	propertyListEditable = true;
 	unitVisible = true;
+        noBorder = false;
 	booleanSetterType = BOOLEAN_DEFAULT_SETTER;
 	toolTipDisplay = TOOLTIP_DISPLAY_NONE;
         setterEnabled = true;
@@ -659,8 +662,8 @@ public class ScalarListViewer extends javax.swing.JPanel
 	   changeUnitVisibility();
 	}
     }
-
     
+
     private void changeUnitVisibility()
     {
        int                             indRow, nbRows;
@@ -698,8 +701,60 @@ public class ScalarListViewer extends javax.swing.JPanel
        } // if scalarViewers != null
 
     }
+
+    
+    public boolean getNoBorder()
+    {
+       return(noBorder);
+    }
+    
+    public void setNoBorder(boolean  nb)
+    {
+        if (noBorder != nb)
+	{
+	   noBorder = nb;
+	   changeBorder();
+	}
+    }
+
+
      
-     
+
+    private void changeBorder()
+    {
+       int                             indRow, nbRows;
+       JComponent                      jcomp = null;
+       SimpleScalarViewer              viewer=null;
+       NumberScalarComboEditor         setter=null;
+
+
+       if (scalarViewers != null)
+       {
+	  nbRows = scalarViewers.size();
+	  for (indRow=0; indRow<nbRows; indRow++)
+	  {
+	     try
+	     {
+	        jcomp = scalarViewers.get(indRow);
+		if (jcomp instanceof SimpleScalarViewer)
+		{
+		   viewer = (SimpleScalarViewer) jcomp;
+                   if (noBorder)
+                       viewer.setBorder(BorderFactory.createEmptyBorder());
+                   else
+                       viewer.setBorder(BorderFactory.createLoweredBevelBorder());
+		}
+	     }
+	     catch (Exception e)
+	     {
+	       System.out.println("ScalarListViewer : changeBorder : Caught exception  "+e.getMessage());
+	     }
+	  }
+       } // if scalarViewers != null
+
+    }
+   
+    
    /**
     * Returns the current BooleanSetterType used for all BooleanScalar attributes
     * @see #setBooleanSetterType
@@ -1248,7 +1303,10 @@ public class ScalarListViewer extends javax.swing.JPanel
                  ssViewer.setFont(theFont);
 		 ssViewer.setUnitVisible(unitVisible);
         	 ssViewer.setBackgroundColor(getBackground());
-        	 ssViewer.setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());
+                 if (noBorder)
+                     ssViewer.setBorder(BorderFactory.createEmptyBorder());
+                 else
+                     ssViewer.setBorder(BorderFactory.createLoweredBevelBorder());
 		 ssViewer.setAlarmEnabled(true);
 	         ssViewer.addTextListener(this);		 
 		 //ssViewer.setValueOffsets(0, -5);
@@ -1621,6 +1679,7 @@ public class ScalarListViewer extends javax.swing.JPanel
        //scalarlv.setSetterVisible(false);
        //scalarlv.setPropertyButtonVisible(false);
        scalarlv.setBooleanSetterType(ScalarListViewer.BOOLEAN_COMBO_SETTER);
+//       scalarlv.setNoBorder(true);
 
        // Connect to a list of scalar attributes
        try
@@ -1639,6 +1698,8 @@ public class ScalarListViewer extends javax.swing.JPanel
 	  ex.printStackTrace();
 	  System.exit(-1);
        }
+       
+//       scalarlv.setNoBorder(true);
        
        mainFrame = new JFrame();
        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
