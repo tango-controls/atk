@@ -37,7 +37,8 @@ BEANINFO= StringScalarViewerBeanInfo.java            \
 	  NumberImageViewerBeanInfo.java \
 	  RawImageViewerBeanInfo.java \
 	  ScalarLevelMeterViewerBeanInfo.java \
-	  EnumScalarComboEditorBeanInfo.java
+	  EnumScalarComboEditorBeanInfo.java\
+	  StateStatusViewerBeanInfo.java
 
 include ../../../../../../.make-include
 
@@ -117,7 +118,8 @@ ALL =	$(TARGET)/IAttributeViewer.class            \
    	$(TARGET)/NumberScalarTextEditor.class \
 	$(TARGET)/ScalarLevelMeterViewer.class \
 	$(TARGET)/BooleanSpectrumViewer.class \
-	$(TARGET)/DevStateScalarComboEditor.class
+	$(TARGET)/DevStateScalarComboEditor.class \
+	$(TARGET)/StateStatusViewer.class
 
 #	$(TARGET)/AttributeBarChart.class
 
