@@ -1440,7 +1440,8 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     Insets insets = getInsets();
     int bW = (insets.right+insets.left);
     int bH = (insets.bottom+insets.top);
-    return new Dimension(zbconvert(sizeX,0)+bW, zbconvert(sizeY,0)+bH);
+    Dimension d = new Dimension(zbconvert(sizeX,0)+bW, zbconvert(sizeY,0)+bH);
+    return d;
   }
 
   public Dimension getMinimumSize() {
@@ -2613,7 +2614,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
     if (autoZoom) {
 
-      return (int) ((double) (x) / autoZoomFactor) - t;
+      return (int) ((double)(x)/autoZoomFactor+0.5) - t;
 
     } else {
 
@@ -2633,7 +2634,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
     if (autoZoom) {
 
-      return (int)((x + t) * autoZoomFactor);
+      return (int)((double)(x + t)*autoZoomFactor+0.5);
 
     } else {
 
