@@ -172,20 +172,23 @@ public class ATKGraphicsUtils {
    */
   public static void centerFrameOnScreen(Frame fr) {
 
-    Rectangle r = new Rectangle(0,0,screenSize.width,screenSize.height);
     fr.pack();
+    fr.setLocationRelativeTo(null);
 
     // Center
     int xe,ye,wx,wy;
-    wx = fr.getPreferredSize().width;
-    if(wx>screenSize.width) wx = screenSize.width;
-    wy = fr.getPreferredSize().height;
-    if(wy>screenSize.height) wy = screenSize.height;
-    xe = r.x + (r.width - wx) / 2;
-    ye = r.y + (r.height - wy) / 2;
-
-    // Set bounds
-    fr.setBounds(xe, ye, wx, wy);
+    wx = fr.getSize().width;
+    wy = fr.getSize().height;
+    if( wx>screenSize.width || wy>screenSize.height ) {
+      // Need to crop
+      Rectangle r = new Rectangle(0,0,screenSize.width,screenSize.height);
+      if(wx>screenSize.width) wx = screenSize.width;
+      if(wy>screenSize.height) wy = screenSize.height;
+      xe = r.x + (r.width - wx) / 2;
+      ye = r.y + (r.height - wy) / 2;
+      // Set bounds
+      fr.setBounds(xe, ye, wx, wy);
+    }
 
   }
 
