@@ -175,21 +175,6 @@ public class ATKGraphicsUtils {
     fr.pack();
     fr.setLocationRelativeTo(null);
 
-    // Center
-    int xe,ye,wx,wy;
-    wx = fr.getSize().width;
-    wy = fr.getSize().height;
-    if( wx>screenSize.width || wy>screenSize.height ) {
-      // Need to crop
-      Rectangle r = new Rectangle(0,0,screenSize.width,screenSize.height);
-      if(wx>screenSize.width) wx = screenSize.width;
-      if(wy>screenSize.height) wy = screenSize.height;
-      xe = r.x + (r.width - wx) / 2;
-      ye = r.y + (r.height - wy) / 2;
-      // Set bounds
-      fr.setBounds(xe, ye, wx, wy);
-    }
-
   }
 
   /**
@@ -202,39 +187,7 @@ public class ATKGraphicsUtils {
   public static void centerFrame(JComponent parent,Frame fr) {
 
     fr.pack();
-    Window parentWin = getWindowForComponent(parent);
-
-    // Get the parent rectangle
-    Rectangle r = new Rectangle(0,0,0,0);
-    if (parentWin!=null && parentWin.isVisible())
-      r = parentWin.getBounds();
-
-    // Check rectangle validity
-    if(r.width==0 || r.height==0) {
-      r.x = 0;
-      r.y = 0;
-      r.width  = screenSize.width;
-      r.height = screenSize.height;
-    }
-
-    // Center
-    int xe,ye,wx,wy;
-    wx = fr.getPreferredSize().width;
-    wy = fr.getPreferredSize().height;
-    xe = r.x + (r.width - wx) / 2;
-    ye = r.y + (r.height - wy) / 2;
-
-    // Saturate
-    if( (xe+wx) > screenSize.width )
-      xe = screenSize.width - wx;
-    if( (ye+wy) > screenSize.height )
-      ye = screenSize.height - wy;
-    if( xe<0 ) xe=0;
-    if( ye<0 ) ye=0;
-
-    // Set bounds
-    fr.setBounds(xe, ye, wx, wy);
-
+    fr.setLocationRelativeTo(parent);
 
   }
 
