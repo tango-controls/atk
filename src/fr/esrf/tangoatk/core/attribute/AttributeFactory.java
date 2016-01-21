@@ -26,6 +26,7 @@
 
 package fr.esrf.tangoatk.core.attribute;
 
+import fr.esrf.Tango.AttrWriteType;
 import fr.esrf.tangoatk.core.*;
 
 import java.util.*;
@@ -455,6 +456,40 @@ public class AttributeFactory extends AEntityFactory {
     }
 
 
+  private double getMinimumIncrement(Device device, AttributeInfoEx config) {
+
+    String name = config.name;
+    DbAttribute dbAtt;
+    String[] propVal;
+    double inc = Double.NaN;
+
+    if (config.writable == AttrWriteType.READ_WRITE) {
+
+      try {
+        dbAtt = device.get_attribute_property(name);
+        if (dbAtt != null) {
+          if (!dbAtt.is_empty("minimumIncrement")) {
+            propVal = dbAtt.get_value("minimumIncrement");
+            if (propVal != null) {
+              try {
+                inc = Double.parseDouble(propVal[0]);
+              } catch (NumberFormatException e1) {
+                System.out.println("Warning, " + device.getName() + "/" + name + "/minimumIncrement, invalid number");
+              }
+            }
+          }
+        }
+      } catch (Exception ex) {
+        System.out.println("get_attribute_property(" + name + ") thrown exception");
+        ex.printStackTrace();
+      }
+
+    }
+
+    return inc;
+
+  }
+
   private EnumScalar getEnumScalarFromTangoDevShort(Device device,AttributeInfoEx config)
   {
      String         name = config.name;
@@ -598,9 +633,11 @@ public class AttributeFactory extends AEntityFactory {
             break;
       case Tango_DEV_DOUBLE:
             ns.setNumberHelper(new DoubleScalarHelper(ns));
+            ns.setMinimumIncrement(getMinimumIncrement(device, config));
             break;
       case Tango_DEV_FLOAT:
             ns.setNumberHelper(new FloatScalarHelper(ns));
+            ns.setMinimumIncrement(getMinimumIncrement(device, config));
             break;
       case Tango_DEV_LONG:
             ns.setNumberHelper(new LongScalarHelper(ns));

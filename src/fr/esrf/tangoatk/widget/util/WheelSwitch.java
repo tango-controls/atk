@@ -74,6 +74,7 @@ public class WheelSwitch extends JComponent {
     private String format = "%5.2f";
     private boolean editable; // Edition
     private char decimalSeparator = '.';
+    private double minimumIncrement=0.0;
 
     // Arrow buttons
     private JArrowButton buttons_up[];
@@ -169,6 +170,19 @@ public class WheelSwitch extends JComponent {
             }
           });
         }
+    }
+
+  /**
+   * Sets the minimum increment. When try to add a value lower than minimumIncrement,
+   * minimumIncrement is added.
+   * @param inc Minimum increment
+   */
+    public void setMinimumIncrement(double inc) {
+      minimumIncrement = inc;
+    }
+
+    public double getMinimumIncrement() {
+      return minimumIncrement;
     }
 
     public Dimension getPreferredSize() {
@@ -1026,8 +1040,13 @@ public class WheelSwitch extends JComponent {
         double newValue = near(dval1) * Math.pow(10, dval2);
 
         if (!Double.isNaN(newValue)) {
-            //double newValue = near(value + Math.pow(10, (intNumber - idx -
-            // 1)));
+
+            double curValue = getValue();
+            double delta = Math.abs(curValue-newValue);
+            if(delta<minimumIncrement) {
+              newValue = curValue + minimumIncrement;
+            }
+
             if ((newValue <= maxValue) && (newValue >= minValue)) {
                 //value = newValue;
                 setValue(newValue);
@@ -1091,17 +1110,21 @@ public class WheelSwitch extends JComponent {
         double newValue = near(dval1) * Math.pow(10, dval2);
 
         if (!Double.isNaN(newValue)) {
-           
-            //double newValue = near(value + Math.pow(10, (intNumber - idx -
-            // 1)));
-            if ((newValue <= maxValue) && (newValue >= minValue)) {
-                //value = newValue;
-                setValue(newValue);
-                if (format.indexOf('e') > 0) {
-                    reformat(ATKFormat.format(format, value), intNumber, fracNumber);
-                }  
-            }
-            fireValueChange();
+
+          double curValue = getValue();
+          double delta = Math.abs(curValue-newValue);
+          if(delta<minimumIncrement) {
+            newValue = curValue - minimumIncrement;
+          }
+
+          if ((newValue <= maxValue) && (newValue >= minValue)) {
+              //value = newValue;
+              setValue(newValue);
+              if (format.indexOf('e') > 0) {
+                  reformat(ATKFormat.format(format, value), intNumber, fracNumber);
+              }
+          }
+          fireValueChange();
         }
         updateButtonVisibility();
         /*if (!Double.isNaN(value)) {
@@ -1324,7 +1347,8 @@ public class WheelSwitch extends JComponent {
         });
 
         // float format
-        ws2.setFormat("%6.0f");
+        ws2.setFormat("%6.2f");
+        ws2.setMinimumIncrement(0.05);
         ws2.setButtonColor(Color.GREEN);
         ws2.setValue(-12.5);
         ws2.setMaxValue(75.0);
