@@ -27,8 +27,12 @@
 
 package fr.esrf.tangoatk.widget.attribute;
 
+import fr.esrf.Tango.DevFailed;
+import fr.esrf.TangoApi.DbAttribute;
+import fr.esrf.TangoApi.DbDatum;
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.core.attribute.ANumber;
+import fr.esrf.tangoatk.core.attribute.NumberScalar;
 import fr.esrf.tangoatk.widget.util.*;
 import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
 
@@ -71,12 +75,17 @@ public class NumberScalarWheelEditor extends WheelSwitch
     if (!m.isWritable())
       throw new IllegalArgumentException("NumberScalarWheelEditor: Only accept writeable attribute.");
 
-
     model = m;
 
     // Register new listener
     model.addNumberScalarListener(this);
     model.getProperty("format").addPresentationListener(this);
+
+    // Set minimumIncrement if defined
+    NumberScalar ns = (NumberScalar)model;
+    if( !Double.isNaN(ns.getMinimumIncrement())) {
+      setMinimumIncrement(ns.getMinimumIncrement());
+    }
 
     setFormat(model.getProperty("format").getPresentation(),model.getName());
     
@@ -250,7 +259,7 @@ public class NumberScalarWheelEditor extends WheelSwitch
     try {
 
       nsv.setFont(new java.awt.Font("Lucida Bright", java.awt.Font.BOLD, 22));
-      final INumberScalar attr = (INumberScalar) attributeList.add("test/universal/1/DevULong64RW");
+      final INumberScalar attr = (INumberScalar) attributeList.add("sy/rfssa-pinatt/tra0/Attenuation1");
       nsv.setModel(attr);
       nsv2.setModel(attr);
       attributeList.setRefreshInterval(1000);

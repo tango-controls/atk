@@ -33,12 +33,13 @@ import fr.esrf.TangoApi.events.*;
 
 public class NumberScalar extends ANumber
   implements INumberScalar {
+
   double              scalarValue;
   double              setPointValue;
   double              devScalarValue;
   double              devSetPointValue;
   double[]            possibleValues = null;
-
+  double              minimumIncrement = Double.NaN;
 
   // TODO better solution : TEMP
   public ANumberScalarHelper getNumberScalarHelper()
@@ -55,6 +56,14 @@ public class NumberScalar extends ANumber
 
   public IScalarAttribute getReadableAttribute() {
     return null;
+  }
+
+  public double getMinimumIncrement() {
+    return minimumIncrement;
+  }
+
+  public void setMinimumIncrement(double inc) {
+    minimumIncrement = inc;
   }
 
   public int getXDimension() {
