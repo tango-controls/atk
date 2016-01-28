@@ -115,3 +115,6 @@ Java-Bean: True
 Name: fr/esrf/tangoatk/widget/attribute/EnumScalarComboEditor.class
 Java-Bean: True
 
+Name: fr/esrf/tangoatk/widget/attribute/StateStatusViewer.class
+Java-Bean: True
+
