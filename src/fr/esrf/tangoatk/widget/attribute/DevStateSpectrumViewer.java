@@ -115,6 +115,7 @@ public class DevStateSpectrumViewer extends javax.swing.JPanel
     setVisible(true);
 
     model.addDevStateSpectrumListener(this);
+    model.refresh();
 
   }
 
@@ -370,6 +371,7 @@ public class DevStateSpectrumViewer extends javax.swing.JPanel
   }
 
 
+  @Override
   public void devStateSpectrumChange(DevStateSpectrumEvent evt) {
     String[] newStates = evt.getValue();
     if (newStates == null)
@@ -402,7 +404,7 @@ public class DevStateSpectrumViewer extends javax.swing.JPanel
       if (colorJLabels != null) {
         try {
           colLab = colorJLabels.get(idx);
-          colLab.setBackground(ATKConstant.getColor4State(newStates[idx]));
+          colLab.setBackground(ATKConstant.getColor4State(newStates[idx], model.getInvertedOpenCloseForElement(idx), model.getInvertedInsertExtractForElement(idx)));
         } catch (Exception ex) {
         }
       }
@@ -453,50 +455,41 @@ public class DevStateSpectrumViewer extends javax.swing.JPanel
         elemLabel.setText(modelLabel + "[" + idx + "]");
     }
   }
+  
+  
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[])
+    {
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable()
+        {
+            public void run()
+            {
+                AttributeList               attList = new AttributeList();
+                IDevStateSpectrum           stateSpectAtt = null;
 
-
-  public static void main(String[] args) {
-    final fr.esrf.tangoatk.core.AttributeList attList = new fr.esrf.tangoatk.core.AttributeList();
-    DevStateSpectrumViewer dssv = new DevStateSpectrumViewer();
-    IDevStateSpectrum stateSpectAtt;
-    JFrame mainFrame;
-
-
-    //dssv.setBackground(Color.white);
-    //dssv.setForeground(Color.black);
-    //dssv.setGlobalFont(new java.awt.Font("Lucida Bright", java.awt.Font.PLAIN, 18));
-    //dssv.setStateStringVisible(false);
-    //dssv.setStateLabelVisible(false);
-
-    // Connect to a devStateSpectrum attribute
-    try {
-      stateSpectAtt = (IDevStateSpectrum) attList.add("sr/rf-cavi/cav56/SubDevicesStates");
-      dssv.setModel(stateSpectAtt);
-
-    } catch (Exception ex) {
-      System.out.println("caught exception : " + ex.getMessage());
-      ex.printStackTrace();
-      System.exit(-1);
+                try
+                {
+                    stateSpectAtt = (IDevStateSpectrum) attList.add("sr/rf-cavi/cav12/SubDevicesStates");
+                }
+                catch (Exception ex) {}
+                
+                if (stateSpectAtt == null) System.exit(-1);
+                attList.startRefresher();
+                
+                JFrame                      mainFrame = new JFrame();
+                DevStateSpectrumViewer      dssv = new DevStateSpectrumViewer();
+                dssv.setModel(stateSpectAtt);
+                
+                mainFrame.setContentPane(dssv);
+                mainFrame.pack();
+                mainFrame.setVisible(true);
+            }
+        });
     }
 
-    mainFrame = new JFrame();
-
-    mainFrame.addWindowListener(
-        new java.awt.event.WindowAdapter() {
-          public void windowActivated(java.awt.event.WindowEvent evt) {
-            // To be sure that the refresher (an independente thread)
-            // will begin when the the layout manager has finished
-            // to size and position all the components of the window
-            attList.startRefresher();
-          }
-        }
-    );
 
 
-    mainFrame.setContentPane(dssv);
-    mainFrame.pack();
-
-    mainFrame.setVisible(true);
-
-  } // end of main ()
 }
