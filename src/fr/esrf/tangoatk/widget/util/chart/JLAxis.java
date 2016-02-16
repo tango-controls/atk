@@ -2084,18 +2084,19 @@ public class JLAxis implements java.io.Serializable {
   // Expert usage
   private void computeLabels(FontRenderContext frc, double length) {
 
-    // XXX Vincent Hardion max < min ???
     if (max < min) {
-//      StringBuffer errorBuffer = new StringBuffer("Error found in JLAxis");
-//      errorBuffer.append("\nMethod computeLabels(FontRenderContext,double)");
-//      errorBuffer.append("\nmax < min : ");
-//      errorBuffer.append("max = ").append(max);
-//      errorBuffer.append(", min = ").append(min);
-//      errorBuffer.append("\nInverting min and max values to avoid problems");
-//      System.err.println( errorBuffer.toString() );
+      // (Vincent Hardion) max < min ???
+      // Switch min and max
    	  double a = min;
    	  min=max;
    	  max=a;
+    }
+
+    if( Double.isInfinite(min) || Double.isInfinite(max) ) {
+      // Unable to compute
+      // Reset to default
+      min = 0.0;
+      max = 100.0;
     }
 
     double sz = max - min;
