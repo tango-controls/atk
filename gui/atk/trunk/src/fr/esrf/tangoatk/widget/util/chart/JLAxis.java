@@ -2092,11 +2092,17 @@ public class JLAxis implements java.io.Serializable {
    	  max=a;
     }
 
-    if( Double.isInfinite(min) || Double.isInfinite(max) ) {
+    if( Double.isInfinite(min) || Double.isInfinite(max) ||
+        Double.isNaN(min) || Double.isNaN(max) ) {
       // Unable to compute
       // Reset to default
-      min = 0.0;
-      max = 100.0;
+      if (scale != LOG_SCALE) {
+        min = 0.0;
+        max = 100.0;
+      } else {
+        min = 0.0;
+        max = 2.0;
+      }
     }
 
     double sz = max - min;
