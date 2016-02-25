@@ -1590,12 +1590,12 @@ public class NetEditor extends JComponent implements MouseListener, MouseMotionL
   // Miscelaneous stuff
   // ---------------------------------------------------------------
 
-  private void error(String m) {
+  void error(String m) {
     JOptionPane.showMessageDialog(pFrame, m, "Error",
             JOptionPane.ERROR_MESSAGE);
   }
 
-  private void fireValueChanged() {
+  void fireValueChanged() {
       for(int i=0;i<listeners.size();i++)
        ((NetEditorListener)listeners.get(i)).valueChanged(this);
   }
