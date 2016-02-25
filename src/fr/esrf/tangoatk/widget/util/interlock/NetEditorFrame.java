@@ -32,6 +32,7 @@ package fr.esrf.tangoatk.widget.util.interlock;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 /** A Frame for the NetEditor. This class is a good base class to create
  * specific network editor. By default, It constructs all menus needed by
@@ -394,6 +395,20 @@ public class NetEditorFrame extends JFrame implements NetEditorListener,ActionLi
     }
 
     return null;
+
+  }
+
+  /**
+   * Load a file into the editor
+   */
+  public void loadFile(String fileName) {
+
+    try {
+      netEditor.loadFile(fileName);
+    } catch (IOException ex) {
+      netEditor.error("Error during reading file:" + fileName + "\n" + ex.getMessage());
+      netEditor.fireValueChanged();
+    }
 
   }
 
