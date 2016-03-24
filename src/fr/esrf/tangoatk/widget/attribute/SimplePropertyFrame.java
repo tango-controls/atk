@@ -23,6 +23,7 @@
 package fr.esrf.tangoatk.widget.attribute;
 
 import fr.esrf.tangoatk.core.*;
+import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.JAutoScrolledText;
 import fr.esrf.Tango.AttrWriteType;
 import fr.esrf.Tango.DispLevel;
@@ -302,12 +303,9 @@ public class SimplePropertyFrame extends JDialog {
 
     setTitle("Attribute property editor");
     placeComponents();
-
-    Toolkit toolkit = Toolkit.getDefaultToolkit();
-    Dimension scrsize = toolkit.getScreenSize();
-    int x = (scrsize.width - appsize.width) / 2;
-    int y = (scrsize.height - appsize.height) / 2;
-    setBounds(x, y, appsize.width, appsize.height);
+    Dimension d = getSize();
+    setPreferredSize(d);
+    ATKGraphicsUtils.centerDialog(this);
 
   }
 
@@ -479,7 +477,7 @@ public class SimplePropertyFrame extends JDialog {
 
     Container pane = getContentPane();
     pane.remove(1);
-    deviceText.setText(model.getDevice().getName());
+    deviceText.setText(model.getDeviceName());
     attText.setText(model.getNameSansDevice());
 
     if (model instanceof INumberScalar) {
@@ -630,7 +628,7 @@ public class SimplePropertyFrame extends JDialog {
     if (numberAndStringValue.isVisible()) {
       if ( (!numberSetter.isVisible())
               && (!stringSetter.isVisible()) ) {
-        numberAndStringValue.setBounds(5, 87, 440, 45);
+        numberAndStringValue.setBounds(5, 87, 435, 45);
       } else {
         int w = (int) numberSetter.getPreferredSize().getWidth();
         numberAndStringValue.setBounds(5, 87, 435 - w, 45);
@@ -641,7 +639,7 @@ public class SimplePropertyFrame extends JDialog {
 
     } else if (booleanValue.isVisible()) {
       if ( (!booleanSetter.isVisible()) ) {
-          booleanValue.setBounds(5, 87, 440, 45);
+          booleanValue.setBounds(5, 87, 435, 45);
       } else {
         int w = (int) booleanSetter.getPreferredSize().getWidth();
         booleanValue.setBounds(5, 87, 435 - w, 45);
@@ -696,12 +694,12 @@ public class SimplePropertyFrame extends JDialog {
     if (numberAndStringValue.isVisible() || booleanValue.isVisible()) {
       applyButton.setBounds(5, 420, 120, 30);
       infoButton.setBounds(160, 420, 120, 30);
-      okButton.setBounds(325, 420, 120, 30);
+      okButton.setBounds(322, 420, 120, 30);
       setSize(appsize);
     } else {
       applyButton.setBounds(5, 370, 120, 30);
       infoButton.setBounds(160, 370, 120, 30);
-      okButton.setBounds(325, 370, 120, 30);
+      okButton.setBounds(322, 370, 120, 30);
       Dimension d = new Dimension(appsize);
       d.height -= 50;
       setSize(d);

@@ -64,8 +64,9 @@ public class AttributeList extends AEntityList {
 
     // Add this entity within the private per device structure
     // whether the attribute is not refreshed using event
-    if(!attToAdd.hasEvents())
-      addEntity(attToAdd);
+    if(!forceRefresh)
+      if(!attToAdd.hasEvents())
+        addEntity(attToAdd);
 
   }
 
@@ -231,8 +232,8 @@ public class AttributeList extends AEntityList {
 
   public void startRefresher() {
 
-    // Check that all items in this list are device IDL > 3
-    for(int i=0;i<size();i++) {
+    // Check that all items in this list are device IDL > 3 for using optimized refresh
+    for(int i=0;i<size() && !forceRefresh;i++) {
       IAttribute att = (IAttribute)get(i);
       int idl = att.getDevice().getIdlVersion();
       if(idl<3) {

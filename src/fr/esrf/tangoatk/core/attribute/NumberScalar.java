@@ -132,7 +132,7 @@ public class NumberScalar extends ANumber
 
 
 
-  public final void refresh()
+  public void refresh()
   {
       DeviceAttribute       att = null;
       long                  t0 = System.currentTimeMillis();

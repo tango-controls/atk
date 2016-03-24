@@ -302,4 +302,10 @@ public interface IAttribute extends IEntity
      */
     public void loadAttProperties();
 
+  /**
+   * Returns the device name associated to this attribute
+   * @return Device name
+   */
+    public String getDeviceName();
+
 }

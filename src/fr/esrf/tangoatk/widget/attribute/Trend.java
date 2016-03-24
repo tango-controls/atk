@@ -816,10 +816,10 @@ public void setTimePrecision(int timePrecision) {
       int sz = attList.size();
       if( sz>1 ) {
         IAttribute s = (IAttribute)attList.get(0);
-        String dName = s.getDevice().getName();
+        String dName = s.getDeviceName();
         for(i=1;i<sz && singleDevice;i++) {
           s = (IAttribute)attList.get(i);
-          singleDevice=dName.equalsIgnoreCase(s.getDevice().getName());
+          singleDevice=dName.equalsIgnoreCase(s.getDeviceName());
         }
       }
 

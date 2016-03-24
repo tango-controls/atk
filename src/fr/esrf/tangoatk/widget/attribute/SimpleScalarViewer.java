@@ -56,6 +56,7 @@ public class SimpleScalarViewer extends JAutoScrolledText
   String userFormat = "";
   ATKFormat atkUserFormat = null;
   String format = "";
+  String state = IAttribute.VALID;
   String error = "-----";
   boolean unitVisible = true;
   Color backgroundColor;
@@ -282,12 +283,15 @@ public class SimpleScalarViewer extends JAutoScrolledText
     Double attDouble = new Double(evt.getValue());
     String dispStr;
 
-    if (Double.isNaN(evt.getValue()) || Double.isInfinite(evt.getValue()))
-    {
+    if ( state.equals(IAttribute.INVALID) ) {
+      dispStr = error;
+      if( !format.isEmpty() ) {
+        String z  = ATKFormat.format(format, 0.0);
+        dispStr = z.replace('0','-');
+      }
+    } else if(Double.isInfinite(evt.getValue()) || Double.isNaN(evt.getValue())) {
       dispStr = Double.toString(evt.getValue());
-    }
-    else
-    {
+    } else {
       if (atkUserFormat != null) {
         dispStr = atkUserFormat.format(new Double(evt.getValue()));
       } else {
@@ -394,7 +398,7 @@ public class SimpleScalarViewer extends JAutoScrolledText
   public void stateChange(AttributeStateEvent evt)
   {
 
-    String state = evt.getState();
+    state = evt.getState();
 
     if (hasToolTip)
     {
