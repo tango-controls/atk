@@ -1032,6 +1032,23 @@ public abstract class AAttribute implements IAttribute,
       // this method should be overriden as in DevStateScalar and DevStateSpectrum to perform the necessary tasks
       attPropertiesLoaded = true;
   }
-    
+
+  public String getDeviceName() {
+    if(device!=null)
+      return device.getName();
+    else
+      return getDeviceNameFromAtt(getName());
+  }
+
+  private String getDeviceNameFromAtt(String attName) {
+
+    int idx = attName.lastIndexOf('/');
+    if (idx != -1) {
+      return attName.substring(0, idx);
+    } else {
+      return attName;
+    }
+
+  }
 
 }
