@@ -2957,19 +2957,18 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
     String[] str = null;
 
     String xValue;
-    if (xAxis.getAnnotation() == JLAxis.TIME_ANNO) {
-      xValue = "Time= " + JLAxis.formatTimeValue(si.value.x);
-    }
-    else {
-      xValue = "Index= " + si.value.x;
-    }
     if (xAxis.isXY()) {
       str = new String[4];
       str[0] = si.dataView.getExtendedName() + " " + si.axis.getAxeName();
-      str[1] = xValue;
+      str[1] = JLAxis.formatTimeValue(si.value.x);
       str[2] = "X= " + si.xdataView.formatValue(si.xdataView.getTransformedValue(si.xvalue.y));
       str[3] = "Y= " + si.dataView.formatValue(si.dataView.getTransformedValue(si.value.y)) + " " + si.dataView.getUnit();
     } else {
+      if (xAxis.getAnnotation() == JLAxis.TIME_ANNO) {
+        xValue = "Time= " + JLAxis.formatTimeValue(si.value.x);
+      } else {
+        xValue = "Index= " + si.value.x;
+      }
       str = new String[3];
       str[0] = si.dataView.getExtendedName() + " " + si.axis.getAxeName();
       str[1] = xValue;
@@ -3353,6 +3352,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
     chart.getXAxis().setAnnotation(JLAxis.VALUE_ANNO);
     chart.getXAxis().setPercentScrollback(0.0);
     chart.getXAxis().setAutoScale(true);
+    chart.getXAxis().setPosition(JLAxis.HORIZONTAL_ORG1);
 
     chart.getY1Axis().setName("Y");
     chart.getY1Axis().setAutoScale(true);
@@ -3361,7 +3361,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
 
     // ---------------------------------------------
 
-    int NB_PTS = 50000;
+    int NB_PTS = 10000;
     int NB_CURVE = 1;
     Random rng = new Random(12345678);
 
@@ -3373,7 +3373,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
       for(int i=0;i<NB_PTS;i++) {
         double x = (double)i;
         if(isInRange(x,NB_PTS))
-          v[j].add(x,rng.nextDouble()*10.0);
+          v[j].add(x,rng.nextDouble()*10.0-5.0);
       }
       chart.getY1Axis().addDataView(v[j]);
     }
