@@ -2950,6 +2950,7 @@ public class JLAxis implements java.io.Serializable {
     int xDim = xMax-xMin+1;
 
     int xin=Integer.MIN_VALUE,yin=0;
+    int fxin,fyin;
     int xout=Integer.MIN_VALUE,yout=0;
 
     int px,py;
@@ -3028,6 +3029,9 @@ public class JLAxis implements java.io.Serializable {
 
     } // End (!end)
 
+    fxin = xin;
+    fyin = yin;
+
     // Draw
     if (v.getLineWidth() > 0) {
 
@@ -3065,13 +3069,15 @@ public class JLAxis implements java.io.Serializable {
 
     if (showMarker) {
 
+      xin = fxin;
+      yin = fyin;
+
       for (int i = 0; i < xDim; i++) {
 
         if (mins[i] <= maxs[i]) {
 
           // Draw marker on the entry point (if any)
           if (xin != Integer.MIN_VALUE) {
-            g2.drawLine(xin + xOrg, yin + yOrg, i + xOrg, hin[i] + yOrg);
             // Draw marker on the entry point
             if (yin + yOrg >= yMin && yin + yOrg <= yMax) {
               g2.setColor(v.getMarkerColor());
@@ -3079,10 +3085,10 @@ public class JLAxis implements java.io.Serializable {
             }
           }
 
-        }
+          xin = i;
+          yin = hout[i];
 
-        xin = i;
-        yin = hout[i];
+        }
 
       }
 

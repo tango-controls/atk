@@ -9,6 +9,7 @@ ALL = $(TARGET)/SynopticProgressListener.class \
       $(TARGET)/DeviceSynopticViewer.class \
       $(TARGET)/DeviceSynopticFrame.class \
       $(TARGET)/SimpleSynopticAppli.class \
+      $(TARGET)/SimpleMessage.class \
       $(TARGET)/../util/jdraw/JDrawEditorPanel.class \
       $(TARGET)/../util/jdraw/JDrawEditorFrame.class
       

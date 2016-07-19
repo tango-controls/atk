@@ -3361,7 +3361,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
 
     // ---------------------------------------------
 
-    int NB_PTS = 10000;
+    int NB_PTS = 50000;
     int NB_CURVE = 1;
     Random rng = new Random(12345678);
 
