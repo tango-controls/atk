@@ -2169,8 +2169,12 @@ public void setTimePrecision(int timePrecision) {
     f.setContentPane(t);
     Image image = Toolkit.getDefaultToolkit().getImage(t.getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_icon.gif"));
     if (image != null) f.setIconImage(image);
-    f.pack();
-    f.setBounds(framePos.x, framePos.y, frameDimension.x, frameDimension.y);
+    if( args.length>0 ) {
+      f.pack();
+      f.setBounds(framePos.x, framePos.y, frameDimension.x, frameDimension.y);
+    } else {
+      ATKGraphicsUtils.centerFrameOnScreen(f);
+    }
     f.setVisible(true);
 
   } // end of main ()
