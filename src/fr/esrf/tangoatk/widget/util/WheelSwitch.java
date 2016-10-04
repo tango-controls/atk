@@ -123,22 +123,6 @@ public class WheelSwitch extends JComponent {
         } catch(Exception e) {}
         */
 
-        addComponentListener(new ComponentListener() {
-            public void componentHidden(ComponentEvent e) {
-            }
-
-            public void componentMoved(ComponentEvent e) {
-            }
-
-            public void componentResized(ComponentEvent e) {
-                placeComponents();
-            }
-
-            public void componentShown(ComponentEvent e) {
-                placeComponents();
-            }
-        });
-
         if (editable) {
           addKeyListener(new KeyListener() {
             public void keyPressed(KeyEvent e) {
@@ -285,7 +269,7 @@ public class WheelSwitch extends JComponent {
         // reset digit size
         dz = null;
         computeDigitSize();
-        placeComponents();
+        if(isVisible()) placeComponents(getSize());
     }
 
     public boolean isGoodFormat()
@@ -652,7 +636,7 @@ public class WheelSwitch extends JComponent {
         nbButton = nb;
         selButton = nb - 1;
 
-        placeComponents();
+        if(isVisible()) placeComponents(getSize());
         updateButtonFocus();
         repaint();
 
@@ -1273,8 +1257,13 @@ public class WheelSwitch extends JComponent {
       return f.indexOf('x')!=-1 || f.indexOf('X')!=-1;
     }
 
+    public void setBounds(int x,int y,int w,int h) {
+      placeComponents(new Dimension(w, h));
+      super.setBounds(x,y,w,h);
+    }
+
     // Place the components
-    synchronized private void placeComponents() {
+    synchronized private void placeComponents(Dimension sz) {
 
         int total_width;
         int total_height;
@@ -1283,7 +1272,6 @@ public class WheelSwitch extends JComponent {
         computeDigitSize();
 
         // Place buttons
-        Dimension sz = getSize();
 
         if (expNumber >0)
             total_width = dz.width * (nbButton + 4);

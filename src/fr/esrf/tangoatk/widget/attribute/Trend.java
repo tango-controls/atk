@@ -2173,6 +2173,7 @@ public void setTimePrecision(int timePrecision) {
       f.pack();
       f.setBounds(framePos.x, framePos.y, frameDimension.x, frameDimension.y);
     } else {
+      t.setPreferredSize(new Dimension(640,480));
       ATKGraphicsUtils.centerFrameOnScreen(f);
     }
     f.setVisible(true);
