@@ -23,7 +23,7 @@
 
     <scm>
         <connection>scm:git:git://github.com/tango-controls/atk.git</connection>
-        <developerConnection>scm:git:git://github.com/tango-controls/atk.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:tango-controls/atk.git</developerConnection>
         <url>https://github.com/tango-controls/atk</url>
     </scm>
 
