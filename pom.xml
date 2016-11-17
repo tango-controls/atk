@@ -5,6 +5,7 @@
 
 
     <modules>
+        <module>parent</module>
         <module>core</module>
         <module>widget</module>
         <module>util</module>
@@ -15,46 +16,12 @@
     <artifactId>TangoATK</artifactId>
     <version>9.1.14-SNAPSHOT</version>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.tango</groupId>
-                <artifactId>ATKUtil</artifactId>
-                <version>9.1.14-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.tango</groupId>
-                <artifactId>ATKCore</artifactId>
-                <version>9.1.14-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.tango</groupId>
-                <artifactId>TangORB</artifactId>
-                <version>9.2.0</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
-    <distributionManagement>
-        <repository>
-            <id>bintray</id>
-            <url>https://api.bintray.com/maven/tango-controls/maven/</url>
-        </repository>
-    </distributionManagement>
-
-    <scm>
-        <connection>scm:git:git://github.com/tango-controls/atk</connection>
-        <url>https://github.com/tango-controls/atk</url>
-    </scm>
-
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-release-plugin</artifactId>
+                <artifactId>maven-deploy-plugin</artifactId>
                 <configuration>
-                    <useReleaseProfile>false</useReleaseProfile>
-                    <releaseProfiles>release</releaseProfiles>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>

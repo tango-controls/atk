@@ -6,9 +6,9 @@
 
     <parent>
         <groupId>org.tango</groupId>
-        <artifactId>TangoATK</artifactId>
+        <artifactId>atk-parent</artifactId>
         <version>9.1.14-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>ATKWidget</artifactId>
