@@ -38,9 +38,14 @@
     <distributionManagement>
         <repository>
             <id>bintray</id>
-            <url>https://api.bintray.com/maven/tango-controls/maven/??</url>
+            <url>https://api.bintray.com/maven/tango-controls/maven/</url>
         </repository>
     </distributionManagement>
+
+    <scm>
+        <connection>scm:git:git://github.com/tango-controls/atk</connection>
+        <url>https://github.com/tango-controls/atk</url>
+    </scm>
 
     <build>
         <plugins>
