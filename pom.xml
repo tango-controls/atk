@@ -16,6 +16,14 @@
     <artifactId>TangoATK</artifactId>
     <version>9.1.14-SNAPSHOT</version>
 
+
+
+    <scm>
+        <connection>scm:git:git://github.com/tango-controls/atk.git</connection>
+        <developerConnection>scm:git:git://github.com/tango-controls/atk.git</developerConnection>
+        <url>https://github.com/tango-controls/atk</url>
+    </scm>
+
     <build>
         <plugins>
             <plugin>
