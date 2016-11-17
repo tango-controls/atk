@@ -22,7 +22,7 @@ to an attribute by asking for it. You do not need a reference to the
 attributes device to obtain the attribute. The same goes for commands.
 
 Attributes and commands need to be stored somewhere, and for that we
-have supplied the `AttributeList~ and
+have supplied the `AttributeList` and
 the `CommandList`. These objects take the name of a
 command or attribute, fetch them and store them.
 
