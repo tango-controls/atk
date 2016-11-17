@@ -21,10 +21,10 @@ the central building blocks. This means that you can get a reference
 to an attribute by asking for it. You do not need a reference to the
 attributes device to obtain the attribute. The same goes for commands.
 
-    Attributes and commands need to be stored somewhere, and for that we
-    have supplied the `AttributeList~ and
-    the `CommandList`. These objects take the name of a
-    command or attribute, fetch them and store them.
+Attributes and commands need to be stored somewhere, and for that we
+have supplied the `AttributeList~ and
+the `CommandList`. These objects take the name of a
+command or attribute, fetch them and store them.
 
 
 ### I've got a running device-server, what do I do?
@@ -62,7 +62,8 @@ connect models and views, and responding to user input.
 Connecting a view to a model is done by calling
 the `setModel` method on a view with the model you want to
 connect to it as argument:
-```#!java
+
+```java
 INumberScalar      model;
 SimpleScalarViewer viewer;
 AttributeList      list;
@@ -113,7 +114,7 @@ attributes and commands from any device and mix them without having
 to know about their devices. The main entry-points into TangoATK are
 the CommandList and the AttributeList, they live in fr.esrf.TangoATK.Core
 
-```#!java
+```java
 import fr.esrf.TangoATK.Core.*;
 
 
@@ -148,7 +149,7 @@ String-arrays as arguments to their add methods.
 
 ### A graphic example
 
-```#!java
+```java
 import fr.esrf.TangoATK.Core.AttributeList;
 import fr.esrf.TangoATK.Core.INumberScalar;
 import fr.esrf.TangoATK.Core.ConnectionException;
