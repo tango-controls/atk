@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+
+    <modules>
+        <module>core</module>
+        <module>widget</module>
+        <module>util</module>
+    </modules>
+    <packaging>pom</packaging>
+
+    <groupId>org.tango</groupId>
+    <artifactId>TangoATK</artifactId>
+    <version>9.1.14-SNAPSHOT</version>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.tango</groupId>
+                <artifactId>ATKUtil</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.tango</groupId>
+                <artifactId>ATKCore</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.tango</groupId>
+                <artifactId>TangORB</artifactId>
+                <version>9.2.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <distributionManagement>
+        <repository>
+            <id>bintray</id>
+            <url>https://api.bintray.com/maven/tango-controls/maven/??</url>
+        </repository>
+    </distributionManagement>
+</project>

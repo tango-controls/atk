@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.tango</groupId>
+        <artifactId>TangoATK</artifactId>
+        <version>9.1.14-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>ATKWidget</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.tango</groupId>
+            <artifactId>ATKCore</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.gluegen</groupId>
+            <artifactId>gluegen-rt</artifactId>
+            <version>unknown</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/gluegen-rt.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.jogl</groupId>
+            <artifactId>jogl</artifactId>
+            <version>unknown</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/jogl.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.ij</groupId>
+            <artifactId>ij</artifactId>
+            <version>unknown</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/ij.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.jep</groupId>
+            <artifactId>jep</artifactId>
+            <version>unknown</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/jep.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.jepext</groupId>
+            <artifactId>jepext</artifactId>
+            <version>unknown</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/jepext.jar</systemPath>
+        </dependency>
+    </dependencies>
+
+</project>
