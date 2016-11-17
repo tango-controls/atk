@@ -1,57 +1,43 @@
-<html>
-<head>
-    <title></title>
-</head>
-<body>
-Welcome to TangoATK.
-<h1>Getting started</h1>
+# Welcome to TangoATK.
+## Getting started
 
 TangoATK is a collection of java-classes to help build applications
 which interact with Tango-devices.
-<p>
-    This document does assumes some prior knowledge:
-<ul>
-    <li>Tango - it is assumed that you already have a clear understanding
-        of devices, their attributes and their commands.
-    <li>Java - There are many excellent tutorials on java, please read them. <a
-            href="http://java.oreilly.com/">O'Reilly</a> have quite a few books on
-        the subject.
-    <li>JDK - The Java Development Kit. You are expected to know how to
-        set up a class-path and how to compile and run a java-program.
-</ul>
 
-<h2>Central concepts</h2>
+This document does assumes some prior knowledge:
+
+* Tango - it is assumed that you already have a clear understanding of devices, their attributes and their commands.
+* Java - There are many excellent tutorials on java, please read them. [O'Reilly](http://java.oreilly.com) have quite a few books on the subject.
+* JDK - The Java Development Kit. You are expected to know how to set up a class-path and how to compile and run a java-program.
+
+### Central concepts
 
 TangoATK is not built in a device-centric way. What this means is
 that in terms of TangoATK, a device is something that lurks in the
 background, but very seldom something that is worked with directly.
-<br>
+
 Instead we have chosen to look at the attributes and the commands as
 the central building blocks. This means that you can get a reference
 to an attribute by asking for it. You do not need a reference to the
 attributes device to obtain the attribute. The same goes for commands.
-<p>
+
     Attributes and commands need to be stored somewhere, and for that we
-    have supplied the <code>AttributeList</code> and
-    the <code>CommandList</code>. These objects take the name of a
+    have supplied the `AttributeList~ and
+    the `CommandList`. These objects take the name of a
     command or attribute, fetch them and store them.
 
 
-<h2>I've got a running device-server, what do I do?</h2>
+### I've got a running device-server, what do I do?
 
 First of all it is important to understand the ideas behind TangoATK.
-TangoATK is buildt using several standard <a
-        href="http://directory.google.com/Top/Computers/Programming/Methodologies/Patterns_and_Anti-Patterns/">patterns</a>
-where the most prominent one is the <a
-        href="http://www.google.com/search?hl=en&lr=&safe=off&q=model+view+controller&btnG=Google+Search">Model
-    View Controller</a> , or MVC for short. TangoATK supplies the model
+TangoATK is buildt using several standard [patterns](http://directory.google.com/Top/Computers/Programming/Methodologies/Patterns_and_Anti-Patterns)
+where the most prominent one is the [Model View Controller](http://www.google.com/search?hl=en&lr=&safe=off&q=model+view+controller&btnG=Google+Search), or MVC for short. TangoATK supplies the model
 and the view, and it is the task of the application programmer to
 create the controller.
 
-<h3>The Model</h3>
+#### The Model
 
-The model-part of TangoATK is found in the <a
-        href="fr/esrf/tangoatk/core/package-summary.html">fr.esrf.tangoatk.core</a>
+The model-part of TangoATK is found in the [fr.esrf.tangoatk.core](src/fr/esrf/tangoatk/core/package-summary.html)
 package. What we find here are non-graphic classes which are used to
 get a hold of devices, attributes, and commands. The objects
 representing attributes, devices, and commands, are made to
@@ -60,25 +46,23 @@ when eg an attribute changes its value, an event is sent to all
 registered listeners of that attribute.
 
 
-<h3>The View</h3>
+#### The View
 
-The view-part of TangoATK is found in the packages under <a
-        href="fr/esrf/tangoatk/widget/package-summary.html">fr.esrf.tangoatk.widget</a>.
+The view-part of TangoATK is found in the packages under [fr.esrf.tangoatk.widget](src/fr/esrf/tangoatk/widget/package-summary.html)
 There are specific viewers for attributes, commands, and devices.
 There are also widgets for viewing errors and such.
 
-<h3>The Controller</h3>
+#### The Controller
 
 The job of the controller, which normally is the application, is to
 connect models and views, and responding to user input.
 
-<h4>Connecting models and views</h4>
+##### Connecting models and views
 
 Connecting a view to a model is done by calling
-the <code>setModel</code> method on a view with the model you want to
+the `setModel` method on a view with the model you want to
 connect to it as argument:
-<code>
-<pre>
+```#!java
 INumberScalar      model;
 SimpleScalarViewer viewer;
 AttributeList      list;
@@ -89,46 +73,47 @@ model = (INumberScalar)list.add("my/device/name/numberscalar");
 
 // connect them
 viewer.setModel(model);
-</pre>
-</code>
-Normally the <code>setModel</code> method in a viewer takes care of
+```
+
+Normally the `setModel` method in a viewer takes care of
 adding the viewer to the list of listeners of the model.
 
 
-<h2>Dependencies</h2>
+### Dependencies
+
 TangoATK is a modular toolkit built on top of other packages. This
 means that you will need to have the following packages in your
 classpath:
-<ul>
-    <li>TangORB.jar, a library implementing the underlying Tango
-        infrastructure
-</ul>
+
+    * TangORB.jar, a library implementing the underlying Tango infrastructure
+
 In addition to this, you'll also need the two jars for TangoATK:
-<ul>
-    <li>ATKCore.jar, the non graphical part of the toolkit
-    <li>ATKWidget.jar, all the viewers and graphical stuff.
-</ul>
+
+    * ATKCore.jar, the non graphical part of the toolkit
+    * ATKWidget.jar, all the viewers and graphical stuff.
+
 Normally you will find all these in your favourite lib/java directory
 in your tangodistribution, so assuming $TANGO is pointing to where
 you installed tango, this command should set up your CLASSPATH:
-<pre>
+```
 $ export CLASSPATH=$TANGO/lib/java/TangORB.jar:$TANGO/lib/java/ATKCore.jar:$TANGO/lib/java/ATKWidget.jar
-</pre>
+```
 It is also worth noting that TangoATK is for the moment made with and for jdk1.4,
 but we invite you to use jdk1.5 today because future releases of ATK will be built
-with jdk1.5 and might be incompatible with jdk1.4. So you better fetch that from
-<a href="http://java.sun.com/">http://java.sun.com/</a> while you're at it.
+with jdk1.5 and might be incompatible with jdk1.4. So you better fetch that from [http://java.sun.com](http://java.sun.com/)
+ while you're at it.
 
 
 
 
-<h2>A simple example</h2>
+### A simple example
+
 TangoATK is attribute and command centric, that is, you can obtain
 attributes and commands from any device and mix them without having
 to know about their devices. The main entry-points into TangoATK are
 the CommandList and the AttributeList, they live in fr.esrf.TangoATK.Core
-<pre>
 
+```#!java
 import fr.esrf.TangoATK.Core.*;
 
 
@@ -156,15 +141,14 @@ public class FirstExample {
 
 }
 
-</pre>
+```
 
 AttributeList and CommandList also accept wildcard-entries and
 String-arrays as arguments to their add methods.
 
-<h2>A graphic example</h2>
+### A graphic example
 
-<pre>
-
+```#!java
 import fr.esrf.TangoATK.Core.AttributeList;
 import fr.esrf.TangoATK.Core.INumberScalar;
 import fr.esrf.TangoATK.Core.ConnectionException;
@@ -207,6 +191,4 @@ public class SecondExample {
 	} // end of try-catch
     }
 }
-    </pre>
-</body>
-</html>
+```
