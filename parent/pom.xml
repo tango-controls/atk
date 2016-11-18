@@ -4,7 +4,7 @@
 
     <groupId>org.tango.atk</groupId>
     <artifactId>atk-parent</artifactId>
-    <version>9.1.16-SNAPSHOT</version>
+    <version>9.1.16</version>
 
     <packaging>pom</packaging>
 
@@ -14,12 +14,12 @@
             <dependency>
                 <groupId>org.tango.atk</groupId>
                 <artifactId>ATKUtil</artifactId>
-                <version>9.1.16-SNAPSHOT</version>
+                <version>9.1.16</version>
             </dependency>
             <dependency>
                 <groupId>org.tango.atk</groupId>
                 <artifactId>ATKCore</artifactId>
-                <version>9.1.16-SNAPSHOT</version>
+                <version>9.1.16</version>
             </dependency>
             <dependency>
                 <groupId>org.tango</groupId>
