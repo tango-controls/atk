@@ -15,11 +15,6 @@
     <artifactId>TangoATK</artifactId>
     <version>9.1.15-SNAPSHOT</version>
 
-
-    <properties>
-        <github.global.server>github</github.global.server>
-    </properties>
-
     <scm>
         <connection>scm:git:git@github.com:tango-controls/atk.git</connection>
         <developerConnection>scm:git:git@github.com:tango-controls/atk.git</developerConnection>

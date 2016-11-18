@@ -13,7 +13,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.tango</groupId>
+            <groupId>org.tango.atk</groupId>
             <artifactId>ATKCore</artifactId>
         </dependency>
         <dependency>
