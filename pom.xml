@@ -13,13 +13,13 @@
 
     <groupId>org.tango.atk</groupId>
     <artifactId>TangoATK</artifactId>
-    <version>9.1.16</version>
+    <version>9.1.17-SNAPSHOT</version>
 
     <scm>
         <connection>scm:git:git@github.com:tango-controls/atk.git</connection>
         <developerConnection>scm:git:git@github.com:tango-controls/atk.git</developerConnection>
         <url>https://github.com/tango-controls/atk</url>
-      <tag>TangoATK-9.1.16</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <build>
