@@ -24,7 +24,7 @@
             <dependency>
                 <groupId>org.tango</groupId>
                 <artifactId>TangORB</artifactId>
-                <version>9.2.0</version>
+                <version>9.1.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
