@@ -1,0 +1,222 @@
+NetFile v10 {
+  GlobalParam {
+  }
+  Bubble 1 (4,4) 1,1 {
+    editable_shape:0
+    label:"a"
+    children:1
+    extensions {
+      Type:"S/L"
+      Address:"1/1"
+    }
+  }
+  Bubble 1 (7,4) 1,1 {
+    editable_shape:0
+    label:"b"
+    children:2
+    extensions {
+      Type:""
+      Address:"1/2"
+    }
+  }
+  Bubble 1 (10,4) 1,1 {
+    editable_shape:0
+    label:"c"
+    children:16
+    extensions {
+      Type:""
+      Address:"1/3"
+    }
+  }
+  Bubble 1 (4,8) 1,1 {
+    editable_shape:0
+    label:"d"
+    children:4
+    extensions {
+      Type:""
+      Address:"2/1"
+    }
+  }
+  Bubble 1 (7,8) 1,1 {
+    editable_shape:0
+    label:"e"
+    children:5
+    extensions {
+      Type:""
+      Address:"2/2"
+    }
+  }
+  Bubble 1 (10,8) 1,1 {
+    editable_shape:0
+    label:"f"
+    children:17
+    extensions {
+      Type:""
+      Address:"2/3"
+    }
+  }
+  Bubble 1 (16,4) 1,1 {
+    editable_shape:0
+    label:"g"
+    children:7
+    extensions {
+      Type:""
+      Address:"3/1"
+    }
+  }
+  Bubble 1 (19,4) 1,1 {
+    editable_shape:0
+    label:"h"
+    children:8
+    extensions {
+      Type:""
+      Address:"3/2"
+    }
+  }
+  Bubble 1 (22,4) 1,1 {
+    editable_shape:0
+    label:"i"
+    children:21
+    extensions {
+      Type:""
+      Address:"3/3"
+    }
+  }
+  Bubble 1 (16,8) 1,1 {
+    editable_shape:0
+    label:"j"
+    children:10
+    extensions {
+      Type:"L"
+      Address:"4/1"
+    }
+  }
+  Bubble 1 (19,8) 1,1 {
+    editable_shape:0
+    label:"k"
+    children:22
+    extensions {
+      Type:""
+      Address:"4/2"
+    }
+  }
+  Bubble 2 (26,8) 1,1 {
+    shape:1
+    editable_shape:0
+    size:9
+    label:"Logical",
+          "sensor 1"
+    label_offset:17,12
+    justify:0
+    children:28
+  }
+  Bubble 4 (26,14) 1,0 {
+    shape:4
+  }
+  Bubble 3 (1,2) 0,1 {
+    shape:3
+    editable_shape:0
+    label:"Vcc"
+    label_offset:-2,6
+    children:14
+  }
+  Bubble 5 (1,4) 10,10 {
+    shape:5
+    editable_shape:0
+    children:15,0
+  }
+  Bubble 5 (1,8) 10,10 {
+    shape:5
+    editable_shape:0
+    children:3,24
+  }
+  Bubble 5 (12,4) 10,10 {
+    shape:5
+    editable_shape:0
+    children:19
+  }
+  Bubble 5 (12,8) 10,10 {
+    shape:5
+    editable_shape:0
+    children:16
+  }
+  Bubble 5 (14,8) 10,10 {
+    shape:5
+    editable_shape:0
+    children:9
+  }
+  Bubble 5 (14,4) 10,10 {
+    shape:5
+    editable_shape:0
+    children:18,6
+  }
+  Bubble 5 (26,4) 10,10 {
+    shape:5
+    editable_shape:0
+    children:11
+  }
+  Bubble 5 (24,4) 10,10 {
+    shape:5
+    editable_shape:0
+    children:20
+  }
+  Bubble 5 (24,8) 10,10 {
+    shape:5
+    editable_shape:0
+    children:21
+  }
+  Text 0 (97,163) {
+    label:"This sample application demonstrates how to use the NetEditor to Edit and Play a",
+          "logical interlock diagram :",
+          "  Click on a bubble to set its state (OPEN=red or CLOSE=green) and you will see ",
+          "the evolution of the output state."
+    label_offset:-80,71
+    justify:0
+    font:"Dialog",0,12
+  }
+  Bubble 5 (1,12) 10,10 {
+    shape:5
+    editable_shape:0
+    children:25
+  }
+  Bubble 1 (4,12) 1,1 {
+    editable_shape:0
+    label:"l"
+    children:26
+    extensions {
+      Type:""
+      Address:"2/1"
+    }
+  }
+  Bubble 1 (7,12) 1,1 {
+    editable_shape:0
+    label:"m"
+    children:27
+    extensions {
+      Type:""
+      Address:"2/2"
+    }
+  }
+  Bubble 1 (10,12) 1,1 {
+    editable_shape:0
+    label:"n"
+    children:29
+    extensions {
+      Type:""
+      Address:"2/3"
+    }
+  }
+  Bubble 5 (26,12) 10,10 {
+    shape:5
+    editable_shape:0
+    children:12
+  }
+  Bubble 2 (22,12) 1,1 {
+    shape:1
+    editable_shape:0
+    size:9
+    label:"Logical sensor 2"
+    label_offset:3,-5
+    children:28
+  }
+}
