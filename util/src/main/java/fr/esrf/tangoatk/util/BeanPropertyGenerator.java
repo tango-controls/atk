@@ -36,6 +36,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
@@ -92,13 +93,16 @@ public class BeanPropertyGenerator extends AbstractMojo {
         generateBeanHeader();
 
 
-        File icon16File = FileUtils.getFile(
-                FileUtils.getFile(imagesRoot,_packagePath.split("/")),color16);
-        File icon32File = FileUtils.getFile(
-                FileUtils.getFile(imagesRoot,_packagePath.split("/")),color32);
-
-        if (color16 != null) generateIconArray(icon16File, 16, 16);
-        if (color32 != null) generateIconArray(icon32File, 32, 32);
+        if (color16 != null) {
+            File icon16File = FileUtils.getFile(
+                    FileUtils.getFile(imagesRoot,_packagePath.split("/")),color16);
+            generateIconArray(icon16File, 16, 16);
+        }
+        if (color32 != null) {
+            File icon32File = FileUtils.getFile(
+                    FileUtils.getFile(imagesRoot,_packagePath.split("/")),color32);
+            generateIconArray(icon32File, 32, 32);
+        }
 
         generateConstructor();
 
