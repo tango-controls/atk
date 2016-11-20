@@ -39,7 +39,7 @@ public class BeanPropertyGeneratorTest {
     public void execute() throws Exception {
         instance.execute();
 
-        assertTrue(new File("target/test-classes/target/generated-sources/test/Test.java").exists());
+        assertTrue(new File("target/test-classes/target/generated-sources/beaninfo/test/Test.java").exists());
 
         //TODO assert diff against expected result
     }

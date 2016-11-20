@@ -36,9 +36,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import java.util.IllegalFormatException;
@@ -50,9 +50,12 @@ import java.util.*;
 
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class BeanPropertyGenerator extends AbstractMojo {
+    @Parameter
+    private File imagesRoot;
+
 
     public static final String PROJECT = "project";
-    public static final String TARGET_GENERATED_SOURCES = "/target/generated-sources/";
+    public static final String TARGET_GENERATED_SOURCES = "/target/generated-sources/beaninfo/";
     int indentLevel = 4;
     PrintStream out;
     String name;
@@ -88,8 +91,14 @@ public class BeanPropertyGenerator extends AbstractMojo {
 
         generateBeanHeader();
 
-        if (color16 != null) generateIconArray(color16, 16, 16);
-        if (color32 != null) generateIconArray(color32, 32, 32);
+
+        File icon16File = FileUtils.getFile(
+                FileUtils.getFile(imagesRoot,_packagePath.split("/")),color16);
+        File icon32File = FileUtils.getFile(
+                FileUtils.getFile(imagesRoot,_packagePath.split("/")),color32);
+
+        if (color16 != null) generateIconArray(icon16File, 16, 16);
+        if (color32 != null) generateIconArray(icon32File, 32, 32);
 
         generateConstructor();
 
@@ -192,19 +201,23 @@ public class BeanPropertyGenerator extends AbstractMojo {
 
 
     int generateIconArray(String iconName, int dimX, int dimY) throws IOException {
+        return generateIconArray(iconName, dimX, dimY);
+    }
+
+    int generateIconArray(File icon, int dimX, int dimY) throws IOException {
 
         BufferedImage img;
 
         try {
-            img = ImageIO.read(new File(iconName));
+            img = ImageIO.read(icon);
         } catch (IOException ex) {
-            System.err.println("Failed to read " + iconName);
+            System.err.println("Failed to read " + icon);
             throw ex;
         }
 
-        if (img.getWidth() != dimX) throw new IOException(iconName + ":Invalid width dimension (must be " + dimX + ")");
+        if (img.getWidth() != dimX) throw new IOException(icon + ":Invalid width dimension (must be " + dimX + ")");
         if (img.getHeight() != dimY)
-            throw new IOException(iconName + ":Invalid height dimension (must be " + dimY + ")");
+            throw new IOException(icon + ":Invalid height dimension (must be " + dimY + ")");
 
         int[] rgbArray;
         int nbData = dimX * dimY;
