@@ -1,3 +1,0 @@
-Name: fr/esrf/tangoatk/widget/jdraw/SynopticFileViewer.class
-Java-Bean: True
-

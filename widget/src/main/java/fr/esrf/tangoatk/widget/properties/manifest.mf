@@ -1,6 +1,0 @@
-Name: fr/esrf/tangoatk/widget/properties/LabelViewer.class
-Java-Bean: True
-
-Name: fr/esrf/tangoatk/widget/properties/UnitViewer.class
-Java-Bean: True
-
