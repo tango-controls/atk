@@ -29,6 +29,18 @@
         </dependencies>
     </dependencyManagement>
 
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.tango.atk</groupId>
+                    <artifactId>beaninfo-maven-plugin</artifactId>
+                    <version>9.1.17-SNAPSHOT</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
     <distributionManagement>
         <repository>
             <id>bintray-tango-controls</id>
