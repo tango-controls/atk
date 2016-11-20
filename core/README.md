@@ -36,7 +36,7 @@ commands and properties.
 
 
 There are two ways of obtaining properties from a command or
-attribute. Either by calling `getPropertyMap() which
+attribute. Either by calling `getPropertyMap()` which
 returns a `java.util.Map` with all propeties, or by
 calling specialized methods in the objects, such
 as `getName()` which returns the value for a particular property.
