@@ -51,8 +51,10 @@ import java.util.*;
 
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class BeanPropertyGenerator extends AbstractMojo {
-    @Parameter
+    @Parameter(defaultValue = "${project.basedir}/src/main/resources")
     private File imagesRoot;
+    @Parameter(defaultValue = "${project}", readonly = true)
+    MavenProject project;
 
 
     public static final String PROJECT = "project";
@@ -533,11 +535,8 @@ public class BeanPropertyGenerator extends AbstractMojo {
     } // end of main ()
 
     public void execute() throws MojoExecutionException, MojoFailureException {
-
-        MavenProject project = (MavenProject) getPluginContext().get(PROJECT);
-
+        //TODO log info
         File targetDir = new File(project.getBasedir().getAbsolutePath() + TARGET_GENERATED_SOURCES);
-
 
         try {
             FileUtils.forceMkdir(targetDir);
@@ -555,6 +554,7 @@ public class BeanPropertyGenerator extends AbstractMojo {
             throw new MojoExecutionException(e.getMessage());
         }
 
+        project.addCompileSourceRoot(targetDir.getAbsolutePath());
     }
 }
 

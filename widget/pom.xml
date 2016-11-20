@@ -66,9 +66,6 @@
                         <goals>
                             <goal>generate</goal>
                         </goals>
-                        <configuration>
-                            <imagesRoot>${project.basedir}/src/main/resources</imagesRoot>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

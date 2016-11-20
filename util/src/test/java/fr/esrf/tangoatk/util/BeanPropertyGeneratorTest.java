@@ -30,9 +30,7 @@ public class BeanPropertyGeneratorTest {
         //simulating mvn executed from target/test-classes
         doReturn(new File("target/test-classes")).when(mockProject).getBasedir();
 
-        context.put(BeanPropertyGenerator.PROJECT, mockProject);
-
-        instance.setPluginContext(context);
+        instance.project = mockProject;
     }
 
     @org.junit.Test
