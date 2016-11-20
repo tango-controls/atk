@@ -17,9 +17,5 @@
             <groupId>org.tango</groupId>
             <artifactId>TangORB</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.tango.atk</groupId>
-            <artifactId>ATKUtil</artifactId>
-        </dependency>
     </dependencies>
 </project>
