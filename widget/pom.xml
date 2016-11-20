@@ -17,42 +17,6 @@
             <groupId>org.tango.atk</groupId>
             <artifactId>ATKCore</artifactId>
         </dependency>
-        <!-- TODO #2: use maven central -->
-        <dependency>
-            <groupId>org.jogamp.gluegen</groupId>
-            <artifactId>gluegen-rt</artifactId>
-            <version>unknown</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/gluegen-rt.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl</artifactId>
-            <version>unknown</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/jogl.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>org.jogamp.ij</groupId>
-            <artifactId>ij</artifactId>
-            <version>unknown</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/ij.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>org.jogamp.jep</groupId>
-            <artifactId>jep</artifactId>
-            <version>unknown</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/jep.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>org.jogamp.jepext</groupId>
-            <artifactId>jepext</artifactId>
-            <version>unknown</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/jepext.jar</systemPath>
-        </dependency>
     </dependencies>
 
     <build>

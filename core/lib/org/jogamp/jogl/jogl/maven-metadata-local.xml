@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.jogamp.jogl</groupId>
+  <artifactId>jogl</artifactId>
+  <versioning>
+    <release>pre-2.0</release>
+    <versions>
+      <version>pre-2.0</version>
+    </versions>
+    <lastUpdated>20161120200900</lastUpdated>
+  </versioning>
+</metadata>
