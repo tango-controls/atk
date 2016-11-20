@@ -15,6 +15,31 @@
     <artifactId>TangoATK</artifactId>
     <version>9.1.17-SNAPSHOT</version>
 
+    <description>TangoATK is a collection of java-classes to help build applications which interact with Tango-devices.</description>
+
+    <developers>
+        <developer>
+            <id>pons</id>
+            <name>Jean Luc Pons</name>
+            <email>pons@esrf.fr</email>
+            <organization>ESRF</organization>
+            <organizationUrl>http://esrf.eu</organizationUrl>
+            <roles>
+                <role>Maintainer</role>
+            </roles>
+            <timezone>1</timezone>
+        </developer>
+        <developer>
+            <id>ingvord</id>
+            <name>Igor Khokhriakov</name>
+            <email>mail@ingvord.ru</email>
+            <roles>
+                <role>Contributor</role>
+            </roles>
+            <timezone>3</timezone>
+        </developer>
+    </developers>
+
     <scm>
         <connection>scm:git:git@github.com:tango-controls/atk.git</connection>
         <developerConnection>scm:git:git@github.com:tango-controls/atk.git</developerConnection>
