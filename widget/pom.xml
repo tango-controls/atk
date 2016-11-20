@@ -14,6 +14,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.tango</groupId>
+            <artifactId>TangORB</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.tango.atk</groupId>
             <artifactId>ATKCore</artifactId>
         </dependency>
