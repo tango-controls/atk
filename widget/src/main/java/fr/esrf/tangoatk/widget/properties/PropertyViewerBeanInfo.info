@@ -1,4 +1,4 @@
 name = PropertyViewer
-package = fr.esrf.TangoATK.Widget.Properties
+package = fr.esrf.tangoatk.widget.properties
 
 properties = value, labelVisible, labelWidth, valueWidth, model, valueHorizontalAlignment
