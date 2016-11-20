@@ -8,6 +8,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import static fr.esrf.tangoatk.util.BeanPropertyGenerator.TARGET_GENERATED_SOURCES;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -26,6 +27,7 @@ public class BeanPropertyGeneratorTest {
 
         MavenProject mockProject = mock(MavenProject.class);
 
+        //simulating mvn executed from target/test-classes
         doReturn(new File("target/test-classes")).when(mockProject).getBasedir();
 
         context.put(BeanPropertyGenerator.PROJECT, mockProject);
@@ -37,7 +39,7 @@ public class BeanPropertyGeneratorTest {
     public void execute() throws Exception {
         instance.execute();
 
-        assertTrue(new File("target/test-classes/src/main/java/test/Test.java").exists());
+        assertTrue(new File("target/test-classes/target/generated-sources/test/Test.java").exists());
 
         //TODO assert diff against expected result
     }

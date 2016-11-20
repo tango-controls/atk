@@ -36,6 +36,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProject;
@@ -51,6 +52,7 @@ import java.util.*;
 public class BeanPropertyGenerator extends AbstractMojo {
 
     public static final String PROJECT = "project";
+    public static final String TARGET_GENERATED_SOURCES = "/target/generated-sources/";
     int indentLevel = 4;
     PrintStream out;
     String name;
@@ -60,18 +62,26 @@ public class BeanPropertyGenerator extends AbstractMojo {
     String color16;
     String color32;
 
-    public BeanPropertyGenerator(){}
+    public BeanPropertyGenerator() {
+    }
 
-    public void execute(InputStream properties, PrintStream out)
+    public void execute(InputStream properties, File baseDir, String javaName)
             throws java.io.IOException {
 
         int level = 0;
-        this.out = out;
+
+
         prop = new Properties();
         prop.load(properties);
         name = prop.getProperty("name").trim();
         _package = prop.getProperty("package").trim();
         _packagePath = _package.replace('.', '/');
+
+
+        File packageDir = new File(baseDir.getAbsolutePath() + "/" + _packagePath);
+        FileUtils.forceMkdir(packageDir);
+
+        this.out = new PrintStream(new FileOutputStream(FileUtils.getFile(packageDir, javaName)));
 
         color16 = prop.getProperty("ICON_COLOR_16x16");
         color32 = prop.getProperty("ICON_COLOR_32x32");
@@ -494,7 +504,7 @@ public class BeanPropertyGenerator extends AbstractMojo {
                 infoName = makeInfoName(javaName);
                 BeanPropertyGenerator generator = new BeanPropertyGenerator();
                 generator.execute(new FileInputStream(infoName),
-                        new PrintStream(new FileOutputStream(javaName)));
+                        new File(System.getProperty("user.dir")), javaName);
             }
 
         } catch (IOException e) {
@@ -506,20 +516,28 @@ public class BeanPropertyGenerator extends AbstractMojo {
     } // end of main ()
 
     public void execute() throws MojoExecutionException, MojoFailureException {
+
+        MavenProject project = (MavenProject) getPluginContext().get(PROJECT);
+
+        File targetDir = new File(project.getBasedir().getAbsolutePath() + TARGET_GENERATED_SOURCES);
+
+
         try {
-            MavenProject project = (MavenProject) getPluginContext().get(PROJECT);
-            Iterator<File> infos = FileUtils.iterateFiles(project.getBasedir(),new String[]{"info"},true);
-            while(infos.hasNext()){
+            FileUtils.forceMkdir(targetDir);
+            Iterator<File> infos = FileUtils.iterateFiles(project.getBasedir(), new String[]{"info"}, true);
+            while (infos.hasNext()) {
                 File info = infos.next();
-                String infoName = info.getAbsolutePath();
+                String infoName = info.getName();
                 String javaName = makeJavaName(infoName);
-                execute(new FileInputStream(infoName),
-                        new PrintStream(new FileOutputStream(javaName)));
+
+                execute(new FileInputStream(info), new File(project.getBasedir().getAbsolutePath() + TARGET_GENERATED_SOURCES), javaName);
+
             }
-        } catch (IOException e){
+        } catch (IOException e) {
             getLog().error(e);
             throw new MojoExecutionException(e.getMessage());
         }
+
     }
 }
 
