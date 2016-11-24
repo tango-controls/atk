@@ -21,6 +21,31 @@
             <groupId>org.tango.atk</groupId>
             <artifactId>ATKCore</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.jogamp.gluegen</groupId>
+            <artifactId>gluegen-rt</artifactId>
+            <version>pre-2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.jogl</groupId>
+            <artifactId>jogl</artifactId>
+            <version>pre-2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.ij</groupId>
+            <artifactId>ij</artifactId>
+            <version>pre-2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.jep</groupId>
+            <artifactId>jep</artifactId>
+            <version>pre-2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jogamp.jepext</groupId>
+            <artifactId>jepext</artifactId>
+            <version>pre-2.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -46,8 +71,36 @@
                     </archive>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>make_jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
+
+
+    <!-- TODO #2: use maven central -->
+    <repositories>
+        <repository>
+            <id>bundled</id>
+            <url>file://${project.basedir}/lib</url>
+        </repository>
+    </repositories>
 
     <pluginRepositories>
         <pluginRepository>
