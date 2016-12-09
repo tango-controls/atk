@@ -21,11 +21,15 @@
  */
 package fr.esrf.tangoatk.widget.util.jgl3dchart;
 
-import javax.media.opengl.GLJPanel;
-import javax.media.opengl.GL;
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
-import javax.media.opengl.glu.GLU;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.awt.GLJPanel;
+import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
+import com.jogamp.opengl.glu.GLU;
+import com.jogamp.common.util.PropertyAccess;
+
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.event.*;
@@ -223,10 +227,11 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
     updateModelMatrix(gl,camDist);
     computeBoundingBoxDepth(gl);
 
+    GL2 gl2 = (GL2)gl;
     Dimension d = getSize();
-    gl.glMatrixMode(GL.GL_PROJECTION);
-    gl.glLoadIdentity();
-    gl.glOrtho(d.width/2,-d.width/2,-d.height/2,d.height/2,zNear*1.1,zFar*1.1);
+    gl2.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
+    gl2.glLoadIdentity();
+    gl2.glOrtho(d.width/2,-d.width/2,-d.height/2,d.height/2,zNear*1.1,zFar*1.1);
 
   }
 
@@ -497,8 +502,9 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
 
     if(data==null)
       return;
+    GL2 gl2 = (GL2)gl;
 
-    if(dataList!=0) gl.glDeleteLists(dataList,1);
+    if(dataList!=0) gl2.glDeleteLists(dataList,1);
     dataList=0;
 
     if (data.length > 2 && data[0].length > 2) {
@@ -511,10 +517,10 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
       double zGain = zAxis.getGainTransform();
       double zOff  = zAxis.getOffsetTransform();
 
-      dataList = gl.glGenLists(1);
-      gl.glNewList(dataList, GL.GL_COMPILE);
+      dataList = gl2.glGenLists(1);
+      gl2.glNewList(dataList, GL2.GL_COMPILE);
 
-      gl.glBegin(GL.GL_TRIANGLES);
+      gl2.glBegin(GL.GL_TRIANGLES);
       float rgb[] = new float[3];
       for (int x = 0; x < data.length - 1; x++) {
         for (int z = 0; z < data[x].length - 1; z++) {
@@ -526,49 +532,49 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
                 !Double.isNaN(data[x][z+1]) && !Double.isNaN(data[x+1][z+1]) )
             {
 
-              double x00 = xGain*(double)x+xOff;
-              double y00 = yGain*data[x][z]+yOff;
-              double z00 = zGain*(double)z+zOff;
+              float x00 = (float)(xGain*(double)x+xOff);
+              float y00 = (float)(yGain*data[x][z]+yOff);
+              float z00 = (float)(zGain*(double)z+zOff);
 
-              double x01 = x00;
-              double y01 = yGain*data[x][z+1]+yOff;
-              double z01 = zGain*(z+1.0)+zOff;
+              float x01 = (float)(x00);
+              float y01 = (float)(yGain*data[x][z+1]+yOff);
+              float z01 = (float)(zGain*(z+1.0)+zOff);
 
-              double x10 = xGain*(x+1.0)+xOff;
-              double y10 = yGain*data[x+1][z]+yOff;
-              double z10 = z00;
+              float x10 = (float)(xGain*(x+1.0)+xOff);
+              float y10 = (float)(yGain*data[x+1][z]+yOff);
+              float z10 = (float)(z00);
 
-              double x11 = x10;
-              double y11 = yGain*data[x+1][z+1]+yOff;
-              double z11 = z01;
+              float x11 = (float)(x10);
+              float y11 = (float)(yGain*data[x+1][z+1]+yOff);
+              float z11 = (float)(z01);
 
 
               getColor(y00, Scmin, Scmax, rgb);
-              gl.glColor3f(rgb[0], rgb[1], rgb[2]);
-              gl.glVertex3d(x00, y00, z00);
+              gl2.glColor3f(rgb[0], rgb[1], rgb[2]);
+              gl2.glVertex3f(x00, y00, z00);
               getColor(y01, Scmin, Scmax, rgb);
-              gl.glColor3f(rgb[0], rgb[1], rgb[2]);
-              gl.glVertex3d(x01,y01, z01);
+              gl2.glColor3f(rgb[0], rgb[1], rgb[2]);
+              gl2.glVertex3f(x01,y01, z01);
               getColor(y10, Scmin, Scmax, rgb);
-              gl.glColor3f(rgb[0], rgb[1], rgb[2]);
-              gl.glVertex3d(x10, y10, z10);
+              gl2.glColor3f(rgb[0], rgb[1], rgb[2]);
+              gl2.glVertex3f(x10, y10, z10);
 
               getColor(y01, Scmin, Scmax, rgb);
-              gl.glColor3f(rgb[0], rgb[1], rgb[2]);
-              gl.glVertex3d(x01, y01, z01);
+              gl2.glColor3f(rgb[0], rgb[1], rgb[2]);
+              gl2.glVertex3f(x01, y01, z01);
               getColor(y11, Scmin, Scmax, rgb);
-              gl.glColor3f(rgb[0], rgb[1], rgb[2]);
-              gl.glVertex3d(x11, y11, z11);
+              gl2.glColor3f(rgb[0], rgb[1], rgb[2]);
+              gl2.glVertex3f(x11, y11, z11);
               getColor(y10, Scmin, Scmax, rgb);
-              gl.glColor3f(rgb[0], rgb[1], rgb[2]);
-              gl.glVertex3d(x10, y10, z10);
+              gl2.glColor3f(rgb[0], rgb[1], rgb[2]);
+              gl2.glVertex3f(x10, y10, z10);
             }
           }
 
         }
       }
-      gl.glEnd();
-      gl.glEndList();
+      gl2.glEnd();
+      gl2.glEndList();
 
     }
 
@@ -677,7 +683,7 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
     gl.glDisable(GL.GL_CULL_FACE);
 
     // Light
-    gl.glDisable( GL.GL_LIGHTING );
+    gl.glDisable(GL2.GL_LIGHTING);
     gl.glDisable(GL.GL_TEXTURE_2D);
 
     /*
@@ -702,9 +708,12 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
 
   }
 
+  public void dispose( GLAutoDrawable glautodrawable ) {
+  }
+
   public void display(GLAutoDrawable glDrawable) {
 
-    GL gl = glDrawable.getGL();
+    GL2 gl = (GL2)glDrawable.getGL();
 
     double xMin = xAxis.getMin();
     double xMax = xAxis.getMax();
@@ -722,34 +731,34 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
     gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
     gl.glDisable(GL.GL_DEPTH_TEST);
 
-    gl.glBegin(GL.GL_QUADS);
+    gl.glBegin(GL2.GL_QUADS);
 
     //Z,Y plane
     gl.glColor3f(0.8f,0.8f,0.8f);
-    gl.glVertex3d(xMax , yMin , zMin);
-    gl.glVertex3d(xMax, yMin , zMax);
-    gl.glVertex3d(xMax, yMax, zMax);
-    gl.glVertex3d(xMax , yMax, zMin);
+    gl.glVertex3f((float)xMax , (float)yMin , (float)zMin);
+    gl.glVertex3f((float)xMax, (float)yMin , (float)zMax);
+    gl.glVertex3f((float)xMax, (float)yMax, (float)zMax);
+    gl.glVertex3f((float)xMax , (float)yMax, (float)zMin);
 
     //Z,X plane
     gl.glColor3f(0.91f,0.91f,0.91f);
-    gl.glVertex3d(xMin, yMin , zMin);
-    gl.glVertex3d(xMin, yMin , zMax);
-    gl.glVertex3d(xMax, yMin, zMax);
-    gl.glVertex3d(xMax, yMin, zMin);
+    gl.glVertex3f((float)xMin, (float)yMin , (float)zMin);
+    gl.glVertex3f((float)xMin, (float)yMin , (float)zMax);
+    gl.glVertex3f((float)xMax, (float)yMin, (float)zMax);
+    gl.glVertex3f((float)xMax, (float)yMin, (float)zMin);
 
     //Y,X plane
     gl.glColor3f(0.85f,0.85f,0.85f);
     if(angleOy<Math.PI/2) {
-      gl.glVertex3d(xMin, yMin , zMax);
-      gl.glVertex3d(xMin, yMax , zMax);
-      gl.glVertex3d(xMax, yMax, zMax);
-      gl.glVertex3d(xMax, yMin, zMax);
+      gl.glVertex3f((float)xMin, (float)yMin , (float)zMax);
+      gl.glVertex3f((float)xMin, (float)yMax , (float)zMax);
+      gl.glVertex3f((float)xMax, (float)yMax, (float)zMax);
+      gl.glVertex3f((float)xMax, (float)yMin, (float)zMax);
     } else {
-      gl.glVertex3d(xMin, yMin , zMin);
-      gl.glVertex3d(xMin, yMax , zMin);
-      gl.glVertex3d(xMax, yMax, zMin);
-      gl.glVertex3d(xMax, yMin, zMin);
+      gl.glVertex3f((float)xMin, (float)yMin , (float)zMin);
+      gl.glVertex3f((float)xMin, (float)yMax , (float)zMin);
+      gl.glVertex3f((float)xMax, (float)yMax, (float)zMin);
+      gl.glVertex3f((float)xMax, (float)yMin, (float)zMin);
     }
 
     gl.glEnd();
@@ -765,32 +774,32 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
     // Paint grid
     short pattern = 0x0F0F;
     gl.glLineStipple(1,pattern);
-    gl.glEnable(GL.GL_LINE_STIPPLE);
+    gl.glEnable(GL2.GL_LINE_STIPPLE);
     gl.glColor3f(0.5f,0.5f,0.5f);
     gl.glBegin(GL.GL_LINES);
 
     //Z,Y plane
     for(int i=0;i<yAxis.labelInfo.size();i++) {
       LabelInfo li = (LabelInfo)yAxis.labelInfo.get(i);
-      gl.glVertex3d(xMax, li.p1.y, zMin);
-      gl.glVertex3d(xMax, li.p1.y, zMax);
+      gl.glVertex3f((float)xMax, (float)li.p1.y, (float)zMin);
+      gl.glVertex3f((float)xMax, (float)li.p1.y, (float)zMax);
     }
     for(int i=0;i<zAxis.labelInfo.size();i++) {
       LabelInfo li = (LabelInfo)zAxis.labelInfo.get(i);
-      gl.glVertex3d(xMax, yMin, li.p1.z);
-      gl.glVertex3d(xMax, yMax, li.p1.z);
+      gl.glVertex3f((float)xMax, (float)yMin, (float)li.p1.z);
+      gl.glVertex3f((float)xMax, (float)yMax, (float)li.p1.z);
     }
 
     //Z,X plane
     for(int i=0;i<xAxis.labelInfo.size();i++) {
       LabelInfo li = (LabelInfo)xAxis.labelInfo.get(i);
-      gl.glVertex3d(li.p1.x, yMin, zMin);
-      gl.glVertex3d(li.p1.x, yMin, zMax);
+      gl.glVertex3f((float)li.p1.x, (float)yMin, (float)zMin);
+      gl.glVertex3f((float)li.p1.x, (float)yMin, (float)zMax);
     }
     for(int i=0;i<zAxis.labelInfo.size();i++) {
       LabelInfo li = (LabelInfo)zAxis.labelInfo.get(i);
-      gl.glVertex3d(xMin, yMin, li.p1.z);
-      gl.glVertex3d(xMax, yMin, li.p1.z);
+      gl.glVertex3f((float)xMin, (float)yMin, (float)li.p1.z);
+      gl.glVertex3f((float)xMax, (float)yMin, (float)li.p1.z);
     }
 
     //Y,X plane
@@ -798,26 +807,26 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
 
       for (int i = 0; i < yAxis.labelInfo.size(); i++) {
         LabelInfo li = (LabelInfo) yAxis.labelInfo.get(i);
-        gl.glVertex3d(xMin, li.p1.y, zMax);
-        gl.glVertex3d(xMax, li.p1.y, zMax);
+        gl.glVertex3f((float)xMin, (float)li.p1.y, (float)zMax);
+        gl.glVertex3f((float)xMax, (float)li.p1.y, (float)zMax);
       }
       for (int i = 0; i < xAxis.labelInfo.size(); i++) {
         LabelInfo li = (LabelInfo) xAxis.labelInfo.get(i);
-        gl.glVertex3d(li.p1.x, yMin, zMax);
-        gl.glVertex3d(li.p1.x, yMax, zMax);
+        gl.glVertex3f((float)li.p1.x, (float)yMin, (float)zMax);
+        gl.glVertex3f((float)li.p1.x, (float)yMax, (float)zMax);
       }
 
     } else {
 
       for (int i = 0; i < yAxis.labelInfo.size(); i++) {
         LabelInfo li = (LabelInfo) yAxis.labelInfo.get(i);
-        gl.glVertex3d(xMin, li.p1.y, zMin);
-        gl.glVertex3d(xMax, li.p1.y, zMin);
+        gl.glVertex3f((float)xMin, (float)li.p1.y, (float)zMin);
+        gl.glVertex3f((float)xMax, (float)li.p1.y, (float)zMin);
       }
       for (int i = 0; i < xAxis.labelInfo.size(); i++) {
         LabelInfo li = (LabelInfo) xAxis.labelInfo.get(i);
-        gl.glVertex3d(li.p1.x, yMin, zMin);
-        gl.glVertex3d(li.p1.x, yMax, zMin);
+        gl.glVertex3f((float)li.p1.x, (float)yMin, (float)zMin);
+        gl.glVertex3f((float)li.p1.x, (float)yMax, (float)zMin);
       }
 
     }
@@ -1088,12 +1097,13 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
     center.y = (yAxis.getMax()+yAxis.getMin())/2.0;
     center.z = (zAxis.getMax()+zAxis.getMin())/2.0;
 
-    gl.glMatrixMode(GL.GL_MODELVIEW);
-    gl.glLoadIdentity();
-    gl.glScaled(scale,scale,scale);
-    gl.glRotated(-Utils.ToDeg(angleOx),1.0,0.0,0.0);
-    gl.glRotated(-Utils.ToDeg(angleOy),0.0,1.0,0.0);
-    gl.glTranslated(-center.x,-center.y,-center.z);
+    GL2 gl2 = (GL2)gl;
+    gl2.glMatrixMode(GL2.GL_MODELVIEW);
+    gl2.glLoadIdentity();
+    gl2.glScaled(scale,scale,scale);
+    gl2.glRotated(-Utils.ToDeg(angleOx),1.0,0.0,0.0);
+    gl2.glRotated(-Utils.ToDeg(angleOy),0.0,1.0,0.0);
+    gl2.glTranslated(-center.x,-center.y,-center.z);
 
   }
 

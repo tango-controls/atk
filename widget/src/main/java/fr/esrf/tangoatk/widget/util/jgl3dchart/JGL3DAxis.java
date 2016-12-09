@@ -21,7 +21,9 @@
  */
 package fr.esrf.tangoatk.widget.util.jgl3dchart;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+
 import java.awt.*;
 import java.util.Vector;
 
@@ -745,29 +747,31 @@ public class JGL3DAxis {
     if(!drawAble || !visible)
       return;
 
+    GL2 gl2 = (GL2)gl;
+
     // Axis
-    gl.glDisable(GL.GL_LIGHTING);
-    gl.glDisable(GL.GL_TEXTURE_2D);
-    gl.glDisable(GL.GL_DEPTH_TEST);
-    gl.glDisable(GL.GL_LINE_STIPPLE);
-    gl.glLineWidth(2.0f);
-    gl.glColor3f((float)labelColor.getRed()/255.0f,
+    gl2.glDisable(GL2.GL_LIGHTING);
+    gl2.glDisable(GL.GL_TEXTURE_2D);
+    gl2.glDisable(GL.GL_DEPTH_TEST);
+    gl2.glDisable(GL2.GL_LINE_STIPPLE);
+    gl2.glLineWidth(2.0f);
+    gl2.glColor3f((float)labelColor.getRed()/255.0f,
                  (float)labelColor.getGreen()/255.0f,
                  (float)labelColor.getBlue()/255.0f);
-    gl.glBegin(GL.GL_LINES);
-    gl.glVertex3d(p1.x, p1.y, p1.z);
-    gl.glVertex3d(p2.x, p2.y, p2.z);
-    gl.glEnd();
+    gl2.glBegin(GL.GL_LINES);
+    gl2.glVertex3f((float) p1.x, (float) p1.y, (float) p1.z);
+    gl2.glVertex3f((float) p2.x, (float) p2.y, (float) p2.z);
+    gl2.glEnd();
 
     // Tick
-    gl.glLineWidth(1.0f);
-    gl.glBegin(GL.GL_LINES);
+    gl2.glLineWidth(1.0f);
+    gl2.glBegin(GL.GL_LINES);
     for(int i=0;i<labelInfo.size();i++) {
       LabelInfo li = (LabelInfo)labelInfo.get(i);
-      gl.glVertex3d(li.p1.x,li.p1.y, li.p1.z);
-      gl.glVertex3d(li.p2.x,li.p2.y, li.p2.z);
+      gl2.glVertex3f((float) li.p1.x, (float) li.p1.y, (float) li.p1.z);
+      gl2.glVertex3f((float) li.p2.x, (float) li.p2.y, (float) li.p2.z);
     }
-    gl.glEnd();
+    gl2.glEnd();
 
   }
 

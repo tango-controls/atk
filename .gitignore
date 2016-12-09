@@ -11,6 +11,8 @@
 
 #ignore release if present
 release/
+test/
+lib/
 
 # User-specific stuff:
 .idea/workspace.xml

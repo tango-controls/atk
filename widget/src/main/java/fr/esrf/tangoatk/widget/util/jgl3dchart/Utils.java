@@ -21,15 +21,14 @@
  */
 package fr.esrf.tangoatk.widget.util.jgl3dchart;
 
-import com.sun.opengl.util.BufferUtil;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
-import java.nio.ByteBuffer;
-import java.awt.image.BufferedImage;
-import java.awt.image.PixelGrabber;
 import java.awt.event.ActionListener;
 import java.awt.*;
 
@@ -68,42 +67,6 @@ public class Utils {
 
   }
 
-  // Make a texture from a texture image
-  static ByteBuffer convertImageToTexture(BufferedImage img, boolean storeAlphaChannel) {
-
-    int[] packedPixels = new int[img.getWidth() * img.getHeight()];
-    PixelGrabber pixelgrabber = new PixelGrabber(img, 0, 0, img.getWidth(), img.getHeight(), packedPixels, 0, img.getWidth());
-
-    try {
-      pixelgrabber.grabPixels();
-    } catch (InterruptedException e) {
-      throw new RuntimeException();
-    }
-
-    int bytesPerPixel = storeAlphaChannel ? 4 : 3;
-
-    ByteBuffer unpackedPixels = BufferUtil.newByteBuffer(packedPixels.length * bytesPerPixel);
-
-    for (int row = img.getHeight() - 1; row >= 0; row--) {
-      for (int col = 0; col < img.getWidth(); col++) {
-
-        int packedPixel = packedPixels[row * img.getWidth() + col];
-        unpackedPixels.put((byte) ((packedPixel >> 16) & 0xFF));
-        unpackedPixels.put((byte) ((packedPixel >> 8) & 0xFF));
-        unpackedPixels.put((byte) ((packedPixel >> 0) & 0xFF));
-
-        if (storeAlphaChannel) {
-          unpackedPixels.put((byte) ((packedPixel >> 24) & 0xFF));
-        }
-
-      }
-    }
-
-    unpackedPixels.flip();
-    return unpackedPixels;
-
-  }
-
   // Round angle in the [-PI,PI] range
   static double RoundAngle(double a) {
 
@@ -127,9 +90,10 @@ public class Utils {
     double projmatrix[] = new double[16];
     double wcoord[]     = new double[4];
 
-    gl.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);
-    gl.glGetDoublev(GL.GL_MODELVIEW_MATRIX, mvmatrix, 0);
-    gl.glGetDoublev(GL.GL_PROJECTION_MATRIX, projmatrix, 0);
+    GL2 gl2 = (GL2)gl;
+    gl2.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);
+    gl2.glGetDoublev(GLMatrixFunc.GL_MODELVIEW_MATRIX, mvmatrix, 0);
+    gl2.glGetDoublev(GLMatrixFunc.GL_PROJECTION_MATRIX, projmatrix, 0);
 
     JGL3DView.glu.gluProject(x, y, z,
               mvmatrix, 0,
@@ -150,15 +114,16 @@ public class Utils {
     double projmatrix[] = new double[16];
     double wcoord[]     = new double[4];
 
-    gl.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);
-    gl.glGetDoublev(GL.GL_MODELVIEW_MATRIX, mvmatrix, 0);
-    gl.glGetDoublev(GL.GL_PROJECTION_MATRIX, projmatrix, 0);
+    GL2 gl2 = (GL2)gl;
+    gl2.glGetIntegerv(GL.GL_VIEWPORT, viewport, 0);
+    gl2.glGetDoublev(GLMatrixFunc.GL_MODELVIEW_MATRIX, mvmatrix, 0);
+    gl2.glGetDoublev(GLMatrixFunc.GL_PROJECTION_MATRIX, projmatrix, 0);
     double realy = viewport[3] - (int) y - 1;
     JGL3DView.glu.gluUnProject(x, realy, z,
-              mvmatrix, 0,
-              projmatrix, 0,
-              viewport, 0,
-              wcoord, 0);
+        mvmatrix, 0,
+        projmatrix, 0,
+        viewport, 0,
+        wcoord, 0);
 
     _3dcoord[0] = wcoord[0];
     _3dcoord[1] = wcoord[1];
@@ -168,8 +133,9 @@ public class Utils {
 
   static public void project3D(GL gl,double x,double y,double z,double[] _3dcoord) {
 
+    GL2 gl2 = (GL2)gl;
     double mvmatrix[]   = new double[16];
-    gl.glGetDoublev(GL.GL_MODELVIEW_MATRIX, mvmatrix, 0);
+    gl2.glGetDoublev(GL2.GL_MODELVIEW_MATRIX, mvmatrix, 0);
 
     _3dcoord[0] = x*mvmatrix[0] + y*mvmatrix[4] + z*mvmatrix[8]  + mvmatrix[12];
     _3dcoord[1] = x*mvmatrix[1] + y*mvmatrix[5] + z*mvmatrix[9]  + mvmatrix[13];

@@ -21,31 +21,30 @@
             <groupId>org.tango.atk</groupId>
             <artifactId>ATKCore</artifactId>
         </dependency>
+        <!-- JOGL Open GL java , get version number here because native libs are dependant -->
         <dependency>
             <groupId>org.jogamp.gluegen</groupId>
-            <artifactId>gluegen-rt</artifactId>
-            <version>pre-2.0</version>
+            <artifactId>gluegen-rt-main</artifactId>
+            <version>2.3.1</version>
         </dependency>
         <dependency>
             <groupId>org.jogamp.jogl</groupId>
-            <artifactId>jogl</artifactId>
-            <version>pre-2.0</version>
+            <artifactId>jogl-all-main</artifactId>
+            <version>2.3.1</version>
         </dependency>
+        <!-- Image J -->
         <dependency>
-            <groupId>org.jogamp.ij</groupId>
+            <groupId>net.imagej</groupId>
             <artifactId>ij</artifactId>
-            <version>pre-2.0</version>
+            <version>RELEASE</version>
         </dependency>
+        <!-- JEP Expression parser -->
         <dependency>
-            <groupId>org.jogamp.jep</groupId>
+            <groupId>org.scijava</groupId>
             <artifactId>jep</artifactId>
-            <version>pre-2.0</version>
+            <version>2.4.2</version>
         </dependency>
-        <dependency>
-            <groupId>org.jogamp.jepext</groupId>
-            <artifactId>jepext</artifactId>
-            <version>pre-2.0</version>
-        </dependency>
+
     </dependencies>
 
     <build>
@@ -112,4 +111,5 @@
             <url>http://dl.bintray.com/tango-controls/maven</url>
         </pluginRepository>
     </pluginRepositories>
+
 </project>
