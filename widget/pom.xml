@@ -91,16 +91,6 @@
         </plugins>
     </build>
 
-
-
-    <!-- TODO #2: use maven central -->
-    <repositories>
-        <repository>
-            <id>bundled</id>
-            <url>file://${project.basedir}/lib</url>
-        </repository>
-    </repositories>
-
     <pluginRepositories>
         <pluginRepository>
             <snapshots>
