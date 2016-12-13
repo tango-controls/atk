@@ -109,51 +109,7 @@ public class SimpleSynopticAppli extends javax.swing.JFrame implements SynopticP
   public SimpleSynopticAppli(String jdrawFullFileName) {
 
     this();
-
-    try {
-      tangoSynopHandler.setProgressListener(this);
-      tangoSynopHandler.setSynopticFileName(jdrawFullFileName);
-      splash.setMessage("Synoptic file loaded ...");
-      tangoSynopHandler.setToolTipMode(TangoSynopticHandler.TOOL_TIP_NAME);
-      tangoSynopHandler.setAutoZoom(true);
-    } catch (FileNotFoundException fnfEx) {
-      splash.setVisible(false);
-      javax.swing.JOptionPane.showMessageDialog(
-          null, "Cannot find the synoptic file : " + jdrawFullFileName + ".\n"
-          + "Check the file name you entered;"
-          + " Application will abort ...\n"
-          + fnfEx,
-          "No such file",
-          javax.swing.JOptionPane.ERROR_MESSAGE);
-      //System.exit(-1); don't exit if not standalone
-      return;
-    } catch (IllegalArgumentException illEx) {
-      splash.setVisible(false);
-      javax.swing.JOptionPane.showMessageDialog(
-          null, "Cannot parse the synoptic file : " + jdrawFullFileName + ".\n"
-          + "Check if the file is a Jdraw file."
-          + " Application will abort ...\n"
-          + illEx,
-          "Cannot parse the file",
-          javax.swing.JOptionPane.ERROR_MESSAGE);
-      //System.exit(-1); don't exit if not standalone
-      return;
-    } catch (MissingResourceException mrEx) {
-      splash.setVisible(false);
-      javax.swing.JOptionPane.showMessageDialog(
-          null, "Cannot parse the synoptic file : " + jdrawFullFileName + ".\n"
-          + " Application will abort ...\n"
-          + mrEx,
-          "Cannot parse the file",
-          javax.swing.JOptionPane.ERROR_MESSAGE);
-      //System.exit(-1); don't exit if not standalone
-      return;
-    }
-    setTrendAttributeList();
-    splash.setVisible(false);
-
-    fileLoaded = true;
-    setTitle(jdrawFullFileName);
+    loadSynoptic(jdrawFullFileName);
     pack();
     setVisible(true);
 
@@ -161,7 +117,8 @@ public class SimpleSynopticAppli extends javax.swing.JFrame implements SynopticP
 
   public SimpleSynopticAppli(String jdrawFullFileName, boolean stand) {
 
-    this(jdrawFullFileName);
+    this();
+    loadSynoptic(jdrawFullFileName);
     standAlone = stand;
 
   }
@@ -230,7 +187,7 @@ public class SimpleSynopticAppli extends javax.swing.JFrame implements SynopticP
       gbc.fill = GridBagConstraints.BOTH;
       gbc.insets = new Insets(3,3,3,3);
 
-      JLabel label1 = new JLabel("Current file");
+      JLabel label1 = new JLabel("Configuration file");
       label1.setFont(ATKConstant.labelFont);
 
       gbc.gridx = 0;
@@ -295,6 +252,55 @@ public class SimpleSynopticAppli extends javax.swing.JFrame implements SynopticP
       attList.startRefresher();
 
     }
+
+  }
+
+  private void loadSynoptic(String jdrawFullFileName) {
+
+    try {
+      tangoSynopHandler.setProgressListener(this);
+      tangoSynopHandler.setSynopticFileName(jdrawFullFileName);
+      splash.setMessage("Synoptic file loaded ...");
+      tangoSynopHandler.setToolTipMode(TangoSynopticHandler.TOOL_TIP_NAME);
+      tangoSynopHandler.setAutoZoom(true);
+    } catch (FileNotFoundException fnfEx) {
+      splash.setVisible(false);
+      javax.swing.JOptionPane.showMessageDialog(
+          null, "Cannot find the synoptic file : " + jdrawFullFileName + ".\n"
+          + "Check the file name you entered;"
+          + " Application will abort ...\n"
+          + fnfEx,
+          "No such file",
+          javax.swing.JOptionPane.ERROR_MESSAGE);
+      //System.exit(-1); don't exit if not standalone
+      return;
+    } catch (IllegalArgumentException illEx) {
+      splash.setVisible(false);
+      javax.swing.JOptionPane.showMessageDialog(
+          null, "Cannot parse the synoptic file : " + jdrawFullFileName + ".\n"
+          + "Check if the file is a Jdraw file."
+          + " Application will abort ...\n"
+          + illEx,
+          "Cannot parse the file",
+          javax.swing.JOptionPane.ERROR_MESSAGE);
+      //System.exit(-1); don't exit if not standalone
+      return;
+    } catch (MissingResourceException mrEx) {
+      splash.setVisible(false);
+      javax.swing.JOptionPane.showMessageDialog(
+          null, "Cannot parse the synoptic file : " + jdrawFullFileName + ".\n"
+          + " Application will abort ...\n"
+          + mrEx,
+          "Cannot parse the file",
+          javax.swing.JOptionPane.ERROR_MESSAGE);
+      //System.exit(-1); don't exit if not standalone
+      return;
+    }
+    setTrendAttributeList();
+    splash.setVisible(false);
+
+    fileLoaded = true;
+    setTitle(jdrawFullFileName);
 
   }
 
@@ -548,6 +554,7 @@ public class SimpleSynopticAppli extends javax.swing.JFrame implements SynopticP
       System.exit(-1);
 
     ATKGraphicsUtils.centerFrameOnScreen(syApp);
+    syApp.setVisible(true);
 
   }
 
