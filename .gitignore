@@ -13,6 +13,7 @@
 release/
 test/
 lib/
+install.bat
 
 # User-specific stuff:
 .idea/workspace.xml

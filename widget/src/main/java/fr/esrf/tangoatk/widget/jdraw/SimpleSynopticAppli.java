@@ -28,41 +28,43 @@
 
 package fr.esrf.tangoatk.widget.jdraw;
 
-import fr.esrf.tangoatk.core.AttributeList;
-import fr.esrf.tangoatk.core.AttributePolledList;
-import fr.esrf.tangoatk.core.ConnectionException;
-import fr.esrf.tangoatk.core.IDevStateScalar;
-import fr.esrf.tangoatk.core.IEntity;
-import fr.esrf.tangoatk.core.IEntityFilter;
-import fr.esrf.tangoatk.core.INumberScalar;
+import fr.esrf.Tango.DevFailed;
+import fr.esrf.tangoatk.core.*;
+import fr.esrf.tangoatk.widget.attribute.SimpleScalarViewer;
 import fr.esrf.tangoatk.widget.attribute.Trend;
 
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.*;
 
-import fr.esrf.tangoatk.widget.util.ErrorHistory;
-import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
-import fr.esrf.tangoatk.widget.util.SplashTimer;
+import fr.esrf.tangoatk.widget.util.*;
 import fr.esrf.tangoatk.widget.util.jdraw.JDFileFilter;
+import org.tango.settingsmanager.client.SettingsManagedEvent;
+import org.tango.settingsmanager.client.SettingsManagedListener;
+import org.tango.settingsmanager.client.SettingsManagerClient;
 
 import javax.swing.*;
 
 /**
  * @author PONCET
  */
-public class SimpleSynopticAppli extends javax.swing.JFrame {
+public class SimpleSynopticAppli extends javax.swing.JFrame implements SynopticProgressListener {
 
-  private final SplashTimer splash = new SplashTimer(10000, 200);  // progress during 10s with steps of 200ms
+  private final Splash splash = new Splash();
 
   private ErrorHistory errorHistory;
   private boolean standAlone = false;
   private boolean fileLoaded = false;
-  private boolean hasSettingManager;
   private String  settingManagerName;
+  private SettingsManagerClient sm;
+  private SimpleScalarViewer settingFile = null;
 
   private AttributePolledList numberAndStateScalarAttList; /* used in the global trend */
   private AttributeList attList; /* used for setting manager */
   private JFrame trendFrame;
+  private JPanel innerPanel;
   private Trend globalTrend = null;
 
   /**
@@ -77,8 +79,8 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
     splash.setCopyright("(c) ESRF 2003-2015");
     splash.setMessage("Loading synoptic ...");
     splash.initProgress();
+    splash.setMaxProgress(100);
     splash.setVisible(true);
-
 
     numberAndStateScalarAttList = new fr.esrf.tangoatk.core.AttributePolledList();
     numberAndStateScalarAttList.setFilter(new IEntityFilter() {
@@ -92,20 +94,12 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
     });
 
     trendFrame = new JFrame();
-    javax.swing.JPanel jpanel = new javax.swing.JPanel();
-    trendFrame.getContentPane().add(jpanel, java.awt.BorderLayout.CENTER);
-    jpanel.setPreferredSize(new java.awt.Dimension(600, 300));
-    jpanel.setLayout(new java.awt.GridBagLayout());
-
-    java.awt.GridBagConstraints trendGbc;
-    trendGbc = new java.awt.GridBagConstraints();
-    trendGbc.gridx = 0;
-    trendGbc.gridy = 0;
-    trendGbc.fill = java.awt.GridBagConstraints.BOTH;
-    trendGbc.weightx = 1.0;
-    trendGbc.weighty = 1.0;
+    javax.swing.JPanel trendPanel = new javax.swing.JPanel();
+    trendPanel.setPreferredSize(new java.awt.Dimension(600, 300));
+    trendPanel.setLayout(new BorderLayout());
     globalTrend = new Trend(trendFrame);
-    jpanel.add(globalTrend, trendGbc);
+    trendPanel.add(globalTrend, BorderLayout.CENTER);
+    trendFrame.setContentPane(trendPanel);
     trendFrame.pack();
 
     initComponents();
@@ -117,11 +111,13 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
     this();
 
     try {
+      tangoSynopHandler.setProgressListener(this);
       tangoSynopHandler.setSynopticFileName(jdrawFullFileName);
       splash.setMessage("Synoptic file loaded ...");
       tangoSynopHandler.setToolTipMode(TangoSynopticHandler.TOOL_TIP_NAME);
       tangoSynopHandler.setAutoZoom(true);
     } catch (FileNotFoundException fnfEx) {
+      splash.setVisible(false);
       javax.swing.JOptionPane.showMessageDialog(
           null, "Cannot find the synoptic file : " + jdrawFullFileName + ".\n"
           + "Check the file name you entered;"
@@ -130,9 +126,9 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
           "No such file",
           javax.swing.JOptionPane.ERROR_MESSAGE);
       //System.exit(-1); don't exit if not standalone
-      splash.setVisible(false);
       return;
     } catch (IllegalArgumentException illEx) {
+      splash.setVisible(false);
       javax.swing.JOptionPane.showMessageDialog(
           null, "Cannot parse the synoptic file : " + jdrawFullFileName + ".\n"
           + "Check if the file is a Jdraw file."
@@ -141,9 +137,9 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
           "Cannot parse the file",
           javax.swing.JOptionPane.ERROR_MESSAGE);
       //System.exit(-1); don't exit if not standalone
-      splash.setVisible(false);
       return;
     } catch (MissingResourceException mrEx) {
+      splash.setVisible(false);
       javax.swing.JOptionPane.showMessageDialog(
           null, "Cannot parse the synoptic file : " + jdrawFullFileName + ".\n"
           + " Application will abort ...\n"
@@ -151,7 +147,6 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
           "Cannot parse the file",
           javax.swing.JOptionPane.ERROR_MESSAGE);
       //System.exit(-1); don't exit if not standalone
-      splash.setVisible(false);
       return;
     }
     setTrendAttributeList();
@@ -177,11 +172,156 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
     this.settingManagerName = settingManagerName;
 
     if( settingManagerName!=null ) {
+
+
+      // Setting manager file menu
+      fileLoadMenuItem = new JMenuItem("Load...");
+      fileLoadMenuItem.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          fileLoadMenuItemActionPerformed(e);
+        }
+      });
+
+      fileJMenu.add(fileLoadMenuItem);
+
+      filePreviewMenuItem = new JMenuItem("Preview...");
+      filePreviewMenuItem.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          filePreviewMenuItemActionPerformed(e);
+        }
+      });
+
+      fileJMenu.add(filePreviewMenuItem);
+
+      fileSaveMenuItem = new JMenuItem("Save...");
+      fileSaveMenuItem.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          fileSaveMenuItemActionPerformed(e);
+        }
+      });
+      fileJMenu.add(fileSaveMenuItem);
+
+      // Setting manager API
+      try {
+
+        sm = new SettingsManagerClient(settingManagerName);
+        sm.addSettingsAppliedListener(new SettingsManagedListener() {
+          @Override
+          public void settingsManaged(SettingsManagedEvent event) {
+            settingsAppliedPerformed(event);
+          }
+        });
+
+      } catch (DevFailed ex) {
+        ErrorPane.showErrorMessage(this, settingManagerName, ex);
+      }
+
+      // Setting panel
       attList = new AttributeList();
       attList.addErrorListener(errorHistory);
 
+      JPanel settingPanel = new JPanel();
+      settingPanel.setLayout(new GridBagLayout());
+      GridBagConstraints gbc = new GridBagConstraints();
+
+      gbc.fill = GridBagConstraints.BOTH;
+      gbc.insets = new Insets(3,3,3,3);
+
+      JLabel label1 = new JLabel("Current file");
+      label1.setFont(ATKConstant.labelFont);
+
+      gbc.gridx = 0;
+      gbc.gridy = 0;
+      gbc.weightx = 0;
+      settingPanel.add(label1,gbc);
+
+      settingFile = new SimpleScalarViewer();
+      settingFile.setBackgroundColor(Color.WHITE);
+
+      gbc.gridx = 1;
+      gbc.gridy = 0;
+      gbc.weightx = 1;
+      gbc.ipadx = 100;
+      settingPanel.add(settingFile,gbc);
+
+      JButton previewBtn = new JButton("Preview");
+      previewBtn.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          filePreviewMenuItemActionPerformed(e);
+        }
+      });
+      gbc.gridx = 2;
+      gbc.gridy = 0;
+      gbc.ipadx = 0;
+      gbc.weightx = 0;
+      settingPanel.add(previewBtn,gbc);
+
+      JButton loadBtn = new JButton("Load");
+      loadBtn.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          fileLoadMenuItemActionPerformed(e);
+        }
+      });
+      gbc.gridx = 3;
+      gbc.gridy = 0;
+      gbc.weightx = 0;
+      settingPanel.add(loadBtn,gbc);
+
+      JButton saveBtn = new JButton("Save");
+      loadBtn.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          fileSaveMenuItemActionPerformed(e);
+        }
+      });
+      gbc.gridx = 4;
+      gbc.gridy = 0;
+      gbc.weightx = 0;
+      settingPanel.add(saveBtn,gbc);
+
+      innerPanel.add(settingPanel,BorderLayout.SOUTH);
+
+      try {
+        IStringScalar model = (IStringScalar)attList.add(settingManagerName+"/LastAppliedFile");
+        settingFile.setModel(model);
+        model.refresh();
+      } catch (ConnectionException e) {}
+
+      attList.startRefresher();
+
     }
 
+  }
+
+  private void settingsAppliedPerformed(SettingsManagedEvent event) {
+    String fileName = event.getFileName();
+    switch (event.getAction()) {
+      case SettingsManagerClient.APPLIED:
+        //  Display applied results
+        if (event.hasFailed()) {
+          ErrorPane.showErrorMessage(new JFrame(),
+              "Applying file " + fileName, event.getDevFailed());
+        } else {
+          JOptionPane.showMessageDialog(new JFrame(),
+              "Settings loaded from  " + event.getFileName());
+        }
+        break;
+      case SettingsManagerClient.GENERATED:
+        //  Display generated results
+        if (event.hasFailed()) {
+          ErrorPane.showErrorMessage(new JFrame(),
+              "Generated file " + fileName, event.getDevFailed());
+        } else {
+          JOptionPane.showMessageDialog(new JFrame(),
+              "Settings saved in  " + event.getFileName());
+        }
+        break;
+    }
   }
 
   private void setTrendAttributeList() {
@@ -199,17 +339,10 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
 
   }
 
-  /**
-   * This method is called from within the constructor to
-   * initialize the form.
-   * WARNING: Do NOT modify this code. The content of this method is
-   * always regenerated by the Form Editor.
-   */
-  private void initComponents() {//GEN-BEGIN:initComponents
+  private void initComponents() {
 
-    java.awt.GridBagConstraints gridBagConstraints;
-
-    jPanel1 = new javax.swing.JPanel();
+    innerPanel = new JPanel();
+    innerPanel.setLayout(new BorderLayout());
     tangoSynopHandler = new fr.esrf.tangoatk.widget.jdraw.TangoSynopticHandler();
     jMenuBar1 = new javax.swing.JMenuBar();
     fileJMenu = new javax.swing.JMenu();
@@ -227,8 +360,6 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
       }
     });
 
-    jPanel1.setLayout(new java.awt.GridBagLayout());
-
     if (errorHistory != null) {
       try {
         tangoSynopHandler.setErrorHistoryWindow(errorHistory);
@@ -237,21 +368,8 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
       }
     }
 
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    jPanel1.add(tangoSynopHandler, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    getContentPane().add(jPanel1, gridBagConstraints);
+    innerPanel.add(tangoSynopHandler, BorderLayout.CENTER);
+    setContentPane(innerPanel);
 
     fileJMenu.setText("File");
     quitJMenuItem.setText("Quit");
@@ -301,23 +419,51 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
 
     pack();
 
-  }//GEN-END:initComponents
+  }
 
-  private void viewTrendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_viewTrendActionPerformed
-    // Add your handling code here:
+  private void viewTrendActionPerformed(java.awt.event.ActionEvent evt) {
     fr.esrf.tangoatk.widget.util.ATKGraphicsUtils.centerFrame(getRootPane(), trendFrame);
     trendFrame.setVisible(true);
-  }//GEN-LAST:event_viewTrendActionPerformed
+  }
 
-  private void errHistMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_errHistMenuItemActionPerformed
-    // TODO add your handling code here:
+  private void errHistMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
     errorHistory.setVisible(true);
-  }//GEN-LAST:event_errHistMenuItemActionPerformed
+  }
 
-  private void quitJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_quitJMenuItemActionPerformed
+  private void quitJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
     // TODO add your handling code here:
     stopSimpleSynopticAppli();
-  }//GEN-LAST:event_quitJMenuItemActionPerformed
+  }
+
+  private void fileLoadMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
+
+    try {
+      sm.applySettings(this);
+    } catch (DevFailed ex) {
+      ErrorPane.showErrorMessage(this, settingManagerName, ex);
+    }
+
+  }
+
+  private void fileSaveMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
+
+    try {
+      sm.generateSettingsFile(this);
+    } catch (DevFailed ex) {
+      ErrorPane.showErrorMessage(this,settingManagerName,ex);
+    }
+
+  }
+
+  private void filePreviewMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
+
+    try {
+      sm.viewSettingsFile(this);
+    } catch (DevFailed ex) {
+      ErrorPane.showErrorMessage(this,settingManagerName,ex);
+    }
+
+  }
 
   /**
    * Exit the Application
@@ -327,15 +473,22 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
   }//GEN-LAST:event_exitForm
 
   public void stopSimpleSynopticAppli() {
+
     if (standAlone == true)
       System.exit(0);
     else {
+
       tangoSynopHandler.getAttributeList().stopRefresher();
 
       if (globalTrend != null)
         globalTrend.clearModel();
+
+      if(settingFile != null)
+        settingFile.clearModel();
+
       this.dispose();
     }
+
   }
 
   private static void printUsage() {
@@ -389,7 +542,7 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
 
     }
 
-    syApp = new SimpleSynopticAppli(fullFileName, true);
+    syApp = new SimpleSynopticAppli(fullFileName, settingManagerName, true);
 
     if (!syApp.fileLoaded) // failed to load the synoptic file : constructor failure
       System.exit(-1);
@@ -404,12 +557,17 @@ public class SimpleSynopticAppli extends javax.swing.JFrame {
   private javax.swing.JMenuItem diagtMenuItem;
   private javax.swing.JMenu fileJMenu;
   private javax.swing.JMenuBar jMenuBar1;
-  private javax.swing.JPanel jPanel1;
   private javax.swing.JMenuItem quitJMenuItem;
   private javax.swing.JMenuItem fileLoadMenuItem;
   private javax.swing.JMenuItem fileSaveMenuItem;
+  private javax.swing.JMenuItem filePreviewMenuItem;
   private fr.esrf.tangoatk.widget.jdraw.TangoSynopticHandler tangoSynopHandler;
   private javax.swing.JMenu viewMenu;
+
+  @Override
+  public void progress(double p) {
+    splash.progress((int)(p*100.0));
+  }
   // End of variables declaration//GEN-END:variables
 
 }
