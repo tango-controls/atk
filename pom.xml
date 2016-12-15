@@ -13,7 +13,7 @@
 
     <groupId>org.tango.atk</groupId>
     <artifactId>TangoATK</artifactId>
-    <version>9.1.27</version>
+    <version>9.1.28-SNAPSHOT</version>
 
     <description>TangoATK is a collection of java-classes to help build applications which interact with Tango-devices.</description>
 
@@ -44,7 +44,7 @@
         <connection>scm:git:git@github.com:tango-controls/atk.git</connection>
         <developerConnection>scm:git:git@github.com:tango-controls/atk.git</developerConnection>
         <url>https://github.com/tango-controls/atk</url>
-      <tag>TangoATK-9.1.27</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <build>
