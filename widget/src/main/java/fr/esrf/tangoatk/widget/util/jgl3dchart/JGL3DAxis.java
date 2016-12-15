@@ -252,6 +252,27 @@ public class JGL3DAxis {
   }
 
   /**
+   * Sets linear or log scale
+   * @see #LINEAR_SCALE
+   * @see #LOG_SCALE
+   * @param scale Scale
+   */
+  public void setScale(int scale) {
+    this.scale = scale;
+    parent.computeScale();
+  }
+
+  /**
+   * Returns current scale
+   * @see #LINEAR_SCALE
+   * @see #LOG_SCALE
+   * @return Scale
+   */
+  public int getScale() {
+    return scale;
+  }
+
+  /**
    * Returns minimum value of this axis
    */
   public double getMinimum() {
@@ -345,11 +366,11 @@ public class JGL3DAxis {
   }
 
   double getMin() {
-    return min;
+    return min * atGain;
   }
 
   double getMax() {
-    return max;
+    return max*atGain;
   }
 
   void setMin(double min) {
@@ -442,6 +463,9 @@ public class JGL3DAxis {
    */
   private String suppressZero(String n) {
 
+    if(n.indexOf('e')>=0 || n.indexOf('E')>=0)
+      return n;
+
     boolean hasDecimal = n.indexOf('.') != -1;
 
     if(hasDecimal) {
@@ -475,6 +499,9 @@ public class JGL3DAxis {
 
     if(Double.isNaN(vt))
       return "NaN";
+
+    if(scale==LOG_SCALE)
+      vt = Math.pow(10.0, vt);
 
     // Round value to nearest multiple of prec
     // TODO: rounding in LOG_SCALE
@@ -575,73 +602,97 @@ public class JGL3DAxis {
         break;
     }
 
+    max = max / atGain;
+    min = min / atGain;
+
     double prec = computeLowTen(max - min);
     int n = (int) Math.rint((max - min) / prec);
     int nbMaxLab = (int) length / tickSpacing;
     if(nbMaxLab>20) nbMaxLab=20;
     double sz = (max-min);
     int step=10;
+    double startx;
+    double sx;
     double precDelta = sz / length;
 
-    if (n <= nbMaxLab) {
+    if (scale == LOG_SCALE) {
 
-      // Look forward
-      n = (int) Math.rint((max - min) / (prec / 2.0));
+      prec = 1;   // Decade
 
-      while (n <= nbMaxLab) {
-        prec = prec / 2.0;
-        step = 5;
-        n = (int) Math.rint((max - min) / (prec / 5.0));
-        if (n <= nbMaxLab) {
-          prec = prec / 5.0;
-          step = 10;
-          n = (int) Math.rint((max - min) / (prec / 2.0));
+      startx = Math.rint(min);
+
+      n = (int) Math.rint((max - min) / prec);
+
+      while (n > nbMaxLab) {
+        prec = prec * 2;
+        n = (int) Math.rint((max - min) / prec);
+        if (n > nbMaxLab) {
+          prec = prec * 5;
+          n = (int) Math.rint((max - min) / prec);
         }
       }
 
     } else {
 
-      // Look backward
-      while (n > nbMaxLab) {
-        prec = prec * 5.0;
-        step = 5;
-        n = (int) Math.rint((max - min) / prec);
-        if (n > nbMaxLab) {
-          prec = prec * 2.0;
-          step = 10;
-          n = (int) Math.rint((max - min) / prec);
+      if (n <= nbMaxLab) {
+
+        // Look forward
+        n = (int) Math.rint((max - min) / (prec / 2.0));
+
+        while (n <= nbMaxLab) {
+          prec = prec / 2.0;
+          step = 5;
+          n = (int) Math.rint((max - min) / (prec / 5.0));
+          if (n <= nbMaxLab) {
+            prec = prec / 5.0;
+            step = 10;
+            n = (int) Math.rint((max - min) / (prec / 2.0));
+          }
         }
-      }
 
-    }
-
-    // round to multiple of prec (last not visible label)
-
-    long round = (long) Math.floor(min / prec);
-    double startx = round * prec;
-
-    // Compute real number of label
-
-    double sx = startx;
-    int nbL = 0;
-    while(sx<=(max + precDelta)) {
-      if( sx >= (min - precDelta)) {
-        nbL++;
-      }
-      sx += prec;
-    }
-
-    if (nbL <= 2) {
-      // Only one label
-      // Go backward and extract the 2 extremity
-      if (step == 10) {
-        step = 5;
-        prec = prec / 2.0;
       } else {
-        step = 10;
-        prec = prec / 5.0;
+
+        // Look backward
+        while (n > nbMaxLab) {
+          prec = prec * 5.0;
+          step = 5;
+          n = (int) Math.rint((max - min) / prec);
+          if (n > nbMaxLab) {
+            prec = prec * 2.0;
+            step = 10;
+            n = (int) Math.rint((max - min) / prec);
+          }
+        }
+
       }
-      extractLabel = true;
+
+      // round to multiple of prec (last not visible label)
+
+      long round = (long) Math.floor(min / prec);
+      startx = round * prec;
+
+      // Compute real number of label
+
+      sx = startx;
+      int nbL = 0;
+      while (sx <= (max + precDelta)) {
+        if (sx >= (min - precDelta)) {
+          nbL++;
+        }
+        sx += prec;
+      }
+
+      if (nbL <= 2) {
+        // Only one label
+        // Go backward and extract the 2 extremity
+        if (step == 10) {
+          prec = prec / 2.0;
+        } else {
+          prec = prec / 5.0;
+        }
+        extractLabel = true;
+      }
+
     }
 
     VERTEX3D nV = new VERTEX3D(p2.x-p1.x,p2.y-p1.y,p2.z-p1.z);
@@ -652,7 +703,7 @@ public class JGL3DAxis {
 
         LabelInfo l = new LabelInfo();
 
-        sx = startx;
+        sx = startx * atGain;
         l.p1 = new VERTEX3D(sx*nV.x+axisPos.x,sx*nV.y+axisPos.y,sx*nV.z+axisPos.z);
         l.p2 = new VERTEX3D(sx*nV.x+normal.x+axisPos.x,sx*nV.y+normal.y+axisPos.y,sx*nV.z+normal.z+axisPos.z);
 

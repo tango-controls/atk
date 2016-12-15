@@ -43,6 +43,7 @@ class AxisPanel extends JPanel implements ActionListener, KeyListener {
   private JLabel     MaxLabel;
   private JTextField MaxText;
   private JCheckBox  AutoScaleCheck;
+  private JCheckBox  LogScaleCheck;
 
   private JPanel     settingPanel;
   private JCheckBox  VisibleCheck;
@@ -64,7 +65,7 @@ class AxisPanel extends JPanel implements ActionListener, KeyListener {
   private JLabel     gainLabel;
   private JTextField gainText;
 
-  public AxisPanel(JGL3DAxis axis,JGL3DChart chart) {
+  public AxisPanel(JGL3DAxis axis,JGL3DChart chart,boolean showLog) {
 
     this.axis = axis;
     this.chart = chart;
@@ -104,6 +105,17 @@ class AxisPanel extends JPanel implements ActionListener, KeyListener {
     AutoScaleCheck.setSelected(axis.isAutoScale());
     AutoScaleCheck.addActionListener(this);
 
+    if(showLog) {
+      LogScaleCheck = new JCheckBox("Log scale");
+      LogScaleCheck.setFont(Utils.labelFont);
+      LogScaleCheck.setForeground(Utils.fColor);
+      LogScaleCheck.setSelected(axis.isAutoScale());
+      LogScaleCheck.addActionListener(this);
+      LogScaleCheck.setBounds(140, 50, 135, 25);
+      LogScaleCheck.setSelected(false);
+      scalePanel.add(LogScaleCheck);
+    }
+
     scalePanel.add(MinLabel);
     scalePanel.add(MinText);
     scalePanel.add(MaxLabel);
@@ -114,7 +126,7 @@ class AxisPanel extends JPanel implements ActionListener, KeyListener {
     MinText.setBounds(50, 20, 90, 25);
     MaxLabel.setBounds(145, 20, 40, 25);
     MaxText.setBounds(190, 20, 90, 25);
-    AutoScaleCheck.setBounds(5, 50, 275, 25);
+    AutoScaleCheck.setBounds(5, 50, 130, 25);
     scalePanel.setBounds(5,10,290,85);
 
     settingPanel = new JPanel();
@@ -274,6 +286,14 @@ class AxisPanel extends JPanel implements ActionListener, KeyListener {
         ColorView.setBackground(c);
         chart.repaint();
       }
+
+    } else if (e.getSource() == LogScaleCheck ) {
+
+      boolean b = LogScaleCheck.isSelected();
+      if(b)
+        axis.setScale(JGL3DAxis.LOG_SCALE);
+      else
+        axis.setScale(JGL3DAxis.LINEAR_SCALE);
 
     } else if (e.getSource() == VisibleCheck) {
 
@@ -488,9 +508,9 @@ public class SettingsFrame extends JFrame implements ActionListener {
 
     JPanel innerPane = new JPanel((LayoutManager)null);
 
-    xPanel = new AxisPanel(chart.getXAxis(),chart);
-    yPanel = new AxisPanel(chart.getYAxis(),chart);
-    zPanel = new AxisPanel(chart.getZAxis(),chart);
+    xPanel = new AxisPanel(chart.getXAxis(),chart,false);
+    yPanel = new AxisPanel(chart.getYAxis(),chart,true);
+    zPanel = new AxisPanel(chart.getZAxis(),chart,false);
     gPanel = new GradientPanel(chart);
 
     // Global frame construction

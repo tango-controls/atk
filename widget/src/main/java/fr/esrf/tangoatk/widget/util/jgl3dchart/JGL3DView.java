@@ -29,10 +29,12 @@ import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 import com.jogamp.opengl.glu.GLU;
 import com.jogamp.common.util.PropertyAccess;
+import fr.esrf.tangoatk.widget.util.chart.JLAxis;
 
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.event.*;
+import java.awt.geom.Arc2D;
 
 class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener {
 
@@ -62,8 +64,6 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
   private JGL3DAxis yAxis;
   private JGL3DAxis zAxis;
 
-  private double colMin=0;     // Data min (for colormap)
-  private double colMax=100;   // Data max (for colormap)
   private double Scmin=0.0;    // Data min (for colormap scaling)
   private double Scmax=100.0;  // Data min (for colormap scaling)
 
@@ -328,6 +328,24 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
 
   }
 
+  private boolean isValid(double f) {
+    if(Double.isNaN(f))
+      return false;
+    if(Double.isInfinite(f))
+      return false;
+    return true;
+  }
+
+  private void setDefaultRange() {
+    if(yAxis.getScale() == JGL3DAxis.LINEAR_SCALE ) {
+      Scmax = 100.0;
+      Scmin = 0.0;
+    } else {
+      Scmax = 2.0;
+      Scmin = -1.0;
+    }
+  }
+
   void computeScale() {
 
     if(data==null) {
@@ -354,20 +372,25 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
       boolean yRangeOK = false;
       Scmin = Double.MAX_VALUE;
       Scmax = -Double.MAX_VALUE;
-      if(!yDataAutoScale) {
-        Scmax = colMax;
-        Scmin = colMin;
-      }
+      if(!yDataAutoScale)
+        setDefaultRange();
 
       if (yDataAutoScale) {
         for (int x = 0; x < data.length - 1; x++) {
           for (int z = 0; z < data[x].length - 1; z++) {
-            double v = yGain*data[x][z]+yOff;
-            if (!Double.isNaN(v)) {
+            double v;
+
+            if(yAxis.getScale()==JGL3DAxis.LINEAR_SCALE)
+              v = yGain*data[x][z]+yOff;
+            else
+              v = yGain * Math.log10(data[x][z]) + yOff;
+
+            if (isValid(v)) {
               if (v < Scmin) Scmin = v;
               if (v > Scmax) Scmax = v;
               yRangeOK = true;
             }
+
           }
         }
       }
@@ -379,8 +402,7 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
         }
       } else {
         // Only Nan or invalid data
-        Scmin = colMin;
-        Scmax = colMax;
+        setDefaultRange();
       }
 
       switch(zoomMode) {
@@ -444,8 +466,21 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
             yAxis.setMin(Scmin);
             yAxis.setMax(Scmax);
           } else {
-            yAxis.setMin(yAxis.getMinimum());
-            yAxis.setMax(yAxis.getMaximum());
+            if(yAxis.getScale()==JGL3DAxis.LINEAR_SCALE) {
+              yAxis.setMin(yAxis.getMinimum());
+              yAxis.setMax(yAxis.getMaximum());
+            } else {
+              double yMin = Math.log10(yAxis.getMinimum());
+              double yMax = Math.log10(yAxis.getMaximum());
+              if(isValid(yMin) && isValid(yMax)) {
+                Scmin = yMin;
+                Scmax = yMax;
+              } else {
+                setDefaultRange();
+              }
+              yAxis.setMin(Scmin);
+              yAxis.setMax(Scmax);
+            }
           }
 
           if (zAxis.isAutoScale()) {
@@ -466,8 +501,13 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
       updateAxisPosition();
 
       // Update gradient viewer
-      parent.gradientViewer.getAxis().setMinimum(Scmin);
-      parent.gradientViewer.getAxis().setMaximum(Scmax);
+      if(yAxis.getScale()==JGL3DAxis.LINEAR_SCALE) {
+        parent.gradientViewer.getAxis().setMinimum(Scmin);
+        parent.gradientViewer.getAxis().setMaximum(Scmax);
+      } else {
+        parent.gradientViewer.getAxis().setMinimum(Math.pow(10.0,Scmin));
+        parent.gradientViewer.getAxis().setMaximum(Math.pow(10.0,Scmax));
+      }
       parent.revalidate();
       parent.repaint();
 
@@ -516,12 +556,17 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
       double yOff  = yAxis.getOffsetTransform();
       double zGain = zAxis.getGainTransform();
       double zOff  = zAxis.getOffsetTransform();
+      float x00,y00,z00;
+      float x01,y01,z01;
+      float x10,y10,z10;
+      float x11,y11,z11;
 
       dataList = gl2.glGenLists(1);
       gl2.glNewList(dataList, GL2.GL_COMPILE);
 
       gl2.glBegin(GL.GL_TRIANGLES);
       float rgb[] = new float[3];
+      int scale = yAxis.getScale();
       for (int x = 0; x < data.length - 1; x++) {
         for (int z = 0; z < data[x].length - 1; z++) {
 
@@ -532,40 +577,52 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
                 !Double.isNaN(data[x][z+1]) && !Double.isNaN(data[x+1][z+1]) )
             {
 
-              float x00 = (float)(xGain*(double)x+xOff);
-              float y00 = (float)(yGain*data[x][z]+yOff);
-              float z00 = (float)(zGain*(double)z+zOff);
+              x00 = (float)(xGain*(double)x+xOff);
+              if(scale==JGL3DAxis.LOG_SCALE)
+                y00 = (float)(yGain * Math.log10(data[x][z]) + yOff);
+              else
+                y00 = (float)(yGain*data[x][z]+yOff);
+              z00 = (float)(zGain*(double)z+zOff);
 
-              float x01 = (float)(x00);
-              float y01 = (float)(yGain*data[x][z+1]+yOff);
-              float z01 = (float)(zGain*(z+1.0)+zOff);
+              x01 = (float)(x00);
+              if(scale==JGL3DAxis.LOG_SCALE)
+                y01 = (float)(yGain * Math.log10(data[x][z + 1])+yOff);
+              else
+                y01 = (float)(yGain*data[x][z+1]+yOff);
+              z01 = (float)(zGain*(z+1.0)+zOff);
 
-              float x10 = (float)(xGain*(x+1.0)+xOff);
-              float y10 = (float)(yGain*data[x+1][z]+yOff);
-              float z10 = (float)(z00);
+              x10 = (float)(xGain*(x+1.0)+xOff);
+              if(scale==JGL3DAxis.LOG_SCALE)
+                y10 = (float)(yGain * Math.log10(data[x + 1][z])+yOff);
+              else
+                y10 = (float)(yGain*data[x+1][z]+yOff);
+              z10 = (float)(z00);
 
-              float x11 = (float)(x10);
-              float y11 = (float)(yGain*data[x+1][z+1]+yOff);
-              float z11 = (float)(z01);
+              x11 = (float)(x10);
+              if(scale==JGL3DAxis.LOG_SCALE)
+                y11 = (float)(yGain * Math.log10(data[x + 1][z + 1])+yOff);
+              else
+                y11 = (float)(yGain*data[x+1][z+1]+yOff);
+              z11 = (float)(z01);
 
 
-              getColor(y00, Scmin, Scmax, rgb);
+              getColor(y00, Scmin*yGain, Scmax*yGain, rgb);
               gl2.glColor3f(rgb[0], rgb[1], rgb[2]);
               gl2.glVertex3f(x00, y00, z00);
-              getColor(y01, Scmin, Scmax, rgb);
+              getColor(y01, Scmin*yGain, Scmax*yGain, rgb);
               gl2.glColor3f(rgb[0], rgb[1], rgb[2]);
               gl2.glVertex3f(x01,y01, z01);
-              getColor(y10, Scmin, Scmax, rgb);
+              getColor(y10, Scmin*yGain, Scmax*yGain, rgb);
               gl2.glColor3f(rgb[0], rgb[1], rgb[2]);
               gl2.glVertex3f(x10, y10, z10);
 
-              getColor(y01, Scmin, Scmax, rgb);
+              getColor(y01, Scmin*yGain, Scmax*yGain, rgb);
               gl2.glColor3f(rgb[0], rgb[1], rgb[2]);
               gl2.glVertex3f(x01, y01, z01);
-              getColor(y11, Scmin, Scmax, rgb);
+              getColor(y11, Scmin*yGain, Scmax*yGain, rgb);
               gl2.glColor3f(rgb[0], rgb[1], rgb[2]);
               gl2.glVertex3f(x11, y11, z11);
-              getColor(y10, Scmin, Scmax, rgb);
+              getColor(y10, Scmin*yGain, Scmax*yGain, rgb);
               gl2.glColor3f(rgb[0], rgb[1], rgb[2]);
               gl2.glVertex3f(x10, y10, z10);
             }
