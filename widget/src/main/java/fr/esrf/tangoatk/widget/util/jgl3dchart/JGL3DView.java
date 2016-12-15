@@ -730,6 +730,8 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
     gl.glClear(GL.GL_COLOR_BUFFER_BIT);
     gl.glClear(GL.GL_DEPTH_BUFFER_BIT);
     gl.glDisable(GL.GL_DEPTH_TEST);
+    gl.glDisable(GL2.GL_CLIP_PLANE0);
+    gl.glDisable(GL2.GL_CLIP_PLANE1);
 
     gl.glBegin(GL2.GL_QUADS);
 
@@ -839,6 +841,13 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
     }
 
     if(dataList>0) {
+
+      gl.glEnable(GL2.GL_CLIP_PLANE0);
+      gl.glEnable(GL2.GL_CLIP_PLANE1);
+      double[] pMin = {0.0,1.0,0.0,-yMin};
+      gl.glClipPlane(GL2.GL_CLIP_PLANE0,pMin,0);
+      double[] pMax = {0.0,-1.0,0.0,yMax};
+      gl.glClipPlane(GL2.GL_CLIP_PLANE1,pMax,0);
       gl.glEnable(GL.GL_DEPTH_TEST);
       gl.glCallList(dataList);
     }

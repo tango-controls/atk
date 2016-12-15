@@ -21,6 +21,7 @@
  */
 package fr.esrf.tangoatk.widget.util.jgl3dchart;
 
+import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.Gradient;
 
 import fr.esrf.tangoatk.widget.util.JGradientViewer;
@@ -216,12 +217,12 @@ public class JGL3DChart extends JPanel implements ActionListener {
 
     // Build test data
 
-    double[][] data = new double[1000][1000];
-    for(int x=-500;x<500;x++) {
-      for(int y=-500;y<500;y++) {
+    double[][] data = new double[500][500];
+    for(int x=-250;x<250;x++) {
+      for(int y=-250;y<250;y++) {
         double e1 = (x-100)*(x-100)/100.0 + (y-5)*(y-5)/100.0;
         double e2 = (x+100)*(x+100)/100.0 + (y+5)*(y+5)/100.0;
-        data[x+500][y+500] = 150.0*Math.exp(-e1) - 150.0*Math.exp(-e2);
+        data[x+250][y+250] = 150.0*Math.exp(-e1) - 150.0*Math.exp(-e2);
       }
     }
     joglChart.setData(data);
@@ -257,7 +258,7 @@ public class JGL3DChart extends JPanel implements ActionListener {
     fr.setTitle("JOGL Chart");
     fr.setContentPane(joglChart);
     fr.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    fr.pack();
+    ATKGraphicsUtils.centerFrameOnScreen(fr);
     fr.setVisible(true);
 
   }
