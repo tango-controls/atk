@@ -43,6 +43,7 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
   final static int ZOOM_ZY = 1;
   final static int ZOOM_ZX = 2;
   final static int ZOOM_YX = 3;
+  static double logStep[] = {0.301, 0.477, 0.602, 0.699, 0.778, 0.845, 0.903, 0.954};
 
   // Camera stuff
   private double angleOx=0.5;
@@ -381,9 +382,9 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
             double v;
 
             if(yAxis.getScale()==JGL3DAxis.LINEAR_SCALE)
-              v = yGain*data[x][z]+yOff;
+              v = data[x][z]+yOff;
             else
-              v = yGain * Math.log10(data[x][z]) + yOff;
+              v = Math.log10(data[x][z])+yOff;
 
             if (isValid(v)) {
               if (v < Scmin) Scmin = v;
@@ -467,8 +468,8 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
             yAxis.setMax(Scmax);
           } else {
             if(yAxis.getScale()==JGL3DAxis.LINEAR_SCALE) {
-              yAxis.setMin(yAxis.getMinimum());
-              yAxis.setMax(yAxis.getMaximum());
+              Scmin = yAxis.getMinimum();
+              Scmax = yAxis.getMaximum();
             } else {
               double yMin = Math.log10(yAxis.getMinimum());
               double yMax = Math.log10(yAxis.getMaximum());
@@ -478,9 +479,9 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
               } else {
                 setDefaultRange();
               }
-              yAxis.setMin(Scmin);
-              yAxis.setMax(Scmax);
             }
+            yAxis.setMin(Scmin);
+            yAxis.setMax(Scmax);
           }
 
           if (zAxis.isAutoScale()) {
@@ -570,40 +571,41 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
       for (int x = 0; x < data.length - 1; x++) {
         for (int z = 0; z < data[x].length - 1; z++) {
 
-          if (xGain*(double)x+xOff >= xAxis.getMin() && xGain*(x+1.0)+xOff <= xAxis.getMax()
-           && zGain*(double)z+zOff >= zAxis.getMin() && zGain*(z+1.0)+zOff <= zAxis.getMax() ) {
+          x00 = (float)(xGain*(double)x+xOff);
+          z00 = (float)(zGain*(double)z+zOff);
+          x01 = (float)(x00);
+          z01 = (float)(zGain*(z+1.0)+zOff);
+          x10 = (float)(xGain*(x+1.0)+xOff);
+          z10 = (float)(z00);
+          x11 = (float)(x10);
+          z11 = (float)(z01);
 
-            if (!Double.isNaN(data[x][z]) && !Double.isNaN(data[x+1][z]) &&
-                !Double.isNaN(data[x][z+1]) && !Double.isNaN(data[x+1][z+1]) )
+          if (x00 >= xAxis.getMin() && x10 <= xAxis.getMax()
+           && z00 >= zAxis.getMin() && z01 <= zAxis.getMax() ) {
+
+            if (isValid(data[x][z]) && isValid(data[x+1][z]) &&
+                isValid(data[x][z+1]) && isValid(data[x+1][z+1]) )
             {
 
-              x00 = (float)(xGain*(double)x+xOff);
               if(scale==JGL3DAxis.LOG_SCALE)
                 y00 = (float)(yGain * Math.log10(data[x][z]) + yOff);
               else
                 y00 = (float)(yGain*data[x][z]+yOff);
-              z00 = (float)(zGain*(double)z+zOff);
 
-              x01 = (float)(x00);
               if(scale==JGL3DAxis.LOG_SCALE)
                 y01 = (float)(yGain * Math.log10(data[x][z + 1])+yOff);
               else
                 y01 = (float)(yGain*data[x][z+1]+yOff);
-              z01 = (float)(zGain*(z+1.0)+zOff);
 
-              x10 = (float)(xGain*(x+1.0)+xOff);
               if(scale==JGL3DAxis.LOG_SCALE)
                 y10 = (float)(yGain * Math.log10(data[x + 1][z])+yOff);
               else
                 y10 = (float)(yGain*data[x+1][z]+yOff);
-              z10 = (float)(z00);
 
-              x11 = (float)(x10);
               if(scale==JGL3DAxis.LOG_SCALE)
                 y11 = (float)(yGain * Math.log10(data[x + 1][z + 1])+yOff);
               else
                 y11 = (float)(yGain*data[x+1][z+1]+yOff);
-              z11 = (float)(z01);
 
 
               getColor(y00, Scmin*yGain, Scmax*yGain, rgb);
@@ -625,6 +627,7 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
               getColor(y10, Scmin*yGain, Scmax*yGain, rgb);
               gl2.glColor3f(rgb[0], rgb[1], rgb[2]);
               gl2.glVertex3f(x10, y10, z10);
+
             }
           }
 
@@ -832,62 +835,74 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
 
     // Paint grid
     short pattern = 0x0F0F;
-    gl.glLineStipple(1,pattern);
+    gl.glLineStipple(1, pattern);
     gl.glEnable(GL2.GL_LINE_STIPPLE);
-    gl.glColor3f(0.5f,0.5f,0.5f);
     gl.glBegin(GL.GL_LINES);
 
     //Z,Y plane
     for(int i=0;i<yAxis.labelInfo.size();i++) {
-      LabelInfo li = (LabelInfo)yAxis.labelInfo.get(i);
+      LabelInfo li = yAxis.labelInfo.get(i);
+      gl.glColor3f(0.5f,0.5f,0.5f);
       gl.glVertex3f((float)xMax, (float)li.p1.y, (float)zMin);
       gl.glVertex3f((float)xMax, (float)li.p1.y, (float)zMax);
+      if(yAxis.getScale()==JGL3DAxis.LOG_SCALE && i<yAxis.labelInfo.size()-1) {
+        LabelInfo li2 = yAxis.labelInfo.get(i+1);
+        double step = li2.p1.y - li.p1.y;
+        for(int j=0;j<logStep.length;j++) {
+          gl.glColor3f(0.7f,0.7f,0.7f);
+          gl.glVertex3f((float)xMax, (float)(li.p1.y+step*logStep[j]), (float)zMin);
+          gl.glVertex3f((float)xMax, (float)(li.p1.y+step*logStep[j]), (float)zMax);
+        }
+      }
     }
+
+    gl.glColor3f(0.5f,0.5f,0.5f);
     for(int i=0;i<zAxis.labelInfo.size();i++) {
-      LabelInfo li = (LabelInfo)zAxis.labelInfo.get(i);
+      LabelInfo li = zAxis.labelInfo.get(i);
       gl.glVertex3f((float)xMax, (float)yMin, (float)li.p1.z);
       gl.glVertex3f((float)xMax, (float)yMax, (float)li.p1.z);
     }
 
     //Z,X plane
     for(int i=0;i<xAxis.labelInfo.size();i++) {
-      LabelInfo li = (LabelInfo)xAxis.labelInfo.get(i);
+      LabelInfo li = xAxis.labelInfo.get(i);
       gl.glVertex3f((float)li.p1.x, (float)yMin, (float)zMin);
       gl.glVertex3f((float)li.p1.x, (float)yMin, (float)zMax);
     }
     for(int i=0;i<zAxis.labelInfo.size();i++) {
-      LabelInfo li = (LabelInfo)zAxis.labelInfo.get(i);
+      LabelInfo li = zAxis.labelInfo.get(i);
       gl.glVertex3f((float)xMin, (float)yMin, (float)li.p1.z);
       gl.glVertex3f((float)xMax, (float)yMin, (float)li.p1.z);
     }
 
     //Y,X plane
-    if (angleOy < Math.PI / 2) {
+    float zEnd;
+    if (angleOy < Math.PI / 2)
+      zEnd = (float)zMax;
+    else
+      zEnd = (float)zMin;
 
-      for (int i = 0; i < yAxis.labelInfo.size(); i++) {
-        LabelInfo li = (LabelInfo) yAxis.labelInfo.get(i);
-        gl.glVertex3f((float)xMin, (float)li.p1.y, (float)zMax);
-        gl.glVertex3f((float)xMax, (float)li.p1.y, (float)zMax);
-      }
-      for (int i = 0; i < xAxis.labelInfo.size(); i++) {
-        LabelInfo li = (LabelInfo) xAxis.labelInfo.get(i);
-        gl.glVertex3f((float)li.p1.x, (float)yMin, (float)zMax);
-        gl.glVertex3f((float)li.p1.x, (float)yMax, (float)zMax);
-      }
 
-    } else {
-
-      for (int i = 0; i < yAxis.labelInfo.size(); i++) {
-        LabelInfo li = (LabelInfo) yAxis.labelInfo.get(i);
-        gl.glVertex3f((float)xMin, (float)li.p1.y, (float)zMin);
-        gl.glVertex3f((float)xMax, (float)li.p1.y, (float)zMin);
+    for (int i = 0; i < yAxis.labelInfo.size(); i++) {
+      LabelInfo li =  yAxis.labelInfo.get(i);
+      gl.glColor3f(0.5f,0.5f,0.5f);
+      gl.glVertex3f((float)xMin, (float)li.p1.y, zEnd);
+      gl.glVertex3f((float)xMax, (float)li.p1.y, zEnd);
+      if(yAxis.getScale()==JGL3DAxis.LOG_SCALE && i<yAxis.labelInfo.size()-1) {
+        LabelInfo li2 = yAxis.labelInfo.get(i+1);
+        double step = li2.p1.y - li.p1.y;
+        for(int j=0;j<logStep.length;j++) {
+          gl.glColor3f(0.7f,0.7f,0.7f);
+          gl.glVertex3f((float)xMin, (float)(li.p1.y+step*logStep[j]), zEnd);
+          gl.glVertex3f((float)xMax, (float)(li.p1.y+step*logStep[j]), zEnd);
+        }
       }
-      for (int i = 0; i < xAxis.labelInfo.size(); i++) {
-        LabelInfo li = (LabelInfo) xAxis.labelInfo.get(i);
-        gl.glVertex3f((float)li.p1.x, (float)yMin, (float)zMin);
-        gl.glVertex3f((float)li.p1.x, (float)yMax, (float)zMin);
-      }
-
+    }
+    gl.glColor3f(0.5f,0.5f,0.5f);
+    for (int i = 0; i < xAxis.labelInfo.size(); i++) {
+      LabelInfo li = xAxis.labelInfo.get(i);
+      gl.glVertex3f((float)li.p1.x, (float)yMin, zEnd);
+      gl.glVertex3f((float)li.p1.x, (float)yMax, zEnd);
     }
 
     gl.glEnd();

@@ -25,7 +25,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 
 import java.awt.*;
-import java.util.Vector;
+import java.util.ArrayList;
 
 /**
  * Class which handles chart axis.
@@ -70,7 +70,7 @@ public class JGL3DAxis {
   private Font      nameFont;
   private int       labelFormat;
   private int       scale;
-  Vector            labelInfo;
+  ArrayList<LabelInfo> labelInfo;
   LabelInfo         nameInfo;
   private int       type;
   private String    name;
@@ -95,7 +95,7 @@ public class JGL3DAxis {
     labelColor = Color.black;
     labelFormat = AUTO_FORMAT;
     scale = LINEAR_SCALE;
-    labelInfo = new Vector();
+    labelInfo = new ArrayList<LabelInfo>();
     name = "";
     drawAble = true;
     visible = true;
@@ -421,8 +421,6 @@ public class JGL3DAxis {
 
     if (d < 0) a = -a;
 
-    Object o[] = {new Double(a), new Integer(e)};
-
     return String.format(f,a,e);
   }
 
@@ -732,9 +730,9 @@ public class JGL3DAxis {
     // Extract 2 bounds when we didn't found a correct match.
     if(extractLabel) {
       if(labelInfo.size()>2) {
-        Vector nLabels = new Vector();
-        LabelInfo lis = (LabelInfo)labelInfo.get(0);
-        LabelInfo lie = (LabelInfo)labelInfo.get(labelInfo.size()-1);
+        ArrayList<LabelInfo> nLabels = new ArrayList<LabelInfo>();
+        LabelInfo lis = labelInfo.get(0);
+        LabelInfo lie = labelInfo.get(labelInfo.size()-1);
         nLabels.add(lis);
         nLabels.add(lie);
         labelInfo = nLabels;
