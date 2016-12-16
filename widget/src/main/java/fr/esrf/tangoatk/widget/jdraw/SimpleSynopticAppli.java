@@ -28,7 +28,9 @@
 
 package fr.esrf.tangoatk.widget.jdraw;
 
+import fr.esrf.Tango.AttrQuality;
 import fr.esrf.Tango.DevFailed;
+import fr.esrf.TangoApi.DeviceAttribute;
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.widget.attribute.SimpleScalarViewer;
 import fr.esrf.tangoatk.widget.attribute.Trend;
@@ -204,6 +206,19 @@ public class SimpleSynopticAppli extends javax.swing.JFrame implements SynopticP
       gbc.ipadx = 100;
       settingPanel.add(settingFile,gbc);
 
+      JButton statusBtn = new JButton("Status");
+      statusBtn.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          fileStatusMenuItemActionPerformed(e);
+        }
+      });
+      gbc.gridx = 2;
+      gbc.gridy = 0;
+      gbc.ipadx = 0;
+      gbc.weightx = 0;
+      settingPanel.add(statusBtn,gbc);
+
       JButton previewBtn = new JButton("Preview");
       previewBtn.addActionListener(new ActionListener() {
         @Override
@@ -211,7 +226,7 @@ public class SimpleSynopticAppli extends javax.swing.JFrame implements SynopticP
           filePreviewMenuItemActionPerformed(e);
         }
       });
-      gbc.gridx = 2;
+      gbc.gridx = 3;
       gbc.gridy = 0;
       gbc.ipadx = 0;
       gbc.weightx = 0;
@@ -224,19 +239,19 @@ public class SimpleSynopticAppli extends javax.swing.JFrame implements SynopticP
           fileLoadMenuItemActionPerformed(e);
         }
       });
-      gbc.gridx = 3;
+      gbc.gridx = 4;
       gbc.gridy = 0;
       gbc.weightx = 0;
       settingPanel.add(loadBtn,gbc);
 
       JButton saveBtn = new JButton("Save");
-      loadBtn.addActionListener(new ActionListener() {
+      saveBtn.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
           fileSaveMenuItemActionPerformed(e);
         }
       });
-      gbc.gridx = 4;
+      gbc.gridx = 5;
       gbc.gridy = 0;
       gbc.weightx = 0;
       settingPanel.add(saveBtn,gbc);
@@ -439,6 +454,29 @@ public class SimpleSynopticAppli extends javax.swing.JFrame implements SynopticP
   private void quitJMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
     // TODO add your handling code here:
     stopSimpleSynopticAppli();
+  }
+
+  private void fileStatusMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
+
+    try {
+
+      String status;
+
+      DeviceAttribute da = sm.getManagerProxy().read_attribute("Status");
+      status = da.extractString();
+
+      da = sm.getManagerProxy().read_attribute("AlarmAttributes");
+      if(da.getQuality() != AttrQuality.ATTR_INVALID) {
+        String[] atts = da.extractStringArray();
+        for(int i=0;i<atts.length;i++)
+          status += "\n" + atts[0];
+      }
+      JOptionPane.showMessageDialog(this,status,"Status ["+settingManagerName+"]",JOptionPane.INFORMATION_MESSAGE);
+
+    } catch (DevFailed ex) {
+      ErrorPane.showErrorMessage(this, settingManagerName, ex);
+    }
+
   }
 
   private void fileLoadMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
