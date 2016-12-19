@@ -2105,6 +2105,10 @@ public class JLAxis implements java.io.Serializable {
       }
     }
 
+    // 1 pixel minimum
+    if(length<=1.0)
+      length = 1.0;
+
     double sz = max - min;
     double pos;
     int w,h;

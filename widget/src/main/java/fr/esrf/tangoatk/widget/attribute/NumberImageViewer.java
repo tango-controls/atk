@@ -4612,7 +4612,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
     f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     f.setTitle("ImageViewer");
-    f.pack();
+    ATKGraphicsUtils.centerFrameOnScreen(f);
     f.setVisible(true);
 
     attributeList.setRefreshInterval(1000);

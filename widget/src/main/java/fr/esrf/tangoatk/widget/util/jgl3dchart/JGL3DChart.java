@@ -204,11 +204,18 @@ public class JGL3DChart extends JPanel implements ActionListener {
     } else if (src==zoomBackBtn) {
       j3dView.zoomBack();
     } else if (src==settingsBtn) {
-      if( settingsFrame==null )
-        settingsFrame = new SettingsFrame(this);
-      settingsFrame.setVisible(true);
+      showSettings();
     }
 
+  }
+
+  /**
+   * Displays setting frame
+   */
+  public void showSettings() {
+    if( settingsFrame==null )
+      settingsFrame = new SettingsFrame(this);
+    settingsFrame.setVisible(true);
   }
 
   public static void main(String[] args) {
