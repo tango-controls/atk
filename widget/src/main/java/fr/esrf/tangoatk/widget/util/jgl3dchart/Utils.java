@@ -25,6 +25,7 @@ package fr.esrf.tangoatk.widget.util.jgl3dchart;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
+import com.jogamp.opengl.glu.GLU;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -83,7 +84,7 @@ public class Utils {
   }
 
   // project vertex
-  static public void project(GL gl,double x,double y,double z,double[] _2dcoord) {
+  static public void project(GLU glu,GL gl,double x,double y,double z,double[] _2dcoord) {
 
     int    viewport[]   = new int[4];
     double mvmatrix[]   = new double[16];
@@ -95,7 +96,7 @@ public class Utils {
     gl2.glGetDoublev(GLMatrixFunc.GL_MODELVIEW_MATRIX, mvmatrix, 0);
     gl2.glGetDoublev(GLMatrixFunc.GL_PROJECTION_MATRIX, projmatrix, 0);
 
-    JGL3DView.glu.gluProject(x, y, z,
+    glu.gluProject(x, y, z,
               mvmatrix, 0,
               projmatrix, 0,
               viewport, 0,
@@ -107,7 +108,7 @@ public class Utils {
   }
 
   // Unproject vertex
-  static public void unproject(GL gl,double x,double y,double z,double[] _3dcoord) {
+  static public void unproject(GLU glu,GL gl,double x,double y,double z,double[] _3dcoord) {
 
     int    viewport[]   = new int[4];
     double mvmatrix[]   = new double[16];
@@ -119,7 +120,7 @@ public class Utils {
     gl2.glGetDoublev(GLMatrixFunc.GL_MODELVIEW_MATRIX, mvmatrix, 0);
     gl2.glGetDoublev(GLMatrixFunc.GL_PROJECTION_MATRIX, projmatrix, 0);
     double realy = viewport[3] - (int) y - 1;
-    JGL3DView.glu.gluUnProject(x, realy, z,
+    glu.gluUnProject(x, realy, z,
         mvmatrix, 0,
         projmatrix, 0,
         viewport, 0,

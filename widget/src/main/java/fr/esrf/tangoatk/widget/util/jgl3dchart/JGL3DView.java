@@ -25,20 +25,16 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
-import com.jogamp.opengl.awt.GLJPanel;
+import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 import com.jogamp.opengl.glu.GLU;
-import com.jogamp.common.util.PropertyAccess;
-import fr.esrf.tangoatk.widget.util.chart.JLAxis;
 
 import java.awt.*;
-import java.awt.font.FontRenderContext;
 import java.awt.event.*;
-import java.awt.geom.Arc2D;
 
-class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener {
+class JGL3DView extends GLCanvas implements GLEventListener, MouseListener, MouseMotionListener, MouseWheelListener {
 
-  final static GLU glu = new GLU();
+  GLU glu;
 
   final static int ZOOM_ZY = 1;
   final static int ZOOM_ZX = 2;
@@ -112,8 +108,11 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
     yAxis.setName("Yaxis");
     zAxis.setName("Zaxis");
     xAxis.setLabelColor(Color.RED);
-    yAxis.setLabelColor(new Color(0,128,0));
+    xAxis.setNameColor(Color.RED);
+    yAxis.setLabelColor(new Color(0, 128, 0));
+    yAxis.setNameColor(new Color(0, 128, 0));
     zAxis.setLabelColor(Color.BLUE);
+    zAxis.setNameColor(Color.BLUE);
 
     updateAxisPosition();
     autoScaleCameraRequest();
@@ -649,8 +648,8 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
 
       case ZOOM_ZY:
 
-        Utils.unproject(gl,mX,mY,0.0,_coords);
-        Utils.unproject(gl,mX2,mY2,0.0,_coords2);
+        Utils.unproject(glu,gl,mX,mY,0.0,_coords);
+        Utils.unproject(glu,gl,mX2,mY2,0.0,_coords2);
 
         if( _coords[1]>_coords2[1] ) {
           yAxis.setMax(_coords[1]);
@@ -675,8 +674,8 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
 
       case ZOOM_ZX:
 
-        Utils.unproject(gl,mX,mY,0.0,_coords);
-        Utils.unproject(gl,mX2,mY2,0.0,_coords2);
+        Utils.unproject(glu,gl,mX,mY,0.0,_coords);
+        Utils.unproject(glu,gl,mX2,mY2,0.0,_coords2);
 
         if( _coords[0]>_coords2[0] ) {
           xAxis.setMax(_coords[0]);
@@ -701,8 +700,8 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
 
       case ZOOM_YX:
 
-        Utils.unproject(gl,mX,mY,0.0,_coords);
-        Utils.unproject(gl,mX2,mY2,0.0,_coords2);
+        Utils.unproject(glu,gl,mX,mY,0.0,_coords);
+        Utils.unproject(glu,gl,mX2,mY2,0.0,_coords2);
 
         if( _coords[0]>_coords2[0] ) {
           xAxis.setMax(_coords[0]);
@@ -736,6 +735,7 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
   public void init(GLAutoDrawable glDrawable) {
 
     GL gl = glDrawable.getGL();
+    glu = GLU.createGLU(gl);
     gl.glClearColor(0.9f, 0.9f, 0.9f, 0.0f);
     gl.glClearDepth(0.0f);
     gl.glDepthFunc(GL.GL_GEQUAL);
@@ -826,11 +826,11 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
     gl.glEnd();
 
     // Axis
-    xAxis.measureAxis(gl);
+    xAxis.measureAxis(glu,gl);
     xAxis.paintAxis(gl);
-    yAxis.measureAxis(gl);
+    yAxis.measureAxis(glu,gl);
     yAxis.paintAxis(gl);
-    zAxis.measureAxis(gl);
+    zAxis.measureAxis(glu,gl);
     zAxis.paintAxis(gl);
 
     // Paint grid
@@ -922,13 +922,28 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
       gl.glClipPlane(GL2.GL_CLIP_PLANE1,pMax,0);
       gl.glEnable(GL.GL_DEPTH_TEST);
       gl.glCallList(dataList);
+
     }
+      
+    // Draw labels
+    gl.glDisable(GL.GL_DEPTH_TEST);
+    gl.glDisable(GL2.GL_CLIP_PLANE0);
+    gl.glDisable(GL2.GL_CLIP_PLANE1);
+    Dimension d = getSize();
+    LabelInfo.textRenderer.beginRendering(d.width, d.height);
+    LabelInfo.textRenderer.setSmoothing(true);
+    xAxis.paintAxisLabel(gl,d.width,d.height);
+    yAxis.paintAxisLabel(gl,d.width,d.height);
+    zAxis.paintAxisLabel(gl,d.width,d.height);
+    LabelInfo.textRenderer.endRendering();
 
     if( zoomRequest ) {
       manageZoom(gl);
       autoScaleCameraRequest = true;
       zoomRequest = false;
     }
+
+
   }
 
   public void reshape(GLAutoDrawable glDrawable, int x, int y, int width, int height) {
@@ -1077,50 +1092,7 @@ class JGL3DView extends GLJPanel implements GLEventListener, MouseListener, Mous
 
   public void paint(Graphics g) {
 
-    Graphics2D g2 = (Graphics2D) g;
-    g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-      RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-    g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS,
-      RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-    FontRenderContext frc = g2.getFontRenderContext();
-
     super.paint(g);
-
-    if (xAxis.isVisible() && xAxis.isDrawAble()) {
-      for (int i = 0; i < xAxis.labelInfo.size(); i++) {
-        LabelInfo l = (LabelInfo) xAxis.labelInfo.get(i);
-        l.measureLabel(frc);
-        l.computePosition();
-        l.paint(g);
-      }
-      xAxis.nameInfo.measureLabel(frc);
-      xAxis.nameInfo.computePosition();
-      xAxis.nameInfo.paint(g);
-    }
-
-    if (yAxis.isVisible() && yAxis.isDrawAble()) {
-      for (int i = 0; i < yAxis.labelInfo.size(); i++) {
-        LabelInfo l = (LabelInfo) yAxis.labelInfo.get(i);
-        l.measureLabel(frc);
-        l.computePosition();
-        l.paint(g);
-      }
-      yAxis.nameInfo.measureLabel(frc);
-      yAxis.nameInfo.computePosition();
-      yAxis.nameInfo.paint(g);
-    }
-
-    if (zAxis.isVisible() && zAxis.isDrawAble()) {
-      for (int i = 0; i < zAxis.labelInfo.size(); i++) {
-        LabelInfo l = (LabelInfo) zAxis.labelInfo.get(i);
-        l.measureLabel(frc);
-        l.computePosition();
-        l.paint(g);
-      }
-      zAxis.nameInfo.measureLabel(frc);
-      zAxis.nameInfo.computePosition();
-      zAxis.nameInfo.paint(g);
-    }
 
     if( isDraggingZoom) {
       g.setColor(Color.WHITE);

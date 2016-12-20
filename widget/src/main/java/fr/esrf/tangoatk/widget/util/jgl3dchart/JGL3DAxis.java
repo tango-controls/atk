@@ -23,6 +23,7 @@ package fr.esrf.tangoatk.widget.util.jgl3dchart;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.glu.GLU;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -569,7 +570,7 @@ public class JGL3DAxis {
   }
 
   // Compute labels
-  private void computeTicks(GL gl,double length) {
+  private void computeTicks(GLU glu,GL gl,double length) {
 
     double min=0,max=0;
     VERTEX3D axisPos = new VERTEX3D();
@@ -706,16 +707,15 @@ public class JGL3DAxis {
         l.p2 = new VERTEX3D(sx*nV.x+normal.x+axisPos.x,sx*nV.y+normal.y+axisPos.y,sx*nV.z+normal.z+axisPos.z);
 
         l.value = formatValue(startx,prec);
-        l.labelFont = labelFont;
         l.labelColor = labelColor;
         double offLabel = 1.5;
-        Utils.project(gl,sx*nV.x+axisPos.x,
+        Utils.project(glu,gl,sx*nV.x+axisPos.x,
                          sx*nV.y+axisPos.y,
                          sx*nV.z+axisPos.z,
                          coord);
         l.x1 = coord[0];
         l.y1 = coord[1];
-        Utils.project(gl,sx*nV.x+axisPos.x+normal.x*offLabel,
+        Utils.project(glu,gl,sx*nV.x+axisPos.x+normal.x*offLabel,
                          sx*nV.y+axisPos.y+normal.y*offLabel,
                          sx*nV.z+axisPos.z+normal.z*offLabel,
                          coord);
@@ -743,15 +743,14 @@ public class JGL3DAxis {
     double middlePos = (max+min)/2.0f;
     nameInfo = new LabelInfo();
     nameInfo.value = name;
-    nameInfo.labelFont = nameFont;
     nameInfo.labelColor = nameColor;
-    Utils.project(gl,middlePos*nV.x+axisPos.x,
+    Utils.project(glu,gl,middlePos*nV.x+axisPos.x,
                      middlePos*nV.y+axisPos.y,
                      middlePos*nV.z+axisPos.z,
                      coord);
     nameInfo.x1 = coord[0];
     nameInfo.y1 = coord[1];
-    Utils.project(gl,middlePos*nV.x+axisPos.x+normal.x*offLabel,
+    Utils.project(glu,gl,middlePos*nV.x+axisPos.x+normal.x*offLabel,
                      middlePos*nV.y+axisPos.y+normal.y*offLabel,
                      middlePos*nV.z+axisPos.z+normal.z*offLabel,
                      coord);
@@ -770,16 +769,16 @@ public class JGL3DAxis {
     return Math.pow(10.0, p);
   }
 
-  void measureAxis(GL gl) {
+  void measureAxis(GLU glu,GL gl) {
 
     labelInfo.clear();
 
     double[] coord = new double[2];
-    Utils.project(gl,p1.x, p1.y, p1.z,coord);
+    Utils.project(glu,gl,p1.x, p1.y, p1.z,coord);
     double x1 = coord[0];
     double y1 = coord[1];
 
-    Utils.project(gl,p2.x, p2.y, p2.z,coord);
+    Utils.project(glu,gl,p2.x, p2.y, p2.z,coord);
     double x2 = coord[0];
     double y2 = coord[1];
 
@@ -787,7 +786,19 @@ public class JGL3DAxis {
     if( axisLenght<10.0 ) drawAble = false;
     else                  drawAble = true;
 
-    if(drawAble) computeTicks(gl,axisLenght);
+    if(drawAble) computeTicks(glu,gl,axisLenght);
+
+  }
+
+  void paintAxisLabel(GL gl,int screenWidth,int screenHeight) {
+
+    if (isVisible() && isDrawAble()) {
+      for (int i = 0; i < labelInfo.size(); i++) {
+        LabelInfo l = labelInfo.get(i);
+        l.paint(gl,screenWidth,screenHeight);
+      }
+      nameInfo.paint(gl,screenWidth,screenHeight);
+    }
 
   }
 
@@ -816,11 +827,12 @@ public class JGL3DAxis {
     gl2.glLineWidth(1.0f);
     gl2.glBegin(GL.GL_LINES);
     for(int i=0;i<labelInfo.size();i++) {
-      LabelInfo li = (LabelInfo)labelInfo.get(i);
+      LabelInfo li = labelInfo.get(i);
       gl2.glVertex3f((float) li.p1.x, (float) li.p1.y, (float) li.p1.z);
       gl2.glVertex3f((float) li.p2.x, (float) li.p2.y, (float) li.p2.z);
     }
     gl2.glEnd();
+
 
   }
 

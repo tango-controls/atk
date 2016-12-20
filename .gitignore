@@ -14,6 +14,7 @@ release/
 test/
 lib/
 install.bat
+install_dbg.bat
 
 # User-specific stuff:
 .idea/workspace.xml

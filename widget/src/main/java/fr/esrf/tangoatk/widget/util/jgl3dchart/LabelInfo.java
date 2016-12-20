@@ -21,6 +21,9 @@
  */
 package fr.esrf.tangoatk.widget.util.jgl3dchart;
 
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.util.awt.TextRenderer;
+
 import java.awt.font.FontRenderContext;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -30,6 +33,7 @@ import java.awt.geom.Rectangle2D;
  */
 public class LabelInfo {
 
+  final static TextRenderer textRenderer = new TextRenderer(new Font("Dialog", Font.BOLD, 12));
   private final static double cos27 = 0.891;
   private final static double cos63 = 0.454;
 
@@ -43,7 +47,6 @@ public class LabelInfo {
   VERTEX3D p1;
   VERTEX3D p2;
 
-  Font labelFont;
   Color labelColor;
   String value;
   int width;
@@ -52,12 +55,12 @@ public class LabelInfo {
   double y;
   int ascent;
 
-  void measureLabel(FontRenderContext frc) {
+  void measureLabel() {
 
-    Rectangle2D bounds = labelFont.getStringBounds(value, frc);
+    Rectangle2D bounds = textRenderer.getBounds(value);
     width  = (int)(bounds.getWidth()+0.5);
     height = (int)(bounds.getHeight()+0.5);
-    ascent = (int)(labelFont.getLineMetrics("0",frc).getAscent()+0.5f);
+    ascent = 0;
 
   }
 
@@ -120,9 +123,13 @@ public class LabelInfo {
 
   }
 
-  void paint(Graphics g) {
-    g.setColor(labelColor);
-    g.drawString(value,(int)(x+0.5),(int)(y+0.5)+ascent);
+  void paint(GL g,int screenWidth,int screenHeight) {
+
+    measureLabel();
+    computePosition();
+    textRenderer.setColor(labelColor);
+    textRenderer.draw(value, (int)x, screenHeight-(int)y-height);
+
   }
 
 }
