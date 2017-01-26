@@ -35,7 +35,6 @@ import fr.esrf.Tango.DevFailed;
 import fr.esrf.Tango.AttrDataFormat;
 import fr.esrf.TangoApi.DbAttribute;
 import fr.esrf.TangoApi.AttributeInfoEx;
-import static fr.esrf.TangoDs.TangoConst.Tango_DEV_ENUM;
 
 /**
  * <code>AttributeFactory</code> is an extension of {@link AEntityFactory}
@@ -490,7 +489,7 @@ public class AttributeFactory extends AEntityFactory {
 
   }
 
-  private EnumScalar getEnumScalarFromTangoDevShort(Device device,AttributeInfoEx config)
+  private EnumScalar getEnumScalarFromScalar(Device device,AttributeInfoEx config)
   {
      String         name = config.name;
      DbAttribute    dbAtt=null;
@@ -600,13 +599,14 @@ public class AttributeFactory extends AEntityFactory {
    * ShortScalar, DoubleScalar, LongScalar, StringScalar, BooleanScalar or DevStateScalar.
    * @throws IllegalArgumentException if the type is unknown.
    */
-  private AAttribute getScalar(Device device,AttributeInfoEx config) {
+  private AAttribute getScalar(Device device, AttributeInfoEx config) {
+
     String name = config.name;
     int dataType = config.data_type;
-    BooleanScalar   bs=null;
-    DevStateScalar  dss=null;
-    EnumScalar      ens=null;
-    RawImage        ri = null;
+    BooleanScalar bs = null;
+    DevStateScalar dss = null;
+    EnumScalar ens = null;
+    RawImage ri = null;
 
     if (dataType == Tango_DEV_STRING) {
       return new StringScalar();
@@ -615,75 +615,109 @@ public class AttributeFactory extends AEntityFactory {
     NumberScalar ns = new NumberScalar();
 
     switch (dataType) {
+
       case Tango_DEV_UCHAR:
-            ns.setNumberHelper(new UCharScalarHelper(ns));
-            return ns;
+        ns.setNumberHelper(new UCharScalarHelper(ns));
+        return ns;
+
       case Tango_DEV_SHORT:
-            ens = getEnumScalarFromTangoDevShort(device, config);
-            if (ens != null)
-            {
-               ens.setEnumHelper(new EnumScalarHelper(ens));
-               return ens;
-            }
-            else
-               ns.setNumberHelper(new ShortScalarHelper(ns));
-            break;
+        ens = getEnumScalarFromScalar(device, config);
+        if (ens != null) {
+          ens.setEnumHelper(new EnumScalarHelper(ens));
+          return ens;
+        } else
+          ns.setNumberHelper(new ShortScalarHelper(ns));
+        break;
+
       case Tango_DEV_USHORT:
-            ns.setNumberHelper(new UShortScalarHelper(ns));
-            break;
+        ens = getEnumScalarFromScalar(device, config);
+        if (ens != null) {
+          ens.setEnumHelper(new EnumScalarHelper(ens));
+          return ens;
+        } else
+          ns.setNumberHelper(new UShortScalarHelper(ns));
+        break;
+
       case Tango_DEV_DOUBLE:
-            ns.setNumberHelper(new DoubleScalarHelper(ns));
-            ns.setMinimumIncrement(getMinimumIncrement(device, config));
-            break;
+        ns.setNumberHelper(new DoubleScalarHelper(ns));
+        ns.setMinimumIncrement(getMinimumIncrement(device, config));
+        break;
+
       case Tango_DEV_FLOAT:
-            ns.setNumberHelper(new FloatScalarHelper(ns));
-            ns.setMinimumIncrement(getMinimumIncrement(device, config));
-            break;
+        ns.setNumberHelper(new FloatScalarHelper(ns));
+        ns.setMinimumIncrement(getMinimumIncrement(device, config));
+        break;
+
       case Tango_DEV_LONG:
-            ns.setNumberHelper(new LongScalarHelper(ns));
-            break;
+        ens = getEnumScalarFromScalar(device, config);
+        if (ens != null) {
+          ens.setEnumHelper(new EnumScalarHelper(ens));
+          return ens;
+        } else
+          ns.setNumberHelper(new LongScalarHelper(ns));
+        break;
+
       case Tango_DEV_ULONG:
-            ns.setNumberHelper(new ULongScalarHelper(ns));
-            break;
+        ens = getEnumScalarFromScalar(device, config);
+        if (ens != null) {
+          ens.setEnumHelper(new EnumScalarHelper(ens));
+          return ens;
+        } else
+          ns.setNumberHelper(new ULongScalarHelper(ns));
+        break;
+
       case Tango_DEV_LONG64:
-        ns.setNumberHelper(new Long64ScalarHelper(ns));
+        ens = getEnumScalarFromScalar(device, config);
+        if (ens != null) {
+          ens.setEnumHelper(new EnumScalarHelper(ens));
+          return ens;
+        } else
+          ns.setNumberHelper(new Long64ScalarHelper(ns));
         break;
+
       case Tango_DEV_ULONG64:
-        ns.setNumberHelper(new ULong64ScalarHelper(ns));
+        ens = getEnumScalarFromScalar(device, config);
+        if (ens != null) {
+          ens.setEnumHelper(new EnumScalarHelper(ens));
+          return ens;
+        } else
+          ns.setNumberHelper(new ULong64ScalarHelper(ns));
         break;
+
       case Tango_DEV_BOOLEAN:
-            bs = new BooleanScalar();
-            return bs;
+        bs = new BooleanScalar();
+        return bs;
+
       case Tango_DEV_STATE:
-            dss = new DevStateScalar();
-            return dss;
+        dss = new DevStateScalar();
+        return dss;
+
       case Tango_DEV_ENCODED:
-           if (config.format.equalsIgnoreCase(AAttribute.RAW_IMAGE_FORMAT))
-           {
-               ri = new RawImage();
-               return ri;
-           }
-           else
-           {
-              System.out.println("Warning, AttributeFactory.getScalar(" + device.getName() + "/" + name +
-                               ") : Unsupported DevEncoded attribute. Try to set the format attribute property to 'RawImage'.");
-               return new InvalidAttribute();               
-           }
+        if (config.format.equalsIgnoreCase(AAttribute.RAW_IMAGE_FORMAT)) {
+          ri = new RawImage();
+          return ri;
+        } else {
+          System.out.println("Warning, AttributeFactory.getScalar(" + device.getName() + "/" + name +
+              ") : Unsupported DevEncoded attribute. Try to set the format attribute property to 'RawImage'.");
+          return new InvalidAttribute();
+        }
+
       case Tango_DEV_ENUM:
-            ens = getTangoEnumScalar(config);
-            if (ens == null) // failed to instantiate correctly Enum
-            {
-                System.out.println("Warning, Tango_DEV_ENUM, AttributeFactory.getTangoEnumScalar(" + device.getName() + "/" + name + ") : Failed ");
-                return new InvalidAttribute();
-            }
-            ens.setEnumHelper(new EnumScalarHelper(ens));
-            return ens;
+        ens = getTangoEnumScalar(config);
+        if (ens == null) // failed to instantiate correctly Enum
+        {
+          System.out.println("Warning, Tango_DEV_ENUM, AttributeFactory.getTangoEnumScalar(" + device.getName() + "/" + name + ") : Failed ");
+          return new InvalidAttribute();
+        }
+        ens.setEnumHelper(new EnumScalarHelper(ens));
+        return ens;
 
       default:
-            System.out.println("Warning, AttributeFactory.getScalar(" + device.getName() + "/" + name +
-                               ") : Unsupported data type [" + dataType +"]");
-            return new InvalidAttribute();
+        System.out.println("Warning, AttributeFactory.getScalar(" + device.getName() + "/" + name +
+            ") : Unsupported data type [" + dataType + "]");
+        return new InvalidAttribute();
     }
+
     return ns;
   }
 

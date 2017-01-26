@@ -222,7 +222,7 @@ public class EnumScalar extends AAttribute implements IEnumScalar, PropertyChang
     short shortValue = -1;
     try
     {
-        shortValue = enumHelper.getShortValueForEnum(enumStr);
+        shortValue = enumHelper.getValueForEnum(enumStr);
     }
     catch (IllegalArgumentException ex)
     {
@@ -235,7 +235,7 @@ public class EnumScalar extends AAttribute implements IEnumScalar, PropertyChang
     String enumStr = null;
     try
     {
-        enumStr = enumHelper.getEnumValueFromShort(shortValue);
+        enumStr = enumHelper.getEnumValue(shortValue);
     }
     catch (IllegalArgumentException ex)
     {
