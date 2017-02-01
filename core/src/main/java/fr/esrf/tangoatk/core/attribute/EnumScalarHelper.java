@@ -78,6 +78,7 @@ public class EnumScalarHelper implements java.io.Serializable,TangoConst {
 
       switch(da.getType()) {
         case Tango_DEV_SHORT:
+        case Tango_DEV_ENUM:
           da.insert(shortValue);
           break;
         case Tango_DEV_USHORT:
@@ -124,6 +125,7 @@ public class EnumScalarHelper implements java.io.Serializable,TangoConst {
       switch (devAtt.getType()) {
 
         case Tango_DEV_SHORT:
+        case Tango_DEV_ENUM:
           short[] short_arr = devAtt.extractShortArray();
           if (short_arr.length <= idx)
             throw new AttributeReadException("Invalid ShortArray");
@@ -158,6 +160,7 @@ public class EnumScalarHelper implements java.io.Serializable,TangoConst {
           if (ulong64_arr.length <= idx)
             throw new AttributeReadException("Invalid ULong64Array");
           return getEnumValue((short) ulong64_arr[idx]);
+
 
         default:
           throw new AttributeReadException("Invalid attribute type for enumeration");
