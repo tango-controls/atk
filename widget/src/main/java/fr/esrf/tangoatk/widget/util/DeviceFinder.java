@@ -468,9 +468,11 @@ class MemberNode extends Node {
                     case TangoConst.Tango_DEV_LONG:
                     case TangoConst.Tango_DEV_ULONG:
                     case TangoConst.Tango_DEV_FLOAT:
-                    case TangoConst.Tango_DEV_DOUBLE:                        
-                        add(new SpectrumItemNode(mode,ainbs[i].name,ainbs[i].max_dim_x));
-                        break;
+                    case TangoConst.Tango_DEV_DOUBLE:
+                      int maxx = ainbs[i].max_dim_x;
+                      if(maxx>1024) maxx = 1024;
+                      add(new SpectrumItemNode(mode,ainbs[i].name,maxx));
+                      break;
                 }
 
 
@@ -516,7 +518,9 @@ class MemberNode extends Node {
                   case TangoConst.Tango_DEV_ULONG64:
                   case TangoConst.Tango_DEV_FLOAT:
                   case TangoConst.Tango_DEV_DOUBLE:
-                    add(new SpectrumItemNode(mode,ainbss[i].name,ainbss[i].max_dim_x));
+                    int maxx = ainbss[i].max_dim_x;
+                    if(maxx>1024) maxx = 1024;
+                    add(new SpectrumItemNode(mode,ainbss[i].name,maxx));
                     break;
                 }
 
