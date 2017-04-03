@@ -22,9 +22,12 @@
  
 package fr.esrf.tangoatk.core;
 
+import fr.esrf.Tango.DevSource;
 import fr.esrf.TangoApi.DeviceAttribute;
 import fr.esrf.Tango.DevFailed;
 import fr.esrf.tangoatk.core.attribute.PolledAttributeFactory;
+
+import javax.xml.transform.Source;
 
 /**
   * A class to force the usage of client side polling (ATK refreshser)
@@ -34,6 +37,36 @@ public class AttributePolledList extends AttributeList {
 
   public AttributePolledList() {
     factory = PolledAttributeFactory.getPolledInstance();
+  }
+
+  public void setSource(DevSource source) throws ATKException {
+
+    if( isForceRefresh() ) {
+
+      try {
+        for (int i = 0; i < size(); i++) {
+          IEntity ie = (IEntity) get(i);
+          ((Device)ie.getDevice()).set_source(source);
+        }
+      } catch (DevFailed e) {
+        throw new ATKException(e);
+      }
+
+    } else {
+
+      try {
+        synchronized (this) {
+          for (int i = 0; i < deviceList.size(); i++) {
+            devItem = deviceList.get(i);
+            devItem.getDevice().set_source(source);
+          }
+        }
+      } catch (DevFailed e) {
+        throw new ATKException(e);
+      }
+
+    }
+
   }
 
   public String getVersion() {

@@ -41,7 +41,9 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import fr.esrf.Tango.DevSource;
 import fr.esrf.Tango.DevState;
+import fr.esrf.TangoDs.TangoConst;
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.widget.util.*;
 import fr.esrf.tangoatk.widget.util.chart.*;
@@ -105,6 +107,10 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
   protected JMenuItem zoomMenuI;
   protected JButton timeButton;
   protected JMenuItem timeMenuI;
+  protected JMenu sourceMenuI;
+  protected JCheckBoxMenuItem sourceDEVMenuI;
+  protected JCheckBoxMenuItem sourceCACHEMenuI;
+  protected JCheckBoxMenuItem sourceCACHEDEVMenuI;
   protected JButton cfgButton;
   protected JMenuItem cfgMenuI;
   protected JButton resetButton;
@@ -224,6 +230,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
   private int refreshIntervalTrend = 1000;
 
   protected boolean offLineMode = false;
+  protected DevSource listSource = DevSource.CACHE_DEV;
 
   protected ErrorHistory errWin;
 
@@ -276,6 +283,16 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     timeButton.setToolTipText("Set refresh interval");
     timeMenuI = new JMenuItem("Set refresh interval");
 
+    sourceMenuI = new JMenu("Source");
+    sourceDEVMenuI = new JCheckBoxMenuItem("Device");
+    sourceCACHEMenuI = new JCheckBoxMenuItem("Cache");
+    sourceCACHEDEVMenuI = new JCheckBoxMenuItem("Cache Device");
+    sourceCACHEDEVMenuI.setSelected(true);
+    sourceMenuI.add(sourceDEVMenuI);
+    sourceMenuI.add(sourceCACHEMenuI);
+    sourceMenuI.add(sourceCACHEDEVMenuI);
+
+
     cfgButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/attribute/trend_config.gif")));
     cfgButton.setToolTipText("Add new attribute");
     cfgMenuI = new JMenuItem("Add new attribute");
@@ -312,6 +329,9 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     offLineButton.addActionListener(this);
     showErrorMenuI.addActionListener(this);
     showDiagMenuI.addActionListener(this);
+    sourceDEVMenuI.addActionListener(this);
+    sourceCACHEDEVMenuI.addActionListener(this);
+    sourceCACHEMenuI.addActionListener(this);
 
     theToolBar.add(loadButton);
     theToolBar.add(saveButton);
@@ -337,6 +357,7 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
     toolMenu.add(zoomMenuI);
     toolMenu.add(startStopMenuI);
     toolMenu.add(timeMenuI);
+    toolMenu.add(sourceMenuI);
     toolMenu.add(cfgMenuI);
     toolMenu.add(resetMenuI);
     toolMenu.add(showtoolMenuI);
@@ -606,6 +627,22 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
 
   }
 
+  private void setSource(DevSource source) {
+
+    if(attList!=null) {
+      try {
+        attList.setSource(source);
+        sourceDEVMenuI.setSelected(source==DevSource.DEV);
+        sourceCACHEDEVMenuI.setSelected(source==DevSource.CACHE_DEV);
+        sourceCACHEMenuI.setSelected(source==DevSource.CACHE);
+      } catch (ATKException e) {
+        ErrorPane.showErrorMessage(this,"Trend (SetSource)",e);
+      }
+      listSource = source;
+    }
+
+  }
+
   // -------------------------------------------------------------
   // Action listener
   // -------------------------------------------------------------
@@ -658,6 +695,12 @@ public class Trend extends JPanel implements IControlee, ActionListener, IJLChar
       errWin.setVisible(true);
     } else if (o == showDiagMenuI) {
       fr.esrf.tangoatk.widget.util.ATKDiagnostic.showDiagnostic();
+    } else if (o == sourceDEVMenuI ) {
+      setSource(DevSource.DEV);
+    } else if (o == sourceCACHEDEVMenuI ) {
+      setSource(DevSource.CACHE_DEV);
+    } else if (o == sourceCACHEMenuI ) {
+      setSource(DevSource.CACHE);
     }
 
   }
@@ -1295,7 +1338,10 @@ public void setTimePrecision(int timePrecision) {
     to_write += "window_size:" + getSize().width + "," + getSize().height + "\n";
     to_write += "show_device_name:" + isShowingDeviceNames() + "\n";
 
-    if (attList != null) to_write += "refresh_time:" + attList.getRefreshInterval() + "\n";
+    if (attList != null) {
+      to_write += "refresh_time:" + attList.getRefreshInterval() + "\n";
+      to_write += "source:" + listSource.value() + "\n";
+    }
     to_write += "min_refresh_time:" + getMinRefreshInterval() + "\n";
 
     // Axis
@@ -1487,6 +1533,11 @@ public void setTimePrecision(int timePrecision) {
     if( p != null ) framePos=OFormat.getPoint(p);
     p = f.getParam("window_size");
     if( p != null ) frameDimension=OFormat.getPoint(p);
+    p = f.getParam("source");
+    if( p != null ) {
+      listSource = DevSource.from_int( OFormat.getInt(p.get(0).toString()));
+      setSource(listSource);
+    }
 
     // Axis
     theGraph.getXAxis().applyConfiguration("x",f);
