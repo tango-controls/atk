@@ -63,6 +63,9 @@ public abstract class AAttribute implements IAttribute,
   protected long refreshCount = 0;
   protected long changeCount = 0;
   protected long periodicCount = 0;
+  public long lastRefreshCount = 0;
+  public long lastChangeCount = 0;
+  public long lastPeriodicCount = 0;
   protected long configCount = 0;
   protected int eventType = 0;
   protected DevFailed eventError = null; // Event subscription error
