@@ -4,7 +4,7 @@
 
     <groupId>org.tango.atk</groupId>
     <artifactId>atk-parent</artifactId>
-    <version>9.1.35</version>
+    <version>9.1.36-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
@@ -14,7 +14,7 @@
             <dependency>
                 <groupId>org.tango.atk</groupId>
                 <artifactId>ATKCore</artifactId>
-                <version>9.1.35</version>
+                <version>9.1.36-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>org.tango</groupId>
@@ -30,7 +30,7 @@
                 <plugin>
                     <groupId>org.tango.atk</groupId>
                     <artifactId>beaninfo-maven-plugin</artifactId>
-                    <version>9.1.35</version>
+                    <version>9.1.36-SNAPSHOT</version>
                 </plugin>
             </plugins>
         </pluginManagement>
