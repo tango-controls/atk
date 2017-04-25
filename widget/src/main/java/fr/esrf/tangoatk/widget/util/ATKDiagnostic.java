@@ -52,6 +52,7 @@ public class ATKDiagnostic {
 
   private long refreshTime;
   private long lastRefreshTime;
+  private long deltaRefresh;
 
   /** Contruct and displays the ATK diagnostic window (allows
    * this panel to be instancied by the TangoSynopticHandler).
@@ -59,6 +60,7 @@ public class ATKDiagnostic {
   public ATKDiagnostic(String dummy) {
     refreshTime = System.currentTimeMillis();
     lastRefreshTime = refreshTime;
+    deltaRefresh = 0;
     JFrame f = new DiagPanel();
     ATKGraphicsUtils.centerFrameOnScreen(f);
     f.setVisible(true);
@@ -72,7 +74,7 @@ public class ATKDiagnostic {
   public static void main(String[] args) {
     try {
       AttributeFactory.getInstance().getAttribute("sys/machstat/tango/sig_current");
-      AttributeFactory.getInstance().getAttribute("test/d-libera-bpm/srtm-2/SaA");
+      AttributeFactory.getInstance().getAttribute("test/d-libera-bpm/srtm-2/SA_Va");
     } catch (ConnectionException e) {
       ErrorPane.showErrorMessage(null,"Error","",e);
     } catch (DevFailed e) {
@@ -172,11 +174,44 @@ public class ATKDiagnostic {
     private AAttribute[] allAttributes = new AAttribute[0];
 
     public AttributeTableModel() {
+
       refresh();
+
+      // Init stats
+      for(int i=0;i<allAttributes.length;i++) {
+        allAttributes[i].lastRefreshCount = allAttributes[i].getRefreshCount();
+        allAttributes[i].lastChangeCount = allAttributes[i].getChangeCount();
+        allAttributes[i].lastPeriodicCount = allAttributes[i].getPeriodicCount();
+        allAttributes[i].statRefresh = "";
+        allAttributes[i].statChange = "";
+        allAttributes[i].statPeriodic = "";
+      }
+
     }
 
     public void refresh() {
       allAttributes = AttributeFactory.getInstance().getAttributes();
+    }
+
+    public void refreshStat() {
+
+      for(int i=0;i<allAttributes.length;i++) {
+
+        double diffT = (double)deltaRefresh / 1000.0;
+        double diffR = (double)(allAttributes[i].getRefreshCount() - allAttributes[i].lastRefreshCount);
+        double diffC = (double)(allAttributes[i].getChangeCount() - allAttributes[i].lastChangeCount);
+        double diffP = (double)(allAttributes[i].getPeriodicCount() - allAttributes[i].lastPeriodicCount);
+
+        allAttributes[i].statRefresh = " (" + String.format("%.1f",diffR/diffT) + " Hz)";
+        allAttributes[i].statChange = " (" + String.format("%.1f",diffC/diffT) + " Hz)";
+        allAttributes[i].statPeriodic = " (" + String.format("%.1f",diffP/diffT) + " Hz)";
+
+        allAttributes[i].lastRefreshCount = allAttributes[i].getRefreshCount();
+        allAttributes[i].lastChangeCount = allAttributes[i].getChangeCount();
+        allAttributes[i].lastPeriodicCount = allAttributes[i].getPeriodicCount();
+
+      }
+
     }
 
     public AAttribute getAttribute(int idx) {
@@ -219,33 +254,15 @@ public class ATKDiagnostic {
         case 4:
           // Details button
           return "";
-        case 5: {
-          String suffix = "";
-          long diff = allAttributes[rowIndex].getRefreshCount() - allAttributes[rowIndex].lastRefreshCount;
-          allAttributes[rowIndex].lastRefreshCount = allAttributes[rowIndex].getRefreshCount();
-          double diffT = (refreshTime - lastRefreshTime)/1000.0;
-          if(diffT>0.0)
-            suffix = " (" + String.format("%.1f",(double)diff/diffT) + " Hz)";
-          return Long.toString(allAttributes[rowIndex].getRefreshCount()) + suffix;
-        }
-        case 6: {
-          String suffix = "";
-          long diff = allAttributes[rowIndex].getChangeCount() - allAttributes[rowIndex].lastChangeCount;
-          allAttributes[rowIndex].lastChangeCount = allAttributes[rowIndex].getChangeCount();
-          double diffT = (refreshTime - lastRefreshTime)/1000.0;
-          if(diffT>0.0)
-            suffix = " (" + String.format("%.1f",(double)diff/diffT) + " Hz)";
-          return Long.toString(allAttributes[rowIndex].getChangeCount()) + suffix;
-        }
-        case 7: {
-          String suffix = "";
-          long diff = allAttributes[rowIndex].getPeriodicCount() - allAttributes[rowIndex].lastPeriodicCount;
-          allAttributes[rowIndex].lastPeriodicCount = allAttributes[rowIndex].getPeriodicCount();
-          double diffT = (refreshTime - lastRefreshTime)/1000.0;
-          if(diffT>0.0)
-            suffix = " (" + String.format("%.1f",(double)diff/diffT) + " Hz)";
-          return Long.toString(allAttributes[rowIndex].getPeriodicCount()) + suffix;
-        }
+        case 5:
+          return Long.toString(allAttributes[rowIndex].getChangeCount()) +
+                 allAttributes[rowIndex].statRefresh;
+        case 6:
+          return Long.toString(allAttributes[rowIndex].getChangeCount()) +
+                 allAttributes[rowIndex].statChange;
+        case 7:
+          return Long.toString(allAttributes[rowIndex].getPeriodicCount()) +
+                 allAttributes[rowIndex].statPeriodic;
         case 8:
           return Long.toString(allAttributes[rowIndex].getConfigCount());
       }
@@ -533,8 +550,13 @@ public class ATKDiagnostic {
       if(src==dismissButton) {
         setVisible(false);
       } else if(src==refreshButton) {
-        lastRefreshTime = refreshTime;
         refreshTime = System.currentTimeMillis();
+        long delta = refreshTime - lastRefreshTime;
+        if(delta>1000) {
+          deltaRefresh = delta;
+          lastRefreshTime = refreshTime;
+          attributeModel.refreshStat();
+        }
         deviceModel.refresh();
         deviceModel.fireTableDataChanged();
         attributeModel.refresh();
