@@ -255,7 +255,7 @@ public class ATKDiagnostic {
           // Details button
           return "";
         case 5:
-          return Long.toString(allAttributes[rowIndex].getChangeCount()) +
+          return Long.toString(allAttributes[rowIndex].getRefreshCount()) +
                  allAttributes[rowIndex].statRefresh;
         case 6:
           return Long.toString(allAttributes[rowIndex].getChangeCount()) +
