@@ -149,6 +149,7 @@ public class JLDataViewOption extends JDialog implements ActionListener, MouseLi
   private JRadioButton         integralBtn;
   private JRadioButton         fftModBtn;
   private JRadioButton         fftPhaseBtn;
+  private JCheckBox            removeAvgBtn;
 
   /**
    * Dialog constructor.
@@ -765,6 +766,11 @@ public class JLDataViewOption extends JDialog implements ActionListener, MouseLi
     fftPhaseBtn.setBounds(5,110,160,25);
     mathPanel.add(fftPhaseBtn);
     mathBtnGrp.add(fftPhaseBtn);
+    removeAvgBtn = new JCheckBox("Remove Average (FFT)");
+    removeAvgBtn.setForeground(GraphicsUtils.fColor);
+    removeAvgBtn.setFont(GraphicsUtils.labelFont);
+    removeAvgBtn.setBounds(5,135,160,25);
+    mathPanel.add(removeAvgBtn);
 
     switch(dataView.getMathFunction()) {
       case JLDataView.MATH_NONE:
@@ -783,12 +789,14 @@ public class JLDataViewOption extends JDialog implements ActionListener, MouseLi
         fftPhaseBtn.setSelected(true);
         break;
     }
+    removeAvgBtn.setSelected(dataView.getRemoveAverage());
 
     noMathBtn.addChangeListener(this);
     derivativeBtn.addChangeListener(this);
     integralBtn.addChangeListener(this);
     fftModBtn.addChangeListener(this);
     fftPhaseBtn.addChangeListener(this);
+    removeAvgBtn.addChangeListener(this);
 
     // Global frame construction
     nameLabel = new JLabel();
@@ -990,6 +998,8 @@ public class JLDataViewOption extends JDialog implements ActionListener, MouseLi
     } else if (src == fftPhaseBtn) {
       if(fftPhaseBtn.isSelected())
         dataView.setMathFunction(JLDataView.MATH_FFT_PHASE);
+    } else if (src == removeAvgBtn) {
+      dataView.setRemoveAverage(removeAvgBtn.isSelected());
     }
 
     updateControls();
