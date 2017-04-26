@@ -1,8 +1,8 @@
 # Welcome to TangoATK.
 
-[ ![Download ATKCore](https://api.bintray.com/packages/tango-controls/maven/ATKCore/images/download.svg) ](https://bintray.com/tango-controls/maven/ATKCore/_latestVersion)
+ATKCore: [ ![Download ATKCore](https://api.bintray.com/packages/tango-controls/maven/ATKCore/images/download.svg) ](https://bintray.com/tango-controls/maven/ATKCore/_latestVersion)
 
-[ ![Download ATKWidget](https://api.bintray.com/packages/tango-controls/maven/ATKWidget/images/download.svg) ](https://bintray.com/tango-controls/maven/ATKWidget/_latestVersion)
+ATKWidget: [ ![Download ATKWidget](https://api.bintray.com/packages/tango-controls/maven/ATKWidget/images/download.svg) ](https://bintray.com/tango-controls/maven/ATKWidget/_latestVersion)
 
 ## Getting started
 
