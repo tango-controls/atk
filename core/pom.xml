@@ -16,7 +16,6 @@
         <dependency>
             <groupId>org.tango</groupId>
             <artifactId>TangORB</artifactId>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 

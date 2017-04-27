@@ -15,7 +15,6 @@
         <dependency>
             <groupId>org.tango</groupId>
             <artifactId>TangORB</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.tango.atk</groupId>
@@ -49,7 +48,6 @@
             <groupId>org.tango.ds</groupId>
             <artifactId>SettingsManager</artifactId>
             <version>RELEASE</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -76,35 +74,11 @@
                     </archive>
                 </configuration>
             </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>make_jar</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <descriptorRefs>
-                                <descriptorRef>jar-with-dependencies</descriptorRef>
-                            </descriptorRefs>
-                            <archive>
-                                <manifestFile>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</manifestFile>
-                            </archive>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 
     <pluginRepositories>
         <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
             <id>bintray-tango-controls</id>
             <name>bintray-plugins</name>
             <url>http://dl.bintray.com/tango-controls/maven</url>
