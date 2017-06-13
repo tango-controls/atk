@@ -74,23 +74,7 @@
                     </archive>
                 </configuration>
             </plugin>
-        </plugins>
-    </build>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>bintray-tango-controls</id>
-            <name>bintray-plugins</name>
-            <url>http://dl.bintray.com/tango-controls/maven</url>
-        </pluginRepository>
-    </pluginRepositories>
-
-    <profiles>
-        <profile>
-            <id>single-executable-jar</id>
-            <build>
-                <plugins>
-                    <plugin>
+            <plugin>
 -                <artifactId>maven-assembly-plugin</artifactId>
 -                <executions>
 -                    <execution>
@@ -100,7 +84,7 @@
 -                            <goal>single</goal>
 -                        </goals>
 -                        <configuration>
--                            <appendAssemblyId>true</appendAssemblyId>
+-                            <appendAssemblyId>false</appendAssemblyId>
 -                            <descriptorRefs>
 -                                <descriptorRef>jar-with-dependencies</descriptorRef>
 -                            </descriptorRefs>
@@ -111,8 +95,14 @@
 -                    </execution>
 -                </executions>
 -            </plugin>
-                </plugins>
-            </build>
-        </profile>    
-    </profiles>    
+        </plugins>
+    </build>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>bintray-tango-controls</id>
+            <name>bintray-plugins</name>
+            <url>http://dl.bintray.com/tango-controls/maven</url>
+        </pluginRepository>
+    </pluginRepositories>
 </project>
