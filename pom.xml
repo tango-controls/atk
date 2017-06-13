@@ -13,7 +13,7 @@
 
     <groupId>org.tango.atk</groupId>
     <artifactId>TangoATK</artifactId>
-    <version>9.1.40-SNAPSHOT</version>
+    <version>9.1.41-SNAPSHOT</version>
 
     <description>TangoATK is a collection of java-classes to help build applications which interact with Tango-devices.</description>
 
