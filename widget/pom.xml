@@ -85,4 +85,34 @@
         </pluginRepository>
     </pluginRepositories>
 
+    <profiles>
+        <profile>
+            <id>single-executable-jar</id>
+            <build>
+                <plugins>
+                    <plugin>
+-                <artifactId>maven-assembly-plugin</artifactId>
+-                <executions>
+-                    <execution>
+-                        <id>make_jar</id>
+-                        <phase>package</phase>
+-                        <goals>
+-                            <goal>single</goal>
+-                        </goals>
+-                        <configuration>
+-                            <appendAssemblyId>true</appendAssemblyId>
+-                            <descriptorRefs>
+-                                <descriptorRef>jar-with-dependencies</descriptorRef>
+-                            </descriptorRefs>
+-                            <archive>
+-                                <manifestFile>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+-                            </archive>
+-                        </configuration>
+-                    </execution>
+-                </executions>
+-            </plugin>
+                </plugins>
+            </build>
+        </profile>    
+    </profiles>    
 </project>
