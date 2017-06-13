@@ -1097,7 +1097,7 @@ public class TangoSynopticHandler extends JDrawEditor
      String       stateCash = null;
 
      // Find the "cashed" state
-     stateStatusCash = stateCashHash.get(dev.getName());
+     stateStatusCash = stateCashHash.get(dev.getName().toLowerCase());
      if (stateStatusCash != null)
      {     
          try 
@@ -1575,7 +1575,7 @@ invoqex.printStackTrace();
       List<String>       list;
       String             str;
 
-      list = stateCashHash.get(s);
+      list = stateCashHash.get(s.toLowerCase());
       if (list != null)
          return;
 
@@ -1583,7 +1583,7 @@ invoqex.printStackTrace();
       str = new String(STATE_NONE);
       list.add(STATE_INDEX, str);
       list.add(STATUS_INDEX, str);
-      stateCashHash.put(s, list);
+      stateCashHash.put(s.toLowerCase(), list);
    }
 
 
@@ -1706,7 +1706,7 @@ invoqex.printStackTrace();
      String       stateCash = null;
 
      // Find the "cashed" state
-     stateStatusCash = stateCashHash.get(stateAtt.getName());
+     stateStatusCash = stateCashHash.get(stateAtt.getName().toLowerCase());
      if (stateStatusCash != null)
      {     
          try 
@@ -2454,7 +2454,7 @@ invoqex.printStackTrace();
 
         // Restore color stored in the state map
         String objName = jdObj.getName();
-        List<String> stateStatusCash = stateCashHash.get(objName);
+        List<String> stateStatusCash = stateCashHash.get(objName.toLowerCase());
         if (stateStatusCash != null) {
           try {
             String stateCash = stateStatusCash.get(STATE_INDEX);
@@ -2484,7 +2484,7 @@ invoqex.printStackTrace();
     // Update and test the "cashed" state
     List<String> stateStatusCash = null;
 
-    stateStatusCash = stateCashHash.get(entityName);
+    stateStatusCash = stateCashHash.get(entityName.toLowerCase());
     if (stateStatusCash != null) {
       String stateCash = null;
       try {
@@ -2496,7 +2496,7 @@ invoqex.printStackTrace();
 
         stateCash = new String(state);
         stateStatusCash.set(STATE_INDEX, stateCash);
-        stateCashHash.put(entityName, stateStatusCash);
+        stateCashHash.put(entityName.toLowerCase(), stateStatusCash);
       } catch (IndexOutOfBoundsException iob) {
       }
     }
@@ -2702,7 +2702,7 @@ invoqex.printStackTrace();
 
       List<String>  stateStatusCash = null;
 
-      stateStatusCash = stateCashHash.get(s);
+      stateStatusCash = stateCashHash.get(s.toLowerCase());
       if (stateStatusCash != null)
       {
          String  statusCash = null;
@@ -2719,7 +2719,7 @@ invoqex.printStackTrace();
 
 	    statusCash = new String(event.getStatus());
 	    stateStatusCash.set(STATUS_INDEX, statusCash);
-            stateCashHash.put(s, stateStatusCash);
+            stateCashHash.put(s.toLowerCase(), stateStatusCash);
 	 }
 	 catch (IndexOutOfBoundsException  iob)
 	 {
@@ -2764,7 +2764,7 @@ invoqex.printStackTrace();
 	  devName = jdObj.getName();     // The name of the device
 
 	  // get the "cashed" state for the device
-	  stateStatusCash = (List) stateCashHash.get(devName);
+	  stateStatusCash = (List) stateCashHash.get(devName.toLowerCase());
 	  if (stateStatusCash == null)
 	  {
 	     setToolTipText(null);
