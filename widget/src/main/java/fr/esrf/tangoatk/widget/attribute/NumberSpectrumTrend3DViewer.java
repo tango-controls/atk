@@ -2471,7 +2471,8 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
     calendar.setTimeInMillis(time);
     Date date = calendar.getTime();
-    return genFormat.format(date);
+    String ms = String.format(".%03d",time%1000);
+    return genFormat.format(date)+ms;
 
   }
 
@@ -2546,7 +2547,6 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       nstv.readPollingHistory(true);
       nstv.setShowDerivative(true);
 
-      /*
       int nbData = 1000;
       long dates[] = new long[nbData];
       double[][] data = new double[nbData][256];
@@ -2558,7 +2558,6 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
         }
       }
       nstv.setData(dates,data);
-      */
 
       //nstv.getXAxis().setVisible(false);
       //nstv.getYAxis().setVisible(false);
@@ -2575,7 +2574,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       nstv.setYIndexName(idxName);
       //nstv.setYTransfom(2,10);
 
-      nstv.setModel((INumberSpectrum) attributeList.add("jlp/test/1/att_spectrum"));
+      //nstv.setModel((INumberSpectrum) attributeList.add("jlp/test/1/att_spectrum"));
       nstv.setZAutoScale(true);
       nstv.setZMinimum(-0.5);
       nstv.setZMaximum(0.5);
