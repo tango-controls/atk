@@ -1262,33 +1262,30 @@ public class TangoSynopticHandler extends JDrawEditor
       return false;
   }
 
-  private void launchPanel(JDObject comp,String compName, boolean isAdevice)
-  {
+  private void launchPanel(JDObject comp, String compName, boolean isAdevice) {
+
+    // Do not launch the panel if JDObject is disabled
+    if (comp.isDisabled())
+      return;
 
     // Added 27/november/2006 : if className extension IS DEFINED and equals to
     // noPanel then the default panel (atkpanel) IS NOT launched when the JDobject is clicked
-    if (comp.hasExtendedParam("className"))
-    {
-        String   pname = comp.getExtendedParam("className");
-	if (isNoPanel(pname))
-	   return;
+    if (comp.hasExtendedParam("className")) {
+      String pname = comp.getExtendedParam("className");
+      if (isNoPanel(pname))
+        return;
     }
-    
-    if (!comp.hasExtendedParam("className"))
-    {
-       if (isAdevice)
-       {
-	  Window w = getPanel("atkpanel.MainPanel",compName);
-	  if (w==null)
-	  {
-	     showDefaultPanel(compName);
-	  }
-	  else
-	  {
-	     showPanelWindow(w);
-	  }
-       }
-       return;
+
+    if (!comp.hasExtendedParam("className")) {
+      if (isAdevice) {
+        Window w = getPanel("atkpanel.MainPanel", compName);
+        if (w == null) {
+          showDefaultPanel(compName);
+        } else {
+          showPanelWindow(w);
+        }
+      }
+      return;
     }
 
     String clName = comp.getExtendedParam("className");
@@ -1316,64 +1313,49 @@ public class TangoSynopticHandler extends JDrawEditor
     System.out.println("params[0]= " + params[0]);
 
     // Check whether this panel has already been started
-    Window w = getPanel(clName,(String)params[0]);
-    if (w!=null)
-    {
-	showPanelWindow(w);
-        return;
+    Window w = getPanel(clName, (String) params[0]);
+    if (w != null) {
+      showPanelWindow(w);
+      return;
     }
 
     try // Load the class and the constructor (one String argument) of the device panel
     {
-       panelCl = Class.forName(clName);
-       paramCls[0] = compName.getClass();
-       panelClNew = panelCl.getConstructor(paramCls);
-    } 
-    catch (ClassNotFoundException clex)
-    {
-       showErrorMsg("The panel class : " + clName + " not found; ignored.\n");
-       return;
-    }
-    catch (Exception e)
-    {
-       showErrorMsg("Failed to load the constructor " + clName + "( String ) for the panel class.\n");
-       return;
+      panelCl = Class.forName(clName);
+      paramCls[0] = compName.getClass();
+      panelClNew = panelCl.getConstructor(paramCls);
+    } catch (ClassNotFoundException clex) {
+      showErrorMsg("The panel class : " + clName + " not found; ignored.\n");
+      return;
+    } catch (Exception e) {
+      showErrorMsg("Failed to load the constructor " + clName + "( String ) for the panel class.\n");
+      return;
     }
 
 
     try // Instantiate the device panel class
     {
-	Object obj = panelClNew.newInstance(params);
-	PanelItem newPanel = addNewPanel(obj,clName,(String)params[0]);
-	if (newPanel != null) // Workaround : to avoid the panel window go behind when excuting throught JVM in Linux
-	   showPanelWindow (newPanel.parent);
-    } 
-    catch (InstantiationException instex)
-    {
-	showErrorMsg("Failed to instantiate 1 the panel class : " + clName + ".\n");
-    } 
-    catch (IllegalAccessException accesex)
-    {
-	showErrorMsg("Failed to instantiate 2 the panel class : " + clName + ".\n");
-    }
-    catch (IllegalArgumentException argex)
-    {
-	showErrorMsg("Failed to instantiate 3 the panel class : " + clName + ".\n");
-    }
-    catch (InvocationTargetException invoqex)
-    {
-	showErrorMsg("Failed to instantiate 4 the panel class : " + clName + ".\n");
-	System.out.println(invoqex);
-	System.out.println(invoqex.getMessage());
-	invoqex.printStackTrace();
-    }
-    catch (Exception e)
-    {
-	showErrorMsg("Got an exception when instantiate the panel class : " + clName + ".\n");
+      Object obj = panelClNew.newInstance(params);
+      PanelItem newPanel = addNewPanel(obj, clName, (String) params[0]);
+      if (newPanel != null) // Workaround : to avoid the panel window go behind when excuting throught JVM in Linux
+        showPanelWindow(newPanel.parent);
+    } catch (InstantiationException instex) {
+      showErrorMsg("Failed to instantiate 1 the panel class : " + clName + ".\n");
+    } catch (IllegalAccessException accesex) {
+      showErrorMsg("Failed to instantiate 2 the panel class : " + clName + ".\n");
+    } catch (IllegalArgumentException argex) {
+      showErrorMsg("Failed to instantiate 3 the panel class : " + clName + ".\n");
+    } catch (InvocationTargetException invoqex) {
+      showErrorMsg("Failed to instantiate 4 the panel class : " + clName + ".\n");
+      System.out.println(invoqex);
+      System.out.println(invoqex.getMessage());
+      invoqex.printStackTrace();
+    } catch (Exception e) {
+      showErrorMsg("Got an exception when instantiate the panel class : " + clName + ".\n");
     }
 
   }
-  
+
   private void showErrorMsg(String  msg)
   {
       try // Workaround : to avoid the JOptionPane window go behind when excuting throught JVM in Linux
