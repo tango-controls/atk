@@ -567,7 +567,7 @@ public class AttributeFactory extends AEntityFactory {
 
      if (enumLabs == null) return null;
 
-     if (enumLabs.length <= 1) return null;
+     if (enumLabs.length <= 0) return null;
 
      ens = new EnumScalar(enumLabs);
      return ens;
