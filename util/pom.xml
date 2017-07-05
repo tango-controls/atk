@@ -4,9 +4,8 @@
 
     <parent>
         <groupId>org.tango.atk</groupId>
-        <artifactId>atk-parent</artifactId>
+        <artifactId>TangoATK</artifactId>
         <version>9.1.44-SNAPSHOT</version>
-        <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>beaninfo-maven-plugin</artifactId>

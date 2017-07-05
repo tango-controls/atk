@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>org.tango.atk</groupId>
-        <artifactId>atk-parent</artifactId>
+        <artifactId>TangoATK</artifactId>
         <version>9.1.44-SNAPSHOT</version>
-        <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>ATKWidget</artifactId>
@@ -15,10 +15,13 @@
         <dependency>
             <groupId>org.tango</groupId>
             <artifactId>TangORB</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.tango.atk</groupId>
             <artifactId>ATKCore</artifactId>
+            <version>9.1.44-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
         <!-- JOGL Open GL java , get version number here because native libs are dependant -->
         <dependency>
@@ -48,11 +51,13 @@
             <groupId>org.tango.ds</groupId>
             <artifactId>SettingsManager</artifactId>
             <version>RELEASE</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.tango.atk</groupId>
                 <artifactId>beaninfo-maven-plugin</artifactId>
@@ -65,36 +70,29 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifestFile>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</manifestFile>
-                    </archive>
-                </configuration>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>make_jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifestFile>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+                            </archive>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
-            <plugin>
--                <artifactId>maven-assembly-plugin</artifactId>
--                <executions>
--                    <execution>
--                        <id>make_jar</id>
--                        <phase>package</phase>
--                        <goals>
--                            <goal>single</goal>
--                        </goals>
--                        <configuration>
--                            <appendAssemblyId>false</appendAssemblyId>
--                            <descriptorRefs>
--                                <descriptorRef>jar-with-dependencies</descriptorRef>
--                            </descriptorRefs>
--                            <archive>
--                                <manifestFile>${project.basedir}/src/main/resources/META-INF/MANIFEST.MF</manifestFile>
--                            </archive>
--                        </configuration>
--                    </execution>
--                </executions>
--            </plugin>
+
         </plugins>
     </build>
 
@@ -105,4 +103,5 @@
             <url>http://dl.bintray.com/tango-controls/maven</url>
         </pluginRepository>
     </pluginRepositories>
+
 </project>
