@@ -132,7 +132,6 @@ public class SimpleSynopticAppli extends javax.swing.JFrame implements SynopticP
 
     if( settingManagerName!=null ) {
 
-
       // Setting manager file menu
       fileLoadMenuItem = new JMenuItem("Load...");
       fileLoadMenuItem.addActionListener(new ActionListener() {
@@ -142,7 +141,6 @@ public class SimpleSynopticAppli extends javax.swing.JFrame implements SynopticP
         }
       });
 
-      fileJMenu.add(fileLoadMenuItem);
 
       filePreviewMenuItem = new JMenuItem("Preview...");
       filePreviewMenuItem.addActionListener(new ActionListener() {
@@ -152,7 +150,6 @@ public class SimpleSynopticAppli extends javax.swing.JFrame implements SynopticP
         }
       });
 
-      fileJMenu.add(filePreviewMenuItem);
 
       fileSaveMenuItem = new JMenuItem("Save...");
       fileSaveMenuItem.addActionListener(new ActionListener() {
@@ -161,7 +158,11 @@ public class SimpleSynopticAppli extends javax.swing.JFrame implements SynopticP
           fileSaveMenuItemActionPerformed(e);
         }
       });
-      fileJMenu.add(fileSaveMenuItem);
+
+      fileJMenu.add(new JSeparator(),0);
+      fileJMenu.add(fileSaveMenuItem,0);
+      fileJMenu.add(filePreviewMenuItem, 0);
+      fileJMenu.add(fileLoadMenuItem,0);
 
       // Setting manager API
       try {
