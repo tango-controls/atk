@@ -99,7 +99,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>RELEASE</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -112,7 +111,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>RELEASE</version>
                         <configuration>
                             <skip>true</skip>
                         </configuration>
