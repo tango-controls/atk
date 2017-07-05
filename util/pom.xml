@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.tango.atk</groupId>
         <artifactId>TangoATK</artifactId>
-        <version>9.1.44-SNAPSHOT</version>
+        <version>9.1.45-SNAPSHOT</version>
     </parent>
 
     <artifactId>beaninfo-maven-plugin</artifactId>
