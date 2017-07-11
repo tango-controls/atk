@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.tango.atk</groupId>
         <artifactId>TangoATK</artifactId>
-        <version>9.1.47</version>
+        <version>9.1.48-SNAPSHOT</version>
     </parent>
 
     <artifactId>ATKCore</artifactId>
