@@ -3101,7 +3101,7 @@ public class JLAxis implements java.io.Serializable {
 
   }
 
-  private void paintDataViewPolyline(Graphics2D g2,BasicStroke bs,Paint fPattern,JLDataView v,DataList l,
+  private void paintDataViewPolyline(Graphics2D g2,BasicStroke bs,Paint fPattern,JLDataView v,DataList list,
                                      JLAxis xAxis, int xOrg, int yOrg,int y0,
                                      int xMin,int xMax,int yMin,int yMax,double iX,double iY) {
 
@@ -3122,19 +3122,22 @@ public class JLAxis implements java.io.Serializable {
     double yratio;
 
     // Extract visible part
+    DataList l = list;
     int maxNbPoint = 1;
-    boolean found = false;
-    DataList f = l;
-    while (f != null && !found) {
-      if (isXLogScale)
-        xratio = (Math.log(f.x) / ln10 - minx) * iX;
-      else
-        xratio = (f.x - minx) * iX;
-      px = (int) ((xratio) + xOrg);
-      found = px > xMax;
-      if (!found) {
-        maxNbPoint++;
-        f = f.next;
+    synchronized (l) {
+      boolean found = false;
+      DataList f = l;
+      while (f != null && !found) {
+        if (isXLogScale)
+          xratio = (Math.log(f.x) / ln10 - minx) * iX;
+        else
+          xratio = (f.x - minx) * iX;
+        px = (int) ((xratio) + xOrg);
+        found = px > xMax;
+        if (!found) {
+          maxNbPoint++;
+          f = f.next;
+        }
       }
     }
 
