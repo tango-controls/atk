@@ -22,6 +22,14 @@
         </dependency>
     </dependencies>
 
+    <!-- tango-controls bintray maven repo to deploy release-->
+    <distributionManagement>
+        <repository>
+            <id>bintray-tango-controls</id>
+            <url>https://api.bintray.com/maven/tango-controls/maven/${project.artifactId}/;publish=1</url>
+        </repository>
+    </distributionManagement>
+
     <build>
         <plugins>
             <plugin>
