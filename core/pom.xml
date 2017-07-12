@@ -3,18 +3,22 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
+    <!--parent>
         <groupId>org.tango.atk</groupId>
         <artifactId>TangoATK</artifactId>
         <version>9.1.48-SNAPSHOT</version>
-    </parent>
+    </parent-->
 
+    <groupId>org.tango.atk</groupId>
     <artifactId>ATKCore</artifactId>
+    <version>9.1.48-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
             <groupId>org.tango</groupId>
             <artifactId>TangORB</artifactId>
+            <version>RELEASE</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

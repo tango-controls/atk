@@ -41,16 +41,6 @@
         </developer>
     </developers>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.tango</groupId>
-                <artifactId>TangORB</artifactId>
-                <version>RELEASE</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <build>
 
         <plugins>
