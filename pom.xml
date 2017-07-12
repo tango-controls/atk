@@ -7,7 +7,7 @@
 
     <groupId>org.tango.atk</groupId>
     <artifactId>TangoATK</artifactId>
-    <version>9.1.49-SNAPSHOT</version>
+    <version>9.1.50-SNAPSHOT</version>
 
     <modules>
         <module>core</module>
