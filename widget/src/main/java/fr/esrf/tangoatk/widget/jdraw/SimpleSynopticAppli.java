@@ -465,13 +465,6 @@ public class SimpleSynopticAppli extends javax.swing.JFrame implements SynopticP
 
       DeviceAttribute da = sm.getManagerProxy().read_attribute("Status");
       status = da.extractString();
-
-      da = sm.getManagerProxy().read_attribute("AlarmAttributes");
-      if(da.getQuality() != AttrQuality.ATTR_INVALID) {
-        String[] atts = da.extractStringArray();
-        for(int i=0;i<atts.length;i++)
-          status += "\n" + atts[0];
-      }
       JOptionPane.showMessageDialog(this,status,"Status ["+settingManagerName+"]",JOptionPane.INFORMATION_MESSAGE);
 
     } catch (DevFailed ex) {

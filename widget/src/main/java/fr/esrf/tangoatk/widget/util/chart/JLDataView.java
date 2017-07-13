@@ -2003,7 +2003,7 @@ public class JLDataView implements java.io.Serializable {
 
     // Get source data
     Point2D.Double[] source;
-    if(interpMethod==INTERPOLATE_NONE && smoothMethod==SMOOTH_NONE)
+    if(interpMethod==INTERPOLATE_NONE)
       source = getSource(theData,0,false);
     else
       source = getSource(theFilteredData,0,false);
@@ -2094,25 +2094,26 @@ public class JLDataView implements java.io.Serializable {
     while(nbSample!=0) { nbSample = nbSample >> 1; p++; }
     nbSample = 1 << p;
 
+    // Compute average
     double avg = 0.0;
-    if(removeAverage) {
-      // Compute average
-      for(i=0;i<in.length;i++)
-        avg += in[i].y;
-      avg = avg/(double)in.length;
-    }
+    double avgr = 0.0;
+    for(i=0;i<in.length;i++)
+      avg += in[i].y;
+    avg = avg/(double)in.length;
+
+    if(removeAverage) avgr = avg;
 
     // Create initial array
     double[] real = new double[nbSample];
     double[] imag = new double[nbSample];
     for(i=0;i<in.length;i++) {
       idx = reverse(i,p);
-      real[idx] = in[i].y-avg;
+      real[idx] = in[i].y-avgr;
       imag[idx] = 0.0;
     }
     for(;i<nbSample;i++) {
       idx = reverse(i,p);
-      real[idx] = 0.0;
+      real[idx] = avg-avgr;
       imag[idx] = 0.0;
     }
     double fs;
@@ -2179,13 +2180,11 @@ public class JLDataView implements java.io.Serializable {
         break;
       case 1: // Arguments (in radians)
         for(i=0;i<nbSample;i++) {
-          double n = Math.sqrt( real[i]*real[i] + imag[i]*imag[i] );
-          double arg = Math.asin( imag[i]/n );
+          double arg = Math.atan2( imag[i],real[i] );
           addInt((double)i*fs/nS,arg);
         }
         break;
     }
-
 
   }
 
@@ -2199,8 +2198,8 @@ public class JLDataView implements java.io.Serializable {
     filteredDataLength = 0;
     if(hasFilter()) {
       interpolate();
-      convolution();
       mathop();
+      convolution();
       computeDataBounds();
     }
   }
@@ -2279,7 +2278,7 @@ public class JLDataView implements java.io.Serializable {
 
     // Get source data
     Point2D.Double[] source;
-    if(interpMethod==INTERPOLATE_NONE)
+    if(interpMethod==INTERPOLATE_NONE && mathFunction==MATH_NONE)
       source = getSource(theData,nbE,true);
     else
       source = getSource(theFilteredData,nbE,true);
