@@ -111,6 +111,14 @@
         </repository>
     </distributionManagement>
 
+    <repositories>
+        <repository>
+            <id>bintray-tango-controls</id>
+            <name>bintray</name>
+            <url>http://dl.bintray.com/tango-controls/maven</url>
+        </repository>
+    </repositories>
+
     <pluginRepositories>
         <pluginRepository>
             <id>bintray-tango-controls</id>
