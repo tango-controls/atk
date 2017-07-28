@@ -57,3 +57,6 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
+/core/target/
+/widget/target/
+/util/target/

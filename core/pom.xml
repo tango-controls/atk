@@ -24,6 +24,15 @@
         </repository>
     </distributionManagement>
 
+    <!-- tango-controls bintray maven repo to resolve dependencies-->
+    <repositories>
+        <repository>
+            <id>bintray-tango-controls</id>
+            <name>bintray</name>
+            <url>http://dl.bintray.com/tango-controls/maven</url>
+        </repository>
+    </repositories>
+
     <build>
         <plugins>
             <plugin>

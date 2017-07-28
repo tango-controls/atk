@@ -31,6 +31,17 @@
             <timezone>1</timezone>
         </developer>
         <developer>
+            <id>poncet</id>
+            <name>Faranguiss Poncet</name>
+            <email>poncet@esrf.fr</email>
+            <organization>ESRF</organization>
+            <organizationUrl>http://esrf.eu</organizationUrl>
+            <roles>
+                <role>Maintainer</role>
+            </roles>
+            <timezone>1</timezone>
+        </developer>
+        <developer>
             <id>ingvord</id>
             <name>Igor Khokhriakov</name>
             <email>mail@ingvord.ru</email>
