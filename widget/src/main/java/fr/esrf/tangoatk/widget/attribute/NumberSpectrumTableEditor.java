@@ -14,6 +14,7 @@ import fr.esrf.tangoatk.core.NumberSpectrumEvent;
 import fr.esrf.tangoatk.widget.util.EditableTableRowModel;
 import fr.esrf.tangoatk.widget.util.EditableJTableRow;
 import fr.esrf.tangoatk.widget.util.MultiExtFileFilter;
+import fr.esrf.tangoatk.widget.util.chart.DataList;
 import fr.esrf.tangoatk.widget.util.chart.JLDataView;
 import java.awt.Dimension;
 import java.awt.Toolkit;
@@ -286,7 +287,6 @@ public class NumberSpectrumTableEditor extends javax.swing.JFrame
 
     public void errorChange(ErrorEvent evt)
     {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private void updateTable()
@@ -309,13 +309,12 @@ public class NumberSpectrumTableEditor extends javax.swing.JFrame
             // Build data
             Object[][] data = new Object[setValue.length][2];
 
+            DataList dly = setDvy.getData();
             for (int i = 0; i < setValue.length; i++)
             {
-                String[]  lineValue = new String[2];
-                lineValue[0] = Double.toString(i);
-                lineValue[1] = setDvy.formatValue(setDvy.getYValueByIndex(i));
-                data[i][0] = lineValue[0];
-                data[i][1] = lineValue[1];
+                data[i][0] = Integer.toString(i);
+                data[i][1] = setDvy.formatValue(dly.y);
+                dly = dly.next;
             }
             setData( data, cols );
         }             
