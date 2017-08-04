@@ -44,13 +44,6 @@
             <artifactId>jep</artifactId>
             <version>2.4.2</version>
         </dependency>
-        <!-- Setting manager API -->
-        <dependency>
-            <groupId>org.tango.ds</groupId>
-            <artifactId>SettingsManager</artifactId>
-            <version>RELEASE</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>
