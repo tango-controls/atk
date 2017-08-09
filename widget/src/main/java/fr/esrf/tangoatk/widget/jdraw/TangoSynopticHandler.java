@@ -39,7 +39,6 @@ import fr.esrf.tangoatk.core.AttributeList;
 import fr.esrf.tangoatk.core.attribute.AttributeFactory;
 import fr.esrf.tangoatk.core.attribute.AAttribute;
 import fr.esrf.tangoatk.core.attribute.BooleanScalar;
-import fr.esrf.tangoatk.core.attribute.DevStateScalar;
 import fr.esrf.tangoatk.core.command.*;
 import fr.esrf.tangoatk.widget.command.AnyCommandViewer;
 import fr.esrf.tangoatk.widget.command.VoidVoidCommandViewer;
@@ -49,8 +48,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.*;
 
 import java.lang.reflect.Constructor;
@@ -136,7 +133,7 @@ import fr.esrf.tangoatk.widget.util.ErrorPopup;
 
 public class TangoSynopticHandler extends JDrawEditor
                                   implements IStateListener, IStatusListener,
-                                             INumberScalarListener, IDevStateScalarListener,
+                                             INumberScalarListener, IEnumScalarListener, IDevStateScalarListener,
                                              IBooleanScalarListener, IDevStateSpectrumListener,
                                              WindowListener
 {
@@ -2022,6 +2019,16 @@ invoqex.printStackTrace();
 	      System.out.println(atkObj.getClass().getName() + " does not accept IStringScalar model");
 	    }
      }
+     else
+     {
+          // Default behavior for JDObject value (dyno).
+          mouseifyAttribute(jdObj);
+          String attName = model.getName();
+          System.out.println("connecting to a EnumScalar attribute : " + attName);
+          allAttributes.add(model);
+          model.addEnumScalarListener(this);
+          stashComponent(model.getName(), jdObj);
+     }
   }
   
   private String[]  parsePossStringValues(String vals)
@@ -2200,7 +2207,44 @@ invoqex.printStackTrace();
      }
 
    }
-   
+
+    public void enumScalarChange(EnumScalarEvent evt)
+    {
+        JDObject jdObj;
+        IEnumScalar ies = null;
+//        double value = evt.
+        if (ies != null)
+        {
+            ies = (IEnumScalar) evt.getSource();
+            String s = ies.getName();
+            List list = jdHash.get(s);
+            if (list == null) return;
+            
+            short  enumVal = ies.getShortValueFromEnumScalar(evt.getValue());
+            int nbJdObjs = list.size();
+            int i;
+            for (i = 0; i < nbJdObjs; i++)
+            {
+                jdObj = null;
+                jdObj = (JDObject) list.get(i);
+                if (jdObj != null)
+                {
+                    // Sets the dyno value
+                    if (jdObj.isProgrammed())
+                    {
+                        int jdValue = (int) enumVal;
+                        if (jdObj.getValue() != jdValue)
+                        {
+                            jdObj.preRefresh();
+                            jdObj.setValue(jdValue);
+                            jdObj.refresh();
+                        }
+                    }
+                }
+            }
+        }
+    }
+  
    
    // Interface IDevStateSpectrumListener
    public void booleanScalarChange(BooleanScalarEvent evt)

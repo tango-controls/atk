@@ -447,23 +447,23 @@ public class SimpleSynopticAppli extends javax.swing.JFrame implements SynopticP
         // If Synoptic file name is not specified, launch a file chooser window to let the user select the file name
         if (fullFileName == null)
         {
-            fullFileName = "/segfs/tango/tmp/poncet/syquad.jdw";
-            settingManagerName = "sys/settings/sy-quad";
-            
-//            JFileChooser chooser = new JFileChooser(".");
-//            chooser.setDialogTitle("[SimpleSynopticAppli] Open a synoptic file");
-//            JDFileFilter jdwFilter = new JDFileFilter("JDraw synoptic", new String[]{"jdw"});
-//            chooser.addChoosableFileFilter(jdwFilter);
-//            int returnVal = chooser.showOpenDialog(null);
-//            if (returnVal == JFileChooser.APPROVE_OPTION)
-//            {
-//                File f = chooser.getSelectedFile();
-//                fullFileName = f.getAbsolutePath();
-//            }
-//            else
-//            {
-//                System.exit(0);
-//            }
+//            fullFileName = "/segfs/tango/tmp/poncet/syquad.jdw";
+//            settingManagerName = "sys/settings/sy-quad";
+//            
+            JFileChooser chooser = new JFileChooser(".");
+            chooser.setDialogTitle("[SimpleSynopticAppli] Open a synoptic file");
+            JDFileFilter jdwFilter = new JDFileFilter("JDraw synoptic", new String[]{"jdw"});
+            chooser.addChoosableFileFilter(jdwFilter);
+            int returnVal = chooser.showOpenDialog(null);
+            if (returnVal == JFileChooser.APPROVE_OPTION)
+            {
+                File f = chooser.getSelectedFile();
+                fullFileName = f.getAbsolutePath();
+            }
+            else
+            {
+                System.exit(0);
+            }
 
         }
 
