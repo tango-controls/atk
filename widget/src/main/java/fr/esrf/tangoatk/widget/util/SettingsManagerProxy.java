@@ -29,6 +29,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -49,7 +50,9 @@ public class SettingsManagerProxy
     public static final String            LOAD_BUTTON = "Load";
     public static final String            SAVE_BUTTON = "Save";
     public static final String            PREVIEW_BUTTON = "Preview";
-    
+    public static final String            FILE_LABEL = "FileLabel";
+    public static final String            FILE_NAME = "FileName";
+   
     
     private String                 devName = null;
     private Device                 settingsManagerDevice = null;
@@ -76,7 +79,7 @@ public class SettingsManagerProxy
     private JButton                loadJButton = null;
     private JButton                saveJButton = null;
     private JButton                previewJButton = null;
-//    private FilePreviewWindow      previewer = null;
+    private JLabel                 fileLabel = null;
     
     public SettingsManagerProxy(String smDeviceName)
     {
@@ -212,31 +215,33 @@ public class SettingsManagerProxy
         settingsPanel.setLayout(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.BOTH;
         gbc.insets = new Insets(3, 3, 3, 3);
 
-        JLabel fileLabel = new JLabel("Configuration file");
+        fileLabel = new JLabel("Configuration file");
 //        fileLabel.setFont(ATKConstant.labelFont);
         fileLabel.setFont(new Font("Dialog", Font.BOLD, 12));
         
         gbc.gridx = 0;
         gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0;
         settingsPanel.add(fileLabel, gbc);
 
         settingsFileSsv = new SimpleScalarViewer();
         settingsFileSsv.setBackgroundColor(Color.WHITE);
+        settingsFileSsv.setMargin(new Insets(3,2,3,2));
         gbc.gridx = 1;
         gbc.gridy = 0;
-        gbc.weightx = 1;
-        gbc.ipadx = 100;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
         settingsPanel.add(settingsFileSsv, gbc);
         if(settingsFileAtt != null)
         {
             settingsFileSsv.setHasToolTip(true);
             settingsFileSsv.setModel(settingsFileAtt);
+            settingsFileSsv.setFont(new Font("Dialog", Font.PLAIN, 12));
         }
-
+        
         statusJButton = new JButton("Status");
         statusJButton.addActionListener(new ActionListener()
                 {
@@ -249,6 +254,8 @@ public class SettingsManagerProxy
         gbc.gridx = 2;
         gbc.gridy = 0;
         gbc.ipadx = 0;
+        gbc.ipady = 0;        
+        gbc.fill = GridBagConstraints.NONE;
         gbc.weightx = 0;
         settingsPanel.add(statusJButton, gbc);
 
@@ -417,6 +424,13 @@ public class SettingsManagerProxy
     
     public void settingsPanelHideChild(String  childName)
     {
+        if (childName.equalsIgnoreCase(FILE_LABEL))
+        {
+            if (fileLabel != null)
+                fileLabel.setVisible(false);
+            return;
+        }
+        
         if (childName.equalsIgnoreCase(STATUS_BUTTON))
         {
             if (statusJButton != null)
@@ -442,32 +456,57 @@ public class SettingsManagerProxy
         }
     }
     
-    public void settingsPanelShowChild(String  buttonName)
+    public void settingsPanelShowChild(String  childName)
     {
-        if (buttonName.equalsIgnoreCase(STATUS_BUTTON))
+        if (childName.equalsIgnoreCase(FILE_LABEL))
+        {
+            if (fileLabel != null)
+                fileLabel.setVisible(true);
+            return;
+        }
+        
+        if (childName.equalsIgnoreCase(STATUS_BUTTON))
         {
             if (statusJButton != null)
                 statusJButton.setVisible(true);
             return;
         }
-        if (buttonName.equalsIgnoreCase(LOAD_BUTTON))
+        if (childName.equalsIgnoreCase(LOAD_BUTTON))
         {
             if (loadJButton != null)
                 loadJButton.setVisible(true);
             return;
         }
-        if (buttonName.equalsIgnoreCase(SAVE_BUTTON))
+        if (childName.equalsIgnoreCase(SAVE_BUTTON))
         {
             if (saveJButton != null)
                 saveJButton.setVisible(true);
             return;
         }
-        if (buttonName.equalsIgnoreCase(PREVIEW_BUTTON))
+        if (childName.equalsIgnoreCase(PREVIEW_BUTTON))
         {
             if (previewJButton != null)
                 previewJButton.setVisible(true);
         }
     }
+    
+    public JComponent getSettingsPanelChild(String  childName)
+    {
+        if (childName.equalsIgnoreCase(FILE_LABEL)) return fileLabel;
+        
+        if (childName.equalsIgnoreCase(FILE_NAME)) return settingsFileSsv;
+        
+        if (childName.equalsIgnoreCase(STATUS_BUTTON)) return statusJButton;
+
+        if (childName.equalsIgnoreCase(LOAD_BUTTON)) return loadJButton;
+
+        if (childName.equalsIgnoreCase(SAVE_BUTTON)) return saveJButton;
+
+        if (childName.equalsIgnoreCase(PREVIEW_BUTTON)) return previewJButton;
+        
+        return null;
+    }
+    
     
     
     public void setLoadButtonText(String loadLabel)
@@ -563,7 +602,15 @@ public class SettingsManagerProxy
 //                smp.settingsPanelHideChild(SettingsManagerProxy.STATUS_BUTTON);
 //                smp.settingsPanelHideChild(SettingsManagerProxy.LOAD_BUTTON);
 //                smp.settingsPanelHideChild(SettingsManagerProxy.SAVE_BUTTON);
-//                smp.settingsPanelHideChild(SettingsManagerProxy.PREVIEW_BUTTON);
+                smp.settingsPanelHideChild(SettingsManagerProxy.PREVIEW_BUTTON);
+                JButton  statusButton = (JButton) smp.getSettingsPanelChild(SettingsManagerProxy.STATUS_BUTTON);
+                // move status button under the settings file name
+                GridBagLayout        gbl = (GridBagLayout) smp.getSettingsPanel().getLayout();
+                GridBagConstraints   gbc = gbl.getConstraints(smp.getSettingsPanelChild(SettingsManagerProxy.FILE_NAME));
+                smp.getSettingsPanel().remove(statusButton);
+                gbc.gridy++;
+                gbc.fill = GridBagConstraints.NONE;
+                smp.getSettingsPanel().add(statusButton, gbc);
                 
                 
                 
@@ -657,6 +704,7 @@ public class SettingsManagerProxy
                 viewMenu.add(atkDiagMenuItem);
                 
                 jf.setJMenuBar(jMenuBar1);
+                jf.setPreferredSize(new Dimension(600, 300));
                 jf.pack();
                 jf.setVisible(true);
                 
