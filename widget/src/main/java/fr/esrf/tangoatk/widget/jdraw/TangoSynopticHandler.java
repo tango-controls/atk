@@ -2210,36 +2210,25 @@ invoqex.printStackTrace();
 
     public void enumScalarChange(EnumScalarEvent evt)
     {
-        JDObject jdObj;
-        IEnumScalar ies = null;
-//        double value = evt.
-        if (ies != null)
+        IEnumScalar ies = (IEnumScalar) evt.getSource();
+        String s = ies.getName();
+        List list = jdHash.get(s);
+        if (list == null) return;
+
+        short enumVal = ies.getShortValueFromEnumScalar(evt.getValue());
+        int nbJdObjs = list.size();
+        int i;
+        for (i = 0; i < nbJdObjs; i++)
         {
-            ies = (IEnumScalar) evt.getSource();
-            String s = ies.getName();
-            List list = jdHash.get(s);
-            if (list == null) return;
-            
-            short  enumVal = ies.getShortValueFromEnumScalar(evt.getValue());
-            int nbJdObjs = list.size();
-            int i;
-            for (i = 0; i < nbJdObjs; i++)
-            {
-                jdObj = null;
-                jdObj = (JDObject) list.get(i);
-                if (jdObj != null)
+            JDObject jdObj = null;
+            jdObj = (JDObject) list.get(i);
+            if (jdObj != null)
+            {                
+                if (jdObj.isProgrammed()) // is it a Dyno?
                 {
-                    // Sets the dyno value
-                    if (jdObj.isProgrammed())
-                    {
-                        int jdValue = (int) enumVal;
-                        if (jdObj.getValue() != jdValue)
-                        {
-                            jdObj.preRefresh();
-                            jdObj.setValue(jdValue);
-                            jdObj.refresh();
-                        }
-                    }
+                    jdObj.preRefresh();
+                    jdObj.setValue((int) enumVal);
+                    jdObj.refresh();
                 }
             }
         }
