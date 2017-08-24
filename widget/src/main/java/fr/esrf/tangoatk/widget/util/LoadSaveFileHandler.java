@@ -42,6 +42,8 @@ public class LoadSaveFileHandler implements IResultListener
     private ICommand                      saveFileCmd = null; 
     private ICommand                      loadFileCmd = null; 
     private ICommand                      readFileContentCmd = null;
+
+    private boolean                       relativeFileName = true;
     
     private String                        fileContent = null;
     
@@ -52,11 +54,18 @@ public class LoadSaveFileHandler implements IResultListener
         saveFileChooser = pfc;
         previewer = new FilePreviewWindow();
     }
+       
+    public LoadSaveFileHandler (boolean relFileName)
+    {
+        this();
+        relativeFileName = relFileName;
+    }
     
     public LoadSaveFileHandler (String rootDirPath)
     {
         pfc = new PreviewFileChooser(rootDirPath);
         pfc.setContentVisible(true);
+        saveFileChooser = pfc;
         // Get conninical path of the root path
         File sDir = new File(pfc.getRootDirectory());
         try
@@ -66,6 +75,12 @@ public class LoadSaveFileHandler implements IResultListener
         catch (IOException ioex)
         {          
         }
+    }
+    
+    public LoadSaveFileHandler (String rootDirPath, boolean relFileName)
+    {
+        this(rootDirPath);
+        relativeFileName = relFileName;
     }
     
     public void clearModels()
@@ -252,13 +267,17 @@ public class LoadSaveFileHandler implements IResultListener
 
     private void loadFile(File file)
     {
-        String relPath = getRelativeFileName(file);
-        if (relPath == null) return;
+        String filePath = null;
+        if (relativeFileName)
+            filePath = getRelativeFileName(file);
+        else
+            filePath = file.getAbsolutePath();
+        if (filePath == null) return;
         if (loadFileCmd == null) return;
         
         
         ArrayList<String>  listArg = new ArrayList<String>();
-        listArg.add(relPath);
+        listArg.add(filePath);
 //        System.out.println("Will execute "+loadFileCmd.getName());
         loadFileCmd.execute(listArg);
     }
@@ -293,8 +312,12 @@ public class LoadSaveFileHandler implements IResultListener
     
     private void saveFile(File  file)
     {
-        String relPath = getRelativeFileName(file);
-        if (relPath == null) return;
+        String filePath = null;
+        if (relativeFileName)
+            filePath = getRelativeFileName(file);
+        else
+            filePath = file.getAbsolutePath();
+        if (filePath == null) return;
         if (saveFileCmd == null) return;
 
         if (saveFileChooser instanceof SmSaveFileChooser)
@@ -305,11 +328,11 @@ public class LoadSaveFileHandler implements IResultListener
         }
         
         if (saveFileCmd instanceof ArrayVoidCommand)
-            settingManagerSaveFile(relPath);
+            settingManagerSaveFile(filePath);
         else
         {
             ArrayList<String>  listArg = new ArrayList<String>();
-            listArg.add(relPath);
+            listArg.add(filePath);
 //            System.out.println("Will execute "+saveFileCmd.getName());
             saveFileCmd.execute(listArg);
         }
@@ -320,14 +343,18 @@ public class LoadSaveFileHandler implements IResultListener
     {
         if (readFileContentCmd == null) return;
         
-        String relPath = getRelativeFileName(file);
-        if (relPath == null) return;
+        String filePath = null;
+        if (relativeFileName)
+            filePath = getRelativeFileName(file);
+        else
+            filePath = file.getAbsolutePath();
+        if (filePath == null) return;
         
         fileContent = null;
         previewer.setText(fileContent);
 
         ArrayList<String>  listArg = new ArrayList<String>();
-        listArg.add(relPath);
+        listArg.add(filePath);
         
 //        System.out.println("Will execute "+readFileContentCmd.getName());
         readFileContentCmd.execute(listArg);
