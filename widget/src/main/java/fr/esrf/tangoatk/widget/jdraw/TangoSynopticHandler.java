@@ -1035,31 +1035,32 @@ public class TangoSynopticHandler extends JDrawEditor
     boolean   devNamePattern;
 
     String s = new String(devName);
+    String devicePattern = "[a-zA-Z_0-9[-][\\.]]+/[a-zA-Z_0-9[-][\\.]]+/[a-zA-Z_0-9[-][\\.]]+";
 
     // Remove the 'tango:'
     if(s.startsWith("tango:")) s = s.substring(6);
 
     // Check full syntax: //hostName:portNumber/domain/family/member
-    devNamePattern = Pattern.matches("//[a-zA-Z_0-9]+:[0-9]+/[a-zA-Z_0-9[-]]+/[a-zA-Z_0-9[-]]+/[a-zA-Z_0-9[-]]+", s);
+    devNamePattern = Pattern.matches("//[a-zA-Z_0-9]+:[0-9]+/" + devicePattern, s);
 
     // Check classic syntax: domain/family/member
     if (devNamePattern == false)
-       devNamePattern = Pattern.matches("[a-zA-Z_0-9[-]]+/[a-zA-Z_0-9[-]]+/[[a-zA-Z_0-9][-]]+", s);
+       devNamePattern = Pattern.matches("[a-zA-Z_0-9[-][\\.]]+/" + devicePattern, s);
 
     // Check taco syntax: taco:domain/family/member
     if (devNamePattern == false)
-       devNamePattern = Pattern.matches("taco:[a-zA-Z_0-9[-]]+/[a-zA-Z_0-9[-]]+/[a-zA-Z_0-9[-]]+", s);
+       devNamePattern = Pattern.matches("taco:"+devicePattern, s);
 
     // Check taco syntax: taco://nethost/domain/family/member
     if (devNamePattern == false)
-       devNamePattern = Pattern.matches("taco://[a-zA-Z_0-9]+/[a-zA-Z_0-9[-]]+/[a-zA-Z_0-9[-]]+/[a-zA-Z_0-9[-]]+", s);
+       devNamePattern = Pattern.matches("taco://"+devicePattern, s);
 
     // Change added to support device names beginning with TANGO_HOST ip adress
     // Check full syntax: //ipAddress:portNumber/domain/family/member
     // Modification sent by  "Alan David Zoldan" <alan@dataeco.com.br>
     // Change included by F. Poncet on 15th April 2005
     if (devNamePattern == false)
-       devNamePattern = Pattern.matches("//[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+:[0-9]+/[a-zA-Z_0-9[-]]+/[a-zA-Z_0-9[-]]+/[a-zA-Z_0-9[-]]+", s);
+       devNamePattern = Pattern.matches("//[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+:[0-9]+/"+devicePattern, s);
 
     return devNamePattern;
 
