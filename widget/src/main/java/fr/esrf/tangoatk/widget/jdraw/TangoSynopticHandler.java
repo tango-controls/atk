@@ -1042,7 +1042,7 @@ public class TangoSynopticHandler extends JDrawEditor
 
     // Check classic syntax: domain/family/member
     if (devNamePattern == false)
-       devNamePattern = Pattern.matches("[a-zA-Z_0-9[-][\\.]]+/" + devicePattern, s);
+       devNamePattern = Pattern.matches( devicePattern, s);
 
     // Check taco syntax: taco:domain/family/member
     if (devNamePattern == false)
