@@ -76,7 +76,8 @@ public class EnumScalarHelper implements java.io.Serializable,TangoConst {
 
       shortValue = getValueForEnum(enumStr);
 
-      switch(da.getType()) {
+      switch(this.enumAtt.config.data_type)
+      {
         case Tango_DEV_SHORT:
         case Tango_DEV_ENUM:
           da.insert(shortValue);
