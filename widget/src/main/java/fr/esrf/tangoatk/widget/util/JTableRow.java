@@ -73,6 +73,7 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
   protected JMenuItem  selectColumnMenuItem;
   protected JMenuItem  selectRowMenuItem;
   protected JMenuItem  copyMenuItem;
+  protected JMenuItem  copyFormatMenuItem;
   protected JMenuItem  saveMenuItem;
   protected JMenuItem  print1MenuItem;
   protected JMenuItem  print2MenuItem;
@@ -192,6 +193,8 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
     selectColumnMenuItem.addActionListener(this);
     copyMenuItem = new JMenuItem("Copy selection to clipboard");
     copyMenuItem.addActionListener(this);
+    copyFormatMenuItem = new JMenuItem("Copy formated selection to clipboard");
+    copyFormatMenuItem.addActionListener(this);
     saveMenuItem = new JMenuItem("Save selection");
     saveMenuItem.addActionListener(this);
     print1MenuItem = new JMenuItem("Print table (Big size)");
@@ -207,6 +210,7 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
     tableMenu.add(selectColumnMenuItem);
     tableMenu.add(new JSeparator());
     tableMenu.add(copyMenuItem);
+    tableMenu.add(copyFormatMenuItem);
     tableMenu.add(saveMenuItem);
     tableMenu.add(new JSeparator());
     tableMenu.add(print1MenuItem);
@@ -487,6 +491,12 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
       Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
       clipboard.setContents( stringSelection, null );
 
+    } if(src == copyFormatMenuItem) {
+
+      StringSelection stringSelection = new StringSelection( makeFormatTabbedString() );
+      Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+      clipboard.setContents( stringSelection, null );
+
     } else if (src==selectAllMenuItem) {
 
       theTable.selectAll();
@@ -676,6 +686,53 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
       }
       str.append('\n');
     }
+    return str.toString();
+
+  }
+
+  protected String makeFormatTabbedString() {
+
+    int[] cols = theTable.getSelectedColumns();
+    int[] rows = theTable.getSelectedRows();
+
+    //If nothing is selected, save all the table.
+    if((cols == null || cols.length == 0)&& (rows == null|| rows.length == 0))
+    {
+
+      int nbCols = theTable.getColumnCount();
+      cols = new int[nbCols];
+      for (int i = 0; i < nbCols; i++) {
+        cols[i]=i;
+      }
+
+      int nbRows = theTable.getRowCount();
+      rows = new int[nbRows];
+      for (int i = 0; i < nbRows; i++) {
+        rows[i]=i;
+      }
+    }
+
+    String rep = JOptionPane.showInputDialog(this,"Number per line", "8");
+    if(rep==null) return "";
+    int nbPerLine = Integer.parseInt(rep);
+
+    StringBuffer str = new StringBuffer();
+    for (int i = 0; i < cols.length; i++) {
+      String colTitle = theTable.getColumnName(cols[i]);
+      if(colTitle.length()==0) colTitle = "Col" + Integer.toString(i);
+      colTitle += " = { ";
+      str.append(colTitle);
+      for (int j = 0; j < rows.length; j++) {
+        if(j!=0 && j%nbPerLine==0) {
+          str.append('\n');
+          for(int k=0;k<colTitle.length();k++) str.append(' ');
+        }
+        str.append(theData[rows[j]][cols[i]]);
+        if (j < rows.length - 1) str.append(',');
+      }
+      str.append("};\n");
+    }
+
     return str.toString();
 
   }
