@@ -83,8 +83,8 @@ public class StateViewer extends javax.swing.JPanel
     gridBagConstraints1.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints1.insets = new java.awt.Insets(0, 4, 0, 3);
     gridBagConstraints1.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints1.weightx = 0.1;
-    gridBagConstraints1.weighty = 0.1;
+    gridBagConstraints1.weightx = 1.0;
+    gridBagConstraints1.weighty = 0.0;
     add(textLabel, gridBagConstraints1);
 
     valueLabel.setBackground(java.awt.Color.red);
@@ -98,8 +98,8 @@ public class StateViewer extends javax.swing.JPanel
     gridBagConstraints1.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints1.insets = new java.awt.Insets(0, 3, 0, 4);
     gridBagConstraints1.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints1.weightx = 0.2;
-    gridBagConstraints1.weighty = 0.2;
+    gridBagConstraints1.weightx = 0.0;
+    gridBagConstraints1.weighty = 0.0;
     add(valueLabel, gridBagConstraints1);
 
   }
