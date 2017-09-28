@@ -451,13 +451,19 @@ public class JDFileLoader {
 
   Color parseColor()  throws IOException {
 
+    int alpha = 255;
     int red = (int)parseDouble();
     jumpLexem(COMA);
     int green = (int)parseDouble();
     jumpLexem(COMA);
     int blue = (int)parseDouble();
+    if( class_lex(word)==COMA ) {
+      // Alpha definition
+      jumpLexem(COMA);
+      alpha = (int)parseDouble();
+    }
 
-    return new Color(red,green,blue);
+    return new Color(red,green,blue,alpha);
 
   }
 

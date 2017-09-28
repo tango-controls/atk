@@ -36,7 +36,12 @@ public class OFormat {
    * @return A string containing color: "rrr,ggg,bbb"
    */
   public static String color(Color c) {
-    return c.getRed()+","+c.getGreen()+","+c.getBlue();
+
+    if(c.getAlpha()==255)
+      return c.getRed()+","+c.getGreen()+","+c.getBlue();
+    else
+      return c.getRed()+","+c.getGreen()+","+c.getBlue()+","+c.getAlpha();
+
   }
   /**
    * Convert Font to String
@@ -122,9 +127,9 @@ public class OFormat {
    */
   public static Color getColor(Vector v) {    
     
-    int r=0,g=0,b=0;
+    int r=0,g=0,b=0,a=255;
     
-    if( v.size()!=3 ) {
+    if( v.size()<3 || v.size()>4 ) {
       System.out.println("Invalid color parameters.");
       return new Color(0,0,0);
     }
@@ -133,11 +138,14 @@ public class OFormat {
       r = saturate(Integer.parseInt(v.get(0).toString()));
       g = saturate(Integer.parseInt(v.get(1).toString()));
       b = saturate(Integer.parseInt(v.get(2).toString()));
+      if(v.size()==4) {
+        a = saturate(Integer.parseInt(v.get(3).toString()));
+      }
     } catch( Exception e ) {
       System.out.println("Invalid color parameters.");
     }
     
-    return new Color(r,g,b);  
+    return new Color(r,g,b,a);
   }
 
   private static int saturate(int value) {

@@ -595,59 +595,80 @@ public class TangoSynopticHandler extends JDrawEditor
     * @see #isAttribute
     * @see #isCommand
     */
-   protected void parseJdrawComponents()
-   {
+   protected void parseJdrawComponents() {
 
-      if(progressListener!=null) countJdrawComponents();
-      loadedItem = 0;
+     if (progressListener != null) countJdrawComponents();
+     loadedItem = 0;
 
-      for (int i = 0; i < getObjectNumber(); i++)
-      {
-	 JDObject jdObj = getObjectAt(i);
-	 String s = jdObj.getName();
+     for (int i = 0; i < getObjectNumber(); i++) {
 
-	 if (isDevice(s))
-	 {
-	    addDevice(jdObj, s);
-      itemLoaded();
-	 }
-	 else
-	 {
-	    // Add attribute before command to avoid that the State attribute
-	    // is taken as a command.
-	    // But there is still a potential problem for attributes and commands
-	    // which have the same name...
-	    if (isAttribute(s))
-	    {
-               addAttribute(jdObj, s);
+       JDObject jdObj = getObjectAt(i);
+       String s = jdObj.getName();
+
+       if (jdObj instanceof JDSwingObject && ((JDSwingObject) jdObj).getComponent() instanceof MultiNumberSpectrumViewer) {
+
+         // Special case for MultiNumberSpectrumViewer
+         MultiNumberSpectrumViewer v = (MultiNumberSpectrumViewer)((JDSwingObject) jdObj).getComponent();
+         for(int j=0;j<v.getJDWAttributeNumber();j++) {
+
+           JDWAttribute jdwAtt = v.getJDWAttribute(j);
+           if(isAttribute(jdwAtt.attName)) {
+             try {
+               IAttribute att = aFac.getAttribute(jdwAtt.attName);
+               if (att != null) {
+                 // NumberSpectrum attributes only
+                 if (att instanceof INumberSpectrum) {
+                   INumberSpectrum model = (INumberSpectrum)att;
+                   v.addNumberSpectrumModel(model,jdwAtt);
+                   allAttributes.add(model);
+                   if (errorHistWind != null)
+                     model.addErrorListener(errorHistWind);
+                 }
+               }
+             } catch (ConnectionException connectionexception) {
+               System.out.println("Error: " + s + " " + connectionexception);
+             } catch (DevFailed ex) {
+               System.out.println("Error: " + s + " " + ex.errors[0].desc);
+             }
+           }
+
+         }
+
+       } else {
+
+         if (isDevice(s)) {
+           addDevice(jdObj, s);
+           itemLoaded();
+         } else {
+           // Add attribute before command to avoid that the State attribute
+           // is taken as a command.
+           // But there is still a potential problem for attributes and commands
+           // which have the same name...
+           if (isAttribute(s)) {
+             addAttribute(jdObj, s);
+             itemLoaded();
+           } else {
+             if (isSpectrumAttElement(s)) {
+               addSpectrumAttElement(jdObj, s);
                itemLoaded();
-	    }
-            else
-            {
-               if (isSpectrumAttElement(s))
+             } else {
+               if (isCommand(s)) {
+                 addCommand(jdObj, s);
+                 itemLoaded();
+               } else //System.out.println(s+" is not an attribute, nor a command, nor a device; ignored.");
                {
-                  addSpectrumAttElement(jdObj, s);
-                  itemLoaded();
+                 // Check if it's an interactiveButton for shellCommands
+                 if (jdObj.isInteractive() && jdObj.hasExtendedParam("shellCommand")) {
+                   addShellCmdButton(jdObj);
+                 }
                }
-               else
-               {
-                  if (isCommand(s))
-                  {
-                    addCommand(jdObj, s);
-                    itemLoaded();
-                  }
-                  else //System.out.println(s+" is not an attribute, nor a command, nor a device; ignored.");
-                  {
-                     // Check if it's an interactiveButton for shellCommands
-                     if (jdObj.isInteractive() && jdObj.hasExtendedParam("shellCommand"))
-                     {
-                        addShellCmdButton(jdObj);
-                     }
-                  }
-               }
-            }
-	 }
-      } /* for */
+             }
+           }
+         }
+
+       }
+
+     } /* for */
    }
 
 

@@ -1205,14 +1205,20 @@ public abstract class JDObject {
       to_write.append(decal).append("foreground:");
       to_write.append(foreground.getRed()).append(",");
       to_write.append(foreground.getGreen()).append(",");
-      to_write.append(foreground.getBlue()).append("\n");
+      to_write.append(foreground.getBlue());
+      if(foreground.getAlpha()!=255)
+        to_write.append(",").append(foreground.getAlpha());
+      to_write.append("\n");
     }
 
     if (background.getRGB() != backgroundDefault.getRGB()) {
       to_write.append(decal).append("background:");
       to_write.append(background.getRed()).append(",");
       to_write.append(background.getGreen()).append(",");
-      to_write.append(background.getBlue()).append("\n");
+      to_write.append(background.getBlue());
+      if(background.getAlpha()!=255)
+        to_write.append(",").append(background.getAlpha());
+      to_write.append("\n");
     }
 
     if (fillStyle != fillStyleDefault) {
