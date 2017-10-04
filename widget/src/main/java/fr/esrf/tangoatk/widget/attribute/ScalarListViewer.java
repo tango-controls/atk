@@ -119,7 +119,7 @@ public class ScalarListViewer extends javax.swing.JPanel
 	unitVisible = true;
         noBorder = false;
 	booleanSetterType = BOOLEAN_DEFAULT_SETTER;
-	toolTipDisplay = TOOLTIP_DISPLAY_NONE;
+	toolTipDisplay = TOOLTIP_DISPLAY_NAME_ONLY;
         setterEnabled = true;
         setLayout(new java.awt.GridBagLayout());
 	
