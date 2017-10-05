@@ -1503,10 +1503,7 @@ public class JLAxis implements java.io.Serializable {
         }
       }
 
-      if ((max - min) < 1e-100) {
-        max += 0.999;
-        min -= 0.999;
-      }
+      adjustMinMax();
 
       if( scale==LOG_SCALE ) {
 
@@ -1641,10 +1638,7 @@ public class JLAxis implements java.io.Serializable {
 
         }
 
-        if ((max - min) < 1e-100) {
-          max += 0.999;
-          min -= 0.999;
-        }
+        adjustMinMax();
 
       } else {
 
@@ -1656,6 +1650,27 @@ public class JLAxis implements java.io.Serializable {
 
     }
 
+
+  }
+
+  private void adjustMinMax() {
+
+    // Check that max is not equal to min
+    if ((max - min) < 1e-100) {
+      max += 0.999;
+      min -= 0.999;
+    }
+
+    // If still equal , it is a large value
+    if ((max - min) < 1e-100) {
+      if(max<0.0) {
+        max = max/10.0;
+        min = min*10.0;
+      } else {
+        max = max*10.0;
+        min = min/10.0;
+      }
+    }
 
   }
 

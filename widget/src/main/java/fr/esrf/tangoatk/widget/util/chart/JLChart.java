@@ -2804,8 +2804,10 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
 
       if (msi.found) {
         Graphics g = getGraphics();
-        showPanel(g, msi, e);
-        g.dispose();
+        if(g!=null) {
+          showPanel(g, msi, e);
+          g.dispose();
+        }
         return;
       }
 
@@ -3151,8 +3153,10 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
       if (yaxis.getBoundRect().contains(p) && !need_repaint) {
         // We can perform fast update
         Graphics g = getGraphics();
-        yaxis.drawFast(g, lp, p, v);
-        g.dispose();
+        if(g!=null) {
+          yaxis.drawFast(g, lp, p, v);
+          g.dispose();
+        }
       } else {
         // Full update needed
         garbageData(v);
