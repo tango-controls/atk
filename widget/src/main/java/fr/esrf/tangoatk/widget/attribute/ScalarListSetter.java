@@ -67,6 +67,7 @@ public class ScalarListSetter extends javax.swing.JPanel
     private boolean          unitVisible;
     private String           booleanSetterType;
     private Color            arrowColor;
+    private String           toolTipDisplay;
     
     /* Deprecated bean properties: the setter type is automatically selected
        according the valueList present or not. */
@@ -78,6 +79,9 @@ public class ScalarListSetter extends javax.swing.JPanel
     public static final String      STRING_COMBO_SETTER = "StringComboEditor";
 
     
+    public static final String      TOOLTIP_DISPLAY_NONE = "None";
+    public static final String      TOOLTIP_DISPLAY_NAME_ONLY = "Name";
+    public static final String      TOOLTIP_DISPLAY_ALL = "All";
 
     /** Creates new form ScalarListSetter */
     public ScalarListSetter()
@@ -102,6 +106,7 @@ public class ScalarListSetter extends javax.swing.JPanel
 	propertyListEditable = true;
 	unitVisible = true;
 	booleanSetterType = BOOLEAN_DEFAULT_SETTER;
+	toolTipDisplay = TOOLTIP_DISPLAY_NAME_ONLY;
         setLayout(new java.awt.GridBagLayout());
 	
 	//setVisible(false);
@@ -628,6 +633,35 @@ public class ScalarListSetter extends javax.swing.JPanel
     }
      
      
+   /**
+    * Returns the current toolTipDisplay
+    * @see #setToolTipDisplay
+    */
+    public String getToolTipDisplay()
+    {
+         return toolTipDisplay;
+    }
+    
+   /**
+    * Sets the current toolTipDisplay. This property should be set before the call to setModel()
+    * @see #getToolTipDisplay
+    */
+    public void setToolTipDisplay(String  ttType)
+    {
+	if (listModel != null)
+	   return;
+	   
+        if (ttType.equalsIgnoreCase(TOOLTIP_DISPLAY_ALL))
+	   toolTipDisplay = TOOLTIP_DISPLAY_ALL;
+	else
+	   if (ttType.equalsIgnoreCase(TOOLTIP_DISPLAY_NAME_ONLY))
+	       toolTipDisplay = TOOLTIP_DISPLAY_NAME_ONLY;
+	   else
+	       toolTipDisplay = TOOLTIP_DISPLAY_NONE;
+    }
+     
+      
+     
     /**
      * @deprecated As of ATKWidget-2.5.8 and higher
      * The method getNumberSetterType should not be used.
@@ -983,6 +1017,22 @@ public class ScalarListSetter extends javax.swing.JPanel
 	      // Set the Viewer properties
 	      if (ssViewer != null) // SimpleScalarViewer
 	      {
+		 if (toolTipDisplay.equalsIgnoreCase(TOOLTIP_DISPLAY_ALL))
+		 {
+		    ssViewer.setHasToolTip(true);
+		    ssViewer.setQualityInTooltip(true);
+		 }
+		 else
+		    if (toolTipDisplay.equalsIgnoreCase(TOOLTIP_DISPLAY_NAME_ONLY))
+		    {
+		       ssViewer.setHasToolTip(true);
+		       ssViewer.setQualityInTooltip(false);
+		    }
+		    else
+		       {
+			  ssViewer.setHasToolTip(false);
+			  ssViewer.setQualityInTooltip(false);
+		       }
                  ssViewer.setFont(theFont);
 		 ssViewer.setUnitVisible(unitVisible);
         	 ssViewer.setBackgroundColor(getBackground());
@@ -999,6 +1049,11 @@ public class ScalarListSetter extends javax.swing.JPanel
 	      {
 	         if (boolViewer != null)
 		 {
+		    if (     toolTipDisplay.equalsIgnoreCase(TOOLTIP_DISPLAY_ALL)
+		         ||  toolTipDisplay.equalsIgnoreCase(TOOLTIP_DISPLAY_NAME_ONLY))
+		       boolViewer.setHasToolTip(true);
+		    else
+		        boolViewer.setHasToolTip(false);
 		     boolViewer.setAttModel(ibs);
         	     boolViewer.setBackground(getBackground());
 		 }
@@ -1006,6 +1061,22 @@ public class ScalarListSetter extends javax.swing.JPanel
 		 {
 	            if (enumViewer != null)
 		    {
+                        if (toolTipDisplay.equalsIgnoreCase(TOOLTIP_DISPLAY_ALL))
+                        {
+                           enumViewer.setHasToolTip(true);
+                           enumViewer.setQualityInTooltip(true);
+                        }
+                        else
+                           if (toolTipDisplay.equalsIgnoreCase(TOOLTIP_DISPLAY_NAME_ONLY))
+                           {
+                              enumViewer.setHasToolTip(true);
+                              enumViewer.setQualityInTooltip(false);
+                           }
+                           else
+                           {
+                              enumViewer.setHasToolTip(false);
+                              enumViewer.setQualityInTooltip(false);
+                           }
                 	enumViewer.setFont(theFont);
         		enumViewer.setBackgroundColor(getBackground());
         		enumViewer.setBorder(javax.swing.BorderFactory.createLoweredBevelBorder());
