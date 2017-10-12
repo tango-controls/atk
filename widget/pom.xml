@@ -5,7 +5,7 @@
 
     <groupId>org.tango.atk</groupId>
     <artifactId>ATKWidget</artifactId>
-    <version>9.2.13</version>
+    <version>9.2.14-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
@@ -17,7 +17,7 @@
         <dependency>
             <groupId>org.tango.atk</groupId>
             <artifactId>ATKCore</artifactId>
-            <version>9.2.13</version>
+            <version>9.2.14-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- JOGL Open GL java , get version number here because native libs are dependant -->
