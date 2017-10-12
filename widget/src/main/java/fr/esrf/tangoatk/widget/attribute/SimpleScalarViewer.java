@@ -47,11 +47,12 @@ import fr.esrf.TangoDs.AttrManip;
  */
 
 public class SimpleScalarViewer extends JAutoScrolledText
-       implements INumberScalarListener, IStringScalarListener, IBooleanScalarListener, PropertyChangeListener, IErrorListener, JDrawable {
+       implements IEnumScalarListener, INumberScalarListener, IStringScalarListener, IBooleanScalarListener, PropertyChangeListener, IErrorListener, JDrawable {
 
   INumberScalar numberModel = null;
   IStringScalar stringModel = null;
   IBooleanScalar booleanModel = null;
+  IEnumScalar enumModel;
   boolean alarmEnabled = true;
   String userFormat = "";
   ATKFormat atkUserFormat = null;
@@ -259,6 +260,14 @@ public class SimpleScalarViewer extends JAutoScrolledText
     } else {
       setText(val);
     }
+
+  }
+
+  public void enumScalarChange(EnumScalarEvent evt) {
+
+    String val = evt.getValue();
+    String oldVal=getText();
+    if(!val.equals(oldVal)) setText(val);
 
   }
 
@@ -503,6 +512,26 @@ public class SimpleScalarViewer extends JAutoScrolledText
    * Sets the model for this viewer.
    * @param scalar model
    */
+  public void setModel(IEnumScalar scalar) {
+
+    clearModel();
+
+    if (scalar != null) {
+      format = scalar.getProperty("format").getPresentation();
+      enumModel = scalar;
+      enumModel.addEnumScalarListener(this);
+      enumModel.getProperty("format").addPresentationListener(this);
+      enumModel.refresh();
+      if (hasToolTip)
+        setToolTipText(scalar.getName());
+    }
+
+  }
+
+  /**
+   * Sets the model for this viewer.
+   * @param scalar model
+   */
   public void setModel(IBooleanScalar scalar) {
 
     clearModel();
@@ -545,6 +574,11 @@ public class SimpleScalarViewer extends JAutoScrolledText
       booleanModel = null;
     }
 
+    if (enumModel != null) {
+      enumModel.removeEnumScalarListener(this);
+      enumModel.getProperty("format").removePresentationListener(this);
+      enumModel = null;
+    }
 
   }
 
