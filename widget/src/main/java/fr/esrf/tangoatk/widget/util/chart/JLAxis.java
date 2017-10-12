@@ -212,6 +212,8 @@ public class JLAxis implements java.io.Serializable {
   private boolean  autoLabeling = true;
   private String[] userLabel = null;
   private double[] userLabelPos = null;
+  private int labelOffsetX = 0;
+  private int labelOffsetY = 0;
 
   private String dateFormat = US_DATE_FORMAT;
 
@@ -1250,6 +1252,16 @@ public class JLAxis implements java.io.Serializable {
   }
 
   /**
+   * Sets the label offset (in pixel)
+   * @param x Horizontal offset
+   * @param y Vertical offset
+   */
+  public void setLabelOffset(int x,int y) {
+    labelOffsetX = x;
+    labelOffsetY = y;
+  }
+
+  /**
    * Customize axis labels.
    * @param labels Label values
    * @param labelPos Label positions (in axis coordinates)
@@ -1289,8 +1301,9 @@ public class JLAxis implements java.io.Serializable {
   private String suppressZero(String n) {
 
     boolean hasDecimal = n.indexOf(decimalSeparator) != -1;
+    boolean hasExponent = n.toLowerCase().indexOf("e") != -1;
 
-    if(hasDecimal) {
+    if(hasDecimal && !hasExponent) {
 
       StringBuffer str = new StringBuffer(n);
       int i = str.length() - 1;
@@ -2049,17 +2062,17 @@ public class JLAxis implements java.io.Serializable {
 
     //Adjust labels offset according to tick
 
-    int offX = 0;
-    int offY = 0;
+    int offX = labelOffsetX;
+    int offY = labelOffsetY;
     switch(dOrientation) {
       case VERTICAL_LEFT:
-        offX = (tickLength<0)?tickLength:0;
+        offX += (tickLength<0)?tickLength:0;
         break;
       case VERTICAL_RIGHT:
-        offX = (tickLength<0)?-tickLength:0;
+        offX += (tickLength<0)?-tickLength:0;
         break;
       default: // HORIZONTAL_DOWN
-        offY = (tickLength<0)?-tickLength:0;
+        offY += (tickLength<0)?-tickLength:0;
         break;
     }
 
@@ -2378,17 +2391,17 @@ public class JLAxis implements java.io.Serializable {
 
         //Adjust labels offset according to tick
 
-        int offX = 0;
-        int offY = 0;
+        int offX = labelOffsetX;
+        int offY = labelOffsetY;
         switch(dOrientation) {
           case VERTICAL_LEFT:
-            offX = (tickLength<0)?tickLength:0;
+            offX += (tickLength<0)?tickLength:0;
             break;
           case VERTICAL_RIGHT:
-            offX = (tickLength<0)?-tickLength:0;
+            offX += (tickLength<0)?-tickLength:0;
             break;
           default: // HORIZONTAL_DOWN
-            offY = (tickLength<0)?-tickLength:0;
+            offY += (tickLength<0)?-tickLength:0;
             break;
         }
 

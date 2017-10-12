@@ -3355,10 +3355,13 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
     chart.getXAxis().setAnnotation(JLAxis.VALUE_ANNO);
     chart.getXAxis().setPercentScrollback(0.0);
     chart.getXAxis().setAutoScale(true);
-    chart.getXAxis().setPosition(JLAxis.HORIZONTAL_ORG1);
 
     chart.getY1Axis().setName("Y");
     chart.getY1Axis().setAutoScale(true);
+
+    Font aFont = new Font("Dialog",Font.PLAIN,16);
+    chart.getXAxis().setFont(aFont);
+    chart.getY1Axis().setFont(aFont);
 
     chart.setLabelVisible(false);
 
@@ -3376,7 +3379,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
       for(int i=0;i<NB_PTS;i++) {
         double x = (double)i;
         if(isInRange(x,NB_PTS))
-          v[j].add(x,rng.nextDouble()*10.0-5.0);
+          v[j].add(x+5000,rng.nextDouble()*10.0-5.0);
       }
       chart.getY1Axis().addDataView(v[j]);
     }
