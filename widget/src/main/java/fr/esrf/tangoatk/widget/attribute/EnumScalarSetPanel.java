@@ -36,6 +36,8 @@ import javax.swing.*;
 
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.widget.properties.LabelViewer;
+import fr.esrf.tangoatk.widget.util.JAutoScrolledText;
+import fr.esrf.tangoatk.widget.util.JAutoScrolledTextListener;
 
 
 /** A EnumScalarSetPanel is a Swing JPanel which displays the "read value" of 
@@ -44,6 +46,7 @@ import fr.esrf.tangoatk.widget.properties.LabelViewer;
  *
  */
 public class EnumScalarSetPanel extends JPanel
+                                implements JAutoScrolledTextListener
 {
     
     private LabelViewer                  attLabelViewer;
@@ -89,8 +92,11 @@ public class EnumScalarSetPanel extends JPanel
 	enumAtt = ies;
 	
 	attLabelViewer.setModel(enumAtt);
+        
 	attEnumScalarViewer.setModel(enumAtt);
 	attEnumScalarViewer.setToolTipText(enumAtt.getName());
+        attEnumScalarViewer.addTextListener(this);
+
 	attEnumScalarEditor.setEnumModel(enumAtt);
     }
     
@@ -128,11 +134,22 @@ public class EnumScalarSetPanel extends JPanel
         if (enumAtt == null) return;
 	
 	attLabelViewer.setModel(null);
+        
 	attEnumScalarViewer.clearModel();
 	attEnumScalarViewer.setToolTipText(null);
+        attEnumScalarViewer.removeTextListener(this);
+        
 	attEnumScalarEditor.setEnumModel(null);
 	
 	enumAtt=null;
+    }
+    
+    
+    /* Method for JAutoScrolledTextListener interface */
+    @Override
+    public void textExceedBounds(JAutoScrolledText source)
+    {
+        this.revalidate();
     }
     
     private void initComponents()
