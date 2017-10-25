@@ -1422,7 +1422,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
     }
     hProfilerData.reset();
 
-    for(int i=0;i<rdimx;i++) {
+    for(int i=rdimx-1;i>=0;i--) {
       if(data[i]!=null) {
         if(data[i].time>0) {
           if( yData>=0 && yData<data[i].values.length ) {
