@@ -47,7 +47,7 @@ import java.util.Date;
 
 class TrendData {
   double[] values;
-  long     time;
+  double   time;
 }
 
 /**
@@ -280,9 +280,10 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
    * Clear the viewer
    */
   public void clearData() {
-    setData(null,null);
+    setData((double[])null,null);
     trend.clearCursor();
   }
+
 
   /**
    * Fill the viewer with arbitrary data
@@ -290,6 +291,49 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
    * @param data Data
    */
   public void setData(long[] dates,double[][] data) {
+
+    if( dates==null || data==null ) {
+
+      synchronized (this) {
+
+        // Clear the data
+        TrendData[] newData = new TrendData[historyLength];
+        for (int i=0; i < historyLength; i++) {
+          newData[i] = null;
+        }
+        this.data = newData;
+        if(showDerivative) buildDerivative();
+        buildImage();
+        return;
+
+      }
+
+    }
+
+    if(dates.length!=data.length) {
+      System.out.println("Invalid data: date length and data length differ");
+      return;
+    }
+
+    synchronized (this) {
+
+      int nbData = dates.length;
+      TrendData[] newData = new TrendData[nbData];
+      for(int i=0;i<nbData;i++) {
+        newData[nbData-i-1] = new TrendData();
+        newData[nbData-i-1].time = (double)dates[i];
+        newData[nbData-i-1].values = data[i];
+      }
+      this.data = newData;
+      historyLength = nbData;
+      if(showDerivative) buildDerivative();
+      buildImage();
+
+    }
+
+  }
+
+  public void setData(double[] dates,double[][] data) {
 
     if( dates==null || data==null ) {
 
@@ -601,7 +645,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
    * no data is present at this place. x is in image coordinates.
    * @param x X coordinates (in image coordinates)
    */
-  public long getTimeAt(int x) {
+  public double getTimeAt(int x) {
 
     int xData;
 
@@ -846,7 +890,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
           xIndex = historyLength - xCursor * (-hZoom) - 1;
         }
 
-        long time = getTimeAt(xCursor);
+        long time = (long)getTimeAt(xCursor);
         double val = getValueAt(xCursor, yCursor);
 
         String status;
@@ -864,7 +908,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
         if (xCursor < 0) {
           statusLabel.setText(modelName);
         } else {
-          long time = getTimeAt(xCursor);
+          double time = getTimeAt(xCursor);
           if (time == 0) {
             statusLabel.setText(modelName + "  | no data at marker position");
           } else {
@@ -2467,12 +2511,19 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
   }
 
-  private String buildTime(long time) {
+  private String buildTime(double time) {
 
-    calendar.setTimeInMillis(time);
+    long t = (long)time;
+    long us = (long)(time*1000.0) - t*1000;
+    calendar.setTimeInMillis(t);
     Date date = calendar.getTime();
-    String ms = String.format(".%03d",time%1000);
-    return genFormat.format(date)+ms;
+    if(us==0) {
+      String msStr = String.format(".%03d",t%1000);
+      return genFormat.format(date)+msStr;
+    } else {
+      String usStr = String.format(".%03d%03d",t%1000,us);
+      return genFormat.format(date)+usStr;
+    }
 
   }
 
@@ -2548,11 +2599,11 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       nstv.setShowDerivative(true);
 
       int nbData = 1000;
-      long dates[] = new long[nbData];
+      double dates[] = new double[nbData];
       double[][] data = new double[nbData][256];
       long startDate = System.currentTimeMillis()-nbData*1000;
       for(int i=0;i<nbData;i++) {
-        dates[i] = startDate + i*1000;
+        dates[i] = startDate + i*1000 + 0.12;
         for(int j=0;j<256;j++) {
           data[i][j] = (double)j/256.0;
         }
