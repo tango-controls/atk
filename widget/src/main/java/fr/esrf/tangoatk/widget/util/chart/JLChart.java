@@ -59,22 +59,7 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.Vector;
 import javax.imageio.ImageIO;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JSeparator;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.event.EventListenerList;
 import javax.swing.filechooser.FileFilter;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
@@ -95,18 +80,25 @@ class TabbedLine {
 
   JLDataView[] dv;
   DataList[] dl;
+  double[] lastValue;
   int anno;
   int sIndex;
   int precision = 0;
   String noValueString = "";
+  boolean correlated;
 
   TabbedLine(int nb) {
     dv = new JLDataView[nb];
     dl = new DataList[nb];
+    lastValue = new double[nb];
+  }
+
+  void setCorrelated(boolean correlated) {
+    this.correlated = correlated;
   }
 
   void setPrecision(int milliseconds) {
-      precision = milliseconds;
+    precision = milliseconds;
   }
 
   void setNoValueString (String noValueString) {
@@ -116,17 +108,19 @@ class TabbedLine {
   void add(int id, JLDataView v) {
     dv[id] = v;
     dl[id] = v.getData();
+    if(v.getData()!=null)
+      lastValue[id] = v.getData().y;
+    else
+      lastValue[id] = Double.NaN;
   }
 
   double getMinTime() {
     double r = Double.MAX_VALUE;
-
     for (int i = 0; i < dl.length; i++) {
       if (dl[i] != null) {
         if (dl[i].x < r) r = dl[i].x;
       }
     }
-
     return r;
   }
 
@@ -178,17 +172,32 @@ class TabbedLine {
       ret.append(Double.toString(t0) + "\t");
     }
 
-    for (int i = 0; i < dl.length; i++) {
-      if (dl[i] != null) {
-//        if (dl[i].x == t0) {
-        if ( (dl[i].x >= t0 - precision) && (dl[i].x <= t0 + precision) ) {
-          ret.append(Double.toString(dl[i].y) + "\t");
-          dl[i] = dl[i].next;
+    if (correlated) {
+      for (int i = 0; i < dl.length; i++) {
+        if (dl[i] != null) {
+          if (dl[i].x == t0) {
+            ret.append(Double.toString(dl[i].y) + "\t");
+            lastValue[i] = dl[i].y;
+            dl[i] = dl[i].next;
+          } else {
+            ret.append(Double.toString(lastValue[i]) + "\t");
+          }
         } else {
-          ret.append(noValueString+"\t");
+          ret.append(Double.toString(lastValue[i]) + "\t");
         }
-      } else {
-        ret.append(noValueString+"\t");
+      }
+    } else {
+      for (int i = 0; i < dl.length; i++) {
+        if (dl[i] != null) {
+          if ((dl[i].x >= t0 - precision) && (dl[i].x <= t0 + precision)) {
+            ret.append(Double.toString(dl[i].y) + "\t");
+            dl[i] = dl[i].next;
+          } else {
+            ret.append(noValueString + "\t");
+          }
+        } else {
+          ret.append(noValueString + "\t");
+        }
       }
     }
 
@@ -1438,7 +1447,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
   }
 
   // Make a snapshot of data in a TAB seperated field
-  private void saveDataFile(String fileName) {
+  private void saveDataFile(String fileName,boolean correlated) {
 
     try {
 
@@ -1452,13 +1461,9 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
       views.addAll(y2Axis.getViews());
 
       tl = new TabbedLine(views.size());
-      //-------precision-------//
       tl.setPrecision(timePrecision);
-      //-------precision-------//
-
-      //-------no value String-------//
+      tl.setCorrelated(correlated);
       tl.setNoValueString( noValueString );
-      //-------no value String-------//
 
       for (int v = 0; v < views.size(); v++) tl.add(v, views.get(v));
 
@@ -1761,6 +1766,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
   // Displays a dialog in which user can set precision (for table construction)
   private void displayPrecisionDialog() {
       final JDialog precisionDialog = new JDialog((Frame)null,"Set error margin",true);
+      precisionDialog.setLocationRelativeTo(this);
       JLabel precisionLabel = new JLabel("Set error margin in x units.");
       JLabel detailLabel = new JLabel("If x represents time, unit is ms.");
       final char[] allowed = {'0','1','2','3','4','5','6','7','8','9',KeyEvent.VK_BACK_SPACE,KeyEvent.VK_DELETE,KeyEvent.VK_LEFT,KeyEvent.VK_RIGHT,KeyEvent.VK_KP_LEFT,KeyEvent.VK_KP_RIGHT,KeyEvent.VK_ENTER,KeyEvent.VK_TAB,KeyEvent.VK_SHIFT};
@@ -2145,9 +2151,12 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
     } else if (src == saveFileMenuItem) {
 
         int ok = JOptionPane.YES_OPTION;
+        JCheckBox correlatedCheck = new JCheckBox("Correlated data");
         JFileChooser chooser = new JFileChooser(lastDataFileLocation);
         chooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
         chooser.setDialogTitle("Save Graph Data (Text file with TAB separated fields)");
+        chooser.setAccessory(correlatedCheck);
+
         int returnVal = chooser.showSaveDialog(this);
 
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -2166,7 +2175,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
                 }
                 if (ok == JOptionPane.YES_OPTION) {
                     lastDataFileLocation = f.getParentFile().getAbsolutePath();
-                    saveDataFile(f.getAbsolutePath());
+                    saveDataFile(f.getAbsolutePath(),correlatedCheck.isSelected());
                 }
             }
         }
