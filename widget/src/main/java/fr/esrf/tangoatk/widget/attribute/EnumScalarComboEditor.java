@@ -41,6 +41,8 @@ import javax.swing.*;
 
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
+import java.awt.Component;
+import java.awt.HeadlessException;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -65,6 +67,10 @@ public class EnumScalarComboEditor extends JComboBox
     private IEnumScalar      enumModel=null;
     private String[]         defOptionList={"None"};
     private String[]         optionList={"None"};
+    private boolean          hasConfirmWindow = false;
+    
+    protected String confirmTitle = "Confirm attribute set value";
+    protected String confirmMessage = "Do you want to set the value of the attribute?\n";
 
     // Default constructor
     public EnumScalarComboEditor()
@@ -76,6 +82,42 @@ public class EnumScalarComboEditor extends JComboBox
        this.setModel(comboModel);
        this.setActionCommand(defActionCmd);
        this.addActionListener(this);
+    }
+
+    public boolean getHasConfirmWindow()
+    {
+        return hasConfirmWindow;
+    }
+
+    
+    public void setHasConfirmWindow(boolean  flag)
+    {
+        hasConfirmWindow = flag;
+    }
+    
+    
+    public String getConfirmTitle()
+    {
+        return confirmTitle;
+    }
+
+    
+    public void setConfirmTitle(String title)
+    {
+        confirmTitle = title;
+    }
+
+
+    
+    public String getConfirmMessage()
+    {
+        return confirmMessage;
+    }
+
+    
+    public void setConfirmMessage(String msg)
+    {
+        confirmMessage = msg;
     }
     
     
@@ -242,7 +284,6 @@ public class EnumScalarComboEditor extends JComboBox
     // ---------------------------------------------------
     public void actionPerformed(ActionEvent e)
     {
-
 	JComboBox        cb=null;
 	String           cmdOption = null;
 
@@ -259,8 +300,30 @@ public class EnumScalarComboEditor extends JComboBox
 
 	if (cmdOption == null)
            return;
-	   
-	enumModel.setEnumScalarValue(cmdOption);
+        
+	if (!hasConfirmWindow)
+        {
+            enumModel.setEnumScalarValue(cmdOption);
+            return;
+        }
+
+        // hasConfirmWindow is true
+        cb.hidePopup();
+        enumModel.refresh();
+        int    userAnswer=JOptionPane.NO_OPTION;	
+ //System.out.println("Called actionPerformed in EnumScalarComboEditor");
+	try
+	{
+            String msg = confirmMessage + "New value = " + cmdOption + "\n";
+	    userAnswer = JOptionPane.showConfirmDialog(this, msg,
+                                    confirmTitle, JOptionPane.YES_NO_OPTION);
+	}
+	catch (HeadlessException hex) {}
+        
+	if (userAnswer == JOptionPane.YES_OPTION)
+        {
+	    enumModel.setEnumScalarValue(cmdOption);
+        }
     }
     
     
@@ -355,11 +418,13 @@ public class EnumScalarComboEditor extends JComboBox
 	 IEntity                                ie;
 	 IEnumScalar                            enumAtt;
          JFrame                                 mainFrame = null;
+         
+         esce.setHasConfirmWindow(true);
 	 try
 	 {
 //            ie = attList.add("jlp/test/1/Att_six");
 //            ie = attList.add("//orion:10000/sy/ps-rips-master/plc/DipoleGrid");
-            ie = attList.add("//acudebian7:10000/dev/test/10/enum_attr_rw");
+            ie = attList.add("//acudebian7:10000/test/universal/1/DevFloatRO_quality_");
 
 	    if (ie instanceof IEnumScalar)
 	    {
