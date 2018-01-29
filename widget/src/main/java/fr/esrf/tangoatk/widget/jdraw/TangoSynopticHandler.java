@@ -60,6 +60,7 @@ import java.util.regex.Pattern;
 import fr.esrf.tangoatk.widget.util.jdraw.*;
 import fr.esrf.tangoatk.widget.attribute.*;
 import fr.esrf.tangoatk.widget.util.ErrorPopup;
+import java.awt.event.MouseEvent;
 
 /**
  * TangoSynopticHandler is the base class used to display and animate any
@@ -1258,17 +1259,20 @@ public class TangoSynopticHandler extends JDrawEditor
 
   }
 
-  private void stateAttributeClicked(JDMouseEvent evt) {
+    private void stateAttributeClicked(JDMouseEvent evt)
+    {
+        if (evt.getButton() != MouseEvent.BUTTON1)
+            return;
+        JDObject comp = (JDObject) evt.getSource();
+        String attName = comp.getName();
+        int i = attName.lastIndexOf('/');
+        if (i > 0)
+        {
+            String devName = attName.substring(0, i);
+            launchPanel(comp, devName, true);
+        }
 
-    JDObject comp = (JDObject) evt.getSource();
-    String attName = comp.getName();
-    int i = attName.lastIndexOf('/');
-    if(i>0) {
-      String devName = attName.substring(0,i);
-      launchPanel(comp,devName, true);
     }
-
-  }
   
   private boolean isNoPanel(String panelName)
   {
