@@ -866,7 +866,7 @@ public class WheelSwitch extends JComponent {
 
       if(textBackground!=null) {
         g.setColor(textBackground);
-        g.fillRect(off_x+2,off_y + (dz.height-2),totalWidth-4,totalHeight - 2*(dz.height-2));
+        g.fillRect(off_x+1,off_y+1,totalWidth-2,totalHeight-2);
       }
 
       g.setColor(getForeground());
