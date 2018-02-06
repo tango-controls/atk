@@ -81,7 +81,10 @@ public class WheelSwitch extends JComponent {
     private int selButton = 0;
     private Color buttonBackground;
     private Color selectionColor;
+    private Color textBackground;
     private String valueFormatted = null;
+    private int totalWidth;
+    private int totalHeight;
 
     /**
      * WheelSwitch constructor.
@@ -102,6 +105,7 @@ public class WheelSwitch extends JComponent {
         setBorder(null);
         setFont(defaultFont);
         buttonBackground = getBackground();
+        textBackground = null;
         selectionColor = defaultSelectionColor;
         setOpaque(true);
         this.editable = editable;
@@ -165,6 +169,14 @@ public class WheelSwitch extends JComponent {
 
     public double getMinimumIncrement() {
       return minimumIncrement;
+    }
+
+  /**
+   * Sets the text background, null to disable.
+   * @param c Text background color
+   */
+    public void setTextBackground(Color c) {
+      textBackground = c;
     }
 
     public Dimension getPreferredSize() {
@@ -838,11 +850,11 @@ public class WheelSwitch extends JComponent {
       g.fillRect(0, 0, w, h);
     }
 
-    g.setColor(getForeground());
     g.setFont(getFont());
 
     if (editMode) {
 
+      g.setColor(getForeground());
       FontMetrics fm = getFontMetrics(getFont());
       Rectangle2D b = fm.getStringBounds(editValue, g);
       int xpos = (w - (int) b.getWidth()) / 2;
@@ -851,6 +863,14 @@ public class WheelSwitch extends JComponent {
     } else {
 
       int ypos;
+
+      if(textBackground!=null) {
+        g.setColor(textBackground);
+        g.fillRect(off_x+2,off_y + (dz.height-2),totalWidth-4,totalHeight - 2*(dz.height-2));
+      }
+
+      g.setColor(getForeground());
+
       if (editable) {
         ypos = off_y + dz.width + dz.height - 2;
       } else {
@@ -1263,8 +1283,6 @@ public class WheelSwitch extends JComponent {
     // Place the components
     synchronized private void placeComponents(Dimension sz) {
 
-        int total_width;
-        int total_height;
         int i;
 
         computeDigitSize();
@@ -1272,20 +1290,20 @@ public class WheelSwitch extends JComponent {
         // Place buttons
 
         if (expNumber >0)
-            total_width = dz.width * (nbButton + 4);
+            totalWidth = dz.width * (nbButton + 4);
         else if (fracNumber > 0)
-            total_width = dz.width * (nbButton + 2);
+            totalWidth = dz.width * (nbButton + 2);
         else
-            total_width = dz.width * (nbButton + 1);
+            totalWidth = dz.width * (nbButton + 1);
 
         if(editable) {
-          total_height = dz.height + 2 * dz.width;
+          totalHeight = dz.height + 2 * dz.width;
         } else {
-          total_height = dz.height;
+          totalHeight = dz.height;
         }
 
-        off_x = (sz.width - total_width) / 2;
-        off_y = (sz.height - total_height) / 2;
+        off_x = (sz.width - totalWidth) / 2;
+        off_y = (sz.height - totalHeight) / 2;
 
         for (i = 0; i < nbButton && editable; i++) {
             int xpos;

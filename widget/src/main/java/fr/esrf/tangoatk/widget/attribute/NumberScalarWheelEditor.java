@@ -50,11 +50,48 @@ public class NumberScalarWheelEditor extends WheelSwitch
   static String[] exts = {"arrowColor","arrowSelColor"};
 
   private INumberScalar model;
+  boolean alarmEnabled = false;
+  Color backgroundColor;
+
 
   // General constructor
   public NumberScalarWheelEditor() {
+    backgroundColor = ATKConstant.getColor4Quality(IAttribute.VALID);
     model = null;
     addWheelSwitchListener(this);
+  }
+
+  /** Returns the current background color of this viewer. Color used for the VALID attribute quality state */
+  public Color getBackgroundColor() {
+    return backgroundColor;
+  }
+
+  /**
+   * Sets the 'VALID' background color of this viewer.
+   * Color used for the VALID attribute quality state.
+   * @param bg Background color.
+   * @see #setAlarmEnabled
+   */
+  public void setBackgroundColor(Color bg) {
+    backgroundColor = bg;
+  }
+
+  /**
+   * Enables or disables alarm background (represents the attribute quality factor).
+   * @param b True to enable alarm.
+   * @see #setBackgroundColor
+   */
+  public void setAlarmEnabled(boolean b) {
+    alarmEnabled = b;
+  }
+
+  /**
+   * Determines whether the background color is overrided by the quality factor.
+   * @see #setAlarmEnabled
+   * @see #setBackgroundColor
+   */
+  public boolean isAlarmEnabled() {
+    return alarmEnabled;
   }
 
   public INumberScalar getModel() {
@@ -222,10 +259,26 @@ public class NumberScalarWheelEditor extends WheelSwitch
   }
 
   public void errorChange(ErrorEvent e) {
+
     setValue(Double.NaN);
+    if (!alarmEnabled) return;
+    setTextBackground(ATKConstant.getColor4Quality(IAttribute.UNKNOWN));
+
   }
 
   public void stateChange(AttributeStateEvent e) {
+
+    if (!alarmEnabled) return;
+
+    String state = e.getState();
+
+    if (state.equals(IAttribute.VALID)) {
+      setTextBackground(backgroundColor);
+      return;
+    }
+
+    setBackground(ATKConstant.getColor4Quality(state));
+
   }
 
   // Listen change on the WheelSwitch
@@ -258,15 +311,17 @@ public class NumberScalarWheelEditor extends WheelSwitch
 
     try {
 
-      nsv.setFont(new java.awt.Font("Lucida Bright", java.awt.Font.BOLD, 22));
+      nsv.setFont(new java.awt.Font("Dialog", java.awt.Font.PLAIN, 12));
       final INumberScalar attr = (INumberScalar) attributeList.add("sy/rfssa-pinatt/tra0/Attenuation1");
       nsv.setModel(attr);
+      nsv.setAlarmEnabled(true);
       nsv2.setModel(attr);
+      nsv2.setAlarmEnabled(true);
       attributeList.setRefreshInterval(1000);
       attributeList.startRefresher();
 
     } catch (ConnectionException e) {
-      ErrorPane.showErrorMessage(f,"test/universal/1",e);
+      ErrorPane.showErrorMessage(f,"sy/rfssa-pinatt/tra0",e);
     } // end of try-catch
 
     f.getContentPane().setLayout(new java.awt.GridBagLayout());
