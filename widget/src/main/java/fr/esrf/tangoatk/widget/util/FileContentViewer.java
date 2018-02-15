@@ -61,8 +61,6 @@ public class FileContentViewer extends javax.swing.JPanel
 
         setLayout(new java.awt.GridBagLayout());
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
         jScrollPane1.setViewportView(jTextArea1);
 
         gridBagConstraints = new java.awt.GridBagConstraints();
@@ -145,6 +143,13 @@ public class FileContentViewer extends javax.swing.JPanel
             line = br.readLine();
             while (line != null)
             {
+                // workaround the swing bug introduced in JTextArea since java 1.8
+                // Swing Bug : for the very long lines (more than 8783 characters)
+                // the line content is displayed overlapping the characters.
+                if (line.length() > 6000)
+                {
+                    line = line.substring(0, 6000);
+                }
                 sb.append(line);
                 sb.append("\n");
                 line = br.readLine();
