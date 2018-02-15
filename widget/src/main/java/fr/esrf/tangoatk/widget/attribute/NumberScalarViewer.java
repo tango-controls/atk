@@ -22,6 +22,7 @@
  
 package fr.esrf.tangoatk.widget.attribute;
 
+import fr.esrf.tangoatk.widget.util.ATKConstant;
 import fr.esrf.tangoatk.widget.util.WheelSwitch;
 import fr.esrf.tangoatk.widget.util.ErrorPane;
 import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
@@ -38,9 +39,45 @@ import java.beans.PropertyChangeListener;
 public class NumberScalarViewer extends WheelSwitch implements INumberScalarListener, PropertyChangeListener {
 
   private INumberScalar model = null;
+  boolean alarmEnabled = false;
+  Color backgroundColor;
 
   public NumberScalarViewer() {
     super(false);
+    backgroundColor = ATKConstant.getColor4Quality(IAttribute.VALID);
+  }
+
+  /** Returns the current background color of this viewer. Color used for the VALID attribute quality state */
+  public Color getBackgroundColor() {
+    return backgroundColor;
+  }
+
+  /**
+   * Sets the 'VALID' background color of this viewer.
+   * Color used for the VALID attribute quality state.
+   * @param bg Background color.
+   * @see #setAlarmEnabled
+   */
+  public void setBackgroundColor(Color bg) {
+    backgroundColor = bg;
+  }
+
+  /**
+   * Enables or disables alarm background (represents the attribute quality factor).
+   * @param b True to enable alarm.
+   * @see #setBackgroundColor
+   */
+  public void setAlarmEnabled(boolean b) {
+    alarmEnabled = b;
+  }
+
+  /**
+   * Determines whether the background color is overrided by the quality factor.
+   * @see #setAlarmEnabled
+   * @see #setBackgroundColor
+   */
+  public boolean isAlarmEnabled() {
+    return alarmEnabled;
   }
 
   public INumberScalar getModel() {
@@ -79,9 +116,25 @@ public class NumberScalarViewer extends WheelSwitch implements INumberScalarList
 
   public void errorChange(ErrorEvent e) {
     setValue(Double.NaN);
+    if (!alarmEnabled) return;
+    setBackground(ATKConstant.getColor4Quality(IAttribute.UNKNOWN));
   }
 
   public void stateChange(AttributeStateEvent e) {
+
+    String state = e.getState();
+
+    if(state.equals(IAttribute.INVALID))
+      setValue(Double.NaN);
+
+    if (!alarmEnabled) return;
+
+    if (state.equals(IAttribute.VALID)) {
+      setBackground(backgroundColor);
+      return;
+    }
+
+    setBackground(ATKConstant.getColor4Quality(state));
   }
 
   public void propertyChange(PropertyChangeEvent evt) {

@@ -160,6 +160,14 @@ public class NumberScalarSetPanel extends JPanel {
 
   }
 
+  public NumberScalarViewer getViewer() {
+    return attNumberScalarViewer;
+  }
+
+  public NumberScalarWheelEditor getEditor() {
+    return attNumberScalarWheelEditor;
+  }
+
   private void initComponents() {
 
     java.awt.GridBagConstraints gridBagConstraints;
@@ -223,6 +231,7 @@ public class NumberScalarSetPanel extends JPanel {
     fr.esrf.tangoatk.core.AttributeList lst;
     lst = new fr.esrf.tangoatk.core.AttributeList();
     NumberScalarSetPanel nsp = new NumberScalarSetPanel();
+    nsp.getViewer().setAlarmEnabled(true);
     try{
       nsp.setAttModel((fr.esrf.tangoatk.core.attribute.NumberScalar) lst.add("jlp/test/1/att_trois"));
     } catch (Exception e) {
