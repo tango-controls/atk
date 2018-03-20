@@ -503,7 +503,7 @@ public class SimpleScalarViewer extends JAutoScrolledText
       stringModel.getProperty("format").addPresentationListener(this);
       stringModel.refresh();
       if (hasToolTip)
-	setToolTipText(scalar.getName());
+	    setToolTipText(scalar.getName());
     }
 
   }
