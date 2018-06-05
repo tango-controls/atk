@@ -2457,6 +2457,13 @@ invoqex.printStackTrace();
        return;
      }
 
+     if( source instanceof IEnumScalar )
+     {
+       EnumScalarEvent e = new EnumScalarEvent((IEnumScalar)source,"UNKNOWN",event.getTimeStamp());
+       enumScalarChange(e);
+       return;
+     }
+
      if( source instanceof ICommand )
      {
        ICommand src = ((ICommand)source);
