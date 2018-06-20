@@ -2532,6 +2532,15 @@ public class JLAxis implements java.io.Serializable {
    */
   public static void paintMarker(Graphics g, int mType, int mSize, int x, int y) {
 
+    if( mSize==0 )
+      return;
+
+    if( mSize==1 ) {
+      // Plot a pixel
+      g.drawLine(x,y,x,y);
+      return;
+    }
+
     int mSize2 = mSize / 2;
     int mSize21 = mSize / 2 + 1;
 
