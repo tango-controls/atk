@@ -304,7 +304,9 @@ public class JDSwingObject extends JDRectangular {
     // Map JDObject property to JComponent
     if (swingComp != null) {
 
-      swingComp.getComponent().setBackground(background);
+      // Keep swing background if fillStyle is not none of solid
+      if( fillStyle==FILL_STYLE_SOLID )
+        swingComp.getComponent().setBackground(background);
       swingComp.getComponent().setForeground(foreground);
       swingComp.getComponent().setVisible(visible);
       swingComp.getComponent().setOpaque(fillStyle != FILL_STYLE_NONE);
