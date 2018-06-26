@@ -535,6 +535,8 @@ public class JDFileLoader {
       return new JDLine(this);
     } else if (className.equals("JDPolyline")) {
       return new JDPolyline(this);
+    } else if (className.equals("JDTitledRect")) {
+      return new JDTitledRect(this);
     } else if (className.equals("JDSpline")) {
       return new JDSpline(this);
     } else if (className.equals("JDGroup")) {

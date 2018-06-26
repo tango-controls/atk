@@ -77,6 +77,90 @@ public abstract class JDRectangular extends JDObject {
     return JDObject.HORIZONTAL_SM;
   }
 
+  public void setLeft(int x) {
+    int nw = getWidth() + getLeft() - x;
+    summit[0].x = x;
+    summit[6].x = x;
+    summit[2].x = x+nw;
+    summit[4].x = x+nw;
+    centerSummit();
+    updateShape();
+  }
+
+  public int getLeft() {
+    return (int)Math.min(summit[2].x,summit[0].x);
+  }
+
+  public void setTop(int y) {
+    int nh = getHeight() + getTop() - y;
+    summit[0].y = y;
+    summit[2].y = y;
+    summit[4].y = y+nh;
+    summit[6].y = y+nh;
+    centerSummit();
+    updateShape();
+  }
+
+  public int getTop() {
+    return (int)Math.min(summit[0].y,summit[4].y);
+  }
+
+  public void setRight(int x) {
+    int nw = getWidth() + x - getRight();
+    summit[2].x = x;
+    summit[4].x = x;
+    summit[0].x = x-nw;
+    summit[6].x = x-nw;
+    centerSummit();
+    updateShape();
+  }
+
+  public int getRight() {
+    return (int)Math.max(summit[0].x,summit[2].x);
+  }
+
+  public void setBottom(int y) {
+    int nh = getHeight() + y - getBottom();
+    summit[0].y = y-nh;
+    summit[2].y = y-nh;
+    summit[4].y = y;
+    summit[6].y = y;
+    centerSummit();
+    updateShape();
+  }
+
+  public int getBottom() {
+    return (int)Math.max(summit[0].y,summit[4].y);
+  }
+
+  public void setWidth(int w) {
+    int x = getLeft();
+    summit[0].x = x;
+    summit[6].x = x;
+    summit[2].x = x + w;
+    summit[4].x = x + w;
+    centerSummit();
+    updateShape();
+  }
+
+  public int getWidth() {
+    return (int)Math.abs(summit[2].x - summit[0].x);
+  }
+
+  public void setHeight(int h) {
+    int y = getTop();
+    summit[0].y = y;
+    summit[2].y = y;
+    summit[4].y = y+h;
+    summit[6].y = y+h;
+    centerSummit();
+    updateShape();
+  }
+
+  public int getHeight() {
+    return (int)Math.abs(summit[4].y - summit[0].y);
+  }
+
   public void moveSummit(int id,double x,double y) {
 
     switch (id) {

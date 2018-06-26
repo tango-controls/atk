@@ -63,6 +63,7 @@ class JDBrowserPanel extends JPanel implements TreeSelectionListener,ActionListe
   private JDSwingPanel          swingPanel;
   private JDAxisPanel           axisPanel;
   private JDBarPanel            barPanel;
+  private JDTitledRectPanel     titledRectPanel;
   private Component             lastSelectedPanel=null;
   private boolean               updatingProp = false;
 
@@ -112,6 +113,7 @@ class JDBrowserPanel extends JPanel implements TreeSelectionListener,ActionListe
     swingPanel = new JDSwingPanel(null, invoker);
     axisPanel = new JDAxisPanel(null, invoker);
     barPanel = new JDBarPanel(null, invoker);
+    titledRectPanel = new JDTitledRectPanel(null, invoker);
 
     tabbedPane.add(objectPanel,"Graphics");
     tabbedPane.add(valuePanel, "Value");
@@ -251,6 +253,13 @@ class JDBrowserPanel extends JPanel implements TreeSelectionListener,ActionListe
            objs2[0] = (JDBar)jObj;
            barPanel.updatePanel(objs2);
            tabbedPane.add(barPanel, "Bar");
+         }
+
+         if (jObj instanceof JDTitledRect) {
+           JDTitledRect[] objs2 = new JDTitledRect[1];
+           objs2[0] = (JDTitledRect)jObj;
+           titledRectPanel.updatePanel(objs2);
+           tabbedPane.add(titledRectPanel, "TitledRect");
          }
 
          tabbedPane.add(valuePanel, "Value");

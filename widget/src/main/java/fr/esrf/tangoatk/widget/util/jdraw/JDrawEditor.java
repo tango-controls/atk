@@ -84,6 +84,8 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   final static int CREATE_SLIDER_CURSOR = 14;
   /** Creation mode of the editor */
   final static int CREATE_CONNECT_POLY = 15;
+  /** Creation mode of the titled rect */
+  final static int CREATE_TITLEDRECT = 16;
 
   final static private int undoLength=20;
 
@@ -465,6 +467,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
    *  @see #CREATE_AXIS
    *  @see #CREATE_BAR
    *  @see #CREATE_SLIDER
+   *  @see #CREATE_TITLEDRECT
    */
   public void create(int what) {
     if(mode==MODE_PLAY) return;
@@ -3037,6 +3040,9 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
       case CREATE_LABEL:
         setStatus("Left click to create the label");
         break;
+      case CREATE_TITLEDRECT:
+        setStatus("Left click to create the titled rectangle");
+        break;
       case CREATE_SPLINE:
         setStatus("Left click to create a new point and right click to create the last point");
         break;
@@ -3322,6 +3328,17 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
         String str = JOptionPane.showInputDialog(this, "Enter a text", "Create label", JOptionPane.INFORMATION_MESSAGE);
         if (str != null)
           createObject(new JDLabel("Label", str, ex, ey), -1);
+        else {
+          //Canceling
+          creationMode = 0;
+          fireCreationDone();
+        }
+        return true;
+
+      case CREATE_TITLEDRECT:
+        String title = JOptionPane.showInputDialog(this, "Enter a title", "Create titled rect", JOptionPane.INFORMATION_MESSAGE);
+        if (title != null)
+          createObject(new JDTitledRect("TitledRect", title, ex, ey), -1);
         else {
           //Canceling
           creationMode = 0;

@@ -42,6 +42,7 @@ class UndoPattern {
   final static int _JDAxis           = 11;
   final static int _JDBar            = 12;
   final static int _JDSlider         = 13;
+  final static int _JDTitledRect     = 14;
 
   // Class
   int JDclass;
@@ -110,6 +111,10 @@ class UndoPattern {
 
   // Bar
   double value;
+
+  // JDTitleREct
+  int c1;
+  int c2;
 
   // Group children
   Vector gChildren;

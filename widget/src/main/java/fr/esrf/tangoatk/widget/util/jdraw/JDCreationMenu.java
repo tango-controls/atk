@@ -46,6 +46,7 @@ public class JDCreationMenu implements ActionListener {
   private JMenuItem  createAxisMenuItem;
   private JMenuItem  createBarMenuItem;
   private JMenuItem  createSliderMenuItem;
+  private JMenuItem  createTitledRectMenuItem;
 
   /** JDrawable Swing object */
   private JMenu       swingMenu;
@@ -68,6 +69,7 @@ public class JDCreationMenu implements ActionListener {
   private JButton  objectToolBarBtn;
   private JButton  objectToolSliderBtn;
   private JButton  objectToolSwingBtn;
+  private JButton  objectToolTitledRectBtn;
 
   /**
    * Constructs menu and toolbar for JDObject creation.
@@ -100,6 +102,8 @@ public class JDCreationMenu implements ActionListener {
     createBarMenuItem.addActionListener(this);
     createSliderMenuItem = new JMenuItem("Slider");
     createSliderMenuItem.addActionListener(this);
+    createTitledRectMenuItem = new JMenuItem("Titled Rectangle");
+    createTitledRectMenuItem.addActionListener(this);
 
     // JDrawable Swing object menu --------------------
 
@@ -126,6 +130,7 @@ public class JDCreationMenu implements ActionListener {
     createMenu.add(createLabelMenuItem);
     createMenu.add(createSplineMenuItem);
     createMenu.add(createPolylineMenuItem);
+    createMenu.add(createTitledRectMenuItem);
     createMenu.add(createImageMenuItem);
     createMenu.add(createAxisMenuItem);
     createMenu.add(createBarMenuItem);
@@ -147,6 +152,7 @@ public class JDCreationMenu implements ActionListener {
     objectToolBarBtn = JDUtils.createIconButton("jdraw_bar",false,"Create a bar",this);
     objectToolSliderBtn = JDUtils.createIconButton("jdraw_slider",false,"Create a slider",this);
     objectToolSwingBtn = JDUtils.createIconButton("jdraw_swing",false,"Create a swing object",this);
+    objectToolTitledRectBtn = JDUtils.createIconButton("jdraw_titledrect",false,"Create a titled rectangle",this);
     objectToolBar.add(objectToolLineBtn);
     objectToolBar.add(objectToolRectangleBtn);
     objectToolBar.add(objectToolRoundRectBtn);
@@ -154,6 +160,7 @@ public class JDCreationMenu implements ActionListener {
     objectToolBar.add(objectToolLabelBtn);
     objectToolBar.add(objectToolPolylineBtn);
     objectToolBar.add(objectToolSplineBtn);
+    objectToolBar.add(objectToolTitledRectBtn);
     objectToolBar.add(objectToolImageBtn);
     objectToolBar.add(objectToolAxisBtn);
     objectToolBar.add(objectToolBarBtn);
@@ -221,6 +228,8 @@ public class JDCreationMenu implements ActionListener {
       invoke(JDrawEditor.CREATE_BAR);
     } else if (src == objectToolSliderBtn || src == createSliderMenuItem) {
       invoke(JDrawEditor.CREATE_SLIDER);
+    } else if (src == objectToolTitledRectBtn || src == createTitledRectMenuItem) {
+      invoke(JDrawEditor.CREATE_TITLEDRECT);
     } else if (src == objectToolSwingBtn) {
       swingPopupMenu.show(objectToolSwingBtn,32,0);
     } else {

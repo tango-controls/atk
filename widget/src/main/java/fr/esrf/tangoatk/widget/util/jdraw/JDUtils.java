@@ -50,6 +50,7 @@ class JDUtils {
   private static boolean               updatingProp=false;
   private static JTabbedPane           innerPane = null;
   private static JDObjectPanel         objectPanel=null;
+  private static JDRectangularPanel    rectangularPanel=null;
   private static JDLabelPanel          labelPanel=null;
   private static JDLinePanel           linePanel=null;
   private static JDPolylinePanel       polylinePanel=null;
@@ -59,6 +60,7 @@ class JDUtils {
   private static JDSwingPanel          swingPanel=null;
   private static JDAxisPanel           axisPanel=null;
   private static JDBarPanel            barPanel=null;
+  private static JDTitledRectPanel     titledRectPanel=null;
   private static JDSliderPanel         sliderPanel=null;
   private static JDValuePanel          valuePanel=null;
   private static JDExtensionPanel      extensionPanel=null;
@@ -113,6 +115,7 @@ class JDUtils {
     if(objects.size()==0) {
       nonModalPropDlg.setTitle("Properties [None selected]");
       objectPanel.updatePanel(null);
+      rectangularPanel.updatePanel(null);
       labelPanel.updatePanel(null);
       linePanel.updatePanel(null);
       polylinePanel.updatePanel(null);
@@ -122,6 +125,7 @@ class JDUtils {
       swingPanel.updatePanel(null);
       axisPanel.updatePanel(null);
       barPanel.updatePanel(null);
+      titledRectPanel.updatePanel(null);
       valuePanel.updatePanel(null);
       extensionPanel.updatePanel(null);
       return;
@@ -132,12 +136,14 @@ class JDUtils {
     // Check object instance and make object array
     JDObject[] objs = new JDObject[objects.size()];
     boolean sameClass = true;
+    boolean isRectangular = true;
     int i = 1;
     objs[0] = (JDObject) objects.get(0);
     Class firstClass = objs[0].getClass();
     for (i = 1; i < objs.length; i++) {
       objs[i] = (JDObject) objects.get(i);
       sameClass &= firstClass.equals(objs[i].getClass());
+      isRectangular &= objs[i] instanceof JDRectangular;
     }
 
     innerPane.removeAll();
@@ -150,6 +156,14 @@ class JDUtils {
       for (i = 0; i < objs.length; i++) objs2[i] = (JDLabel) objs[i];
       labelPanel.updatePanel(objs2);
       innerPane.add(labelPanel, "Text");
+    }
+
+    // Specific properties
+    if (isRectangular) {
+      JDRectangular[] objs2 = new JDRectangular[objs.length];
+      for (i = 0; i < objs.length; i++) objs2[i] = (JDRectangular) objs[i];
+      rectangularPanel.updatePanel(objs2);
+      innerPane.add(rectangularPanel, "Size");
     }
 
     if (sameClass && objs[0] instanceof JDLine) {
@@ -206,6 +220,13 @@ class JDUtils {
       for (i = 0; i < objs.length; i++) objs2[i] = (JDBar) objs[i];
       barPanel.updatePanel(objs2);
       innerPane.add(barPanel, "Bar");
+    }
+
+    if (sameClass && objs[0] instanceof JDTitledRect) {
+      JDTitledRect[] objs2 = new JDTitledRect[objs.length];
+      for (i = 0; i < objs.length; i++) objs2[i] = (JDTitledRect) objs[i];
+      titledRectPanel.updatePanel(objs2);
+      innerPane.add(titledRectPanel, "TitledRect");
     }
 
     if (sameClass && objs[0] instanceof JDSlider) {
@@ -286,6 +307,7 @@ class JDUtils {
       // Tabbed pane
       innerPane = new JTabbedPane();
       objectPanel = new JDObjectPanel(null, invoker, null);
+      rectangularPanel = new JDRectangularPanel(null,invoker);
       labelPanel = new JDLabelPanel(null, invoker);
       linePanel = new JDLinePanel(null, invoker);
       polylinePanel = new JDPolylinePanel(null, invoker);
@@ -295,6 +317,7 @@ class JDUtils {
       swingPanel = new JDSwingPanel(null, invoker);
       axisPanel = new JDAxisPanel(null, invoker);
       barPanel = new JDBarPanel(null, invoker);
+      titledRectPanel = new JDTitledRectPanel(null, invoker);
       sliderPanel = new JDSliderPanel(null, invoker);
       valuePanel = new JDValuePanel(null, invoker, null);
       extensionPanel = new JDExtensionPanel(null, invoker);

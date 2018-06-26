@@ -100,6 +100,7 @@ class JDTreeNodeRenderer extends DefaultTreeCellRenderer {
   ImageIcon rectangleIcon;
   ImageIcon ellipseIcon;
   ImageIcon labelIcon;
+  ImageIcon titledRectIcon;
   ImageIcon splineIcon;
   ImageIcon groupIcon;
   ImageIcon rrectangleIcon;
@@ -126,6 +127,7 @@ class JDTreeNodeRenderer extends DefaultTreeCellRenderer {
     axisIcon = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/util/jdraw/gif/jdraw_axis_icon.gif"));
     barIcon = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/util/jdraw/gif/jdraw_bar_icon.gif"));
     sliderIcon = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/util/jdraw/gif/jdraw_slider_icon.gif"));
+    titledRectIcon = new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/util/jdraw/gif/jdraw_titledrect_icon.gif"));
     renderMaster = new MasterNodeRenderer();
   }
 
@@ -193,6 +195,11 @@ class JDTreeNodeRenderer extends DefaultTreeCellRenderer {
 
     if (n.getObject() instanceof JDImage) {
       renderMaster.setValues(imgIcon,o.getNodeName(),(o.hasValueProgram())?"[change with value]":"");
+      return renderMaster;
+    }
+
+    if (n.getObject() instanceof JDTitledRect) {
+      renderMaster.setValues(titledRectIcon,o.getNodeName(),(o.hasValueProgram())?"[change with value]":"");
       return renderMaster;
     }
 

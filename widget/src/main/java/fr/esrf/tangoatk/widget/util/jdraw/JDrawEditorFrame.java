@@ -951,7 +951,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
     final JDrawEditor ed = new JDrawEditor(JDrawEditor.MODE_EDIT);
     final JDrawEditor py = new JDrawEditor(JDrawEditor.MODE_PLAY);
     final JDrawEditorFrame jde = new JDrawEditorFrame();
-    jde.setAppTitle("JDraw Editor 1.14");
+    jde.setAppTitle("JDraw Editor 1.15");
     jde.setEditor(ed);
     jde.setPlayer(py);
     jde.setLibraries(null);

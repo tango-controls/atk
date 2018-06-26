@@ -68,6 +68,9 @@ class UndoBuffer  {
       case UndoPattern._JDRoundRectangle:
         children.add(new JDRoundRectangle(u));
         break;
+      case UndoPattern._JDTitledRect:
+        children.add(new JDTitledRect(u));
+        break;
       case UndoPattern._JDSpline:
         children.add(new JDSpline(u));
         break;
