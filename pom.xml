@@ -7,7 +7,7 @@
 
     <groupId>org.tango.atk</groupId>
     <artifactId>TangoATK</artifactId>
-    <version>9.2.30-SNAPSHOT</version>
+    <version>9.2.30</version>
 
     <modules>
         <module>core</module>
@@ -88,7 +88,7 @@
         <connection>scm:git:git@github.com:tango-controls/atk.git</connection>
         <developerConnection>scm:git:git@github.com:tango-controls/atk.git</developerConnection>
         <url>https://github.com/tango-controls/atk</url>
-      <tag>HEAD</tag>
+      <tag>TangoATK-9.2.30</tag>
     </scm>
 
 
