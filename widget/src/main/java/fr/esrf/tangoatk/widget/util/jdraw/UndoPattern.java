@@ -115,6 +115,7 @@ class UndoPattern {
   // JDTitleREct
   int c1;
   int c2;
+  boolean etched;
 
   // Group children
   Vector gChildren;

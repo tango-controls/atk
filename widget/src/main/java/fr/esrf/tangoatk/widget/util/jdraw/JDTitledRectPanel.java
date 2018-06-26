@@ -23,6 +23,7 @@
 /** A panel for JDTitledRect private properties */
 package fr.esrf.tangoatk.widget.util.jdraw;
 
+import fr.esrf.tangoatk.widget.util.ATKConstant;
 import fr.esrf.tangoatk.widget.util.ATKFontChooser;
 
 import javax.swing.*;
@@ -43,6 +44,7 @@ class JDTitledRectPanel extends JPanel implements ActionListener {
   private JButton c1Button;
   private JLabel c2Label;
   private JButton c2Button;
+  private JCheckBox etchedCheckBox;
 
   private JDTitledRect allObjects[] = null;
   private JDrawEditor invoker;
@@ -99,32 +101,34 @@ class JDTitledRectPanel extends JPanel implements ActionListener {
     add(stylePanel);
 
     // ------------------------------------------------------------------------------------
-    JPanel colorPanel = new JPanel(null);
-    colorPanel.setBorder(JDUtils.createTitleBorder("Border Colors"));
-    colorPanel.setBounds(5, 120, 370, 55);
+    JPanel borderPanel = new JPanel(null);
+    borderPanel.setBorder(JDUtils.createTitleBorder("Border"));
+    borderPanel.setBounds(5, 120, 370, 85);
 
     c1Label = JDUtils.createLabel("Color #1");
     c1Label.setBounds(10, 20, 100, 24);
-    colorPanel.add(c1Label);
+    borderPanel.add(c1Label);
     c1Button = new JButton("...");
     c1Button.setMargin(new Insets(0, 0, 0, 0));
     c1Button.setForeground(Color.BLACK);
     c1Button.addActionListener(this);
     c1Button.setBounds(120, 20, 60, 24);
-    colorPanel.add(c1Button);
-    add(colorPanel);
+    borderPanel.add(c1Button);
+    add(borderPanel);
 
     c2Label = JDUtils.createLabel("Color #2");
     c2Label.setBounds(190, 20, 100, 24);
-    colorPanel.add(c2Label);
+    borderPanel.add(c2Label);
     c2Button = new JButton("");
     c2Button.setMargin(new Insets(0, 0, 0, 0));
     c2Button.setForeground(Color.BLACK);
     c2Button.addActionListener(this);
     c2Button.setBounds(300, 20, 60, 24);
-    colorPanel.add(c2Button);
+    borderPanel.add(c2Button);
 
-
+    etchedCheckBox = JDUtils.createCheckBox("Etched",this);
+    etchedCheckBox.setBounds(10,50,150,25);
+    borderPanel.add(etchedCheckBox);
 
     updatePanel(p);
 
@@ -139,6 +143,9 @@ class JDTitledRectPanel extends JPanel implements ActionListener {
 
       titleText.setText("");
       fontLabel.setText("Font: ");
+      c1Button.setBackground(JDTitledRect.color1Default);
+      c2Button.setBackground(JDTitledRect.color2Default);
+      etchedCheckBox.setSelected(true);
 
     } else {
 
@@ -148,6 +155,7 @@ class JDTitledRectPanel extends JPanel implements ActionListener {
       titleText.setText(p.getTitle());
       c1Button.setBackground(p.getColor1());
       c2Button.setBackground(p.getColor2());
+      etchedCheckBox.setSelected(p.hasEtchedBorder());
 
     }
 
@@ -208,6 +216,10 @@ class JDTitledRectPanel extends JPanel implements ActionListener {
         c2Button.setBackground(c);
         invoker.setNeedToSave(true,"Change color #2");
       }
+    } else if (src == etchedCheckBox) {
+       for (i = 0; i < allObjects.length; i++)
+         allObjects[i].setEtchedBorder(etchedCheckBox.isSelected());
+       invoker.setNeedToSave(true,"Change etched");
     }
 
     repaintObjects();

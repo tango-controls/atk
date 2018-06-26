@@ -17,6 +17,7 @@ public class JDTitledRect extends JDRectangular {
   static final int rMargin = 10;
   static final Color color1Default = Color.BLACK;
   static final Color color2Default = Color.WHITE;
+  static final boolean etchedBorderDefault = true;
 
   // Vars
   static BufferedImage img = new BufferedImage(10, 10, BufferedImage.TYPE_INT_RGB);
@@ -25,6 +26,7 @@ public class JDTitledRect extends JDRectangular {
   private Color c1;
   private Color c2;
   private Dimension preferredSize = null;
+  private boolean etchedBorder;
   private int wTitle = 0;
   private int hTitle = 0;
 
@@ -66,6 +68,7 @@ public class JDTitledRect extends JDRectangular {
     theFont = fontDefault;
     c1 = color1Default;
     c2 = color2Default;
+    etchedBorder = etchedBorderDefault;
   }
 
   public JDTitledRect copy(int x, int y) {
@@ -131,7 +134,8 @@ public class JDTitledRect extends JDRectangular {
       }
 
       paintRect(g2,c1,x1,y1,x2,y2,h1,h2);
-      paintRect(g2,c2,x1+lineWidth,y1+lineWidth,x2+lineWidth,y2+lineWidth,h1,h2);
+      if( etchedBorder )
+        paintRect(g2,c2,x1+lineWidth,y1+lineWidth,x2+lineWidth,y2+lineWidth,h1,h2);
 
     }
 
@@ -282,6 +286,20 @@ public class JDTitledRect extends JDRectangular {
     return c2;
   }
 
+  /**
+   * Returns true if etched border is enabled
+   */
+  public boolean hasEtchedBorder() {
+    return etchedBorder;
+  }
+
+  /**
+   * Sets the etched border.
+   * @param b Etched border
+   */
+  public void setEtchedBorder(boolean b) {
+    etchedBorder = b;
+  }
   // -----------------------------------------------------------
   // File management
   // -----------------------------------------------------------
@@ -323,6 +341,10 @@ public class JDTitledRect extends JDRectangular {
       to_write.append("\n");
     }
 
+    if( etchedBorder != etchedBorderDefault ) {
+      to_write.append(decal).append("etchedBorder:").append(etchedBorder).append("\n");
+    }
+
     closeObjectHeader(to_write, level);
 
   }
@@ -343,6 +365,8 @@ public class JDTitledRect extends JDRectangular {
         c1 = f.parseColor();
       } else if (propName.equals("color2")) {
         c2 = f.parseColor();
+      } else if (propName.equals("etchedBorder")) {
+        etchedBorder = f.parseBoolean();
       } else
         loadDefaultPropery(f, propName);
     }
@@ -363,6 +387,7 @@ public class JDTitledRect extends JDRectangular {
     u.fStyle = theFont.getStyle();
     u.fSize = theFont.getSize();
     u.text = new String(theTitle);
+    u.etched = etchedBorder;
     u.c1 = c1.getRGB();
     u.c2 = c2.getRGB();
 
@@ -376,6 +401,7 @@ public class JDTitledRect extends JDRectangular {
     theTitle = e.text;
     c1 = new Color(e.c1);
     c2 = new Color(e.c2);
+    etchedBorder = e.etched;
     updateShape();
   }
 
