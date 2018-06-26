@@ -25,6 +25,8 @@ public class JDTitledRect extends JDRectangular {
   private Color c1;
   private Color c2;
   private Dimension preferredSize = null;
+  private int wTitle = 0;
+  private int hTitle = 0;
 
   /**
    * Construcxt a JDTitledRect.
@@ -88,8 +90,8 @@ public class JDTitledRect extends JDRectangular {
 
     // Draw title if visible
     Rectangle2D bounds = g.getFont().getStringBounds(theTitle, frc);
-    int wTitle = (int) Math.ceil(bounds.getWidth());
-    int hTitle = (int) Math.ceil(bounds.getHeight());
+    wTitle = (int) Math.ceil(bounds.getWidth());
+    hTitle = (int) Math.ceil(bounds.getHeight());
 
     // Draw border
     g2.setColor(foreground);
@@ -188,6 +190,26 @@ public class JDTitledRect extends JDRectangular {
 
     if (old != null)
       g2.setStroke(old);
+
+  }
+
+  public boolean isInsideObject(int x, int y) {
+
+    if(!super.isInsideObject(x,y)) return false;
+
+    if (fillStyle != FILL_STYLE_NONE) {
+      return boundRect.contains(x, y);
+    } else {
+      int x1 = boundRect.x;
+      int x2 = boundRect.x + boundRect.width;
+      int y1 = boundRect.y + hTitle/2;
+      int y2 = boundRect.y + boundRect.height;
+
+      return isPointOnLine(x, y, x1, y1, x2, y1) ||
+          isPointOnLine(x, y, x2, y1, x2, y2) ||
+          isPointOnLine(x, y, x2, y2, x1, y2) ||
+          isPointOnLine(x, y, x1, y2, x1, y1);
+    }
 
   }
 

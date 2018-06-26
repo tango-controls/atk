@@ -154,7 +154,7 @@ class JDRectangularPanel extends JPanel implements ActionListener,ChangeListener
     } else {
 
       JDRectangular p = objs[0];
-      Integer min = 0;
+      Integer min = -4096;
       Integer max = 4096;
       Integer step = 1;
 
