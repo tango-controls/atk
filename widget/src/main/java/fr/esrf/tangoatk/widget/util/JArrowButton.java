@@ -52,6 +52,8 @@ public class JArrowButton extends JComponent implements MouseListener, ActionLis
   private int orientation;
   private Color lightColor;
   private Color darkColor;
+  private Color lightDisaColor;
+  private Color darkDisaColor;
   private Timer autoRepeat;
   private int timerDelay;
 
@@ -107,6 +109,8 @@ public class JArrowButton extends JComponent implements MouseListener, ActionLis
     
     lightColor = computeShadowColor(c, 90);
     darkColor = computeShadowColor(c, -90);
+    lightDisaColor = computeShadowColor(c, 20);
+    darkDisaColor = computeShadowColor(c, -20);
     super.setBackground(c);
 
   }
@@ -165,6 +169,20 @@ public class JArrowButton extends JComponent implements MouseListener, ActionLis
     //System.out.println("Release");
   }
 
+  private void setLightColor(Graphics g) {
+    if(isEnabled())
+      g.setColor(lightColor);
+    else
+      g.setColor(lightDisaColor);
+  }
+
+  private void setDarkColor(Graphics g) {
+    if(isEnabled())
+      g.setColor(darkColor);
+    else
+      g.setColor(darkDisaColor);
+  }
+
   // Paint the component
   protected void paintComponent(Graphics g) {
 
@@ -190,15 +208,15 @@ public class JArrowButton extends JComponent implements MouseListener, ActionLis
 
       // Draw border
       if (state == 0) {
-        g.setColor(lightColor);
+        setLightColor(g);
         g.drawLine(0, h, m, 0);
-        g.setColor(darkColor);
+        setDarkColor(g);
         g.drawLine(m, 0, w, h);
         g.drawLine(w, h, 0, h);
       } else {
-        g.setColor(darkColor);
+        setDarkColor(g);
         g.drawLine(0, h, m, 0);
-        g.setColor(lightColor);
+        setLightColor(g);
         g.drawLine(m, 0, w, h);
         g.drawLine(w, h, 0, h);
       }
@@ -217,15 +235,15 @@ public class JArrowButton extends JComponent implements MouseListener, ActionLis
 
       // Draw border
       if (state == 0) {
-        g.setColor(lightColor);
+        setLightColor(g);
         g.drawLine(0, 0, m, h);
-        g.setColor(darkColor);
+        setDarkColor(g);
         g.drawLine(m, h, w, 0);
         g.drawLine(w, 0, 0, 0);
       } else {
-        g.setColor(darkColor);
+        setDarkColor(g);
         g.drawLine(0, 0, m, h);
-        g.setColor(lightColor);
+        setLightColor(g);
         g.drawLine(m, h, w, 0);
         g.drawLine(w, 0, 0, 0);
       }

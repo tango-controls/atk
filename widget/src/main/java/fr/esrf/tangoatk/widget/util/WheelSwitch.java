@@ -780,7 +780,7 @@ public class WheelSwitch extends JComponent {
   private char getDigit(int pos) {
 
     if (Double.isNaN(value))
-      return 'X';
+      return '-';
 
     String intPart = "";
 
@@ -869,7 +869,10 @@ public class WheelSwitch extends JComponent {
         g.fillRect(off_x+1,off_y+1,totalWidth-2,totalHeight-2);
       }
 
-      g.setColor(getForeground());
+      if(isEnabled())
+        g.setColor(getForeground());
+      else
+        g.setColor(getBackground().darker());
 
       if (editable) {
         ypos = off_y + dz.width + dz.height - 2;
