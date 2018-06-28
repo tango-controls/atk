@@ -136,10 +136,10 @@ class JDUtils {
     // Check object instance and make object array
     JDObject[] objs = new JDObject[objects.size()];
     boolean sameClass = true;
-    boolean isRectangular = true;
     int i = 1;
     objs[0] = (JDObject) objects.get(0);
     Class firstClass = objs[0].getClass();
+    boolean isRectangular = objs[0] instanceof JDRectangular;
     for (i = 1; i < objs.length; i++) {
       objs[i] = (JDObject) objects.get(i);
       sameClass &= firstClass.equals(objs[i].getClass());
