@@ -151,6 +151,18 @@ public class StateViewer extends javax.swing.JPanel
   }
 
   /**
+   * Sets the tooltip text for this component
+   * @param text Tooltip text
+   */
+  public void setToolTipText(String text) {
+
+    valueLabel.setToolTipText(text);
+    textLabel.setToolTipText(text);
+    super.setToolTipText(text);
+
+  }
+
+  /**
    * <code>getModel</code> gets the model of this stateviewer.
    *
    * @return a <code>DevStateScalar</code> value
