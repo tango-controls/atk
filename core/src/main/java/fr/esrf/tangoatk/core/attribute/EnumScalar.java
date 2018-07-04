@@ -682,5 +682,16 @@ public class EnumScalar extends AAttribute implements IEnumScalar, PropertyChang
         enumSetLabels = enums;
     }
 
+  public boolean isScalar() {
+    return true;
+  }
+
+  public boolean isSpectrum(){
+    return false;
+  }
+
+  public boolean isImage(){
+    return false;
+  }
 
 }

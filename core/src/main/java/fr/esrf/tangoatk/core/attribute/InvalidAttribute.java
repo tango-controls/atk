@@ -71,4 +71,16 @@ public class InvalidAttribute extends AAttribute {
     public String getName() {
 	return "Invalid " + name;
     }
+
+  public boolean isScalar() {
+    return false;
+  }
+
+  public boolean isSpectrum(){
+    return false;
+  }
+
+  public boolean isImage(){
+    return false;
+  }
 }

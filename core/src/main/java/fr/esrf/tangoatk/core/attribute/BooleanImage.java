@@ -351,5 +351,16 @@ public class BooleanImage extends AAttribute
     serializeInit();
   }
 
+  public boolean isScalar() {
+    return false;
+  }
+
+  public boolean isSpectrum(){
+    return false;
+  }
+
+  public boolean isImage(){
+    return true;
+  }
 
 }

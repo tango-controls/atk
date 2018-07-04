@@ -505,5 +505,17 @@ public class StringScalar extends AAttribute
     serializeInit();
   }
 
+  public boolean isScalar() {
+    return true;
+  }
+
+  public boolean isSpectrum(){
+    return false;
+  }
+
+  public boolean isImage(){
+    return false;
+  }
+
 
 }

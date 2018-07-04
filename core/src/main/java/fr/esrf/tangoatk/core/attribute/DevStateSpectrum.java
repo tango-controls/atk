@@ -589,4 +589,17 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
        in.defaultReadObject();
        serializeInit();
     }
+
+  public boolean isScalar() {
+    return false;
+  }
+
+  public boolean isSpectrum(){
+    return true;
+  }
+
+  public boolean isImage(){
+    return false;
+  }
+
 }

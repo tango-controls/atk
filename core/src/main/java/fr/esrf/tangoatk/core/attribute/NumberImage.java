@@ -372,4 +372,16 @@ public class NumberImage extends ANumber implements INumberImage
     serializeInit();
   }
 
+  public boolean isScalar() {
+    return false;
+  }
+
+  public boolean isSpectrum(){
+    return false;
+  }
+
+  public boolean isImage(){
+    return true;
+  }
+
 }

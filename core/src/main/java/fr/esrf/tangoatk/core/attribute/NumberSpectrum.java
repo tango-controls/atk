@@ -656,6 +656,17 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
      
   }
 
+  public boolean isScalar() {
+    return false;
+  }
+
+  public boolean isSpectrum(){
+    return true;
+  }
+
+  public boolean isImage(){
+    return false;
+  }
 
 
 }

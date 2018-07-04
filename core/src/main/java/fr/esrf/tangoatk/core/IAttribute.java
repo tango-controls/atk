@@ -308,4 +308,20 @@ public interface IAttribute extends IEntity
    */
     public String getDeviceName();
 
+  /**
+   *
+   * Returns true if the attribute is a scalar
+   */
+   public boolean isScalar();
+
+  /**
+   * Returns true if the attribute is a spectrum
+   */
+   public boolean isSpectrum();
+
+  /**
+   * Returns true if the attribute is an image
+   */
+   public boolean isImage();
+
 }
