@@ -158,17 +158,17 @@ public class TangoSynopticHandler extends JDrawEditor
    private static Map<String, Integer>    dynoState;
 
    private    int                   toolTipMode;
-   private    String                jdrawFileFullName = null;
+   protected  String                jdrawFileFullName = null;
 
    private    AttributeFactory      aFac = null;
    private    CommandFactory        cFac = null;
    private    DeviceFactory         dFac = null;
 
-   private    AttributeList         allAttributes = null;
+   protected  AttributeList         allAttributes = null;
 
 
-   private    Map<String, List<JDObject>>     jdHash;
-   private    Map <String, List<String>>      stateCashHash;
+   protected    Map<String, List<JDObject>>     jdHash;
+   protected    Map <String, List<String>>      stateCashHash;
 
    private    AnyCommandViewer                acv = null;
    private    JFrame                          argFrame = null;
