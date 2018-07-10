@@ -1,6 +1,5 @@
 package fr.esrf.tangoatk.widget.jdraw;
 
-import com.sun.swing.internal.plaf.metal.resources.metal;
 
 import javax.swing.*;
 
