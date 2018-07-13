@@ -30,8 +30,13 @@ package fr.esrf.tangoatk.widget.attribute;
 
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.widget.util.ATKConstant;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.event.MouseInputListener;
 
 
 /**
@@ -59,6 +64,7 @@ public class StateViewer extends javax.swing.JPanel
   private String           currentState = IDevice.UNKNOWN;
   private boolean          externalSetText = false;
   private boolean          stateInTooltip = false;
+  private final JPanel           thisPanel = this;
   
 
   public StateViewer()
@@ -145,8 +151,12 @@ public class StateViewer extends javax.swing.JPanel
 	else
 	   textLabel.setText(model.getDevice().getName());
 
-      valueLabel.setToolTipText(model.getDevice().getName());
-      stateAtt.refresh();
+        if(model.getName().toLowerCase().endsWith("/state")){
+            setToolTipText(model.getDevice().getName());
+        }else{
+            setToolTipText(model.getName());
+        }
+        stateAtt.refresh();
 //      setCurrentState(model.getDeviceValue());
   }
 
@@ -155,11 +165,54 @@ public class StateViewer extends javax.swing.JPanel
    * @param text Tooltip text
    */
   public void setToolTipText(String text) {
-
+    super.setToolTipText(text);
+      
     valueLabel.setToolTipText(text);
     textLabel.setToolTipText(text);
-    super.setToolTipText(text);
+    
+    MouseListener ml = new MouseInputListener() {
+        @Override
+        public void mouseClicked(MouseEvent e) {
+            dispatch(e);
+        }
 
+        @Override
+        public void mousePressed(MouseEvent e) {
+            dispatch(e);
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            dispatch(e);
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            dispatch(e);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            dispatch(e);
+        }
+
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            dispatch(e);
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+            dispatch(e);
+        }
+
+        public void dispatch(MouseEvent e) {
+            dispatchEvent(SwingUtilities.convertMouseEvent(e.getComponent(), e, thisPanel));
+        }
+    };
+    
+    valueLabel.addMouseListener(ml);
+    textLabel.addMouseListener(ml);
   }
 
   /**
