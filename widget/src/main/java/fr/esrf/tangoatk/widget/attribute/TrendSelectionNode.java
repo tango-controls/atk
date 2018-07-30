@@ -915,7 +915,7 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
 
     // Add data to the dataView
     boolean ok = true;
-    DataList lv = data.getLastValue();
+    DataList lv = data.getLastValueRaw();
 
     double x = (double) evt.getTimeStamp();
     double y = evt.getValue();
@@ -962,7 +962,7 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
 
     // Add data to the dataView
     boolean ok = true;
-    DataList lv = data.getLastValue();
+    DataList lv = data.getLastValueRaw();
 
     double x = (double) evt.getTimeStamp();
     double y = evt.getValue()?1.0:0.0;
@@ -995,7 +995,7 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
 
     // Add data to the dataView
     boolean ok = true;
-    DataList lv = data.getLastValue();
+    DataList lv = data.getLastValueRaw();
 
     double x = (double) evt.getTimeStamp();
     double y = modelst.getDevState().value();
@@ -1037,7 +1037,7 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
 
     // Add data to the dataView
     boolean ok = true;
-    DataList lv = data.getLastValue();
+    DataList lv = data.getLastValueRaw();
 
     double x = (double) evt.getTimeStamp();
     double y = (double) modele.getShortValueFromEnumScalar(evt.getValue());
@@ -1070,7 +1070,7 @@ class TrendSelectionNode extends DefaultMutableTreeNode implements INumberScalar
 
     // Add data to the dataView
     boolean ok = true;
-    DataList lv = data.getLastValue();
+    DataList lv = data.getLastValueRaw();
 
     double x = (double) evt.getTimeStamp();
     int lgth = evt.getValue().length;

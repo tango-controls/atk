@@ -1547,6 +1547,14 @@ public class JLDataView implements java.io.Serializable {
   }
 
   /**
+   * Get last value ignoring filter
+   * @return Last value
+   */
+  public DataList getLastValueRaw() {
+    return theDataEnd;
+  }
+
+  /**
    * Clear all data in this view.
    */
   public synchronized void reset() {
