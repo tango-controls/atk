@@ -30,21 +30,7 @@
 package fr.esrf.tangoatk.widget.util.chart;
 
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Dialog;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Frame;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.event.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
@@ -1447,10 +1433,11 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
   }
 
   // Make a snapshot of data in a TAB seperated field
-  private void saveDataFile(String fileName,boolean correlated) {
+  private void saveDataFile(String fileName,boolean correlated,boolean decimate,String decimatePeriod) {
 
     try {
 
+      double decPeriod = Double.parseDouble(decimatePeriod)/1000.0;
       FileWriter fw = new FileWriter(fileName);
       TabbedLine tl;
       String s;
@@ -1468,9 +1455,26 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
       for (int v = 0; v < views.size(); v++) tl.add(v, views.get(v));
 
       s = tl.getFirstLine(xAxis.getAnnotation());
-      while (s != null) {
-        fw.write(s);
+      fw.write(s);
+      double lastT = 0.0;
+
+      while(s!=null) {
+
         s = tl.getNextLine();
+        if (s != null) {
+
+          double t = tl.getMinTime();
+          if (decimate) {
+            if (t - lastT > decPeriod) {
+              fw.write(s);
+              lastT = t;
+            }
+          } else {
+            fw.write(s);
+          }
+
+        }
+
       }
 
       fw.close();
@@ -2150,35 +2154,102 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
       readFile();
     } else if (src == saveFileMenuItem) {
 
-        int ok = JOptionPane.YES_OPTION;
-        JCheckBox correlatedCheck = new JCheckBox("Correlated data");
-        JFileChooser chooser = new JFileChooser(lastDataFileLocation);
-        chooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
-        chooser.setDialogTitle("Save Graph Data (Text file with TAB separated fields)");
-        chooser.setAccessory(correlatedCheck);
+      int ok = JOptionPane.YES_OPTION;
 
-        int returnVal = chooser.showSaveDialog(this);
+      // Acessory panel
+      javax.swing.JPanel aPanel;
+      javax.swing.JCheckBox correlatedCheck;
+      javax.swing.JPanel correlationPanel;
+      javax.swing.JCheckBox decimateCheck;
+      javax.swing.JTextField decimateText;
+      javax.swing.JPanel decimationPanel;
+      javax.swing.JLabel periodLabel;
+      GridBagConstraints gridBagConstraints;
 
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File f = chooser.getSelectedFile();
-            if (f != null) {
-                if (MultiExtFileFilter.getExtension(f) == null) {
-                    f = new File(f.getAbsolutePath() + ".txt");
-                }
-                if (f.exists()) {
-                    ok = JOptionPane.showConfirmDialog(
-                            this,
-                            "Do you want to overwrite " + f.getName() + " ?",
-                            "Confirm overwrite",
-                            JOptionPane.YES_NO_OPTION
-                    );
-                }
-                if (ok == JOptionPane.YES_OPTION) {
-                    lastDataFileLocation = f.getParentFile().getAbsolutePath();
-                    saveDataFile(f.getAbsolutePath(),correlatedCheck.isSelected());
-                }
-            }
+      aPanel = new javax.swing.JPanel();
+      correlationPanel = new javax.swing.JPanel();
+      correlatedCheck = new javax.swing.JCheckBox();
+      decimationPanel = new javax.swing.JPanel();
+      decimateText = new javax.swing.JTextField();
+      periodLabel = new javax.swing.JLabel();
+      decimateCheck = new javax.swing.JCheckBox();
+
+      aPanel.setLayout(new java.awt.GridBagLayout());
+
+      correlationPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Correlated Data"));
+      correlationPanel.setLayout(new java.awt.BorderLayout());
+
+      correlatedCheck.setText("Enable");
+      correlationPanel.add(correlatedCheck, java.awt.BorderLayout.CENTER);
+
+      gridBagConstraints = new java.awt.GridBagConstraints();
+      gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+      aPanel.add(correlationPanel, gridBagConstraints);
+
+      decimationPanel.setBorder(javax.swing.BorderFactory.createTitledBorder("Decimation"));
+      decimationPanel.setLayout(new java.awt.GridBagLayout());
+
+      decimateText.setText("1000");
+      gridBagConstraints = new java.awt.GridBagConstraints();
+      gridBagConstraints.gridx = 1;
+      gridBagConstraints.gridy = 1;
+      gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+      gridBagConstraints.ipadx = 20;
+      gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+      decimationPanel.add(decimateText, gridBagConstraints);
+
+      periodLabel.setText("Period (ms)");
+      gridBagConstraints = new java.awt.GridBagConstraints();
+      gridBagConstraints.gridx = 0;
+      gridBagConstraints.gridy = 1;
+      gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+      gridBagConstraints.ipadx = 10;
+      gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+      decimationPanel.add(periodLabel, gridBagConstraints);
+
+      decimateCheck.setText("Enable");
+      gridBagConstraints = new java.awt.GridBagConstraints();
+      gridBagConstraints.gridx = 0;
+      gridBagConstraints.gridy = 0;
+      gridBagConstraints.gridwidth = 2;
+      gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+      gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+      decimationPanel.add(decimateCheck, gridBagConstraints);
+
+      gridBagConstraints = new java.awt.GridBagConstraints();
+      gridBagConstraints.gridx = 0;
+      gridBagConstraints.gridy = 1;
+      gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+      aPanel.add(decimationPanel, gridBagConstraints);
+
+
+      JFileChooser chooser = new JFileChooser(lastDataFileLocation);
+      chooser.addChoosableFileFilter(new MultiExtFileFilter("Text files", "txt"));
+      chooser.setDialogTitle("Save Graph Data (Text file with TAB separated fields)");
+      chooser.setAccessory(aPanel);
+
+      int returnVal = chooser.showSaveDialog(this);
+
+      if (returnVal == JFileChooser.APPROVE_OPTION) {
+        File f = chooser.getSelectedFile();
+        if (f != null) {
+          if (MultiExtFileFilter.getExtension(f) == null) {
+            f = new File(f.getAbsolutePath() + ".txt");
+          }
+          if (f.exists()) {
+            ok = JOptionPane.showConfirmDialog(
+                this,
+                "Do you want to overwrite " + f.getName() + " ?",
+                "Confirm overwrite",
+                JOptionPane.YES_NO_OPTION
+            );
+          }
+          if (ok == JOptionPane.YES_OPTION) {
+            lastDataFileLocation = f.getParentFile().getAbsolutePath();
+            saveDataFile(f.getAbsolutePath(), correlatedCheck.isSelected(), decimateCheck.isSelected(), decimateText.getText());
+          }
         }
+      }
     } else {
 
       // Search in user action
@@ -2206,7 +2277,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
         if (!found) i++;
       }
 
-      if(found) {
+      if (found) {
         showDataOptionDialog(y1Axis.getDataView(i));
         return;
       }
@@ -2217,7 +2288,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
         if (!found) i++;
       }
 
-      if(found) {
+      if (found) {
         showDataOptionDialog(y2Axis.getDataView(i));
         return;
       }
@@ -2229,7 +2300,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
         if (!found) i++;
       }
 
-      if(found) {
+      if (found) {
         showTableSingle(y1Axis.getDataView(i));
         return;
       }
@@ -2240,7 +2311,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
         if (!found) i++;
       }
 
-      if(found) {
+      if (found) {
         showTableSingle(y2Axis.getDataView(i));
         return;
       }
@@ -2252,7 +2323,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
         if (!found) i++;
       }
 
-      if(found) {
+      if (found) {
         showStatSingle(y1Axis.getDataView(i));
         return;
       }
@@ -2263,7 +2334,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
         if (!found) i++;
       }
 
-      if(found) {
+      if (found) {
         showStatSingle(y2Axis.getDataView(i));
         return;
       }
@@ -3376,8 +3447,8 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
 
     // ---------------------------------------------
 
-    int NB_PTS = 50000;
-    int NB_CURVE = 1;
+    int NB_PTS = 100;
+    int NB_CURVE = 5;
     Random rng = new Random(12345678);
 
     v = new JLDataView[NB_CURVE];
@@ -3388,7 +3459,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
       for(int i=0;i<NB_PTS;i++) {
         double x = (double)i;
         if(isInRange(x,NB_PTS))
-          v[j].add(x+5000,rng.nextDouble()*10.0-5.0);
+          v[j].add((x+5000)/10.0,rng.nextDouble()*10.0-5.0);
       }
       chart.getY1Axis().addDataView(v[j]);
     }
