@@ -312,7 +312,7 @@ public class NumberScalarWheelEditor extends WheelSwitch
     try {
 
       nsv.setFont(new java.awt.Font("Dialog", java.awt.Font.PLAIN, 12));
-      final INumberScalar attr = (INumberScalar) attributeList.add("sr/d-mfdbk/cleaning/upp5");
+      final INumberScalar attr = (INumberScalar) attributeList.add("jlp/test/1/att_six");
       nsv.setModel(attr);
       nsv.setAlarmEnabled(false);
       nsv2.setModel(attr);

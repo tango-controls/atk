@@ -31,6 +31,8 @@ import fr.esrf.Tango.*;
 import fr.esrf.TangoApi.*;
 import fr.esrf.TangoApi.events.*;
 
+import javax.swing.*;
+
 public class NumberScalar extends ANumber
   implements INumberScalar {
 
@@ -40,6 +42,7 @@ public class NumberScalar extends ANumber
   double              devSetPointValue;
   double[]            possibleValues = null;
   double              minimumIncrement = Double.NaN;
+  String              confirmationMessage = null;
 
   // TODO better solution : TEMP
   public ANumberScalarHelper getNumberScalarHelper()
@@ -229,6 +232,13 @@ public class NumberScalar extends ANumber
   }
 
   public void setValue(double d) {
+
+    if( confirmationMessage!=null ) {
+      if( JOptionPane.showConfirmDialog(null,confirmationMessage,"Confirmation",JOptionPane.YES_NO_OPTION)
+          != JOptionPane.YES_OPTION )
+        return;
+    }
+
     try {
       insert(d);
       writeAtt();

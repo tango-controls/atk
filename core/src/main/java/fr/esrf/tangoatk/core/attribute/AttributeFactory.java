@@ -489,10 +489,9 @@ public class AttributeFactory extends AEntityFactory {
 
   }
 
-  private EnumScalar getEnumScalarFromScalar(Device device,AttributeInfoEx config)
+  private EnumScalar getEnumScalarFromScalar(Device device,AttributeInfoEx config,DbAttribute dbAtt)
   {
      String         name = config.name;
-     DbAttribute    dbAtt=null;
      String[]       propVal=null;
 
      String[]       enumLabs =null;
@@ -501,7 +500,6 @@ public class AttributeFactory extends AEntityFactory {
 
      try
      {
-         dbAtt = device.get_attribute_property(name);
          if (dbAtt != null)
          {
              if (!dbAtt.is_empty("EnumLabels"))
@@ -614,6 +612,15 @@ public class AttributeFactory extends AEntityFactory {
 
     NumberScalar ns = new NumberScalar();
 
+    // Handle confirmation window
+    DbAttribute dbAtt = null;
+    try {
+      dbAtt = device.get_attribute_property(name);
+      if(!dbAtt.is_empty("ConfirmationMessage")) {
+        ns.confirmationMessage = dbAtt.get_value("ConfirmationMessage")[0];
+      }
+    } catch (DevFailed e) {}
+
     switch (dataType) {
 
       case Tango_DEV_UCHAR:
@@ -621,7 +628,7 @@ public class AttributeFactory extends AEntityFactory {
         return ns;
 
       case Tango_DEV_SHORT:
-        ens = getEnumScalarFromScalar(device, config);
+        ens = getEnumScalarFromScalar(device, config, dbAtt);
         if (ens != null) {
           ens.setEnumHelper(new EnumScalarHelper(ens));
           return ens;
@@ -630,7 +637,7 @@ public class AttributeFactory extends AEntityFactory {
         break;
 
       case Tango_DEV_USHORT:
-        ens = getEnumScalarFromScalar(device, config);
+        ens = getEnumScalarFromScalar(device, config, dbAtt);
         if (ens != null) {
           ens.setEnumHelper(new EnumScalarHelper(ens));
           return ens;
@@ -649,7 +656,7 @@ public class AttributeFactory extends AEntityFactory {
         break;
 
       case Tango_DEV_LONG:
-        ens = getEnumScalarFromScalar(device, config);
+        ens = getEnumScalarFromScalar(device, config, dbAtt);
         if (ens != null) {
           ens.setEnumHelper(new EnumScalarHelper(ens));
           return ens;
@@ -658,7 +665,7 @@ public class AttributeFactory extends AEntityFactory {
         break;
 
       case Tango_DEV_ULONG:
-        ens = getEnumScalarFromScalar(device, config);
+        ens = getEnumScalarFromScalar(device, config, dbAtt);
         if (ens != null) {
           ens.setEnumHelper(new EnumScalarHelper(ens));
           return ens;
@@ -667,7 +674,7 @@ public class AttributeFactory extends AEntityFactory {
         break;
 
       case Tango_DEV_LONG64:
-        ens = getEnumScalarFromScalar(device, config);
+        ens = getEnumScalarFromScalar(device, config, dbAtt);
         if (ens != null) {
           ens.setEnumHelper(new EnumScalarHelper(ens));
           return ens;
@@ -676,7 +683,7 @@ public class AttributeFactory extends AEntityFactory {
         break;
 
       case Tango_DEV_ULONG64:
-        ens = getEnumScalarFromScalar(device, config);
+        ens = getEnumScalarFromScalar(device, config, dbAtt);
         if (ens != null) {
           ens.setEnumHelper(new EnumScalarHelper(ens));
           return ens;
