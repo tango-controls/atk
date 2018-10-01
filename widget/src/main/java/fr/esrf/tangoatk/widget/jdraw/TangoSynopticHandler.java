@@ -620,7 +620,7 @@ public class TangoSynopticHandler extends JDrawEditor
         String objName = obj.getName();
         found = objName.contains(metaNames.get(2*i));
         if(found) {
-          objName.replace(metaNames.get(2*i),metaNames.get(2*i+1));
+          objName = objName.replace(metaNames.get(2*i),metaNames.get(2*i+1));
           obj.setName(objName);
         }
         i++;
