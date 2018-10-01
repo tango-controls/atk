@@ -167,8 +167,9 @@ public class TangoSynopticHandler extends JDrawEditor
    protected  AttributeList         allAttributes = null;
 
 
-   protected    Map<String, List<JDObject>>     jdHash;
-   protected    Map <String, List<String>>      stateCashHash;
+   protected    Map<String, List<JDObject>>    jdHash;
+   protected    Map<String, List<String>>      stateCashHash;
+   protected    Vector<String>                 metaNames;
 
    private    AnyCommandViewer                acv = null;
    private    JFrame                          argFrame = null;
@@ -232,6 +233,7 @@ public class TangoSynopticHandler extends JDrawEditor
 
      progressListener = null;
      itemNumber = 0;
+     metaNames = new Vector<String>();
 
    }
 
@@ -412,6 +414,19 @@ public class TangoSynopticHandler extends JDrawEditor
       return (jdrawFileFullName);
    }
 
+
+  /**
+   * Add a meta name. All JDObject name which contains the meta name will be replaced by real name before initialising Tango entities.
+   * @param metaName Original string
+   * @param realName String which will appear after loading the synoptic
+   */
+  public void addMetaName(String metaName,String realName) {
+
+    metaNames.add(metaName);
+    metaNames.add(realName);
+
+  }
+
   /**
    * Returns a Handle to the global attribute list which is used
    * internaly to monitor attributes. This list is filled after
@@ -588,6 +603,35 @@ public class TangoSynopticHandler extends JDrawEditor
        jdrawFileFullName = null;
   }
 
+  /**
+   * Update metaName
+   * @param obj JDObject to update
+   */
+  private void updateName(JDObject obj) {
+
+    int nbName = metaNames.size()/2;
+
+    if(nbName>0) {
+
+      boolean found = false;
+      int i = 0;
+      while(!found && i<nbName) {
+
+        String objName = obj.getName();
+        found = objName.contains(metaNames.get(2*i));
+        if(found) {
+          objName.replace(metaNames.get(2*i),metaNames.get(2*i+1));
+          obj.setName(objName);
+        }
+        i++;
+
+      }
+
+
+    }
+
+  }
+
    /**
     * Parses JDraw components , detects tango entity name and attatch a model.
     * This method does not recurse group and use isDevice() , isAttribute()
@@ -604,6 +648,7 @@ public class TangoSynopticHandler extends JDrawEditor
      for (int i = 0; i < getObjectNumber(); i++) {
 
        JDObject jdObj = getObjectAt(i);
+       updateName(jdObj);
        String s = jdObj.getName();
 
        if (jdObj instanceof JDSwingObject && ((JDSwingObject) jdObj).getComponent() instanceof MultiNumberSpectrumViewer) {
