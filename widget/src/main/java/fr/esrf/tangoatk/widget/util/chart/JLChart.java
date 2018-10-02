@@ -1919,214 +1919,22 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
     showTableAll(views);
   }
 
-  protected void showStatAll(Vector<JLDataView>  views){
-      int dataCount = 0;
-      double[][] values;
-      synchronized (views) {
-          for (int i = 0; i < views.size(); i++) {
-              dataCount += views.get(i).getDataLength();
-          }
-          values = new double[dataCount][2];
-          int index = 0;
-          for (int i = 0; i < views.size(); i++) {
-              DataList data = views.get(i).getData();
-              while (data != null) {
-                  double y = data.y;
-                  double x = data.x;
-                  if(Double.isNaN(y)) {
-                      long l = Double.doubleToRawLongBits( data.y );
-                      if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_NEGATIVE_INFINITY) ) {
-                          y = Double.POSITIVE_INFINITY;
-                      }
-                      else if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_POSITIVE_INFINITY) ) {
-                          y = Double.NEGATIVE_INFINITY;
-                      }
-                  }
-                  if(Double.isNaN(y)) {
-                      long l = Double.doubleToRawLongBits( data.y );
-                      if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_NEGATIVE_INFINITY) ) {
-                          y = Double.POSITIVE_INFINITY;
-                      }
-                      else if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_POSITIVE_INFINITY) ) {
-                          y = Double.NEGATIVE_INFINITY;
-                      }
-                  }
-                  if(Double.isNaN(x)) {
-                      long l = Double.doubleToRawLongBits( data.x );
-                      if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_NEGATIVE_INFINITY) ) {
-                          x = Double.POSITIVE_INFINITY;
-                      }
-                      else if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_POSITIVE_INFINITY) ) {
-                          x = Double.NEGATIVE_INFINITY;
-                      }
-                  }
-                  values[index][0] = y;
-                  values[index++][1] = x;
-                  data = data.next;
-              }
-          }
-      }
-      showStatistics(values, "all");
-  }
-  
+
   // Display a Dialog containing all statistics of the chart
   protected void showStatAll() {
-      Vector<JLDataView>  views = new Vector<JLDataView> ();
-      if (xAxis.isXY()) views.addAll(xAxis.getViews());
-      views.addAll(y1Axis.getViews());
-      views.addAll(y2Axis.getViews());
-      showStatAll(views);
+    Vector<JLDataView>  views = new Vector<JLDataView> ();
+    views.addAll(y1Axis.getViews());
+    views.addAll(y2Axis.getViews());
+    StatFrame fr = new StatFrame(this,views);
+    fr.setVisible(true);
   }
 
   // Display a Dialog containing The dataView statistics
   private void showStatSingle(JLDataView v) {
-      double[][] values;
-      synchronized(v) {
-          int dataCount = v.getDataLength();
-          DataList data = v.getData();
-          values = new double[dataCount][2];
-          for (int i =0; i < values.length; i++) {
-              double y = data.y;
-              double x = data.x;
-              if( Double.isNaN(y) ) {
-                  long l = Double.doubleToRawLongBits(data.y);
-                  if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_NEGATIVE_INFINITY) ) {
-                      y = Double.POSITIVE_INFINITY;
-                  }
-                  else if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_POSITIVE_INFINITY) ) {
-                      y = Double.NEGATIVE_INFINITY;
-                  }
-              }
-              if( Double.isNaN(x) ) {
-                  long l = Double.doubleToRawLongBits(data.x);
-                  if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_NEGATIVE_INFINITY) ) {
-                      x = Double.POSITIVE_INFINITY;
-                  }
-                  else if ( l == Double.doubleToRawLongBits(JLDataView.NAN_FOR_POSITIVE_INFINITY) ) {
-                      x = Double.NEGATIVE_INFINITY;
-                  }
-              }
-              values[i][0] = y;
-              values[i][1] = x;
-              data = data.next;
-          }
-      }
-      showStatistics( values, v.getName() );
-  }
-
-  private void showStatistics(double[][] values, String name) {
-      double min = Double.POSITIVE_INFINITY;
-      double max = Double.NEGATIVE_INFINITY;
-      double minX = Double.NaN;
-      double maxX = Double.NaN;
-      double average = 0;
-      double standardDeviation = 0;
-      double sampleStandardDeviation = 0;
-      double squareSum = 0;
-      // standard deviation = sqrt( (1/N)*sum(xi^2) - ( (1/N)*sum(xi) )^2 )
-      // sample standard deviation = sqrt( (N/(N-1)) * ( (1/N)*sum(xi^2) - ( (1/N)*sum(xi) )^2 ) )
-      // (JLDataViews may be considered as samples of points)
-      try {
-          for (int i = 0; i < values.length; i++) {
-              if (values[i][0] < min) {
-                  min = values[i][0];
-                  minX = values[i][1];
-              }
-              if (values[i][0] > max) {
-                  max = values[i][0];
-                  maxX = values[i][1];
-              }
-              average += values[i][0];
-              double square;
-              if ( Double.isInfinite(values[i][0]) ) {
-                  square = Double.POSITIVE_INFINITY;
-              }
-              else if ( Double.isNaN(values[i][0]) ) {
-                  square = Double.NaN;
-              }
-              else {
-                  square = values[i][0] * values[i][0];
-              }
-              squareSum += square;
-          }
-          if ( Double.isInfinite(min) && min > 0 ) {
-              min = Double.NaN;
-          }
-          if ( Double.isInfinite(max) && max < 0 ) {
-              max = Double.NaN;
-          }
-          if (values.length > 0) {
-              //-------------------calculate average---------------------------
-              average =  average / (double)values.length ;
-              //---------------calculate standard deviation--------------------
-              squareSum = squareSum / (double)values.length;
-              standardDeviation = Math.sqrt( squareSum - (average*average) );
-              if (values.length > 1) {
-                  sampleStandardDeviation = Math.sqrt( (((double)values.length)/(double)(values.length-1)) * (squareSum - (average*average)) );
-              }
-              else {
-                  sampleStandardDeviation = Double.NaN;
-              }
-          }
-          else {
-              average = Double.NaN;
-              standardDeviation = Double.NaN;
-              sampleStandardDeviation = Double.NaN;
-              min = Double.NaN;
-              max = Double.NaN;
-          }
-
-          StringBuffer titleBuffer = new StringBuffer("Statistics: ");
-          titleBuffer.append(name);
-          StringBuffer messageBuffer = new StringBuffer("Minimum: ");
-          messageBuffer.append(min);
-          if ( !Double.isNaN(minX) ) {
-              String xStringValue = "";
-              if (xAxis.getAnnotation() == JLAxis.TIME_ANNO) {
-                  xStringValue = JLAxis.formatTimeValue(minX);
-              }
-              else {
-                  xStringValue = xAxis.formatValue(minX, 0);
-              }
-              messageBuffer.append(", obtained at X = ");
-              messageBuffer.append(xStringValue);
-          }
-          messageBuffer.append("\nMaximum: ").append(max);
-          if ( !Double.isNaN(maxX) ) {
-              String xStringValue = "";
-              if (xAxis.getAnnotation() == JLAxis.TIME_ANNO) {
-                  xStringValue = JLAxis.formatTimeValue(maxX);
-              }
-              else {
-                  xStringValue = xAxis.formatValue(maxX, 0);
-              }
-              messageBuffer.append(", obtained at X = ");
-              messageBuffer.append(xStringValue);
-          }
-          messageBuffer.append("\nAverage: ").append(average);
-          messageBuffer.append("\nStandard Deviation: ");
-          messageBuffer.append(standardDeviation);
-          messageBuffer.append("\nSample Standard Deviation: ");
-          messageBuffer.append(sampleStandardDeviation);
-          JOptionPane.showMessageDialog(
-                  this,
-                  messageBuffer.toString(),
-                  titleBuffer.toString(),
-                  JOptionPane.PLAIN_MESSAGE,
-                  null
-          );
-          titleBuffer = null;
-          messageBuffer = null;
-      }
-      catch(Exception e) {
-          JOptionPane.showMessageDialog(
-                  this,
-                  "Failed to obtain statistics on " + name,
-                  "Error",
-                  JOptionPane.ERROR_MESSAGE
-          );
-          e.printStackTrace();
-      }
+    Vector<JLDataView>  views = new Vector<JLDataView> ();
+    views.add(v);
+    StatFrame fr = new StatFrame(this,views);
+    fr.setVisible(true);
   }
 
   // -----------------------------------------------------
@@ -3455,6 +3263,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
 
     for(int j=0;j<NB_CURVE;j++) {
       v[j] = new JLDataView();
+      v[j].setName("DV #" + (j+1));
       v[j].setMarker(JLDataView.MARKER_NONE);
       for(int i=0;i<NB_PTS;i++) {
         double x = (double)i;
