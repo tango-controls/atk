@@ -4,7 +4,7 @@
 
     <groupId>org.tango.atk</groupId>
     <artifactId>beaninfo-maven-plugin</artifactId>
-    <version>9.2.43</version>
+    <version>9.2.44-SNAPSHOT</version>
 
     <packaging>maven-plugin</packaging>
 
