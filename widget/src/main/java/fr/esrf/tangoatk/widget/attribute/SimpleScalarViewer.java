@@ -293,10 +293,6 @@ public class SimpleScalarViewer extends JAutoScrolledText
 
     if ( state.equals(IAttribute.INVALID) || Double.isNaN(evt.getValue()) ) {
       dispStr = error;
-      if( !format.isEmpty() ) {
-        String z  = ATKFormat.format(format, 0.0);
-        dispStr = z.replace('0','-');
-      }
     } else if( Double.isInfinite(evt.getValue()) ) {
       dispStr = Double.toString(evt.getValue());
     } else {
@@ -304,13 +300,12 @@ public class SimpleScalarViewer extends JAutoScrolledText
         dispStr = atkUserFormat.format(new Double(evt.getValue()));
       } else {
         try {
-          Double attDouble = new Double(evt.getValue());
           if (userFormat.length() > 0) {
-            dispStr = ATKFormat.format(userFormat, attDouble);
+            dispStr = ATKFormat.format(userFormat, evt.getValue());
           } else if (format.indexOf('%') == -1) {
             dispStr = AttrManip.format(format, evt.getValue());
           } else {
-            dispStr = ATKFormat.format(format, attDouble);
+            dispStr = ATKFormat.format(format, evt.getValue());
           }
         } catch (Exception e) {
           return "Exception while formating";
