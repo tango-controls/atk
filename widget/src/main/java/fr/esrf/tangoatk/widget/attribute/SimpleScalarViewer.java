@@ -289,22 +289,22 @@ public class SimpleScalarViewer extends JAutoScrolledText
 
   private String getDisplayString(NumberScalarEvent evt) {
 
-    Double attDouble = new Double(evt.getValue());
     String dispStr;
 
-    if ( state.equals(IAttribute.INVALID) ) {
+    if ( state.equals(IAttribute.INVALID) || Double.isNaN(evt.getValue()) ) {
       dispStr = error;
       if( !format.isEmpty() ) {
         String z  = ATKFormat.format(format, 0.0);
         dispStr = z.replace('0','-');
       }
-    } else if(Double.isInfinite(evt.getValue()) || Double.isNaN(evt.getValue())) {
+    } else if( Double.isInfinite(evt.getValue()) ) {
       dispStr = Double.toString(evt.getValue());
     } else {
       if (atkUserFormat != null) {
         dispStr = atkUserFormat.format(new Double(evt.getValue()));
       } else {
         try {
+          Double attDouble = new Double(evt.getValue());
           if (userFormat.length() > 0) {
             dispStr = ATKFormat.format(userFormat, attDouble);
           } else if (format.indexOf('%') == -1) {
