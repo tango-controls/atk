@@ -90,7 +90,7 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
 
   protected void checkDimensions(double[] o) {
     if (o.length > getMaxXDimension()) {
-      throw new IllegalStateException();
+      throw new IllegalStateException("Invalid spectrum dimension " + o.length + ">" + getMaxXDimension());
     }
   }
 
