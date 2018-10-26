@@ -54,7 +54,7 @@ public class VoidVoidCommandViewer extends JButton
 
   protected void executeButtonActionPerformed(ActionEvent actionevent) {
 
-    //System.out.println("Called executeButtonActionPerformed in VoidVoidCommandViewer");
+//    System.out.println("Called executeButtonActionPerformed in VoidVoidCommandViewer : "+ model.getName());
     if (model != null)
       model.execute();
 
