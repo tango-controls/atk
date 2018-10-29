@@ -11,6 +11,7 @@ import fr.esrf.tangoatk.core.IAttribute;
 import fr.esrf.tangoatk.core.ICommand;
 import fr.esrf.tangoatk.core.IEntity;
 import fr.esrf.tangoatk.core.command.VoidVoidCommand;
+import fr.esrf.tangoatk.widget.command.ConfirmCommandViewer;
 import fr.esrf.tangoatk.widget.command.VoidVoidCommandViewer;
 import java.awt.Component;
 import java.awt.Insets;
@@ -75,15 +76,15 @@ public class MultiAttAndCmdTableViewer extends MultiScalarTableViewer
           System.out.println("Unsupported type of model; Only voidVoidCommands and scalar attributes are accepted; setModelAt failed.");
 	  return;
        }
+       
+       if ((r < 0) || (c < 0)) return;
+       if ((r >= nbRows) || (c >= nbColumns)) return;
       
        // Here we know that the ient parameter is instanceof VoidVoidCommand
        if (entityModels == null)
        {
           initModels();
        }
-       
-       if ((r < 0) || (c < 0)) return;
-       if ((r >= nbRows) || (c >= nbColumns)) return;
        
        clearModelAt(r, c);
        
@@ -94,12 +95,65 @@ public class MultiAttAndCmdTableViewer extends MultiScalarTableViewer
        VoidVoidCommand cmd = (VoidVoidCommand) ient;
        addCmdAt(cmd, r, c);
    }
+   
+   public void setConfirmCommandAt(ICommand ic, int r, int c, String confirmMsg)
+   {
+       if (confirmMsg == null)
+       {
+           setModelAt(ic, r, c);
+           return;
+       }
+       
+       if (confirmMsg.isEmpty())
+       {
+           setModelAt(ic, r, c);
+           return;
+       }
+       
+       if ( !(ic instanceof VoidVoidCommand) )
+       {
+          System.out.println("Unsupported type of model; Only voidVoidCommands and scalar attributes are accepted; setModelAt failed.");
+	  return;
+       }
+       
+       if ((r < 0) || (c < 0)) return;
+       if ((r >= nbRows) || (c >= nbColumns)) return;
+       
+       // Here we know that the ient parameter is instanceof VoidVoidCommand
+       if (entityModels == null)
+       {
+          initModels();
+       }
+       
+       clearModelAt(r, c);
+       
+       entityModels[r][c] = ic;       
+       VoidVoidCommand cmd = (VoidVoidCommand) ic;
+       addConfirmCmdAt(cmd, r, c, confirmMsg);
+       
+   }
 
 
    private void addCmdAt( VoidVoidCommand cmd, int r, int c )
    { 
        VoidVoidCommandViewer  cmdViewer = new VoidVoidCommandViewer();
        cmdViewer.setFont(getFont());
+       cmdViewer.setModel(cmd);
+       cmdViewer.setMargin(new Insets(1,1,1,1));
+       
+//       if ( ((double) rowHeight) < cmdViewer.getPreferredSize().getHeight() )
+//          rowHeight = (int) cmdViewer.getPreferredSize().getHeight();
+       MultiAttAndCmdViewerTableModel  tm = (MultiAttAndCmdViewerTableModel) tabModel;
+       tm.addCommandAt(r,c,cmd,cmdViewer);
+   }
+   
+   private void addConfirmCmdAt( VoidVoidCommand cmd, int r, int c, String msg )
+   { 
+       ConfirmCommandViewer  cmdViewer = new ConfirmCommandViewer();
+       cmdViewer.setFont(getFont());
+       cmdViewer.setConfirmDialParent(this);
+       cmdViewer.setConfirmTitle("Confirm Command");
+       cmdViewer.setConfirmMessage(msg);
        cmdViewer.setModel(cmd);
        cmdViewer.setMargin(new Insets(1,1,1,1));
        
@@ -465,7 +519,7 @@ public class MultiAttAndCmdTableViewer extends MultiScalarTableViewer
             mstv.setModelAt(cmd, 0, 6);
             
             cmd = (ICommand) cmdl.add("jlp/test/2/On");
-            mstv.setModelAt(cmd, 1, 6);
+            mstv.setConfirmCommandAt(cmd, 1, 6, "Do you want to turn On?");
         }
         catch (Exception ex)
         {
