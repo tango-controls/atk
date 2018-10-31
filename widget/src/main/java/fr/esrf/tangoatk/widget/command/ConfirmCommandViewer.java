@@ -144,7 +144,7 @@ public class ConfirmCommandViewer extends VoidVoidCommandViewer
     {
 	int    userAnswer;
 	
- //System.out.println("Called executeButtonActionPerformed in ConfirmCommandViewer");
+// System.out.println("Called executeButtonActionPerformed in ConfirmCommandViewer: "+ model.getName());
 
         userAnswer = JOptionPane.NO_OPTION;
 	

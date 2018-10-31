@@ -17,9 +17,12 @@ import java.awt.Component;
 import java.awt.Insets;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.UIManager;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
@@ -31,9 +34,7 @@ import javax.swing.table.TableModel;
 public class MultiAttAndCmdTableViewer extends MultiScalarTableViewer
 {
     
-//   protected IEntity[][]        entityModels=null;
-//   MultiScalarViewerCellRenderer  scalarViewerRenderer=null;
-   
+    CmdButtonRenderAndEdit   cmdRendEdit = null;
    
    // ---------------------------------------------------
    // Contruction
@@ -43,9 +44,12 @@ public class MultiAttAndCmdTableViewer extends MultiScalarTableViewer
        super();
        tabModel = new MultiAttAndCmdViewerTableModel();
        super.setModel(tabModel);
-       scalarViewerRenderer = new MultiAttAndCmdViewerCellRenderer();
        setRowMargin(0);
        //getColumnModel().setColumnMargin(getColumnModel().getColumnMargin()+2);
+//       this.removeMouseListener(cellRendererAndEditor);
+       cmdRendEdit = new CmdButtonRenderAndEdit(this);
+//       cellRendererAndEditor = cmdRendEdit;
+       this.addMouseListener(cmdRendEdit);
    }
    
    
@@ -55,11 +59,43 @@ public class MultiAttAndCmdTableViewer extends MultiScalarTableViewer
        Object obj=tabModel.getValueAt(row, column);
        if (obj != null)
           if (obj instanceof VoidVoidCommandViewer)
-              return scalarViewerRenderer;
+              return cmdRendEdit;
        
        return super.getCellRenderer(row, column);
    }    
 
+
+    @Override
+    public TableCellEditor getCellEditor(int row, int column)
+    {
+
+       Object obj=tabModel.getValueAt(row, column);
+
+       if (obj != null)
+	  if (obj instanceof VoidVoidCommandViewer)
+	      return cmdRendEdit;
+
+       if (obj != null)
+	  if (obj instanceof SimpleScalarViewer)
+	      return cellRendererAndEditor;
+
+       if (obj != null)
+	  if (obj instanceof SimpleEnumScalarViewer)
+	      return cellRendererAndEditor;
+
+       if (obj != null)
+	  if (obj instanceof BooleanScalarCheckBoxViewer)
+	      return cellRendererAndEditor;
+        
+        return super.getCellEditor(row, column);
+    }
+    
+    
+    @Override
+    public boolean isCellEditable(int row, int column)
+    {
+       return tabModel.isCellEditable(row, column);
+    }
 
 
    public void setModelAt( IEntity ient, int r, int c )
@@ -191,6 +227,12 @@ public class MultiAttAndCmdTableViewer extends MultiScalarTableViewer
          columnIdents = new String[nbColumns];
       tabModel.init();
       initColumnHeaderRenderers();
+//      
+//      // set cell editors
+//      for (int i=0; i<columnIdents.length; i++)
+//      {
+//          this.getColumnModel().getColumn(i).setCellEditor(cmdRendEdit);
+//      }
    }
    
    
@@ -246,30 +288,29 @@ public class MultiAttAndCmdTableViewer extends MultiScalarTableViewer
        setModel(tabModel);
    }
 
-   @Override
-   protected void tableMouseClick(MouseEvent e)
-   {
-       int  row = getSelectedRow();
-       int  col = getSelectedColumn();
-       
-       if (tabModel.getValueAt(row, col) instanceof VoidVoidCommandViewer)
-       {
-           VoidVoidCommandViewer cmdv = (VoidVoidCommandViewer)tabModel.getValueAt(row, col);
-           cmdv.doClick();
-           return;
-       }
-       
-       super.tableMouseClick(e);
-       
-   }
+//   @Override
+//   protected void tableMouseClick(MouseEvent e)
+//   {
+//       int  row = getSelectedRow();
+//       int  col = getSelectedColumn();
+//       
+//       if (tabModel.getValueAt(row, col) instanceof VoidVoidCommandViewer)
+//       {
+//           VoidVoidCommandViewer cmdv = (VoidVoidCommandViewer)tabModel.getValueAt(row, col);
+//           cmdv.doClick();
+//           return;
+//       }
+//       
+//       super.tableMouseClick(e);
+//       
+//   }
 
 
 
    
     
-            // inner classes
-   
-   
+            // Inner classes
+      
             class MultiAttAndCmdViewerTableModel extends MultiScalarViewerTableModel
             {
                 /**
@@ -279,9 +320,14 @@ public class MultiAttAndCmdTableViewer extends MultiScalarTableViewer
                 {
                 }
 
+                @Override
                 public boolean isCellEditable(int row, int column)
                 {
-                    return false;
+                    Object obj = getValueAt(row, column);
+                    if (obj != null)
+                       if (obj instanceof VoidVoidCommandViewer)
+                          return true;
+                   return (super.isCellEditable(row, column) );
                 }
 
                 void init()
@@ -317,7 +363,7 @@ public class MultiAttAndCmdTableViewer extends MultiScalarTableViewer
                                 colIds[j] = " ";
                         }
                         
-                        Object[][] tableData = new Object[entityModels.length][entityModels[0].length + 1];
+		        tableData= new Object[entityModels.length][entityModels[0].length+1];
                         setDataVector(tableData, colIds);
 
                         for (int i = 0; i < nbRows; i++)
@@ -325,7 +371,8 @@ public class MultiAttAndCmdTableViewer extends MultiScalarTableViewer
                     }
                     else
                     {
-                        this.setDataVector(entityModels, columnIdents);
+                       tableData= new Object[entityModels.length][entityModels[0].length];
+                       this.setDataVector(tableData, columnIdents);
                     }
                     //this.fireTableStructureChanged();
                     //this.fireTableDataChanged();
@@ -398,46 +445,124 @@ public class MultiAttAndCmdTableViewer extends MultiScalarTableViewer
                     fireTableDataChanged();
                 }
             }
-            
+           
+       
+           class CmdButtonRenderAndEdit extends MultiScalarCellRendererAndEditor implements TableCellRenderer, TableCellEditor
+           {
+                JButton     rendererBtn;
+                JButton     editorBtn;
 
-            class MultiAttAndCmdViewerCellRenderer extends MultiScalarViewerCellRenderer
-            {
+                boolean     isCmdRenderAndEdit;
+                MultiAttAndCmdViewerTableModel  tm = null;
 
-                /**
-                 * Creates a new instance of MultiAttAndCmdViewerCellRenderer
-                 */
-                MultiAttAndCmdViewerCellRenderer()
+                /** Creates a new instance of CmdButtonRenderEdit */
+                CmdButtonRenderAndEdit(JTable tbl)
+                {
+                    super(tbl);
+                    if (table.getModel() instanceof MultiAttAndCmdViewerTableModel)
+                    {
+                        tm = (MultiAttAndCmdViewerTableModel) table.getModel();
+                    }
+                }
+                
+                private boolean isMouseOnCmd()
+                {
+                    int row = getSelectedRow();
+                    int col = getSelectedColumn();
+                    Object obj = table.getValueAt(row, col);
+                    if (obj instanceof VoidVoidCommandViewer)
+                        return true;                    
+                    return false;
+                }
+
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
+                {
+                    if (value instanceof VoidVoidCommandViewer)
+                    {
+                        rendererBtn = (JButton) value;
+                        if (isSelected)
+                        {
+                            rendererBtn.setForeground(table.getSelectionForeground());
+                            rendererBtn.setBackground(table.getSelectionBackground());
+                        }
+                        else
+                        {
+                            rendererBtn.setForeground(table.getForeground());
+                            rendererBtn.setBackground(UIManager.getColor("Button.background"));
+                        }
+                        return rendererBtn;
+                    }
+                    else
+                        return (super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row,  column));
+                }
+
+                @Override
+                public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column)
+                {
+                    if (value instanceof VoidVoidCommandViewer)
+                    {
+                        editorBtn = (JButton) value;
+                        this.editorValue = value;
+                        return editorBtn;
+                    }
+                    else
+                        return (super.getTableCellEditorComponent(table, value, isSelected, row,  column));
+                }
+
+                @Override
+                public Object getCellEditorValue()
+                {
+                    return editorValue;
+                }
+
+                @Override
+                public void mouseClicked(MouseEvent e)
                 {
                 }
 
                 @Override
-                public Component getTableCellRendererComponent(JTable table, Object value,
-                        boolean isSelected, boolean hasFocus, int row, int column)
+                public void mousePressed(MouseEvent e)
                 {
-                    VoidVoidCommandViewer cmdv;
-
-                    if (value instanceof VoidVoidCommandViewer)
+                    boolean isCmd = isMouseOnCmd();
+                    if (isCmd)
                     {
-//                        JPanel jp = new JPanel();
-//                        jp.setLayout(new GridBagLayout());
-//                        GridBagConstraints gbc = new GridBagConstraints();
-//                        gbc.gridx = 0;
-//                        gbc.gridy = 0;
-//                        gbc.fill = GridBagConstraints.NONE;
-//                        cmdv = (VoidVoidCommandViewer) value;
-//                        jp.add(cmdv, gbc);
-//                        return jp;
-                        cmdv = (VoidVoidCommandViewer) value;
-                        return cmdv;
-                    }
-                    else
-                    {
-                        return (super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column));
+                        if (table.isEditing() && (table.getCellEditor() == this))
+                        {                        
+                            isCmdRenderAndEdit = true;
+//                            System.out.println("command pressed");
+                        }
                     }
                 }
-            }
-   
-   
+
+                @Override
+                public void mouseReleased(MouseEvent e)
+                {
+                    boolean isCmd = isMouseOnCmd();
+                    if (isCmd)
+                    {
+                        if (isCmdRenderAndEdit && table.isEditing())
+                        {
+                            table.getCellEditor().stopCellEditing();
+//                            System.out.println("command released");
+//                            System.out.println("tableMouseReleased : row="+getSelectedRow()+" column="+getSelectedColumn());
+                        }
+                        isCmdRenderAndEdit = false;
+                    }
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent e)
+                {
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e)
+                {
+                }
+
+           }
+            
     // ---------------------------------------------------
     // Main test fucntion
     // ---------------------------------------------------
