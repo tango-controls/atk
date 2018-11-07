@@ -6,15 +6,8 @@
 package fr.esrf.tangoatk.widget.util;
 
 import fr.esrf.Tango.DevFailed;
-import fr.esrf.tangoatk.core.AttributeList;
-import fr.esrf.tangoatk.core.CommandList;
-import fr.esrf.tangoatk.core.ConnectionException;
-import fr.esrf.tangoatk.core.Device;
-import fr.esrf.tangoatk.core.DeviceFactory;
-import fr.esrf.tangoatk.core.IAttribute;
-import fr.esrf.tangoatk.core.ICommand;
-import fr.esrf.tangoatk.core.IEntity;
-import fr.esrf.tangoatk.core.IStringScalar;
+import fr.esrf.TangoApi.DeviceAttribute;
+import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.core.command.ArrayVoidCommand;
 import fr.esrf.tangoatk.core.command.ScalarScalarCommand;
 import fr.esrf.tangoatk.core.command.StringVoidCommand;
@@ -421,6 +414,29 @@ public class SettingsManagerProxy
         attl.clear();
         cmdl.clear();
     }
+
+    public Device getDevice() {
+       return settingsManagerDevice;
+    }
+
+    public String getLastAppliedFile() {
+
+      // Return last applied file from the setting manager
+      // Force a reading from the device to avoid polling side effect
+      String fName = "-----";
+      try {
+        DeviceAttribute da = settingsManagerDevice.readAttributeFromDevice("LastAppliedFile");
+        fName = da.extractString();
+      } catch (DevFailed ex) {
+        if( errh!=null ) {
+          // Add to Error window if any
+          ErrorEvent e = new ErrorEvent(devName,new AttributeReadException(ex),System.currentTimeMillis());
+          errh.setErrorOccured(e);
+        }
+      }
+      return fName;
+
+    }
     
     public void settingsPanelHideChild(String  childName)
     {
@@ -554,6 +570,12 @@ public class SettingsManagerProxy
     {
         if (lsfh == null) return;
         lsfh.loadFile();
+    }
+
+    public void setLoadSaveListener(LoadSaveFileListener l) {
+      if (lsfh == null) return;
+      lsfh.setParent(this);
+      lsfh.setLoadSaveListener(l);
     }
 
   /**

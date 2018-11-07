@@ -12,6 +12,7 @@ import fr.esrf.tangoatk.core.IStringScalar;
 import fr.esrf.tangoatk.core.ResultEvent;
 import fr.esrf.tangoatk.core.command.ArrayVoidCommand;
 import fr.esrf.tangoatk.core.command.StringVoidCommand;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -46,7 +47,10 @@ public class LoadSaveFileHandler implements IResultListener
     private boolean                       relativeFileName = true;
     
     private String                        fileContent = null;
-    
+
+    private LoadSaveFileListener          listener = null;
+    private SettingsManagerProxy          parent = null;
+
     public LoadSaveFileHandler ()
     {
         pfc = new PreviewFileChooser();
@@ -82,6 +86,10 @@ public class LoadSaveFileHandler implements IResultListener
         this(rootDirPath);
         relativeFileName = relFileName;
     }
+
+    public void setParent(SettingsManagerProxy parent) {
+      this.parent = parent;
+    }
     
     public void clearModels()
     {
@@ -93,8 +101,11 @@ public class LoadSaveFileHandler implements IResultListener
         loadFileCmd = null;
         readFileContentCmd = null;
     }
-    
-    
+
+    public void setLoadSaveListener(LoadSaveFileListener l) {
+      listener = l;
+    }
+
     public void setSaveJFileChooser(JFileChooser jfc)
     {
         if (jfc == null) return;
@@ -389,8 +400,11 @@ public class LoadSaveFileHandler implements IResultListener
                     javax.swing.JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
+
+        if(listener!=null) listener.beforeLoad(parent,selectedFile);
         loadFile(selectedFile);
+        if(listener!=null) listener.afterLoad(parent,selectedFile);
+
     }
     
     
@@ -429,8 +443,11 @@ public class LoadSaveFileHandler implements IResultListener
                 return;
             }
         }
-        
+
+        if(listener!=null) listener.beforeSave(parent,selectedFile);
         saveFile(selectedFile);
+        if(listener!=null) listener.afterSave(parent,selectedFile);
+
     }
     
     
