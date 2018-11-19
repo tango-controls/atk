@@ -330,7 +330,7 @@ public class MultiAttAndCmdTableViewer extends MultiScalarTableViewer
                    return (super.isCellEditable(row, column) );
                 }
 
-                void init()
+                protected void init()
                 {
                     if (entityModels == null) return;
 

@@ -74,7 +74,7 @@ public class MultiScalarTableViewer extends JTable
    private JDialog                        attSetDialWindow=null;
    private ScalarAttributeSetPanel        attSetPanel=null;
    
-   private boolean                        noAttModel=true;
+   protected boolean                        noAttModel=true;
 
    // ---------------------------------------------------
    // Contruction
@@ -172,35 +172,6 @@ public class MultiScalarTableViewer extends JTable
        attSetPanel.setBackground(panelBackground);
    }
 
-   // Only when a double click
-//   protected void tableMouseClick(MouseEvent e)
-//   {
-//       boolean   doubleclick;
-//       long      clickTime = System.currentTimeMillis();
-//       long      clickInterval = clickTime-firstClickTime;
-//
-//       if (clickInterval < 500)
-//       {
-//	    // double click
-//	    firstClickTime = 0;
-//	    doubleclick = true;
-//       }
-//       else 
-//       {
-//	   firstClickTime = clickTime;
-//	   doubleclick = false;
-//       }
-//       
-//       if (doubleclick == false)
-//	   return;
-//	  
-//       if (tabModel.getHasRowLabels())
-//	  if (getSelectedColumn() == 0)
-//	     return;
-//       
-//       //System.out.println("tableMouseDoubleClicked : row="+getSelectedRow()+" column="+getSelectedColumn());
-//       doEdit(getSelectedRow(), getSelectedColumn());
-//   }
    
    private void doEdit(int r, int c )
    {
@@ -683,11 +654,10 @@ public class MultiScalarTableViewer extends JTable
        
        if (entityModels[r][c] == null) return;
        
-       if (entityModels[r][c] instanceof INumberScalar)
+       if (entityModels[r][c] instanceof IAttribute)
        {
            tabModel.removeAttributeAt(r,c);
 	   entityModels[r][c] = null;
-	   return;
        } 
        
    }
@@ -718,7 +688,7 @@ public class MultiScalarTableViewer extends JTable
    }
 
 
-   private void initAttModels()
+   protected void initAttModels()
    {
       if ((nbRows <= 0) || (nbColumns <= 0))
       {
@@ -767,18 +737,18 @@ public class MultiScalarTableViewer extends JTable
    }
     
 
-       class MultiScalarViewerTableModel extends DefaultTableModel
-                                         implements INumberScalarListener,
-					            IStringScalarListener,
-					            IEnumScalarListener,
-						    IBooleanScalarListener
+       protected class MultiScalarViewerTableModel extends DefaultTableModel
+                                                   implements INumberScalarListener,
+					                      IStringScalarListener,
+					                      IEnumScalarListener,
+						              IBooleanScalarListener
        {
 	   protected  boolean                                   hasRowLabels = false;
 	   protected  HashMap<IEntity, ArrayList<Integer>>      entityMap = null;
            protected  Object[][]                                tableData = null;
 
 	   /** Creates a new instance of MSviewerTableModel */
-	   MultiScalarViewerTableModel()
+	   protected MultiScalarViewerTableModel()
 	   {
 	       entityMap = new HashMap<IEntity, ArrayList<Integer>> ();
 	   }
@@ -817,7 +787,7 @@ public class MultiScalarTableViewer extends JTable
                return null;               
            }
 
-	   void init ()
+	   protected void init ()
 	   {
                if (entityModels == null) return;
 	       if (entityModels.length != nbRows)
@@ -948,7 +918,7 @@ public class MultiScalarTableViewer extends JTable
               fireTableDataChanged();
 	   }
 
-	   void removeAttributeAt(int r, int c)
+	   protected void removeAttributeAt(int r, int c)
 	   {
               int col = c;
 	      if (hasRowLabels)
@@ -1097,7 +1067,7 @@ public class MultiScalarTableViewer extends JTable
 	       doUpdateAttCell(ibs);
 	   }
 	   
-	   private void doUpdateAttCell(IAttribute  iatt)
+	   protected void doUpdateAttCell(IAttribute  iatt)
 	   {
 	       if (!entityMap.containsKey(iatt))
 	          return;
@@ -1121,7 +1091,7 @@ public class MultiScalarTableViewer extends JTable
        }
        
        
-       class MultiScalarCellRendererAndEditor extends AbstractCellEditor implements TableCellRenderer, TableCellEditor, MouseListener
+       protected class MultiScalarCellRendererAndEditor extends AbstractCellEditor implements TableCellRenderer, TableCellEditor, MouseListener
        {
            protected JTable      table;
            protected Component   rendererComp;
@@ -1129,7 +1099,7 @@ public class MultiScalarTableViewer extends JTable
            protected Object      editorValue;
 
            /** Creates a new instance of MultiScalarViewerCellRenderer */
-	   MultiScalarCellRendererAndEditor(JTable tbl)
+	   protected MultiScalarCellRendererAndEditor(JTable tbl)
 	   {
                table = tbl;
 	   }
