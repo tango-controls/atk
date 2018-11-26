@@ -42,6 +42,11 @@ public class ATKConstant {
   private static Map qualityLightMap;
   private static Map stateLightMap;
 
+  private static Map stateSmallBallMap;
+  private static Map stateMediumBallMap;
+  private static Map stateLargeBallMap;
+  private static Map stateXlBallMap;
+
   /** Default font used by some ATK viewers */
   public static final Font labelFont = new Font("Dialog", Font.PLAIN, 12);
 
@@ -98,6 +103,75 @@ public class ATKConstant {
     stateLightMap.put( IDevice.ALARM, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/icons/ledDarkOrange.gif")) ); // Orange
     stateLightMap.put( IDevice.DISABLE, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/icons/ledPink.gif")) );     // Magenta
     stateLightMap.put( IDevice.UNKNOWN, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/icons/ledGray.gif")) );     // Gray
+
+
+    stateSmallBallMap = new HashMap();
+    stateSmallBallMap.put( IDevice.ON, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_ON_10.png")) );              // Green
+    stateSmallBallMap.put( IDevice.OFF, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_OFF_10.png")) );            // White
+    stateSmallBallMap.put( IDevice.CLOSE, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_OFF_10.png")) );          // White
+    stateSmallBallMap.put( IDevice.OPEN, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_ON_10.png")) );            // Green
+    stateSmallBallMap.put( IDevice.INSERT, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_OFF_10.png")) );         // White
+    stateSmallBallMap.put( IDevice.EXTRACT, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_ON_10.png")) );         // Green
+    stateSmallBallMap.put( IDevice.MOVING, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_MOVING_10.png")) );      // Light Blue
+    stateSmallBallMap.put( IDevice.STANDBY, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_STANDBY_10.png")) );    // Yellow
+    stateSmallBallMap.put( IDevice.FAULT, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_FAULT_10.png")) );        // Red
+    stateSmallBallMap.put( IDevice.INIT, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_INIT_10.png")) );          // Beige
+    stateSmallBallMap.put( IDevice.RUNNING, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_RUNNING_10.png")) );    // Dark Green
+    stateSmallBallMap.put( IDevice.ALARM, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_ALARM_10.png")) );        // Orange
+    stateSmallBallMap.put( IDevice.DISABLE, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_DISABLE_10.png")) );    // Magenta
+    stateSmallBallMap.put( IDevice.UNKNOWN, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_UNKNOWN_10.png")) );    // Gray
+
+
+    stateMediumBallMap = new HashMap();
+    stateMediumBallMap.put( IDevice.ON, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_ON_14.png")) );              // Green
+    stateMediumBallMap.put( IDevice.OFF, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_OFF_14.png")) );            // White
+    stateMediumBallMap.put( IDevice.CLOSE, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_OFF_14.png")) );          // White
+    stateMediumBallMap.put( IDevice.OPEN, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_ON_14.png")) );            // Green
+    stateMediumBallMap.put( IDevice.INSERT, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_OFF_14.png")) );         // White
+    stateMediumBallMap.put( IDevice.EXTRACT, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_ON_14.png")) );         // Green
+    stateMediumBallMap.put( IDevice.MOVING, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_MOVING_14.png")) );      // Light Blue
+    stateMediumBallMap.put( IDevice.STANDBY, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_STANDBY_14.png")) );    // Yellow
+    stateMediumBallMap.put( IDevice.FAULT, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_FAULT_14.png")) );        // Red
+    stateMediumBallMap.put( IDevice.INIT, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_INIT_14.png")) );          // Beige
+    stateMediumBallMap.put( IDevice.RUNNING, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_RUNNING_14.png")) );    // Dark Green
+    stateMediumBallMap.put( IDevice.ALARM, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_ALARM_14.png")) );        // Orange
+    stateMediumBallMap.put( IDevice.DISABLE, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_DISABLE_14.png")) );    // Magenta
+    stateMediumBallMap.put( IDevice.UNKNOWN, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_UNKNOWN_14.png")) );    // Gray
+
+
+    stateLargeBallMap = new HashMap();
+    stateLargeBallMap.put( IDevice.ON, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_ON_20.png")) );              // Green
+    stateLargeBallMap.put( IDevice.OFF, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_OFF_20.png")) );            // White
+    stateLargeBallMap.put( IDevice.CLOSE, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_OFF_20.png")) );          // White
+    stateLargeBallMap.put( IDevice.OPEN, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_ON_20.png")) );            // Green
+    stateLargeBallMap.put( IDevice.INSERT, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_OFF_20.png")) );         // White
+    stateLargeBallMap.put( IDevice.EXTRACT, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_ON_20.png")) );         // Green
+    stateLargeBallMap.put( IDevice.MOVING, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_MOVING_20.png")) );      // Light Blue
+    stateLargeBallMap.put( IDevice.STANDBY, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_STANDBY_20.png")) );    // Yellow
+    stateLargeBallMap.put( IDevice.FAULT, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_FAULT_20.png")) );        // Red
+    stateLargeBallMap.put( IDevice.INIT, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_INIT_20.png")) );          // Beige
+    stateLargeBallMap.put( IDevice.RUNNING, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_RUNNING_20.png")) );    // Dark Green
+    stateLargeBallMap.put( IDevice.ALARM, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_ALARM_20.png")) );        // Orange
+    stateLargeBallMap.put( IDevice.DISABLE, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_DISABLE_20.png")) );    // Magenta
+    stateLargeBallMap.put( IDevice.UNKNOWN, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_UNKNOWN_20.png")) );    // Gray
+   
+    
+    stateXlBallMap = new HashMap();
+    stateXlBallMap.put( IDevice.ON, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_ON_28.png")) );              // Green
+    stateXlBallMap.put( IDevice.OFF, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_OFF_28.png")) );            // White
+    stateXlBallMap.put( IDevice.CLOSE, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_OFF_28.png")) );          // White
+    stateXlBallMap.put( IDevice.OPEN, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_ON_28.png")) );            // Green
+    stateXlBallMap.put( IDevice.INSERT, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_OFF_28.png")) );         // White
+    stateXlBallMap.put( IDevice.EXTRACT, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_ON_28.png")) );         // Green
+    stateXlBallMap.put( IDevice.MOVING, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_MOVING_28.png")) );      // Light Blue
+    stateXlBallMap.put( IDevice.STANDBY, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_STANDBY_28.png")) );    // Yellow
+    stateXlBallMap.put( IDevice.FAULT, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_FAULT_28.png")) );        // Red
+    stateXlBallMap.put( IDevice.INIT, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_INIT_28.png")) );          // Beige
+    stateXlBallMap.put( IDevice.RUNNING, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_RUNNING_28.png")) );    // Dark Green
+    stateXlBallMap.put( IDevice.ALARM, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_ALARM_28.png")) );        // Orange
+    stateXlBallMap.put( IDevice.DISABLE, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_DISABLE_28.png")) );    // Magenta
+    stateXlBallMap.put( IDevice.UNKNOWN, new ImageIcon(ATKConstant.class.getResource("/fr/esrf/tangoatk/widget/util/jlballs/ball_UNKNOWN_28.png")) );    // Gray
+
 
     Locale.setDefault(Locale.US);
 
@@ -211,6 +285,50 @@ public class ATKConstant {
   }
 
 
+
+    /**
+     * Return the "10 pixels" 3D ball ImageIcon according to the given device state.
+     *
+     * @param state Attribute state.
+     * @return ImageIcon.
+     */
+    public static ImageIcon getSmallBallIcon4State(String state)
+    {
+        return (ImageIcon) stateSmallBallMap.get(state);
+    }
+
+    /**
+     * Return the "14 pixels" 3D ball ImageIcon according to the given device state.
+     *
+     * @param state Attribute state.
+     * @return ImageIcon.
+     */
+    public static ImageIcon getMediumBallIcon4State(String state)
+    {
+        return (ImageIcon) stateMediumBallMap.get(state);
+    }
+    
+    /**
+     * Return the "20 pixels" 3D ball ImageIcon according to the given device state.
+     *
+     * @param state Attribute state.
+     * @return ImageIcon.
+     */
+    public static ImageIcon getLargeBallIcon4State(String state)
+    {
+        return (ImageIcon) stateLargeBallMap.get(state);
+    }
+    
+    /**
+     * Return the "28 pixels" 3D ball ImageIcon according to the given device state.
+     *
+     * @param state Attribute state.
+     * @return ImageIcon.
+     */
+    public static ImageIcon getXLBallIcon4State(String state)
+    {
+        return (ImageIcon) stateXlBallMap.get(state);
+    }
 
 }
 
