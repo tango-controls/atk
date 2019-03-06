@@ -135,6 +135,12 @@
             <id>bintray-tango-controls-maven</id>
             <url>http://dl.bintray.com/tango-controls/maven</url>
         </repository>
+   <!-- tango-controls-jtango bintray maven repo to resolve dependencies-->
+        <repository>
+            <id>bintray-tango-controls-jtango</id>
+            <name>bintray</name>
+            <url>http://dl.bintray.com/tango-controls/jtango</url>
+        </repository>
     </repositories>
 
 </project>
