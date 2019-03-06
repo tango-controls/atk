@@ -9,10 +9,10 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.tango</groupId>
-            <artifactId>TangORB</artifactId>
-            <version>RELEASE</version>
-            <scope>provided</scope>
+            <groupId>org.tango-controls</groupId>
+            <artifactId>JTango</artifactId>
+            <version>9.5.13</version>
+            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>org.tango.atk</groupId>
@@ -103,11 +103,12 @@
         </repository>
     </distributionManagement>
 
+    <!-- tango-controls-jtango bintray maven repo to resolve dependencies-->
     <repositories>
         <repository>
-            <id>bintray-tango-controls</id>
+            <id>bintray-tango-controls-jtango</id>
             <name>bintray</name>
-            <url>http://dl.bintray.com/tango-controls/maven</url>
+            <url>http://dl.bintray.com/tango-controls/jtango</url>
         </repository>
     </repositories>
 
