@@ -99,30 +99,33 @@ public class SettingsManagerProxy
         }
         
         String className = null;
-        try
-        {
-            className = settingsManagerDevice.get_class_name();
-        }
-        catch (DevFailed ex) {}
         
-        if (className == null)
+        if (settingsManagerDevice != null)
         {
-            javax.swing.JOptionPane.showMessageDialog(
-                        null, "Failed to get the class name of the device.\n"
-                                + "Check the setting manager device name you entered.",
-                        "Get class name failed",
-                        javax.swing.JOptionPane.ERROR_MESSAGE);
+            try
+            {
+                className = settingsManagerDevice.get_class_name();
+            }
+            catch (DevFailed ex) {}
+            if (className == null)
+            {
+                javax.swing.JOptionPane.showMessageDialog(
+                            null, "Failed to get the class name of the device.\n"
+                                    + "Check the setting manager device name you entered.",
+                            "Get class name failed",
+                            javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
+            if (!className.equalsIgnoreCase("SettingsManager"))
+            {
+                javax.swing.JOptionPane.showMessageDialog(
+                            null, "The device is not a SettingsManager.\n"
+                                    + "Check the setting manager device name you entered.",
+                            "Bad class name",
+                            javax.swing.JOptionPane.ERROR_MESSAGE);
+                className = null;
+            }
         }
-        
-        if (!className.equalsIgnoreCase("SettingsManager"))
-        {
-            javax.swing.JOptionPane.showMessageDialog(
-                        null, "The device is not a SettingsManager.\n"
-                                + "Check the setting manager device name you entered.",
-                        "Bad class name",
-                        javax.swing.JOptionPane.ERROR_MESSAGE);
-            className = null;
-        }
+                
         
         if (className != null)
         {
@@ -173,10 +176,10 @@ public class SettingsManagerProxy
                     readContentCmd = (ICommand) ie;
             }
             catch (Exception ex) {}
+            attl.startRefresher();
+            createLoadSaveFileHandler();
+            createSettingsPanel();
         }
-        attl.startRefresher();
-        createLoadSaveFileHandler();
-        createSettingsPanel();
     }
     
     
@@ -415,31 +418,40 @@ public class SettingsManagerProxy
         cmdl.clear();
     }
 
-    public Device getDevice() {
-       return settingsManagerDevice;
+    public Device getDevice()
+    {
+        return settingsManagerDevice;
     }
 
-    public String getLastAppliedFile() {
-
-      // Return last applied file from the setting manager
-      // Force a reading from the device to avoid polling side effect
-      String fName = "-----";
-      try {
-        DeviceAttribute da = settingsManagerDevice.readAttributeFromDevice("LastAppliedFile");
-        fName = da.extractString();
-      } catch (DevFailed ex) {
-        if( errh!=null ) {
-          // Add to Error window if any
-          ErrorEvent e = new ErrorEvent(devName,new AttributeReadException(ex),System.currentTimeMillis());
-          errh.setErrorOccured(e);
+    public String getLastAppliedFile()
+    {
+        if (settingsManagerDevice == null) return null;
+        
+        // Return last applied file from the setting manager
+        // Force a reading from the device to avoid polling side effect
+        String fName = "-----";
+        try
+        {
+            DeviceAttribute da = settingsManagerDevice.readAttributeFromDevice("LastAppliedFile");
+            fName = da.extractString();
         }
-      }
-      return fName;
+        catch (DevFailed ex)
+        {
+            if (errh != null)
+            {
+                // Add to Error window if any
+                ErrorEvent e = new ErrorEvent(devName, new AttributeReadException(ex), System.currentTimeMillis());
+                errh.setErrorOccured(e);
+            }
+        }
+        return fName;
 
     }
     
     public void settingsPanelHideChild(String  childName)
     {
+        if (settingsManagerDevice == null) return;
+        
         if (childName.equalsIgnoreCase(FILE_LABEL))
         {
             if (fileLabel != null)
@@ -474,6 +486,8 @@ public class SettingsManagerProxy
     
     public void settingsPanelShowChild(String  childName)
     {
+        if (settingsManagerDevice == null) return;
+        
         if (childName.equalsIgnoreCase(FILE_LABEL))
         {
             if (fileLabel != null)
@@ -508,6 +522,8 @@ public class SettingsManagerProxy
     
     public JComponent getSettingsPanelChild(String  childName)
     {
+        if (settingsManagerDevice == null) return null;
+        
         if (childName.equalsIgnoreCase(FILE_LABEL)) return fileLabel;
         
         if (childName.equalsIgnoreCase(FILE_NAME)) return settingsFileSsv;
@@ -611,7 +627,7 @@ public class SettingsManagerProxy
                 // Create the SettingsManagerProxy and errorWindow
                 final ErrorHistory  errorWindow = new ErrorHistory();
                 
-                final SettingsManagerProxy  smp = new SettingsManagerProxy("//acudebian7:10000/sys/settings/syco");
+                final SettingsManagerProxy  smp = new SettingsManagerProxy("//acudebian7:10000/sys/settings/syccco");
                 smp.setErrorHistoryWindow(errorWindow);
                 smp.setFileAuthor("Test");
                 smp.setFileComments("Encore test");
@@ -627,12 +643,15 @@ public class SettingsManagerProxy
                 smp.settingsPanelHideChild(SettingsManagerProxy.PREVIEW_BUTTON);
                 JButton  statusButton = (JButton) smp.getSettingsPanelChild(SettingsManagerProxy.STATUS_BUTTON);
                 // move status button under the settings file name
-                GridBagLayout        gbl = (GridBagLayout) smp.getSettingsPanel().getLayout();
-                GridBagConstraints   gbc = gbl.getConstraints(smp.getSettingsPanelChild(SettingsManagerProxy.FILE_NAME));
-                smp.getSettingsPanel().remove(statusButton);
-                gbc.gridy++;
-                gbc.fill = GridBagConstraints.NONE;
-                smp.getSettingsPanel().add(statusButton, gbc);
+                if (smp.getSettingsPanel() != null)
+                {
+                    GridBagLayout        gbl = (GridBagLayout) smp.getSettingsPanel().getLayout();
+                    GridBagConstraints   gbc = gbl.getConstraints(smp.getSettingsPanelChild(SettingsManagerProxy.FILE_NAME));
+                    smp.getSettingsPanel().remove(statusButton);
+                    gbc.gridy++;
+                    gbc.fill = GridBagConstraints.NONE;
+                    smp.getSettingsPanel().add(statusButton, gbc);
+                }
                 
                 
                 
