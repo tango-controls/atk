@@ -713,7 +713,7 @@ public class SimpleScalarViewer extends JAutoScrolledText
     fr.esrf.tangoatk.core.AttributeList attributeList = new
         fr.esrf.tangoatk.core.AttributeList();
     SimpleScalarViewer snv = new SimpleScalarViewer();
-    String attributeName = "jlp/test/1/att_quatre";
+    String attributeName = "srdiag/bpm/c08-01/SA_HPosition";
     //String attributeName = "tango://pcantares:12345/fp/dev/01#dbase=no/Float_attr";
     if (args != null && args.length > 0) {
         attributeName = args[0];

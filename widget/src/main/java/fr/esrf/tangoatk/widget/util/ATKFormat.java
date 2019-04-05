@@ -23,12 +23,15 @@
 
 package fr.esrf.tangoatk.widget.util;
 
+import java.text.DecimalFormat;
 import java.util.IllegalFormatException;
 
 /**
  * A Base class for atk formatting.
  */
 public class ATKFormat {
+
+  static DecimalFormat engFormat = new DecimalFormat("##0.0E0");
 
   /** Returns a String representating the given number.
    * @param number A number
@@ -61,7 +64,13 @@ public class ATKFormat {
     String retValue;
 
     try {
-      retValue = String.format(format,value);
+
+      if( format.equals("%eng")) {
+        retValue = engFormat.format(value);
+      } else {
+        retValue = String.format(format,value);
+      }
+
     } catch (IllegalFormatException e1) {
       // We may have a %d or a %x in the format
       try {
