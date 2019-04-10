@@ -22,13 +22,17 @@
  
 package fr.esrf.tangoatk.widget.util.jdraw;
 
-/** An interface for receving JDValue events of a JDObject */
+/** An interface for receiving JDValue events of a JDObject */
 public interface JDValueListener {
 
-  /** Trigerred when the JDObject value change */
+  /** Trigerred when the JDObject value change
+   * @param src Source object
+   * */
   public void valueChanged(JDObject src);
 
-  /** Trigerred when the JDObject value goes out of bounds and is reseted to its minimum value */
+  /** Triggered when the JDObject value goes out of bounds and is reseted to its minimum value
+   * @param src Source object
+   */
   public void valueExceedBounds(JDObject src);
 
 }

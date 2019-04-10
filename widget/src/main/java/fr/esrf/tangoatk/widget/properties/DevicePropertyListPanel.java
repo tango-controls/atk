@@ -367,7 +367,7 @@ public class DevicePropertyListPanel extends JFrame implements Serializable {
     /**
      * Constructor
      * 
-     * @throws java.awt.HeadlessException
+     * @throws java.awt.HeadlessException In case of failure
      */
     public DevicePropertyListPanel() throws HeadlessException {
         super();
@@ -428,8 +428,10 @@ public class DevicePropertyListPanel extends JFrame implements Serializable {
     /**
      * Constructs the widget, associates a Device, and sets the title of the
      * columns of the table
-     * 
-     * @throws java.awt.HeadlessException
+     * @param aDevice Device model
+     * @param apropertiesNameColumnText Column name
+     * @param apropertiesValueColumnText Column name
+     * @throws java.awt.HeadlessException In case of failure
      */
     public DevicePropertyListPanel(Device aDevice,
             String apropertiesNameColumnText,
@@ -693,7 +695,7 @@ public class DevicePropertyListPanel extends JFrame implements Serializable {
 
     /**
      * sets the title of the column "values"
-     * @param propertiesNameColumnText the title
+     * @param propertiesValueColumnText the title
      */
     public void setPropertiesValueColumnText(String propertiesValueColumnText) {
         this.propertiesValueColumnText = propertiesValueColumnText;
@@ -761,7 +763,7 @@ public class DevicePropertyListPanel extends JFrame implements Serializable {
 
     /**
      * sets the message to ask confirmation for modifications
-     * @param titleAskConfirmation the message
+     * @param textAskConfirmation the message
      */
     public void setTextAskConfirmation(String textAskConfirmation) {
         if (textAskConfirmation.equals(""))
@@ -769,10 +771,6 @@ public class DevicePropertyListPanel extends JFrame implements Serializable {
         this.textAskConfirmation = textAskConfirmation;
     }
     
-    /**
-     * Main class, so you can test this widget.
-     * Give the name of your device as parameter
-     */
     public static void main(String[] args) {
         try {
             if (args.length != 0 && args.length != 1) {

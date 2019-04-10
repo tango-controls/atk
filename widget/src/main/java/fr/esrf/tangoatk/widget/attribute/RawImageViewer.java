@@ -373,6 +373,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
   /**
    * Sets data to display.
+   * @param encFormat DevEncoded format
    * @param rawData Handle to data
    */
   public void setData(String encFormat,byte[] rawData) {
@@ -543,6 +544,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
   /**
    * Return the current zoom factor index.
+   * @return Zoom factor
    * @see #setZoom
    */
   public int getZoom() {
@@ -644,6 +646,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
   }
 
   /** Determines wheter this image viewer has auto zoom enabled.
+   * @return Autozoom flag
    * @see #setAutoZoom
    */
   public boolean getAutoZoom() {
@@ -793,14 +796,14 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
   }
 
   /**
-   * Returns a handle to the x axis.
+   * @return a handle to the x axis.
    */
   public JLAxis getXAxis() {
     return imagePanel.getXAxis();
   }
 
   /**
-   * Return a handle to the Y axis.
+   * @return a handle to the Y axis.
    */
   public JLAxis getYAxis() {
     return imagePanel.getYAxis();
@@ -815,7 +818,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
   }
 
   /**
-   * Returns true when the gradient is visible.
+   * @return true when the gradient is visible.
    */
   public boolean isGradientVisible() {
     return gradientTool.isVisible();
@@ -824,6 +827,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
   /**
    * Converts the component horizontal coordinate to the image coordinate.
    * @param x Component horizontal coordinate
+   * @return Converted coordinates
    */
   public int getImageXCoord(int x) {
 
@@ -838,6 +842,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
   /**
    * Converts the component vertical coordinate to the image coordinate.
    * @param y Component vertical coordinate
+   * @return Converted coordinates
    */
   public int getImageYCoord(int y) {
 

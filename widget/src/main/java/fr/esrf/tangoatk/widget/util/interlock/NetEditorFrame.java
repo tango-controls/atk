@@ -266,13 +266,13 @@ public class NetEditorFrame extends JFrame implements NetEditorListener,ActionLi
     appRelease = appName;
   }
 
-  /** Returns the file menu. */
+  /** @return the file menu. */
   public JMenu getFileMenu() {
     return jMenuFile;
   }
 
 /**
- * Returns a reference to the specified menu item of the file menu.
+ * @return a reference to the specified menu item of the file menu.
  * @param which Menu identifier
  * @see NetEditorFrame#FILE_NEW
  * @see NetEditorFrame#FILE_LOAD
@@ -298,13 +298,13 @@ public class NetEditorFrame extends JFrame implements NetEditorListener,ActionLi
     return null;
   }
 
-  /** Returns the edit menu. */
+  /** @return the edit menu. */
   public JMenu getEditMenu() {
     return jMenuEdit;
   }
 
   /**
-   * Returns a reference to the specified menu item of the edit menu.
+   * @return a reference to the specified menu item of the edit menu.
    * @param which Menu identifier
    * @see NetEditorFrame#EDIT_UNDO
    * @see NetEditorFrame#EDIT_REDO
@@ -341,13 +341,13 @@ public class NetEditorFrame extends JFrame implements NetEditorListener,ActionLi
   }
 
 
-  /** Returns the option menu. */
+  /** @return the option menu. */
   public JMenu getOptionMenu() {
     return jMenuOptions;
   }
 
   /**
-   * Returns a reference to the specified menu item of the option menu.
+   * @return a reference to the specified menu item of the option menu.
    * @param which Menu identifier
    * @see NetEditorFrame#OPTION_FIT
    * @see NetEditorFrame#OPTION_PREF
@@ -365,13 +365,13 @@ public class NetEditorFrame extends JFrame implements NetEditorListener,ActionLi
 
   }
 
-  /** Returns the default toolbar */
+  /** @return the default toolbar */
   public JToolBar getToolbar() {
     return toolBar;
   }
 
   /**
-   * Returns a reference to the specified button of the toolbar.
+   * @return a reference to the specified button of the toolbar.
    * @param which Button identifier
    * @see NetEditorFrame#TOOL_BUBBLE
    * @see NetEditorFrame#TOOL_LABEL
@@ -400,6 +400,7 @@ public class NetEditorFrame extends JFrame implements NetEditorListener,ActionLi
 
   /**
    * Load a file into the editor
+   * @param fileName File name
    */
   public void loadFile(String fileName) {
 
@@ -412,12 +413,12 @@ public class NetEditorFrame extends JFrame implements NetEditorListener,ActionLi
 
   }
 
-  /** Returns a reference to the help label */
+  /** @return a reference to the help label */
   public JLabel getHelpLabel() {
     return helpLabel;
   }
 
-  /** Return the JScrollPane that contains the NetEditor object */
+  /** @return the JScrollPane that contains the NetEditor object */
   public JScrollPane getScrollPane() {
     return netView;
   }
@@ -584,7 +585,6 @@ public class NetEditorFrame extends JFrame implements NetEditorListener,ActionLi
 
   }
 
-  /** Main function which launch the default NerEditor . */
   public static void main(String[] args) {
 
     NetEditorFrame frame = new NetEditorFrame();

@@ -138,15 +138,15 @@ public class MultiNumberSpectrumViewer extends JLChart
 
   /**
    * Returns number of JDW attribute
-   * @return
+   * @return Number of JDW attribute
    */
   public int getJDWAttributeNumber() {
     return dvs.size();
   }
 
   /**
-   * Returns the specified JDW attribute
    * @param idx Index of JDW attribute
+   * @return the specified JDW attribute
    */
   public JDWAttribute getJDWAttribute(int idx) {
     return dvs.get(idx);
@@ -366,11 +366,11 @@ public class MultiNumberSpectrumViewer extends JLChart
 
 
   /**
-   * Sets an affine tranform to the X axis. This allows to transform
+   * Sets an affine transform to the X axis. This allows to transform
    * spectra index displayed on X axis.
    *
-   * @param a0
-   * @param a1
+   * @param a0 a0 coefficient
+   * @param a1 a1 coefficient
    */
   public void setXAxisAffineTransform(double a0, double a1) {
     affineA0 = a0;

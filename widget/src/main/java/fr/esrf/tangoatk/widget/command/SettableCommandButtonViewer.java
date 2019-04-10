@@ -281,7 +281,7 @@ public class SettableCommandButtonViewer extends SimpleCommandButtonViewer {
     /**
      * Sets the confirmation title
      * 
-     * @param titleAskConfirmation
+     * @param titleAskConfirmation Title of confirmation window
      */
     public void setAskConfirmationTitle(String titleAskConfirmation) {
         if( !titleAskConfirmation.equals("") ) {

@@ -35,7 +35,7 @@ import fr.esrf.tangoatk.core.StateEvent;
 import fr.esrf.tangoatk.widget.util.ATKConstant;
 
 /**
- * <code>DeviceStateLightViewer</code> is a viewer to surveil the state of a
+ * <code>DeviceStateLightViewer</code> is a viewer to survey the state of a
  * {@link fr.esrf.tangoatk.core.Device}represented by a DEL. DEL color
  * corresponds to the color defined for TANGO. <br>
  * See ATKWidget Manual to check these colors.
@@ -79,13 +79,12 @@ public class DeviceStateLightViewer extends JButton implements IStateListener,
         setDeviceModel(null);
     }
 
-    /**
-     * Contructs a DeviceStateLightViewer.
-     * 
-     * @param textLabel
-     *            a boolean to know whether you want to see the state as label
-     *            or not.
-     */
+  /**
+   * Contructs a DeviceStateLightViewer.
+   * @param device Device
+   * @param kindOfLabel Kind of label
+   * @param viewLbl a boolean to know whether you want to see the state as label or not
+   */
     public DeviceStateLightViewer(Device device, int kindOfLabel,
             boolean viewLbl) {
         super();
@@ -144,7 +143,6 @@ public class DeviceStateLightViewer extends JButton implements IStateListener,
      *            <code>true</code> and devicePropertyModel is not null, it will show label
      *            depending on the chosen label. if devicePropertyModel is null a message in
      *            label will warn user that there is no attribute
-     * @see setChosenLabel
      */
     public void setViewLabel(boolean b) {
         viewLabel = b;
@@ -156,7 +154,7 @@ public class DeviceStateLightViewer extends JButton implements IStateListener,
     }
 
     /**
-     * To know whether devicePropertyModel's label is text of this JLabel or not
+     * @return whether devicePropertyModel's label is text of this JLabel or not
      */
     public boolean isViewLabel() {
         return viewLabel;
@@ -213,10 +211,6 @@ public class DeviceStateLightViewer extends JButton implements IStateListener,
         repaint();
     }
 
-    /**
-     * Main class, so you can have an example.
-     * You can monitor your own device by giving its full path name in argument
-     */
     public static void main(String[] args) {
         try {
             Device d;

@@ -61,6 +61,7 @@ public interface IImageManipulator extends java.util.EventListener {
      * <code>filter</code> is called on each repaint from the IImageViewer.
      * You can manipulate the image in any way you want.
      * @param image a <code>BufferedImage</code> value
+     * @return Image
      */
     public BufferedImage filter(BufferedImage image);
 

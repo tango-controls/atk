@@ -37,7 +37,7 @@ import java.lang.reflect.Constructor;
  * available in the JDrawEditor. Adding a component for playing only can be done
  * by using the classic add(Component) method, no need here to be JDrawable ,however the add() method
  * shoud be called after initPlayer() or loadFile() is called.
- * Here is an example of a simple JDrawable JButton:<p>
+ * Here is an example of a simple JDrawable JButton:
  * <pre>
  public class MyJDButton extends JButton implements JDrawable {
 
@@ -201,7 +201,7 @@ public class JDSwingObject extends JDRectangular {
   }
 
   /**
-   * Returns true if the specified param is fixed. (coming from JDrawable)
+   * @return true if the specified param is fixed. (coming from JDrawable)
    * @param name Param name.
    */
   public boolean isFixedExtendedParam(String name) {
@@ -388,7 +388,7 @@ public class JDSwingObject extends JDRectangular {
   }
 
   /**
-   * Returns the current border.
+   * @return the current border.
    * @see #setBorder
    */
   public int getBorder() {
@@ -396,7 +396,7 @@ public class JDSwingObject extends JDRectangular {
   }
 
   /**
-   * Returns the current font.
+   * @return the current font.
    * @see #setFont(Font)
    * @see #setFont(Font,boolean)
    */
@@ -413,12 +413,12 @@ public class JDSwingObject extends JDRectangular {
   // Property stuff
   // -----------------------------------------------------------
 
-  /** Returns class name of the Swing JComponent object. */
+  /** @return class name of the Swing JComponent object. */
   public String getClassName() {
     return className;
   }
 
-  /** Returns the actual JComponent. */
+  /** @return the actual JComponent. */
   public JComponent getComponent() {
     if(swingComp!=null)
       return swingComp.getComponent();

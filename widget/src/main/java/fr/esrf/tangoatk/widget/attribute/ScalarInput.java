@@ -278,10 +278,6 @@ public class ScalarInput extends JPanel implements ActionListener{
             ((IBooleanScalar)scalarModel).setValue(avalue);
     }
 
-    /**
-     * Main class, so you can have an example.
-     * You can monitor your own attribute by giving its full path name in argument
-     */
     static public void main(String args[])
     {
         fr.esrf.tangoatk.core.AttributeList attributeList = new fr.esrf.tangoatk.core.AttributeList();

@@ -103,7 +103,7 @@ public class ScalarLevelMeterViewer extends JComponent implements INumberScalarL
   }
 
   /**
-   * Returns the view meter background color
+   * @return the view meter background color
    */
   public Color getViewBackground() {
     return viewBackground;
@@ -264,7 +264,7 @@ public class ScalarLevelMeterViewer extends JComponent implements INumberScalarL
   /**
    * Test function
    * @param args Not used
-   * @throws Exception
+   * @throws Exception In case of failure
    */
   public static void main(String[] args) throws Exception {
 

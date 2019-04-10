@@ -107,7 +107,8 @@ public class Property  {
     }
     
     /**
-     * <code>isEditable</code> true if this property is editable, else false 
+     * <code>isEditable</code> true if this property is editable, else false
+     * @return Is editable
      */
     public boolean isEditable() {
 	return editable;

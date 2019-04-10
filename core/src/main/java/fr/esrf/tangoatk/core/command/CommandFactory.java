@@ -112,8 +112,8 @@ public class CommandFactory extends AEntityFactory {
    * @param fqname a <code>String</code> value containing the EntityName
    * fully qualified with device name.
    * @return null if the type of the IEntity is not ACommand, a valid entity otherwise.
-   * @throws ConnectionException
-   * @throws DevFailed
+   * @throws ConnectionException In case of failure
+   * @throws DevFailed In case of failure
    */
   public ICommand getCommand(String fqname)
           throws ConnectionException, DevFailed {
@@ -142,6 +142,7 @@ public class CommandFactory extends AEntityFactory {
 
   /**
    * Returns an array containing all commands.
+   * @return Command array
    */
   public ACommand[] getCommands() {
 

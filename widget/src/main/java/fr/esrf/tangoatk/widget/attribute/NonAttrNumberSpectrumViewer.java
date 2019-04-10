@@ -219,8 +219,9 @@ public class NonAttrNumberSpectrumViewer extends JLChart implements
     }
 
     /**
-     * <code>setSettings()</code> Applies graph configuration given as string return
-     * error string or an empty string when succesfull
+     * <code>setSettings()</code> Applies graph configuration given as string
+     * @param cfg Configuration string
+     * @return error string or an empty string when successfull
      */
     public String setSettings (String cfg)
     {
@@ -321,6 +322,7 @@ public class NonAttrNumberSpectrumViewer extends JLChart implements
 
     /**
      * <code>getSettings()</code> Return graph configuration as string
+     * @return Configuration string
      */
     public String getSettings ()
     {

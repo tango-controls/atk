@@ -43,7 +43,6 @@ import javax.swing.JFrame;
  * the possibility to use Antialiased font for better rendering.
  * SimpleStateViewer has no label. Normally one connects the DevStateScalar attribute
  * with the viewer like this:
- * <p>
  * <pre>
  * IDevStateScalar stateAtt = (IDevStateScalar) attributeList.add("myStateAttName");
  * SimpleStateViewer statev = new SimpleStateViewer();
@@ -131,7 +130,7 @@ public class SimpleStateViewer extends JSmoothLabel implements IDevStateScalarLi
     * <code>setModel</code> sets the model of this viewer.
     * If the textLabel property is not set, the name of the device is
     * shown on the textLabel.
-    * @param IDevStateScalar a <code>stateAtt</code> to surveil
+    * @param stateAtt a <code>stateAtt</code> to survey
     */
     public void setModel(IDevStateScalar stateAtt)
     {
@@ -228,7 +227,7 @@ public class SimpleStateViewer extends JSmoothLabel implements IDevStateScalarLi
     }
 
     /**
-    * Gets the application attached to this state viewer.
+    * @return the application attached to this state viewer.
     * @see #setApplication
     */
     public IDeviceApplication getApplication()

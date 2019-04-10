@@ -817,7 +817,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
   }
 
   /**
-   * Returns true if the header is visible, false otherwise
+   * @return true if the header is visible, false otherwise
  a  */
   public boolean isHeaderVisible() {
     return headerVisible;
@@ -1001,7 +1001,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
   }
 
   /**
-   * Returns the header color
+   * @return the header color
    */
   public Color getHeaderColor() {
     return headerColor;
@@ -1048,14 +1048,14 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
 
   /**
    * Sets the label font
-   * @param f
+   * @param f Label font
    */
   public void setLabelFont(Font f) {
     labelFont = f;
   }
 
   /**
-   * Returns the label font
+   * @return the label font
    * @see #setLabelFont
    */
   public Font getLabelFont() {
@@ -1085,6 +1085,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
 
   /**
    * Display the data view option dialog.
+   * @param v Dataview
    */
   public void showDataOptionDialog(JLDataView v) {
 
@@ -1376,7 +1377,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
   }
 
   /**
-   * Returns a string containing the configuration file help.
+   * @return a string containing the configuration file help.
    */
   public String getHelpString() {
 

@@ -42,12 +42,12 @@ import java.io.IOException;
 /**
  * Class which allow to control and display an object of the network. It exists 2 types of object :
  * <p>
- * <li> The <strong>bubble object</strong> which is the main object . A bubble accept a free label that can be moved
+ * The <strong>bubble object</strong> which is the main object . A bubble accept a free label that can be moved
  * by the user , 2 small fixed labels (one centered and one at the bottom left) and can have extensions :
  * A list of named parameters associated to a string value. You can also specifie the maximum number of
  * incoming/outgoing links and its shape. The coordinates of a bubble are in GRID unit.
  * <p>
- * <li> The <strong>text object</strong> which is a free label moveable by the user. You can also specify a font for
+ * The <strong>text object</strong> which is a free label moveable by the user. You can also specify a font for
  * this object. The text object does not accept links , extensions , small fixed labels and shape. The coordinates
  * for a text object a in pixel.
  * <p>
@@ -58,8 +58,6 @@ import java.io.IOException;
  * loaded NetObject into a new type. As there is no undo or clipboard operation, your
  * objects will not be affected.
  *
- * <p>Here are the possible bubble shapes:<p>
- * <img src="all_shapes.gif" border="0" alt="The NetEditor shapes"></img>
  */
 
 public class NetObject {
@@ -304,7 +302,7 @@ public class NetObject {
     children.remove(i);
   }
 
-  /** Returns the number of children. */
+  /** @return the number of children. */
   public int getChildrenNumber() {
     return children.size();
   }
@@ -325,7 +323,7 @@ public class NetObject {
     children.clear();
   }
 
-  /** Returns the number of parent */
+  /** @return the number of parent */
   public int getParentNumber() {
     return parents.size();
   }
@@ -339,39 +337,43 @@ public class NetObject {
     return (NetObject)parents.get(idx);
   }
 
-  /** Returns true if this object is parent of o */
+  /** @return true if this object is parent of o
+   * @param o NetObject
+   */
   public boolean isParentOf(NetObject o) {
     return children.contains(o);
   }
 
-  /** Returns true if this object is child of o */
+  /** @return true if this object is child of o
+   * @param o NetObject
+   */
   public boolean isChildOf(NetObject o) {
     return parents.contains(o);
   }
 
   // --------------------------------------------------------------------
 
-  /** Internal usage */
+  // Internal usage
   void setChildrenIdList(int[] lst) {
     childrenIds = lst;
   }
 
-  /** Internal usage */
+  // Internal usage
   int[] getChildrenIdList() {
     return childrenIds;
   }
 
-  /** Internal usage */
+  // Internal usage
   int getIndex() {
     return idx;
   }
 
-  /** Internal usage */
+  // Internal usage
   void setIndex(int i) {
     idx=i;
   }
 
-  /** Internal usage */
+  // Internal usage
   void setParent(NetEditor iE) {
     parentEditor=iE;
   }
@@ -380,7 +382,7 @@ public class NetObject {
   // Property stuff
   // --------------------------------------------------------------------
 
-  /** Returns the label */
+  /** @return the label */
   public String getLabel() {
 
     StringBuffer tmpStr = new StringBuffer();
@@ -428,7 +430,9 @@ public class NetObject {
 
   }
 
-  /** Sets the free lablel */
+  /** Sets the free labels
+   * @param value Labels
+   */
   public void setLabel(String[] value) {
     labels = value;
     labelWidth = new int[labels.length];
@@ -452,7 +456,7 @@ public class NetObject {
   }
 
   /**
-   * Return the type of this NetObject.
+   * @return the type of this NetObject.
    * @see NetObject#OBJECT_BUBBLE
    * @see NetObject#OBJECT_TEXT
    */
@@ -460,7 +464,7 @@ public class NetObject {
     return type;
   }
 
-  /** Returns the user defined type. */
+  /** @return the user defined type. */
   public int getUserType() {
     return userType;
   }
@@ -474,7 +478,7 @@ public class NetObject {
     shape = s;
   }
 
-  /** Returns shape of this object */
+  /** @return shape of this object */
   public int getShape() {
     return shape;
   }
@@ -492,24 +496,25 @@ public class NetObject {
    * @see NetObject#JUSTIFY_LEFT
    * @see NetObject#JUSTIFY_RIGHT
    * @see NetObject#JUSTIFY_CENTER
+   * @param i Justify value
    */
   public void setJustify(int i) {
     justify = i;
   }
 
-  /** Returns current justification
+  /** @return current justification
    * @see NetObject#setJustify
    */
   public int getJustify() {
     return justify;
   }
 
-  /** Returns maximum number of incoming link */
+  /** @return maximum number of incoming link */
   public int getMaxInput() {
     return maxInput;
   }
 
-  /** Returns maximum number of outgoing link */
+  /** @return maximum number of outgoing link */
   public int getMaxOutput() {
     return maxOutput;
   }
@@ -517,6 +522,7 @@ public class NetObject {
   /**
    * Sets the label displayed at the center of this object.
    * It uses the NetEditor small font.
+   * @param s Label
    */
   public void setCenterLabel(String s) {
     smallCenterLabel = s;
@@ -525,37 +531,44 @@ public class NetObject {
   /**
    * Sets the label displayed at the bottom left of this object.
    * It uses the NetEditor small font.
+   * @param s Label
    */
   public void setBottomLabel(String s) {
     smallBottomLabel = s;
   }
 
-  /** Sets the background (fill color) of this object (when parent NetEditor is not editable) */
+  /** Sets the background (fill color) of this object (when parent NetEditor is not editable)
+   * @param c Background color
+   */
   public void setColor(Color c) {
     backColor = c;
   }
 
-  /** Gets the background (fill color) of this object (when parent NetEditor is not editable) */
+  /** @return the background (fill color) of this object (when parent NetEditor is not editable) */
   public Color getColor() {
     return backColor;
   }
 
-  /** Sets the object size */
+  /** Sets the object size
+   * @param size Object size
+   */
   public void setSize(int size) {
     bSize = size;
   }
 
-  /** Gets the object size */
+  /** @return the object size */
   public int getSize() {
     return bSize;
   }
 
-  /** Sets the user value for external usage */
+  /** Sets the user value for external usage
+   * @param v User value
+   */
   public void setUserValue(Object v) {
     userValue = v;
   }
 
-  /** Returns the user value */
+  /** @return the user value */
   public Object getUserValue() {
     return userValue;
   }
@@ -635,7 +648,7 @@ public class NetObject {
     return extParamValue[extIdx];
   }
 
-  /** Returns the number of extensions */
+  /** @return the number of extensions */
   public int getExtendedParamNumber() {
    if( extParamValue == null )
      return 0;
@@ -643,7 +656,9 @@ public class NetObject {
      return extParamValue.length;
   }
 
-  /** Returns the index of the specified extended param , -1 when not found */
+  /** @return the index of the specified extended param , -1 when not found
+   * @param name Param name
+   */
   public int getExtendedParamIndex(String name) {
 
     if( extParamName==null )
@@ -672,13 +687,13 @@ public class NetObject {
       textFont = f;
   }
 
-  /** Get the font of this object */
+  /** @return the font of this object */
   public Font getTextFont() {
     return textFont;
   }
 
   /**
-   * Returns X pixel coordinates.Returns a valid value only if
+   * @return X pixel coordinates.Returns a valid value only if
    * this object has been inserted in a NetEditor.
    */
   public int getXOrigin() {
@@ -690,7 +705,7 @@ public class NetObject {
   }
 
   /**
-   * Returns Y pixel coordinates.Returns a valid value only if
+   * @return Y pixel coordinates.Returns a valid value only if
    * this object has been inserted in a NetEditor.
    */
   public int getYOrigin() {

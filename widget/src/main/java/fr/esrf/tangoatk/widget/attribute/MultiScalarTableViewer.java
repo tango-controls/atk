@@ -294,7 +294,7 @@ public class MultiScalarTableViewer extends JTable
     * <code>setNbRows</code> sets the number of rows. The number of rows can only be set
     * when there is no attribute model for the viewer. No call to setModelAt yet.
     *
-    * @param int nr
+    * @param nr Number of rows
     */
    public void setNbRows (int nr)
    {
@@ -321,7 +321,7 @@ public class MultiScalarTableViewer extends JTable
     * <code>setNbColumns</code> sets the number of columns. The number of columns can only be set
     * when there is no attribute model for the viewer. No call to setModelAt yet.
     *
-    * @param int nr
+    * @param nc Number of columns
     */
    public void setNbColumns (int nc)
    {
@@ -352,7 +352,7 @@ public class MultiScalarTableViewer extends JTable
     * the attribute models.If the attribute model is not set yet the size of the colIds will change
     * the nbColumns property as well.
     *
-    * @param colIds
+    * @param colIds Column Ids
     */
    public void setColumnIdents (String[] colIds)
    {
@@ -390,7 +390,7 @@ public class MultiScalarTableViewer extends JTable
     * The RowIdents can only be set when there is no attribute model for the viewer. No call to setModelAt yet.If the attribute model is not set yet the size of the rowIds will change
     * the nbRow sproperty as well.
     *
-    * @param rowIds
+    * @param rowIds Row ids
     */
    public void setRowIdents (String[] rowIds)
    {
@@ -1098,7 +1098,9 @@ public class MultiScalarTableViewer extends JTable
            protected Component   editorComp;
            protected Object      editorValue;
 
-           /** Creates a new instance of MultiScalarViewerCellRenderer */
+     /** Creates a new instance of MultiScalarViewerCellRenderer
+      * @param tbl Table to use for this renderer
+      */
 	   protected MultiScalarCellRendererAndEditor(JTable tbl)
 	   {
                table = tbl;

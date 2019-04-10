@@ -242,7 +242,7 @@ public class JDImage extends JDRectangular {
 
   }
 
-  /** Returns false, Image cannot be shadowed. */
+  /** @return false, Image cannot be shadowed. */
   public boolean hasShadow() {
     return false;
   }
@@ -264,7 +264,7 @@ public class JDImage extends JDRectangular {
     centerOrigin();
   }
 
-  /** Returns current image filename. */
+  /** @return current image filename. */
   public String getFileName() {
     return fileName;
   }
@@ -277,14 +277,14 @@ public class JDImage extends JDRectangular {
   }
 
   /**
-   * Returns original image widht.
+   * @return original image width.
    */
   public int getImageWidth() {
     return imgWidth;
   }
 
   /**
-   * Returns original image height.
+   * @return original image height.
    */
   public int getImageHeight() {
     return imgHeight;

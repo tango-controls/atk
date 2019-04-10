@@ -52,7 +52,7 @@ public class JGradientViewer extends JComponent {
   }
 
   /**
-   * Return the current gradient.
+   * @return the current gradient.
    * @see #setGradient
    */
   public Gradient getGradient() {
@@ -69,19 +69,21 @@ public class JGradientViewer extends JComponent {
   }
 
   /**
-   * Returns a Handle to the axis.
+   * @return a Handle to the axis.
    */
   public JLAxis getAxis() {
     return axis;
   }
 
-  /** Returns the current bar width */
+  /** @return the current bar width */
   public int getBarWidth() {
     return barWidth;
   }
 
-  /** Sets the bar thickness. */
-  public void setBarWidth(int barWidth) {
+  /** Sets the bar thickness.
+   * @param barWidth Bar width
+   */
+   public void setBarWidth(int barWidth) {
     this.barWidth = barWidth;
   }
 

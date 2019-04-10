@@ -42,6 +42,7 @@ public abstract class IImageFormat {
   /**
    * Sets and decode the data.
    * @param rawData Pointer to image data
+   * @throws IOException In case of failure
    */
   public abstract void setData(byte[] rawData) throws IOException;
 
@@ -59,7 +60,7 @@ public abstract class IImageFormat {
   }
 
   /**
-   * Returns true if the image has a null size, false otherwise
+   * @return true if the image has a null size, false otherwise
    */
   public boolean isNull() {
     int s = getWidth()*getHeight();
@@ -71,6 +72,7 @@ public abstract class IImageFormat {
    * @param bestFit Enable automatic fitting
    * @param min minumun fitting value (0..100%)
    * @param max maximum fitting value (0..100%)
+   * @return true if input parameters are correct
    */
   public boolean setFitting(boolean bestFit,double min,double max) {
 
@@ -96,24 +98,24 @@ public abstract class IImageFormat {
   }
 
   /**
-   * Returns the width of the image depending on the format.
+   * @return the width of the image depending on the format.
    */
   public abstract int getWidth();
 
   /**
-   * Returns the height of the image depending on the format.
+   * @return the height of the image depending on the format.
    */
   public int getHeight() {
     return data.length;
   }
 
   /**
-   * Returns true if this format is a color format, false otherwise.
+   * @return true if this format is a color format, false otherwise.
    */
   public abstract boolean isColorFormat();
 
   /**
-   * Returns the format name.
+   * @return the format name.
    */
   public abstract String getName();
 
@@ -121,6 +123,7 @@ public abstract class IImageFormat {
    * Gets the pixel value as double (Used for table and profile display).
    * @param x horizontal coordinate
    * @param y vertical coordinate
+   * @return Pixel value as double
    */
   public abstract double getValue(int x,int y);
 
@@ -128,12 +131,12 @@ public abstract class IImageFormat {
    * Gets the pixel value as string (Used for pixel info display).
    * @param x horizontal coordinate
    * @param y vertical coordinate
+   * @return Pixel value as String
    */
   public abstract String getValueStr(int x,int y);
 
   /**
-   * Returns the histogram width.
-   * (The number of possible value for a pixel)
+   * @return the histogram width. (The number of possible value for a pixel)
    */
   public abstract int getHistogramWidth();
 
@@ -148,6 +151,7 @@ public abstract class IImageFormat {
    * @param y vertical coordinate
    * @param negative Negative flag
    * @param colormap16 16Bit colormap (Monochrome only)
+   * @return the pixel at the specifed pos
    */
   public abstract int getRGB(boolean negative,int[] colormap16,int x,int y);
 

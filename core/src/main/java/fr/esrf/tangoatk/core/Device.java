@@ -257,6 +257,7 @@ public class Device extends DeviceProxy implements IDevice, Serializable {
 
     /**
      * Returns the EventSupport object which manages ATKEvents for this device.
+     * @return EventSupport object
      */
     public EventSupport getPropChanges() {
         return propChanges;
@@ -650,6 +651,7 @@ public class Device extends DeviceProxy implements IDevice, Serializable {
 
     /**
      * Returns the number of call to refresh()
+     * @return Refresh count
      */
     public long getRefreshCount() {
         return refreshCount;
@@ -938,6 +940,8 @@ public class Device extends DeviceProxy implements IDevice, Serializable {
      * This method is provided to ATK applications so that they don't need to
      * import fr.esrf.TangoApi.DeviceProxy to get the timeout for the
      * connection to the device.
+     * @return Device timeout
+     * @throws ConnectionException In case of failure
      */
     public int getDevTimeout() throws ConnectionException
     {
@@ -972,6 +976,8 @@ public class Device extends DeviceProxy implements IDevice, Serializable {
      * This method is provided to ATK applications so that they don't need to
      * import fr.esrf.TangoApi.DeviceProxy to set the timeout for the
      * connection to the device.
+     * @param tmout_ms Timeout in millisecond
+     * @throws ConnectionException In case of failure
      */
     synchronized public void setDevTimeout(int  tmout_ms) throws ConnectionException
     {

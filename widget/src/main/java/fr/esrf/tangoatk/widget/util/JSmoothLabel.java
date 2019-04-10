@@ -66,7 +66,9 @@ public class JSmoothLabel extends JComponent {
 
   }
 
-  /** Sets the text. */
+  /** Sets the text.
+   * @param txt Text
+   */
   public void setText(String txt) {
     if (txt == null)
       text = "";
@@ -75,7 +77,9 @@ public class JSmoothLabel extends JComponent {
     repaint();
   }
 
-  /** Gets the text. */
+  /** Gets the text.
+   * @return Text
+   */
   public String getText() {
     return text;
   }
@@ -91,6 +95,7 @@ public class JSmoothLabel extends JComponent {
 
   /**
    * Returns the current text vertical offset.
+   * @return Vertical offset
    */
   public int getVerticalOffset() {
     return off_y;
@@ -98,6 +103,8 @@ public class JSmoothLabel extends JComponent {
 
   /**
    * Has no longer effects.
+   * @param x Not used
+   * @param y Not used
    * @see #setVerticalOffset
    * @deprecated
    */

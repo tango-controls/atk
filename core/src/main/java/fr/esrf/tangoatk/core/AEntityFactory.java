@@ -210,7 +210,7 @@ public abstract class AEntityFactory implements TangoConst,
    * list might contain more than one entity.
    * @param name a <code>String</code> value containing the name of the
    * entity wanted. Might be a wildcard.
-   * @return a <code>List<IEntity></code> value containing the corresponding entities
+   * @return a <code>List</code> value containing the corresponding entities
    * @exception ConnectionException if an error occurs
    * @see AEntityFactory#isWildCard(String)
    */
@@ -266,7 +266,7 @@ public abstract class AEntityFactory implements TangoConst,
    * entity
    * @param device a <code>Device</code> value containing the device from
    * which the entity is to be obtained.
-   * @return a <code>List<IEntity></code> value containing the entities corresponding
+   * @return a <code>List</code> value containing the entities corresponding
    * to the name
    * @exception DevFailed if an error occurs
    * @see AEntityFactory#isWildCard(String)

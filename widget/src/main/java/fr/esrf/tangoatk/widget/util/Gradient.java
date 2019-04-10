@@ -205,7 +205,7 @@ public class Gradient {
    * Sets the position for a specified id.
    * Position value must be greater that the previous pos and
    * lower than the next pos. It must also be in the
-   * range 0.0 => 1.0. If those conditions are
+   * range [0.0,1.0]. If those conditions are
    * not validated , no change happens.
    * @param id Entry id
    * @param pos New position value
@@ -231,7 +231,7 @@ public class Gradient {
    * Adds a color,pos entry to the gradient
    * Note that you have by default 2 entries at 0.0 and 1.0
    * @param c Color value
-   * @param pos Position [0.0 => 1.0]
+   * @param pos Position [0.0 , 1.0]
    * @return Entry id (-1 when fails)
    */
   public int addEntry(Color c,double pos) {

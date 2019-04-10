@@ -146,7 +146,7 @@ public class JGL3DAxis {
   }
 
   /**
-   * Returns the label font
+   * @return the label font
    */
   public Font getLabelFont() {
     return labelFont;
@@ -161,7 +161,7 @@ public class JGL3DAxis {
   }
 
   /**
-   * Returns label color
+   * @return label color
    */
   public Color getLabelColor() {
     return labelColor;
@@ -176,7 +176,7 @@ public class JGL3DAxis {
   }
 
   /**
-   * Returns the axis name font
+   * @return the axis name font
    */
   public Font getNameFont() {
     return nameFont;
@@ -191,7 +191,7 @@ public class JGL3DAxis {
   }
 
   /**
-   * Returns axis name color
+   * @return axis name color
    */
   public Color getNameColor() {
     return nameColor;
@@ -206,14 +206,14 @@ public class JGL3DAxis {
   }
 
   /**
-   * Returns the axis name
+   * @return the axis name
    */
   public String getName() {
     return name;
   }
 
   /**
-   * Returns true if the axis is visible
+   * @return true if the axis is visible
    */
   public boolean isVisible() {
     return visible;
@@ -237,7 +237,7 @@ public class JGL3DAxis {
   }
 
   /**
-   * Returns maximum value of this axis
+   * @return maximum value of this axis
    */
   public double getMaximum() {
     return maximum;
@@ -264,7 +264,7 @@ public class JGL3DAxis {
   }
 
   /**
-   * Returns current scale
+   * @return current scale
    * @see #LINEAR_SCALE
    * @see #LOG_SCALE
    * @return Scale
@@ -274,7 +274,7 @@ public class JGL3DAxis {
   }
 
   /**
-   * Returns minimum value of this axis
+   * @return minimum value of this axis
    */
   public double getMinimum() {
     return minimum;
@@ -290,7 +290,7 @@ public class JGL3DAxis {
   }
 
   /**
-   * Returns true wether this axis is auto scale
+   * @return true wether this axis is auto scale
 \   */
   public boolean isAutoScale() {
     return autoScale;
@@ -305,7 +305,7 @@ public class JGL3DAxis {
   }
 
   /**
-   * Returns the minimum length between 2 labels
+   * @return the minimum length between 2 labels
    */
   public int getTickSpacing() {
     return tickSpacing;
@@ -320,7 +320,7 @@ public class JGL3DAxis {
   }
 
   /**
-   * Returns the space between the axis name and the axis
+   * @return the space between the axis name and the axis
    */
   public double getTitleOffset() {
     return offLabel;
@@ -336,7 +336,7 @@ public class JGL3DAxis {
   }
 
   /**
-   * Returns the offset for axis coordinates
+   * @return the offset for axis coordinates
    */
   public double getOffsetTransform() {
     return atOffset;
@@ -352,7 +352,7 @@ public class JGL3DAxis {
   }
 
   /**
-   * Returns the gain for axis coordinates
+   * @return the gain for axis coordinates
    */
   public double getGainTransform() {
     return atGain;

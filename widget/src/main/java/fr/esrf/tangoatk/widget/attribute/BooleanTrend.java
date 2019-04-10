@@ -644,8 +644,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
      * parameter), remember to clean it, because this is not the list the
      * BooleanTrand uses (it uses a copy of it)
      * 
-     * @param list
-     *            an <code>AttributePolledList</code> value
+     * @param list an <code>AttributePolledList</code> value
      */
     public void setModel (AttributePolledList list)
     {
@@ -803,8 +802,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
      * Additional calls to addAttribute will add more IBooleanScalars to the
      * BooleanTrend.
      * 
-     * @param name
-     *            Attribute name
+     * @param name Attribute name
      */
     public void addAttribute (String name)
     {
@@ -985,6 +983,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
      * returns the configuration as string.
      * 
      * @see #setSetting
+     * @return Configuration string
      */
     public String getSettings ()
     {
@@ -1153,8 +1152,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
     /**
      * Apply a configuration.
      * 
-     * @param txt
-     *            Configuration text.
+     * @param txt Configuration text.
      * @return An error string or An empty string when succes
      * @see #getSettings
      */
@@ -1172,8 +1170,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
     /**
      * Save settings.
      * 
-     * @param filename
-     *            file to be saved.
+     * @param filename file to be saved.
      */
     public void saveSetting (String filename)
     {
@@ -1195,8 +1192,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
     /**
      * Load graph settings.
      * 
-     * @param filename
-     *            file to be read
+     * @param filename file to be read
      * @return An error string or An empty string when succes
      */
     public String loadSetting (String filename)
@@ -1211,7 +1207,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
         return applySettings( f );
     }
 
-    /** Returns the frame_title field read in the config file. */
+    /** @return the frame_title field read in the config file. */
     public String getTitle ()
     {
         return graphTitle;
@@ -1229,6 +1225,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
     // ************************************************
     /**
      * @deprecated use getChart()
+     * @param b Not used
      */
     public void setLegendVisible (boolean b)
     {
@@ -1236,6 +1233,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
 
     /**
      * @deprecated use getChart()
+     * @return false
      */
     public boolean isLegendVisible ()
     {
@@ -1244,6 +1242,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
 
     /**
      * @deprecated no longer used (has no FX)
+     * @param rate Not used
      */
     public void setSamplingRate (double rate)
     {
@@ -1251,6 +1250,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
 
     /**
      * @deprecated no longer used (has no FX)
+     * @return 0
      */
     public double getSamplingRate ()
     {
@@ -1259,6 +1259,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
 
     /**
      * @deprecated no longer used (has no FX)
+     * @param length Not used
      */
     public void setXAxisLength (int length)
     {
@@ -1266,6 +1267,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
 
     /**
      * @deprecated no longer used (has no FX)
+     * @return 0
      */
     public int getXAxisLength ()
     {
@@ -1274,6 +1276,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
 
     /**
      * @deprecated use getChart()
+     * @param logarithmic Not used
      */
     public void setLogarithmicScale (boolean logarithmic)
     {
@@ -1281,6 +1284,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
 
     /**
      * @deprecated use getChart()
+     * @return false
      */
     public boolean isLogarithmicScale ()
     {
@@ -1289,6 +1293,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
 
     /**
      * @deprecated no longer used (has no FX)
+     * @param b Not used
      */
     public void setListVisible (boolean b)
     {
@@ -1296,6 +1301,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
 
     /**
      * @deprecated no longer used (has no FX)
+     * @return false
      */
     public boolean isListVisible ()
     {
@@ -1304,6 +1310,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
 
     /**
      * @deprecated no longer used (has no FX)
+     * @param b Not used
      */
     public void setShowingNames (boolean b)
     {
@@ -1311,6 +1318,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
 
     /**
      * @deprecated no longer used (has no FX)
+     * @return false
      */
     public boolean isShowingNames ()
     {
@@ -1320,8 +1328,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
     /**
      * Determines whether or not device names (within chart labels) are visible.
      * 
-     * @param mode
-     *            Device name display mode
+     * @param mode Device name display mode
      * @see #DEVICE_LABEL_AUTO
      * @see #DEVICE_LABEL_NEVER
      * @see #DEVICE_LABEL_ALWAYS
@@ -1334,7 +1341,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
 
     /**
      * Determines whether or not device names (within chart labels) are visible.
-     * 
+     * @return Showing device name flag
      * @see #setShowingDeviceNames
      */
     public int isShowingDeviceNames ()
@@ -1379,8 +1386,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
     /**
      * Displays or hides the date label
      * 
-     * @param b
-     *            Visible flag
+     * @param b Visible flag
      */
     public void setDateVisible (boolean b)
     {
@@ -1401,8 +1407,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
     /**
      * Displays or hides the selection tree
      * 
-     * @param b
-     *            Visible flag
+     * @param b Visible flag
      */
     public void setSelectionTreeVisible (boolean b)
     {
@@ -1414,7 +1419,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
     }
 
     /**
-     * Returns true only if the selection tree is visible
+     * @return true only if the selection tree is visible
      */
     public boolean isSelectionTreeVisible ()
     {
@@ -1439,6 +1444,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
 
     /**
      * Disables the button corresponding to the string
+     * @param buttonName Button name
      */
     public void disableButton (String buttonName)
     {
@@ -1448,6 +1454,7 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
 
     /**
      * Enables the button corresponding to the string
+     * @param buttonName Button name
      */
     public void enableButton (String buttonName)
     {
@@ -1468,10 +1475,10 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
      *            A boolean to say wheather the attribute has to be added in
      *            model or not. If <code>true</code> and the attribute is not
      *            in model, the attribute is added in the trend model.
-     * @see #SEL_X
-     * @see #SEL_Y1
-     * @see #SEL_Y2
-     * @see #SEL_NONE
+     * @see Trend#SEL_X
+     * @see Trend#SEL_Y1
+     * @see Trend#SEL_Y2
+     * @see Trend#SEL_NONE
      */
     public void addToAxis (String attributeName, int axisSelection,
             boolean addToModel)
@@ -1533,13 +1540,13 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
      *            The axis. Can be SEL_X (x axis), SEL_Y1 (y1 axis), SEL_Y2 (y2
      *            axis) or SEL_NONE (removes attribute from axis)
      * @param addToModel
-     *            A boolean to say wheather the attribute has to be added in
+     *            A boolean to say whether the attribute has to be added in
      *            model or not. If <code>true</code> and the attribute is not
      *            in model, the attribute is added in the trend model.
-     * @see #SEL_X
-     * @see #SEL_Y1
-     * @see #SEL_Y2
-     * @see #SEL_NONE
+     * @see Trend#SEL_X
+     * @see Trend#SEL_Y1
+     * @see Trend#SEL_Y2
+     * @see Trend#SEL_NONE
      */
     public void addToAxis (IBooleanScalar attribute, int axisSelection,
             boolean addToModel)
@@ -1589,17 +1596,11 @@ public class BooleanTrend extends JPanel implements IControlee, ActionListener,
      * 
      * @param attributeName
      *            The name of the attribute
-     * @return The axis associated with the attribute the value can be:<br>
-     *         <ul>
-     *         <li>SEL_X (x axis)</li>
-     *         <li>SEL_Y1 (y1 axis)</li>
-     *         <li>SEL_Y2 (y2 axis)</li>
-     *         <li>SEL_NONE (no axis, default value)</li>
-     *         </ul>
-     * @see #SEL_X
-     * @see #SEL_Y1
-     * @see #SEL_Y2
-     * @see #SEL_NONE
+     * @return The axis associated with the attribute
+     * @see Trend#SEL_X
+     * @see Trend#SEL_Y1
+     * @see Trend#SEL_Y2
+     * @see Trend#SEL_NONE
      */
     public int getAxisForAttribute (String attributeName)
     {

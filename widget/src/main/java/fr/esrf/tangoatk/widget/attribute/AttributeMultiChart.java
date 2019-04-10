@@ -591,16 +591,17 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
 
     /**
      * Sets the marker style for line chart and dot chart
-     * @see MARKER_DOT
-     * @see MARKER_BOX
-     * @see MARKER_TRIANGLE
-     * @see MARKER_DIAMOND
-     * @see MARKER_STAR
-     * @see MARKER_VERT_LINE
-     * @see MARKER_HORIZ_LINE
-     * @see MARKER_CROSS
-     * @see MARKER_CIRCLE
-     * @see MARKER_SQUARE
+     * @param style Marker style
+     * @see JLDataView#MARKER_DOT
+     * @see JLDataView#MARKER_BOX
+     * @see JLDataView#MARKER_TRIANGLE
+     * @see JLDataView#MARKER_DIAMOND
+     * @see JLDataView#MARKER_STAR
+     * @see JLDataView#MARKER_VERT_LINE
+     * @see JLDataView#MARKER_HORIZ_LINE
+     * @see JLDataView#MARKER_CROSS
+     * @see JLDataView#MARKER_CIRCLE
+     * @see JLDataView#MARKER_SQUARE
      */
     public void setMarkerStyle(int style) {
         markerStyle = style;
@@ -1058,9 +1059,9 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
     /**
      * 
      * @return an int representing the kind of chart used.
-     * @see barChart
-     * @see dotChart
-     * @see lineChart
+     * @see #barChart
+     * @see #dotChart
+     * @see #lineChart
      */
     public int getChartStyle() {
         return chartStyle;
@@ -1069,9 +1070,9 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
     /**
      * Allows you to choose which kind of chart you want to use
      * @param style the kind of chart you want to use
-     * @see barChart
-     * @see dotChart
-     * @see lineChart
+     * @see #barChart
+     * @see #dotChart
+     * @see #lineChart
      */
     public void setChartStyle(int style) {
         chartStyle = style;
@@ -1529,9 +1530,10 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
         setModel(attributeList);
     }
 
-    /**
-     * @see fr.esrf.tangoatk.widge.util.chart.JLChart#actionPerformed(ActionEvent)
-     */
+  /**
+   * @param evt Action Event
+   * @see JLChart#actionPerformed
+   */
     public void actionPerformed(ActionEvent evt) {
         if (evt.getActionCommand().trim().equalsIgnoreCase("Load configuration"))
         {
@@ -1904,10 +1906,6 @@ public class AttributeMultiChart extends JLChart implements INumberScalarListene
 		this.alarmEnable = alarmEnable;
 	}
 
-    /**
-     * Main class, so you can have an example.
-     * You can put your own attribute names in parameter
-     */
     public static void main(String[] args) {
         JFrame frame = new JFrame();
         final AttributeMultiChart f = new AttributeMultiChart(

@@ -27,9 +27,11 @@ public class FileContentViewer extends javax.swing.JPanel
     private int       width, height;
     private File      theFile = null;
 
-    /**
-     * Creates new form FileContentViewer
-     */
+  /**
+   * Creates new form FileContentViewer
+   * @param w Width
+   * @param h Height
+   */
     public FileContentViewer(int w, int h)
     {
         width = w;

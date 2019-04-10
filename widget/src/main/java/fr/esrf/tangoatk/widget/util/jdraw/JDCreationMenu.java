@@ -172,14 +172,14 @@ public class JDCreationMenu implements ActionListener {
 
 
   /**
-   * Returns the JDObject creation toolbar.
+   * @return the JDObject creation toolbar.
    */
   public JToolBar getToolbar() {
     return objectToolBar;
   }
 
   /**
-   * Returns the JDObject creation menu.
+   * @return the JDObject creation menu.
    */
   public JMenu getMenu() {
     return createMenu;

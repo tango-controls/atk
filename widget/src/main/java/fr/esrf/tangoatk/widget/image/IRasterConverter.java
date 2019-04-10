@@ -52,12 +52,13 @@ public interface IRasterConverter {
      * Oh, and by the way, the first dimension is the y-axis, and
      * the second is the x-axis:
      * <code>
-     * double point;<br>
-     * for (int y = 0; y < raster.length; y++)<br>
-     *    for (int x = 0; x < raster[y].length; x++)<br>
-     *        point = raster[y][x]; <br>
+     * double point;
+     * for (int y = 0; y &lt; raster.length; y++)
+     *    for (int x = 0; x &lt; raster[y].length; x++)
+     *        point = raster[y][x];
      * </code>
      * @param raster a <code>double[][]</code> value
+     * @return Image
      */
     public BufferedImage convertRaster(double [][] raster);
 

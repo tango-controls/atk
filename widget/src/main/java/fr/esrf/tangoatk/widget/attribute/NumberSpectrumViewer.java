@@ -124,14 +124,14 @@ public class NumberSpectrumViewer extends AdvancedJLChart
   /* Bean Property stuff */
 
   /**
-   * Returns the dataview which contains plotted data
+   * @return the dataview which contains plotted data
    */
   public JLDataView getDataView() {
     return dvy;
   }
 
   /**
-   * Gets if the viewer should manage the X axis according to a min and max value.
+   * @return if the viewer should manage the X axis according to a min and max value.
    */
   public boolean getManageXaxis()
   {
@@ -140,7 +140,7 @@ public class NumberSpectrumViewer extends AdvancedJLChart
 
   /**
    * Sets if the viewer should manage the X axis according to a min and max value. This method should be called BEFORE setModel()
-   * @param b
+   * @param b True to enable automatic axis management
    */
   public void setManageXaxis(boolean b)
   {
@@ -149,7 +149,7 @@ public class NumberSpectrumViewer extends AdvancedJLChart
   }
 
   /**
-   * Gets the x Axis unit.
+   * @return the x Axis unit.
    */
   public String getXAxisUnit() {
     return (xAxisUnit);
@@ -157,7 +157,7 @@ public class NumberSpectrumViewer extends AdvancedJLChart
 
   /**
    * Sets the x Axis unit.
-   * @param u
+   * @param u Axis unit
    */
   public void setXAxisUnit(String u) {
     xAxisUnit = u;
@@ -168,8 +168,8 @@ public class NumberSpectrumViewer extends AdvancedJLChart
   /**
    * Sets an affine tranform to the X axis. This allows to transform
    * spectra index displayed on X axis.
-   * @param a0
-   * @param a1
+   * @param a0 a0 coefficient
+   * @param a1 a1 coefficient
    */
   public void setXAxisAffineTransform(double a0,double a1) {
     A0 = a0;
@@ -675,8 +675,8 @@ public class NumberSpectrumViewer extends AdvancedJLChart
   /**
    * Sets the min and max  for X axis to two scalar attributes
    *
-   * @param min
-   * @param max
+   * @param min Min value model
+   * @param max Max value model
    */
   public void setXaxisModels(INumberScalar min, INumberScalar max)
   {

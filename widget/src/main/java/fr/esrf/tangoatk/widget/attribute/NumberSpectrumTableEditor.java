@@ -112,8 +112,8 @@ public class NumberSpectrumTableEditor extends javax.swing.JFrame
    /**
     * Sets an affine tranform to the X axis. This allows to transform
     * spectra index displayed on X axis.
-    * @param a0
-    * @param a1
+    * @param a0 a0 coefficient
+    * @param a1 a1 coefficient
     */
     public void setXAxisAffineTransform(double a0,double a1)
     {

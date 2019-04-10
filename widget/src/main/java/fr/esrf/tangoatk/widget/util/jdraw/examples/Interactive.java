@@ -99,6 +99,7 @@ public class Interactive extends JFrame implements JDValueListener {
   /**
    * Returns the JDObject having the given name.
    * @param name Name to search
+   * @return JDObject named name
    */
   public JDObject getObject(String name) {
 

@@ -76,8 +76,9 @@ public class ATKException extends Exception {
   }
 
   /**
-   * Constructs an ATK exception from a Tango DevErros error stack with a message.
-   * @param e Tango exception
+   * Constructs an ATK exception from a Tango DevError error stack with a message.
+   * @param s Error message
+   * @param errs Error stack
    */
   public ATKException(String s, DevError[] errs) {
     // Copy the stack trace
@@ -120,6 +121,7 @@ public class ATKException extends Exception {
 
   /**
    * Returns the error stack.
+   * @return Error message
    */
   public DevError[] getErrors() {
     return errors;
@@ -127,6 +129,7 @@ public class ATKException extends Exception {
 
   /**
    * Returns the Exception message. (Not from the stack)
+   * @return Message
    */
   public String getMessage() {
     String s = toString();
@@ -139,6 +142,7 @@ public class ATKException extends Exception {
 
   /**
    * Returns the severity of this exception.
+   * @return Severity level
    */
   public int getSeverity() {
     return getSeverity(0);
@@ -147,6 +151,7 @@ public class ATKException extends Exception {
   /**
    * Gets the sevrity at the given stack level of this exception.
    * @param i Stack level
+   * @return Severity level
    * @see #WARNING
    * @see #ERROR
    * @see #PANIC
@@ -164,6 +169,7 @@ public class ATKException extends Exception {
   /**
    * Returns the description at the top level of the stack or the
    * message if no stack is present.
+   * @return Description message
    */
   public String getDescription() {
     if( errors.length==0 ) {
@@ -176,6 +182,7 @@ public class ATKException extends Exception {
   /**
    * Returns the description at the specified level of the stack.
    * @param i Stack level
+   * @return Description message
    */
   public String getDescription(int i) {
     try {
@@ -187,6 +194,7 @@ public class ATKException extends Exception {
 
   /**
    * Returns the origin at the top level of the stack.
+   * @return Origin message
    */
   public String getOrigin() {
     return getOrigin(0);
@@ -195,6 +203,7 @@ public class ATKException extends Exception {
   /**
    * Returns the origin at the specified level of the stack.
    * @param i Stack level
+   * @return Origin message
    */
   public String getOrigin(int i) {
     try {
@@ -206,6 +215,7 @@ public class ATKException extends Exception {
 
   /**
    * Returns the reason at the top level of the stack.
+   * @return Reason message
    */
   public String getReason() {
     return getReason(0);
@@ -214,6 +224,7 @@ public class ATKException extends Exception {
   /**
    * Returns the reason at the specified level of the stack.
    * @param i Stack level
+   * @return Reason message
    */
   public String getReason(int i) {
     try {
@@ -225,6 +236,7 @@ public class ATKException extends Exception {
 
   /**
    * Returns the tango stack length.
+   * @return Stack Length
    */
   public int getStackLength() {
     return errors.length;

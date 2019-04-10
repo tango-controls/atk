@@ -33,7 +33,7 @@ public class ATKFormat {
 
   static DecimalFormat engFormat = new DecimalFormat("##0.0E0");
 
-  /** Returns a String representating the given number.
+  /** @return a String representating the given number.
    * @param number A number
    */
   public String format(Number number) {
@@ -42,6 +42,7 @@ public class ATKFormat {
 
   /** Returns a String representating the given string.
    * @param s A String
+   * @return Formatted string
    */
   public String format(String s) {
     return s;
@@ -49,6 +50,7 @@ public class ATKFormat {
 
   /** Returns a String representating the given object.
    * @param obj An Object
+   * @return Formatted string
    */
   public String format(Object obj) {
     return obj.toString();
@@ -58,6 +60,7 @@ public class ATKFormat {
    * Format a double
    * @param format C like format
    * @param value Value to be formatted
+   * @return Formatted string
    */
   public static String format(String format,double value) {
 

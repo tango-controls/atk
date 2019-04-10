@@ -42,6 +42,7 @@ public interface IHelpful extends IControlee {
     /**
      * <code>getHelpUrl</code> is called to get the url of the help-page
      * for this helpful component.
+     * @return Help URL
      */
     public java.net.URL getHelpUrl();
 

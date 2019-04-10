@@ -267,7 +267,7 @@ public class JDBar extends JDRectangular {
   }
 
   /**
-   * Returns the progress bar's maximum value.
+   * @return the progress bar's maximum value.
    * @see #setMaximum
    */
   public double getMaximum() {
@@ -285,7 +285,7 @@ public class JDBar extends JDRectangular {
   }
 
   /**
-   * Returns the progress bar's maximum value.
+   * @return the progress bar's maximum value.
    * @see #setMinimum
    */
   public double getMinimum() {
@@ -302,7 +302,7 @@ public class JDBar extends JDRectangular {
   }
 
   /**
-   * Returns the current bar value.
+   * @return the current bar value.
    */
   public double getBarValue() {
     return value;
@@ -317,7 +317,7 @@ public class JDBar extends JDRectangular {
   }
 
   /**
-   * Determines whether the outline is visible.
+   * @return whether the outline is visible.
    */
   public boolean isOutLineVisible() {
     return outLineVisible;
@@ -337,7 +337,7 @@ public class JDBar extends JDRectangular {
   }
 
   /**
-   * Returns the current bar orientation.
+   * @return the current bar orientation.
    * @see #setOrientation
    */
   public int getOrientation() {

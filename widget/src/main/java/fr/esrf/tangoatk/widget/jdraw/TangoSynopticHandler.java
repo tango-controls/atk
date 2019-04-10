@@ -242,6 +242,9 @@ public class TangoSynopticHandler extends JDrawEditor
    * Construct a TangoSynopticHandler (A JDrawEditor in MODE_PLAY).
    * @param jdFileName Filename of the JDraw (jdw) synptic to load.
    * @see #setSynopticFileName
+   * @throws FileNotFoundException Exception when the input file cannot be accessed.
+   * @throws MissingResourceException when the "jdraw" inputStream cannot be parsed.
+   * @throws IllegalArgumentException Illegal argument
    */
    public TangoSynopticHandler(String  jdFileName)
               throws MissingResourceException, FileNotFoundException, IllegalArgumentException
@@ -304,6 +307,9 @@ public class TangoSynopticHandler extends JDrawEditor
  * @param errh ErrorHistory window which will receive errors.
  * @see #setSynopticFileName
  * @see ErrorHistory
+ * @throws FileNotFoundException Exception when the input file cannot be accessed.
+ * @throws MissingResourceException when the "jdraw" inputStream cannot be parsed.
+ * @throws IllegalArgumentException Illegal argument
  */
    public TangoSynopticHandler(String  jdFileName, ErrorHistory errh)
               throws MissingResourceException, FileNotFoundException, IllegalArgumentException
@@ -326,6 +332,9 @@ public class TangoSynopticHandler extends JDrawEditor
  * @see #TOOL_TIP_STATE
  * @see #TOOL_TIP_STATUS
  * @see #TOOL_TIP_NAME
+ * @throws FileNotFoundException Exception when the input file cannot be accessed.
+ * @throws MissingResourceException when the "jdraw" inputStream cannot be parsed.
+ * @throws IllegalArgumentException Illegal argument
  */
    public TangoSynopticHandler(String  jdFileName, int ttMode)
               throws MissingResourceException, FileNotFoundException, IllegalArgumentException
@@ -340,7 +349,7 @@ public class TangoSynopticHandler extends JDrawEditor
    }
 
   /**
-   * Sets tje loading progress listener
+   * Sets the loading progress listener
    * @param p Handle to the progress listener
    */
    public void setProgressListener(SynopticProgressListener p) {
@@ -348,7 +357,7 @@ public class TangoSynopticHandler extends JDrawEditor
    }
 
 /**
- * Returns the current Tooltip Mode
+ * @return the current Tooltip Mode
  * @see #setToolTipMode
  */
    public int getToolTipMode()
@@ -381,7 +390,7 @@ public class TangoSynopticHandler extends JDrawEditor
 
 
 /**
- * Returns the current error history window
+ * @return the current error history window
  * @see #setErrorHistoryWindow
  */
    public ErrorHistory getErrorHistoryWindow()
@@ -393,6 +402,7 @@ public class TangoSynopticHandler extends JDrawEditor
 /**
  * Sets the current error history window. Note that the error history window
  * should be set before the jdraw file is parsed (before the call to the setSynopticFileName)
+ * @param errh ErrorHistory window which will receive errors.
  */
    public void setErrorHistoryWindow( ErrorHistory  errh)
    {
@@ -406,7 +416,7 @@ public class TangoSynopticHandler extends JDrawEditor
    }
 
 /**
- * Returns the current synoptic filename.
+ * @return the current synoptic filename.
  * @see #getSynopticFileName
  */
    public String getSynopticFileName()
@@ -428,7 +438,7 @@ public class TangoSynopticHandler extends JDrawEditor
   }
 
   /**
-   * Returns a Handle to the global attribute list which is used
+   * @return a Handle to the global attribute list which is used
    * internaly to monitor attributes. This list is filled after
    * setSynopticFileName() is called. To add an error listener
    * to this list, you have to register it before loading a synoptic.
@@ -485,6 +495,9 @@ public class TangoSynopticHandler extends JDrawEditor
  * The main purpose of this function is to attach Tango entity model to
  * JDraw component.
  * @param jdFileName Filename of the JDraw (jdw) synptic to load.
+ * @throws FileNotFoundException Exception when the input file cannot be accessed.
+ * @throws MissingResourceException when the "jdraw" inputStream cannot be parsed.
+ * @throws IllegalArgumentException Illegal argument
  */
    public void setSynopticFileName( String  jdFileName)
                throws MissingResourceException, FileNotFoundException, IllegalArgumentException
@@ -797,8 +810,8 @@ public class TangoSynopticHandler extends JDrawEditor
    }
 
   /**
-   * Return true only if the given name matches a Tango attribute name.
-    * <p>Attribute name allowed syntax ( Can be preceded by tango: ):<p>
+   * @return true only if the given name matches a Tango attribute name.
+    * Attribute name allowed syntax ( Can be preceded by tango: ):
     * <pre>
     *   Full syntax: //hostName:portNumber/domain/family/member/attName
     *   Full syntax: //ipAddress:portNumber/domain/family/member/attName
@@ -886,8 +899,8 @@ public class TangoSynopticHandler extends JDrawEditor
    }
 
   /**
-   * Return true only if the given name matches a Tango attribute name followed by [index].
-    * <p>Spectrum Attribute element allowed syntax ( Can be preceded by tango: ):<p>
+   * @return true only if the given name matches a Tango attribute name followed by [index].
+    * Spectrum Attribute element allowed syntax ( Can be preceded by tango: ):
     * <pre>
     *   Full syntax: //hostName:portNumber/domain/family/member/attName[xx]
     *   Full syntax: //ipAddress:portNumber/domain/family/member/attName[xx]
@@ -982,8 +995,8 @@ public class TangoSynopticHandler extends JDrawEditor
   }
 
   /**
-   * Return true only if the given name matches a Tango command name.
-   * <p>Command name allowed syntax ( Can be preceded by tango: ):<p>
+   * @return true only if the given name matches a Tango command name.
+   * Command name allowed syntax ( Can be preceded by tango: ):
    * <pre>
    *   Full syntax: //hostName:portNumber/domain/family/member/cmdName
    *   Full syntax: //ipAddress:portNumber/domain/family/member/cmdName
@@ -1063,8 +1076,8 @@ public class TangoSynopticHandler extends JDrawEditor
   }
 
   /**
-   * Return true only if the given name matches a Tango device name.
-   * <p>Device name allowed syntax ( Can be preceded by tango: ):<p>
+   * @return true only if the given name matches a Tango device name.
+   * Device name allowed syntax ( Can be preceded by tango: ):
    * <pre>
    *   Full syntax: //hostName:portNumber/domain/family/member
    *   Full syntax: //ipAddress:portNumber/domain/family/member
@@ -1090,7 +1103,7 @@ public class TangoSynopticHandler extends JDrawEditor
   }
 
   /**
-   * Return true if the given name has a correct tango syntax.
+   * @return true if the given name has a correct tango syntax.
    * @param devName Device name to check
    */
    private boolean isDeviceName(String devName)
@@ -2423,9 +2436,11 @@ invoqex.printStackTrace();
 
    // Interface IAttributeStateListener
    /** change the color of the jdobj (bg or fg) according to the quality factor
-       of the attribute If and Only If the JDobject is not a JDBar, or JDSlider
-       and no color mapper is set for the JDobject
-       and the "extension" QualityFactor is true **/
+    * of the attribute If and Only If the JDobject is not a JDBar, or JDSlider
+    * and no color mapper is set for the JDobject
+    * and the "extension" QualityFactor is true
+    * @param evt AttributeState event
+    */
    public void stateChange(AttributeStateEvent evt)
    {
 	JDObject                   jdObj;
@@ -2535,7 +2550,7 @@ invoqex.printStackTrace();
   /**
    * Update background color of disabled objects, it restore the state color if the JDObject
    * is no longer disabled.
-   * @param disabledColor
+   * @param disabledColor Disabled color
    */
   public void refreshDisabled(Color disabledColor) {
 

@@ -56,6 +56,7 @@ public class ATKDiagnostic {
 
   /** Contruct and displays the ATK diagnostic window (allows
    * this panel to be instancied by the TangoSynopticHandler).
+   * @param dummy Not used
    */
   public ATKDiagnostic(String dummy) {
     refreshTime = System.currentTimeMillis();

@@ -32,7 +32,7 @@ public class DigitalNumberViewer extends JComponent {
 
   /**
    * Sets the format (C like)
-   * @param format
+   * @param format Format
    */
   public void setFormat(String format) {
     this.format = format;
@@ -40,7 +40,7 @@ public class DigitalNumberViewer extends JComponent {
   }
 
   /**
-   * Returns the current format (C like)
+   * @return the current format (C like)
    */
   public String getFormat() {
     return format;
@@ -48,7 +48,7 @@ public class DigitalNumberViewer extends JComponent {
 
   /**
    * Sets the value
-   * @param value
+   * @param value Value
    */
   public void setValue(double value) {
     this.value = value;

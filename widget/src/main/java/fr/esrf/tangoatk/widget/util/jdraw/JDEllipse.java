@@ -27,8 +27,6 @@ import java.awt.geom.Point2D;
 import java.io.IOException;
 
 /** JDraw Ellipse graphic object.
- *  <p>Here is an example of few JDEllipse:<p>
- *  <img src="JDEllipse.gif" border="0" alt="JDEllipse examples"></img>
  */
 public class JDEllipse extends JDRectangular implements JDPolyConvert {
 
@@ -59,7 +57,7 @@ public class JDEllipse extends JDRectangular implements JDPolyConvert {
 
   /**
    * Construct a JDEllipse.
-   * @param objectName
+   * @param objectName Object name
    * @param x Up left corner x coordinate
    * @param y Up left corner y coordinate
    * @param w Ellipse width
@@ -373,7 +371,7 @@ public class JDEllipse extends JDRectangular implements JDPolyConvert {
   }
 
   /**
-   * Returns the interpolation step.
+   * @return the interpolation step.
    * @see #setStep
    */
   public int getStep() {
@@ -393,7 +391,7 @@ public class JDEllipse extends JDRectangular implements JDPolyConvert {
   }
 
   /**
-   * Returns the current arc type.
+   * @return the current arc type.
    * @see #setArcType
    */
   public int getArcType() {
@@ -409,7 +407,7 @@ public class JDEllipse extends JDRectangular implements JDPolyConvert {
     updateShape();
   }
 
-  /** Returns the starting angle of the arc.
+  /** @return the starting angle of the arc.
    * @see #setAngleStart
    */
   public int getAngleStart() {
@@ -426,7 +424,7 @@ public class JDEllipse extends JDRectangular implements JDPolyConvert {
   }
 
   /**
-   * Returns the arc angle extent.
+   * @return the arc angle extent.
    * @see #setAngleExtent
    */
   public int getAngleExtent() {

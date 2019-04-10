@@ -27,7 +27,9 @@ import java.util.EventListener;
 /** An interface to handle dimension change of the AutoScrolled text. */
 public interface JAutoScrolledTextListener extends EventListener {
 
-  /** Trigger when the text exceed component bounds */
+  /** Trigger when the text exceed component bounds
+   * @param source Component source
+   */
   public void textExceedBounds(JAutoScrolledText source);
 
 }

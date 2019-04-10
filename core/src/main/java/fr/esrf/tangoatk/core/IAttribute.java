@@ -278,6 +278,7 @@ public interface IAttribute extends IEntity
     /**
      * Setting this property to true means that the attribute should
      * not read nor distribute new values when its refresh is called
+     * @param b Skipping refresh
      */
     @Deprecated
     public void setSkippingRefresh(boolean b);
@@ -311,16 +312,19 @@ public interface IAttribute extends IEntity
   /**
    *
    * Returns true if the attribute is a scalar
+   * @return Is scalar
    */
    public boolean isScalar();
 
   /**
    * Returns true if the attribute is a spectrum
+   * @return Is spectrum
    */
    public boolean isSpectrum();
 
   /**
    * Returns true if the attribute is an image
+   * @return Is image
    */
    public boolean isImage();
 

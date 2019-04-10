@@ -48,88 +48,88 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
 
   /** File menu. */
   public JMenu     fileMenu;
-  /** File->Open menu item. */
+  /** File/Open menu item. */
   public JMenuItem fileOpenMenuItem;
-  /** File->Import menu item. */
+  /** File/Import menu item. */
   public JMenuItem fileImportMenuItem;
-  /** File->Save menu item. */
+  /** File/Save menu item. */
   public JMenuItem fileSaveMenuItem;
-  /** File->Save as menu item. */
+  /** File/Save as menu item. */
   public JMenuItem fileSaveasMenuItem;
-  /** File->Exit menu item. */
+  /** File/Exit menu item. */
   public JMenuItem fileExitMenuItem;
 
   /** Edit menu. */
   public JMenu     editMenu;
-  /** Edit->Undo menu item. */
+  /** Edit/Undo menu item. */
   public JMenuItem editUndoMenuItem;
-  /** Edit->Redo menu item. */
+  /** Edit/Redo menu item. */
   public JMenuItem editRedoMenuItem;
-  /** Edit->Cut menu item. */
+  /** Edit/Cut menu item. */
   public JMenuItem editCutMenuItem;
-  /** Edit->Copy menu item. */
+  /** Edit/Copy menu item. */
   public JMenuItem editCopyMenuItem;
-  /** Edit->Paste menu item. */
+  /** Edit/Paste menu item. */
   public JMenuItem editPasteMenuItem;
-  /** Edit->Delete menu item. */
+  /** Edit/Delete menu item. */
   public JMenuItem editDeleteMenuItem;
-  /** Edit->Select All menu item. */
+  /** Edit/Select All menu item. */
   public JMenuItem editSelectAllMenuItem;
-  /** Edit->Select Not visible menu item. */
+  /** Edit/Select Not visible menu item. */
   public JMenuItem editSelectNVMenuItem;
-  /** Edit->Select None menu item. */
+  /** Edit/Select None menu item. */
   public JMenuItem editSelectNoneMenuItem;
 
   /** Views menu. */
   public  JMenu     viewsMenu;
-  /** Views->Transform menu item. */
+  /** Views/Transform menu item. */
   public  JMenuItem viewsTransformMenuItem;
-  /** Views->Play menu item. */
+  /** Views/Play menu item. */
   public  JMenuItem viewsPlayMenuItem;
-  /** Views->Tango Synoptic menu item. */
+  /** Views/Tango Synoptic menu item. */
   public  JMenuItem viewsTangoSynopticMenuItem;
-  /** Views->Object properties menu item. */
+  /** Views/Object properties menu item. */
   public  JMenuItem viewsOptionMenuItem;
-  /** Views->Browse menu item. */
+  /** Views/Browse menu item. */
   public  JMenuItem viewsBrowseMenuItem;
-  /** Views->Edit group menu item. */
+  /** Views/Edit group menu item. */
   private JMenuItem viewsGroupEditMenuItem;
-  /** Views->Generate java menu item. */
+  /** Views/Generate java menu item. */
   private JMenuItem viewsJavaMenuItem;
-  /** Views->Global properties menu item. */
+  /** Views/Global properties menu item. */
   private JMenuItem viewsGlobalMenuItem;
 
   /** Tools menu. */
   public  JMenu     toolsMenu;
-  /** Tools->H Mirror menu item. */
+  /** Tools/H Mirror menu item. */
   public  JMenuItem toolsHMirrorMenuItem;
-  /** Tools->V Mirror menu item. */
+  /** Tools/V Mirror menu item. */
   public  JMenuItem toolsVMirrorMenuItem;
-  /** Tools->Align top menu item. */
+  /** Tools/Align top menu item. */
   public  JMenuItem toolsAligntopMenuItem;
-  /** Tools->Align left menu item. */
+  /** Tools/Align left menu item. */
   public  JMenuItem toolsAlignleftMenuItem;
-  /** Tools->Align bottom menu item. */
+  /** Tools/Align bottom menu item. */
   public  JMenuItem toolsAlignbottomMenuItem;
-  /** Tools->Align rigth item. */
+  /** Tools/Align rigth item. */
   public  JMenuItem toolsAlignrightMenuItem;
-  /** Tools->Raise menu item. */
+  /** Tools/Raise menu item. */
   private JMenuItem toolsRaiseMenuItem;
-  /** Tools->Lower menu item. */
+  /** Tools/Lower menu item. */
   private JMenuItem toolsLowerMenuItem;
-  /** Tools->Front menu item. */
+  /** Tools/Front menu item. */
   private JMenuItem toolsFrontMenuItem;
-  /** Tools->Back menu item. */
+  /** Tools/Back menu item. */
   private JMenuItem toolsBackMenuItem;
-  /** Tools->Convert to polyline menu item. */
+  /** Tools/Convert to polyline menu item. */
   private JMenuItem toolsConvertPolyMenuItem;
-  /** Tools->Grid visible menu item. */
+  /** Tools/Grid visible menu item. */
   private JCheckBoxMenuItem toolsGridVisible;
-  /** Tools->Align to grid menu check box item. */
+  /** Tools/Align to grid menu check box item. */
   private JCheckBoxMenuItem toolsAlignToGrid;
-  /** Tools->Grid settings menu item. */
+  /** Tools/Grid settings menu item. */
   private JMenuItem toolsGridSettings;
-  /** Tools->Fit to graph menu item. */
+  /** Tools/Fit to graph menu item. */
   private JMenuItem toolsFitToGraph;
 
   /** Creation menus. */
@@ -468,7 +468,9 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
   // ----------------------------------------------------
   // Property
   // ----------------------------------------------------
-  /** Sets the editor of this EditorFrame. */
+  /** Sets the editor of this EditorFrame.
+   * @param editor Editor object
+   */
   public void setEditor(JDrawEditor editor) {
 
     theEditor = editor;
@@ -486,7 +488,9 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
 
   }
 
-  /** Sets the player of this EditorFrame. (for the play mode) */
+  /** Sets the player of this EditorFrame. (for the play mode)
+   * @param editor Editor object
+   */
   public void setPlayer(JDrawEditor editor) {
     framePlayer = new JFrame();
     framePlayer.getContentPane().setLayout(new BorderLayout());
@@ -524,7 +528,9 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
 
   }
 
-  /** Name used to build the frame title. */
+  /** Name used to build the frame title.
+   * @param title App title
+   */
   public void setAppTitle(String title) {
     APP_RELEASE = title;
   }
@@ -931,7 +937,7 @@ public class JDrawEditorFrame extends JFrame implements ActionListener,JDrawEdit
   }
 
   /** Main function of the Jdraw editor. You can create yourself the editor in order
-   * to customize it. Here is an example of a main function:<p>
+   * to customize it. Here is an example of a main function:
    * <pre>
    * public static void main(String[] args) {
    *   final JDrawEditor ed = new JDrawEditor(JDrawEditor.MODE_EDIT);

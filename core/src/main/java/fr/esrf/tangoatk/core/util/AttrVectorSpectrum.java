@@ -39,7 +39,11 @@ import fr.esrf.Tango.DevFailed;
  */
 public class AttrVectorSpectrum extends AttrFunctionSpectrum {
     
-    /** Creates a new instance of AttrVectorSpectrum */
+  /**
+   * Creates a new instance of AttrVectorSpectrum
+   * @param devices Device array
+   * @param attr_name Attribute name
+   */
     public AttrVectorSpectrum(Device[] devices, String attr_name) {
         this.devices = devices;
         this.attr_name = attr_name;

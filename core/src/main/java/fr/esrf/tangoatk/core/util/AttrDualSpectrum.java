@@ -48,9 +48,13 @@ public class AttrDualSpectrum extends AttrFunctionSpectrum {
     protected String          attr_x;
     protected String          attr_y;
 
-    /**
-     * Creates a new instance of AttrDualSpectrum
-     */
+  /**
+   * Creates a new instance of AttrDualSpectrum
+   * @param device_x Source for X values
+   * @param attr_x  Att name for X
+   * @param device_y Source for Y values
+   * @param attr_y Att name for Y
+   */
     public AttrDualSpectrum (IDevice device_x, String attr_x, IDevice device_y,
             String attr_y) {
         this.device_x = (Device) device_x;

@@ -75,7 +75,7 @@ public class StateStatusViewer extends JAutoScrolledText implements IDevStateSca
 
     /**
     * <code>setStatusModel</code> sets one of the models of this viewer (statusModel).
-     * @param stateAtt a <code>IStringScalar</code>
+     * @param statusAtt a <code>IStringScalar</code> attribute
      */
     public void setStatusModel(IStringScalar statusAtt)
     {

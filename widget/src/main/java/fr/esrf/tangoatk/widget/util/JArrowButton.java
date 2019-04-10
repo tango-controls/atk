@@ -83,7 +83,7 @@ public class JArrowButton extends JComponent implements MouseListener, ActionLis
   }
 
   /**
-   * Gets the orientation
+   * @return the orientation
    * @see #setOrientation
    */
   public int getOrientation() {
@@ -92,7 +92,7 @@ public class JArrowButton extends JComponent implements MouseListener, ActionLis
 
   /**
    * Sets the state.
-   * @param s 1->Push 0->Released
+   * @param s 1=Push 0=Released
    */
   public void setState(int s) {
     state = s;

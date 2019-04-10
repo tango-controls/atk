@@ -100,7 +100,7 @@ public class NumberScalarSpinner extends JSpinner implements Serializable, INumb
         return displayReadValue;
     }
     /**
-     * @param readValue The m_displayReadValue to set.
+     * @param isDisplayReadValue Enable/Disable DisplayReadValue.
      */
     public void setDisplayReadValue(boolean isDisplayReadValue) {
         if(numberModel!= null && !numberModel.isWritable())
@@ -117,14 +117,14 @@ public class NumberScalarSpinner extends JSpinner implements Serializable, INumb
     
     /**
      * Enables or disables alarm background (shows quality factor of the attribute).
-     * @param b
+     * @param b Alarm flag
      */
     public void setAlarmEnabled(boolean b) {
       alarmEnabled = b;
     }
     
     /**
-     * @param editable The valueEditable to set.
+     * @return Value Editable
      */
     public boolean getValueEditable() {
        return  valueEditable;
@@ -150,7 +150,7 @@ public class NumberScalarSpinner extends JSpinner implements Serializable, INumb
      
     /**
     * Modified the incrementation step
-    * @param step
+    * @param step Step value
     */
     public void setStepValue(double step)
     {
@@ -168,7 +168,7 @@ public class NumberScalarSpinner extends JSpinner implements Serializable, INumb
     
       /**
      * Sets the model for this viewer.
-     * @param Number scalar model
+     * @param scalar Number model
      */
     public void setNumberModel(INumberScalar scalar)
     {
@@ -359,9 +359,6 @@ public class NumberScalarSpinner extends JSpinner implements Serializable, INumb
             arrowActionPerformed();
     }
     
-    /**
-     * Main class, so you can have an example.
-     */
     public static void main(String[] args) {
         try {
             INumberScalar attribute;

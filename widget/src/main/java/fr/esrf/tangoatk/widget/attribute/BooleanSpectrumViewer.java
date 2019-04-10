@@ -201,7 +201,7 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
 
 
   /**
-   * Returns the model for this viewer
+   * @return the model for this viewer
    *
    * @see #setModel
    */
@@ -247,7 +247,7 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
 
 
   /**
-   * Returns the globalFont used by the viewer
+   * @return the globalFont used by the viewer
    *
    * @see #setGlobalFont
    */
@@ -285,7 +285,7 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
 
 
   /**
-   * Returns the booleanLabel visiblity
+   * @return the booleanLabel visibility
    *
    * @see #setBooleanLabelVisible
    */
@@ -294,7 +294,7 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
   }
 
   /**
-   * Sets the visiblity for boolean labels.
+   * Sets the visibility for boolean labels.
    *
    * @param blv : if true the labels associated with each element of the spectrum will be visible in the first column
    * @see #getBooleanLabelVisible
@@ -308,7 +308,7 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
 
 
   /**
-   * Returns the current displayMode
+   * @return the current displayMode
    *
    * @see #setDisplayMode
    */
@@ -331,7 +331,7 @@ public class BooleanSpectrumViewer extends javax.swing.JPanel
 
 
   /**
-   * Returns the current toolTipMode
+   * @return the current toolTipMode
    *
    * @see #setToolTipMode
    */

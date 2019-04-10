@@ -34,7 +34,7 @@ public class JpegDecoder extends InputStream {
   }
 
   /**
-   * Returns type (0 is returned if no image has been decoded)
+   * @return type (0 is returned if no image has been decoded)
    * @see #RGB24
    * @see #GRAY8
    */

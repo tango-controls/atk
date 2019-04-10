@@ -38,8 +38,9 @@ public class ScalarCommandViewer extends javax.swing.JPanel
 implements IInput , PropertyChangeListener
 {
     java.util.Vector<String>   inputList;
-    /** Creates new form ScalarCommandViewer */
-
+    /** Creates new form ScalarCommandViewer
+     * @param command Command model
+     */
     public ScalarCommandViewer(ICommand command)
     {
 	this();

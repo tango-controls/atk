@@ -54,7 +54,6 @@ public class MaskUndoableEdit extends AbstractUndoableEdit {
      *            the concerned <code>ImagePlus</code>
      * @param undoProcessor
      *            the <code>ImageProcessor</code> before mask was applied
-     * @see #MaskUndoableEdit(ImagePlus, ImageProcessor, ImageProcessor, String)
      */
     public MaskUndoableEdit (ImagePlus concernedImage,
             ImageProcessor undoProcessor) {

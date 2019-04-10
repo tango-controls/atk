@@ -310,6 +310,7 @@ public abstract class AAttribute implements IAttribute,
 
   /**
    * Returns a string that describe the error which occurs during event subscription.
+   * @return Subscription error
    */
   public String getSubscriptionError() {
 
@@ -994,7 +995,7 @@ public abstract class AAttribute implements IAttribute,
    * @param name
    *            a <code>String</code> value containing the name of the
    *            property
-   * @param n
+   * @param value
    *            a <code>Number</code> value containing the numeric value of
    *            the property
    */
@@ -1008,7 +1009,7 @@ public abstract class AAttribute implements IAttribute,
    * @param name
    *            a <code>String</code> value containing the name of the
    *            property
-   * @param n
+   * @param value
    *            a <code>Number</code> value containing the value of the
    *            property
    * @param editable

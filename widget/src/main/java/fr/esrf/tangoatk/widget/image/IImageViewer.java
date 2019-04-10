@@ -78,7 +78,7 @@ public interface IImageViewer {
 
     /**
      * <code>addImageManipulator</code> adds a manipulator to this
-     * IImageViewer. The manipulators <code>draw(BufferdImage image>
+     * IImageViewer. The manipulators <code>draw(BufferdImage image)</code>
      * is called each time the Image is being repainted, so that they
      * can do whatever imagemanipulation they want.
      *

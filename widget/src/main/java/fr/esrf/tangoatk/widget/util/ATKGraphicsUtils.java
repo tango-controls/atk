@@ -57,7 +57,7 @@ public class ATKGraphicsUtils {
   }
   
   /**
-   * Retreive the default render context.
+   * @return the default render context.
    */
   static public FontRenderContext getDefaultRenderContext() {
     init();
@@ -332,6 +332,8 @@ public class ATKGraphicsUtils {
    * Position the given frame at the requested location  on screen. The frame is not displayed
    * after a call to this function, a call to setVisible() is needed.
    * @param fr Frame to be positioned.
+   * @param posx X position
+   * @param posy Y position
    */
   public static void positionFrameOnScreen(Frame fr, int posx, int posy) {
 

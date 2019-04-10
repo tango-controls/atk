@@ -39,8 +39,12 @@ import java.util.EventObject;
  */
 public class NonAttrNumberSpectrumEvent extends EventObject {
     
-    /** Creates a new instance of NonAttrNumberSpectrumEvent */
-    
+  /**
+   * Creates a new instance of NonAttrNumberSpectrumEvent
+   * @param source Source
+   * @param xvalue X values
+   * @param yvalue Y values
+   */
     public NonAttrNumberSpectrumEvent(INonAttrNumberSpectrum source, double[] xvalue, double[] yvalue) {
         super(source);
 	setValue(xvalue,yvalue);

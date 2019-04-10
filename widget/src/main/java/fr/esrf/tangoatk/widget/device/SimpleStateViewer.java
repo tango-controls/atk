@@ -39,7 +39,6 @@ import fr.esrf.tangoatk.widget.util.*;
  * the possibility to use Antialiased font for better rendering.
  * SimpleStateViewer has no label. Normally one connects the device
  * with the viewer like this:
- * <p>
  * <pre>
  * Device device = DeviceFactory.getInstance().getDevice("my_device");
  * SimpleStateViewer state = new SimpleStateViewer();
@@ -95,7 +94,7 @@ public class SimpleStateViewer extends JSmoothLabel
    * <code>setModel</code> sets the model of this viewer.
    * If the textLabel property is not set, the name of the device is
    * shown on the textLabel.
-   * @param device a <code>Device</code> to surveil
+   * @param devModel a <code>Device</code> to surveil
    */
   public void setModel(Device devModel)
   {
@@ -195,7 +194,7 @@ public class SimpleStateViewer extends JSmoothLabel
   }
 
   /**
-   * Gets the application attached to this state viewer.
+   * @return the application attached to this state viewer.
    * @see #setApplication
    */
   public IDeviceApplication getApplication() {

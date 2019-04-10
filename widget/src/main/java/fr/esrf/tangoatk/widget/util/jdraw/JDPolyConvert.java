@@ -25,7 +25,9 @@ package fr.esrf.tangoatk.widget.util.jdraw;
 /** An interface for converting object to PolyLine */
 interface JDPolyConvert {
 
-  /** Convert this object to a JDPolyline */
+  /** Convert this object to a JDPolyline
+   * @return Converted object
+   */
   public JDPolyline convertToPolyline();
 
 }

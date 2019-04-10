@@ -32,8 +32,6 @@ import java.awt.geom.Point2D;
 import java.io.IOException;
 
 /** JDraw Rectangle graphic object.
-  *  <p>Here is an example of few JDRoundRectangle:<p>
-  *  <img src="JDRRectangle.gif" border="0" alt="JDRoundRectangle examples"></img>
   */
 public class JDRoundRectangle extends JDRectangular implements JDPolyConvert {
 
@@ -354,7 +352,7 @@ public class JDRoundRectangle extends JDRectangular implements JDPolyConvert {
   // Property stuff
   // -----------------------------------------------------------
   /**
-   * Returns the interpolation of rounded corner.
+   * @return the interpolation of rounded corner.
    * @see #setStep
    */
   public int getStep() {
@@ -371,7 +369,7 @@ public class JDRoundRectangle extends JDRectangular implements JDPolyConvert {
   }
 
   /**
-   * Returns the rouded corner width.
+   * @return the rounded corner width.
    * @see #setCornerWidth
    */
   public int getCornerWidth() {

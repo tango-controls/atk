@@ -74,7 +74,7 @@ public class EditableTableRowModel extends TableRowModel
 
     /**
     * Loads a data file and fill in the table with the corresponding data
-    * @param data file
+    * @param dataFile file
     */
     void loadDataFile(File dataFile)
     {
@@ -207,6 +207,7 @@ public class EditableTableRowModel extends TableRowModel
 
     /**
     * Parses the table data (object[][]) from strings to a numeric spectrum data
+     * @return Parsed data
     */
     public double[]  parseNumberSpectrumData()
     {

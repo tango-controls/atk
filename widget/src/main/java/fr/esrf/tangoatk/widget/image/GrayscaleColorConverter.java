@@ -212,6 +212,7 @@ public class GrayscaleColorConverter implements IRasterConverter {
     //===========================================================
     /**
      *	IRasterControl setModel abstract method
+     *@param iv Viewer
      */
     //===========================================================
     public void setModel(IImageViewer iv) {
@@ -341,6 +342,7 @@ public class GrayscaleColorConverter implements IRasterConverter {
     //===========================================================
     /**
      *	Draw rectangle
+     *  @param calculate Calculate ROI
      */
     //===========================================================
     public void drawROI(boolean calculate)

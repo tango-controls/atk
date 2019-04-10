@@ -153,6 +153,7 @@ public class SignalScalarLightViewer extends JButton
     /**
      * Constructs a SignalScalarLightViewer with a devicePropertyModel = null
      * will show devicePropertyModel's label on setModel(...)
+     * @param viewLabel View label
      */
     public SignalScalarLightViewer(boolean viewLabel) {
         super();
@@ -201,6 +202,7 @@ public class SignalScalarLightViewer extends JButton
     }
     /**
      * To know whether devicePropertyModel's label is text of this JLabel or not
+     * @return View label flag
      */
     public boolean isViewLabel(){
         return viewLabel;
@@ -355,6 +357,7 @@ public class SignalScalarLightViewer extends JButton
     /**
      * sets the icon associated with the "true" or "1" value
      * (default : SignalScalarLightViewer.redLED)
+     * @param icon Icon
      */
     public void setIconLightOn(ImageIcon icon) {
         m_iconLightOn = icon;
@@ -363,6 +366,7 @@ public class SignalScalarLightViewer extends JButton
     /**
      * sets the icon associated with the "false" or "0" value
      * (default : SignalScalarLightViewer.grayLED)
+     * @param icon Icon
      */
     public void setIconLightOff(ImageIcon icon) {
         m_iconLightOff = icon;
@@ -371,12 +375,14 @@ public class SignalScalarLightViewer extends JButton
     /**
      * sets the icon associated with "KO" value = "could not get value"
      * (default : SignalScalarLightViewer.KOLED)
+     * @param icon Icon
      */
     public void setIconLightKO(ImageIcon icon) {
         m_iconLightKO = icon;
     }
 
     /**
+     * @param arg0 Event
      * @see fr.esrf.tangoatk.core.IBooleanScalarListener#booleanScalarChange(fr.esrf.tangoatk.core.BooleanScalarEvent)
      */
     public void booleanScalarChange(BooleanScalarEvent arg0) {
@@ -395,10 +401,6 @@ public class SignalScalarLightViewer extends JButton
         repaint();
     }
     
-    /**
-     * Main class, so you can have an example.
-     * You can monitor your own attribute by giving its full path name in argument
-     */
     public static void main(String[] args){
         fr.esrf.tangoatk.core.AttributeList attributeList = new fr.esrf.tangoatk.core.AttributeList();
         SignalScalarLightViewer sslv = new SignalScalarLightViewer(true);

@@ -133,8 +133,8 @@ public class TimeAndValueDualSpectrum extends NonAttrNumberSpectrum implements I
 
     /**
      * Use case example
-     * @param args
-     * @throws ConnectionException 
+     * @param args Input arguments
+     * @throws ConnectionException In case of failure
      */
     public static void main (String[] args) throws ConnectionException
     {

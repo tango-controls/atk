@@ -31,7 +31,7 @@ public class JDTitledRect extends JDRectangular {
   private int hTitle = 0;
 
   /**
-   * Construcxt a JDTitledRect.
+   * Construct a JDTitledRect.
    * @param objectName Object name
    * @param title Title
    * @param x Up left corner x coordinate
@@ -236,7 +236,7 @@ public class JDTitledRect extends JDRectangular {
   }
 
   /**
-   * Returns the current font of this label.
+   * @return the current font of this label.
    */
   public Font getFont() {
     return theFont;
@@ -250,7 +250,7 @@ public class JDTitledRect extends JDRectangular {
   }
 
   /**
-   * Returns the current label text.
+   * @return the current label text.
    */
   public String getTitle() {
     return theTitle;
@@ -265,7 +265,7 @@ public class JDTitledRect extends JDRectangular {
   }
 
   /**
-   * Returns the line color
+   * @return the line color
    */
   public Color getColor1() {
     return c1;
@@ -280,14 +280,14 @@ public class JDTitledRect extends JDRectangular {
   }
 
   /**
-   * Returns the line color
+   * @return the line color
    */
   public Color getColor2() {
     return c2;
   }
 
   /**
-   * Returns true if etched border is enabled
+   * @return true if etched border is enabled
    */
   public boolean hasEtchedBorder() {
     return etchedBorder;

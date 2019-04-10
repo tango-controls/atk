@@ -205,9 +205,6 @@ public class SignalScalarCheckBoxViewer extends JCheckBox
      * this viewer
      * 
      * @param b
-     *            If True the attribute full name will be displayed as tooltip
-     *            for the viewer
-     * @param qualityEnabled
      *            If True the background Color represents the attribute quality
      *            factor
      */

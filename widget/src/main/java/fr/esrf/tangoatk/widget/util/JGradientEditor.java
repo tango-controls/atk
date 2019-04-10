@@ -540,7 +540,6 @@ public class JGradientEditor extends JComponent implements ActionListener,MouseM
   }
 
 
-  /** Main test function. */
   static public void main(String[] args) {
 
     final Gradient d = new Gradient();

@@ -290,7 +290,7 @@ public class JDSlider extends JDRectangular {
   }
 
   /**
-   * Returns the slider's maximum value.
+   * @return the slider's maximum value.
    * @see #setMaximum
    */
   public double getMaximum() {
@@ -308,7 +308,7 @@ public class JDSlider extends JDRectangular {
   }
 
   /**
-   * Returns the slider's maximum value.
+   * @return the slider's maximum value.
    * @see #setMinimum
    */
   public double getMinimum() {
@@ -325,7 +325,7 @@ public class JDSlider extends JDRectangular {
   }
 
   /**
-   * Returns the current slider value.
+   * @return the current slider value.
    */
   public double getSliderValue() {
     return value;
@@ -345,7 +345,7 @@ public class JDSlider extends JDRectangular {
   }
 
   /**
-   * Returns the current bar orientation.
+   * @return the current bar orientation.
    * @see #setOrientation
    */
   public int getOrientation() {
@@ -353,7 +353,7 @@ public class JDSlider extends JDRectangular {
   }
 
   /**
-   * Returns the current cursor object.
+   * @return the current cursor object.
    * @see #setCursor
    */
   public JDObject getCursor() {

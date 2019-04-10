@@ -36,8 +36,9 @@ import java.awt.*;
 public class ScalarCommandInput extends javax.swing.JPanel implements IInput
 {
     java.util.Vector<String>   inputList;
-    /** Creates new form ScalarCommandInput */
-
+    /** Creates new form ScalarCommandInput
+     * @param command Command model
+     */
     public ScalarCommandInput(ICommand command)
     {
 	this();

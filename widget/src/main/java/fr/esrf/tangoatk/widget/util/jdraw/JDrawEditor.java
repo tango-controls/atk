@@ -292,7 +292,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   }
 
   /**
-   * Determines whether the grid is visible.
+   * @return whether the grid is visible.
    */
   public boolean isGridVisible() {
     return gridVisible;
@@ -310,7 +310,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   }
 
   /**
-   * Returns the current gid size.
+   * @return the current gid size.
    * @see #setGridSize
    */
   public int getGridSize() {
@@ -327,7 +327,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   }
 
   /**
-   * Determines whether object and control point are aligned to the grid.
+   * @return whether object and control point are aligned to the grid.
    * @see #setAlignToGrid
    * @see #setGridSize
    */
@@ -335,7 +335,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     return alignToGrid;
   }
 
-  /** Returns the mode of the editor. */
+  /** @return the mode of the editor. */
   public int getMode() {
     return mode;
   }
@@ -364,7 +364,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   }
 
   /**
-   * Determine wheter the specifed object is selected.
+   * @return whether the specified object is selected.
    * @param obj JDObject
    * @see #selectObject
    * @see #unselectObject
@@ -386,24 +386,28 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     }
   }
 
-  /** Get number of object */
+  /** @return number of object */
   public int getObjectNumber() {
     return objects.size();
   }
 
-  /** Get the JDObject at the specified position.
+  /** @return the JDObject at the specified position.
    * @param idx Object index.
    */
   public JDObject getObjectAt(int idx) {
     return (JDObject)objects.get(idx);
   }
 
-  /** Used for read only purpose , vector should not be modified by this way. */
+  /** Used for read only purpose , vector should not be modified by this way.
+   * @return Vector of objects
+   */
   public Vector getObjects() {
     return objects;
   }
 
-  /** Used for read only purpose , vector should not be modified by this way. */
+  /** Used for read only purpose , vector should not be modified by this way.
+   * @return Vector of selected objects
+   */
   public Vector getSelectedObjects() {
     return selObjects;
   }
@@ -508,7 +512,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     }
   }
 
-  /** Get number of selected object */
+  /** @return number of selected object */
   public int getSelectionLength() {
     if(mode==MODE_PLAY) return 0;
     return selObjects.size();
@@ -553,7 +557,9 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   }
 
   /** Generates java classes from the selection.
+   * @param dirName Directory where to generate files
    * @see JDGroup#generateJavaClass
+   * @throws java.io.IOException In case of failure
    */
   public void generateJavaClasses(String dirName) throws IOException {
 
@@ -617,6 +623,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   /** Paste the selection at the specified pos.
   * @param x Up left corner x coordinate
   * @param y Up left corner y coordinate
+  * @param fromOrigin Get coordinates from Top Left corner of clipboard
   */
   public void pasteClipboard(int x, int y, boolean fromOrigin) {
 
@@ -802,7 +809,9 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
   }
 
-  /** Save the current drawing to the file (Ask for filename if no filename has been previously set) */
+  /** Save the current drawing to the file (Ask for filename if no filename has been previously set)
+   * @param defaultDir Default directory
+   */
   public void instantSave(String defaultDir) {
 
     if (lastFileName.length()>0) {
@@ -1138,13 +1147,13 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
   }
 
-  /** Get the zoom factor in percent */
+  /** @return the zoom factor in percent */
   public int getZoomFactorPercent() {
     return zbconvert(100,0);
   }
 
   /**
-   * Returns the zoom factor value.
+   * @return the zoom factor value.
    * @see #getZoomFactorPercent
    */
   public int getZoomFactor() {
@@ -1185,14 +1194,17 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   }
 
   /**
-   * Returns true is auto zoom is enabled, false otherwise.
+   * @return true is auto zoom is enabled, false otherwise.
    * @see #setAutoZoom
    */
   public boolean isAutoZoom() {
     return autoZoom;
   }
 
-  /** Translate selected Object */
+  /** Translate selected Object
+   * @param x X translation
+   * @param y Y translation
+   */
   public void translateSelection(int x, int y) {
     if(mode==MODE_PLAY) return;
     if(mode==MODE_LIB) return;
@@ -1212,23 +1224,23 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
   }
 
-  /** Get undo state */
+  /** @return undo state */
   public boolean canUndo() {
     return (mode==MODE_EDIT) && undoPos>=2;
   }
 
-  /** Get redo state */
+  /** @return redo state */
   public boolean canRedo() {
     return (mode==MODE_EDIT) && undoPos<undo.size();
   }
 
-  /** Get name of the last action */
+  /** @return name of the last action */
   public String getLastActionName() {
     if( canUndo() ) return ((UndoBuffer)undo.get(undoPos-1)).getName();
     else return "";
   }
 
-  /** Get name of the action that can be redone */
+  /** @return name of the action that can be redone */
   public String getNextActionName() {
     if( canRedo() ) return ((UndoBuffer)undo.get(undoPos)).getName();
     else return "";
@@ -1373,12 +1385,12 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     listeners.clear();
   }
 
-  /** Returns true if the drawing has been modofied and need to be saved */
+  /** @return true if the drawing has been modofied and need to be saved */
   public boolean getNeedToSaveState() {
     return needToSave;
   }
 
-  /** Gets the name of the last loaded file */
+  /** @return the name of the last loaded file */
   public String getFileName() {
     return lastFileName;
   }
@@ -1386,6 +1398,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   /** Add an object to the drawing. If you want to add dynamcaly object to this
    * editor (in PLAY_MODE) , You should call initPlayer() after all objects
    * are inserted.
+   * @param o Object to add
    * @see #initPlayer
    */
   public void addObject(JDObject o) {
@@ -1400,7 +1413,10 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
     selObjects.clear();
   }
 
-  /** Set a global translation for the drawing area */
+  /** Set a global translation for the drawing area
+   * @param x X translation
+   * @param y Y translation
+   */
   public void setTranslation(int x,int y) {
     transx = x;
     transy = y;
@@ -1483,7 +1499,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   }
 
   /**
-   * Retunrs all objects of the specified class present in the drawing area.
+   * @return all objects of the specified class present in the drawing area.
    * @param theClass JDObject subclass
    */
   public Vector getObjectsOfClass(Class theClass) {
@@ -1494,7 +1510,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   }
 
   /**
-   * Returns all objects having the given name present in the drawing area.
+   * @return all objects having the given name present in the drawing area.
    * @param name JDObject name (Case sensitive)
    * @param recurseGroup true to perform a deep search whithin group, false otherwise.
    */
@@ -1568,7 +1584,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
   }
 
-  /** Return all object that have the "User interaction" flag enabled. */
+  /** @return all object that have the "User interaction" flag enabled. */
   public Vector getInteractiveObjects() {
     Vector ret = new Vector();
     for(int i=0;i<objects.size();i++)
@@ -1585,7 +1601,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   }
 
   /**
-   * Returns true if the clipboard contains valid data
+   * @return true if the clipboard contains valid data
    */
   public boolean canPaste() {
     return clipboard.size() > 0;

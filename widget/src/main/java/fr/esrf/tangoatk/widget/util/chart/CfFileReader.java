@@ -253,8 +253,8 @@ public class CfFileReader {
   }
   /**
    * Parse the given file and fill property vector.
-   * @param filename File to parse
-   * @return Return true when file succesfully parsed
+   * @param file File to parse
+   * @return Return true when file successfully parsed
    */
 
    public boolean readFile(File file) {

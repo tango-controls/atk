@@ -193,7 +193,7 @@ public class NetEditor extends JComponent implements MouseListener, MouseMotionL
     defaultExtension = ext;
   }
 
-  /** Returns the file extension of this editor */
+  /** @return the file extension of this editor */
   public String getFileExtension() {
     return defaultExtension;
   }
@@ -705,12 +705,12 @@ public class NetEditor extends JComponent implements MouseListener, MouseMotionL
 
   }
 
-  /** Get undo state */
+  /** @return undo state */
   public boolean canUndo() {
     return (isEditable && undoPos>=2);
   }
 
-  /** Get the name of the last action performed */
+  /** @return the name of the last action performed */
   public String getUndoActionName() {
     if( canUndo() ) {
       return ((UndoBuffer)undo.get(undoPos-1)).getName();
@@ -719,7 +719,7 @@ public class NetEditor extends JComponent implements MouseListener, MouseMotionL
     }
   }
 
-  /** Get the name of the last action undone */
+  /** @return the name of the last action undone */
   public String getRedoActionName() {
     if( canRedo() ) {
       return ((UndoBuffer)undo.get(undoPos)).getName();
@@ -728,7 +728,7 @@ public class NetEditor extends JComponent implements MouseListener, MouseMotionL
     }
   }
 
-  /** Get redo state */
+  /** @return redo state */
   public boolean canRedo() {
     return (isEditable && undoPos<undo.size());
   }
@@ -775,7 +775,7 @@ public class NetEditor extends JComponent implements MouseListener, MouseMotionL
     listeners.clear();
   }
 
-  /** Returns true if the scheme has been modified and need
+  /** @return true if the scheme has been modified and need
       to be saved */
   public boolean getNeedToSaveState() {
     return needToSave;
@@ -810,7 +810,7 @@ public class NetEditor extends JComponent implements MouseListener, MouseMotionL
 
   }
 
-  /** Returns the file name of the last laoded/saved net/xpss file */
+  /** @return the file name of the last laoded/saved net/xpss file */
   public String getFileName() {
     return currentFileName;
   }
@@ -874,7 +874,7 @@ public class NetEditor extends JComponent implements MouseListener, MouseMotionL
 
   }
 
-  /** Returns the number of NetObject in the editor */
+  /** @return the number of NetObject in the editor */
   public int getNetObjectNumber() {
     return objects.size();
   }
@@ -884,22 +884,28 @@ public class NetEditor extends JComponent implements MouseListener, MouseMotionL
     dlgOpt.showOption();
   }
 
-  /** Sets the global option dialog. Allows to build a customized Editor option dialog. */
+  /** Sets the global option dialog. Allows to build a customized Editor option dialog.
+   * @param dlg NetEditor dialog
+   * */
   public void setNetEditorDialog(NetEditorDlg dlg) {
     dlgOpt = dlg;
   }
 
-  /** Sets the object properties dialog. Allows to build a custoimized Object editon dialog. */
+  /** Sets the object properties dialog. Allows to build a custoimized Object editon dialog.
+   * @param dlg NetObjectDlg Dialog
+   */
   public void setNetObjectDialog(NetObjectDlg dlg) {
     dlgProp = dlg;
   }
 
-  /** Allow the user to move bubble object even when the editor is not editable */
+  /** Allow the user to move bubble object even when the editor is not editable
+   * @param b Moveable flag
+   */
   public void setMoveableBubble(boolean b) {
     moveBubble=b;
   }
 
-  /** Returns the parent frame or null */
+  /** @return the parent frame or null */
   public JFrame getParentFrame() {
     return pFrame;
   }
@@ -914,7 +920,7 @@ public class NetEditor extends JComponent implements MouseListener, MouseMotionL
     repaint();
   }
 
-  /** Returns current grid size. */
+  /** @return current grid size. */
   public Dimension getGridSize() {
     return new Dimension(XGRID_SIZE,YGRID_SIZE);
   }
@@ -1466,13 +1472,12 @@ public class NetEditor extends JComponent implements MouseListener, MouseMotionL
    * You can override it to custom the link painting.
    * Here is an example code for painting all links (Note that this code not
    * handle link selection when the editor is editable):
-   * <p>
    * <pre>
-   *  public void <strong>paintLinks</strong>(Graphics2D g2) {
+   *  public void paintLinks(Graphics2D g2) {
    *    g2.setColor(Color.black);
-   *    for (int i = 0; i < getNetObjectNumber() ; i++) {
+   *    for (int i = 0; i &lt; getNetObjectNumber() ; i++) {
    *      NetObject o = getNetObjectAt(i);
-   *      for (int j = 0; j < o.getChildrenNumber() ; j++ ) {
+   *      for (int j = 0; j &lt; o.getChildrenNumber() ; j++ ) {
    *        o.paintLink(g2,o.getChildAt(j),true);
    *      }
    *    }
@@ -1493,13 +1498,12 @@ public class NetEditor extends JComponent implements MouseListener, MouseMotionL
   /**
    * Paint object of the scheme. Called by paint() after paintLinks().
    * You can override it to custom the object painting.
-   * <p>
    * <pre>
-   *  public void <strong>paintObjects</strong>(Graphics2D g2) {
-   *    for (int i = 0; i < getNetObjectNumber() ; i++)
+   *  public void paintObjects(Graphics2D g2) {
+   *    for (int i = 0; i &lt; getNetObjectNumber() ; i++)
    *      getNetObjectAt(i).paint(g2);
    *  }
-   *</pre>
+   * </pre>
    * @param g2 Graphics object
    * @see NetEditor#paintLinks
    */

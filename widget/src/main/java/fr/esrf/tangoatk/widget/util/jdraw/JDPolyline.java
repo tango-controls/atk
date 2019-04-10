@@ -31,8 +31,6 @@ import java.awt.geom.Point2D;
 import java.io.IOException;
 
 /** JDraw Polyline graphic object.
- *  <p>Here is an example of few JDPolyline:<p>
- *  <img src="JDPolyline.gif" border="0" alt="JDPolyline examples"></img>
  */
 public class JDPolyline extends JDObject implements JDRotatable {
 
@@ -342,7 +340,7 @@ public class JDPolyline extends JDObject implements JDRotatable {
   // Property
   // -----------------------------------------------------------
   /**
-   * Determines whether this polyline is closed.
+   * @return whether this polyline is closed.
    * @see #setClosed
    */
   public boolean isClosed() {
@@ -359,7 +357,7 @@ public class JDPolyline extends JDObject implements JDRotatable {
   }
 
   /**
-   * Returns the polyline interpolation step.
+   * @return the polyline interpolation step.
    * @see #setStep
    */
   public int getStep() {
@@ -368,7 +366,7 @@ public class JDPolyline extends JDObject implements JDRotatable {
 
   /**
    * Sets the polyline interpolation step.
-   * @param s Interpolation step (must be >=1).
+   * @param s Interpolation step (must be greater or equal than 1).
    */
   public void setStep(int s) {
     step = 1;

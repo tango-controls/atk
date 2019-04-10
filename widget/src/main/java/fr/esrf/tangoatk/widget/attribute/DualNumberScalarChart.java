@@ -85,10 +85,6 @@ public class DualNumberScalarChart extends JLChart
     
      /**
      * Constructor
-     * @param chartStyle the kind of chart chosen
-     * @see barChart
-     * @see dotChart
-     * @see lineChart
      */
     public DualNumberScalarChart() {
         super();
@@ -105,16 +101,17 @@ public class DualNumberScalarChart extends JLChart
 
     /**
      * Sets the marker style for line chart and dot chart
-     * @see MARKER_DOT
-     * @see MARKER_BOX
-     * @see MARKER_TRIANGLE
-     * @see MARKER_DIAMOND
-     * @see MARKER_STAR
-     * @see MARKER_VERT_LINE
-     * @see MARKER_HORIZ_LINE
-     * @see MARKER_CROSS
-     * @see MARKER_CIRCLE
-     * @see MARKER_SQUARE
+     * @param style Marker style
+     * @see JLDataView#MARKER_BOX
+     * @see JLDataView#MARKER_BOX
+     * @see JLDataView#MARKER_TRIANGLE
+     * @see JLDataView#MARKER_DIAMOND
+     * @see JLDataView#MARKER_STAR
+     * @see JLDataView#MARKER_VERT_LINE
+     * @see JLDataView#MARKER_HORIZ_LINE
+     * @see JLDataView#MARKER_CROSS
+     * @see JLDataView#MARKER_CIRCLE
+     * @see JLDataView#MARKER_SQUARE
      */
     public void setMarkerStyle(int style) {
         markerStyle = style;
@@ -152,11 +149,11 @@ public class DualNumberScalarChart extends JLChart
         setPaintAxisFirst(false);
     }
 
-      /**
-     * Sets the attributes this chart will display.
-     * It calls to clearmodel() first
-     * @param attl the list of Attribute as an <code>AttributeList</code>
-     */
+  /**
+   * Sets the attributes this chart will display.
+   * @param axattribute X attribute
+   * @param ayattribute Y attribute
+   */
     public void setXYModel(INumberScalar axattribute,INumberScalar ayattribute) {
              if ((xattribute != null) || (yattribute != null))
             clearXYModel();
@@ -351,10 +348,6 @@ public class DualNumberScalarChart extends JLChart
     public void errorChange(ErrorEvent arg0) {
     }
 
-    /**
-     * Main class, so you can have an example.
-     * You can put your own attribute names in parameter
-     */
     public static void main(String[] args) {
         JFrame frame = new JFrame();
         DualNumberScalarChart f = new DualNumberScalarChart();

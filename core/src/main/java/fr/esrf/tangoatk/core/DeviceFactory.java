@@ -77,7 +77,10 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
 
   private DeviceFactory() {}
 
-  /** Returns an instance of the singleton device factory class */
+  /**
+   * Returns an instance of the singleton device factory class.
+   * @return DeviceFactory instance
+   */
   public static DeviceFactory getInstance() {
     if (instance == null) {
       instance = new DeviceFactory();
@@ -102,6 +105,7 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
 
   /**
    * Returns the current trace level.
+   * @return Trace mode
    * @see #setTraceMode
    */
   public int getTraceMode() {
@@ -179,6 +183,7 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
 
   /**
    * Returns true if the global device refresher is running.
+   * @return Is refreshing
    */ 
   public boolean isRefreshing() {
     if (refresher == null) {
@@ -413,6 +418,7 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
 
   /**
    * Returns an array containing all device of this factory.
+   * @return  Device array
    */
   public Device[] getDevices() {
 
@@ -467,7 +473,6 @@ public class DeviceFactory implements IRefreshee, java.io.Serializable {
   /**
    * Adds a device instance in the factory if the device name is not already existant in the factory
    * @param dev Device instance to add.
-   * @return true if the device has already been created in the factory
    */
   public synchronized void addDevice(Device dev)
   {

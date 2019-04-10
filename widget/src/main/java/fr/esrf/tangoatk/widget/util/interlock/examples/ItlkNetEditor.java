@@ -52,7 +52,9 @@ public class ItlkNetEditor extends NetEditor {
   // Set of ITLK_BUBBLE extensions
   final static String[] bubbleExt = { "Type","Address" };
 
-  /** Construction */
+  /** Construction
+   * @param parent Parent frame
+   */
   public ItlkNetEditor(JFrame parent) {
 
     super(parent);
@@ -61,7 +63,10 @@ public class ItlkNetEditor extends NetEditor {
 
   }
 
-  /** Override loadFile to reinitialise object struct after a load */
+  /** Override loadFile to reinitialise object struct after a load
+   * @param fileName File name
+   * @throws java.io.IOException In case of failure
+   */
   public void loadFile(String fileName) throws IOException {
 
     super.loadFile(fileName);
@@ -69,7 +74,9 @@ public class ItlkNetEditor extends NetEditor {
 
   }
 
-  /** Sets the editor in EDIT/TRACE mode */
+  /** Sets the editor in EDIT/TRACE mode
+   * @param b EDIT/TRACE mode
+   */
   public void setEditable(boolean b) {
 
     if(!b) prepareObjects();
@@ -77,7 +84,7 @@ public class ItlkNetEditor extends NetEditor {
 
   }
 
-  /** Returns the root of the scheme (The only VCC object) or null */
+  /** @return the root of the scheme (The only VCC object) or null */
   public NetObject getRoot() {
     return theRoot;
   }
@@ -109,7 +116,7 @@ public class ItlkNetEditor extends NetEditor {
 
   }
 
-  /** Compute state of link and output (sensor), paint links */
+  // Compute state of link and output (sensor), paint links
   private void computeState(Graphics2D g,NetObject o,boolean curState) {
 
     if (getII(o).nbHit > 1) {
@@ -157,7 +164,7 @@ public class ItlkNetEditor extends NetEditor {
 
   }
 
-  /** propagate state on children */
+  // propagate state on children
   private void propagateState(Graphics2D g, NetObject o,boolean curState) {
 
     for (int i = 0; i < o.getChildrenNumber(); i++) {
@@ -173,7 +180,9 @@ public class ItlkNetEditor extends NetEditor {
 
   }
 
-  /** Swap an iterlock state */
+  /** Swap an interlock state
+   * @param o Net object to swap
+   */
   public void swapItlkState(NetObject o) {
 
     getII(o).state = !getII(o).state;
@@ -186,18 +195,25 @@ public class ItlkNetEditor extends NetEditor {
 
   }
 
-  /** Helper function to retreive the ItlkInfo */
+  // Helper function to retreive the ItlkInfo
   private ItlkInfo getII(NetObject o) {
     return (ItlkInfo)o.getUserValue();
   }
 
-  /** Sets the editor in creation mode */
+  /** Sets the editor in creation mode
+   * @param type NetEditor creation mode
+   * @param userType User mode creation type
+   */
   public void setCreateMode(int type,int userType) {
     createMode =  userType;
     setCreateMode(type);
   }
 
-  /** Overriding createBubbleObject to create our specific NetObject */
+  /** Overriding createBubbleObject to create our specific NetObject
+   * @param x X position
+   * @param y Y position
+   * @return Created object
+   */
   public NetObject createBubbleObject(int x,int y) {
 
     NetObject ret = null;
@@ -239,7 +255,7 @@ public class ItlkNetEditor extends NetEditor {
 
   }
 
-  /** Override addObject to ensure that there is always at most one VCC object */
+  // Override addObject to ensure that there is always at most one VCC object
   public boolean addObject(NetObject o) {
 
     if (o == null)
@@ -259,7 +275,7 @@ public class ItlkNetEditor extends NetEditor {
 
   }
 
-  /** Override removeObject to ensure that there is always at most one VCC object */
+  // Override removeObject to ensure that there is always at most one VCC object
   public void removeObject(NetObject o) {
 
     if(theRoot==o) theRoot=null;
@@ -267,7 +283,7 @@ public class ItlkNetEditor extends NetEditor {
 
   }
 
-  /** Override clearObjects to ensure that there is always at most one VCC object */
+  // Override clearObjects to ensure that there is always at most one VCC object
   public void clearObjects() {
 
     theRoot=null;
@@ -275,7 +291,7 @@ public class ItlkNetEditor extends NetEditor {
 
   }
 
-  /** Override paintLink to paint link state */
+  // Override paintLink to paint link state
   public void paintLinks(Graphics2D g2) {
 
     if(!isEditable()) {
@@ -287,7 +303,7 @@ public class ItlkNetEditor extends NetEditor {
 
   }
 
-  /** Override paintObject to map the type and address extension to small label before objects are painted */
+  // Override paintObject to map the type and address extension to small label before objects are painted
   public void paintObjects(Graphics2D g2) {
 
     for(int i=0;i < getNetObjectNumber();i++) {

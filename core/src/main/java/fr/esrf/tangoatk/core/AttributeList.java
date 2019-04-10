@@ -140,6 +140,7 @@ public class AttributeList extends AEntityList {
 
   /**
    * Returns whether the refresher execute default refresh loop
+   * @return Is Forced refresh
    */
   public boolean isForceRefresh()
   {

@@ -444,8 +444,8 @@ public class NumberSpectrumTrendViewer extends JPanel implements ISpectrumListen
         return errBuff;
     }
 
-    /** returns the configuration as string.
-      * @see #setSetting
+    /** @return the configuration as string.
+      * @see #loadSetting
       */
     public String getSettings() {
 

@@ -33,8 +33,6 @@ import java.util.Vector;
 
 /** JDraw Group graphic object. A group can contains all JDObject including group.
  * If the group is scaled, all object within this group will also be scaled.
- * <p>Here is an exmaple of few group :<p>
- * <img src="JDGroup.gif" border="0" alt="JDGroup examples"></img>
  */
 public class JDGroup extends JDRectangular {
 
@@ -537,7 +535,7 @@ public class JDGroup extends JDRectangular {
   // Children management
   // -----------------------------------------------------------
 /**
- * Returns the child at the specifed position.
+ * @return the child at the specifed position.
  * @param idx Child index
  */
   public JDObject getChildAt(int idx) {
@@ -545,7 +543,7 @@ public class JDGroup extends JDRectangular {
   }
 
   /**
-   * Returns the number of child of this group.
+   * @return the number of child of this group.
    */
   public int getChildrenNumber() {
     return children.size();
@@ -563,7 +561,7 @@ public class JDGroup extends JDRectangular {
   }
 
   /**
-   * Returns a Vector containing all children of this group.
+   * @return a Vector containing all children of this group.
    */
   public Vector getChildren() {
     return children;
@@ -579,6 +577,7 @@ public class JDGroup extends JDRectangular {
    * color overrided by the color passed to the generated paint()
    * function.
    * @param f file to be saved
+   * @throws java.io.IOException In case of failure
    */
   public void generateJavaClass(FileWriter f) throws IOException {
 

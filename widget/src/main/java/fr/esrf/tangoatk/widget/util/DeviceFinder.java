@@ -113,7 +113,7 @@ public class DeviceFinder extends JPanel {
   }
 
   /**
-   * Returns the list of selected entities.
+   * @return the list of selected entities.
    */
   public String[] getSelectedNames() {
 
@@ -163,7 +163,6 @@ public class DeviceFinder extends JPanel {
     return tree;
   }
 
-  /** test function */
   public static void main(String[] args) {
 
     final DeviceFinder df = new DeviceFinder(MODE_DEVICE);

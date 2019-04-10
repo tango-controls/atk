@@ -133,22 +133,36 @@ public class Splash extends JWindow {
 
   // For backward compatibilty (No longer used)
 
-  /** @deprecated */
+  /** @deprecated
+   * @param maxValue Max value
+   */
   public void initProgress(int maxValue) {
     splashPanel.getProgress().setMaximum(maxValue);
     splashPanel.setProgress(maxValue);
   }
-  /** @deprecated */
+  /** @deprecated
+   * @param b Indeterminate progress
+   */
   public void setIndeterminateProgress(boolean b) {}
-  /** @deprecated */
+  /** @deprecated
+   * @param s Author
+   */
   public void setAuthor(String s) {}
-  /** @deprecated */
+  /** @deprecated
+   * @param color  Foreground color
+   */
   public void setPanelForeground(java.awt.Color color) {}
-  /** @deprecated */
+  /** @deprecated
+   * @return Empty string
+   */
   public String getAuthor() { return ""; }
-  /** @deprecated */
+  /** @deprecated
+   * @param s Version
+   */
   public void setVersion(String s) {}
-  /** @deprecated */
+  /** @deprecated
+   * @return Version
+   */
   public String getVersion() { return ""; }
 
 

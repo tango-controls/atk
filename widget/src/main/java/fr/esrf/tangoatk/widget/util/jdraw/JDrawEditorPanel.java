@@ -47,78 +47,78 @@ public class JDrawEditorPanel extends JPanel implements ActionListener,JDrawEdit
 
   /** Edit menu. */
   JMenu     editMenu;
-  /** Edit->Undo menu item. */
+  /** Edit/Undo menu item. */
   JMenuItem editUndoMenuItem;
-  /** Edit->Redo menu item. */
+  /** Edit/Redo menu item. */
   JMenuItem editRedoMenuItem;
-  /** Edit->Cut menu item. */
+  /** Edit/Cut menu item. */
   JMenuItem editCutMenuItem;
-  /** Edit->Copy menu item. */
+  /** Edit/Copy menu item. */
   JMenuItem editCopyMenuItem;
-  /** Edit->Paste menu item. */
+  /** Edit/Paste menu item. */
   JMenuItem editPasteMenuItem;
-  /** Edit->Delete menu item. */
+  /** Edit/Delete menu item. */
   JMenuItem editDeleteMenuItem;
-  /** Edit->Select All menu item. */
+  /** Edit/Select All menu item. */
   JMenuItem editSelectAllMenuItem;
-  /** Edit->Select Not visible menu item. */
+  /** Edit/Select Not visible menu item. */
   JMenuItem editSelectNVMenuItem;
-  /** Edit->Select None menu item. */
+  /** Edit/Select None menu item. */
   JMenuItem editSelectNoneMenuItem;
 
   /** Views menu. */
   JMenu     viewsMenu;
 
-  /** Views->Hide/Show device tree menu item. */
+  /** Views/Hide/Show device tree menu item. */
   JMenuItem hideshowDeviceTreeMenuItem;
-  /** Views->Transform menu item. */
+  /** Views/Transform menu item. */
   JMenuItem viewsTransformMenuItem;
-  /** Views->Play menu item. */
+  /** Views/Play menu item. */
   JMenuItem viewsPlayMenuItem;
-  /** Views->Tango Synoptic menu item. */
+  /** Views/Tango Synoptic menu item. */
   JMenuItem viewsTangoSynopticMenuItem;
-  /** Views->Object properties menu item. */
+  /** Views/Object properties menu item. */
   JMenuItem viewsOptionMenuItem;
-  /** Views->Browse menu item. */
+  /** Views/Browse menu item. */
   JMenuItem viewsBrowseMenuItem;
-  /** Views->Edit group menu item. */
+  /** Views/Edit group menu item. */
   JMenuItem viewsGroupEditMenuItem;
-  /** Views->Generate java menu item. */
+  /** Views/Generate java menu item. */
   JMenuItem viewsJavaMenuItem;
-  /** Views->Global properties menu item. */
+  /** Views/Global properties menu item. */
   JMenuItem viewsGlobalMenuItem;
 
   /** Tools menu. */
   JMenu     toolsMenu;
-  /** Tools->H Mirror menu item. */
+  /** Tools/H Mirror menu item. */
   JMenuItem toolsHMirrorMenuItem;
-  /** Tools->V Mirror menu item. */
+  /** Tools/V Mirror menu item. */
   JMenuItem toolsVMirrorMenuItem;
-  /** Tools->Align top menu item. */
+  /** Tools/Align top menu item. */
   JMenuItem toolsAligntopMenuItem;
-  /** Tools->Align left menu item. */
+  /** Tools/Align left menu item. */
   JMenuItem toolsAlignleftMenuItem;
-  /** Tools->Align bottom menu item. */
+  /** Tools/Align bottom menu item. */
   JMenuItem toolsAlignbottomMenuItem;
-  /** Tools->Align rigth item. */
+  /** Tools/Align rigth item. */
   JMenuItem toolsAlignrightMenuItem;
-  /** Tools->Raise menu item. */
+  /** Tools/Raise menu item. */
   JMenuItem toolsRaiseMenuItem;
-  /** Tools->Lower menu item. */
+  /** Tools/Lower menu item. */
   JMenuItem toolsLowerMenuItem;
-  /** Tools->Front menu item. */
+  /** Tools/Front menu item. */
   JMenuItem toolsFrontMenuItem;
-  /** Tools->Back menu item. */
+  /** Tools/Back menu item. */
   JMenuItem toolsBackMenuItem;
-  /** Tools->Convert to polyline menu item. */
+  /** Tools/Convert to polyline menu item. */
   JMenuItem toolsConvertPolyMenuItem;
-  /** Tools->Grid visible menu item. */
+  /** Tools/Grid visible menu item. */
   JCheckBoxMenuItem toolsGridVisible;
-  /** Tools->Align to grid menu check box item. */
+  /** Tools/Align to grid menu check box item. */
   JCheckBoxMenuItem toolsAlignToGrid;
-  /** Tools->Grid settings menu item. */
+  /** Tools/Grid settings menu item. */
   JMenuItem toolsGridSettings;
-  /** Tools->Fit to graph menu item. */
+  /** Tools/Fit to graph menu item. */
   JMenuItem toolsFitToGraph;
 
   /** Creation menus. */
@@ -430,7 +430,9 @@ public class JDrawEditorPanel extends JPanel implements ActionListener,JDrawEdit
   // ----------------------------------------------------
   // Property
   // ----------------------------------------------------
-  /** Sets the editor of this EditorFrame. */
+  /** Sets the editor of this EditorFrame.
+   * @param editor Editor object
+   */
   public void setEditor(JDrawEditor editor) {
 
     theEditor = editor;
@@ -448,7 +450,9 @@ public class JDrawEditorPanel extends JPanel implements ActionListener,JDrawEdit
 
   }
 
-  /** Sets the player of this EditorFrame. (for the play mode) */
+  /** Sets the player of this EditorFrame. (for the play mode)
+   * @param editor Editor object
+   */
   public void setPlayer(JDrawEditor editor) {
 
     framePlayer = new JFrame();

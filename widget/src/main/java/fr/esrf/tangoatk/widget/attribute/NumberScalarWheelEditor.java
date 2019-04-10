@@ -61,7 +61,7 @@ public class NumberScalarWheelEditor extends WheelSwitch
     addWheelSwitchListener(this);
   }
 
-  /** Returns the current background color of this viewer. Color used for the VALID attribute quality state */
+  /** @return the current background color of this viewer. Color used for the VALID attribute quality state */
   public Color getBackgroundColor() {
     return backgroundColor;
   }
@@ -87,6 +87,7 @@ public class NumberScalarWheelEditor extends WheelSwitch
 
   /**
    * Determines whether the background color is overrided by the quality factor.
+   * @return Alarm enabled flag
    * @see #setAlarmEnabled
    * @see #setBackgroundColor
    */

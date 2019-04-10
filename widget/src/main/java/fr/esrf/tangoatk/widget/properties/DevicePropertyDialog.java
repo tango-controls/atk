@@ -82,8 +82,8 @@ public class DevicePropertyDialog extends JDialog
     /**
      * Constructs the dialog with a parent Dialog and a title.
      * Use <code>setModel</code> to associate a DeviceProperty.
-     * @param parent
-     * @param title
+     * @param parent Parent dialog
+     * @param title Dialog title
      */
     public DevicePropertyDialog(Dialog parent, String title) {
         super(parent, title, true);
@@ -93,8 +93,8 @@ public class DevicePropertyDialog extends JDialog
     /**
      * Constructs the dialog with a parent Frame and a title.
      * Use <code>setModel</code> to associate a DeviceProperty.
-     * @param parent
-     * @param title
+     * @param parent Parent dialog
+     * @param title Dialog title
      */
     public DevicePropertyDialog(Frame parent, String title) {
         super(parent, title, true);
@@ -104,8 +104,7 @@ public class DevicePropertyDialog extends JDialog
     /**
      * Constructs the dialog with a parent Dialog and no title.
      * Use <code>setModel</code> to associate a DeviceProperty.
-     * @param parent
-     * @param title
+     * @param parent Parent dialog
      */
     public DevicePropertyDialog(Dialog parent) {
         super(parent, "", true);
@@ -115,8 +114,7 @@ public class DevicePropertyDialog extends JDialog
     /**
      * Constructs the dialog with a parent Frame and no title.
      * Use <code>setModel</code> to associate a DeviceProperty.
-     * @param parent
-     * @param title
+     * @param parent Parent frame
      */
     public DevicePropertyDialog(Frame parent) {
         super(parent, "", true);
@@ -126,8 +124,6 @@ public class DevicePropertyDialog extends JDialog
     /**
      * Constructs the dialog with no parent and no title.
      * Use <code>setModel</code> to associate a DeviceProperty.
-     * @param parent
-     * @param title
      */
     public DevicePropertyDialog() {
         super((Frame) null, "", true);
@@ -260,12 +256,8 @@ public class DevicePropertyDialog extends JDialog
     }
 
     /**
-     * This allows you to have an example.<br>
-     * To view your own device property, launch with 2 arguments :
-     * <ul type="disc">
-     * <li> The firts argument is the name of the device </li>
-     * <li> The second one is the name of its property </li>
-     * </ul>
+     * This allows you to have an example.
+     * @param args To view your own device property, launch with 2 arguments [device name,prop name]
      */
     public static void main(String[] args) {
         try {

@@ -127,7 +127,7 @@ public class JSmoothProgressBar extends JComponent {
   }
 
   /**
-   * Returns the current progress value.
+   * @return the current progress value.
    * @see #setValue
    */
   public int getValue() {
@@ -146,13 +146,14 @@ public class JSmoothProgressBar extends JComponent {
   }
 
   /**
-   * Returns the maximum progress value.
+   * @return the maximum progress value.
    */
   public int getMaximum() {
     return (int) maxValue;
   }
 
-  /** @deprecated */
+  /** @deprecated
+   * @param b Not used */
   public void setIndeterminate(boolean b) {
   }
 

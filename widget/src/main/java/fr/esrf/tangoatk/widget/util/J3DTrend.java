@@ -98,14 +98,14 @@ public class J3DTrend extends JComponent implements MouseListener, MouseMotionLi
   }
 
   /**
-   * Return handle to the y axis
+   * @return handle to the y axis
    */
   public JLAxis getYAxis() {
     return yAxis;
   }
 
   /**
-   * Return handle to the x axis
+   * @return handle to the x axis
    */
   public JLAxis getXAxis() {
     return xAxis;
@@ -196,6 +196,8 @@ public class J3DTrend extends JComponent implements MouseListener, MouseMotionLi
   /**
    * Sets the image
    * @param img image
+   * @param maxX Maximum X
+   * @param maxY Maximum Y
    */
   public void setImage(BufferedImage img,int maxX,int maxY) {
 
@@ -227,21 +229,21 @@ public class J3DTrend extends JComponent implements MouseListener, MouseMotionLi
 
   /**
    * Shift the cursor by the specified delta
-   * @param delta
+   * @param delta Shift
    */
   public void shiftCursorX(int delta) {
     xCursor+=delta;
   }
 
   /**
-   * Returns X coordinate of the cursor
+   * @return X coordinate of the cursor
    */
   public int getXCursor() {
     return xCursor;
   }
 
   /**
-   * Returns Y coordinate of the cursor
+   * @return Y coordinate of the cursor
    */
   public int getYCursor() {
     return yCursor;
@@ -259,7 +261,7 @@ public class J3DTrend extends JComponent implements MouseListener, MouseMotionLi
   }
 
   /**
-   * Returns true if the cursor is  inside the image.
+   * @return true if the cursor is  inside the image.
    */
   public boolean isCursorInside() {
     if( theImage==null ) return false;

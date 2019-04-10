@@ -214,7 +214,7 @@ public class JLDataView implements java.io.Serializable {
   protected boolean xDataSorted = true;
 
  /**
-  * Returns a string containing the configuration file help.
+  * @return a string containing the configuration file help.
   */
   public static String getHelpString() {
 
@@ -486,7 +486,7 @@ public class JLDataView implements java.io.Serializable {
   }
 
   /**
-   * Returns the clickable state.
+   * @return the clickable state.
    * @see JLDataView#setClickable
    */
   public boolean isClickable() {
@@ -503,7 +503,7 @@ public class JLDataView implements java.io.Serializable {
     fireStateChange();
   }
 
-  /** Returns true when the label is visible.
+  /** @return true when the label is visible.
    * @see JLDataView#setLabelVisible
    */
   public boolean isLabelVisible() {
@@ -538,7 +538,7 @@ public class JLDataView implements java.io.Serializable {
   }
 
   /**
-   * Return current interpolation mode.
+   * @return current interpolation mode.
    * @see #setInterpolationMethod
    */
   public int getInterpolationMethod() {
@@ -547,7 +547,7 @@ public class JLDataView implements java.io.Serializable {
 
   /**
    * Sets the interpolation step
-   * @param step Interpolation step (must be >=2)
+   * @param step Interpolation step (must be &gt;=2)
    * @see #setInterpolationMethod
    */
   public void setInterpolationStep(int step) {
@@ -558,7 +558,7 @@ public class JLDataView implements java.io.Serializable {
   }
 
   /**
-   * Returns the interpolation step.
+   * @return the interpolation step.
    * @see #setInterpolationStep
    */
   public int getInterpolationStep() {
@@ -567,7 +567,7 @@ public class JLDataView implements java.io.Serializable {
 
   /**
    * Set the Hermite interpolation tension coefficient
-   * @param tension Hermite interpolation tension coefficient (1=>high, 0=>normal, -1=>low)
+   * @param tension Hermite interpolation tension coefficient (1=high, 0=normal, -1=low)
    */
   public void setHermiteTension(double tension) {
     if(tension<-1.0) tension=-1.0;
@@ -578,7 +578,7 @@ public class JLDataView implements java.io.Serializable {
   }
 
   /**
-   * Get the Hermite interpolation tension coefficient
+   * @return the Hermite interpolation tension coefficient
    * @see #setHermiteTension
    */
   public double getHermiteTension() {
@@ -597,7 +597,7 @@ public class JLDataView implements java.io.Serializable {
   }
 
   /**
-   * Set the Hermite interpolation bias coefficient.
+   * @return the Hermite interpolation bias coefficient.
    */
   public double getHermiteBias() {
     return interpBias;
@@ -621,7 +621,7 @@ public class JLDataView implements java.io.Serializable {
   }
 
   /**
-   * Return the smoothing method.
+   * @return the smoothing method.
    * @see #setSmoothingMethod
    */
   public int getSmoothingMethod() {
@@ -630,7 +630,7 @@ public class JLDataView implements java.io.Serializable {
 
   /**
    * Sets number of neighbors for smoothing
-   * @param n Number of neighbors (Must be >=2)
+   * @param n Number of neighbors (Must be &gt;= 2)
    */
   public void setSmoothingNeighbors(int n) {
     smoothNeighbor = (n/2)*2+1;
@@ -641,7 +641,7 @@ public class JLDataView implements java.io.Serializable {
   }
 
   /**
-   * Sets number of neighbors for smoothing
+   * @return number of neighbors for smoothing
    * @see #setSmoothingNeighbors
    */
   public int getSmoothingNeighbors() {
@@ -661,7 +661,7 @@ public class JLDataView implements java.io.Serializable {
   }
 
   /**
-   * Return the standard deviation of the gaussian (Smoothing filter).
+   * @return the standard deviation of the gaussian (Smoothing filter).
    * @see #setSmoothingMethod
    */
   public double getSmoothingGaussSigma() {
@@ -682,7 +682,7 @@ public class JLDataView implements java.io.Serializable {
   }
 
   /**
-   * Returns the extrapolation method used in smoothing operation.
+   * @return the extrapolation method used in smoothing operation.
    * @see #setSmoothingExtrapolation
    */
   public int getSmoothingExtrapolation() {
@@ -709,7 +709,7 @@ public class JLDataView implements java.io.Serializable {
   }
 
   /**
-   * Returns the current math function.
+   * @return the current math function.
    * @see #setMathFunction
    */
   public int getMathFunction() {
@@ -919,7 +919,7 @@ public class JLDataView implements java.io.Serializable {
 
   /**
    * In Bar chart mode, draw a bar up to the yAxis maximum on a NaN value
-   * @param drawOnNaN
+   * @param drawOnNaN Draw on NaN flag
    */
   public void setDrawOnNaN(boolean drawOnNaN) {
     this.drawOnNaN = drawOnNaN;
@@ -1760,7 +1760,7 @@ public class JLDataView implements java.io.Serializable {
   }
 
   /**
-   * Returns the current user format (null when none).
+   * @return the current user format (null when none).
    */
   public String getUserFormat() {
     return userFormat;
@@ -1770,6 +1770,7 @@ public class JLDataView implements java.io.Serializable {
    * Format the given value according the userFormat or
    * to the Axis format.
    * @param v Value to be formated
+   * @return The formatted string
    */
   public String formatValue(double v) {
 
@@ -1958,7 +1959,7 @@ public class JLDataView implements java.io.Serializable {
   // ----------------------------------------------------------------------------
 
   /**
-   * Returns an array of points.
+   * @return an array of points.
    * @param nbExtra Number of extrapolated point
    * @param interpNan Interpolate NaN values when true, remove them otherwise
    */
@@ -2046,7 +2047,7 @@ public class JLDataView implements java.io.Serializable {
 
   }
 
-  /* Reverse bit of idx on p bits */
+  /** @return Reverse bit of idx on p bits */
   private int reverse(int idx,int p) {
     int i, rev;
     for (i = rev = 0; i < p; i++) {
@@ -2058,13 +2059,14 @@ public class JLDataView implements java.io.Serializable {
 
   /**
    * Remove average when calculating FFT
+   * @param remove True to remove average
    */
   public void setRemoveAverage(boolean remove) {
     removeAverage = remove;
   }
 
   /**
-   * Returns true if average is removed during FFT calculation
+   * @return true if average is removed during FFT calculation
    */
   public boolean getRemoveAverage() {
     return removeAverage;
@@ -2079,7 +2081,7 @@ public class JLDataView implements java.io.Serializable {
   }
 
   /**
-   * Get the smapling freqncy used for FFT calculation
+   * @return the smapling freqncy used for FFT calculation
    */
   public double getSamplingFrequency() {
     return samplingFreq;

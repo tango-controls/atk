@@ -232,7 +232,7 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
     }
 
     /**<code>getModel</code> Gets the numberspectrum model.
-     * @returns the numberspectrum model.
+     * @return the numberspectrum model.
      */
     public INumberSpectrum getModel()
     {
@@ -320,7 +320,7 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
 
 
     /**<code>getStatesModel</code> Gets the devState spectrum model.
-     * @returns the devState spectrum model.
+     * @return the devState spectrum model.
      */
     public IDevStateSpectrum getStatesModel()
     {
@@ -363,7 +363,7 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
 
 
     /**<code>getNamesModel</code> Gets the string spectrum model.
-     * @returns the string spectrum model.
+     * @return the string spectrum model.
      */
     public IStringSpectrum getNamesModel()
     {
@@ -480,10 +480,10 @@ public class NumberSpectrumStateBarChartViewer extends JLChart
     }
 
     /**
-     * Sets an affine tranform to the X axis. This allows to transform
+     * Sets an affine transform to the X axis. This allows to transform
      * spectra index displayed on X axis.
-     * @param a0
-     * @param a1
+     * @param a0 a0 Coefficient
+     * @param a1 a1 Coefficient
      */
     public void setXAxisAffineTransform(double a0, double a1)
     {

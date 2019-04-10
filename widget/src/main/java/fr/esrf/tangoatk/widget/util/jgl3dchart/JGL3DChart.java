@@ -161,28 +161,28 @@ public class JGL3DChart extends JPanel implements ActionListener {
   }
 
   /**
-   * Returns the current gradient for Y axis colormap.
+   * @return the current gradient for Y axis colormap.
    */
   public Gradient getGradient() {
     return gColor;
   }
 
   /**
-   * Returns a handle to the X axis
+   * @return a handle to the X axis
    */
   public JGL3DAxis getXAxis() {
     return j3dView.getXAxis();
   }
 
   /**
-   * Returns a handle to the Y axis
+   * @return a handle to the Y axis
    */
   public JGL3DAxis getYAxis() {
     return j3dView.getYAxis();
   }
 
   /**
-   * Returns a handle to the Z axis
+   * @return a handle to the Z axis
    */
   public JGL3DAxis getZAxis() {
     return j3dView.getZAxis();

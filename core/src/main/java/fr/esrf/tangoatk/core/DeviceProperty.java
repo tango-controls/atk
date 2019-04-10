@@ -184,6 +184,7 @@ public class DeviceProperty {
 
     /**
      * <code>isEditable</code> true if this property is editable, else false
+     * @return Is editable
      */
     public boolean isEditable() {
         return editable;
@@ -245,7 +246,7 @@ public class DeviceProperty {
      * (and in the device), you have to use the <code>store()</code> method
      * after.
      * 
-     * @param o
+     * @param s
      *            a <code>String[]</code> containing the value
      */
     public void setValue(String s) {

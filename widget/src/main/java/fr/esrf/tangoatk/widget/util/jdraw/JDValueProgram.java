@@ -156,7 +156,7 @@ public class JDValueProgram {
 
   // -Table manager------------------------------------
 
-  /** Add a new entry to the corespondance table. */
+  /** Add a new entry to the correspondance table. */
   public void addNewEntry() {
 
     switch(type) {
@@ -173,24 +173,29 @@ public class JDValueProgram {
 
   }
 
-  /** Remove the entry in the correspondance table at the specified index. */
+  /** Remove the entry in the correspondance table at the specified index.
+   * @param idx Index to remove
+   */
   public void removeEntry(int idx) {
     tableMap.remove(idx);
   }
 
-  /** Return number of entries in the correspondance table. */
+  /** @return number of entries in the correspondance table. */
   public int getEntryNumber() {
     return tableMap.size();
   }
 
   // - Default value------------------------------------
 
-  /** Return a string representation of the default value, (correspondance table) */
+  /** @return a string representation of the default value, (correspondance table) */
   public String getDefaultMapping() {
     return getStrValue(defaultValue);
   }
 
-  /** Sets the default value. */
+  /** Sets the default value.
+   * @param v Default value as string
+   * @return true if success
+   */
   public boolean setDefaultMapping(String v) {
 
     switch(type) {

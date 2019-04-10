@@ -148,7 +148,7 @@ public class JAutoScrolledText extends JTextField {
   }
 
   /**
-   * Returns the margin of this components.
+   * @return the margin of this components.
    */
   public Insets getMargin() {
     return margin;
@@ -251,7 +251,7 @@ public class JAutoScrolledText extends JTextField {
   }
 
   /**
-   * Returns the current text vertical offset.
+   * @return the current text vertical offset.
    */
   public int getVerticalOffset() {
     return off_y;
@@ -267,7 +267,7 @@ public class JAutoScrolledText extends JTextField {
   }
 
   /**
-   * Returns the current text horizontal offset.
+   * @return the current text horizontal offset.
    */
   public int getHorizontalOffset() {
     return off_x;
@@ -275,6 +275,8 @@ public class JAutoScrolledText extends JTextField {
 
   /**
    * Has no longer effects.
+   * @param x Not used
+   * @param y Not used
    * @see #setVerticalOffset
    * @see #setHorizontalOffset
    * @deprecated
@@ -397,12 +399,16 @@ public class JAutoScrolledText extends JTextField {
 
   }
 
-  /** Add the specified JAutoScrolledTextListener Listeners */
+  /** Add the specified JAutoScrolledTextListener Listeners
+   * @param l Listener to add
+   */
   public void addTextListener(JAutoScrolledTextListener l) {
     listenerList.add(JAutoScrolledTextListener.class, l);
   }
 
-  /** Remove the specified JAutoScrolledTextListener Listeners */
+  /** Remove the specified JAutoScrolledTextListener Listeners
+   * @param l Listener to remove
+   */
   public void removeTextListener(JAutoScrolledTextListener l) {
     listenerList.remove(JAutoScrolledTextListener.class, l);
   }
@@ -416,7 +422,7 @@ public class JAutoScrolledText extends JTextField {
   }
 
   /**
-   * Returns the scrolling mode.
+   * @return the scrolling mode.
    * @see #setScrollingMode
    */
   public int getScrollingMode () {
@@ -432,11 +438,6 @@ public class JAutoScrolledText extends JTextField {
   public void setScrollingMode (int scrollingMode) {
     this.scrollingMode = scrollingMode;
   }
-
-  /**
-   * Test function.
-   * @param args Not used
-   */
 
   public static void main(String args[]) throws Exception {
 

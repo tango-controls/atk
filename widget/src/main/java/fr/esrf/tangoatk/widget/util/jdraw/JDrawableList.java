@@ -66,7 +66,7 @@ public class JDrawableList {
   }
 
   /**
-   * Returns the list of drawable object known by the editor.
+   * @return the list of drawable object known by the editor.
    */
   static public String[] getDrawalbeList() {
     init();

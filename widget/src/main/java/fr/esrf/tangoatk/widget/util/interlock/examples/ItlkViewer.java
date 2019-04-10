@@ -67,7 +67,6 @@ public class ItlkViewer extends JFrame implements NetEditorListener {
     itlkNetViewer.swapItlkState(obj);
   }
 
-  /** Main function */
   public static void main(String[] args) {
 
     final ItlkViewer f = new ItlkViewer();

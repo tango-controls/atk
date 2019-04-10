@@ -35,7 +35,6 @@ import fr.esrf.TangoDs.AttrManip;
 
 /** A light weigth viewer which display a scalar attribute (String or Number) and its unit.
  * Here is an example of use:
- * <p>
  * <pre>
  * fr.esrf.tangoatk.core.AttributeList attributeList = new
  *    fr.esrf.tangoatk.core.AttributeList();
@@ -77,7 +76,7 @@ public class SimpleScalarViewer extends JAutoScrolledText
     setMargin( new Insets(0,0,0,0) ); // text will have the maximum available space
   }
 
-  /** Returns the current background color of this viewer. Color used for the VALID attribute quality state */
+  /** @return the current background color of this viewer. Color used for the VALID attribute quality state */
   public Color getBackgroundColor() {
     return backgroundColor;
   }
@@ -391,7 +390,7 @@ public class SimpleScalarViewer extends JAutoScrolledText
   }
 
   /**
-   * Determines whether the background color is overrided by the quality factor.
+   * @return whether the background color is overrided by the quality factor.
    * @see #setAlarmEnabled
    * @see #setBackgroundColor
    */
@@ -586,7 +585,7 @@ public class SimpleScalarViewer extends JAutoScrolledText
   }
 
   /**
-   * Returns the current text which is displayed in case of error.
+   * @return the current text which is displayed in case of error.
    * @see #setInvalidText
    */
   public String getInvalidText() {
@@ -706,7 +705,7 @@ public class SimpleScalarViewer extends JAutoScrolledText
   /**
    * Test function
    * @param args Not used
-   * @throws Exception
+   * @throws Exception In case of failure
    */
   public static void main(String[] args) throws Exception {
 

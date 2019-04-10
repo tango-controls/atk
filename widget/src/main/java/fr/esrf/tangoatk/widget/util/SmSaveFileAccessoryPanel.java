@@ -15,9 +15,11 @@ public class SmSaveFileAccessoryPanel extends javax.swing.JPanel
 {
     private int       width, height;
 
-    /**
-     * Creates new form SmSaveFileAccessoryPanel
-     */
+  /**
+   * Creates new form SmSaveFileAccessoryPanel
+   * @param w Width
+   * @param h Height
+   */
     public SmSaveFileAccessoryPanel(int w, int h)
     {
         width = w;

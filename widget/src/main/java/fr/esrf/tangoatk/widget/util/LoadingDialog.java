@@ -41,15 +41,7 @@ public class LoadingDialog extends JFrame{
     private static LoadingDialog m_dialog = null;
     private static JPanel container = null;
 
-
-    /**
-
-     * 
-
-     */
-
     public LoadingDialog(String message)
-
     {
         super("Loading : " + message);
         container = new JPanel();

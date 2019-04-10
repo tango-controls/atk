@@ -69,6 +69,7 @@ public class AttributeFactory extends AEntityFactory {
 
   /**
    * Returns all attributes belonging to this factory.
+   * @return  Attributes belonging to this factory
    */
   public AAttribute[] getAttributes() {
 
@@ -90,16 +91,13 @@ public class AttributeFactory extends AEntityFactory {
   }
 
   /**
-   * <code>getWildCardEntities</code>
-   *
+   * Get Entities using wildcard.
    * @param name a <code>String</code> value containing the name of the
-   * attributes to be instantiated.
-   * @param device a <code>Device</code> value containging the device
-   * that the attribute belongs to
-   * @return a <code>List<IEntity></code> value containing the corresponding
-   * IAttributes
-   * @exception DevFailed if an error occurs
-   * @see IAttribute
+   * entity
+   * @param device a <code>Device</code> value containing the device from
+   * which the entity is to be obtained.
+   * @return a List containing the corresponding IAttributes
+   * @throws DevFailed if an error occurs
    */
   protected synchronized List<IEntity> getWildCardEntities(String name, Device device)
           throws DevFailed {
@@ -149,13 +147,12 @@ public class AttributeFactory extends AEntityFactory {
     }
 
   /**
-   * <code>getConnectionlessSingleAttribute</code>
-   *
-   * @param name a <code>String</code> value containing the name of the
+   * Get attribute without contacting the device
+   * @param name <code>String</code> value containing the name of the
    * state attribute to be instantiated.
-   * @return a <code>List<IEntity></code> value containing the corresponding
-   * IAttributes
-* @see IAttribute
+   * @return a <code>List</code> value containing the corresponding IAttributes
+   * @throws ConnectionException In case of failure
+   * @see IAttribute
    */
     @Override
     protected synchronized List<IEntity> getConnectionlessSingleAttribute(String name) throws ConnectionException
@@ -166,7 +163,6 @@ public class AttributeFactory extends AEntityFactory {
         return list;
     }
 
-
   /**
    * <code>getConnectionlessStateAttribute</code> returns an attribute corresponding
    * to the name given in the first parameter. If such an attribute already
@@ -175,6 +171,7 @@ public class AttributeFactory extends AEntityFactory {
    * fully qualified with device name.
    * @param device a <code>Device</code> value the device
    * @return an <code>IEntity</code> value
+   * @throws ConnectionException In case of failure
    */
     protected synchronized IEntity getConnectionlessStateAttribute(String fqname, Device device)  throws ConnectionException
     {
@@ -246,8 +243,8 @@ public class AttributeFactory extends AEntityFactory {
    * @param fqname a <code>String</code> value containing the EntityName
    * fully qualified with device name.
    * @return null if the type of the IEntity is not AAttribute, a valid entity otherwise.
-   * @throws ConnectionException
-   * @throws DevFailed
+   * @throws ConnectionException In case of failure
+   * @throws DevFailed In case of failure
    */
   public IAttribute getAttribute(String fqname)
           throws ConnectionException, DevFailed {
@@ -370,6 +367,7 @@ public class AttributeFactory extends AEntityFactory {
    * @param insertionPos Insertion postion of this new attribute in the global list
    * @param fqname Full entity name (can include host and port)
    * @return an <code>AAttribute</code> value
+   * @throws ConnectionException In case of failure
    */
     protected AAttribute initConnectionlessStateAttribute(Device device,
             int insertionPos,
@@ -441,8 +439,9 @@ public class AttributeFactory extends AEntityFactory {
    * <code>getConnectionlessDevStateScalar</code> does the work of instantiating the
    * DevState scalar attribute even if the device is not responding.
    * @param device a <code>Device</code> value
+   * @param fqname Full entity name (can include host and port)
    * @return an <code>AAttribute</code> value
-   * @throws IllegalArgumentException if the attribute name is not state.
+   * @throws ConnectionException if the attribute name is not state.
    */
     protected AAttribute getConnectionlessDevStateScalar(Device device, String fqname) throws ConnectionException
     {

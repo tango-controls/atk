@@ -168,7 +168,7 @@ public class Refresher extends Thread implements java.io.Serializable {
 
     /**
      * To synchronize or not the refreshing period.
-     * @param synchronizedP 21 dec. 2005
+     * @param synchronizedP Enable/Disable synchronized period
      */
     public void setSynchronizedPeriod(boolean synchronizedP) {
         synchronizedPeriod = synchronizedP;
@@ -184,7 +184,7 @@ public class Refresher extends Thread implements java.io.Serializable {
 
     /**
      * To trace or not unexpected Exceptions.
-     * @param synchronizedP 21 dec. 2005
+     * @param trace Enable/Disable Trace unexpected
      */
     public void setTraceUnexpected(boolean trace) {
         traceUnexpected = trace;
@@ -192,7 +192,7 @@ public class Refresher extends Thread implements java.io.Serializable {
 
     /**
      * To know wheather unexpected exceptions are traced or not
-     * @return 21 dec. 2005
+     * @return Enable/Disable Trace unexpected
      */
     public boolean isTraceUnexpected() {
         return traceUnexpected;

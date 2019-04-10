@@ -1019,7 +1019,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   }
 
   /**
-   * Returns true when the gradient is visible.
+   * @return true when the gradient is visible.
    */
   public boolean isGradientVisible() {
     return gradientTool.isVisible();
@@ -1098,7 +1098,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   }
 
   /**
-   * Return the current zoom factor index.
+   * @return the current zoom factor index.
    * @see #setZoom
    */
   public int getZoom() {
@@ -1145,6 +1145,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
   /** Determines wheter this image viewer has auto zoom enabled.
    * @see #setAutoZoom
+   * @return AutoZoom flag
    */
   public boolean getAutoZoom() {
     return autoZoom;
@@ -1394,21 +1395,21 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   }
 
   /**
-   * Returns a handle to the x axis.
+   * @return a handle to the x axis.
    */
   public JLAxis getXAxis() {
     return imagePanel.getXAxis();
   }
 
   /**
-   * Return a handle to the Y axis.
+   * @return a handle to the Y axis.
    */
   public JLAxis getYAxis() {
     return imagePanel.getYAxis();
   }
 
   /**
-   * Returna handle to the Gradient axis.
+   * @return a handle to the Gradient axis.
    */
   public JLAxis getGradientAxis() {
     return gradientTool.getAxis();
@@ -1417,6 +1418,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   /**
    * Converts the component horizontal coordinate to the image coordinate.
    * @param x Component horizontal coordinate
+   * @return Converted coordinates
    */
   public int getImageXCoord(int x) {
 
@@ -1431,6 +1433,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   /**
    * Converts the component vertical coordinate to the image coordinate.
    * @param y Component vertical coordinate
+   * @return Converted coordinates
    */
   public int getImageYCoord(int y) {
 
@@ -2053,7 +2056,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
   }
 
-  /** returns the configuration as string.
+  /** @return the configuration as string.
     * @see #saveSetting
     */
   public String getSettings() {

@@ -409,14 +409,14 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   }
 
   /**
-   * Returns maximum value of the z axis (color)
+   * @return maximum value of the z axis (color)
    */
   public double getZMaximum() {
     return zMax;
   }
 
   /**
-   * Returns true if the viewer is in autoscale mode for the colormap, false otherwise
+   * @return true if the viewer is in autoscale mode for the colormap, false otherwise
    */
   public boolean isZAutoScale() {
     return zAutoScale;
@@ -435,7 +435,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   }
 
   /**
-   * Return true if the viewer is in log scale for the colormap, false otherwise
+   * @return true if the viewer is in log scale for the colormap, false otherwise
    */
   public boolean isLogScale() {
     return logScale;
@@ -454,7 +454,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   }
 
   /**
-   * Return true if the viewer display derivative data, false otherwise
+   * @return true if the viewer display derivative data, false otherwise
    */
   public boolean isShowDerivative() {
     return showDerivative;
@@ -490,7 +490,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   }
 
   /**
-   * Returns the gradient used by the viewer.
+   * @return the gradient used by the viewer.
    */
   public Gradient getGradient() {
     return gColor;
@@ -505,7 +505,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   }
 
   /**
-   * Returns true when the gradient is visible.
+   * @return true when the gradient is visible.
    */
   public boolean isGradientVisible() {
     return gradientViewer.isVisible();
@@ -520,14 +520,14 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   }
 
   /**
-   * Returns a handle to the horizontal axis
+   * @return a handle to the horizontal axis
    */
   public JLAxis getXAxis() {
     return trend.getXAxis();
   }
 
   /**
-   * Returns a handle to the vertical axis
+   * @return a handle to the vertical axis
    */
   public JLAxis getYAxis() {
     return trend.getYAxis();
@@ -560,7 +560,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   }
 
   /**
-   * Return the horizontal zoom factor.
+   * @return the horizontal zoom factor.
    */
   public int getHorizontalZoom() {
     return hZoom;
@@ -592,7 +592,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   }
 
   /**
-   * Return the vertical zoom factor
+   * @return the vertical zoom factor
    */
   public int getVerticalZoom() {
     return vZoom;
@@ -644,6 +644,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
    * Returns the timestamp of the values at the coordinates x. Returns 0 if
    * no data is present at this place. x is in image coordinates.
    * @param x X coordinates (in image coordinates)
+   * @return Tiemstamp at x
    */
   public double getTimeAt(int x) {
 
@@ -756,8 +757,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   }
 
   /**
-   * Returns horizontal position of the cursor (data coordinates)
-   * -1 is returned if there is no cursor.
+   * @return horizontal position of the cursor (data coordinates), -1 is returned if there is no cursor.
    */
   public int getXCursor() {
 
@@ -777,7 +777,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   }
 
   /**
-   * Returns vertical position of the cursor (data coordinates)
+   * @return vertical position of the cursor (data coordinates)
    * -1 is returned if there is no cursor.
    */
   public int getYCursor() {
@@ -801,6 +801,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
    * Return the value at (x,y) position. NaN is returned if no data.
    * @param x X coordinates (in image coordinates)
    * @param y Y coordinates (in image coordinates)
+   * @return The value at x,y
    */
   public double getValueAt(int x,int y) {
 

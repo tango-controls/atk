@@ -102,8 +102,7 @@ public class StringImageTableViewer extends JTableRow implements IStringImageLis
   /**
    * <code>setQualityEnabled</code> view or not the attribute quality for this viewer
    *
-   * @param b If True the attribute full name will be displayed as tooltip for the viewer
-   * @param qualityEnabled If True the background Color represents the attribute quality factor
+   * @param b If True the background Color represents the attribute quality factor
    */
   public void setQualityEnabled (boolean b)
   {

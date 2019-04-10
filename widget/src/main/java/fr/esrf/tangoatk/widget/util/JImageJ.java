@@ -1037,14 +1037,14 @@ public class JImageJ extends JPanel implements ActionListener {
     }
 
     /**
-     * Returns a handle of the X axis.
+     * @return a handle of the X axis.
      */
     public JLAxis getXAxis () {
         return xAxis;
     }
 
     /**
-     * Returns a handle of the Y axis.
+     * @return a handle of the Y axis.
      */
     public JLAxis getYAxis () {
         return yAxis;

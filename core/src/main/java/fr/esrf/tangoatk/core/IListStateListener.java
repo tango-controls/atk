@@ -10,6 +10,7 @@ public interface IListStateListener {
 
   /**
    * Called by an entityList after a call to EntityList.startRefresher or EntityList.stopRefresher.
+   * @param state State value
    */
    public void stateChange(int state);
 

@@ -42,21 +42,21 @@ public class JDMouseEvent extends EventObject {
 
   }
   /**
-   * Returns the horizontal x position of the intial MouseEvent.
+   * @return the horizontal x position of the intial MouseEvent.
    */
   public int getX() {
       return realSource.getX();
   }
 
   /**
-   * Returns the vetical y position of the intial MouseEvent.
+   * @return the vetical y position of the intial MouseEvent.
    */
   public int getY() {
     return realSource.getY();
   }
 
   /**
-   * Indicates the number of quick consecutive clicks of
+   * @return the number of quick consecutive clicks of
    * a mouse button.
    */
   public int getClickCount() {
@@ -64,7 +64,7 @@ public class JDMouseEvent extends EventObject {
   }
 
   /**
-   * Returns which, if any, of the mouse buttons has changed state.
+   * @return which, if any, of the mouse buttons has changed state.
    * @see MouseEvent#BUTTON1
    * @see MouseEvent#BUTTON2
    * @see MouseEvent#BUTTON3
@@ -74,49 +74,49 @@ public class JDMouseEvent extends EventObject {
   }
 
   /**
-   * Returns the timestamp of when this event occurred.
+   * @return the timestamp of when this event occurred.
    */
   public long getWhen() {
     return realSource.getWhen();
   }
 
   /**
-   * Returns whether or not the Shift modifier is down on this event.
+   * @return whether or not the Shift modifier is down on this event.
    */
   public boolean isShiftDown() {
     return realSource.isShiftDown();
   }
 
   /**
-   * Returns whether or not the Control modifier is down on this event.
+   * @return whether or not the Control modifier is down on this event.
    */
   public boolean isControlDown() {
     return realSource.isControlDown();
   }
 
   /**
-   * Returns whether or not the Meta modifier is down on this event.
+   * @return whether or not the Meta modifier is down on this event.
    */
   public boolean isMetaDown() {
     return realSource.isMetaDown();
   }
 
   /**
-   * Returns whether or not the Alt modifier is down on this event.
+   * @return whether or not the Alt modifier is down on this event.
    */
   public boolean isAltDown() {
       return realSource.isAltDown();
   }
 
   /**
-   * Returns whether or not the AltGraph modifier is down on this event.
+   * @return whether or not the AltGraph modifier is down on this event.
    */
   public boolean isAltGraphDown() {
       return realSource.isAltGraphDown();
   }
 
   /**
-   * Returns the modifier mask for this event.
+   * @return the modifier mask for this event.
    */
   public int getModifiers() {
       return realSource.getModifiers();

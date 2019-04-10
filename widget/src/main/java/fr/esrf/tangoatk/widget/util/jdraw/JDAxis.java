@@ -31,8 +31,6 @@ import java.io.IOException;
 
 /** JDraw Axis graphic object. JDAxis allows to build easily sizeable gauges, it supports
  *  Font, Label format, auto labelling, and tick.
- *  <p>Here is an example of few JDAxis:<p>
- *  <img src="JDAxis.gif" border="0" alt="JDAxis examples"></img>
  */
 public class JDAxis extends JDRectangular {
 
@@ -99,7 +97,7 @@ public class JDAxis extends JDRectangular {
   // Construction
   // -----------------------------------------------------------
   /**
-   * Consttruc a JDAxis object.
+   * Construct a JDAxis object.
    * @param objectName Object name
    * @param x Up left corner x coordinate
    * @param y Up left corner y coordinate
@@ -351,7 +349,7 @@ public class JDAxis extends JDRectangular {
   }
 
   /**
-   * Returns the label font.
+   * @return the label font.
    * @see #setFont
    */
   public Font getFont() {
@@ -390,7 +388,7 @@ public class JDAxis extends JDRectangular {
   }
 
   /**
-   * Returns the current axis tick width.
+   * @return the current axis tick width.
    * @see #setTickWidth
    */
   public int getTickWidth() {
@@ -408,7 +406,7 @@ public class JDAxis extends JDRectangular {
   }
 
   /**
-   * Returns the current axis spacing (in pixel).
+   * @return the current axis spacing (in pixel).
    * @see #setTickSpacing
    */
   public int getTickSpacing() {
@@ -434,7 +432,7 @@ public class JDAxis extends JDRectangular {
   }
 
   /**
-   * Returns the max value of this axis.
+   * @return the max value of this axis.
    * @see #setMax
    */
   public double getMax() {
@@ -442,7 +440,7 @@ public class JDAxis extends JDRectangular {
   }
 
   /**
-   * Returns the min value of this axis.
+   * @return the min value of this axis.
    * @see #setMin
    */
   public double getMin() {
@@ -461,7 +459,7 @@ public class JDAxis extends JDRectangular {
   }
 
   /**
-   * Returns the current label positionning policy.
+   * @return the current label positionning policy.
    * @see #setLabelPos
    */
   public int getLabelPos() {
@@ -480,7 +478,7 @@ public class JDAxis extends JDRectangular {
   }
 
   /**
-   * Returns the orientation of this axis.
+   * @return the orientation of this axis.
    * @see #setOrientation
    */
   public int getOrientation() {
@@ -499,7 +497,7 @@ public class JDAxis extends JDRectangular {
   }
 
   /**
-   * Returns the scale of this axis.
+   * @return the scale of this axis.
    * @see #setScale
    */
   public int getScale() {
@@ -524,7 +522,7 @@ public class JDAxis extends JDRectangular {
   }
 
   /**
-   * Returns the label format of this axis.
+   * @return the label format of this axis.
    * @see #setFormat
    */
   public int getFormat() {
@@ -542,7 +540,7 @@ public class JDAxis extends JDRectangular {
   }
 
   /**
-   * Determines whether this axis is inverted.
+   * @return whether this axis is inverted.
    * @see #setInverted
    */
   public boolean isInverted() {

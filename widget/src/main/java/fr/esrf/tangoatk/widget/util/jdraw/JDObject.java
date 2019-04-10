@@ -245,7 +245,7 @@ public abstract class JDObject {
   // Dynamic value stuff
   // -----------------------------------------------------------
 
-  /** Returns the value of this object.
+  /** @return the value of this object.
    * @see #setValue
    */
   public int getValue() {
@@ -263,18 +263,18 @@ public abstract class JDObject {
     setVal(v,this);
   }
 
-  /** Overrided setValue */
+  // Overrided setValue
   void setVal(int v,JDObject master) {
      value=v;
      manageMappers(master);
   }
 
-  /** Initialise value program. */
+  // Initialise value program
   void initValue() {
     initVal(this);
   }
 
-  /** Overrided initValue */
+  // Overrided initValue
   void initVal(JDObject master) {
     hasMapper = hasValueProgram();
     value = initValue;
@@ -307,7 +307,7 @@ public abstract class JDObject {
     return v;
   }
 
-  /** Process the value program */
+  // Process the value program
   void processValue(int type,int ex,int ey) {
 
     Rectangle b;
@@ -363,7 +363,7 @@ public abstract class JDObject {
 
   }
 
-  /* Find active objects at specified position (including not visible object) and fill the result vector */
+  // Find active objects at specified position (including not visible object) and fill the result vector
   void findObjectsAt(int x,int y,Vector result) {
     boolean oldVisible = visible;
     visible = true;
@@ -541,7 +541,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns all objects having the given name.
+   * Return all objects having the given name.
    * @param result Result vector (must be constructed by the caller)
    * @param name JDObject name (Case sensitive)
    * @param recurseGroup true to perform a deep search whithin group, false otherwise.
@@ -566,7 +566,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Gets the bounding rectangle of this object.
+   * @return the bounding rectangle of this object.
    */
   public Rectangle getBoundRect() {
 
@@ -593,7 +593,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Determines whether the specified point is inside this object.
+   * @return whether the specified point is inside this object.
    * @param x X coordinate (pixel)
    * @param y Y coordinate (pixel)
    */
@@ -605,7 +605,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the summit number of this object.
+   * @return the summit number of this object.
    */
   public int getSummitNumber() {
     return summit.length;
@@ -626,7 +626,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the summit at the specified position. Do not use this
+   * @return the summit at the specified position. Do not use this
    * to change summit coordinates, Use moveSummit() instead.
    * @param id Summit index
    * @see #getSummitNumber
@@ -1780,7 +1780,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Determines whether this object is visible.
+   * @return whether this object is visible.
    */
   public boolean isVisible() {
     return visible;
@@ -1795,7 +1795,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the current name of this object.
+   * @return the current name of this object.
    */
   public String getName() {
     return name;
@@ -1810,7 +1810,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the current background color of this object.
+   * @return the current background color of this object.
    * @see #setBackground
    */
   public Color getBackground() {
@@ -1828,7 +1828,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the current foreground color of this object.
+   * @return the current foreground color of this object.
    * @see #setForeground
    */
   public Color getForeground() {
@@ -1850,7 +1850,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the current origin.
+   * @return the current origin.
    */
   public Point.Double getOrigin() {
     return origin;
@@ -1884,7 +1884,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the current fill style of this object.
+   * @return the current fill style of this object.
    * @see #setFillStyle
    */
   public int getFillStyle() {
@@ -1905,7 +1905,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the current line style of this object.
+   * @return the current line style of this object.
    * @see #setLineStyle
    */
   public int getLineStyle() {
@@ -1921,7 +1921,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Determines wheter this object is anti aliased.
+   * @return wheter this object is anti aliased.
    */
   public boolean isAntiAliased() {
     return antiAlias;
@@ -1936,14 +1936,14 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the current line width of this object.
+   * @return the current line width of this object.
    */
   public int getLineWidth() {
     return lineWidth;
   }
 
   /**
-   * Returns true only if this object is shadowed.
+   * @return true only if this object is shadowed.
    */
   public boolean hasShadow() {
     return isShadowed;
@@ -1971,7 +1971,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the current shadow thickness.
+   * @return the current shadow thickness.
    * @see #setShadowWidth
    */
   public int getShadowWidth() {
@@ -1979,7 +1979,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Determines whether this object has inverse shadow.
+   * @return whether this object has inverse shadow.
    * @see #setInverseShadow
    */
   public boolean hasInverseShadow() {
@@ -2008,7 +2008,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the minimum value of this object.
+   * @return the minimum value of this object.
    * @see #setMinValue
    */
   public int getMinValue() {
@@ -2027,7 +2027,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the maximum value of this object.
+   * @return the maximum value of this object.
    * @see #setMaxValue
    */
   public int getMaxValue() {
@@ -2046,7 +2046,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the init value of this object.
+   * @return the init value of this object.
    * @see #setInitValue
    */
   public int getInitValue() {
@@ -2054,7 +2054,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Determines whether this object is interactive.
+   * @return whether this object is interactive.
    * @see #setInteractive
    */
   public boolean isInteractive() {
@@ -2073,7 +2073,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the value change mode of this object for user interaction.
+   * @return the value change mode of this object for user interaction.
    * @see #setValueChangeMode
    */
   public int getValueChangeMode() {
@@ -2094,7 +2094,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Determines whether this object has a value program for background color.
+   * @return whether this object has a value program for background color.
    * @see #setBackgroundMapper
    */
   public boolean hasBackgroundMapper() {
@@ -2111,7 +2111,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the current value program for background color of this object.
+   * @return the current value program for background color of this object.
    */
   public JDValueProgram getBackgroundMapper() {
     return backgroundMapper;
@@ -2119,7 +2119,7 @@ public abstract class JDObject {
 
 
   /**
-   * Determines whether this object has a value program for foreground color.
+   * @return whether this object has a value program for foreground color.
    * @see #setForegroundMapper
    */
   public boolean hasForegroundMapper() {
@@ -2136,14 +2136,14 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the current value program for foreground color of this object.
+   * @return the current value program for foreground color of this object.
    */
   public JDValueProgram getForegroundMapper() {
     return foregroundMapper;
   }
 
   /**
-   * Determines whether this object has a value program for visibility.
+   * @return whether this object has a value program for visibility.
    * @see #setVisibilityMapper
    */
   public boolean hasVisibilityMapper() {
@@ -2160,14 +2160,14 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the current value program for visibility of this object.
+   * @return the current value program for visibility of this object.
    */
   public JDValueProgram getVisibilityMapper() {
     return visibilityMapper;
   }
 
   /**
-   * Determines whether this object has a value program for invert shadow.
+   * @return whether this object has a value program for invert shadow.
    * @see #setInvertShadowMapper
    */
   public boolean hasInvertShadowMapper() {
@@ -2184,14 +2184,14 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the current value program for invert shadow of this object.
+   * @return the current value program for invert shadow of this object.
    */
   public JDValueProgram getInvertShadowMapper() {
     return invertShadowMapper;
   }
 
   /**
-   * Determines whether this object has a value program for horizontal translation.
+   * @return whether this object has a value program for horizontal translation.
    * @see #setHTranslationMapper
    */
   public boolean hasHTranslationMapper() {
@@ -2208,14 +2208,14 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the current value program for horizontal translation of this object.
+   * @return the current value program for horizontal translation of this object.
    */
   public JDValueProgram getHTranslationMapper() {
     return hTranslationMapper;
   }
 
   /**
-   * Determines whether this object has a value program for vertical translation.
+   * @return whether this object has a value program for vertical translation.
    * @see #setVTranslationMapper
    */
   public boolean hasVTranslationMapper() {
@@ -2232,7 +2232,7 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the current value program for vertical translation of this object.
+   * @return the current value program for vertical translation of this object.
    */
   public JDValueProgram getVTranslationMapper() {
     return vTranslationMapper;
@@ -2281,7 +2281,7 @@ public abstract class JDObject {
     return parent;
   }
 
-  /** Determines whether this object has a programmed behavior. If this object is
+  /** @return whether this object has a programmed behavior. If this object is
     * a JDGroup, the function return true if at least one of grouped JDObject is programmed.
     * @see #setValue
     */
@@ -2472,14 +2472,14 @@ public abstract class JDObject {
   }
 
   /**
-   * Returns the description of the specified extension.
+   * @return the description of the specified extension.
    * @param extName Extension name
    */
   public String getExtendedParamDesc(String extName) {
     return "";
   }
 
-  /** Returns the number of extensions */
+  /** @return the number of extensions */
   public int getExtendedParamNumber() {
    if( extParamValue == null )
      return 0;
@@ -2487,7 +2487,9 @@ public abstract class JDObject {
      return extParamValue.length;
   }
 
-  /** Returns the index of the specified extended param , -1 when not found */
+  /** @return the index of the specified extended param , -1 when not found
+   * @param name Param name
+   */
   public int getExtendedParamIndex(String name) {
 
     if( extParamName==null )
@@ -2507,23 +2509,27 @@ public abstract class JDObject {
 
   }
 
-  /** returns true if the specified extended param exists , false otherwise */
+  /** @return true if the specified extended param exists , false otherwise
+   * @param name Param name
+   */
   public boolean hasExtendedParam(String name) {
     return getExtendedParamIndex(name)>=0;
   }
 
-  /** returns true if this parameters is fixed and cannot be removed. */
+  /** @return true if this parameters is fixed and cannot be removed.
+   * @param name Param name
+   */
   public boolean isFixedExtendedParam(String name) {
     return false;
   }
 
 
-  /** returns disabled state (external usage) */
+  // returns disabled state (external usage)
   public boolean isDisabled() {
     return isDisabled;
   }
 
-  /** sets disabled state (external usage) */
+  // sets disabled state (external usage)
   public void setDisabled(boolean disabled) {
     isDisabled = disabled;
   }

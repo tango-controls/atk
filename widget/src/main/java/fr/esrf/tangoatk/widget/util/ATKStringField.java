@@ -36,7 +36,7 @@ import java.awt.event.*;
 
 /**
  * <code>ATKStringField</code> implements a stringfield which responds to
- * <enter> keypresses. 
+ * enter keypresses.
  * @author <a href="mailto:assum@esrf.fr">Erik Assum</a>
  * @version 1.0
  */

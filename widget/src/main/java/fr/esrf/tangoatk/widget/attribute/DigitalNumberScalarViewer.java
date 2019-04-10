@@ -33,7 +33,6 @@ import fr.esrf.tangoatk.core.*;
 
 /** A class which displays a number scalar attribute.
  * Here is an example of use:
- * <p>
  * <pre>
  * fr.esrf.tangoatk.core.AttributeList attributeList = new
  *    fr.esrf.tangoatk.core.AttributeList();
@@ -65,7 +64,7 @@ public class DigitalNumberScalarViewer extends DigitalNumberViewer
     setOpaque(true);
   }
 
-  /** Returns the current background color of this viewer. Color used for the VALID attribute quality state */
+  /** @return the current background color of this viewer. Color used for the VALID attribute quality state */
   public Color getBackgroundColor() {
     return backgroundColor;
   }
@@ -259,6 +258,7 @@ public class DigitalNumberScalarViewer extends DigitalNumberViewer
 
   /**
    * Determines whether the background color is overrided by the quality factor.
+   * @return Alarm enabled flag
    * @see #setAlarmEnabled
    * @see #setBackgroundColor
    */

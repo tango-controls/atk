@@ -46,6 +46,7 @@ public interface IJLChartActionListener extends EventListener, java.io.Serializa
     * if several listener handle the same action, the result will be a
     * logical and of all results.
     * @param evt Event object (containing acion name)
+    * @return Action state (true to execute)
     * @see JLChart#addUserAction
     */
     public boolean getActionState(JLChartActionEvent evt);

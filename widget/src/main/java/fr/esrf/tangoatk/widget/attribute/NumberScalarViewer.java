@@ -47,7 +47,7 @@ public class NumberScalarViewer extends WheelSwitch implements INumberScalarList
     backgroundColor = ATKConstant.getColor4Quality(IAttribute.VALID);
   }
 
-  /** Returns the current background color of this viewer. Color used for the VALID attribute quality state */
+  /** @return the current background color of this viewer. Color used for the VALID attribute quality state */
   public Color getBackgroundColor() {
     return backgroundColor;
   }
@@ -73,6 +73,7 @@ public class NumberScalarViewer extends WheelSwitch implements INumberScalarList
 
   /**
    * Determines whether the background color is overrided by the quality factor.
+   * @return Alarm enabled flag
    * @see #setAlarmEnabled
    * @see #setBackgroundColor
    */

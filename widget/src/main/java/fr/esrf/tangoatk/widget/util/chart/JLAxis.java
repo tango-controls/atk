@@ -401,7 +401,7 @@ public class JLAxis implements java.io.Serializable {
   }
 
   /**
-   * Return true if the x axis fit to display duration.
+   * @return true if the x axis fit to display duration.
    */
   public boolean isFitXAxisToDisplayDuration() {
     return fitXAxisToDisplayDuration;
@@ -501,7 +501,7 @@ public class JLAxis implements java.io.Serializable {
   }
 
   /**
-   * Returns the annotation method
+   * @return the annotation method
    * @see JLAxis#setAnnotation
    */
   public int getAnnotation() {
@@ -517,7 +517,7 @@ public class JLAxis implements java.io.Serializable {
   }
 
   /**
-   * Returns true if the axis is visble, false otherwise
+   * @return true if the axis is visble, false otherwise
    */
   public boolean isVisible() {
     return visible;
@@ -680,7 +680,7 @@ public class JLAxis implements java.io.Serializable {
   }
 
   /**
-   * Returns the orientation of this axis.
+   * @return the orientation of this axis.
    * @see #setOrientation
    */
   public int getOrientation() {
@@ -696,7 +696,7 @@ public class JLAxis implements java.io.Serializable {
   }
 
   /**
-   * Returns the number of sub tick interval in TIME_ANNO
+   * @return the number of sub tick interval in TIME_ANNO
    * @see #setTimeAnnoSubTickInterval
    */
   public int getTimeAnnoSubTickInterval() {
@@ -868,13 +868,14 @@ public class JLAxis implements java.io.Serializable {
   /**
    * @deprecated Use getTickSpacing
    * @see JLAxis#getTickSpacing
+   * @return minTickStep
    */
   public int getTick() {
     return (int)minTickStep;
   }
 
   /**
-   * Returns the current minimum tick spacing (in pixel).
+   * @return the current minimum tick spacing (in pixel).
    */
   public double getTickSpacing() {
     return minTickStep;
@@ -891,6 +892,7 @@ public class JLAxis implements java.io.Serializable {
 
   /**
    * @deprecated Use setTickSpacing
+   * @param s minTickStep
    * @see JLAxis#setTickSpacing
    */
   public void setTick(int s) {
@@ -907,7 +909,7 @@ public class JLAxis implements java.io.Serializable {
   }
 
   /**
-   * Returns the tick length (in pixel).
+   * @return the tick length (in pixel).
    */
   public int getTickLength() {
     return tickLength;
@@ -1132,7 +1134,7 @@ public class JLAxis implements java.io.Serializable {
   }
 
   /**
-   * Returns true if this axis is inverted.
+   * @return true if this axis is inverted.
    */
   public boolean isInverted() {
     return inverted;
@@ -1334,7 +1336,7 @@ public class JLAxis implements java.io.Serializable {
   }
 
   /**
-   * Returns the vertical label width
+   * @return the vertical label width
    * @see JLAxis#setVLabelWidth
    */
   public int getVLabelWidth() {
@@ -1692,6 +1694,8 @@ public class JLAxis implements java.io.Serializable {
 
   /**
    * @deprecated Use getLabelFontDimension() instead
+   * @param g Graphics
+   * @return getLabelFontDimension
    */
   public int getFontHeight(Graphics g) {
     return getLabelFontDimension(null);
@@ -1699,6 +1703,7 @@ public class JLAxis implements java.io.Serializable {
 
   /**
    * Expert usage.
+   * @param frc FontRenderContext
    * @return Axis font dimension.
    */
   public int getLabelFontDimension(FontRenderContext frc) {
@@ -4299,7 +4304,7 @@ public class JLAxis implements java.io.Serializable {
   }
 
   /**
-   * Allaws user to know if the 0 value will always be visible in case of auto scale
+   * Allows user to know if the 0 value will always be visible in case of auto scale
    * @return a boolean value
    */
   public boolean isZeroAlwaysVisible ()
@@ -4323,7 +4328,7 @@ public class JLAxis implements java.io.Serializable {
 
   /**
    * Sets date format chen chosen label format is DATE_FORMAT
-   * @param dateFormat
+   * @param dateFormat Date format
    * @see #US_DATE_FORMAT
    * @see #FR_DATE_FORMAT
    */

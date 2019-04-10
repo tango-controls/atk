@@ -146,7 +146,7 @@ public class StateViewer extends javax.swing.JPanel
    * <code>setModel</code> sets the model of this viewer.
    * If the textLabel property is not set, the name of the device is
    * shown on the textLabel.
-   * @param device a <code>Device</code> to surveil
+   * @param devModel a <code>Device</code> to survey
    */
   public void setModel(IDevice devModel) {
     clearModel();

@@ -30,8 +30,6 @@ import java.awt.geom.Point2D;
 import java.io.IOException;
 
 /** JDraw Line graphic object.
-  *  <p>Here is an example of few JDLine:<p>
-  *  <img src="JDLine.gif" border="0" alt="JDLine examples"></img>
   */
 public class JDLine extends JDObject implements JDRotatable {
 
@@ -177,7 +175,8 @@ public class JDLine extends JDObject implements JDRotatable {
   }
 
   /**
-   * Returns the current arrow of this line.
+   *
+   * @return the current arrow of this line.
    * @see #setArrow
    */
   public int getArrow() {
@@ -194,7 +193,7 @@ public class JDLine extends JDObject implements JDRotatable {
   }
 
   /**
-   * Returns the current arrow width.
+   * @return the current arrow width.
    * @see #setArrowSize
    */
   public int getArrowSize() {
@@ -239,7 +238,7 @@ public class JDLine extends JDObject implements JDRotatable {
 
   }
 
-  /** Returns false, Line cannot be shadowed. */
+  /** @return false, Line cannot be shadowed. */
   public boolean hasShadow() {
     return false;
   }

@@ -64,6 +64,8 @@ public class ThreeStateSwitch extends JComponent implements MouseListener {
 
   /**
    * Construct a ThreeStateSwitch with the specified title and font.
+   * @param title Title
+   * @param tFont Title font
    */
   public ThreeStateSwitch(String title, Font tFont) {
     initComponents();

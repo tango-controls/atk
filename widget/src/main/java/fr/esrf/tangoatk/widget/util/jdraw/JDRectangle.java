@@ -29,8 +29,6 @@ import java.awt.geom.Point2D;
 import java.io.IOException;
 
 /** JDraw Rectangle graphic object.
- *  <p>Here is an example of few JDRectangle:<p>
- *  <img src="JDRectangle.gif" border="0" alt="JDRectangle examples"></img>
  */
 public class JDRectangle extends JDRectangular implements JDPolyConvert {
 

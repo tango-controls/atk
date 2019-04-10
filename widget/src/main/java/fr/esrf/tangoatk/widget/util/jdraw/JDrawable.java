@@ -33,10 +33,10 @@ public interface JDrawable {
    * and feel for editing. */
   public void initForEditing();
 
-  /** Returns the JComponent that implements this interface. */
+  /** @return the JComponent that implements this interface. */
   public JComponent getComponent();
 
-  /** Returns list of extension name for this objects (Empty array for none). */
+  /** @return list of extension name for this objects (Empty array for none). */
   public String[] getExtensionList();
 
   /** Sets the specified param.

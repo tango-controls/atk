@@ -62,14 +62,14 @@ public class JLChartActionEvent extends EventObject {
 
 
   /**
-   * Gets the action name
+   * @return the action name
    */
   public String getName() {
     return actionName;
   }
 
   /**
-   * Gets the action state
+   * @return the action state
    */
   public boolean getState() {
     return state;

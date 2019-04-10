@@ -85,8 +85,7 @@ public class DevStateSpectrumViewer extends javax.swing.JPanel
 
 
   /**
-   * Returns the model for this viewer
-   *
+   * @return the model for this viewer
    * @see #setModel
    */
   public IDevStateSpectrum getModel() {
@@ -225,8 +224,7 @@ public class DevStateSpectrumViewer extends javax.swing.JPanel
 
 
   /**
-   * Returns the globalFont used by the viewer
-   *
+   * @return the globalFont used by the viewer
    * @see #setGlobalFont
    */
   public Font getGlobalFont() {
@@ -271,8 +269,7 @@ public class DevStateSpectrumViewer extends javax.swing.JPanel
 
 
   /**
-   * Returns the stateLabel visiblity
-   *
+   * @return the stateLabel visibility
    * @see #setStateLabelVisible
    */
   public boolean getStateLabelVisible() {
@@ -308,8 +305,7 @@ public class DevStateSpectrumViewer extends javax.swing.JPanel
 
 
   /**
-   * Returns the stateString visiblity
-   *
+   * @return the stateString visiblity
    * @see #setStateStringVisible
    */
   public boolean getStateStringVisible() {
@@ -346,8 +342,7 @@ public class DevStateSpectrumViewer extends javax.swing.JPanel
 
 
   /**
-   * Returns the current toolTipMode
-   *
+   * @return the current toolTipMode
    * @see #setToolTipMode
    */
   public String getToolTipMode() {

@@ -33,8 +33,6 @@ import java.awt.geom.Point2D;
 import java.io.IOException;
 
 /** JDraw Label graphic object.
- *  <p>Here is an example of few JDLabel:<p>
- *  <img src="JDLabel.gif" border="0" alt="JDLabel examples"></img>
  */
 public class JDLabel extends JDRectangular {
 
@@ -478,7 +476,7 @@ public class JDLabel extends JDRectangular {
   }
 
   /**
-   * Returns the current font of this label.
+   * @return the current font of this label.
    */
   public Font getFont() {
     return theFont;
@@ -496,7 +494,7 @@ public class JDLabel extends JDRectangular {
   }
 
   /**
-   * Returns the current horizontal text alignement.
+   * @return the current horizontal text alignement.
    * @see #setHorizontalAlignment
    */
   public int getHorizontalAlignment() {
@@ -515,7 +513,7 @@ public class JDLabel extends JDRectangular {
   }
 
   /**
-   * Returns the current vetical text alignement.
+   * @return the current vetical text alignement.
    * @see #setHorizontalAlignment
    */
   public int setVerticalAlignment() {
@@ -536,7 +534,7 @@ public class JDLabel extends JDRectangular {
   }
 
   /**
-   * Gets the current text orientation.
+   * @return the current text orientation.
    * @see #setOrientation
    */
   public int getOrientation() {
@@ -562,7 +560,7 @@ public class JDLabel extends JDRectangular {
   }
 
   /**
-   * Returns the current label text.
+   * @return the current label text.
    */
   public String getText() {
     return theText;

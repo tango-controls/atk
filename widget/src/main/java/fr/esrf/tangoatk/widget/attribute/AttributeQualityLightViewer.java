@@ -208,7 +208,6 @@ public class AttributeQualityLightViewer extends JButton implements
      *            JLabel. if <code>true</code> and devicePropertyModel is not null, it will
      *            show label depending on the chosen label. if devicePropertyModel is null
      *            a message in label will warn user that there is no attribute
-     * @see setChosenLabel
      */
     public void setViewLabel(boolean b) {
         viewLabel = b;
@@ -221,6 +220,7 @@ public class AttributeQualityLightViewer extends JButton implements
 
     /**
      * To know whether devicePropertyModel's label is text of this JLabel or not
+     * @return Display flag
      */
     public boolean isViewLabel() {
         return viewLabel;
@@ -291,10 +291,6 @@ public class AttributeQualityLightViewer extends JButton implements
         }// end if (viewLabel)
     }// end manageLabel()
 
-    /**
-     * Main class, so you can have an example.
-     * You can monitor your own attribute by giving its full path name in argument
-     */
     public static void main(String[] args) {
         fr.esrf.tangoatk.core.AttributeList attributeList = new fr.esrf.tangoatk.core.AttributeList();
         AttributeQualityLightViewer aqlv = new AttributeQualityLightViewer();

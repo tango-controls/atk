@@ -60,8 +60,7 @@ public class JLChartEvent extends EventObject {
   }
 
   /**
-   * Return the mouse event that has triggered this event, if any. Null otherwise.
-   * @return
+   * @return the mouse event that has triggered this event, if any. Null otherwise.
    */
   public MouseEvent getMouseEvent() {
     return srcEvent;
@@ -107,7 +106,7 @@ public class JLChartEvent extends EventObject {
   }
 
   /**
-   * Gets the x transformed value (through the A0,A1,A2 polynomial transform)
+   * @return the x transformed value (through the A0,A1,A2 polynomial transform)
    * Does not make conversion in normal monitoring mode (not XY)
    */
   public double getTransformedXValue() {
@@ -118,7 +117,7 @@ public class JLChartEvent extends EventObject {
   }
 
   /**
-   * Gets the y transformed value (through the A0,A1,A2 polynomial transform)
+   * @return the y transformed value (through the A0,A1,A2 polynomial transform)
    */
   public double getTransformedYValue() {
     return searchResult.dataView.getTransformedValue(searchResult.value.y);

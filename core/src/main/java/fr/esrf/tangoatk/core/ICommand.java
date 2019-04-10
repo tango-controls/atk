@@ -129,7 +129,6 @@ public interface ICommand extends IEntity, TangoConst {
      * if this command has an "array" input argument.
      * @see fr.esrf.TangoDs.TangoConst
      * @return an <code>int</code> value containing the in_type.
-     * @throws NoSuchElementException if no such property exists.
      */
     public String getInTypeElemName();
 

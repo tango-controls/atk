@@ -178,7 +178,7 @@ public class NetObjectDlg extends JDialog implements ActionListener {
     setVisible(true);
   }
 
-  /** Returns true if one or more properties have changed. */
+  /** @return true if one or more properties have changed. */
   public boolean getModified() {
     return modified;
   }

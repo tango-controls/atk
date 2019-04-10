@@ -48,7 +48,6 @@ public class Dijkstra extends JFrame  {
 
   }
 
-  /** Main function */
   public static void main(String[] args) {
 
     final Dijkstra f = new Dijkstra();

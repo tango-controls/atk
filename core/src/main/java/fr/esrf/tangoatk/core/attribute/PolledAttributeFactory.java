@@ -47,11 +47,8 @@ public class PolledAttributeFactory extends AttributeFactory {
     return instance;
   }
 
-  /**
-   * @deprecated
-   */
   public static AttributeFactory getInstance() {
-    throw new IllegalStateException("Use getPollledInstance() with PolledAttributeFactory");
+    throw new IllegalStateException("Use getPolledInstance() with PolledAttributeFactory");
   }
 
   /**

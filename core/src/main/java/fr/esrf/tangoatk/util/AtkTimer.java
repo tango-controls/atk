@@ -38,6 +38,7 @@ import java.io.*;
  * @version 1.0
  */
 public class AtkTimer {
+
     protected Map threadMap = new HashMap();
     protected Map methodMap = new HashMap();
     protected static AtkTimer self;
@@ -54,10 +55,10 @@ public class AtkTimer {
 	;
     }
 
-    /**
-     * <code>getInstance</code> Gives you the AtkTimer instance
-     *
-     */
+  /**
+   * <code>getInstance</code> Gives you the AtkTimer instance
+   * @return AtkTimer instance
+   */
     public static AtkTimer getInstance() {
 	if (self == null) {
 	    self = new AtkTimer();

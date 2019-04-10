@@ -1320,7 +1320,7 @@ public void setTimePrecision(int timePrecision) {
 
   }
 
-  /** returns the configuration as string.
+  /** @return the configuration as string.
     * @see #setSetting
     */
   public String getSettings() {
@@ -1662,7 +1662,7 @@ public void setTimePrecision(int timePrecision) {
     return applySettings(f);
   }
 
-  /** Returns the frame_title field read in the config file. */
+  /** @return the frame_title field read in the config file. */
   public String getTitle() {
     return graphTitle;
   }
@@ -1672,12 +1672,14 @@ public void setTimePrecision(int timePrecision) {
   // ************************************************
   /**
    * @deprecated use getChart()
+   * @param b Not used
    */
   public void setLegendVisible(boolean b) {
   }
 
   /**
    * @deprecated use getChart()
+   * @return false
    */
   public boolean isLegendVisible() {
     return false;
@@ -1685,12 +1687,14 @@ public void setTimePrecision(int timePrecision) {
 
   /**
    * @deprecated no longer used (has no FX)
+   * @param rate Not used
    */
   public void setSamplingRate(double rate) {
   }
 
   /**
    * @deprecated no longer used (has no FX)
+   * @return 0
    */
   public double getSamplingRate() {
     return 0.0;
@@ -1698,12 +1702,14 @@ public void setTimePrecision(int timePrecision) {
 
   /**
    * @deprecated no longer used (has no FX)
+   * @param length Not used
    */
   public void setXAxisLength(int length) {
   }
 
   /**
    * @deprecated no longer used (has no FX)
+   * @return 0
    */
   public int getXAxisLength() {
     return 0;
@@ -1711,12 +1717,14 @@ public void setTimePrecision(int timePrecision) {
 
   /**
    * @deprecated use getChart()
+   * @param logarithmic Not used
    */
   public void setLogarithmicScale(boolean logarithmic) {
   }
 
   /**
    * @deprecated use getChart()
+   * @return false
    */
   public boolean isLogarithmicScale() {
     return false;
@@ -1724,12 +1732,14 @@ public void setTimePrecision(int timePrecision) {
 
   /**
    * @deprecated no longer used (has no FX)
+   * @param b Not used
    */
   public void setListVisible(boolean b) {
   }
 
   /**
    * @deprecated no longer used (has no FX)
+   * @return false
    */
   public boolean isListVisible() {
     return false;
@@ -1737,12 +1747,14 @@ public void setTimePrecision(int timePrecision) {
 
   /**
    * @deprecated no longer used (has no FX)
+   * @param b Not used
    */
   public void setShowingNames(boolean b) {
   }
 
   /**
    * @deprecated no longer used (has no FX)
+   * @return false
    */
   public boolean isShowingNames() {
     return false;
@@ -1761,7 +1773,7 @@ public void setTimePrecision(int timePrecision) {
   }
 
   /**
-   * Determines whether or not device names (within chart labels) are visible.
+   * @return whether or not device names (within chart labels) are visible.
    * @see #setShowingDeviceNames
    */
   public int isShowingDeviceNames() {
@@ -1829,7 +1841,7 @@ public void setTimePrecision(int timePrecision) {
   }
 
   /**
-   * Returns true only if the selection tree is visible
+   * @return true only if the selection tree is visible
    */
   public boolean isSelectionTreeVisible() {
     if (treeView != null)
@@ -1852,6 +1864,7 @@ public void setTimePrecision(int timePrecision) {
 
   /**
    * Disables the button corresponding to the string
+   * @param buttonName Button name
    */
   public void disableButton(String buttonName){
       JButton b = (JButton)buttonMap.get(buttonName);
@@ -1860,6 +1873,7 @@ public void setTimePrecision(int timePrecision) {
 
   /**
    * Enables the button corresponding to the string
+   * @param buttonName Button name
    */
   public void enableButton(String buttonName){
       JButton b = (JButton)buttonMap.get(buttonName);

@@ -33,8 +33,6 @@ import java.io.IOException;
 import java.util.Vector;
 
 /** JDraw Spline graphic object.
- *  <p>Here is an example of few JDSpline:<p>
- *  <img src="JDSpline.gif" border="0" alt="JDSpline examples"></img>
  */
 public class JDSpline extends JDPolyline implements JDPolyConvert {
 

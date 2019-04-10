@@ -651,22 +651,22 @@ public class NetFileLoader {
 
   }
 
-  /** Gets the label font read in the global param section if any, default font otherwise */
+  /** @return the label font read in the global param section if any, default font otherwise */
   public Font getLabelFont() {
     return labelFont;
   }
 
-  /** Gets the small font read in the global param section if any, default font otherwise */
+  /** @return the small font read in the global param section if any, default font otherwise */
   public Font getSmallFont() {
     return smallFont;
   }
 
-  /** Gets the Anti-Aliased font usage flag read in the global param section if any, false otherwise */
+  /** @return the Anti-Aliased font usage flag read in the global param section if any, false otherwise */
   public boolean getUseAAFont() {
     return useAAFont;
   }
 
-  /** Gets the draw arrow flag read in the global param section if any, true otherwise */
+  /** @return the draw arrow flag read in the global param section if any, true otherwise */
   public boolean getDrawArrow() {
     return drawArrow;
   }

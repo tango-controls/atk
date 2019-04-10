@@ -32,7 +32,7 @@ import javax.swing.text.*;
 
 
 /**
- *  A font chooser dialog box.<p>
+ *  A font chooser dialog box.
  * <pre>
  *  Font defFont = new Font("Dialog", Font.BOLD, 12);
  *  Font newFont = ATKFontChooser.getNewFont(this,"Choose font",defFont);

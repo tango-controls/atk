@@ -96,6 +96,7 @@ public class BarGraph extends JFrame {
   /**
    * Returns the JDObject having the given name.
    * @param name Name to search
+   * @return JDObject named name
    */
   public JDObject getObject(String name) {
 
@@ -136,9 +137,6 @@ public class BarGraph extends JFrame {
 
   }
 
-  /**
-   * Main function.
-   */
   public static void main(String[] args) {
     final BarGraph bg = new BarGraph();
     ATKGraphicsUtils.centerFrameOnScreen(bg);

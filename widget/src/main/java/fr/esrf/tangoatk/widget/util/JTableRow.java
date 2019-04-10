@@ -232,7 +232,7 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
   }
 
   /**
-   * Returns true if this table is editable
+   * @return  true if this table is editable
    */
   public boolean isEditable() {
    return editable;
@@ -408,6 +408,7 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
    * Returns the cells at the specified pos or null if the table has no data.
    * @param row Row index
    * @param column Column index
+   * @return Cell at the specified pos
    */
   public Object getObjectAt(int row,int column) {
     if(theData!=null)
@@ -922,9 +923,6 @@ public class JTableRow extends JPanel implements ActionListener,MouseListener {
 
   }
   
-  /**
-   * Test function.
-   */
   static public void main(String[] args) {
 
     JFrame f = new JFrame();

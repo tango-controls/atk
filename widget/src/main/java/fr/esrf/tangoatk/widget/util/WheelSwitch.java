@@ -96,6 +96,7 @@ public class WheelSwitch extends JComponent {
 
    /**
     * WheelSwitch constructor.
+    * @param editable Editable flag
     */
     public WheelSwitch(boolean editable) {
 
@@ -269,6 +270,7 @@ public class WheelSwitch extends JComponent {
 
     /**
      * Returns the current wheelswitch value.
+     * @return Current value
      */
     public double getValue() {
         return value;
@@ -342,8 +344,9 @@ public class WheelSwitch extends JComponent {
         }
         else return false;
     }
+
     /**
-     * Returns the current digit size according the the component Font.
+     * @return the current digit size according the the component Font.
      */
     public Dimension getDigitSize() {
         return dz;
@@ -352,8 +355,7 @@ public class WheelSwitch extends JComponent {
     /**
      * Sets the color of arrow buttons.
      * 
-     * @param c
-     *            New button color.
+     * @param c New button color.
      */
     public void setButtonColor(Color c) {
 
@@ -371,8 +373,7 @@ public class WheelSwitch extends JComponent {
     }
 
     /**
-     * Returns the current button color.
-     * 
+     * @return the current button color.
      * @see #setButtonColor
      */
     public Color getButtonColor() {
@@ -390,7 +391,7 @@ public class WheelSwitch extends JComponent {
     }
 
     /**
-     * Returns the current button selection color.
+     * @return the current button selection color.
      */
     public Color getSelButtonColor() {
         return selectionColor;
@@ -439,8 +440,8 @@ public class WheelSwitch extends JComponent {
      * Set the format as C format (only "%x.yf" or "%xd" is supported). This
      * will change the button configuration.
      * 
-     * @param aformat
-     *            New wheelswitch format.
+     * @param aformat New wheelswitch format.
+     * @param attName Attribute name
      */
     public void setFormat(String aformat, String attName) {
 
@@ -553,10 +554,9 @@ public class WheelSwitch extends JComponent {
   /**
      * Set the precision of this wheelswitch.
      * 
-     * @param inb
-     *            number of digit for the integer part
-     * @param fnb
-     *            number of digit for the decimal part
+     * @param inb number of digit for the integer part
+     * @param fnb number of digit for the decimal part
+     * @param enb number of digit for the exponent part
      */
     synchronized public void setPrecision(int inb, int fnb, int enb) {
 

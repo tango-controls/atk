@@ -78,6 +78,7 @@ public class EventSupport implements Serializable
 
     /**
     * Returns a list (as String) of registered listener.
+    * @return Registered listeners
     */
     public String getListenerInfo() {
 

@@ -40,7 +40,11 @@ public class JSmoothDelayDialog extends JDialog
     private int                 delay = 0;// Unit is ms.
     
     
-    /** Constructor takes JDialog parent, title */
+  /**
+   * Construct a JSmoothDelayDialog
+   * @param owner Dialog owner
+   * @param title Dialog title
+   */
     public JSmoothDelayDialog(JDialog owner, String title)
     {
         super(owner,title, true);
@@ -49,7 +53,12 @@ public class JSmoothDelayDialog extends JDialog
     }
     
     
-    /** Constructor takes JDialog parent, title, delay in milli seconds arguments */
+  /**
+   * Construct a JSmoothDelayDialog
+   * @param owner Dialog owner
+   * @param title Dialog title
+   * @param d Delay in millisec
+   */
     public JSmoothDelayDialog(JDialog owner, String title, int d)
     {
         super(owner,title, true);
@@ -57,7 +66,12 @@ public class JSmoothDelayDialog extends JDialog
 	selfref = this;
     }
 
-    /** Constructor takes Frame parent, title, delay in milli seconds arguments */
+  /**
+   * Construct a JSmoothDelayDialog
+   * @param owner Frame owner
+   * @param title Dialog title
+   * @param d Delay in millisec
+   */
     public JSmoothDelayDialog(Frame owner, String title, int d)
     {
         super(owner,title, true);

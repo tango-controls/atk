@@ -257,6 +257,7 @@ public abstract class ANumber extends AAttribute
      * <code>getValueInDeviceUnit</code> converts the value of a numeric property expressed in display unit to the value in device unit
      *
      * @param dispPval a property value expressed in display unit
+     * @return Value in device unit
      */
     public double getValueInDeviceUnit(double dispPval)
     {
@@ -276,6 +277,7 @@ public abstract class ANumber extends AAttribute
      * <code>getValueInDisplayUnit</code> converts the value of a numeric property expressed in device unit to the value in display unit
      *
      * @param devPval a property value expressed in device unit
+     * @return Value in display unit
      */
     public double getValueInDisplayUnit(double devPval)
     {

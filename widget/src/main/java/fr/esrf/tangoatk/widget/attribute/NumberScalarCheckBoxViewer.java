@@ -84,13 +84,14 @@ public class NumberScalarCheckBoxViewer extends BooleanScalarCheckBoxViewer
 
 
     /**
-     * Returns the associated attribute
+     * @return the associated attribute
      */
     public INumberScalar getNumberModel() {
         return numberModel;
     }
     /**
      * Associates an attribute with this checkbox
+     * @param numModel Number model
      */
     public void setNumberModel(INumberScalar numModel) {
         if (numberModel != null) {
@@ -173,10 +174,6 @@ public class NumberScalarCheckBoxViewer extends BooleanScalarCheckBoxViewer
         }
     }
 
-    /**
-     * Main class, so you can have an example.
-     * You can monitor your own attribute by giving its full path name in argument
-     */
     static public void main(String args[]) {
         fr.esrf.tangoatk.core.AttributeList attributeList = new fr.esrf.tangoatk.core.AttributeList();
         NumberScalarCheckBoxViewer nscbv = new NumberScalarCheckBoxViewer();

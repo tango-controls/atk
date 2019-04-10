@@ -32,7 +32,6 @@ import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
 
 /** A light weigth viewer which display an enumerated scalar attribute (EnumScalar).
  * Here is an example of use:
- * <p>
  * <pre>
  * fr.esrf.tangoatk.core.AttributeList attributeList = new fr.esrf.tangoatk.core.AttributeList();
  * SimpleEnumScalarViewer  = new SimpleEnumScalarViewer();
@@ -77,6 +76,7 @@ public class SimpleEnumScalarViewer extends JAutoScrolledText
    /**
    * Returns the current text which is displayed in case of error.
    * @see #setInvalidText
+   * @return Invalid text
    */
    public String getInvalidText()
    {
@@ -84,7 +84,7 @@ public class SimpleEnumScalarViewer extends JAutoScrolledText
    }
   
 
-   /** Returns the current background color of this viewer. Color used for the VALID attribute quality state */
+   /** @return the current background color of this viewer. Color used for the VALID attribute quality state */
    public Color getBackgroundColor()
    {
       return backgroundColor;
@@ -112,7 +112,7 @@ public class SimpleEnumScalarViewer extends JAutoScrolledText
    }
 
    /**
-    * Determines whether the background color is overrided by the quality factor.
+    * @return whether the background color is overrided by the quality factor.
     * @see #setAlarmEnabled
     * @see #setBackgroundColor
     */
@@ -130,7 +130,7 @@ public class SimpleEnumScalarViewer extends JAutoScrolledText
 
    /**
    * Sets the model for this viewer.
-   * @param IEnumScalar model
+   * @param enumeration model
    */
    public void setModel(IEnumScalar enumeration)
    {
@@ -371,11 +371,6 @@ public class SimpleEnumScalarViewer extends JAutoScrolledText
   }
   
 
-  /**
-   * Test function
-   * @param args Not used
-   * @throws Exception
-   */
   public static void main(String[] args) throws Exception
   {
 

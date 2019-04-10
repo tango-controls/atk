@@ -954,7 +954,7 @@ protected INumberImage model;
   }
 
   /**
-   * Returns true when the gradient is visible.
+   * @return true when the gradient is visible.
    */
   public boolean isGradientVisible() {
     return gradientTool.isVisible();
@@ -1028,7 +1028,7 @@ protected INumberImage model;
   }
 
   /**
-   * Return the current zoom factor index.
+   * @return the current zoom factor index.
    * @see #setZoom
    */
   public int getZoom() {
@@ -1075,6 +1075,7 @@ protected INumberImage model;
 
   /** Determines wheter this image viewer has auto zoom enabled.
    * @see #setAutoZoom
+   * @return Autozoom flag
    */
   public boolean getAutoZoom() {
     return autoZoom;
@@ -1213,21 +1214,21 @@ protected INumberImage model;
   }
 
   /**
-   * Returns a handle to the x axis.
+   * @return a handle to the x axis.
    */
   public JLAxis getXAxis() {
     return imagePanel.getXAxis();
   }
 
   /**
-   * Return a handle to the Y axis.
+   * @return a handle to the Y axis.
    */
   public JLAxis getYAxis() {
     return imagePanel.getYAxis();
   }
 
   /**
-   * Returna handle to the Gradient axis.
+   * @return handle to the Gradient axis.
    */
   public JLAxis getGradientAxis() {
     return gradientTool.getAxis();
@@ -1236,6 +1237,7 @@ protected INumberImage model;
   /**
    * Converts the component horizontal coordinate to the image coordinate.
    * @param x Component horizontal coordinate
+   * @return Converted coordinate
    */
   public int getImageXCoord(int x) {
     return x - imagePanel.getXOrigin();
@@ -1244,6 +1246,7 @@ protected INumberImage model;
   /**
    * Converts the component vertical coordinate to the image coordinate.
    * @param y Component vertical coordinate
+   * @return Converted coordinate
    */
   public int getImageYCoord(int y) {
     return y - imagePanel.getYOrigin();
@@ -1564,7 +1567,7 @@ protected INumberImage model;
 
   }
 
-  /** returns the configuration as string.
+  /** @return the configuration as string.
     * @see #saveSetting
     */
   public String getSettings() {

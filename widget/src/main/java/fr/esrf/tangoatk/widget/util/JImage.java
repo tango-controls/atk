@@ -174,7 +174,7 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
   }
 
   /**
-   * Returns true if cross curosr is enabled.
+   * @return true if cross curosr is enabled.
    */
   public boolean isCrossCursor() {
     return crossCursor;
@@ -390,7 +390,7 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
   }
 
   /**
-   * Returns a handle of the X axis.
+   * @return a handle of the X axis.
    */
   public JLAxis getXAxis() {
     return xAxis;
@@ -398,6 +398,7 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
 
   /**
    * Returns a handle of the Y axis.
+   * @return Y axis
    */
   public JLAxis getYAxis() {
     return yAxis;
@@ -434,7 +435,7 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
   /**
    * Enables the grid mode. All selection point are rounded to
    * grid multiple.
-   * @param b
+   * @param b Snap to grid
    * @see JImage#isSnapToGrid
    * @see JImage#getSnapGrid
    */
@@ -583,7 +584,7 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
   }
 
   /**
-   * Returns the horizontal selection arrow position (MODE_CROSS selection)
+   * @return the horizontal selection arrow position (MODE_CROSS selection)
    */
   public int getHorizontalPosition () {
     return horizontalPosition;
@@ -599,7 +600,7 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
   }
 
   /**
-   * Returns the vertical selection arrow position (MODE_CROSS selection)
+   * @return the vertical selection arrow position (MODE_CROSS selection)
    */
   public int getVerticalPosition () {
     return verticalPosition;
@@ -615,7 +616,7 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
   }
 
   /**
-   * Returns the color of the selection area.
+   * @return the color of the selection area.
    */
   public Color getSelectionColor () {
     return selectionColor;
