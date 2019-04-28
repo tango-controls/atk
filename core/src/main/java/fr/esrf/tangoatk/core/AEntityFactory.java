@@ -52,8 +52,11 @@ public abstract class AEntityFactory implements TangoConst,
    * @return a <code>String</code> value containing the deviceName.
    */
   public static String extractDeviceName(String entityName) {
+    int j = entityName.lastIndexOf("#");
     int i = entityName.lastIndexOf("/");
-    return entityName.substring(0, i);
+    String deviceName = entityName.substring(0, i);
+    if (j > 0) deviceName += entityName.substring(j);
+    return deviceName;
   }
 
   /**
