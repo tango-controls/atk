@@ -103,6 +103,11 @@ public class JDClipboard {
         JOptionPane.showMessageDialog(null, "Clipboard not available.\n" + e1.getMessage());
       System.out.println(e1.getMessage());
       return;
+    } catch (Exception e2) {
+      if (showError)
+        JOptionPane.showMessageDialog(null, "Clipboard not available.\n" + e2.getMessage());
+      System.out.println(e2.getMessage());
+      return;
     }
 
     boolean hasTransferableText = (contents != null) && contents.isDataFlavorSupported(DataFlavor.stringFlavor);
