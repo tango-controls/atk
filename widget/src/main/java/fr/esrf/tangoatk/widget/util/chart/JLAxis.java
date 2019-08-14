@@ -2696,18 +2696,28 @@ public class JLAxis implements java.io.Serializable {
     g.clipRect(xClip, yClip, wClip, hClip);
 
     //-------- Draw dataView
-    if (isXY) vx = xAxis.getViews().get(0);
+    if (isXY) {
 
-    for (k = 0; k < nbView; k++) {
+      vx = xAxis.getViews().get(0);
+      synchronized (vx) {
+        for (k = 0; k < nbView; k++) {
+          JLDataView v = dataViews.get(k);
+          synchronized (v) {
+            paintDataViewXY(g, v, vx, xAxis, xOrg, yOrg);
+          }
+        }
+      }
 
-      JLDataView v = dataViews.get(k);
+    } else {
 
-      if (isXY)
-        paintDataViewXY(g, v, vx, xAxis, xOrg, yOrg);
-      else
-        paintDataViewNormal(g, v, xAxis, xOrg, yOrg);
+      for (k = 0; k < nbView; k++) {
+        JLDataView v = dataViews.get(k);
+        synchronized (v) {
+          paintDataViewNormal(g, v, xAxis, xOrg, yOrg);
+        }
+      }
 
-    } // End (for k<nbView)
+    }
 
     //long t1 = System.currentTimeMillis();
     //if( nbView>0 )
@@ -3166,20 +3176,18 @@ public class JLAxis implements java.io.Serializable {
     // Extract visible part
     DataList l = list;
     int maxNbPoint = 1;
-    synchronized (l) {
-      boolean found = false;
-      DataList f = l;
-      while (f != null && !found) {
-        if (isXLogScale)
-          xratio = (Math.log(f.x) / ln10 - minx) * iX;
-        else
-          xratio = (f.x - minx) * iX;
-        px = (int) ((xratio) + xOrg);
-        found = px > xMax;
-        if (!found) {
-          maxNbPoint++;
-          f = f.next;
-        }
+    boolean found = false;
+    DataList f = l;
+    while (f != null && !found) {
+      if (isXLogScale)
+        xratio = (Math.log(f.x) / ln10 - minx) * iX;
+      else
+        xratio = (f.x - minx) * iX;
+      px = (int) ((xratio) + xOrg);
+      found = px > xMax;
+      if (!found) {
+        maxNbPoint++;
+        f = f.next;
       }
     }
 

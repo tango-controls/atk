@@ -626,20 +626,24 @@ public class MultiNumberSpectrumViewer extends JLChart
 
     // update the dataview
     value = evt.getValue();
-    attDvy.reset();
-    int length = value.length;
 
-    if (attDvy.getAxis() == getXAxis()) {
-      for (int i = 0; i < length; i++)
-        attDvy.add((double) i, value[i]);
-    } else {
-      for (int i = 0; i < length; i++)
-        attDvy.add(affineA0 + affineA1 * (double) i, value[i]);
+    synchronized (attDvy) {
+
+      attDvy.reset();
+      int length = value.length;
+
+      if (attDvy.getAxis() == getXAxis()) {
+        for (int i = 0; i < length; i++)
+          attDvy.add((double) i, value[i]);
+      } else {
+        for (int i = 0; i < length; i++)
+          attDvy.add(affineA0 + affineA1 * (double) i, value[i]);
+      }
+
+      // Commit changes
+      repaint();
     }
 
-    // Commit changes
-    repaint();
-    //refreshTableSingle(attDvy); cannot call refreshTableSingle because there are multiple DataViews
   }
 
   // ---------------------------------------------------
