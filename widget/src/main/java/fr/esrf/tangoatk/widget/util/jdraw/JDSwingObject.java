@@ -28,8 +28,11 @@ package fr.esrf.tangoatk.widget.util.jdraw;
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.Vector;
 
 /** JDraw Swing graphic object. JDSwingObject allows a JComponent to be edited (and played)
  * within JDraw as if it is a JDObject. The JComponent must implements the JDrawable interface.
@@ -85,7 +88,7 @@ import java.lang.reflect.Constructor;
  * @see JDrawEditorFrame#main
  */
 
-public class JDSwingObject extends JDRectangular {
+public class JDSwingObject extends JDRectangular implements MouseListener {
 
   /** Swing Lowered border used by JDSwingObject. */
   public static Border lowerBevelBorder  = BorderFactory.createLoweredBevelBorder();
@@ -225,6 +228,16 @@ public class JDSwingObject extends JDRectangular {
     }
     return ret;
 
+  }
+
+  public void addMouseListener(JDMouseListener l) {
+    super.addMouseListener(l);
+    swingComp.getComponent().addMouseListener(this);
+  }
+
+  public void removeMouseListener(JDMouseListener l) {
+    super.removeMouseListener(l);
+    swingComp.getComponent().removeMouseListener(this);
   }
 
   public void setExtendedParam(String name,String value) {
@@ -631,6 +644,31 @@ public class JDSwingObject extends JDRectangular {
 
     }
 
+  }
+
+  @Override
+  public void mouseClicked(MouseEvent e) {
+    fireMouseEvent(MouseEvent.MOUSE_CLICKED,e);
+  }
+
+  @Override
+  public void mousePressed(MouseEvent e) {
+    fireMouseEvent(MouseEvent.MOUSE_PRESSED,e);
+  }
+
+  @Override
+  public void mouseReleased(MouseEvent e) {
+    fireMouseEvent(MouseEvent.MOUSE_RELEASED,e);
+  }
+
+  @Override
+  public void mouseEntered(MouseEvent e) {
+    fireMouseEvent(MouseEvent.MOUSE_ENTERED,e);
+  }
+
+  @Override
+  public void mouseExited(MouseEvent e) {
+    fireMouseEvent(MouseEvent.MOUSE_EXITED,e);
   }
 
 }

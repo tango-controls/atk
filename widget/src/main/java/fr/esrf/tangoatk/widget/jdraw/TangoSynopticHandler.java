@@ -1802,66 +1802,56 @@ invoqex.printStackTrace();
  
   private void addBooleanScalarAttribute(JDObject jdObj,IBooleanScalar model)
   {
-     if (jdObj instanceof JDSwingObject)
-     {
-        JComponent atkObj = ((JDSwingObject) jdObj).getComponent();
 
-        if (atkObj instanceof BooleanScalarCheckBoxViewer)
-        {
-           ((BooleanScalarCheckBoxViewer) atkObj).setAttModel(model);
-           allAttributes.add(model);
-           model.addSetErrorListener(errPopup);
-           if (errorHistWind != null)
-              model.addErrorListener(errorHistWind);
-        }
-        else
-        {
-           System.out.println(atkObj.getClass().getName() + " does not accept IBooleanScalar model");
-        }
-     }
-     else
-     {
-	// Default behavior for JJDObject value (dyno).
-	mouseifyAttribute(jdObj);
-	String attName = model.getName();
-	System.out.println("connecting to a BooleanScalar attribute : " + attName);
-	allAttributes.add(model);
-	model.addBooleanScalarListener(this);
-	stashComponent(model.getName(), jdObj);
-     }
+    mouseifyAttribute(jdObj);
+
+    if (jdObj instanceof JDSwingObject) {
+      JComponent atkObj = ((JDSwingObject) jdObj).getComponent();
+
+      if (atkObj instanceof BooleanScalarCheckBoxViewer) {
+        ((BooleanScalarCheckBoxViewer) atkObj).setAttModel(model);
+        allAttributes.add(model);
+        model.addSetErrorListener(errPopup);
+        if (errorHistWind != null)
+          model.addErrorListener(errorHistWind);
+      } else {
+        System.out.println(atkObj.getClass().getName() + " does not accept IBooleanScalar model");
+      }
+    } else {
+      // Default behavior for JJDObject value (dyno).
+      String attName = model.getName();
+      System.out.println("connecting to a BooleanScalar attribute : " + attName);
+      allAttributes.add(model);
+      model.addBooleanScalarListener(this);
+      stashComponent(model.getName(), jdObj);
+    }
+
   }
 
   private void addNumberScalarAttribute(JDObject jdObj, INumberScalar model) {
 
-    if (jdObj instanceof JDSwingObject)
-    {
+    mouseifyAttribute(jdObj);
+
+    if (jdObj instanceof JDSwingObject) {
+
       JComponent atkObj = ((JDSwingObject) jdObj).getComponent();
 
-      if (atkObj instanceof SimpleScalarViewer)
-      {
+      if (atkObj instanceof SimpleScalarViewer) {
         ((SimpleScalarViewer) atkObj).setModel(model);
         ((SimpleScalarViewer) atkObj).setHasToolTip(true);
         allAttributes.add(model);
-      }
-      else if (atkObj instanceof DigitalNumberScalarViewer)
-      {
+      } else if (atkObj instanceof DigitalNumberScalarViewer) {
         ((DigitalNumberScalarViewer) atkObj).setModel(model);
         ((DigitalNumberScalarViewer) atkObj).setHasToolTip(true);
         allAttributes.add(model);
-      }
-      else if (atkObj instanceof NumberScalarWheelEditor)
-      {
+      } else if (atkObj instanceof NumberScalarWheelEditor) {
         ((NumberScalarWheelEditor) atkObj).setModel(model);
         allAttributes.add(model);
         model.addSetErrorListener(errPopup);
-      }
-      else if (atkObj instanceof NumberScalarComboEditor)
-      {
+      } else if (atkObj instanceof NumberScalarComboEditor) {
         String valList = jdObj.getExtendedParam("valueList");
-        if (valList != null)
-        {
-          if (valList.length() != 0)
-          {
+        if (valList != null) {
+          if (valList.length() != 0) {
             double[] possVals = parsePossNumberValues(valList);
             if (possVals != null)
               if (possVals.length != 0)
@@ -1874,20 +1864,21 @@ invoqex.printStackTrace();
       } else {
         System.out.println(atkObj.getClass().getName() + " does not accept INumberScalar model");
       }
-    }
-    else
-    {
+
+    } else {
+
       // Default behavior for JDBar,JDSlider and JDObject value (dyno).
-      mouseifyAttribute(jdObj);
       String attName = model.getName();
       System.out.println("connecting to a NumberScalar attribute : " + attName);
       allAttributes.add(model);
       model.addNumberScalarListener(this);
       stashComponent(model.getName(), jdObj);
+
     }
 
     if (errorHistWind != null)
       model.addErrorListener(errorHistWind);
+
   }
 
 
