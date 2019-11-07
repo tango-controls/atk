@@ -86,40 +86,44 @@ public class BooleanScalar extends AAttribute
 
   public void refresh()
   {
-      DeviceAttribute           att = null;
-      
-      
+      DeviceAttribute att = null;
+
 //      if (skippingRefresh) return;
       refreshCount++;
       try
       {
-	  try 
-	  {
-	      // Read the attribute from device cache (readValueFromNetwork)
-	      att = readValueFromNetwork();
-	      if (att == null) return;
-	      
-	      // Retreive the read value for the attribute
-	      booleanValue = att.extractBoolean();
-	      
-	      // Retreive the set point for the attribute
-	      setPointValue = booleanHelper.getBooleanScalarSetPoint(att);
+          try
+          {
+              // Read the attribute from device cache (readValueFromNetwork)
+              att = readValueFromNetwork();
+              if (att == null) return;
 
-	      // Fire valueChanged
-	      fireValueChanged(booleanValue);
-	  }
-	  catch (DevFailed e)
-	  {
-	      // Fire error event
-	      readAttError(e.getMessage(), new AttributeReadException(e));
-	  }
+              // Retreive the read value for the attribute
+              booleanValue = att.extractBoolean();
+
+              // Retreive the set point for the attribute
+              setPointValue = booleanHelper.getBooleanScalarSetPoint(att);
+
+              // Fire valueChanged
+              fireValueChanged(booleanValue);
+          }
+          catch (DevFailed e)
+          {
+              // Fire error event
+              readAttError(e.getMessage(), new AttributeReadException(e));
+          }
+          catch (java.lang.Error err)
+          {
+              // Fire error event
+              readAttError(err.getMessage(), new AttributeReadException(err));
+          }
       }
-      catch (Exception e)
+      catch (Throwable th)
       {
-	  // Code failure
-	  System.out.println("BooleanScalar.refresh() Exception caught ------------------------------");
-	  e.printStackTrace();
-	  System.out.println("BooleanScalar.refresh()------------------------------------------------");
+         // Code failure
+          System.out.println("BooleanScalar.refresh() Throwable caught ------------------------------");
+          th.printStackTrace();
+          System.out.println("BooleanScalar.refresh()------------------------------------------------");
       }
   }
   

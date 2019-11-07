@@ -33,6 +33,11 @@ public class AttributeReadException extends ATKException {
 	super(e);
     }
 
+    public AttributeReadException(java.lang.Error  err)
+    {
+	super(err);
+    }
+
     public AttributeReadException(String s) {
 	super(s);
     }

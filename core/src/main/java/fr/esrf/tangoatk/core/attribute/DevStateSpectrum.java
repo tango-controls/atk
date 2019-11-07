@@ -132,8 +132,8 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
               dsSpectrumSetPointValue = dsSpectrumHelper.getStateSpectrumSetPoint(att);
 
               // Fire valueChanged
+              trace(DeviceFactory.TRACE_REFRESHER, "DevStateSpectrum.refresh(" + getName() + ") fireValueChanged(dsSpectrumValue) success", t0);
               fireValueChanged(dsSpectrumValue);
-              trace(DeviceFactory.TRACE_REFRESHER, "DevStateSpectrum.refresh(" + getName() + ") fireValueChanged(devStateValue) success", t0);
           }
           catch (DevFailed e)
           {
@@ -141,13 +141,19 @@ public class DevStateSpectrum extends AAttribute implements IDevStateSpectrum
               // Fire error event
               readAttError(e.getMessage(), new AttributeReadException(e));
           }
+          catch (java.lang.Error err)
+          {
+              trace(DeviceFactory.TRACE_REFRESHER, "DevStateSpectrum.refresh(" + getName() + ") failed, caught java.lang.Error; will call readAttError", t0);
+              // Fire error event
+              readAttError(err.getMessage(), new AttributeReadException(err));              
+          }
       }
-      catch (Exception e)
+      catch (Throwable th)
       {
           // Code failure
-          trace(DeviceFactory.TRACE_REFRESHER, "DevStateSpectrum.refresh(" + getName() + ") Code failure, caught other Exception", t0);
-          System.out.println("DevStateSpectrum.refresh() Exception caught ------------------------------");
-          e.printStackTrace();
+          trace(DeviceFactory.TRACE_REFRESHER, "DevStateSpectrum.refresh(" + getName() + ") Code failure, caught other Throwable", t0);
+          System.out.println("DevStateSpectrum.refresh() Throwable caught ------------------------------");
+          th.printStackTrace();
           System.out.println("DevStateSpectrum.refresh()------------------------------------------------");
       }
     }

@@ -137,46 +137,59 @@ public class NumberScalar extends ANumber
 
   public void refresh()
   {
-      DeviceAttribute       att = null;
-      long                  t0 = System.currentTimeMillis();
+      DeviceAttribute att = null;
+      long t0 = System.currentTimeMillis();
 
 //      if (skippingRefresh) return;
       refreshCount++;
       trace(DeviceFactory.TRACE_REFRESHER, "NumberScalar.refresh() method called for " + getName(), t0);
       try
       {
-	  try
-	  {
-	      // Read the attribute from device cache (readValueFromNetwork)
-	      att = readValueFromNetwork();
-	      if (att == null) return;
-	            
-	      // Retreive the read value for the attribute
-	      scalarValue = getNumberScalarHelper().getNumberScalarDisplayValue(att);
-	      setPointValue = getNumberScalarHelper().getNumberScalarDisplaySetPoint(att);
+          try
+          {
+              // Read the attribute from device cache (readValueFromNetwork)
+              att = readValueFromNetwork();
+              if (att == null) return;
+              trace(DeviceFactory.TRACE_REFRESHER, "NumberScalar.refresh(" + getName() + ") readValueFromNetwork success", t0);
+              
+              // Retreive the read value for the attribute
+              scalarValue = getNumberScalarHelper().getNumberScalarDisplayValue(att);
+              setPointValue = getNumberScalarHelper().getNumberScalarDisplaySetPoint(att);
 
-	      // Fire valueChanged
-	      getNumberScalarHelper().fireScalarValueChanged(scalarValue, timeStamp);
-	  }
-	  catch (DevFailed e)
-	  {
-	      // Tango error
-	      scalarValue = Double.NaN;
-	      setPointValue = Double.NaN;
+              // Fire valueChanged
+              trace(DeviceFactory.TRACE_REFRESHER, "NumberScalar.refresh(" + getName() + ") fireValueChanged(scalarValue) success", t0);
+              getNumberScalarHelper().fireScalarValueChanged(scalarValue, timeStamp);
+          }
+          catch (DevFailed e)
+          {
+              // Tango error
+              scalarValue = Double.NaN;
+              setPointValue = Double.NaN;
 
-	      // Fire error event
-	      readAttError(e.getMessage(), new AttributeReadException(e));
-	  }
+              trace(DeviceFactory.TRACE_REFRESHER, "NumberScalar.refresh(" + getName() + ") failed, caught DevFailed; will call readAttError", t0);
+              // Fire error event
+              readAttError(e.getMessage(), new AttributeReadException(e));
+          }
+          catch (java.lang.Error err)
+          {
+              scalarValue = Double.NaN;
+              setPointValue = Double.NaN;
+
+              // Fire error event
+              trace(DeviceFactory.TRACE_REFRESHER, "NumberScalar.refresh(" + getName() + ") failed, caught java.lang.Error; will call readAttError", t0);
+              readAttError(err.getMessage(), new AttributeReadException(err));
+          }
       }
-      catch (Exception e)
+      catch (Throwable th)
       {
-	  // Code failure
-	  scalarValue = Double.NaN;
-	  setPointValue = Double.NaN;
-
-	  System.out.println("NumberScalar.refresh() Exception caught ------------------------------");
-	  e.printStackTrace();
-	  System.out.println("NumberScalar.refresh()------------------------------------------------");
+         // Code failure
+          scalarValue = Double.NaN;
+          setPointValue = Double.NaN;
+          
+          trace(DeviceFactory.TRACE_REFRESHER, "NumberScalar.refresh(" + getName() + ") Code failure, caught other Throwable", t0);
+          System.out.println("NumberScalar.refresh() Throwable caught ------------------------------");
+          th.printStackTrace();
+          System.out.println("NumberScalar.refresh()------------------------------------------------");
       } // end of catch
   }
 

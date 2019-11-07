@@ -152,15 +152,15 @@ public class DevStateScalar extends AAttribute
 
   public void refresh()
   {
-      DeviceAttribute           att = null;
-      long                      t0 = System.currentTimeMillis();
-     
-      
-//      if (skippingRefresh) return;
+      DeviceAttribute att = null;
+      long t0 = System.currentTimeMillis();
 
+//      if (skippingRefresh) return;
       if (!isConnected())
+      {
           reconnectAtt();
-      
+      }
+
       if (!isConnected())
       {
           trace(DeviceFactory.TRACE_REFRESHER, "DevStateScalar.refresh(" + getName() + ") failed, device not connected; will call readAttError", t0);
@@ -173,39 +173,44 @@ public class DevStateScalar extends AAttribute
       trace(DeviceFactory.TRACE_REFRESHER, "DevStateScalar.refresh() method called for " + getName(), t0);
       try
       {
-	  try 
-	  {
-	      // Read the attribute from device cache (readValueFromNetwork)
-	      att = readValueFromNetwork();
+          try
+          {
+              // Read the attribute from device cache (readValueFromNetwork)
+              att = readValueFromNetwork();
               trace(DeviceFactory.TRACE_REFRESHER, "DevStateScalar.refresh(" + getName() + ") readValueFromNetwork success", t0);
-	      if (att == null) return;
-	      
-	      // Retreive the read value for the attribute
-        devStateValueRaw = att.extractState();
-	      devStateValue = fr.esrf.tangoatk.core.Device.toString(devStateValueRaw);
-	      
-	      // Retreive the set point for the attribute
-	      setPointValue = devStateHelper.getDevStateScalarSetPoint(att);
+              if (att == null) return;
 
-	      
-	      // Fire valueChanged
-	      fireValueChanged(devStateValue);
+              // Retreive the read value for the attribute
+              devStateValueRaw = att.extractState();
+              devStateValue = fr.esrf.tangoatk.core.Device.toString(devStateValueRaw);
+
+              // Retreive the set point for the attribute
+              setPointValue = devStateHelper.getDevStateScalarSetPoint(att);
+
+              // Fire valueChanged
               trace(DeviceFactory.TRACE_REFRESHER, "DevStateScalar.refresh(" + getName() + ") fireValueChanged(devStateValue) success", t0);
-	  }
-	  catch (DevFailed e)
-	  {
+              fireValueChanged(devStateValue);
+          }
+          catch (DevFailed e)
+          {
               trace(DeviceFactory.TRACE_REFRESHER, "DevStateScalar.refresh(" + getName() + ") failed, caught DevFailed; will call readAttError", t0);
-	      // Fire error event
-	      readAttError(e.getMessage(), new AttributeReadException(e));
-	  }
+              // Fire error event
+              readAttError(e.getMessage(), new AttributeReadException(e));
+          }
+          catch (java.lang.Error err)
+          {
+              trace(DeviceFactory.TRACE_REFRESHER, "DevStateScalar.refresh(" + getName() + ") failed, caught java.lang.Error; will call readAttError", t0);
+              // Fire error event
+              readAttError(err.getMessage(), new AttributeReadException(err));
+          }
       }
-      catch (Exception e)
+      catch (Throwable th)
       {
-	  // Code failure
-          trace(DeviceFactory.TRACE_REFRESHER, "DevStateScalar.refresh(" + getName() + ") Code failure, caught other Exception", t0);
-	  System.out.println("DevStateScalar.refresh() Exception caught ------------------------------");
-	  e.printStackTrace();
-	  System.out.println("DevStateScalar.refresh()------------------------------------------------");
+          // Code failure
+          trace(DeviceFactory.TRACE_REFRESHER, "DevStateScalar.refresh(" + getName() + ") Code failure, caught other Throwable", t0);
+          System.out.println("DevStateScalar.refresh() Throwable caught ------------------------------");
+          th.printStackTrace();
+          System.out.println("DevStateScalar.refresh()------------------------------------------------");
       }
   }
   

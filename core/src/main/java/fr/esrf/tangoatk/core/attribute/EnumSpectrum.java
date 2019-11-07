@@ -154,55 +154,66 @@ public class EnumSpectrum extends AAttribute implements IEnumSpectrum, PropertyC
 
   public void refresh()
   {
-      DeviceAttribute           att = null;
-      long                      t0 = System.currentTimeMillis();
-      
+      DeviceAttribute att = null;
+      long t0 = System.currentTimeMillis();
+
 //      if (skippingRefresh) return;
       refreshCount++;
       trace(DeviceFactory.TRACE_REFRESHER, "EnumSpectrum.refresh() method called for " + getName(), t0);
       try
       {
-	  try 
-	  {
-	      // Read the attribute from device cache (readValueFromNetwork)
-	      att = readValueFromNetwork();
-	      attribute = att;
-	      if (att == null) return;
-	      
-	      // Retreive the read value for the attribute
-	      spectrumValue = enumSpecHelper.getEnumSpectrumValue(att);
-	      
-	      // Retreive the set point for the attribute
-	      spectrumSetPointValue = enumSpecHelper.getEnumSpectrumSetPoint(att);
+          try
+          {
+              // Read the attribute from device cache (readValueFromNetwork)
+              att = readValueFromNetwork();
+              attribute = att;
+              if (att == null) return;
+              trace(DeviceFactory.TRACE_REFRESHER, "EnumSpectrum.refresh(" + getName() + ") readValueFromNetwork success", t0);
 
-	      // Fire valueChanged
-	      enumSpecHelper.fireEnumSpectrumValueChanged(spectrumValue, timeStamp);
-	  }
-	  catch (AttributeReadException attEx)
-	  {
-	      spectrumValue = null;
-	      spectrumSetPointValue = null;
-	      // Fire error event
-	      readAttError("Invalid enum value read.", attEx);
-	  }
-	  catch (DevFailed e)
-	  {
-	      // Tango error
-	      spectrumValue = null;
-	      spectrumSetPointValue = null;
-	      // Fire error event
-	      readAttError(e.getMessage(), new AttributeReadException(e));
-	  }
+              // Retreive the read value for the attribute
+              spectrumValue = enumSpecHelper.getEnumSpectrumValue(att);
+
+              // Retreive the set point for the attribute
+              spectrumSetPointValue = enumSpecHelper.getEnumSpectrumSetPoint(att);
+
+              trace(DeviceFactory.TRACE_REFRESHER, "EnumSpectrum.refresh(" + getName() + ") fireValueChanged(spectrumValue) success", t0);
+              // Fire valueChanged
+              enumSpecHelper.fireEnumSpectrumValueChanged(spectrumValue, timeStamp);
+          }
+          catch (AttributeReadException attEx)
+          {
+              spectrumValue = null;
+              spectrumSetPointValue = null;
+              // Fire error event
+              readAttError("Invalid enum value read.", attEx);
+          }
+          catch (DevFailed e)
+          {
+              // Tango error
+              trace(DeviceFactory.TRACE_REFRESHER, "EnumSpectrum.refresh(" + getName() + ") failed, caught DevFailed; will call readAttError", t0);
+              spectrumValue = null;
+              spectrumSetPointValue = null;
+              // Fire error event
+              readAttError(e.getMessage(), new AttributeReadException(e));
+          }
+          catch (java.lang.Error err)
+          {
+              trace(DeviceFactory.TRACE_REFRESHER, "EnumSpectrum.refresh(" + getName() + ") failed, caught java.lang.Error; will call readAttError", t0);
+              spectrumValue = null;
+              spectrumSetPointValue = null;
+              // Fire error event
+              readAttError(err.getMessage(), new AttributeReadException(err));              
+          }
       }
-      catch (Exception e)
+      catch (Throwable th)
       {
-	  // Code failure
-	  spectrumValue = null;
-	  spectrumSetPointValue = null;
-
-	  System.out.println("EnumSpectrum.refresh() Exception caught ------------------------------");
-	  e.printStackTrace();
-	  System.out.println("EnumSpectrum.refresh()------------------------------------------------");
+          // Code failure
+          spectrumValue = null;
+          spectrumSetPointValue = null;
+          trace(DeviceFactory.TRACE_REFRESHER, "EnumSpectrum.refresh(" + getName() + ") Code failure, caught other Throwable", t0);
+          System.out.println("EnumSpectrum.refresh() Throwable caught ------------------------------");
+          th.printStackTrace();
+          System.out.println("EnumSpectrum.refresh()------------------------------------------------");
       }
   }
   

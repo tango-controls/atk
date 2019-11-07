@@ -66,38 +66,48 @@ public class RawImage extends AAttribute
             new AttributeSetException("RawImage writting not supported"));
   }
 
-  public void refresh() {
-
-    DeviceAttribute att = null;
-
+    public void refresh()
+    {
+        DeviceAttribute att = null;
 //    if (skippingRefresh) return;
+        refreshCount++;
+        try
+        {
+            try
+            {
+                // Read the attribute from device cache (readValueFromNetwork)
+                att = readValueFromNetwork();
+                if (att == null)
+                {
+                    return;
+                }
 
-    refreshCount++;
-    try {
-      try {
-        // Read the attribute from device cache (readValueFromNetwork)
-        att = readValueFromNetwork();
-        if (att == null) return;
+                // Retreive the read value for the attribute
+                imageValue = imageHelper.getRawImageValue(att);
+                encFormat = imageHelper.getRawImageFormat();
 
-        // Retreive the read value for the attribute
-        imageValue = imageHelper.getRawImageValue(att);
-        encFormat = imageHelper.getRawImageFormat();
-
-        // Fire valueChanged
-        fireValueChanged(encFormat,imageValue);
-      }
-      catch (DevFailed e) {
-        // Fire error event
-        readAttError(e.getMessage(), new AttributeReadException(e));
-      }
+                // Fire valueChanged
+                fireValueChanged(encFormat, imageValue);
+            }
+            catch (DevFailed e)
+            {
+                // Fire error event
+                readAttError(e.getMessage(), new AttributeReadException(e));
+            }
+            catch (java.lang.Error err)
+            {
+                // Fire error event
+                readAttError(err.getMessage(), new AttributeReadException(err));
+            }
+        }
+        catch (Throwable th)
+        {
+            // Code failure
+            System.out.println("RawImage.refresh() Throwable caught ------------------------------");
+            th.printStackTrace();
+            System.out.println("RawImage.refresh()------------------------------------------------");
+        }
     }
-    catch (Exception e) {
-      // Code failure
-      System.out.println("RawImage.refresh() Exception caught ------------------------------");
-      e.printStackTrace();
-      System.out.println("RawImage.refresh()------------------------------------------------");
-    }
-  }
 
   public void dispatch(DeviceAttribute attValue) {
 

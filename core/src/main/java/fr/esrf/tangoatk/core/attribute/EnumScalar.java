@@ -342,16 +342,23 @@ public class EnumScalar extends AAttribute implements IEnumScalar, PropertyChang
 	      // Fire error event
 	      readAttError(e.getMessage(), new AttributeReadException(e));
 	  }
+          catch (java.lang.Error err)
+          {
+              trace(DeviceFactory.TRACE_REFRESHER, "EnumScalar.refresh(" + getName() + ") failed, caught java.lang.Error; will call readAttError", t0);
+              // Fire error event
+              readAttError(err.getMessage(), new AttributeReadException(err));              
+          }
       }
-      catch (Exception e)
+      catch (Throwable th)
       {
-	  // Code failure
+          // Code failure
 	  scalarValue = null;
 	  setPointValue = null;
 
-	  System.out.println("EnumScalar.refresh() Exception caught ------------------------------");
-	  e.printStackTrace();
-	  System.out.println("EnumScalar.refresh()------------------------------------------------");
+          trace(DeviceFactory.TRACE_REFRESHER, "EnumScalar.refresh(" + getName() + ") Code failure, caught other Throwable", t0);
+          System.out.println("EnumScalar.refresh() Throwable caught ------------------------------");
+          th.printStackTrace();
+          System.out.println("EnumScalar.refresh()------------------------------------------------");
       }
   }
   

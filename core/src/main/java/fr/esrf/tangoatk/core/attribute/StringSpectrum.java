@@ -83,48 +83,53 @@ public class StringSpectrum extends AAttribute
 
   public void refresh()
   {
-    DeviceAttribute           da = null;
+      DeviceAttribute da = null;
 
 //    if (skippingRefresh) return;
-    refreshCount++;
-    try {
+      refreshCount++;
+      try
+      {
+          try
+          {
+              // Retreive the value from the device
+              // Read the attribute from device cache (readValueFromNetwork)
+              da = readValueFromNetwork();
+              // Retreive the read value for the attribute
+              spectrumValue = stringSpectHelper.getStringSpectrumValue(da);
+              // Retreive the setPoint value for the attribute
+              spectrumSetPointValue = stringSpectHelper.getStringSpectrumSetPoint(da);
 
-      try {
+              // Fire valueChanged
+              fireValueChanged(spectrumValue);
+          }
+          catch (DevFailed e)
+          {
+              // Tango error
+              spectrumValue = null;
+              spectrumSetPointValue = null;
 
-        // Retreive the value from the device
-        // Read the attribute from device cache (readValueFromNetwork)
-	da = readValueFromNetwork();
-        // Retreive the read value for the attribute
-        spectrumValue = stringSpectHelper.getStringSpectrumValue(da);
-        // Retreive the setPoint value for the attribute
-        spectrumSetPointValue = stringSpectHelper.getStringSpectrumSetPoint(da);
+              // Fire error event
+              readAttError(e.getMessage(), new AttributeReadException(e));
+          }
+          catch (java.lang.Error err)
+          {
+              spectrumValue = null;
+              spectrumSetPointValue = null;
 
-        // Fire valueChanged
-        fireValueChanged(spectrumValue);
-
-      } catch (DevFailed e) {
-
-        // Tango error
-        spectrumValue = null;
-        spectrumSetPointValue = null;
-
-        // Fire error event
-        readAttError(e.getMessage(), new AttributeReadException(e));
-
+              // Fire error event
+              readAttError(err.getMessage(), new AttributeReadException(err));
+          }
       }
-
-    } catch (Exception e) {
-
-      // Code failure
-      spectrumValue = null;
-      spectrumSetPointValue = null;
-
-      System.out.println("StringSpectrum.refresh() Exception caught ------------------------------");
-      e.printStackTrace();
-      System.out.println("StringSpectrum.refresh()------------------------------------------------");
-
-    }
-
+      catch (Throwable th)
+      {
+         // Code failure
+          spectrumValue = null;
+          spectrumSetPointValue = null;
+          
+          System.out.println("StringSpectrum.refresh() Throwable caught ------------------------------");
+          th.printStackTrace();
+          System.out.println("StringSpectrum.refresh()------------------------------------------------");
+      }
   }
 
   public void dispatch(DeviceAttribute attValue) {

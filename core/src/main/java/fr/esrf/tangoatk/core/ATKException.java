@@ -103,6 +103,18 @@ public class ATKException extends Exception {
     setStackTrace(e.getStackTrace());
   }
 
+  /*
+   * Constructs an ATK exception from a Java java.lang.Error .
+   */
+  public ATKException(java.lang.Error err)
+  {
+    super(err.getMessage());
+    source=err;
+
+    // Copy the stack trace
+    setStackTrace(err.getStackTrace());
+  }
+
   /**
    * Apply the given Tango DevFailed exception to this exception.
    * @param e Tango exception

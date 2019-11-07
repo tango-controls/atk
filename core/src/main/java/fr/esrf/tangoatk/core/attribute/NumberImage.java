@@ -56,43 +56,47 @@ public class NumberImage extends ANumber implements INumberImage
     insert(NumberAttributeHelper.str2double(s));
   }
 
-  public void refresh() {
-
+    public void refresh()
+    {
 //    if (skippingRefresh) return;
-    refreshCount++;
-    try {
+        refreshCount++;
+        try
+        {
+            try
+            {
+                // Retreive the value from the device
+                // imageValue = numberHelper.getNumberImageValue(readValueFromNetwork());
+                imageValue = getNumberImageHelper().getNumberImageDisplayValue(readValueFromNetwork()); //convert to display unit
 
-      try {
+                // Fire valueChanged
+                getNumberImageHelper().fireImageValueChanged(imageValue, timeStamp);
 
-        // Retreive the value from the device
-        // imageValue = numberHelper.getNumberImageValue(readValueFromNetwork());
-        imageValue = getNumberImageHelper().getNumberImageDisplayValue(readValueFromNetwork()); //convert to display unit
+            }
+            catch (DevFailed e)
+            {
+                // Tango error
+                imageValue = null;
 
-        // Fire valueChanged
-        getNumberImageHelper().fireImageValueChanged(imageValue, timeStamp);
+                // Fire error event
+                readAttError(e.getMessage(), new AttributeReadException(e));
+            }
+            catch (java.lang.Error err)
+            {
+                imageValue = null;
+                // Fire error event
+                readAttError(err.getMessage(), new AttributeReadException(err));
+            }
+        }
+        catch (Throwable th)
+        {
+            // Code failure
+            imageValue = null;
 
-      } catch (DevFailed e) {
-
-        // Tango error
-        imageValue = null;
-
-        // Fire error event
-        readAttError(e.getMessage(), new AttributeReadException(e));
-
-      }
-
-    } catch (Exception e) {
-      
-      // Code failure
-      imageValue = null;
-
-      System.out.println("NumberImage.refresh() Exception caught ------------------------------");
-      e.printStackTrace();
-      System.out.println("NumberImage.refresh()------------------------------------------------");
-
+            System.out.println("NumberImage.refresh() Throwable caught ------------------------------");
+            th.printStackTrace();
+            System.out.println("NumberImage.refresh()------------------------------------------------");
+        }
     }
-
-  }
 
 
   public void addImageListener(IImageListener l) {

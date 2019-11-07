@@ -85,50 +85,58 @@ public class StringScalar extends AAttribute
   }
 
 
-  public void refresh()
-  {
-      DeviceAttribute           att = null;
-      
-      
+    public void refresh()
+    {
+        DeviceAttribute att = null;
 //      if (skippingRefresh) return;
-      refreshCount++;
-      try
-      {
-	  try 
-	  {
-	      // Read the attribute from device cache (readValueFromNetwork)
-	      att = readValueFromNetwork();
-	      if (att == null) return;
-	      
-	      // Retreive the read value for the attribute
-	      stringValue = att.extractString();
-	      
-	      // Retreive the set point for the attribute
-	      setPointValue = stringHelper.getStringScalarSetPoint(att);
+        refreshCount++;
+        try
+        {
+            try
+            {
+                // Read the attribute from device cache (readValueFromNetwork)
+                att = readValueFromNetwork();
+                if (att == null)
+                {
+                    return;
+                }
 
-	      // Fire valueChanged
-	      fireValueChanged(stringValue);
-	  }
-	  catch (DevFailed e)
-	  {
-	      // Tango error
-	      stringValue = null;
-	      setPointValue = null;
-	      // Fire error event
-	      readAttError(e.getMessage(), new AttributeReadException(e));
-	  }
-      }
-      catch (Exception e)
-      {
-	  // Code failure
-	  stringValue = null;
-	  setPointValue = null;
+                // Retreive the read value for the attribute
+                stringValue = att.extractString();
 
-	  System.out.println("StringScalar.refresh() Exception caught ------------------------------");
-	  e.printStackTrace();
-	  System.out.println("StringScalar.refresh()------------------------------------------------");
-      }
-  }
+                // Retreive the set point for the attribute
+                setPointValue = stringHelper.getStringScalarSetPoint(att);
+
+                // Fire valueChanged
+                fireValueChanged(stringValue);
+            }
+            catch (DevFailed e)
+            {
+                // Tango error
+                stringValue = null;
+                setPointValue = null;
+                // Fire error event
+                readAttError(e.getMessage(), new AttributeReadException(e));
+            }
+            catch (java.lang.Error err)
+            {
+                stringValue = null;
+                setPointValue = null;
+                // Fire error event
+                readAttError(err.getMessage(), new AttributeReadException(err));
+            }
+        }
+        catch (Throwable th)
+        {
+            // Code failure
+            stringValue = null;
+            setPointValue = null;
+
+            System.out.println("StringScalar.refresh() Throwable caught ------------------------------");
+            th.printStackTrace();
+            System.out.println("StringScalar.refresh()------------------------------------------------");
+        }
+    }
   
   public void dispatch(DeviceAttribute attValue)
   {

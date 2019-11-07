@@ -100,52 +100,63 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
     getNumberSpectrumHelper().insert(d);
   }
 
-  public void refresh() {
+    public void refresh()
+    {
 
 //    if (skippingRefresh) return;
-    refreshCount++;
-    try {
+        refreshCount++;
+        try
+        {
+            try
+            {
+                // Retreive the value from the device
+                DeviceAttribute da = readValueFromNetwork();
+                spectrumValue = getNumberSpectrumHelper().getNumberSpectrumDisplayValue(da); //convert to display unit
+                spectrumSetPointValue = getNumberSpectrumHelper().getNumberSpectrumDisplaySetPoint(da); //convert to display unit
+                devSpectrumValue = getNumberSpectrumHelper().getNumberSpectrumValue(da);
+                devSpectrumSetPointValue = getNumberSpectrumHelper().getNumberSpectrumSetPoint(da);
+                timeStamp = da.getTimeValMillisSec();
+                // Fire valueChanged
+                getNumberSpectrumHelper().fireSpectrumValueChanged(spectrumValue, timeStamp);
 
-      try {
+            }
+            catch (DevFailed e)
+            {
 
-	// Retreive the value from the device
-        DeviceAttribute     da = readValueFromNetwork();
-	spectrumValue = getNumberSpectrumHelper().getNumberSpectrumDisplayValue(da); //convert to display unit
-	spectrumSetPointValue = getNumberSpectrumHelper().getNumberSpectrumDisplaySetPoint(da); //convert to display unit
-	devSpectrumValue = getNumberSpectrumHelper().getNumberSpectrumValue(da); 
-	devSpectrumSetPointValue = getNumberSpectrumHelper().getNumberSpectrumSetPoint(da);
-        timeStamp = da.getTimeValMillisSec();
-        // Fire valueChanged
-        getNumberSpectrumHelper().fireSpectrumValueChanged(spectrumValue, timeStamp);
+                // Tango error
+                spectrumValue = null;
+                spectrumSetPointValue = null;
+                devSpectrumValue = null;
+                devSpectrumSetPointValue = null;
 
-      } catch (DevFailed e) {
+                // Fire error event
+                readAttError(e.getMessage(), new AttributeReadException(e));
 
-        // Tango error
-        spectrumValue = null;
-        spectrumSetPointValue = null;
-        devSpectrumValue = null;
-        devSpectrumSetPointValue = null;
+            }
+            catch (java.lang.Error err)
+            {
+                spectrumValue = null;
+                spectrumSetPointValue = null;
+                devSpectrumValue = null;
+                devSpectrumSetPointValue = null;
 
-        // Fire error event
-        readAttError(e.getMessage(), new AttributeReadException(e));
+                // Fire error event
+                readAttError(err.getMessage(), new AttributeReadException(err));
+            }
+        }
+        catch (Throwable th)
+        {
+            // Code failure
+            spectrumValue = null;
+            spectrumSetPointValue = null;
+            devSpectrumValue = null;
+            devSpectrumSetPointValue = null;
 
-      }
-
-    } catch (Exception e) {
-
-      // Code failure
-      spectrumValue = null;
-      spectrumSetPointValue = null;
-      devSpectrumValue = null;
-      devSpectrumSetPointValue = null;
-
-      System.out.println("NumberSpectrum.refresh() Exception caught ------------------------------");
-      e.printStackTrace();
-      System.out.println("NumberSpectrum.refresh()------------------------------------------------");
-
+            System.out.println("NumberSpectrum.refresh() Throwable caught ------------------------------");
+            th.printStackTrace();
+            System.out.println("NumberSpectrum.refresh()------------------------------------------------");
+        }
     }
-
-  }
 
   public void dispatch(DeviceAttribute attValue) {
 
