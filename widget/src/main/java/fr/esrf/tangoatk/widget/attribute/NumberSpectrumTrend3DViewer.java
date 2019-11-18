@@ -50,11 +50,35 @@ class TrendData {
   double   time;
 }
 
+class ZoomInfo {
+  String text;
+  int ratio; // Negative ration means 1/-ratio
+  ZoomInfo(String txt,int r) {
+    text = txt;
+    ratio = r;
+  }
+};
+
 /**
  * A class to monitor a spectrum as a function of time using colormap for intensity.
  */
 public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrumListener, ActionListener, MouseListener,
     J3DTrendListener, IJLChartListener, AdjustmentListener {
+
+
+  /**
+   * Possible zoom values.
+   */
+  public static final ZoomInfo[] zoomInfos = new ZoomInfo[] {
+      new ZoomInfo("10%",-10),
+      new ZoomInfo("25%",-4),
+      new ZoomInfo("50%",-2),
+      new ZoomInfo("100%",1),
+      new ZoomInfo("200%",2),
+      new ZoomInfo("400%",4),
+      new ZoomInfo("800%",8),
+      new ZoomInfo("1600%",16)
+  };
 
   static final java.util.GregorianCalendar calendar = new java.util.GregorianCalendar();
   static final java.text.SimpleDateFormat genFormat = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -94,6 +118,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   private EventListenerList listenerList=new EventListenerList();
   private int lastHScrollPos = 0;
   private int lastVScrollPos = 0;
+  private String[] zoomText;
 
   // Contextual menu
   private boolean           showingMenu;
@@ -102,10 +127,8 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   protected JMenuItem       settingsMenuItem;
   protected JMenuItem       hProfileMenuItem;
   protected JMenuItem       vProfileMenuItem;
-  protected JMenuItem       hZoomInMenuItem;
-  protected JMenuItem       hZoomOutMenuItem;
-  protected JMenuItem       vZoomInMenuItem;
-  protected JMenuItem       vZoomOutMenuItem;
+  protected JMenu           hZoomMenu;
+  protected JMenu           vZoomMenu;
 
   // Settings panel
   protected JFrame        settingsFrame = null;
@@ -178,18 +201,23 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
     showingMenu = true;
     popupMenu = new JPopupMenu();
 
-    hZoomInMenuItem = new JMenuItem("Horz. ZoomIn");
-    hZoomInMenuItem.addActionListener(this);
-    popupMenu.add(hZoomInMenuItem);
-    hZoomOutMenuItem = new JMenuItem("Horz. ZoomOut");
-    hZoomOutMenuItem.addActionListener(this);
-    popupMenu.add(hZoomOutMenuItem);
-    vZoomInMenuItem = new JMenuItem("Vert. ZoomIn");
-    vZoomInMenuItem.addActionListener(this);
-    popupMenu.add(vZoomInMenuItem);
-    vZoomOutMenuItem = new JMenuItem("Vert. ZoomOut");
-    vZoomOutMenuItem.addActionListener(this);
-    popupMenu.add(vZoomOutMenuItem);
+    hZoomMenu = new JMenu("Horz. Zoom");
+    popupMenu.add(hZoomMenu);
+    for(int i=0;i<zoomInfos.length;i++) {
+      JCheckBoxMenuItem m = new JCheckBoxMenuItem(zoomInfos[i].text);
+      m.addActionListener(this);
+      hZoomMenu.add(m);
+    }
+
+    vZoomMenu = new JMenu("Vert. Zoom");
+    for(int i=0;i<zoomInfos.length;i++) {
+      JCheckBoxMenuItem m = new JCheckBoxMenuItem(zoomInfos[i].text);
+      m.addActionListener(this);
+      vZoomMenu.add(m);
+    }
+
+    popupMenu.add(vZoomMenu);
+    popupMenu.add(vZoomMenu);
     popupMenu.add(new JSeparator());
     hProfileMenuItem = new JMenuItem("Horz. profile");
     hProfileMenuItem.addActionListener(this);
@@ -535,26 +563,13 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
   /**
    * Sets the horizontal zoom factor
-   * -10 = 10%
-   * -9 = 11%
-   * -8 = 12%
-   * -7 = 14%
-   * -6 = 16%
-   * -5 = 20%
-   * -4 = 25%
-   * -3 = 33%
-   * -2 = 50%
-   * -1 = 100%
-   *  0 = Not allowed
-   *  1 = 100%
-   *  2 = 200%
-   *  ...
-   *  8 = 800%
-   * @param zoom zoom factor (between -4 and 8)
+   * See ZoomInfo for accepted zoom.
+   * @param zoom zoom factor
    */
   public void setHorizontalZoom(int zoom) {
     synchronized (this) {
       zoomScroll=0;
+      setZoomCombo(hZoomCombo,zoom);
       hZoom=zoom;
     }
   }
@@ -568,25 +583,12 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
   /**
    * Sets the vertical zoom factor
-   * -10 = 10%
-   * -9 = 11%
-   * -8 = 12%
-   * -7 = 14%
-   * -6 = 16%
-   * -5 = 20%
-   * -4 = 25%
-   * -3 = 33%
-   * -2 = 50%
-   * -1 = 100%
-   *  0 = Not allowed
-   *  1 = 100%
-   *  2 = 200%
-   *  ...
-   *  8 = 800%
-   * @param zoom zoom factor (between -4 and 8)
+   * See ZoomInfo for accepted zoom.
+   * @param zoom zoom factor
    */
   public void setVerticalZoom(int zoom) {
     synchronized (this) {
+      setZoomCombo(vZoomCombo,zoom);
       vZoom=zoom;
     }
   }
@@ -1209,20 +1211,18 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       showVerticalProfile();
     } else if ( src==hProfileMenuItem ) {
       showHorizontalProfile();
-    } else if ( src==hZoomInMenuItem ) {
-      applyHorizontalZoomIn();
-    } else if ( src==hZoomOutMenuItem ) {
-      applyHorizontalZoomOut();
-    } else if ( src==vZoomInMenuItem ) {
-      applyVerticalZoomIn();
-    } else if ( src==vZoomOutMenuItem ) {
-      applyVerticalZoomOut();
     } else if ( src==logScaleCheck ) {
       applyLogScale();
     } else if ( src==derivativeCheck ) {
       applyDerivative();
     } else if ( src==formatText ) {
       applyFormat();
+    } else {
+      // Zoom menu
+      int hIdx = foundZoomMenu(hZoomMenu,src);
+      if(hIdx>=0) applyHorizontalZoom(hIdx);
+      int vIdx = foundZoomMenu(vZoomMenu,src);
+      if(vIdx>=0) applyVerticalZoom(vIdx);
     }
     
   }
@@ -1273,10 +1273,8 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       if (showingMenu && e.getSource()==trend) {
         hProfileMenuItem.setEnabled(trend.isCursorInside());
         vProfileMenuItem.setEnabled(trend.isCursorInside());
-        hZoomInMenuItem.setEnabled(hZoom<8);
-        hZoomOutMenuItem.setEnabled(hZoom>-10);
-        vZoomInMenuItem.setEnabled(vZoom<8);
-        vZoomOutMenuItem.setEnabled(vZoom>-10);
+        setZoomMenu(hZoomMenu, hZoom);
+        setZoomMenu(vZoomMenu,vZoom);
         popupMenu.show(trend, e.getX() , e.getY());
       }
     }
@@ -1563,60 +1561,51 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
   }
 
+  private int getZoomIndex(int zoom) {
+
+    boolean found = false;
+    int i = 0;
+    while(!found && i<zoomInfos.length) {
+      found = zoomInfos[i].ratio == zoom;
+      if(!found) i++;
+    }
+
+    if(found) {
+      return i;
+    } else {
+      throw new IllegalStateException("Unexpected zoom ratio: " + Integer.toHexString(zoom));
+    }
+
+  }
+
   private void setZoomCombo(JComboBox combo,int zoom) {
 
-    switch(zoom) {
-      case -10: // 10%
-        combo.setSelectedIndex(0);
-        break;
-      case -9: // 11%
-        combo.setSelectedIndex(1);
-        break;
-      case -8: // 12%
-        combo.setSelectedIndex(2);
-        break;
-      case -7: // 14%
-        combo.setSelectedIndex(3);
-        break;
-      case -6: // 16%
-        combo.setSelectedIndex(4);
-        break;
-      case -5: // 25%
-        combo.setSelectedIndex(5);
-        break;
-      case -4: // 25%
-        combo.setSelectedIndex(6);
-        break;
-      case -3: // 33%
-        combo.setSelectedIndex(7);
-        break;
-      case -2: // 50%
-        combo.setSelectedIndex(8);
-        break;
-      case 1:  // 100%
-        combo.setSelectedIndex(9);
-        break;
-      case 2:  // 200%
-        combo.setSelectedIndex(10);
-        break;
-      case 3:  // 300%
-        combo.setSelectedIndex(11);
-        break;
-      case 4:  // 400%
-        combo.setSelectedIndex(12);
-        break;
-      case 5:  // 500%
-        combo.setSelectedIndex(13);
-        break;
-      case 6:  // 600%
-        combo.setSelectedIndex(14);
-        break;
-      case 7:  // 700%
-        combo.setSelectedIndex(15);
-        break;
-      case 8:  // 800%
-        combo.setSelectedIndex(16);
-        break;
+    combo.setSelectedIndex(getZoomIndex(zoom));
+
+  }
+
+  private int foundZoomMenu(JMenu menu,Object src) {
+
+    boolean found = false;
+    int i = 0;
+    while(!found && i<menu.getMenuComponentCount()) {
+      found = menu.getMenuComponent(i).equals( src );
+      if(!found) i++;
+    }
+
+    if(found)
+      return i;
+    else
+      return -1;
+
+  }
+
+  private void setZoomMenu(JMenu menu,int zoom) {
+
+    int idx = getZoomIndex(zoom);
+    for(int i=0;i<menu.getMenuComponentCount();i++) {
+      JCheckBoxMenuItem m = (JCheckBoxMenuItem)menu.getMenuComponent(i);
+      m.setSelected(idx==i);
     }
 
   }
@@ -1624,44 +1613,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   private int getZoomCombo(JComboBox combo) {
 
     int s = combo.getSelectedIndex();
-    switch(s) {
-      case 0:
-        return -10;
-      case 1:
-        return -9;
-      case 2:
-        return -8;
-      case 3:
-        return -7;
-      case 4:
-        return -6;
-      case 5:
-        return -5;
-      case 6:
-        return -4;
-      case 7:
-        return -3;
-      case 8:
-        return -2;
-      case 9:
-        return 1;
-      case 10:
-        return 2;
-      case 11:
-        return 3;
-      case 12:
-        return 4;
-      case 13:
-        return 5;
-      case 14:
-        return 6;
-      case 15:
-        return 7;
-      case 16:
-        return 8;
-    }
-
-    return 1;
+    return zoomInfos[s].ratio;
 
   }
 
@@ -1820,8 +1772,9 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   }
 
   private void applyHorizontalZoom() {
-    setHorizontalZoom(getZoomCombo(hZoomCombo));
     synchronized (this) {
+      hZoom = getZoomCombo(hZoomCombo);
+      zoomScroll=0;
       buildImage();
     }
     repaint();
@@ -1829,66 +1782,33 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
   }
 
   private void applyVerticalZoom() {
-    setVerticalZoom(getZoomCombo(vZoomCombo));
     synchronized (this) {
+      vZoom =  getZoomCombo(vZoomCombo);
       buildImage();
     }
     repaint();
     fireZoomChange();
   }
 
-  private void applyHorizontalZoomIn() {
-    if(hZoom<8) {
-      synchronized (this) {
-        hZoom++;
-        if(hZoom==-1) hZoom=1;
-        if(hZoomCombo!=null) setZoomCombo(hZoomCombo,hZoom);
-        zoomScroll=0;
-        buildImage();
-      }
-      repaint();
-      fireZoomChange();
+  private void applyHorizontalZoom(int zIdx) {
+    synchronized (this) {
+      hZoom = zoomInfos[zIdx].ratio;
+      if(hZoomCombo!=null) setZoomCombo(hZoomCombo,hZoom);
+      zoomScroll=0;
+      buildImage();
     }
+    repaint();
+    fireZoomChange();
   }
 
-  private void applyHorizontalZoomOut() {
-    if(hZoom>-10) {
-      synchronized (this) {
-        hZoom--;
-        if(hZoom==0) hZoom=-2;
-        if(hZoomCombo!=null) setZoomCombo(hZoomCombo,hZoom);
-        zoomScroll=0;
-        buildImage();
-      }
-      repaint();
-      fireZoomChange();
+  private void applyVerticalZoom(int zIdx) {
+    synchronized (this) {
+      hZoom = zoomInfos[zIdx].ratio;
+      if(vZoomCombo!=null) setZoomCombo(vZoomCombo,vZoom);
+      buildImage();
     }
-  }
-
-  private void applyVerticalZoomIn() {
-    if(vZoom<8) {
-      synchronized (this) {
-        vZoom++;
-        if(vZoom==-1) vZoom=1;
-        if(vZoomCombo!=null) setZoomCombo(vZoomCombo,vZoom);
-        buildImage();
-      }
-      repaint();
-      fireZoomChange();
-    }
-  }
-
-  private void applyVerticalZoomOut() {
-    if(vZoom>-10) {
-      synchronized (this) {
-        vZoom--;
-        if(vZoom==0) vZoom=-2;
-        if(vZoomCombo!=null) setZoomCombo(vZoomCombo,vZoom-1);
-        buildImage();
-      }
-      repaint();
-      fireZoomChange();
-    }
+    repaint();
+    fireZoomChange();
   }
 
   private void showGradientEditor() {
@@ -2013,40 +1933,8 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
       hZoomCombo = new JComboBox();
       hZoomCombo.setFont(ATKConstant.labelFont);
-      /*
-      * -10 = 10%
-      * -9 = 11%
-      * -8 = 12%
-      * -7 = 14%
-      * -6 = 16%
-      * -5 = 20%
-      * -4 = 25%
-      * -3 = 33%
-      * -2 = 50%
-      * -1 = 100%
-      *  0 = Not allowed
-      *  1 = 100%
-      *  2 = 200%
-      *  ...
-      *  8 = 800%
-      */
-      hZoomCombo.addItem("10%");
-      hZoomCombo.addItem("11%");
-      hZoomCombo.addItem("12%");
-      hZoomCombo.addItem("14%");
-      hZoomCombo.addItem("16%");
-      hZoomCombo.addItem("20%");
-      hZoomCombo.addItem("25%");
-      hZoomCombo.addItem("33%");
-      hZoomCombo.addItem("50%");
-      hZoomCombo.addItem("100%");
-      hZoomCombo.addItem("200%");
-      hZoomCombo.addItem("300%");
-      hZoomCombo.addItem("400%");
-      hZoomCombo.addItem("500%");
-      hZoomCombo.addItem("600%");
-      hZoomCombo.addItem("700%");
-      hZoomCombo.addItem("800%");
+      for(int i=0;i<zoomInfos.length;i++)
+        hZoomCombo.addItem(zoomInfos[i].text);
       hZoomCombo.setBounds(80, 160, 60, 22);
       hZoomCombo.addActionListener(this);
       settingsPanel.add(hZoomCombo);
@@ -2058,23 +1946,8 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
       vZoomCombo = new JComboBox();
       vZoomCombo.setFont(ATKConstant.labelFont);
-      vZoomCombo.addItem("10%");
-      vZoomCombo.addItem("11%");
-      vZoomCombo.addItem("12%");
-      vZoomCombo.addItem("14%");
-      vZoomCombo.addItem("16%");
-      vZoomCombo.addItem("20%");
-      vZoomCombo.addItem("25%");
-      vZoomCombo.addItem("33%");
-      vZoomCombo.addItem("50%");
-      vZoomCombo.addItem("100%");
-      vZoomCombo.addItem("200%");
-      vZoomCombo.addItem("300%");
-      vZoomCombo.addItem("400%");
-      vZoomCombo.addItem("500%");
-      vZoomCombo.addItem("600%");
-      vZoomCombo.addItem("700%");
-      vZoomCombo.addItem("800%");
+      for(int i=0;i<zoomInfos.length;i++)
+        vZoomCombo.addItem(zoomInfos[i].text);
       vZoomCombo.setBounds(225, 160, 60, 22);
       vZoomCombo.addActionListener(this);
       settingsPanel.add(vZoomCombo);
