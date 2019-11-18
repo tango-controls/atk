@@ -1803,7 +1803,7 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
   private void applyVerticalZoom(int zIdx) {
     synchronized (this) {
-      hZoom = zoomInfos[zIdx].ratio;
+      vZoom = zoomInfos[zIdx].ratio;
       if(vZoomCombo!=null) setZoomCombo(vZoomCombo,vZoom);
       buildImage();
     }
