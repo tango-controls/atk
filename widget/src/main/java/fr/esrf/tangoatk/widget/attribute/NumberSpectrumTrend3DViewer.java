@@ -1582,7 +1582,8 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
 
   private void setZoomCombo(JComboBox combo,int zoom) {
 
-    combo.setSelectedIndex(getZoomIndex(zoom));
+    int zIdx = getZoomIndex(zoom);
+    if(combo!=null) combo.setSelectedIndex(zIdx);
 
   }
 
