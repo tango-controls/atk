@@ -75,7 +75,9 @@ public class NumberSpectrumTrend3DViewer extends JComponent implements ISpectrum
       new ZoomInfo("50%",-2),
       new ZoomInfo("100%",1),
       new ZoomInfo("200%",2),
+      new ZoomInfo("300%",3),
       new ZoomInfo("400%",4),
+      new ZoomInfo("500%",5),
       new ZoomInfo("800%",8),
       new ZoomInfo("1600%",16)
   };
