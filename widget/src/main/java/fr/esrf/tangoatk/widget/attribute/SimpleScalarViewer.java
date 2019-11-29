@@ -24,8 +24,16 @@ package fr.esrf.tangoatk.widget.attribute;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.IOException;
 
 import fr.esrf.tangoatk.widget.util.*;
 import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
@@ -46,7 +54,9 @@ import fr.esrf.TangoDs.AttrManip;
  */
 
 public class SimpleScalarViewer extends JAutoScrolledText
-       implements IEnumScalarListener, INumberScalarListener, IStringScalarListener, IBooleanScalarListener, PropertyChangeListener, IErrorListener, JDrawable {
+       implements IEnumScalarListener, INumberScalarListener, IStringScalarListener, IBooleanScalarListener, PropertyChangeListener, IErrorListener, JDrawable, MouseListener {
+
+  private final static Insets noInsets = new Insets(0,0,0,0);
 
   INumberScalar numberModel = null;
   IStringScalar stringModel = null;
@@ -60,6 +70,7 @@ public class SimpleScalarViewer extends JAutoScrolledText
   String error = "-----";
   boolean unitVisible = true;
   Color backgroundColor;
+  JPopupMenu popupMenu;
   
   private boolean          hasToolTip=false;
   private boolean          qualityInTooltip=false;
@@ -73,7 +84,24 @@ public class SimpleScalarViewer extends JAutoScrolledText
   public SimpleScalarViewer() {
     backgroundColor = ATKConstant.getColor4Quality(IAttribute.VALID);
     setOpaque(true);
-    setMargin( new Insets(0,0,0,0) ); // text will have the maximum available space
+
+    // Copy menu
+    popupMenu = new JPopupMenu();
+    JMenuItem copyMenuItem = new JMenuItem("Copy");
+    popupMenu.add(copyMenuItem);
+    copyMenuItem.addActionListener(
+        new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            java.awt.datatransfer.Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            StringSelection stringSelection = new StringSelection( getText() );
+            clipboard.setContents( stringSelection, null );
+          }
+        }
+    );
+    addMouseListener(this);
+
+    setMargin( noInsets ); // text will have the maximum available space
   }
 
   /** @return the current background color of this viewer. Color used for the VALID attribute quality state */
@@ -751,4 +779,25 @@ public class SimpleScalarViewer extends JAutoScrolledText
 
   } // end of main ()
 
+  @Override
+  public void mouseClicked(MouseEvent e) {
+  }
+
+  @Override
+  public void mousePressed(MouseEvent e) {
+    if(e.getButton()==MouseEvent.BUTTON3)
+      popupMenu.show(this, e.getX() , e.getY());
+  }
+
+  @Override
+  public void mouseReleased(MouseEvent e) {
+  }
+
+  @Override
+  public void mouseEntered(MouseEvent e) {
+  }
+
+  @Override
+  public void mouseExited(MouseEvent e) {
+  }
 }
