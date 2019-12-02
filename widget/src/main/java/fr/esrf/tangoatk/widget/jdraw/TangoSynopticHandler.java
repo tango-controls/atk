@@ -693,6 +693,17 @@ public class TangoSynopticHandler extends JDrawEditor
 
          }
 
+       } else if (jdObj instanceof JDSwingObject && ((JDSwingObject) jdObj).getComponent() instanceof Trend) {
+
+         // Special case for Trend
+         // Trend has its own AttributePolledList
+         Trend t =  (Trend)((JDSwingObject) jdObj).getComponent();
+         String config = jdObj.getExtendedParam("trendSettings");
+         if(!config.endsWith("\n")) config = config + "\n";
+         String err = t.setSetting(config);
+         if(err.length()>0)
+           System.out.println("Trend Error: " + err);
+
        } else {
 
          if (isDevice(s)) {

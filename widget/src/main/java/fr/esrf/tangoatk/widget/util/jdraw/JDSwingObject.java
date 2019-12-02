@@ -639,7 +639,8 @@ public class JDSwingObject extends JDRectangular implements MouseListener {
 
     } catch (Exception e) {
 
-      System.out.println("JDraw.constructComponent() : " + e.getClass() + " while trying to construct " + className);
+      System.out.println("JDSwingObject.constructComponent() : " + e.getClass() + " while trying to construct " + className);
+      e.printStackTrace();
       swingComp = null;
 
     }

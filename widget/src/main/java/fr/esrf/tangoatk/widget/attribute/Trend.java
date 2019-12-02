@@ -47,6 +47,7 @@ import fr.esrf.TangoDs.TangoConst;
 import fr.esrf.tangoatk.core.*;
 import fr.esrf.tangoatk.widget.util.*;
 import fr.esrf.tangoatk.widget.util.chart.*;
+import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
 
 /**
  *
@@ -54,7 +55,7 @@ import fr.esrf.tangoatk.widget.util.chart.*;
  */
 
 /** A class to monitor multiple scalar attributes. */
-public class Trend extends JPanel implements IControlee, ActionListener, IJLChartActionListener, IRefresherListener, IListStateListener, IJLChartListener {
+public class Trend extends JPanel implements IControlee, ActionListener, IJLChartActionListener, IRefresherListener, IListStateListener, IJLChartListener,JDrawable {
 
   // Constant
 
@@ -1324,6 +1325,10 @@ public void setTimePrecision(int timePrecision) {
     * @see #setSetting
     */
   public String getSettings() {
+    return getSettings(false);
+  }
+
+  public String getSettings(boolean forJDraw) {
 
     int i;
     String to_write = "";
@@ -1333,9 +1338,11 @@ public void setTimePrecision(int timePrecision) {
     to_write += "toolbar_visible:" + isButtonBarVisible() + "\n";
     to_write += "tree_visible:" + isSelectionTreeVisible() + "\n";
     to_write += "date_visible:" + isDateVisible() + "\n";
-    if (graphTitle.length()>0) to_write += "frame_title:'" + graphTitle + "'\n";
-    to_write += "window_pos:" + getLocationOnScreen().x + "," + getLocationOnScreen().y + "\n";
-    to_write += "window_size:" + getSize().width + "," + getSize().height + "\n";
+    if(!forJDraw) {
+      if (graphTitle.length()>0) to_write += "frame_title:'" + graphTitle + "'\n";
+      to_write += "window_pos:" + getLocationOnScreen().x + "," + getLocationOnScreen().y + "\n";
+      to_write += "window_size:" + getSize().width + "," + getSize().height + "\n";
+    }
     to_write += "show_device_name:" + isShowingDeviceNames() + "\n";
 
     if (attList != null) {
@@ -1350,6 +1357,17 @@ public void setTimePrecision(int timePrecision) {
     to_write += theGraph.getY2Axis().getConfiguration("y2");
 
     // dataViews
+
+    if(forJDraw) {
+      to_write += "dv_number:" + dvs.size() + "\n";
+      for (i = 0; i < dvs.size(); i++) {
+        to_write += "dv" + i + "_name:\'" + dvs.get(i).attName + "\'\n";
+        to_write += "dv" + i + "_selected:" + dvs.get(i).axis + "\n";
+        to_write += dvs.get(i).dv.getConfiguration("dv" + i);
+      }
+      return to_write;
+    }
+
     if (rootNode == null) return to_write;
 
     Vector dv = rootNode.getSelectableItems();
@@ -1371,7 +1389,10 @@ public void setTimePrecision(int timePrecision) {
     return to_write;
   }
 
-  private String applySettings(CfFileReader f) {
+
+
+
+  private String applySettings(CfFileReader f,boolean forJdraw) {
 
     String errBuff = "";
     Vector p;
@@ -1388,28 +1409,30 @@ public void setTimePrecision(int timePrecision) {
 
     //Create a new Attribute List
     AttributePolledList alist = new AttributePolledList();
-    alist.setFilter(new IEntityFilter() {
-      public boolean keep(IEntity entity) {
-        if (entity instanceof INumberScalar) {
-          return true;
+    if (!forJdraw) {
+      alist.setFilter(new IEntityFilter() {
+        public boolean keep(IEntity entity) {
+          if (entity instanceof INumberScalar) {
+            return true;
+          }
+          if (entity instanceof IEnumScalar) {
+            return true;
+          }
+          if (entity instanceof IBooleanScalar) {
+            return true;
+          }
+          if (entity instanceof IDevStateScalar) {
+            return true;
+          }
+          if (entity instanceof INumberSpectrum) {
+            return true;
+          }
+          System.out.println(entity.getName() + " not imported (only NumberScalar, EnumScalar, BooleanScalar or NumberSpectrum!)");
+          return false;
         }
-        if (entity instanceof IEnumScalar) {
-          return true;
-        }
-        if (entity instanceof IBooleanScalar) {
-          return true;
-        }
-        if (entity instanceof IDevStateScalar) {
-          return true;
-        }
-        if (entity instanceof INumberSpectrum) {
-          return true;
-        }
-        System.out.println(entity.getName() + " not imported (only NumberScalar, EnumScalar, BooleanScalar or NumberSpectrum!)");
-        return false;
-      }
-    });
-    alist.addErrorListener(errWin);
+      });
+      alist.addErrorListener(errWin);
+    }
 
     // Get all dataviews
     p = f.getParam("dv_number");
@@ -1433,43 +1456,48 @@ public void setTimePrecision(int timePrecision) {
           return errBuff;
         }
 
-        try {
+        if (!forJdraw) {
 
-          String attName = p.get(0).toString();
-          int sIdx = getIndex(attName);
-          if(sIdx>=0) attName = getAttName(attName);
-          IEntity entity = alist.get(attName);
+          try {
 
-          if( entity==null ) {
+            String attName = p.get(0).toString();
+            int sIdx = getIndex(attName);
+            if (sIdx >= 0) attName = getAttName(attName);
+            IEntity entity = alist.get(attName);
 
-            alist.add(attName);
-            SpectrumItem it = new SpectrumItem(attName);
-            it.addItem(sIdx);
-            spectrumIDS.add(it);
+            if (entity == null) {
 
-          } else {
+              alist.add(attName);
+              SpectrumItem it = new SpectrumItem(attName);
+              it.addItem(sIdx);
+              spectrumIDS.add(it);
 
-            if( entity instanceof INumberSpectrum ) {
+            } else {
 
-              boolean found = false;
-              int j=0;
-              while(!found && j<spectrumIDS.size()) {
-                found = spectrumIDS.get(j).attName.equalsIgnoreCase(attName);
-                if(!found) j++;
-              }
-              if( !found ) {
-                // should never happen
-                System.out.println("Trend.applySettings() Invalid attribute name " + attName);
-              } else {
-                spectrumIDS.get(j).addItem(sIdx);
+              if (entity instanceof INumberSpectrum) {
+
+                boolean found = false;
+                int j = 0;
+                while (!found && j < spectrumIDS.size()) {
+                  found = spectrumIDS.get(j).attName.equalsIgnoreCase(attName);
+                  if (!found) j++;
+                }
+                if (!found) {
+                  // should never happen
+                  System.out.println("Trend.applySettings() Invalid attribute name " + attName);
+                } else {
+                  spectrumIDS.get(j).addItem(sIdx);
+                }
+
               }
 
             }
 
+
+          } catch (Exception e) {
+            errBuff += (e.getMessage() + "\n");
           }
 
-        } catch (Exception e) {
-          errBuff += (e.getMessage() + "\n");
         }
 
       }
@@ -1485,7 +1513,7 @@ public void setTimePrecision(int timePrecision) {
       //Set the devicePropertyModel
       if (nbDv > 0) {
 
-        if (attList != null) {
+        if (!forJdraw && attList != null) {
           innerPanel.remove(treeView);
           treeView = null;
           mainTree = null;
@@ -1501,8 +1529,10 @@ public void setTimePrecision(int timePrecision) {
         }
         alist.setRefreshInterval(refreshInterval);
 
-        alist.startRefresher();
-        setModel(alist,spectrumIDS);
+        if(!forJdraw) {
+          alist.startRefresher();
+          setModel(alist,spectrumIDS);
+        }
         lastCreatedList = alist;
 
       }
@@ -1524,15 +1554,21 @@ public void setTimePrecision(int timePrecision) {
     if (p != null) setSelectionTreeVisible(OFormat.getBoolean(p.get(0).toString()));
     p = f.getParam("date_visible");
     if (p != null) setDateVisible(OFormat.getBoolean(p.get(0).toString()));
-    p = f.getParam("frame_title");
-    if (p != null) {
-      graphTitle = p.get(0).toString();
-      if(parent!=null) parent.setTitle(graphTitle);
+
+    if (!forJdraw) {
+
+      p = f.getParam("frame_title");
+      if (p != null) {
+        graphTitle = p.get(0).toString();
+        if (parent != null) parent.setTitle(graphTitle);
+      }
+      p = f.getParam("window_pos");
+      if (p != null) framePos = OFormat.getPoint(p);
+      p = f.getParam("window_size");
+      if (p != null) frameDimension = OFormat.getPoint(p);
+
     }
-    p = f.getParam("window_pos");
-    if( p != null ) framePos=OFormat.getPoint(p);
-    p = f.getParam("window_size");
-    if( p != null ) frameDimension=OFormat.getPoint(p);
+
     p = f.getParam("source");
     if( p != null ) {
       listSource = DevSource.from_int( OFormat.getInt(p.get(0).toString()));
@@ -1544,65 +1580,104 @@ public void setTimePrecision(int timePrecision) {
     theGraph.getY1Axis().applyConfiguration("y1", f);
     theGraph.getY2Axis().applyConfiguration("y2", f);
 
-    // Select signal and apply dataView options
-    if (rootNode == null) return errBuff;
-    Vector dv = rootNode.getSelectableItems();
-    TrendSelectionNode n = null;
+    if(!forJdraw) {
 
-    for (i = 0; i < nbDv; i++) {
-      String attName;
-      String pref = "dv" + i;
-      p = f.getParam(pref + "_name");
-      attName = p.get(0).toString();
+      // Select signal and apply dataView options
+      if (rootNode == null) return errBuff;
+      Vector dv = rootNode.getSelectableItems();
+      TrendSelectionNode n = null;
 
-      p = f.getParam(pref + "_selected");
-      if (p != null) {
-        int s = OFormat.getInt(p.get(0).toString());
+      for (i = 0; i < nbDv; i++) {
+        String attName;
+        String pref = "dv" + i;
+        p = f.getParam(pref + "_name");
+        attName = p.get(0).toString();
 
-        // Find to node to select
-        int j = 0;
-        boolean found = false;
-        while (!found && j < dv.size()) {
-          n = (TrendSelectionNode) dv.get(j);
-          found = n.getModelName().equals(attName);
-          if (!found) j++;
-        }
-        if (found) {
+        p = f.getParam(pref + "_selected");
+        if (p != null) {
+          int s = OFormat.getInt(p.get(0).toString());
 
-          if (s > 0) n.setSelected(s);
-          JLDataView d = n.getData();
-
-          // Dataview options
-          d.applyConfiguration(pref,f);
-
-          // Min alarm
-          p=f.getParam(pref + "_showminalarm");
-          if(p!=null) {
-            boolean showMinAlarm = OFormat.getBoolean(p.get(0).toString());
-            if( showMinAlarm ) {
-              n.showMinAlarm();
-              String prefMinAlarm = "dv_min_alarm" + i;
-              n.getMinAlarmData().applyConfiguration(prefMinAlarm,f);
-            } else {
-              n.hideMinAlarm();
-            }
+          // Find to node to select
+          int j = 0;
+          boolean found = false;
+          while (!found && j < dv.size()) {
+            n = (TrendSelectionNode) dv.get(j);
+            found = n.getModelName().equals(attName);
+            if (!found) j++;
           }
+          if (found) {
 
-          // Max alarm
-          p=f.getParam(pref + "_showmaxalarm");
-          if(p!=null) {
-            boolean showMaxAlarm = OFormat.getBoolean(p.get(0).toString());
-            if( showMaxAlarm ) {
-              n.showMaxAlarm();
-              String prefMaxAlarm = "dv_max_alarm" + i;
-              n.getMaxAlarmData().applyConfiguration(prefMaxAlarm,f);
-            } else {
-              n.hideMaxAlarm();
+            if (s > 0) n.setSelected(s);
+            JLDataView d = n.getData();
+
+            // Dataview options
+            d.applyConfiguration(pref,f);
+
+            // Min alarm
+            p=f.getParam(pref + "_showminalarm");
+            if(p!=null) {
+              boolean showMinAlarm = OFormat.getBoolean(p.get(0).toString());
+              if( showMinAlarm ) {
+                n.showMinAlarm();
+                String prefMinAlarm = "dv_min_alarm" + i;
+                n.getMinAlarmData().applyConfiguration(prefMinAlarm,f);
+              } else {
+                n.hideMinAlarm();
+              }
             }
-          }
 
+            // Max alarm
+            p=f.getParam(pref + "_showmaxalarm");
+            if(p!=null) {
+              boolean showMaxAlarm = OFormat.getBoolean(p.get(0).toString());
+              if( showMaxAlarm ) {
+                n.showMaxAlarm();
+                String prefMaxAlarm = "dv_max_alarm" + i;
+                n.getMaxAlarmData().applyConfiguration(prefMaxAlarm,f);
+              } else {
+                n.hideMaxAlarm();
+              }
+            }
+
+          }
         }
       }
+
+    } else {
+
+      // JDraw settings
+      // Use JDW vector to maintain JDraw settings
+      Vector<JDWAttribute> ndvs = new Vector<JDWAttribute>();
+
+      for (i = 0; i < nbDv; i++) {
+
+        String attName;
+        String pref = "dv" + i;
+        p = f.getParam(pref + "_name");
+        attName = p.get(0).toString();
+
+        p = f.getParam(pref + "_selected");
+        if (p != null) {
+          int s = OFormat.getInt(p.get(0).toString());
+
+          if(s<0 || s>3) {
+            // Invalid selection
+            return pref + "_selected, invalid use: 0 for none, 1 for X,2 for Y1,3 for Y2";
+          }
+          JDWAttribute item = new JDWAttribute();
+          item.axis = s;
+          item.attName = attName;
+          item.dv = new JLDataView();
+          item.dv.applyConfiguration(pref, f);
+          ndvs.add(item);
+        } else {
+          return pref + "_selected, not found";
+        }
+
+      }
+
+      dvs = ndvs;
+
     }
 
     return errBuff;
@@ -1615,6 +1690,10 @@ public void setTimePrecision(int timePrecision) {
    * @see #getSettings
    */
   public String setSetting(String txt) {
+    return setSetting(txt,false);
+  }
+
+  public String setSetting(String txt,boolean forJdraw) {
 
     CfFileReader f = new CfFileReader();
 
@@ -1623,8 +1702,9 @@ public void setTimePrecision(int timePrecision) {
       return "Trend.setSettings: Failed to parse given text";
     }
 
-    return applySettings(f);
+    return applySettings(f,forJdraw);
   }
+
 
   /**
    * Save settings.
@@ -1659,7 +1739,7 @@ public void setTimePrecision(int timePrecision) {
     }
     lastConfig = filename;
 
-    return applySettings(f);
+    return applySettings(f,false);
   }
 
   /** @return the frame_title field read in the config file. */
@@ -2244,6 +2324,98 @@ public void setTimePrecision(int timePrecision) {
     f.setVisible(true);
 
   } // end of main ()
+
+  // ----------------------------------------------------------------------
+  // JDrawAble
+  // ----------------------------------------------------------------------
+  static String[] exts = {"trendSettings"};
+
+  // Vector use by jdraw
+  private Vector<JDWAttribute> dvs = null;
+
+  @Override
+  public void initForEditing() {
+
+    if(dvs==null || dvs.size()==0) {
+      // Create one dv by default
+      dvs = new Vector<JDWAttribute>();
+      JDWAttribute jdwAtt=new JDWAttribute();
+      jdwAtt.attName = "my/device/example/my_attribute";
+      jdwAtt.dv = new JLDataView();
+      jdwAtt.axis = Trend.SEL_Y1;
+      dvs.add(jdwAtt);
+    }
+    setPreferredSize(new Dimension(400, 300));
+
+  }
+
+  @Override
+  public JComponent getComponent() {
+    return this;
+  }
+
+  @Override
+  public String[] getExtensionList() {
+    return exts;
+  }
+
+  @Override
+  public boolean setExtendedParam(String name, String value, boolean popupAllowed) {
+
+    if (name.equalsIgnoreCase("trendSettings"))
+    {
+      // Handle a 'bug' in CFFileReader parsing
+      if(!value.endsWith("\n")) value = value + "\n";
+      String err = setSetting(value, true);
+      if(err.length()>0) showJdrawError(popupAllowed,"graphSettings",err);
+      return true;
+    }
+
+    return false;
+
+  }
+
+  @Override
+  public String getExtendedParam(String name) {
+
+    if(name.equalsIgnoreCase("trendSettings"))
+    {
+      // Ignore window settings in JDraw
+      return getSettings(true);
+    }
+
+    return "";
+
+  }
+
+  @Override
+  public String getDescription(String extName) {
+    return "";
+  }
+
+  private void showJdrawError(boolean popup,String paramName,String message) {
+    String msg = "Trend: "+paramName+" incorrect.\n" + message;
+    if(popup)
+      JOptionPane.showMessageDialog(null,msg,"Error",JOptionPane.ERROR_MESSAGE);
+    else
+      System.out.println("Warning, " +msg);
+  }
+
+  /**
+   * Returns number of JDW attribute
+   * @return Number of JDW attribute
+   */
+  public int getJDWAttributeNumber() {
+    return dvs.size();
+  }
+
+  /**
+   * @param idx Index of JDW attribute
+   * @return the specified JDW attribute
+   */
+  public JDWAttribute getJDWAttribute(int idx) {
+    return dvs.get(idx);
+  }
 
 }
 
