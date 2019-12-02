@@ -56,8 +56,6 @@ import fr.esrf.TangoDs.AttrManip;
 public class SimpleScalarViewer extends JAutoScrolledText
        implements IEnumScalarListener, INumberScalarListener, IStringScalarListener, IBooleanScalarListener, PropertyChangeListener, IErrorListener, JDrawable, MouseListener {
 
-  private final static Insets noInsets = new Insets(0,0,0,0);
-
   INumberScalar numberModel = null;
   IStringScalar stringModel = null;
   IBooleanScalar booleanModel = null;
@@ -101,7 +99,7 @@ public class SimpleScalarViewer extends JAutoScrolledText
     );
     addMouseListener(this);
 
-    setMargin( noInsets ); // text will have the maximum available space
+    setMargin( new Insets(0,0,0,0) ); // text will have the maximum available space
   }
 
   /** @return the current background color of this viewer. Color used for the VALID attribute quality state */
