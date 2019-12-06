@@ -22,19 +22,17 @@
  
 package fr.esrf.tangoatk.widget.image;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
+import fr.esrf.tangoatk.widget.attribute.NumberImageViewer;
 import fr.esrf.tangoatk.widget.util.ATKFormat;
+import fr.esrf.tangoatk.widget.util.ATKGraphicsUtils;
 import fr.esrf.tangoatk.widget.util.JTableRow;
 import fr.esrf.tangoatk.widget.util.chart.DataList;
 import fr.esrf.tangoatk.widget.util.chart.IJLChartListener;
@@ -43,7 +41,7 @@ import fr.esrf.tangoatk.widget.util.chart.JLChart;
 import fr.esrf.tangoatk.widget.util.chart.JLChartEvent;
 import fr.esrf.tangoatk.widget.util.chart.JLDataView;
 
-public class LineProfilerPanel extends JPanel implements IJLChartListener, ActionListener {
+public class LineProfilerPanel extends JPanel implements IJLChartListener, ActionListener, ChangeListener {
 
     protected JPanel cfgPanel;
     protected JLChart theGraph;
@@ -61,11 +59,24 @@ public class LineProfilerPanel extends JPanel implements IJLChartListener, Actio
     protected JLabel stdLabel;
     protected JTextField stdText;
     protected String userFormat="";
+    protected JLabel srcLabel=null;
+    protected JTextField srcText=null;
+    protected JSpinner srcSpin=null;
 
     protected static String[]   colName  = {"Index", "Value"};
     protected static String[][] emptyStr = {{"", ""}};
 
+    private NumberImageViewer parent;
+    private int id;
+    private boolean isSpinEdit;
+
     public LineProfilerPanel() {
+      this(null);
+    }
+
+    public LineProfilerPanel(NumberImageViewer parent) {
+
+      this.parent = parent;
 
       setLayout(new BorderLayout());
 
@@ -75,60 +86,74 @@ public class LineProfilerPanel extends JPanel implements IJLChartListener, Actio
       panelFont = new Font("Dialog", Font.PLAIN, 11);
 
       cfgPanel = new JPanel();
-      cfgPanel.setLayout(null);
-      cfgPanel.setPreferredSize(new Dimension(0, 25));
+      cfgPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
       add(cfgPanel, BorderLayout.SOUTH);
 
       tableCheck = new JCheckBox("View table");
       tableCheck.setSelected(false);
       tableCheck.setFont(panelFont);
-      tableCheck.setBounds(5, 3, 80, 20);
       tableCheck.addActionListener(this);
       cfgPanel.add(tableCheck);
 
       minLabel = new JLabel("Min");
       minLabel.setFont(panelFont);
       minLabel.setHorizontalAlignment(JLabel.RIGHT);
-      minLabel.setBounds(85, 3, 30, 20);
       cfgPanel.add(minLabel);
       minText = new JTextField("");
-      minText.setMargin(new Insets(0,0,0,0));
+      minText.setPreferredSize(new Dimension(60,20));
+      minText.setMargin(new Insets(0, 0, 0, 0));
       minText.setFont(panelFont);
-      minText.setBounds(120, 3, 60, 20);
       cfgPanel.add(minText);
 
       maxLabel = new JLabel("Max");
       maxLabel.setFont(panelFont);
       maxLabel.setHorizontalAlignment(JLabel.RIGHT);
-      maxLabel.setBounds(180, 3, 30, 20);
       cfgPanel.add(maxLabel);
       maxText = new JTextField("");
+      maxText.setPreferredSize(new Dimension(60,20));
       maxText.setMargin(new Insets(0, 0, 0, 0));
       maxText.setFont(panelFont);
-      maxText.setBounds(215, 3, 60, 20);
       cfgPanel.add(maxText);
 
       avgLabel = new JLabel("Avg");
       avgLabel.setFont(panelFont);
       avgLabel.setHorizontalAlignment(JLabel.RIGHT);
-      avgLabel.setBounds(275, 3, 30, 20);
       cfgPanel.add(avgLabel);
       avgText = new JTextField("");
+      avgText.setPreferredSize(new Dimension(60,20));
       avgText.setMargin(new Insets(0, 0, 0, 0));
       avgText.setFont(panelFont);
-      avgText.setBounds(310, 3, 60, 20);
       cfgPanel.add(avgText);
 
       stdLabel = new JLabel("Std");
       stdLabel.setFont(panelFont);
       stdLabel.setHorizontalAlignment(JLabel.RIGHT);
-      stdLabel.setBounds(370, 3, 30, 20);
       cfgPanel.add(stdLabel);
       stdText = new JTextField("");
+      stdText.setPreferredSize(new Dimension(60,20));
       stdText.setMargin(new Insets(0, 0, 0, 0));
       stdText.setFont(panelFont);
-      stdText.setBounds(405, 3, 60, 20);
       cfgPanel.add(stdText);
+
+      if(parent!=null) {
+        srcLabel = new JLabel("Source");
+        srcLabel.setPreferredSize(new Dimension(60, 20));
+        srcLabel.setFont(panelFont);
+        srcLabel.setHorizontalAlignment(JLabel.RIGHT);
+        cfgPanel.add(srcLabel);
+        srcText = new JTextField("");
+        srcText.setEditable(true);
+        srcText.setPreferredSize(new Dimension(120, 20));
+        srcText.setMargin(new Insets(0, 0, 0, 0));
+        srcText.setFont(panelFont);
+        srcText.addActionListener(this);
+        cfgPanel.add(srcText);
+        srcSpin = new JSpinner(new SpinnerNumberModel(0,0,65536,1));
+        srcSpin.setVisible(false);
+        srcSpin.setPreferredSize(new Dimension(120, 20));
+        srcSpin.addChangeListener(this);
+        cfgPanel.add(srcSpin);
+      }
 
       // -----------------------------------------------
       // Graph
@@ -156,6 +181,38 @@ public class LineProfilerPanel extends JPanel implements IJLChartListener, Actio
       theTable.setPreferredSize(new Dimension(170, 0));
       theTable.setVisible(false);
       add(theTable, BorderLayout.EAST);
+      id = 1;
+      isSpinEdit = false;
+    }
+
+    public void setId(int id) {
+      this.id = id;
+    }
+
+    public void setSource(String label,Object value) {
+      if(srcLabel!=null) {
+        srcLabel.setText(label);
+      }
+
+      if(value instanceof String) {
+        if(srcText!=null) {
+          if(!srcText.hasFocus())
+            srcText.setText((String)value);
+          srcSpin.setVisible(false);
+          srcText.setVisible(true);
+        }
+      }
+
+      if(value instanceof Integer) {
+        if(srcSpin!=null)
+          if(!srcSpin.hasFocus()) {
+            isSpinEdit = true;
+            srcSpin.setValue(value);
+            isSpinEdit = false;
+          }
+        srcSpin.setVisible(true);
+        srcText.setVisible(false);
+      }
 
     }
 
@@ -184,6 +241,7 @@ public class LineProfilerPanel extends JPanel implements IJLChartListener, Actio
           dv = emptyStr;
         }
         theTable.setData(dv,colName);
+
       }
 
     }
@@ -286,11 +344,29 @@ public class LineProfilerPanel extends JPanel implements IJLChartListener, Actio
     // Action listener
     // -------------------------------------------------------------
     public void actionPerformed(ActionEvent e) {
-      if (e.getSource() == tableCheck) {
+
+      Object src = e.getSource();
+
+      if (src == tableCheck) {
         theTable.setVisible(tableCheck.isSelected());
         refreshTable();
         revalidate();
+      } else if (src==srcText) {
+        parent.setSourceFromProfile(srcText.getText(),id);
       }
+
+    }
+
+    @Override
+    public void stateChanged(ChangeEvent e) {
+
+      Object src = e.getSource();
+
+      if (src==srcSpin) {
+        if(!isSpinEdit)
+          parent.setSourceFromProfile(srcSpin.getValue().toString(),id);
+      }
+
     }
 
     // -------------------------------------------------------------
@@ -314,5 +390,7 @@ public class LineProfilerPanel extends JPanel implements IJLChartListener, Actio
     public JLChart getChart() {
       return theGraph;
     }
+
+
 
 }

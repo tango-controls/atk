@@ -60,7 +60,6 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -93,6 +92,13 @@ import fr.esrf.tangoatk.widget.util.jdraw.JDrawable;
 
 public class NumberImageViewer extends JPanel implements IImageListener, MouseMotionListener, MouseListener, ActionListener, KeyListener, JDrawable {
 
+  public final static int PROFILE_NONE = 0;
+  public final static int PROFILE_FREELINE = 1;
+  public final static int PROFILE_HISTO = 2;
+  public final static int PROFILE_DUAL = 3;
+  public final static int PROFILE_HLINE = 4;
+  public final static int PROFILE_VLINE = 5;
+
   INumberImage model;
 
   // ------------------------------------------------------
@@ -100,6 +106,8 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   // ------------------------------------------------------
   protected double[][] doubleValues = null;
   private Rectangle oldSelection = null;
+  protected int hMarker = -1;
+  protected int vMarker = -1;
   protected int profileMode;
   private boolean showingMenu;
   private boolean snapToGrid;
@@ -148,7 +156,8 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   protected JButton zoomButton;
   protected JButton tableButton;
   protected JButton profileButton;
-  protected JButton profile2Button;
+  protected JButton profileHButton;
+  protected JButton profileVButton;
   protected JButton histoButton;
   protected JButton settingsButton;
   protected JButton axisButton;
@@ -182,14 +191,9 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   protected JMenuItem zoomMenuItem;
   protected JMenuItem tableMenuItem;
   protected JMenuItem lineProfileMenuItem;
+  protected JMenuItem lineHProfileMenuItem;
+  protected JMenuItem lineVProfileMenuItem;
   protected JMenuItem lineProfile2MenuItem;
-  protected JMenu dblProfileMenu;
-  protected JCheckBoxMenuItem vLeftCheckMenuItem;
-  protected JCheckBoxMenuItem vCenterCheckMenuItem;
-  protected JCheckBoxMenuItem vRigthCheckMenuItem;
-  protected JCheckBoxMenuItem hTopCheckMenuItem;
-  protected JCheckBoxMenuItem hCenterCheckMenuItem;
-  protected JCheckBoxMenuItem hBottomCheckMenuItem;
   protected JMenuItem histogramMenuItem;
   protected JMenuItem settingsMenuItem;
   protected JMenuItem loadMenuItem;
@@ -329,7 +333,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     rectXYmode = false;
     integrationWidthH = 1;
     integrationWidthV = 1;
-    setAlignToGrid(true);
+    setAlignToGrid(false);
     autoBestFit = true;
     sigHistogram = false;
     isNegative = false;
@@ -339,7 +343,9 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     startHisto = 0;
     zoomFactor = 0; // 100%
     iSz = 1;
+    profileMode = PROFILE_NONE;
     listenerList = new EventListenerList();
+
   }
 
   protected void initImagePanel() {
@@ -354,10 +360,11 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   }
 
   protected void initButtonPanel() {
+
       buttonPanel = new JPanel();
       buttonPanel.setLayout(null);
-      buttonPanel.setMinimumSize(new Dimension(60, 575));
-      buttonPanel.setPreferredSize(new Dimension(60, 575));
+      buttonPanel.setMinimumSize(new Dimension(60, 615));
+      buttonPanel.setPreferredSize(new Dimension(60, 615));
       buttonView = new JScrollPane(buttonPanel);
       buttonView.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
       add(buttonView, BorderLayout.WEST);
@@ -418,18 +425,26 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       profileButton.addActionListener(this);
       buttonPanel.add(profileButton);
 
-      profile2Button = new JButton();
-      profile2Button.setMargin(noMargin);
-      profile2Button.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_profile2.gif")));
-      profile2Button.setBounds(2, 280, 36, 36);
-      profile2Button.setToolTipText("Line profiles");
-      profile2Button.addActionListener(this);
-      buttonPanel.add(profile2Button);
+      profileHButton = new JButton();
+      profileHButton.setMargin(noMargin);
+      profileHButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_profile2.gif")));
+      profileHButton.setBounds(2, 280, 36, 36);
+      profileHButton.setToolTipText("Horizontal profile");
+      profileHButton.addActionListener(this);
+      buttonPanel.add(profileHButton);
+
+      profileVButton = new JButton();
+      profileVButton.setMargin(noMargin);
+      profileVButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_profile3.gif")));
+      profileVButton.setBounds(2, 320, 36, 36);
+      profileVButton.setToolTipText("Vertical profile");
+      profileVButton.addActionListener(this);
+      buttonPanel.add(profileVButton);
 
       histoButton = new JButton();
       histoButton.setMargin(noMargin);
       histoButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_histo.gif")));
-      histoButton.setBounds(2, 320, 36, 36);
+      histoButton.setBounds(2, 360, 36, 36);
       histoButton.setToolTipText("Histogram");
       histoButton.addActionListener(this);
       buttonPanel.add(histoButton);
@@ -437,7 +452,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       settingsButton = new JButton();
       settingsButton.setMargin(noMargin);
       settingsButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_option.gif")));
-      settingsButton.setBounds(2, 365, 36, 36);
+      settingsButton.setBounds(2, 405, 36, 36);
       settingsButton.setToolTipText("Image viewer settings");
       settingsButton.addActionListener(this);
       buttonPanel.add(settingsButton);
@@ -445,7 +460,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       axisButton = new JButton();
       axisButton.setIcon(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_axis.gif")));
       axisButton.setMargin(noMargin);
-      axisButton.setBounds(2, 405, 36, 36);
+      axisButton.setBounds(2, 445, 36, 36);
       axisButton.setToolTipText("Axis settings");
       axisButton.addActionListener(this);
       buttonPanel.add(axisButton);
@@ -453,21 +468,21 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       loadButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_load_settings.gif")));
       loadButton.setToolTipText("Load settings");
       loadButton.setMargin(noMargin);
-      loadButton.setBounds(2, 450, 36, 36);
+      loadButton.setBounds(2, 490, 36, 36);
       loadButton.addActionListener(this);
       buttonPanel.add(loadButton);
 
       saveButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_save_settings.gif")));
       saveButton.setToolTipText("Save settings");
       saveButton.setMargin(noMargin);
-      saveButton.setBounds(2, 490, 36, 36);
+      saveButton.setBounds(2, 530, 36, 36);
       saveButton.addActionListener(this);
       buttonPanel.add(saveButton);
 
       printButton = new JButton(new ImageIcon(getClass().getResource("/fr/esrf/tangoatk/widget/image/img_print.gif")));
       printButton.setToolTipText("Print Image");
       printButton.setMargin(noMargin);
-      printButton.setBounds(2, 535, 36, 36);
+      printButton.setBounds(2, 575, 36, 36);
       printButton.addActionListener(this);
       buttonPanel.add(printButton);
 
@@ -557,31 +572,14 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       lineProfileMenuItem = new JMenuItem("Line profile");
       lineProfileMenuItem.addActionListener(this);
 
-      lineProfile2MenuItem = new JMenuItem("Line profiles");
+      lineHProfileMenuItem = new JMenuItem("Horizontal Line profile");
+      lineHProfileMenuItem.addActionListener(this);
+
+      lineVProfileMenuItem = new JMenuItem("Vertical line profile");
+      lineVProfileMenuItem.addActionListener(this);
+
+      lineProfile2MenuItem = new JMenuItem("Dual profiles");
       lineProfile2MenuItem.addActionListener(this);
-
-      dblProfileMenu = new JMenu("Position");
-
-      hTopCheckMenuItem = new JCheckBoxMenuItem("Horizontal Line (Top)");
-      hTopCheckMenuItem.addActionListener(this);
-      dblProfileMenu.add(hTopCheckMenuItem);
-      hCenterCheckMenuItem = new JCheckBoxMenuItem("Horizontal Line (Center)");
-      hCenterCheckMenuItem.addActionListener(this);
-      dblProfileMenu.add(hCenterCheckMenuItem);
-      hBottomCheckMenuItem = new JCheckBoxMenuItem("Horizontal Line (Bottom)");
-      hBottomCheckMenuItem.addActionListener(this);
-      dblProfileMenu.add(hBottomCheckMenuItem);
-      dblProfileMenu.add(new JSeparator());
-      vLeftCheckMenuItem = new JCheckBoxMenuItem("Vertical Line (Left)");
-      vLeftCheckMenuItem.addActionListener(this);
-      dblProfileMenu.add(vLeftCheckMenuItem);
-      vCenterCheckMenuItem = new JCheckBoxMenuItem("Vertical Line (Center)");
-      vCenterCheckMenuItem.addActionListener(this);
-      dblProfileMenu.add(vCenterCheckMenuItem);
-      vRigthCheckMenuItem = new JCheckBoxMenuItem("Vertical Line (Right)");
-      vRigthCheckMenuItem.addActionListener(this);
-      dblProfileMenu.add(vRigthCheckMenuItem);
-      refreshDblProfileMenu();
 
       histogramMenuItem = new JMenuItem("Histogram");
       histogramMenuItem.addActionListener(this);
@@ -631,8 +629,9 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       imgMenu.add(tableMenuItem);
       imgMenu.add(new JSeparator());
       imgMenu.add(lineProfileMenuItem);
+      imgMenu.add(lineHProfileMenuItem);
+      imgMenu.add(lineVProfileMenuItem);
       imgMenu.add(lineProfile2MenuItem);
-      imgMenu.add(dblProfileMenu);
       imgMenu.add(histogramMenuItem);
       imgMenu.add(new JSeparator());
       imgMenu.add(settingsMenuItem);
@@ -1242,12 +1241,37 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   }
 
   /**
+   * Select all
+   */
+  public void setSelectionFull() {
+
+    Dimension d = imagePanel.getImageSize();
+    imagePanel.setSelection(0, 0, d.width, d.height);
+    selectionChanged();
+
+  }
+
+  /**
    * Return current floating rectangle selection
    * @return Selection rectangle, Null is returned when nothing is selected.
    */
   public Rectangle getSelection() {
     Rectangle r = imagePanel.getSelectionRect();
     if( r!=null) mulRect(r);
+    return r;
+  }
+
+  /**
+   * Return current floating rectangle selection
+   * @return Selection rectangle, full size is returned when nothing is selected.
+   */
+  public Rectangle getSelectionFull() {
+    Rectangle r = imagePanel.getSelectionRect();
+    if(r==null || r.width==0 || r.height==0 ) {
+      Dimension size = imagePanel.getImageSize();
+      r = new Rectangle(0,0,size.width,size.height);
+    }
+    mulRect(r);
     return r;
   }
 
@@ -1457,48 +1481,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   // Private stuff
   // ----------------------------------------------------------
 
-  private void refreshDblProfileMenu() {
-
-    dblProfileMenu.setEnabled(profileMode==3);
-    if (profileMode == 3) {
-
-      hTopCheckMenuItem.setState(false);
-      hCenterCheckMenuItem.setState(false);
-      hBottomCheckMenuItem.setState(false);
-
-      switch (imagePanel.getHorizontalPosition()) {
-        case JImage.HORIZONTAL_TOP:
-          hTopCheckMenuItem.setState(true);
-          break;
-        case JImage.HORIZONTAL_CENTER:
-          hCenterCheckMenuItem.setState(true);
-          break;
-        case JImage.HORIZONTAL_BOTTOM:
-          hBottomCheckMenuItem.setState(true);
-          break;
-      }
-
-      vLeftCheckMenuItem.setState(false);
-      vCenterCheckMenuItem.setState(false);
-      vRigthCheckMenuItem.setState(false);
-
-      switch (imagePanel.getVerticalPosition()) {
-        case JImage.VERTICAL_LEFT:
-          vLeftCheckMenuItem.setState(true);
-          break;
-        case JImage.VERTICAL_CENTER:
-          vCenterCheckMenuItem.setState(true);
-          break;
-        case JImage.VERTICAL_RIGHT:
-          vRigthCheckMenuItem.setState(true);
-          break;
-      }
-
-    }
-
-  }
-
-
   protected void mulRect(Rectangle r) {
     if(iSz<0) {
       r.x /= (-iSz);
@@ -1540,7 +1522,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
     } else {
 
-      // Hack to handle line having a vertex on a image edgde
+      // Hack to handle line having a vertex on an image edge
       if (p.x == (d.width / iSz) - 1) {
         p.x = d.width - 1;
         xOk = true;
@@ -1574,13 +1556,19 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   }
 
   protected double[] buildProfileData(Point p1,Point p2) {
+    return buildProfileData(p1,p2,true);
+  }
+
+  protected double[] buildProfileData(Point p1,Point p2,boolean convertPoint) {
 
     double[] profile;
 
     Dimension d = getCurrentImageSize();
 
-    mulPoint(p1);
-    mulPoint(p2);
+    if(convertPoint) {
+      mulPoint(p1);
+      mulPoint(p2);
+    }
 
     int dx = p2.x - p1.x;
     int dy = p2.y - p1.y;
@@ -1765,38 +1753,147 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
   }
 
+  // Callback from lineprofiler
+  public void setSourceFromProfile(String src,int profileId) {
+
+    switch (profileMode) {
+
+      case PROFILE_FREELINE: {
+        Point p1 = new Point();
+        Point p2 = new Point();
+        try {
+          parseSelection(src, p1, p2);
+          imagePanel.setSelection(p1.x, p1.y, p2.x, p2.y);
+          selectionChanged();
+          refreshStatusLine();
+        } catch (Exception ex) {
+          JOptionPane.showMessageDialog(null, "Invalid syntax for selection", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+      }
+      break;
+
+      case PROFILE_HISTO: {
+        Point p1 = new Point();
+        Point p2 = new Point();
+        try {
+          parseSelection(src, p1, p2);
+          imagePanel.setSelection(p1.x, p1.y, p1.x + p2.x, p1.y + p2.y);
+          selectionChanged();
+          refreshStatusLine();
+        } catch (Exception ex) {
+          JOptionPane.showMessageDialog(null, "Invalid syntax for selection", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+      }
+      break;
+
+      case PROFILE_HLINE: {
+        try {
+          int y = Integer.parseInt(src);
+          setMarkerPos(hMarker,0,y,0,0);
+          refreshLineProfile();
+        } catch (Exception ex) {
+          JOptionPane.showMessageDialog(null, "Invalid syntax for selection", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+      }
+      break;
+
+      case PROFILE_VLINE: {
+        try {
+          int x = Integer.parseInt(src);
+          setMarkerPos(vMarker,x,0,0,0);
+          refreshLineProfile();
+        } catch (Exception ex) {
+          JOptionPane.showMessageDialog(null, "Invalid syntax for selection", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+      }
+      break;
+
+      case PROFILE_DUAL: {
+        try {
+          int v = Integer.parseInt(src);
+          if(profileId==1) {
+            setMarkerPos(hMarker,0,v,0,0);
+          } else {
+            setMarkerPos(vMarker,v,0,0,0);
+          }
+          refreshLineProfile();
+        } catch (Exception ex) {
+          JOptionPane.showMessageDialog(null, "Invalid syntax for selection", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+      }
+      break;
+
+    }
+
+
+  }
+
   protected void refreshLineProfile() {
 
     Point[] p;
 
     if (lineProfiler != null && lineProfiler.isVisible() && profileMode > 0) {
 
-      refreshDblProfileMenu();
-
       switch (profileMode) {
-        case 1:
+
+        case PROFILE_FREELINE:
           p = imagePanel.getSelectionPoint();
           if(p!=null) lineProfiler.setData(buildProfileData(p[0],p[1]));
           else        lineProfiler.setData(null);
+          lineProfiler.setHeader("Line profile " + getLineSel());
+          lineProfiler.setSource("Line", getLineSel());
           break;
-        case 2:
+
+        case PROFILE_HISTO:
           double[] v = buildHistogramData();
           if (v != null) {
             lineProfiler.setData(v, startHisto);
           } else {
             lineProfiler.setData(null);
           }
+          lineProfiler.setHeader("Histogram " + getRectSel());
+          lineProfiler.setSource("Selection",getRectSel());
           break;
-        case 3:
-          p = imagePanel.getSelectionCrossPoint();
-          if(p!=null) {
-            lineProfiler.setData(buildProfileData(p[0],p[1]));
-            lineProfiler.setData2(buildProfileData(p[2],p[3]));
-          } else {
-            lineProfiler.setData(null);
-            lineProfiler.setData2(null);
-          }
-          break;
+
+        case PROFILE_HLINE: {
+          int y = imagePanel.getMarkerPos(hMarker).y;
+          Rectangle r = getSelectionFull();
+          Point p1 = new Point(r.x,y);
+          Point p2 = new Point(r.x+r.width-1,y);
+          lineProfiler.setData(buildProfileData(p1,p2,false));
+          lineProfiler.setHeader("Horizontal profile (Y=" + y + ")");
+          lineProfiler.setSource("Y",new Integer(y));
+        }
+        break;
+
+        case PROFILE_VLINE: {
+          int x = imagePanel.getMarkerPos(vMarker).x;
+          Rectangle r = getSelectionFull();
+          Point p3 = new Point(x,r.y);
+          Point p4 = new Point(x,r.y+r.height-1);
+          lineProfiler.setData(buildProfileData(p3,p4,false));
+          lineProfiler.setHeader("Vertical profile (X=" + x + ")");
+          lineProfiler.setSource("X",new Integer(x));
+        }
+        break;
+
+        case PROFILE_DUAL: {
+          int x = imagePanel.getMarkerPos(vMarker).x;
+          int y = imagePanel.getMarkerPos(hMarker).y;
+          Rectangle r = getSelectionFull();
+          Point p1 = new Point(r.x,y);
+          Point p2 = new Point(r.x+r.width-1,y);
+          Point p3 = new Point(x,r.y);
+          Point p4 = new Point(x,r.y+r.height-1);
+          lineProfiler.setData(buildProfileData(p1,p2,false));
+          lineProfiler.setData2(buildProfileData(p3, p4, false));
+          lineProfiler.setHeader("Horizontal profile (Y=" + y + ")");
+          lineProfiler.setHeader2("Vertical profile (X=" + x + ")");
+          lineProfiler.setSource("Y",new Integer(y));
+          lineProfiler.setSource2("X",new Integer(x));
+        }
+        break;
 
       }
 
@@ -1814,7 +1911,7 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
     Rectangle r = imagePanel.getSelectionRect();
 
-    if (r == null || imagePanel.getSelectionMode() != 1) {
+    if (r == null || imagePanel.getSelectionMode() != JImage.MODE_RECT) {
       rangeLabel.setText("");
       return;
     }
@@ -1884,48 +1981,51 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     }
     fireRoiChange();
   }
+  
+  private String getLineSel() {
+
+    Point[] pts;
+    pts = imagePanel.getSelectionPoint();
+    if (pts != null) {
+      mulPoint(pts[0]);
+      mulPoint(pts[1]);
+      return "(" + pts[0].x + "," + pts[0].y + ") - (" + pts[1].x + "," + pts[1].y + ")";
+    } else {
+      return "None";
+    }
+
+  }
+
+  private String getRectSel() {
+
+    Rectangle sel = imagePanel.getSelectionRect();
+    if (sel != null) {
+      mulRect(sel);
+      if(rectXYmode)
+        return "(" + sel.x + "," + sel.y + ") - (" + (sel.x + sel.width - 1) + "," + (sel.y + sel.height + -1) + ")";
+      else
+        return "(" + sel.x + "," + sel.y + ") - [" + sel.width + "," + sel.height + "]";
+    } else {
+      return "None";
+    }
+
+  }
 
   protected void refreshStatusLine() {
 
     int m = imagePanel.getSelectionMode();
     String selStr = "None";
-    Point[] pts;
 
     switch (m) {
       case JImage.MODE_LINE:
-        pts = imagePanel.getSelectionPoint();
-        if (pts != null) {
-          mulPoint(pts[0]);
-          mulPoint(pts[1]);
-          selStr = "Line (" + pts[0].x + "," + pts[0].y + ") - (" + pts[1].x + "," + pts[1].y + ")";
-        }
-        break;
-      case JImage.MODE_CROSS:
-        pts = imagePanel.getSelectionCrossPoint();
-        if (pts != null) {
-          mulPoint(pts[0]);
-          mulPoint(pts[1]);
-          mulPoint(pts[2]);
-          mulPoint(pts[3]);
-          selStr = "(" + pts[0].x + "," + pts[0].y + ")-(" + pts[1].x + "," + pts[1].y + ")";
-          selStr += " (" + pts[2].x + "," + pts[2].y + ")-(" + pts[3].x + "," + pts[3].y + ")";
-        }
+        selStr = "Line " + getLineSel();
         break;
       case JImage.MODE_RECT:
-        Rectangle sel = imagePanel.getSelectionRect();
-        if (sel != null) {
-          mulRect(sel);
-          if(rectXYmode)
-            selStr = "Rect (" + sel.x + "," + sel.y + ") - (" + (sel.x + sel.width - 1) + "," + (sel.y + sel.height + -1) + ")";
-          else
-            selStr = "Rect (" + sel.x + "," + sel.y + ") - [" + sel.width + "," + sel.height + "]";
-        }
+        selStr = "Rect " + getRectSel();
         break;
     }
 
     selText.setText(selStr);
-
-
   }
 
   private void showZoom() {
@@ -2860,12 +2960,12 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
       // -------------------------------------------------------------------
       // Profiler
       // -------------------------------------------------------------------
-      lineProfiler = new LineProfilerViewer();
+      lineProfiler = new LineProfilerViewer(this);
       lineProfiler.addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent e) {
           //Free data
           lineProfiler.setData(null);
-          lineProfiler.dispose();
+          lineProfiler.setData2(null);
         }
       });
 
@@ -3170,12 +3270,16 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   // ----------------------------------------------------------
   public void actionPerformed(ActionEvent evt) {
 
-    if (evt.getSource() == selectButton ||
-        evt.getSource() == selectionMenuItem) {
+    Object src = evt.getSource();
+
+    if (src == selectButton || src == selectionMenuItem) {
 
       imagePanel.clearSelection();
-      imagePanel.setSelectionMode(1);
-      profileMode = 0;
+      imagePanel.setSelectionMode(JImage.MODE_RECT);
+      profileMode = PROFILE_NONE;
+      hMarker = -1;
+      vMarker = -1;
+      clearMarkers();
       freePopup();
 
       synchronized (this) {
@@ -3183,130 +3287,135 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
         refreshSelectionMinMax();
       }
 
-    } else if (evt.getSource() == selectMaxButton ||
-        evt.getSource() == selectionMaxMenuItem) {
+    } else if (src == selectMaxButton || src == selectionMaxMenuItem) {
 
-      Dimension d = imagePanel.getImageSize();
-      imagePanel.setSelection(0, 0, d.width, d.height);
-      selectionChanged();
+      setSelectionFull();
 
-    } else if (evt.getSource() == selectColorButton ||
-            evt.getSource() == selectionColorMenuItem) {
+    } else if (src == selectColorButton || src == selectionColorMenuItem) {
 
       changeSelectionColor();
 
-    } else if (evt.getSource() == fileButton ||
-            evt.getSource() == fileMenuItem ) {
+    } else if (src == fileButton || src == fileMenuItem ) {
 
       saveFile();
 
-    } else if (evt.getSource() == profileButton ||
-        evt.getSource() == lineProfileMenuItem) {
+    } else if (src == profileButton || src == lineProfileMenuItem) {
 
       imagePanel.setSelectionMode(JImage.MODE_LINE);
       constructLineProfiler();
       lineProfiler.setLineProfileMode();
       lineProfiler.setVisible(true);
-      profileMode = 1;
-      refreshDblProfileMenu();
+      hMarker = -1;
+      vMarker = -1;
+      clearMarkers();
+      profileMode = PROFILE_FREELINE;
       refreshStatusAndProlfile();
 
-    } else if (evt.getSource() == profile2Button ||
-        evt.getSource() == lineProfile2MenuItem) {
+    } else if (src == lineProfile2MenuItem) {
 
-      imagePanel.setSelectionMode(JImage.MODE_CROSS);
+      setSelectionFull();
+      imagePanel.setSelectionMode(JImage.MODE_RECT);
       constructLineProfiler();
       lineProfiler.setMode(LineProfilerViewer.LINE_MODE_DOUBLE);
       lineProfiler.setVisible(true);
-      profileMode = 3;
-      refreshDblProfileMenu();
+      profileMode = PROFILE_DUAL;
+      Rectangle sel = getSelectionFull();
+      clearMarkers();
+      hMarker = addHorizontalLineMarker(sel.y+sel.height/2,Color.GREEN);
+      vMarker = addVerticalLineMarker(sel.x+sel.width/2,Color.GREEN);
       refreshStatusAndProlfile();
 
-    } else if (evt.getSource() == histoButton ||
-        evt.getSource() == histogramMenuItem) {
+    } else if(src == profileHButton || src == lineHProfileMenuItem ) {
+
+      setSelectionFull();
+      imagePanel.setSelectionMode(JImage.MODE_RECT);
+      constructLineProfiler();
+      lineProfiler.setLineProfileMode();
+      lineProfiler.setVisible(true);
+      profileMode = PROFILE_HLINE;
+      Rectangle sel = getSelectionFull();
+      clearMarkers();
+      hMarker = addHorizontalLineMarker(sel.y+sel.height/2,Color.GREEN);
+      refreshStatusAndProlfile();
+
+    } else if(src == profileVButton || src == lineVProfileMenuItem ) {
+
+      setSelectionFull();
+      imagePanel.setSelectionMode(JImage.MODE_RECT);
+      constructLineProfiler();
+      lineProfiler.setLineProfileMode();
+      lineProfiler.setVisible(true);
+      profileMode = PROFILE_VLINE;
+      Rectangle sel = getSelectionFull();
+      clearMarkers();
+      vMarker = addVerticalLineMarker(sel.x+sel.width/2,Color.GREEN);
+      refreshStatusAndProlfile();
+
+    } else if (src == histoButton || src == histogramMenuItem) {
 
       imagePanel.setSelectionMode(JImage.MODE_RECT);
       constructLineProfiler();
       lineProfiler.setHistogramMode();
       lineProfiler.setVisible(true);
-      profileMode = 2;
-      refreshDblProfileMenu();
+      hMarker = -1;
+      vMarker = -1;
+      clearMarkers();
+      profileMode = PROFILE_HISTO;
       refreshStatusAndProlfile();
 
-    } else if (evt.getSource() == bestFitMenuItem) {
+    } else if (src == bestFitMenuItem) {
       setBestFit(!isBestFit());
-    } else if (evt.getSource() == negativeMenuItem) {
+    } else if (src == negativeMenuItem) {
       setNegative(!isNegative());
-    } else if (evt.getSource() == snapToGridMenuItem) {
+    } else if (src == snapToGridMenuItem) {
       setAlignToGrid(!isAlignToGrid());
-    } else if (evt.getSource() == toolbarMenuItem) {
+    } else if (src == toolbarMenuItem) {
       setToolbarVisible(!isToolbarVisible());
-    } else if (evt.getSource() == statusLineMenuItem) {
+    } else if (src == statusLineMenuItem) {
       setStatusLineVisible(!isStatusLineVisible());
-    } else if (evt.getSource() == showGradMenuItem) {
+    } else if (src == showGradMenuItem) {
       setGradientVisible(!isGradientVisible());
-    } else if (evt.getSource() == zoomButton ||
-        evt.getSource() == zoomMenuItem) {
+    } else if (src == zoomButton || src == zoomMenuItem) {
       showZoom();
-    } else if (evt.getSource() == zoomCombo) {
+    } else if (src == zoomCombo) {
       zoomFactor = zoomCombo.getSelectedIndex();
       synchronized (this) {
         buildZoom();
       }
       //zoomView.revalidate();
       zoomDialog.pack();
-    } else if (evt.getSource() == settingsButton ||
-        evt.getSource() == settingsMenuItem) {
+    } else if (src == settingsButton || src == settingsMenuItem) {
       showSettings();
-    } else if (evt.getSource() == autoBestFitCheck) {
+    } else if (src == autoBestFitCheck) {
       autoBestFit = !autoBestFit;
       minBestFitLabel.setEnabled(!autoBestFit);
       minBestFitText.setEnabled(!autoBestFit);
       maxBestFitLabel.setEnabled(!autoBestFit);
       maxBestFitText.setEnabled(!autoBestFit);
-    } else if (evt.getSource() == cancelButton) {
+    } else if (src == cancelButton) {
       settingsDialog.setVisible(false);
-    } else if (evt.getSource() == axisButton) {
+    } else if (src == axisButton) {
       showAxisDialog();
-    } else if (evt.getSource() == axisCloseButton) {
+    } else if (src == axisCloseButton) {
       axisDialog.setVisible(false);
-    } else if (evt.getSource() == okButton) {
+    } else if (src == okButton) {
       applySettings();
-    } else if (evt.getSource() == tableButton ||
-        evt.getSource() == tableMenuItem) {
+    } else if (src == tableButton ||src == tableMenuItem) {
       showTable();
-    } else if (evt.getSource() == propButton) {
+    } else if (src == propButton) {
       showPropertyFrame();
-    } else if (evt.getSource() == gradButton) {
+    } else if (src == gradButton) {
       showGradientEditor();
-    } else if (evt.getSource() == loadButton || evt.getSource() == loadMenuItem) {
+    } else if (src == loadButton || src == loadMenuItem) {
       loadButtonActionPerformed();
-    } else if (evt.getSource() == saveButton || evt.getSource() == saveMenuItem) {
+    } else if (src == saveButton || src == saveMenuItem) {
       saveButtonActionPerformed();
-    } else if (evt.getSource() == saveDataFileMenuItem) {
+    } else if (src == saveDataFileMenuItem) {
           saveDataFile();
-    } else if (evt.getSource() == printButton || evt.getSource() == printMenuItem) {
+    } else if (src == printButton || src == printMenuItem) {
       printImage();
-    } else if (evt.getSource() == displayLogMenuItem) {
+    } else if (src == displayLogMenuItem) {
       setLogValues( displayLogMenuItem.isSelected() );
-    } else if (evt.getSource() == vLeftCheckMenuItem) {
-      imagePanel.setVerticalPosition(JImage.VERTICAL_LEFT);
-      refreshStatusAndProlfile();
-    } else if (evt.getSource() == vCenterCheckMenuItem) {
-      imagePanel.setVerticalPosition(JImage.VERTICAL_CENTER);
-      refreshStatusAndProlfile();
-    } else if (evt.getSource() == vRigthCheckMenuItem) {
-      imagePanel.setVerticalPosition(JImage.VERTICAL_RIGHT);
-      refreshStatusAndProlfile();
-    } else if (evt.getSource() == hTopCheckMenuItem) {
-      imagePanel.setHorizontalPosition(JImage.HORIZONTAL_TOP);
-      refreshStatusAndProlfile();
-    } else if (evt.getSource() == hCenterCheckMenuItem) {
-      imagePanel.setHorizontalPosition(JImage.HORIZONTAL_CENTER);
-      refreshStatusAndProlfile();
-    } else if (evt.getSource() == hBottomCheckMenuItem) {
-      imagePanel.setHorizontalPosition(JImage.HORIZONTAL_BOTTOM);
-      refreshStatusAndProlfile();
     }
 
   }
@@ -3327,15 +3436,8 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
       if (e.getSource() == imagePanel) {
 
-        int x;
-        int y;
-        if(iSz<0) {
-          x = (e.getX() - imagePanel.getXOrigin()) / (-iSz);
-          y = (e.getY() - imagePanel.getYOrigin()) / (-iSz);
-        } else {
-          x = (e.getX() - imagePanel.getXOrigin()) * iSz;
-          y = (e.getY() - imagePanel.getYOrigin()) * iSz;
-        }
+        int x = getImageXCoord(e.getX());
+        int y = getImageYCoord(e.getY());
 
         if ((x >= imgsize.width) || (y >= imgsize.height) || (y < 0) || (x < 0)) {
           statusLabel.setText(getLabelInfoString());
@@ -3347,15 +3449,6 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
         refreshStatusLine();
 
       } else if (e.getSource() == zoomImage) {
-
-
-        /*
-        int x = e.getX() - zoomImage.getXOrigin();
-        int y = e.getY() - zoomImage.getYOrigin();
-        int xc = x / (zoomFactor + 1) + zoomXOrg;
-        int yc = y / (zoomFactor + 1) + zoomYOrg;
-        zoomText.setText("(" + x + "," + y + ") => (" + xc + "," + yc + ")  org=(" + zoomXOrg + "," + zoomYOrg + ") v=" + Double.toString(doubleValues[yc][xc]) );
-        */
 
         int x = (e.getX() - zoomImage.getXOrigin()) / (zoomFactor + 1) + zoomXOrg;
         int y = (e.getY() - zoomImage.getYOrigin()) / (zoomFactor + 1) + zoomYOrg;
@@ -3383,6 +3476,28 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   }
 
   public void mouseClicked(MouseEvent e) {
+
+    int x = getImageXCoord(e.getX());
+    int y = getImageYCoord(e.getY());
+
+    if(e.getButton()==MouseEvent.BUTTON1 && e.getSource() == imagePanel ) {
+      switch (profileMode) {
+        case PROFILE_HLINE:
+          setMarkerPos(hMarker,0,y,0,0);
+          refreshLineProfile();
+          break;
+        case PROFILE_VLINE:
+          setMarkerPos(vMarker,x,0,0,0);
+          refreshLineProfile();
+          break;
+        case PROFILE_DUAL:
+          setMarkerPos(hMarker,0,y,0,0);
+          setMarkerPos(vMarker,x,0,0,0);
+          refreshLineProfile();
+          break;
+      }
+    }
+
   }
 
   public void mouseReleased(MouseEvent e) {
@@ -3412,7 +3527,51 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
     }
 
   }
-  
+
+  private void parseSelection(String sel,Point p1,Point p2) {
+
+    String x1Str;
+    String y1Str;
+    String x2Str;
+    String y2Str;
+
+    sel = sel.substring(sel.indexOf('(') + 1);
+    x1Str = sel.substring(0, sel.indexOf(','));
+    sel = sel.substring(sel.indexOf(',') + 1);
+    y1Str = sel.substring(0, sel.indexOf(')'));
+
+    if (imagePanel.getSelectionMode() == JImage.MODE_LINE) {
+      sel = sel.substring(sel.indexOf('(') + 1);
+      x2Str = sel.substring(0, sel.indexOf(','));
+      sel = sel.substring(sel.indexOf(',') + 1);
+      y2Str = sel.substring(0, sel.indexOf(')'));
+    } else {
+      sel = sel.substring(sel.indexOf('[') + 1);
+      x2Str = sel.substring(0, sel.indexOf(','));
+      sel = sel.substring(sel.indexOf(',') + 1);
+      y2Str = sel.substring(0, sel.indexOf(']'));
+    }
+
+    p1.x = Integer.parseInt(x1Str);
+    p1.y = Integer.parseInt(y1Str);
+    p2.x = Integer.parseInt(x2Str);
+    p2.y = Integer.parseInt(y2Str);
+
+    // Convert to display coordinates
+    if(iSz<0) {
+      p1.x *= (-iSz);
+      p1.y *= (-iSz);
+      p2.x *= (-iSz);
+      p2.y *= (-iSz);
+    } else {
+      p1.x /= iSz;
+      p1.y /= iSz;
+      p2.x /= iSz;
+      p2.y /= iSz;
+    }
+
+  }
+
   // ----------------------------------------------------------
   // Keyboard listener
   // ----------------------------------------------------------
@@ -3420,54 +3579,19 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
   public void keyPressed(KeyEvent e) {
 
     if (e.getSource() == selText) {
-      if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-        // Browse the line
-        String sel = selText.getText();
 
+      if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 
         try {
 
-          String x1Str;
-          String y1Str;
-          String x2Str;
-          String y2Str;
-
-          sel = sel.substring(sel.indexOf('(') + 1);
-          x1Str = sel.substring(0, sel.indexOf(','));
-          sel = sel.substring(sel.indexOf(',') + 1);
-          y1Str = sel.substring(0, sel.indexOf(')'));
-
-
-          if (imagePanel.getSelectionMode() == 0) {
-            sel = sel.substring(sel.indexOf('(') + 1);
-            x2Str = sel.substring(0, sel.indexOf(','));
-            sel = sel.substring(sel.indexOf(',') + 1);
-            y2Str = sel.substring(0, sel.indexOf(')'));
+          Point p1 = new Point();
+          Point p2 = new Point();
+          parseSelection(selText.getText(),p1,p2);
+          if (imagePanel.getSelectionMode() == JImage.MODE_LINE) {
+            imagePanel.setSelection(p1.x, p1.y, p2.x, p2.y);
           } else {
-            sel = sel.substring(sel.indexOf('[') + 1);
-            x2Str = sel.substring(0, sel.indexOf(','));
-            sel = sel.substring(sel.indexOf(',') + 1);
-            y2Str = sel.substring(0, sel.indexOf(']'));
+            imagePanel.setSelection(p1.x, p1.y, p1.x + p2.x, p1.y + p2.y);
           }
-
-          int x1,y1,x2,y2;
-          if(iSz<0) {
-            x1 = Integer.parseInt(x1Str) * (-iSz);
-            y1 = Integer.parseInt(y1Str) * (-iSz);
-            x2 = Integer.parseInt(x2Str) * (-iSz);
-            y2 = Integer.parseInt(y2Str) * (-iSz);
-          } else {
-            x1 = Integer.parseInt(x1Str) / iSz;
-            y1 = Integer.parseInt(y1Str) / iSz;
-            x2 = Integer.parseInt(x2Str) / iSz;
-            y2 = Integer.parseInt(y2Str) / iSz;
-          }
-          if (imagePanel.getSelectionMode() == 0) {
-            imagePanel.setSelection(x1, y1, x2, y2);
-          } else {
-            imagePanel.setSelection(x1, y1, x1 + x2, y1 + y2);
-          }
-
 
         } catch (Exception ex) {
 
@@ -4587,9 +4711,9 @@ public class NumberImageViewer extends JPanel implements IImageListener, MouseMo
 
     }
 
-    int mid = d.addHorizontalLineMarker(512, Color.GREEN);
-    d.setCrossCursor(true);
-    d.setMarkerPos(mid,0,256,0,0);
+//    int mid = d.addHorizontalLineMarker(512, Color.GREEN);
+//    d.setCrossCursor(true);
+//    d.setMarkerPos(mid,0,256,0,0);
 //    d.setSelectionEnabled(false);
 
     f.getContentPane().setLayout(new BorderLayout());

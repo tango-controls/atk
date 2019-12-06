@@ -554,6 +554,15 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
     }
   }
 
+  public Point getMarkerPos(int id) {
+    if (id >= 0 && id < markers.size()) {
+      Marker m = (Marker) markers.get(id);
+      return new Point(m.markerRect.x,m.markerRect.y);
+    } else {
+      return null;
+    }
+  }
+
   /**
    * Clears all markers
    */
@@ -670,9 +679,9 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
       else {
         g2.setColor(Color.RED); 
       }
-      Stroke old = g2.getStroke();
-      BasicStroke bs = new BasicStroke(2);
-      g2.setStroke(bs);
+      //Stroke old = g2.getStroke();
+      //BasicStroke bs = new BasicStroke(2);
+      //g2.setStroke(bs);
 
       Rectangle r = buildSelectionRect();
       Rectangle c = new Rectangle(0, 0, cornerWidth, cornerWidth);
@@ -682,7 +691,7 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
         case MODE_LINE: // Line
           g2.drawLine(x1, y1, x2, y2);
 
-          g2.setStroke(old);
+          //g2.setStroke(old);
 
           // Draw arrow
           int xc = (x1 + x2) / 2;
@@ -716,7 +725,7 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
           g2.drawRect(r.x, r.y, r.width, r.height);
 
           // Draw corners
-          g2.setStroke(old);
+          //g2.setStroke(old);
           c.translate(r.x - cornerWidth / 2, r.y - cornerWidth / 2);
           g2.drawRect(c.x, c.y, c.width, c.height);
           c.translate(r.width, 0);
@@ -786,7 +795,7 @@ public class JImage extends JComponent implements MouseMotionListener, MouseList
                   g2.drawLine( xv + 8, y2 + 8, xv, y2 );
               }
               // Draw corners
-              g2.setStroke( old );
+              //g2.setStroke( old );
               c.translate( r.x - cornerWidth / 2, r.y - cornerWidth / 2 );
               g2.drawRect( c.x, c.y, c.width, c.height );
               c.translate( r.width, 0 );

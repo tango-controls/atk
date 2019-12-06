@@ -22,6 +22,8 @@
  
 package fr.esrf.tangoatk.widget.image;
 
+import fr.esrf.tangoatk.widget.attribute.NumberImageViewer;
+
 import javax.swing.*;
 
 /**
@@ -39,10 +41,22 @@ public class LineProfilerViewer extends JFrame {
   private LineProfilerPanel profile1;
   private LineProfilerPanel profile2;
   private int mode;
+  private NumberImageViewer parent;
 
   public LineProfilerViewer() {
+    this(null);
+  }
+
+  public LineProfilerViewer(NumberImageViewer parent) {
+    this.parent = parent;
     splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-    profile1  = new LineProfilerPanel();
+    profile1  = new LineProfilerPanel(parent);
+    setTitle("[LineProfile] ImageViewer");
+    profile1.getChart().setHeader("Line profile");
+    profile1.getChart().getXAxis().setName("Pixel index");
+    profile1.getChart().getY1Axis().setName("Value");
+    profile1.getChart().setLabelVisible(false);
+    profile1.getChart().setName("Pixel value");
     profile2  = null; // Does not construct the second profiler yet
     splitPane.setLeftComponent(profile1);
     splitPane.setRightComponent(null);
@@ -64,41 +78,73 @@ public class LineProfilerViewer extends JFrame {
     if(profile2!=null) profile2.setFormat(format);
   }
 
+  public void setHeader(String header) {
+    profile1.getChart().setHeader(header);
+  }
+
+  public void setSource(String source,Object value) {
+    profile1.setSource(source, value);
+
+  }
+
+  public void setHeader2(String header) {
+    profile2.getChart().setHeader(header);
+  }
+
+  public void setSource2(String source,Object value) {
+    profile2.setSource(source, value);
+  }
+
   public void setMode(int mode) {
+
+    if(mode==this.mode) {
+      // No mode change
+      // Do nothing
+      return;
+    }
 
     this.mode = mode;
 
     switch(this.mode) {
 
       case LINE_MODE_SINGLE:
-        setTitle("[profile] ImageViewer");
+        setTitle("[LineProfile] ImageViewer");
         profile1.getChart().setHeader("Line profile");
         profile1.getChart().getXAxis().setName("Pixel index");
         profile1.getChart().getY1Axis().setName("Value");
+        profile1.getChart().setLabelVisible(false);
         profile1.getChart().setName("Pixel value");
         if(profile1.getChart().isZoomed()) profile1.getChart().exitZoom();
         if(profile2!=null) {
           splitPane.setRightComponent(null);
           profile2.setVisible(false);
+          pack();
         }
         break;
 
       case LINE_MODE_DOUBLE:
-        setTitle("[profile] ImageViewer");
-        if(profile2==null) profile2 = new LineProfilerPanel();
+        setTitle("[LineProfile] ImageViewer");
+        if(profile2==null) {
+          profile2 = new LineProfilerPanel(parent);
+          profile2.setId(2);
+        }
 
         profile1.getChart().setHeader("Line profile (Horizontal)");
         profile1.getChart().getXAxis().setName("Pixel index");
         profile1.getChart().getY1Axis().setName("Value");
+        profile1.getChart().setLabelVisible(false);
         profile1.getChart().setName("Pixel value");
         if(profile1.getChart().isZoomed()) profile1.getChart().exitZoom();
         profile2.getChart().setHeader("Line profile (Vertical)");
         profile2.getChart().getXAxis().setName("Pixel index");
         profile2.getChart().getY1Axis().setName("Value");
+        profile2.getChart().setLabelVisible(false);
         profile2.getChart().setName("Pixel value");
+
         if(profile2.getChart().isZoomed()) profile2.getChart().exitZoom();
         splitPane.setRightComponent(profile2);
         profile2.setVisible(true);
+        pack();
         break;
 
       case HISTOGRAM_MODE:
@@ -111,11 +157,11 @@ public class LineProfilerViewer extends JFrame {
         if(profile2!=null) {
           splitPane.setRightComponent(null);
           profile2.setVisible(false);
+          pack();
         }
         break;
 
     }
-    pack();
 
   }
 
