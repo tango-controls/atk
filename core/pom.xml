@@ -5,7 +5,7 @@
 
     <groupId>org.tango.atk</groupId>
     <artifactId>ATKCore</artifactId>
-    <version>9.3.15</version>
+    <version>9.3.16-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
