@@ -11,7 +11,7 @@
         <dependency>
             <groupId>org.tango-controls</groupId>
             <artifactId>JTango</artifactId>
-            <version>9.5.13</version>
+            <version>9.5.15</version>
             <type>pom</type>
         </dependency>
     </dependencies>
