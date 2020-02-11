@@ -7,6 +7,12 @@ import java.io.IOException;
  */
 public class Jpeg24ImageFormat extends RGB24ImageFormat {
 
+  JpegDecoder dec;
+
+  public Jpeg24ImageFormat() {
+    dec = new JpegDecoder();
+  }
+
   public String getName() {
     return "RGB24 (JPEG)";
   }
@@ -15,7 +21,7 @@ public class Jpeg24ImageFormat extends RGB24ImageFormat {
 
     data = zImg;
     if(rawData!=null) {
-      JpegDecoder dec = new JpegDecoder(rawData);
+      dec.setBuffer(rawData);
       byte[][] d = dec.decode();
       if( dec.GetType()!=JpegDecoder.RGB24 )
         new IOException("Jpeg24ImageFormat: Unexpected jpeg format");

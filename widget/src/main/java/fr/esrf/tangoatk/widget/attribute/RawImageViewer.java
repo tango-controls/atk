@@ -25,6 +25,7 @@ package fr.esrf.tangoatk.widget.attribute;
 import fr.esrf.tangoatk.core.IRawImageListener;
 import fr.esrf.tangoatk.core.RawImageEvent;
 import fr.esrf.tangoatk.core.IRawImage;
+import fr.esrf.tangoatk.core.attribute.NumberScalar;
 import fr.esrf.tangoatk.widget.util.*;
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
 import fr.esrf.tangoatk.widget.util.chart.AxisPanel;
@@ -71,6 +72,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
   private double minFit;
   private double maxFit;
   private String errorString = "No image";
+  private int rgb[];
 
   // ------------------------------------------------------
   // Main panel components
@@ -378,6 +380,8 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
    */
   public void setData(String encFormat,byte[] rawData) {
 
+    long t0 = System.currentTimeMillis();
+
     if( encFormat==null ) {
 
       // Clear
@@ -437,7 +441,6 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
             imageView.revalidate();
           }
         }
-
         computeAutoZoom();
         convertImage();
         refreshComponents();
@@ -1312,6 +1315,24 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
   }
 
+  /**
+   * Sets the minimum value for fitting
+   * @param min Min fit value (in percent)
+   */
+  public void setMinFit(double min) {
+    minFit = min;
+    applyFitting();
+  }
+
+  /**
+   * Sets the maximum value for fitting
+   * @param max Max fit value (in percent)
+   */
+  public void setMaxFit(double max) {
+    maxFit = max;
+    applyFitting();
+  }
+
   private void applyFitting() {
 
     boolean ok = true;
@@ -2072,7 +2093,6 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
     if(dimx==0 || dimy==0) return;
 
-    //long t1 = System.currentTimeMillis();
 
     BufferedImage lastImg = imagePanel.getImage();
 
@@ -2089,6 +2109,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
     if (lastImg == null || lastImg.getHeight() != rdimy || lastImg.getWidth() != rdimx) {
       // Recreate the image
       //System.out.println("Creating new Image:" + rdimx + "," + rdimy + " Old=" + lastImg);
+      rgb = new int[rdimx];
       lastImg = new BufferedImage(rdimx, rdimy, BufferedImage.TYPE_INT_RGB);
       imagePanel.setImage(lastImg);
       freePopup();
@@ -2096,9 +2117,10 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
       refreshComponents();
     }
 
-    int[] rgb = new int[rdimx];
     format.computeFitting();
     if(isGradientVisible()) gradientTool.repaint();
+
+    //long t1 = System.currentTimeMillis();
 
     // Fill the image
     if (iSz < 0) {
@@ -2113,7 +2135,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
             rgb[i * sz + k] = c;
         }
         for (int k = 0; k < sz; k++)
-          lastImg.setRGB(0, j * sz + k, rdimx, 1, rgb, 0, rdimx);
+          lastImg.getRaster().setDataElements(0,j * sz + k,rdimx,1,rgb);
       }
 
     } else {
@@ -2122,16 +2144,17 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
       for (int j = 0, l = 0; l < rdimy; j += iSz, l++) {
         for (int i = 0, k = 0; k < rdimx; i += iSz, k++)
           rgb[k] = format.getRGB(isNegative, gColormap, i, j);
-        lastImg.setRGB(0, l, rdimx, 1, rgb, 0, rdimx);
+        lastImg.getRaster().setDataElements(0,l,rdimx,1,rgb);
       }
 
     }
 
+    //long T = System.currentTimeMillis() - t1;
+    //System.out.println("Image conversion:" + T + " ms.");
+
     imagePanel.repaint();
     imageView.revalidate();
 
-    //long T = System.currentTimeMillis() - t1;
-    //System.out.println("Image conversion:" + T + " ms.");
 
   }
 
@@ -2143,9 +2166,12 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
 
     final JFrame f = new JFrame();
     final RawImageViewer d = new RawImageViewer();
+    final NumberScalarWheelEditor nse = new NumberScalarWheelEditor();
 
     d.setCrossCursor(true);
-    d.setBestFit(true);
+    //d.setBestFit(true);
+    d.setMinFit(6);
+    d.setMaxFit(90);
 
     final fr.esrf.tangoatk.core.AttributeList attributeList =
         new fr.esrf.tangoatk.core.AttributeList();
@@ -2159,8 +2185,10 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
       //theAtt = (IRawImage) attributeList.add("et/jpeg/01/TheImage");
       //theAtt = (IRawImage) attributeList.add("et/jpeg/01/AnotherImage");
       //theAtt = (IRawImage) attributeList.add("et/jpeg/01/YetAnother");
-      theAtt = (IRawImage) attributeList.add("sr/d-ccd/id25-a/jpegimage");
+      theAtt = (IRawImage) attributeList.add("srdiag/ccd/c25-1/jpegimage");
       d.setModel(theAtt);
+      NumberScalar smooth = (NumberScalar)attributeList.add("srdiag/ccd/c25-1/jpegsmooth");
+      nse.setModel(smooth);
 
     } catch (Exception e) {
 
@@ -2205,6 +2233,7 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
       }
     });
     panel.add(chMdoelBtn);
+    panel.add(nse);
 
     f.getContentPane().add(panel, BorderLayout.SOUTH);
 

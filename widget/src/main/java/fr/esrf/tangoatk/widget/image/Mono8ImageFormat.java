@@ -124,22 +124,18 @@ public class Mono8ImageFormat extends IImageFormat {
 
   }
 
-  private int bestFit(byte b) {
-
-    int v = b & 0xFF; // Unsigned
-    int nv = (int) ((bfA0 + v) * bfA1);
-    if (nv < 0) return 0;
-    if (nv > 65535) return 65535;
-    return nv;
-
-  }
-
   public int getRGB(boolean negative,int[] colormap16,int x,int y) {
 
+    // Best fit
+    double v = (data[y][x] & 0xFF);
+    int nv = (int) ((bfA0 + v) * bfA1);
+    if (nv < 0) nv = 0;
+    if (nv > 65535) nv = 65535;
+
     if(negative) {
-      return colormap16[(~bestFit(data[y][x])) & 65535];
+      return colormap16[~nv & 65535];
     } else {
-      return colormap16[bestFit(data[y][x])];
+      return colormap16[nv];
     }
 
   }

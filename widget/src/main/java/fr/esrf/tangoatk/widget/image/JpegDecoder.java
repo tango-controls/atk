@@ -1,11 +1,20 @@
 package fr.esrf.tangoatk.widget.image;
 
+import com.sun.imageio.plugins.jpeg.JPEGImageReader;
+
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
+import javax.imageio.ImageReader;
+import javax.imageio.ImageTypeSpecifier;
+import javax.imageio.stream.MemoryCacheImageInputStream;
+import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.DataBuffer;
+import java.awt.image.Raster;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 
 /**
  * A class to decode jpeg image
@@ -22,15 +31,35 @@ public class JpegDecoder extends InputStream {
   private byte[] cache;
   private int pos;
   private int type;
+  JPEGImageReader imgReader;
+  MemoryCacheImageInputStream stream;
 
   /**
    * Contructs a JPEG decoder
+   */
+  public JpegDecoder() {
+
+    stream = new MemoryCacheImageInputStream(this);
+    Iterator imgIt = ImageIO.getImageReadersByFormatName("jpeg");
+    if (!imgIt.hasNext()) {
+      JOptionPane.showMessageDialog(null, "Jpeg decoder not found", "Error", JOptionPane.ERROR_MESSAGE);
+      imgReader = null;
+    } else {
+      imgReader = (JPEGImageReader)imgIt.next();
+    }
+
+  }
+
+  /**
+   * Set data
    * @param jpgBuffer buffer of encoded data
    */
-  public JpegDecoder(byte[] jpgBuffer) {
+  public void setBuffer(byte[] jpgBuffer) {
+
     cache = jpgBuffer;
     pos = 0;
     type = 0;
+
   }
 
   /**
@@ -49,45 +78,47 @@ public class JpegDecoder extends InputStream {
    */
   public byte[][] decode() throws IOException {
 
+    if(imgReader==null)
+      throw new IOException("No native JPEG decoder available");
+
     byte[][] img = null;
     DataBufferByte data;
 
     pos = 0;
-    BufferedImage ret = ImageIO.read(this);
-    if (ret == null)
-      throw new IOException("Jpeg decoding error");
 
-    int width  = ret.getWidth();
-    int height = ret.getHeight();
-    int type   = ret.getType();
+    imgReader.setInput(stream, true, true);
+    ImageReadParam param = imgReader.getDefaultReadParam();
+    Raster r = imgReader.readRaster(0,param);
+
+    int width  = r.getWidth();
+    int height = r.getHeight();
+    int colors = imgReader.getRawImageType(0).getColorModel().getNumColorComponents();
     int startLine = 0;
 
-    switch(type) {
+    switch(colors) {
 
-      case BufferedImage.TYPE_3BYTE_BGR:
+      case 1:
+        type = GRAY8;
+        data = (DataBufferByte)r.getDataBuffer();
+        img = new byte[height][width];
+        for(int i=0;i<height;i++) {
+          System.arraycopy(data.getData(),startLine,img[i],0,width);
+          startLine += width;
+        }
+        break;
 
+      case 3:
         type = RGB24;
-        img  = new byte[height][width*3];
-        data = (DataBufferByte)ret.getRaster().getDataBuffer();
+        data = (DataBufferByte)r.getDataBuffer();
+        img = new byte[height][width*3];
         for(int i=0;i<height;i++) {
           System.arraycopy(data.getData(),startLine,img[i],0,width*3);
           startLine += width*3;
         }
         break;
 
-      case BufferedImage.TYPE_BYTE_GRAY:
-
-        type = GRAY8;
-        img = new byte[height][width];
-        data = (DataBufferByte)ret.getRaster().getDataBuffer();
-        for(int i=0;i<height;i++) {
-          System.arraycopy(data.getData(),startLine,img[i],0,width);
-          startLine += width;
-        }
-
-      break;
       default:
-        throw new IOException("Unsupported jpeg format");
+        throw new IOException("Unexpected JPEG color format");
     }
 
     return img;

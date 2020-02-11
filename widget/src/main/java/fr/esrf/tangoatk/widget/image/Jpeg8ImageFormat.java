@@ -7,6 +7,12 @@ import java.io.IOException;
  */
 public class Jpeg8ImageFormat extends Mono8ImageFormat {
 
+  JpegDecoder dec;
+
+  public Jpeg8ImageFormat() {
+    dec = new JpegDecoder();
+  }
+
   public String getName() {
     return "MONO8 (JPEG)";
   }
@@ -15,7 +21,7 @@ public class Jpeg8ImageFormat extends Mono8ImageFormat {
 
     data = zImg;
     if(rawData!=null) {
-      JpegDecoder dec = new JpegDecoder(rawData);
+      dec.setBuffer(rawData);
       byte[][] d = dec.decode();
       if( dec.GetType()!=JpegDecoder.GRAY8 )
         new IOException("Jpeg8ImageFormat: Unexpected jpeg format");
