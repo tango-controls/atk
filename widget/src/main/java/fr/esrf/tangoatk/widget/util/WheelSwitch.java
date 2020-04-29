@@ -228,7 +228,7 @@ public class WheelSwitch extends JComponent {
         double dval1 = 0;
         double dval2 = 0;
         value = v;
-        if (!Double.isNaN(v))
+        if (!Double.isNaN(v) && !Double.isInfinite(v))
         {
             if (format.indexOf('e') > 0) {
                 dval1 = getFloatPart().doubleValue();
@@ -667,7 +667,7 @@ public class WheelSwitch extends JComponent {
 
         grabFocus();
 
-        if (Double.isNaN(value))
+        if (Double.isNaN(value) || Double.isInfinite(value))
             return;
 
         while (i < nbButton && !found) {
@@ -693,7 +693,7 @@ public class WheelSwitch extends JComponent {
 
         grabFocus();
 
-        if (Double.isNaN(value))
+        if (Double.isNaN(value) || Double.isInfinite(value))
             return;
 
         while (i < nbButton && !found) {
@@ -749,7 +749,7 @@ public class WheelSwitch extends JComponent {
 
   private void computeValueFormatted() {
 
-    if (Double.isNaN(value)) {
+    if (Double.isNaN(value) || Double.isInfinite(value)) {
       valueFormatted = "";
       return;
     }
@@ -779,7 +779,7 @@ public class WheelSwitch extends JComponent {
   //Return the digit at the specified position
   private char getDigit(int pos) {
 
-    if (Double.isNaN(value))
+    if (Double.isNaN(value) || Double.isInfinite(value))
       return '-';
 
     String intPart = "";
@@ -963,7 +963,7 @@ public class WheelSwitch extends JComponent {
         }
         else {
             String displayVal = ATKFormat.format(format, value);
-            if (!Double.isNaN(value) && displayVal != null) {
+            if (!Double.isNaN(value) && !Double.isInfinite(value) && displayVal != null) {
                 displayVal = displayVal.toLowerCase();
                 return Double.valueOf(displayVal.substring(displayVal.indexOf('e') + 1));
             }
@@ -980,7 +980,7 @@ public class WheelSwitch extends JComponent {
         }
         else {
             String displayVal = ATKFormat.format(format, value);
-            if (!Double.isNaN(value) && displayVal != null) {
+            if (!Double.isNaN(value) && !Double.isInfinite(value) && displayVal != null) {
                 displayVal = displayVal.toLowerCase();
                 return Double.valueOf(displayVal.substring(0,displayVal.indexOf('e')));
             }
@@ -1044,7 +1044,7 @@ public class WheelSwitch extends JComponent {
         System.out.println("Math.pow(10, dval2) : " + Math.pow(10, dval2));*/
         double newValue = near(dval1) * Math.pow(10, dval2);
 
-        if (!Double.isNaN(newValue)) {
+        if (!Double.isNaN(newValue) && !Double.isInfinite(newValue)) {
 
             double curValue = getValue();
             double delta = Math.abs(curValue-newValue);
@@ -1114,7 +1114,7 @@ public class WheelSwitch extends JComponent {
         System.out.println("Math.pow(10, dval2) : " + Math.pow(10, dval2));*/
         double newValue = near(dval1) * Math.pow(10, dval2);
 
-        if (!Double.isNaN(newValue)) {
+        if (!Double.isNaN(newValue) && !Double.isInfinite(newValue)) {
 
           double curValue = getValue();
           double delta = Math.abs(curValue-newValue);
