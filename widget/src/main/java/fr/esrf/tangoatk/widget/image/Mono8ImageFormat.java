@@ -90,8 +90,10 @@ public class Mono8ImageFormat extends IImageFormat {
 
     if (!bestFit) {
 
-      tool.getAxis().setMinimum(-bfA0);
-      tool.getAxis().setMaximum(-bfA0 + (1.0/bfA1)*65536.0);
+      if(tool.isVisible()) {
+        tool.getAxis().setMinimum(-bfA0);
+        tool.getAxis().setMaximum(-bfA0 + (1.0/bfA1)*65536.0);
+      }
 
     } else {
 
@@ -112,12 +114,16 @@ public class Mono8ImageFormat extends IImageFormat {
       if (autoBfMax == autoBfMin) {
         // Uniform picture
         bfA1 = 0.0;
-        tool.getAxis().setMinimum(autoBfMin);
-        tool.getAxis().setMaximum(autoBfMax+1.0);
+        if(tool.isVisible()) {
+          tool.getAxis().setMinimum(autoBfMin);
+          tool.getAxis().setMaximum(autoBfMax+1.0);
+        }
       } else {
         bfA1 = (65536.0) / (autoBfMax - autoBfMin);
-        tool.getAxis().setMinimum(autoBfMin);
-        tool.getAxis().setMaximum(autoBfMax);
+        if(tool.isVisible()) {
+          tool.getAxis().setMinimum(autoBfMin);
+          tool.getAxis().setMaximum(autoBfMax);
+        }
       }
 
     }
