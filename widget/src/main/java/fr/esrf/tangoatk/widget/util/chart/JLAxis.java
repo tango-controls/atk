@@ -2893,7 +2893,7 @@ public class JLAxis implements java.io.Serializable {
 
   }
 
-  private void paintDataViewBar(Graphics2D g2,BasicStroke bs,Paint fPattern,JLDataView v,DataList l,
+  private void paintDataViewBar(Graphics2D g2,BasicStroke bs,Paint fPattern,JLDataView v,DataList l,int startOffset,
                                 JLAxis xAxis, int xOrg, int yOrg,int y0,
                                 int xMin,int xMax,int yMin,int yMax,double iX,double iY) {
 
@@ -2908,7 +2908,7 @@ public class JLAxis implements java.io.Serializable {
     boolean isXLogScale = xAxis.getScale() == LOG_SCALE;
     boolean isYLogScale = getScale() == LOG_SCALE;
     double vt;
-    int nb=0;
+    int nb=startOffset;
     double minx = xAxis.getMin();
     double miny = min;
     double ly = getLength();
@@ -3329,7 +3329,9 @@ public class JLAxis implements java.io.Serializable {
 
     double iX = (1.0 / (maxx - minx)) * lx;
     double iY = (1.0 / (maxy - miny)) * ly;
-    int px=0;
+    int px;
+    int start = 0;
+
 
     // Search first valid position
     boolean found = false;
@@ -3347,16 +3349,22 @@ public class JLAxis implements java.io.Serializable {
       if(!found) {
         prec = l;
         l=l.next;
+        start++;
       }
     }
-    if(prec!=null) l=prec;
+    if(prec!=null) {
+      l=prec;
+      start--;
+    } else {
+      start=0;
+    }
 
     // Nothing visible
     if(l==null) return;
 
     if (v.getViewType() == JLDataView.TYPE_BAR) {
 
-      paintDataViewBar(g2,bs,fPattern,v,l,xAxis,xOrg,yOrg,y0,xMin,xMax,yMin,yMax,iX,iY);
+      paintDataViewBar(g2,bs,fPattern,v,l,start,xAxis,xOrg,yOrg,y0,xMin,xMax,yMin,yMax,iX,iY);
 
     } else {
 

@@ -3255,6 +3255,7 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
     chart.setLabelVisible(false);
 
     // ---------------------------------------------
+      /*
 
     int NB_PTS = 100;
     int NB_CURVE = 5;
@@ -3273,20 +3274,34 @@ public class JLChart extends JComponent implements MouseWheelListener, MouseList
       }
       chart.getY1Axis().addDataView(v[j]);
     }
+    */
+
+    JLDataView b = new JLDataView();
+    b.setBarWidth(5);
+    b.setViewType(JLDataView.TYPE_BAR);
+    b.add(1,1);
+    b.add(2,2);
+    b.add(3,3);
+    b.add(4,4);
+
+    b.setBarFillColorAt(2,Color.GREEN);
+    b.setFillStyle(JLDataView.FILL_STYLE_SOLID);
+
+    chart.getY1Axis().addDataView(b);
 
     // -----------------------------------------------------------------
 
     JPanel bot = new JPanel();
     bot.setLayout(new FlowLayout());
 
-    JButton b = new JButton("Exit");
-    b.addMouseListener(new MouseAdapter() {
+    JButton btn = new JButton("Exit");
+    btn.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
         System.exit(0);
       }
     });
 
-    bot.add(b);
+    bot.add(btn);
 
     JButton c = new JButton("Options");
     c.addMouseListener(new MouseAdapter() {
