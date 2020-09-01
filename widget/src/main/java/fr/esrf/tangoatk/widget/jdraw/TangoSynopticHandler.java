@@ -542,7 +542,7 @@ public class TangoSynopticHandler extends JDrawEditor
 // not needed : automatically started in dFac class      dFac.startRefresher();
    }
 
-    private void clearAllPanels()
+    public void clearAllPanels()
     {
         Iterator<PanelItem> it = panelList.iterator();
         while (it.hasNext())
