@@ -819,9 +819,10 @@ private static void addXaxisMinMaxAtt (NumberSpectrumViewer viewer, INumberSpect
       NumberSpectrumViewer nsv = new NumberSpectrumViewer();
       nsv.setManageXaxis(true);
       //INumberSpectrum      ins = (INumberSpectrum) attributeList.add("sr/d-mfdbk/horizontal/FFT");
-      INumberSpectrum      ins = (INumberSpectrum) attributeList.add("//orion:10000/sr/d-acdipole/h/Waveform");
-      //INumberSpectrum      ins = (INumberSpectrum) attributeList.add("//kidiboo:10000/fp/test/1/double_spectrum");
+//      INumberSpectrum      ins = (INumberSpectrum) attributeList.add("//acs:10000/sr/d-acdipole/h/Waveform");
+      INumberSpectrum      ins = (INumberSpectrum) attributeList.add("//acudebian7:10000/jlp/test/1/att_spectrum");
       nsv.setModel(ins);
+      nsv.setHeader("Test Header");
       addXaxisMinMaxAtt(nsv, ins);
       //nsv.setModel((INumberSpectrum) attributeList.add("jlp/test/1/att_spectrum"));
       //nsv.setModel((INumberSpectrum) attributeList.add("sr/d-tm/agilent4395/spectrum"));
