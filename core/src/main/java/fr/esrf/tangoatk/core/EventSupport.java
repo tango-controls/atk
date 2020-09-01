@@ -91,8 +91,14 @@ public class EventSupport implements Serializable
       int p = lName.lastIndexOf('.');
       if(p>=0) lName = lName.substring(p+1);
 
-      String cName = lst[i].getClass().toString();
-      if(cName.startsWith("class ")) cName = cName.substring(6);
+     WeakReference<EventListener> weakRef = (WeakReference)lst[i];
+     String cName;
+     if( weakRef.get()==null) {
+       cName = "LostWeakRef";
+     } else {
+       cName = weakRef.get().getClass().toString();
+       if (cName.startsWith("class ")) cName = cName.substring(6);
+     }
 
       ret += cName + " [@" + Integer.toHexString(lst[i].hashCode()) + "] is " + lName + "\n";
     }

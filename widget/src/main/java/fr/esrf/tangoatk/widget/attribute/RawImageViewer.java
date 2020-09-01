@@ -22,9 +22,8 @@
  
 package fr.esrf.tangoatk.widget.attribute;
 
-import fr.esrf.tangoatk.core.IRawImageListener;
-import fr.esrf.tangoatk.core.RawImageEvent;
-import fr.esrf.tangoatk.core.IRawImage;
+import fr.esrf.tangoatk.core.*;
+import fr.esrf.tangoatk.core.attribute.AttributeFactory;
 import fr.esrf.tangoatk.core.attribute.NumberScalar;
 import fr.esrf.tangoatk.widget.util.*;
 import fr.esrf.tangoatk.widget.util.chart.JLAxis;
@@ -2167,28 +2166,52 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
     final JFrame f = new JFrame();
     final RawImageViewer d = new RawImageViewer();
     final NumberScalarWheelEditor nse = new NumberScalarWheelEditor();
+    final NumberScalarViewer nsv = new NumberScalarViewer();
 
-    d.setCrossCursor(true);
-    //d.setBestFit(true);
-    d.setMinFit(6);
-    d.setMaxFit(90);
+    d.setStatusLineVisible(false);
+    d.setGradientVisible(false);
+    d.setToolbarVisible(false);
 
     final fr.esrf.tangoatk.core.AttributeList attributeList =
         new fr.esrf.tangoatk.core.AttributeList();
     final ErrorHistory errWin = new ErrorHistory();
     attributeList.addErrorListener(errWin);
 
+    d.setBestFit(false);
+    Gradient g = new Gradient();
+    g.buildRainbowGradient();
+    g.setColorAt(0,new Color(10,10,10));
+    g.addEntry(new Color(255,255,50),0.1);
+    d.setGradient(g);
+    d.setAutoZoom(false);
+    d.setZoom(2);
+
+    Object Rref;
+
     try {
 
-      IRawImage theAtt;
-      //theAtt = (IRawImage) attributeList.add("jlp/image/1/image");
-      //theAtt = (IRawImage) attributeList.add("et/jpeg/01/TheImage");
-      //theAtt = (IRawImage) attributeList.add("et/jpeg/01/AnotherImage");
-      //theAtt = (IRawImage) attributeList.add("et/jpeg/01/YetAnother");
-      theAtt = (IRawImage) attributeList.add("srdiag/ccd/c25-1/jpegimage");
+      final IRawImage theAtt = (IRawImage) AttributeFactory.getInstance().getAttribute("srdiag/ccd/c25-1/jpegimage");
       d.setModel(theAtt);
+      theAtt.refresh();
       NumberScalar smooth = (NumberScalar)attributeList.add("srdiag/ccd/c25-1/jpegsmooth");
       nse.setModel(smooth);
+      NumberScalar counter = (NumberScalar)attributeList.add("srdiag/ccd/c25-1/ImageCounter");
+      nsv.setModel(counter);
+
+      class R implements fr.esrf.tangoatk.core.INumberScalarListener {
+        public void numberScalarChange(NumberScalarEvent evt) {
+          System.out.println("Refresh enter #" + (int)evt.getValue());
+          theAtt.refresh();
+          System.out.println("Refresh exit #" + (int)evt.getValue());
+        }
+        public void stateChange(AttributeStateEvent e) {
+        }
+        public void errorChange(ErrorEvent evt) {
+        }
+      };
+
+      Rref = new R();
+      counter.addNumberScalarListener((R)Rref);
 
     } catch (Exception e) {
 
@@ -2214,36 +2237,18 @@ public class RawImageViewer extends JPanel implements IRawImageListener,ActionLi
       }
     });
     panel.add(diagBtn);
-    JButton chMdoelBtn = new JButton("Change model");
-    chMdoelBtn.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) {
-
-        try {
-
-          IRawImage theAtt;
-          theAtt = (IRawImage) attributeList.add("sr/d-ccd/d9-a/jpegimage");
-          d.setModel(theAtt);
-
-        } catch (Exception ex) {
-
-          ex.printStackTrace();
-
-        }
-
-      }
-    });
-    panel.add(chMdoelBtn);
     panel.add(nse);
+    panel.add(nsv);
 
     f.getContentPane().add(panel, BorderLayout.SOUTH);
+
+    attributeList.setRefreshInterval(1000);
+    attributeList.startRefresher();
 
     f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     f.setTitle("RawImageViewer");
     f.pack();
     f.setVisible(true);
-
-    attributeList.setRefreshInterval(1000);
-    attributeList.startRefresher();
 
   }
 
