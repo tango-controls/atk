@@ -4,16 +4,11 @@ import com.sun.imageio.plugins.jpeg.JPEGImageReader;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReadParam;
-import javax.imageio.ImageReader;
-import javax.imageio.ImageTypeSpecifier;
-import javax.imageio.stream.MemoryCacheImageInputStream;
+import javax.imageio.stream.ImageInputStreamImpl;
 import javax.swing.*;
-import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.awt.image.DataBuffer;
 import java.awt.image.Raster;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Iterator;
 
 /**
@@ -21,7 +16,7 @@ import java.util.Iterator;
  * Author: JL Pons
  */
 
-public class JpegDecoder extends InputStream {
+public class JpegDecoder extends ImageInputStreamImpl {
 
   /** 32 Bits RGB */
   public final static int RGB24 = 1;
@@ -29,17 +24,14 @@ public class JpegDecoder extends InputStream {
   public final static int GRAY8 = 2;
 
   private byte[] cache;
-  private int pos;
   private int type;
   JPEGImageReader imgReader;
-  MemoryCacheImageInputStream stream;
 
   /**
    * Contructs a JPEG decoder
    */
   public JpegDecoder() {
 
-    stream = new MemoryCacheImageInputStream(this);
     Iterator imgIt = ImageIO.getImageReadersByFormatName("jpeg");
     if (!imgIt.hasNext()) {
       JOptionPane.showMessageDialog(null, "Jpeg decoder not found", "Error", JOptionPane.ERROR_MESSAGE);
@@ -57,7 +49,8 @@ public class JpegDecoder extends InputStream {
   public void setBuffer(byte[] jpgBuffer) {
 
     cache = jpgBuffer;
-    pos = 0;
+    streamPos = 0;
+    bitOffset = 0;
     type = 0;
 
   }
@@ -84,9 +77,9 @@ public class JpegDecoder extends InputStream {
     byte[][] img = null;
     DataBufferByte data;
 
-    pos = 0;
+    streamPos = 0;
 
-    imgReader.setInput(stream, true, true);
+    imgReader.setInput(this, true, true);
     ImageReadParam param = imgReader.getDefaultReadParam();
     Raster r = imgReader.readRaster(0,param);
 
@@ -124,20 +117,34 @@ public class JpegDecoder extends InputStream {
     return img;
   }
 
+
   public int read() throws IOException {
 
-    if (pos >= cache.length)
+    bitOffset = 0;
+    if (streamPos >= cache.length)
       return -1;
-    int i = (int)cache[pos];
+    int i = (int)cache[(int)streamPos];
     i = i & 0xFF;
-    pos++;
+    streamPos++;
     return i;
 
   }
 
-  public int available() throws IOException {
+  @Override
+  public int read(byte[] b, int off, int len) throws IOException {
 
-    return cache.length - pos;
+    bitOffset = 0;
+
+    int remainingByte = (int) (cache.length-streamPos);
+    int byteToCopy = (len<=remainingByte)?len:remainingByte;
+
+    if(byteToCopy>0) {
+      System.arraycopy(cache,(int)streamPos,b,off,byteToCopy);
+      streamPos += byteToCopy;
+      return byteToCopy;
+    } else {
+      return -1;
+    }
 
   }
 
