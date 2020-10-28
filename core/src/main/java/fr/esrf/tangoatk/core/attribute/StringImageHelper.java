@@ -82,11 +82,11 @@ class StringImageHelper implements java.io.Serializable
 	                                   newValue, timeStamp);
     }
 
-    void insert(String[][] stringImg)
+    void insert(DeviceAttribute da,String[][] stringImg)
     {
 	 String[]   flatStr;
 	 flatStr = flatten(stringImg);
-	 attribute.getAttribute().insert(flatStr, stringImg.length, stringImg[0].length);
+	 da.insert(flatStr, stringImg.length, stringImg[0].length);
     }
 
 

@@ -82,11 +82,11 @@ class BooleanImageHelper implements java.io.Serializable
       newValue, timeStamp);
   }
 
-  void insert(boolean[][] boolImage)
+  void insert(DeviceAttribute da,boolean[][] boolImage)
   {
       boolean[]   flatBool;
       flatBool = flatten(boolImage);
-      attribute.getAttribute().insert(flatBool, boolImage[0].length, boolImage.length);
+      da.insert(flatBool, boolImage[0].length, boolImage.length);
   }
   
   

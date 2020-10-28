@@ -48,20 +48,19 @@ public class FloatScalarHelper extends ANumberScalarHelper {
     super.init(attribute);
   }
 
-  void insert(double d)
-  {
-       double   dUnitFactor=1.0;
+  void insert(DeviceAttribute da,double d) {
 
-       DeviceAttribute da = this.attribute.getAttribute();
-       dUnitFactor = this.attribute.getDisplayUnitFactor();
-       
-       if (dUnitFactor == 1.0)
-           da.insert((float) d);
-       else
-       {
-           float  df = (float) (d / dUnitFactor);
-	   da.insert(df);
-       }
+    double dUnitFactor = 1.0;
+
+    dUnitFactor = this.attribute.getDisplayUnitFactor();
+
+    if (dUnitFactor == 1.0) {
+      da.insert((float) d);
+    } else {
+      float  df = (float) (d / dUnitFactor);
+      da.insert(df);
+    }
+
   }
 
   double getNumberScalarValue(DeviceAttribute devAtt)

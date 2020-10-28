@@ -103,8 +103,9 @@ public class DevStateScalar extends AAttribute
   {
     try
     {
-        attribute.insert(fr.esrf.tangoatk.core.Device.getStateFromString(stateValue));
-        writeAtt();
+        DeviceAttribute da = new DeviceAttribute(getNameSansDevice());
+        da.insert(fr.esrf.tangoatk.core.Device.getStateFromString(stateValue));
+        writeAtt(da);
     }
     catch (DevFailed df)
     {
@@ -112,7 +113,7 @@ public class DevStateScalar extends AAttribute
     }
     catch (Exception e)
     {
- System.out.println("Received un exception other than DevFailed while setting a devStateScalar");
+      System.out.println("Received un exception other than DevFailed while setting a devStateScalar");
       setAttError("Couldn't set value", new AttributeSetException("Set Exception other than DevFailed."));
     }
   }

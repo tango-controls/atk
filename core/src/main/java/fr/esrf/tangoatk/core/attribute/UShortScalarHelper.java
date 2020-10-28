@@ -48,20 +48,18 @@ public class UShortScalarHelper extends ANumberScalarHelper {
   }
 
 
-  void insert(double d)
-  {
-     double   dUnitFactor=1.0;
+  void insert(DeviceAttribute da,double d) {
+    double dUnitFactor = 1.0;
 
-     DeviceAttribute da = this.attribute.getAttribute();
-     dUnitFactor = this.attribute.getDisplayUnitFactor();
+    dUnitFactor = this.attribute.getDisplayUnitFactor();
 
-     if (dUnitFactor == 1.0)
-         da.insert_us((int) d);
-     else
-     {
-         int  di = (int) (d / dUnitFactor);
-	 da.insert_us(di);
-     }
+    if (dUnitFactor == 1.0) {
+      da.insert_us((int) d);
+    } else {
+      int  di = (int) (d / dUnitFactor);
+      da.insert_us(di);
+    }
+
   }
 
   double getNumberScalarValue(DeviceAttribute devAtt)

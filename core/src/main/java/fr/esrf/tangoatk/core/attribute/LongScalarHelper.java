@@ -48,20 +48,19 @@ public class LongScalarHelper extends ANumberScalarHelper {
     super.init(attribute);
   }
 
-  void insert(double d)
+  void insert(DeviceAttribute da,double d)
   {
      double   dUnitFactor=1.0;
 
-     DeviceAttribute da = this.attribute.getAttribute();
      dUnitFactor = this.attribute.getDisplayUnitFactor();
 
-     if (dUnitFactor == 1.0)
-         da.insert((int) d);
-     else
-     {
-         int  di = (int) (d / dUnitFactor);
-	 da.insert(di);
-     }
+    if (dUnitFactor == 1.0) {
+      da.insert((int) d);
+    } else {
+      int  di = (int) (d / dUnitFactor);
+      da.insert(di);
+    }
+
   }
 
 

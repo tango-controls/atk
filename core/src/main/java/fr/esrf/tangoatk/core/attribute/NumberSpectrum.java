@@ -80,8 +80,9 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
 
   public void setValue(double[] d) {
     try {
-      insert(d);
-      writeAtt();
+      DeviceAttribute da = new DeviceAttribute(getNameSansDevice());
+      insert(da,d);
+      writeAtt(da);
       refresh();
     } catch (DevFailed df) {
       setAttError("Couldn't set value", new AttributeSetException(df));
@@ -95,9 +96,9 @@ public class NumberSpectrum extends ANumber  implements INumberSpectrum
   }
 
 
-  protected void insert(double[] d) {
+  protected void insert(DeviceAttribute da, double[] d) {
     checkDimensions(d);
-    getNumberSpectrumHelper().insert(d);
+    getNumberSpectrumHelper().insert(da,d);
   }
 
     public void refresh()

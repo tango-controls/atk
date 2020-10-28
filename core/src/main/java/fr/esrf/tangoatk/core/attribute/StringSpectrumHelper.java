@@ -80,11 +80,6 @@ public class StringSpectrumHelper implements java.io.Serializable
       newValue, timeStamp);
   }
 
-  void insert(String[] strSpect)
-  {
-      attribute.getAttribute().insert(strSpect);
-  }
-  
   String[] getStringSpectrumValue(DeviceAttribute da) throws DevFailed
   {
       String[]   tmp = da.extractStringArray();

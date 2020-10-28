@@ -48,15 +48,14 @@ public class Long64ScalarHelper extends ANumberScalarHelper {
     super.init(attribute);
   }
 
-  void insert(double d) {
+  void insert(DeviceAttribute da,double d) {
     double dUnitFactor = 1.0;
 
-    DeviceAttribute da = this.attribute.getAttribute();
     dUnitFactor = this.attribute.getDisplayUnitFactor();
 
-    if (dUnitFactor == 1.0)
+    if (dUnitFactor == 1.0) {
       da.insert((long) d);
-    else {
+    } else {
       long di = (long) (d / dUnitFactor);
       da.insert(di);
     }

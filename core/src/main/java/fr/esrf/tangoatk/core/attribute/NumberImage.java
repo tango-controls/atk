@@ -51,11 +51,6 @@ public class NumberImage extends ANumber implements INumberImage
 	  getNumberImageHelper().removeImageListener(l);
   }
 
-  protected void insert(String[][] s) {
-    checkDimensions(s);
-    insert(NumberAttributeHelper.str2double(s));
-  }
-
     public void refresh()
     {
 //    if (skippingRefresh) return;
@@ -156,18 +151,14 @@ public class NumberImage extends ANumber implements INumberImage
 
   public void setValue(double[][] d) {
     try {
+      DeviceAttribute da = new DeviceAttribute(getNameSansDevice());
       checkDimensions(d);
-      insert(d);
-      writeAtt();
+      getNumberImageHelper().insert(da,d);
+      writeAtt(da);
       getNumberImageHelper().fireImageValueChanged(d, System.currentTimeMillis());
     } catch (DevFailed df) {
       setAttError("Couldn't set value", new AttributeSetException(df));
     }
-  }
-
-
-  void insert(double[][] d) {
-    getNumberImageHelper().insert(d);
   }
 
   public String[][] extract() throws DevFailed {

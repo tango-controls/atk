@@ -870,8 +870,8 @@ public abstract class AAttribute implements IAttribute,
     return state;
   }
 
-  protected void writeAtt() throws DevFailed {
-    device.writeAttribute(attribute);
+  protected void writeAtt(DeviceAttribute da) throws DevFailed {
+    device.writeAttribute(da);
   }
 
   public int getMaxXDimension() {

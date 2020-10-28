@@ -50,8 +50,9 @@ public class StringSpectrum extends AAttribute
 
   public void setStringSpectrumValue(String[] s) {
     try {
-      stringSpectHelper.insert(s);
-      writeAtt();
+      DeviceAttribute da = new DeviceAttribute(getNameSansDevice());
+      da.insert(s);
+      writeAtt(da);
       refresh();
     } catch (DevFailed df) {
       setAttError("Couldn't set value", new AttributeSetException(df));

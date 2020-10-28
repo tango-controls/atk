@@ -47,20 +47,19 @@ public class ShortScalarHelper extends ANumberScalarHelper {
     super.init(attribute);
   }
 
-  void insert(double d)
+  void insert(DeviceAttribute da,double d)
   {
      double   dUnitFactor=1.0;
 
-     DeviceAttribute da = this.attribute.getAttribute();
      dUnitFactor = this.attribute.getDisplayUnitFactor();
 
-     if (dUnitFactor == 1.0)
-         da.insert((short) d);
-     else
-     {
-         short  ds = (short) (d / dUnitFactor);
-	 da.insert(ds);
-     }
+    if (dUnitFactor == 1.0) {
+      da.insert((short) d);
+    } else {
+      short  ds = (short) (d / dUnitFactor);
+      da.insert(ds);
+    }
+
   }
   
 

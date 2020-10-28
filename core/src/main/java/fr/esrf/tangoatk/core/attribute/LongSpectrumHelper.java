@@ -48,14 +48,13 @@ public class LongSpectrumHelper extends ANumberSpectrumHelper {
     super.init(attribute);
   }
 
-  void insert(double[] d)
+  void insert(DeviceAttribute da,double[] d)
   {
       double   dUnitFactor=1.0;
       int[]    tmp = new int[d.length];
       
       dUnitFactor = this.attribute.getDisplayUnitFactor();
-      DeviceAttribute da = this.attribute.getAttribute();
-      
+
       for (int i = 0; i < tmp.length; i++)
       {
            tmp[i] = (int) (d[i] / dUnitFactor);

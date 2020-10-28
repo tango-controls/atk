@@ -253,8 +253,10 @@ public class NumberScalar extends ANumber
     }
 
     try {
-      insert(d);
-      writeAtt();
+
+      DeviceAttribute da = new DeviceAttribute(getNameSansDevice());
+      insert(da,d);
+      writeAtt(da);
       // This is not needed due to the problem
       // of polled attribute. All setter handle this
       // issue by forcing a reading on the device instead
@@ -266,27 +268,27 @@ public class NumberScalar extends ANumber
     }
     catch (Exception e)
     {
- System.out.println("Received un exception other than DevFailed while setting a numberScalar");
+      System.out.println("Received un exception other than DevFailed while setting a numberScalar");
       setAttError("Couldn't set value", new AttributeSetException("Set Exception other than DevFailed."));
     }
   }
 
-  protected fr.esrf.TangoApi.DeviceAttribute scalarInsert(String s)
-    throws fr.esrf.Tango.DevFailed {
-    insert(s);
-    return attribute;
+  //protected fr.esrf.TangoApi.DeviceAttribute scalarInsert(String s)
+  //  throws fr.esrf.Tango.DevFailed {
+  //  insert(s);
+  //  return attribute;
+  //}
+
+  protected void insert(DeviceAttribute da,double[] d) {
+    insert(da,d[0]);
   }
 
-  protected void insert(double[] d) {
-    insert(d[0]);
+  protected void insert(DeviceAttribute da,double d) {
+    getNumberScalarHelper().insert(da,d);
   }
 
-  protected void insert(double d) {
-    getNumberScalarHelper().insert(d);
-  }
-
-  protected void insert(String s) {
-    insert(Double.parseDouble(s));
+  protected void insert(DeviceAttribute da,String s) {
+    insert(da,Double.parseDouble(s));
   }
 
 

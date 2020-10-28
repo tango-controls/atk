@@ -48,11 +48,10 @@ public class DoubleSpectrumHelper extends ANumberSpectrumHelper {
     super.init(attribute);
   }
 
-  void insert(double[] d) {
+  void insert(DeviceAttribute da,double[] d) {
     double dUnitFactor = 1.0;
 
     dUnitFactor = this.attribute.getDisplayUnitFactor();
-    DeviceAttribute da = this.attribute.getAttribute();
 
     if (dUnitFactor == 1.0) {
       da.insert(d);

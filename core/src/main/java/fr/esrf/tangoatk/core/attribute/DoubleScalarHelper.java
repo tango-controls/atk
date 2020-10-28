@@ -54,11 +54,10 @@ public class DoubleScalarHelper extends ANumberScalarHelper {
   }
 */
 
-  void insert(double d)
+  void insert(DeviceAttribute da,double d)
   {
        double   dUnitFactor=1.0;
 
-       DeviceAttribute da = this.attribute.getAttribute();
        dUnitFactor = this.attribute.getDisplayUnitFactor();
        
        if (dUnitFactor == 1.0)

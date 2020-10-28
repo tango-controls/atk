@@ -139,17 +139,10 @@ public class EnumSpectrumHelper implements java.io.Serializable
     }
     
     
-    void insert(String[] enumValues) throws DevFailed, AttributeSetException
+    void insert(DeviceAttribute da,String[] enumValues) throws DevFailed, AttributeSetException
     {
-	DeviceAttribute      da;
 	short[]              shortValues;
 
-	da = this.enumSpectAtt.getAttribute();
-	if (da == null)
-	{
-	   throw new AttributeSetException("Cannot set enumeration value. DeviceAttribute is null.");
-	}
-	
 	try
 	{
 	   shortValues=getShortValuesFromEnumValues(enumValues);

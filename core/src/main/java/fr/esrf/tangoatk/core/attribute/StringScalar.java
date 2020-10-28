@@ -51,8 +51,9 @@ public class StringScalar extends AAttribute
 
   public void setValue(String s) {
     try {
-      attribute.insert(s);
-      writeAtt();
+        DeviceAttribute da = new DeviceAttribute(getNameSansDevice());
+        da.insert(s);
+        writeAtt(da);
       //changed 0n 29/07/2003 by F. Poncet use refresh instead of fireValueChange
       //fireValueChanged(s);
       refresh();

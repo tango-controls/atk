@@ -47,20 +47,19 @@ public class ULongScalarHelper extends ANumberScalarHelper
    }
 
 
-   void insert(double d)
+   void insert(DeviceAttribute da,double d)
    {
       double   dUnitFactor=1.0;
 
-      DeviceAttribute da = this.attribute.getAttribute();
       dUnitFactor = this.attribute.getDisplayUnitFactor();
 
-      if (dUnitFactor == 1.0)
-         da.insert_ul((long) d);
-      else
-      {
-         long  li = (long) (d / dUnitFactor);
-	 da.insert_ul(li);
-      }
+       if (dUnitFactor == 1.0) {
+           da.insert_ul((long) d);
+       } else {
+           long  li = (long) (d / dUnitFactor);
+           da.insert_ul(li);
+       }
+
    }
 
    double getNumberScalarValue(DeviceAttribute devAtt)

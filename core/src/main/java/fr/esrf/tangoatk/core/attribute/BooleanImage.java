@@ -60,28 +60,21 @@ public class BooleanImage extends AAttribute
   {
       try
       {
-	  checkDimensions(bImage);
-	  insert(bImage);
-	  writeAtt();
-	  imageHelper.fireImageValueChanged(bImage, System.currentTimeMillis());
+          DeviceAttribute da = new DeviceAttribute(getNameSansDevice());
+          checkDimensions(bImage);
+          imageHelper.insert(da,bImage);
+          writeAtt(da);
+          imageHelper.fireImageValueChanged(bImage, System.currentTimeMillis());
       }
       catch (DevFailed df)
       {
-	  setAttError("Couldn't set value", new AttributeSetException(df));
+          setAttError("Couldn't set value", new AttributeSetException(df));
       }
       catch (Exception ex)
       {
-	  setAttError("Couldn't set value", new ATKException(ex));
+          setAttError("Couldn't set value", new ATKException(ex));
       }
   }
-  
-  
-  void insert(boolean[][] bImg)
-  {
-      imageHelper.insert(bImg);
-  }
-
-
 
   public void refresh()
   {

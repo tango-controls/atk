@@ -59,8 +59,9 @@ public class BooleanScalar extends AAttribute
   {
     try
     {
-      attribute.insert(b);
-      writeAtt();
+      DeviceAttribute da = new DeviceAttribute(getNameSansDevice());
+      da.insert(b);
+      writeAtt(da);
 //      refresh();
     }
     catch (DevFailed df)

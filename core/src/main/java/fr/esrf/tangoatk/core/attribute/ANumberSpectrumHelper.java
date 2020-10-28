@@ -79,7 +79,7 @@ abstract class ANumberSpectrumHelper extends NumberAttributeHelper {
 
     protected abstract IAttributeSpectrumHistory[] getSpectrumDeviceAttHistory(DeviceDataHistory[] attPollHist);
 
-    abstract void insert(double [] d);
+    abstract void insert(DeviceAttribute da,double [] d);
 
     public String getVersion() {
 	return "$Id$";

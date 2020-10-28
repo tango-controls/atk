@@ -61,16 +61,9 @@ public class EnumScalarHelper implements java.io.Serializable,TangoConst {
   }
 
 
-  void insert(String enumStr) throws DevFailed, AttributeSetException {
+  void insert(DeviceAttribute da,String enumStr) throws DevFailed, AttributeSetException {
 
-    DeviceAttribute da;
     short shortValue;
-
-    da = this.enumAtt.getAttribute();
-
-    if (da == null) {
-      throw new AttributeSetException("Cannot set enumeration value. DeviceAttribute is null.");
-    }
 
     try {
 

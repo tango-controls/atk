@@ -54,19 +54,18 @@ class DoubleImageHelper extends ANumberImageHelper {
   }
   */
   
-  protected void insert(double[][] d)
+  protected void insert(DeviceAttribute da,double[][] d)
   {
       double     dUnitFactor=1.0;
       double[]   flatd;
 
-      DeviceAttribute da = this.attribute.getAttribute();
       dUnitFactor = this.attribute.getDisplayUnitFactor();
       
       flatd = flatten(d);
       if (dUnitFactor==1.0)
       {
     	 da.insert(flatd, d[0].length, d.length);
-	 return;
+  	     return;
       }
       
       double[] tmp = new double[flatd.length];

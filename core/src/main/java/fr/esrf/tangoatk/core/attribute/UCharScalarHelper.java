@@ -49,20 +49,19 @@ public class UCharScalarHelper extends ANumberScalarHelper {
   }
 
 
-  void insert(double d)
+  void insert(DeviceAttribute da,double d)
   {
      double   dUnitFactor=1.0;
 
-     DeviceAttribute da = this.attribute.getAttribute();
      dUnitFactor = this.attribute.getDisplayUnitFactor();
 
-     if (dUnitFactor == 1.0)
-         da.insert_uc((short) d);
-     else
-     {
-         short  ds = (short) (d / dUnitFactor);
-	 da.insert_uc(ds);
-     }
+    if (dUnitFactor == 1.0) {
+      da.insert_uc((short) d);
+    } else {
+      short  ds = (short) (d / dUnitFactor);
+      da.insert_uc(ds);
+    }
+
   }
 
   double getNumberScalarValue(DeviceAttribute devAtt)

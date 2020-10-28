@@ -61,7 +61,7 @@ public abstract class ANumberScalarHelper extends NumberAttributeHelper {
 
     protected abstract IAttributeScalarHistory[] getScalarDeviceAttHistory(DeviceDataHistory[] attPollHist);
 
-    abstract void insert(double d);
+    abstract void insert(DeviceAttribute da,double d);
 
     abstract double getNumberScalarDisplayValue(DeviceAttribute attribute);
 

@@ -45,12 +45,8 @@ abstract class ANumberImageHelper extends NumberAttributeHelper {
 
   abstract double[][] getNumberImageValue(DeviceAttribute attribute) throws DevFailed;
 
-  abstract void insert(double[][] d);
-  
-  void insert(double[] d)
-  {
-  }
-  
+  abstract void insert(DeviceAttribute da,double[][] d);
+
   void fireImageValueChanged(double[][] newValue, long timeStamp) {
 	propChanges.fireImageEvent((INumberImage) attribute, newValue, timeStamp);
   }

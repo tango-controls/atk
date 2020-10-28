@@ -109,8 +109,9 @@ public class BooleanSpectrum extends AAttribute
   {
     try
     {
-      attribute.insert(bArray);
-      writeAtt();
+      DeviceAttribute da = new DeviceAttribute(getNameSansDevice());
+      da.insert(bArray);
+      writeAtt(da);
       refresh();
     }
     catch (DevFailed df)

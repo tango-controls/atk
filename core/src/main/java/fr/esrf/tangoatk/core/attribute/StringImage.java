@@ -60,10 +60,11 @@ public class StringImage extends AAttribute implements IStringImage
   {
       try
       {
-	  checkDimensions(sImage);
-	  insert(sImage);
-	  writeAtt();
-	  imageHelper.fireImageValueChanged(sImage, System.currentTimeMillis());
+          DeviceAttribute da = new DeviceAttribute(getNameSansDevice());
+          checkDimensions(sImage);
+          imageHelper.insert(da,sImage);
+          writeAtt(da);
+          imageHelper.fireImageValueChanged(sImage, System.currentTimeMillis());
       }
       catch (DevFailed df)
       {
@@ -74,14 +75,6 @@ public class StringImage extends AAttribute implements IStringImage
 	  setAttError("Couldn't set value", new ATKException(ex));
       }
   }
-  
-  
-  void insert(String[][] sImage)
-  {
-      imageHelper.insert(sImage);
-  }
-
-
 
   public void refresh()
   {

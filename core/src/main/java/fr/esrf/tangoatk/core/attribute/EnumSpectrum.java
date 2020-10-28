@@ -93,8 +93,9 @@ public class EnumSpectrum extends AAttribute implements IEnumSpectrum, PropertyC
   {
      try
      {
-	enumSpecHelper.insert(s);
-	writeAtt();
+         DeviceAttribute da = new DeviceAttribute(getNameSansDevice());
+         enumSpecHelper.insert(da,s);
+         writeAtt(da);
      }
      catch (AttributeSetException attEx)
      {

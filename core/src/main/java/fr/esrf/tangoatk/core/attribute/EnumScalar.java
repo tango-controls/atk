@@ -193,8 +193,9 @@ public class EnumScalar extends AAttribute implements IEnumScalar, PropertyChang
   {
      try
      {
-	enumHelper.insert(s);
-	writeAtt();
+       DeviceAttribute da = new DeviceAttribute(getNameSansDevice());
+       enumHelper.insert(da,s);
+       writeAtt(da);
 	   // The call to refresh() is suppressed due to the problem
 	   // of polled attribute. All setter handle this
 	   // issue by forcing a reading on the device instead
