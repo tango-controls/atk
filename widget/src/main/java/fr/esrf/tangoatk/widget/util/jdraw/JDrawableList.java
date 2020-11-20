@@ -38,6 +38,7 @@ public class JDrawableList {
 
       drawableList.add("fr.esrf.tangoatk.widget.attribute.NumberScalarWheelEditor");
       drawableList.add("fr.esrf.tangoatk.widget.attribute.SimpleScalarViewer");
+      drawableList.add("fr.esrf.tangoatk.widget.attribute.StatusViewer");
       drawableList.add("fr.esrf.tangoatk.widget.attribute.NumberSpectrumViewer");
       drawableList.add("fr.esrf.tangoatk.widget.attribute.NumberImageViewer");
       drawableList.add("fr.esrf.tangoatk.widget.command.VoidVoidCommandViewer");

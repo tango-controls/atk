@@ -2044,40 +2044,47 @@ invoqex.printStackTrace();
 
   private void addStringScalarAttribute(JDObject jdObj,IStringScalar model)
   {
-     if (jdObj instanceof JDSwingObject)
-     {
-	 JComponent atkObj = ((JDSwingObject) jdObj).getComponent();
 
-	 if (atkObj instanceof SimpleScalarViewer)
-	 {
-	    ((SimpleScalarViewer) atkObj).setModel(model);
-	    allAttributes.add(model);
-	    if (errorHistWind != null)
-               model.addErrorListener(errorHistWind);
-	 }
-	 else
-	    if (atkObj instanceof StringScalarComboEditor)
-	    {
-	       String valList = jdObj.getExtendedParam("valueList");
-	       if (valList != null)
-	       {
-		  if (valList.length() != 0)
-		  {
-		     String[] possStrVals=parsePossStringValues(valList);
-		     if (possStrVals != null)
-			if (possStrVals.length != 0)
-			   model.setPossibleValues(possStrVals);
-		  }
-	       }
-               ((StringScalarComboEditor) atkObj).setStringModel(model);
-               allAttributes.add(model);
-               model.addSetErrorListener(errPopup);
-	    }
-	    else
-	    {
-	      System.out.println(atkObj.getClass().getName() + " does not accept IStringScalar model");
-	    }
-     }
+    if (jdObj instanceof JDSwingObject) {
+
+      JComponent atkObj = ((JDSwingObject) jdObj).getComponent();
+
+      if (atkObj instanceof SimpleScalarViewer) {
+
+        ((SimpleScalarViewer) atkObj).setModel(model);
+        allAttributes.add(model);
+        if (errorHistWind != null)
+          model.addErrorListener(errorHistWind);
+
+      } else if (atkObj instanceof StatusViewer) {
+
+        ((StatusViewer) atkObj).setModel(model);
+        allAttributes.add(model);
+        if (errorHistWind != null)
+          model.addErrorListener(errorHistWind);
+
+      } else if (atkObj instanceof StringScalarComboEditor) {
+
+        String valList = jdObj.getExtendedParam("valueList");
+        if (valList != null)
+        {
+          if (valList.length() != 0)
+          {
+            String[] possStrVals=parsePossStringValues(valList);
+            if (possStrVals != null)
+              if (possStrVals.length != 0)
+                model.setPossibleValues(possStrVals);
+          }
+        }
+        ((StringScalarComboEditor) atkObj).setStringModel(model);
+        allAttributes.add(model);
+        model.addSetErrorListener(errPopup);
+
+      } else {
+        System.out.println(atkObj.getClass().getName() + " does not accept IStringScalar model");
+      }
+
+    }
   }
 
   private void addEnumScalarAttribute(JDObject jdObj,IEnumScalar model)
