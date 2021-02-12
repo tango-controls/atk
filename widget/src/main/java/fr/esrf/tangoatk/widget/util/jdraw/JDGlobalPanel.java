@@ -34,6 +34,7 @@ class JDGlobalPanel extends JPanel implements ActionListener {
   private JLabel backgroundLabel;
   private JButton backgroundButton;
   private JButton dismissBtn;
+  private JCheckBox autoResizeLabelCheck;
   private JCheckBox resizeLabelFontCheck;
   private JCheckBox resizeLabelTextCheck;
 
@@ -47,12 +48,12 @@ class JDGlobalPanel extends JPanel implements ActionListener {
     setFont(JDUtils.labelFont);
     setLayout(null);
     setBorder(BorderFactory.createEtchedBorder());
-    setPreferredSize(new Dimension(280, 184));
+    setPreferredSize(new Dimension(270, 220));
 
     // -----------------------------------------------------------------
     JPanel colorPanel = new JPanel(null);
-    colorPanel.setBorder(JDUtils.createTitleBorder("Colors"));
-    colorPanel.setBounds(5, 5, 270, 55);
+    colorPanel.setBorder(JDUtils.createTitleBorder("Global settings"));
+    colorPanel.setBounds(5, 5, 270, 95);
 
     backgroundLabel = JDUtils.createLabel("Background");
     backgroundLabel.setBounds(10, 20, 180, 24);
@@ -65,12 +66,19 @@ class JDGlobalPanel extends JPanel implements ActionListener {
     backgroundButton.setBounds(200, 20, 60, 24);
     colorPanel.add(backgroundButton);
 
+    autoResizeLabelCheck = new JCheckBox("Resize drawing when panel size change");
+    autoResizeLabelCheck.setFont(JDUtils.labelFont);
+    autoResizeLabelCheck.setForeground(JDUtils.labelColor);
+    autoResizeLabelCheck.setBounds(10, 50, 250, 25);
+    autoResizeLabelCheck.setSelected(invoker.autoZoomAsked);
+    colorPanel.add(autoResizeLabelCheck);
+
     add(colorPanel);
 
     // -----------------------------------------------------------------
     JPanel editorPanel = new JPanel(null);
     editorPanel.setBorder(JDUtils.createTitleBorder("Editor settings"));
-    editorPanel.setBounds(5, 65, 270, 85);
+    editorPanel.setBounds(5, 105, 270, 85);
 
     resizeLabelFontCheck = new JCheckBox("Resize label when changing font");
     resizeLabelFontCheck.setFont(JDUtils.labelFont);
@@ -92,7 +100,7 @@ class JDGlobalPanel extends JPanel implements ActionListener {
     dismissBtn.setMargin(new Insets(0, 0, 0, 0));
     dismissBtn.setFont(JDUtils.labelFont);
     dismissBtn.addActionListener(this);
-    dismissBtn.setBounds(192, 155, 80, 24);
+    dismissBtn.setBounds(192, 195, 80, 24);
     add(dismissBtn);
 
   }
@@ -109,6 +117,7 @@ class JDGlobalPanel extends JPanel implements ActionListener {
     } else if (src == dismissBtn) {
       invoker.resizeLabelOnFontChange = resizeLabelFontCheck.isSelected();
       invoker.resizeLabelOnTextChange = resizeLabelTextCheck.isSelected();
+      invoker.autoZoomAsked = autoResizeLabelCheck.isSelected();
       ATKGraphicsUtils.getWindowForComponent(this).setVisible(false);
     }
 

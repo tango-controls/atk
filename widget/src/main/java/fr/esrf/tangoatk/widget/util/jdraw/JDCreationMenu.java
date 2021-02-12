@@ -107,7 +107,7 @@ public class JDCreationMenu implements ActionListener {
 
     // JDrawable Swing object menu --------------------
 
-    swingMenu = new JMenu("ATK Swing");
+    swingMenu = new JMenu("Tango ATK");
     swingPopupMenu = new JPopupMenu();
     drawableItem = JDrawableList.getDrawalbeList();
     swingMenuItem = new JMenuItem[drawableItem.length];

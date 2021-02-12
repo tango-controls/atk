@@ -195,7 +195,8 @@ public class SimpleSynopticAppli extends javax.swing.JFrame implements SynopticP
             tangoSynopHandler.setSynopticFileName(jdrawFullFileName);
             splash.setMessage("Synoptic file loaded ...");
             tangoSynopHandler.setToolTipMode(TangoSynopticHandler.TOOL_TIP_NAME);
-            tangoSynopHandler.setAutoZoom(true);
+            if(tangoSynopHandler.isAutoZoomAsked())
+              tangoSynopHandler.setAutoZoom(true);
         }
         catch (FileNotFoundException fnfEx)
         {

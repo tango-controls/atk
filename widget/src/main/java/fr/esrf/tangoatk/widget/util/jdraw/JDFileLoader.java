@@ -72,6 +72,7 @@ public class JDFileLoader {
 
   // Global param section
   Color globalBackground = JDrawEditor.defaultBackground;
+  boolean autoZoomAsked = true;
 
   /**
    * Construct a JDFileLoader.
@@ -509,6 +510,8 @@ public class JDFileLoader {
       String propName = parseProperyName();
       if( propName.equals("background") ) {
         globalBackground = parseColor();
+      } else if( propName.equals("autoZoom") ) {
+        autoZoomAsked = parseBoolean();
       } else {
         System.out.println("Unknown global property found:" + propName);
         jumpPropertyValue();

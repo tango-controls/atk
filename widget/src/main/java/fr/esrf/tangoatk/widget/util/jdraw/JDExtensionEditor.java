@@ -73,6 +73,7 @@ class JDExtensionEditor extends JDialog implements ActionListener {
     textView = new JScrollPane(textArea);
     innerPane.add(textView,BorderLayout.CENTER);
 
+    textView.setPreferredSize(new Dimension(800,600));
     setContentPane(innerPane);
 
   }
@@ -117,10 +118,8 @@ class JDExtensionEditor extends JDialog implements ActionListener {
     }
 
     dlg.setTitle(title);
-    // Hack to enlarge a bit the dialog
-    dlg.setValue(defaultValue+"____\n_");
-    ATKGraphicsUtils.centerDialog(dlg);
     dlg.setValue(defaultValue);
+    ATKGraphicsUtils.centerDialog(dlg);
     dlg.setVisible(true);
     if(dlg.getModified()) {
       return dlg.getValue();

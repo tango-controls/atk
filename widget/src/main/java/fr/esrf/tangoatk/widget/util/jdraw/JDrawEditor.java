@@ -134,6 +134,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   private String creationParam = null;
   boolean resizeLabelOnFontChange = true;
   boolean resizeLabelOnTextChange = true;
+  boolean autoZoomAsked = true;
   private JDSlider sliderRef; // Used to pick new cursor
   private JDPolyline connectPolyline;
   private JLabel statusLabel = null;
@@ -797,6 +798,9 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
       to_save.append(getBackground().getBlue());
       to_save.append("\n");
     }
+    if( !autoZoomAsked ) {
+      to_save.append("    autoZoom:false\n");
+    }
     to_save.append("  }\n");
 
     // Objects
@@ -1200,6 +1204,14 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
   public boolean isAutoZoom() {
     return autoZoom;
   }
+
+
+  /**
+   *
+   * @return true if auto zoom asked in jdw file, false otherwise
+   * @see #setAutoZoom
+   */
+  public boolean isAutoZoomAsked() { return autoZoomAsked; }
 
   /** Translate selected Object
    * @param x X translation
@@ -3137,6 +3149,7 @@ public class JDrawEditor extends JComponent implements MouseMotionListener, Mous
 
   private void applyGlobalOption(JDFileLoader f) {
     setBackground(f.globalBackground);
+    autoZoomAsked = f.autoZoomAsked;
   }
 
   private void createContextualMenu() {
