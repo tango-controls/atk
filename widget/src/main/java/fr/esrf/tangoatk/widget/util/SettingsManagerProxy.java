@@ -627,7 +627,7 @@ public class SettingsManagerProxy
                 // Create the SettingsManagerProxy and errorWindow
                 final ErrorHistory  errorWindow = new ErrorHistory();
                 
-                final SettingsManagerProxy  smp = new SettingsManagerProxy("//acudebian7:10000/sys/settings/syccco");
+                final SettingsManagerProxy  smp = new SettingsManagerProxy("//acudebian7:10000/sys/settings/syco");
                 smp.setErrorHistoryWindow(errorWindow);
                 smp.setFileAuthor("Test");
                 smp.setFileComments("Encore test");
