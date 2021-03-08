@@ -65,3 +65,9 @@ fabric.properties
 /core/target/
 /widget/target/
 /util/target/
+
+#VS Code
+.project
+.factorypath
+.classpath
+.settings
